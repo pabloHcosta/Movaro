@@ -1,0 +1,1225 @@
+{
+  "@@locale": "es",
+  "homeTitle": "Movaro",
+  "homeEnvironmentLabel": "Entorno actual",
+  "environmentValue": "{environment}",
+  "@environmentValue": {
+    "placeholders": {
+      "environment": {
+        "type": "String"
+      }
+    }
+  },
+  "splashLoadingLabel": "Preparando tu experiencia",
+  "splashHeroTitle": "Planificación migratoria con más claridad.",
+  "splashHeroBody": "Cargando ciudades, costos y contexto práctico para armar tu ruta inicial.",
+  "splashInitializingLabel": "Inicializando experiencia",
+  "loadingCountriesLabel": "Cargando países",
+  "loadingCitiesCatalogLabel": "Cargando catálogo de ciudades",
+  "journeySetupPageTitle": "Elegí tu trayecto",
+  "journeySetupHeroTitle": "Empezá definiendo desde dónde salís y a dónde querés ir",
+  "journeySetupHeroBody": "Movaro usa esta elección para armar la experiencia correcta para vos. Hoy el beta está disponible para Argentina -> Brasil, pero la estructura ya está pensada para crecer a nivel global.",
+  "journeyOriginTitle": "País de origen",
+  "journeyOriginBody": "Elegí el país desde el que salís. Esto ayuda a contextualizar idioma, trámites y adaptación.",
+  "journeyDestinationTitle": "País de destino",
+  "journeyDestinationBody": "Elegí el país que querés evaluar. La home y el plan pasan a reflejar ese destino.",
+  "journeySummaryTitle": "Tu trayecto actual",
+  "journeySummaryValue": "{origin} -> {destination}",
+  "@journeySummaryValue": {
+    "placeholders": {
+      "origin": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "journeySummaryPlaceholder": "Seleccioná origen y destino para continuar.",
+  "journeyAvailabilityNote": "Hoy solo el trayecto Argentina -> Brasil está disponible para uso completo. Los demás países ya aparecen para señalar la dirección global del producto.",
+  "journeyContinueAction": "Continuar con este trayecto",
+  "journeyAvailableNowLabel": "Disponible ahora",
+  "journeyComingSoonLabel": "Próximamente",
+  "journeyChangeAction": "Cambiar trayecto",
+  "publicHomeHeadline": "Planificá tu mudanza con más claridad",
+  "publicHomeDescription": "Entendé tus opciones en pocos pasos antes de decidir qué querés guardar.",
+  "publicHomeScopeBadge": "Hoy: Argentina -> Brasil",
+  "publicHomeFocusedDescription": "Movaro hoy está diseñado para quienes están evaluando una mudanza de Argentina a Brasil. En vez de mostrar todo de una sola vez, te ayuda a elegir el mejor primer paso.",
+  "publicHomeSelectedJourneyDescription": "Movaro va a organizar tu experiencia para el trayecto {origin} -> {destination}. Empezás con lo esencial y profundizás solo cuando haga falta.",
+  "@publicHomeSelectedJourneyDescription": {
+    "placeholders": {
+      "origin": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "publicHomePrimaryQuestionTitle": "Empezá por la decisión principal",
+  "publicHomePrimaryQuestionBody": "Primero definí si necesitás un plan guiado, comparar ciudades o solo una vista rápida de lo que resuelve el producto.",
+  "publicHomeTrustFastTitle": "Entrada rápida",
+  "publicHomeTrustFastBody": "Podés empezar sin un formulario largo ni un bloqueo inicial.",
+  "publicHomeTrustGuestTitle": "Sin login ahora",
+  "publicHomeTrustGuestBody": "Explorá como visitante y entrá solo cuando tenga sentido guardar algo.",
+  "publicHomeTrustFocusTitle": "Alcance claro",
+  "publicHomeTrustFocusBody": "Este beta está enfocado en el corredor Argentina -> Brasil.",
+  "publicHomeTrustSelectedBody": "Tu navegación ahora está contextualizada para {origin} -> {destination}, sin adelantar contenido irrelevante antes de elegir.",
+  "@publicHomeTrustSelectedBody": {
+    "placeholders": {
+      "origin": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "publicHomeFirstStepTitle": "Elegí tu primer paso",
+  "publicHomeFirstStepBody": "La home ahora orienta la entrada. El contenido más profundo aparece después, dentro del camino que elijas.",
+  "publicHomeSecondaryTitle": "La documentación viene después",
+  "publicHomeSecondaryBody": "La guía práctica de Brasil sigue disponible, pero como apoyo. Tiene más sentido después de entender si querés generar un plan o comparar ciudades.",
+  "publicHomeSecondaryGenericBody": "Cuando un nuevo destino esté disponible, la documentación y los detalles locales deberían aparecer como apoyo contextual, no como ruido en la primera pantalla.",
+  "publicHomeExploreAction": "Explorar más",
+  "publicHomeQuestionnaireAction": "Crear mi plan",
+  "publicHomeLoginAction": "Entrar cuando necesite guardar",
+  "publicHomeGuestSectionTitle": "Podés empezar en modo visitante",
+  "publicHomeGuestSectionBody": "Podés explorar todo esto sin entrar. El inicio de sesión aparece solo cuando tiene sentido guardar algo personal.",
+  "publicHomeBetaSectionBody": "Este beta ya abre lo que está listo: exploración, documentación práctica y tu primer plan.",
+  "publicHomeHowItWorksAction": "Ver cómo funciona",
+  "publicHomeCitiesTitle": "Descubrir ciudades",
+  "publicHomeCitiesBody": "Mira sugerencias por costo, trabajo y popularidad entre argentinos.",
+  "publicHomeCitiesAction": "Ver ciudades",
+  "publicHomePlanTitle": "Crear mi plan",
+  "publicHomePlanBody": "Responde pocas preguntas y recibe un punto de partida simple.",
+  "publicHomeStoriesTitle": "Leer experiencias reales",
+  "publicHomeStoriesBody": "Entendé qué están buscando otras personas antes de decidir tu siguiente paso.",
+  "publicHomeStoriesAction": "Explorar historias",
+  "decisionSupportTitle": "Empezá por la pregunta que más te importa",
+  "decisionSupportBody": "Quien piensa en mudarse suele buscar respuestas rápidas sobre idioma, costo, papeles y trabajo. Movaro debería dejar eso claro desde el inicio.",
+  "decisionSupportLanguageTitle": "¿Voy a poder manejarme sin portugués al principio?",
+  "decisionSupportLanguageBody": "Usá la señal de adaptación con el idioma para ver qué lugares se sienten más fáciles si todavía dependés del español.",
+  "decisionSupportCostTitle": "¿La vida diaria se va a sentir demasiado cara?",
+  "decisionSupportCostBody": "Compará ciudades por costo y alquiler antes de profundizar en un destino.",
+  "decisionSupportPaperworkTitle": "¿Cuáles son los primeros trámites que tendría que hacer?",
+  "decisionSupportPaperworkBody": "El plan guiado convierte esa duda en una lista corta en vez de una investigación interminable.",
+  "decisionSupportWorkTitle": "¿Dónde conviene empezar si necesito estructura o trabajo?",
+  "decisionSupportWorkBody": "El cuestionario y el ranking ayudan a reducir la búsqueda a ciudades con mejor encaje inicial.",
+  "commonNeedsTitle": "Si todavía no sabés por dónde empezar",
+  "commonNeedsBody": "Estos son los atajos más útiles para quien llega con dudas mezcladas y quiere bajar la ansiedad antes de decidir.",
+  "commonNeedCompareCostTitle": "Quiero comparar costo y alquiler primero",
+  "commonNeedCompareCostBody": "Andá directo a ciudades y usá las señales de costo, alquiler, idioma y trabajo como primera lectura.",
+  "commonNeedDocumentsTitle": "Necesito entender los documentos antes que nada",
+  "commonNeedDocumentsBody": "La guía de documentación resume CPF, registro, permanencia, trabajo y banco con fuente oficial y lenguaje simple.",
+  "commonNeedDirectionTitle": "Todavía no sé qué camino me conviene",
+  "commonNeedDirectionBody": "El plan guiado reduce la duda a una ciudad inicial y a un orden corto de primeros pasos.",
+  "commonNeedExploreAllTitle": "Quiero mirar todo sin quedarme trabado",
+  "commonNeedExploreAllBody": "La sección Explorar junta ciudades, documentación y otros caminos en un solo lugar.",
+  "explorePageTitle": "Explorar",
+  "explorePublicFeaturesTitle": "Exploración pública",
+  "explorePublicFeaturesDescription": "Descubrí ciudades y países disponibles para cualquier usuario visitante.",
+  "exploreDocumentationTitle": "Vida práctica en Brasil",
+  "exploreDocumentationDescription": "Entiende documentos, salud, licencia, trabajo y cuenta bancaria con lenguaje simple.",
+  "exploreDocumentationAction": "Ver documentación",
+  "exploreCitiesAction": "Ver ciudades",
+  "exploreCountriesAction": "Ver países",
+  "exploreCommunityTitle": "Contenido de la comunidad",
+  "exploreCommunityDescription": "El contenido de la comunidad es público, pero publicar requiere autenticación.",
+  "exploreCreatePostAction": "Crear post",
+  "exploreIntroTitle": "Cómo usar Movaro",
+  "exploreIntroDescription": "Antes de salir a navegar, mirá en menos de un minuto qué resuelve Movaro y qué ya está disponible en este beta.",
+  "exploreIntroAction": "Abrir introducción",
+  "exploreChecklistTitle": "Checklist migratorio",
+  "exploreChecklistDescription": "Las personas visitantes pueden responder un flujo corto y generar un plan migratorio inicial antes de iniciar sesión.",
+  "exploreQuestionnaireAction": "Iniciar cuestionario",
+  "exploreTrailsEyebrow": "Tres caminos claros",
+  "exploreTrailsTitle": "Elegí el tipo de ayuda que necesitás ahora",
+  "exploreTrailsBody": "En vez de mostrar todo de una vez, la app ahora separa la experiencia en tres recorridos: decidir ciudad, entender la burocracia práctica y preparar la mudanza.",
+  "exploreTrailCitiesTitle": "Decidir ciudad",
+  "exploreTrailCitiesBody": "Compará ciudades y usá señales de litoral, costo, trabajo, idioma y vivienda para ver qué contexto te cierra mejor.",
+  "exploreTrailDocsTitle": "Entender burocracia práctica",
+  "exploreTrailDocsBody": "Mirá alquiler, SUS, CPF, trabajo, conducir y costos iniciales en bloques más claros y con menos ruido.",
+  "exploreTrailPrepTitle": "Preparar la mudanza",
+  "exploreTrailPrepBodyStart": "Si todavía no confirmaste una ciudad, empezá por el plan inicial para ordenar la decisión.",
+  "exploreTrailPrepBodyReady": "Como ya confirmaste una ciudad, acá el foco pasa a checklist, documentos, vivienda y llegada.",
+  "exploreSavePlanAction": "Guardar plan",
+  "documentationPageTitle": "Documentación y vida práctica",
+  "documentationHeroEyebrow": "Guía práctica",
+  "documentationHeroTitle": "Lo que suele destrabar la vida práctica en Brasil",
+  "documentationHeroDescription": "Sin texto infinito. Acá ves documentos, salud, movilidad y costos aproximados de lo que suele importar primero para quien va a vivir en Brasil.",
+  "documentationQuickStepCpf": "CPF",
+  "documentationQuickStepRegistration": "Registro",
+  "documentationQuickStepStay": "Permanencia",
+  "documentationQuickStepWorkBank": "Trabajo y banco",
+  "documentationQuickStepCitizenship": "Naturalización",
+  "documentationQuickStepHealth": "Salud",
+  "documentationQuickStepDriving": "Licencia",
+  "documentationQuickStepWork": "Trabajo",
+  "documentationQuickStepRetirement": "Previsión",
+  "documentationOfficialSourceLabel": "Fuente oficial",
+  "documentationPathsTitle": "Empieza por tu duda principal",
+  "documentationPathsBody": "En vez de leer todo, elegí el área que más te pesa ahora. Lo demás queda como apoyo cuando necesites profundizar.",
+  "documentationHousingArrivalSectionTitle": "Vivienda y llegada",
+  "documentationHousingArrivalSectionBody": "Mirá alquiler, costo de entrada, garantía, soft landing y cómo evitar los primeros errores.",
+  "documentationNavigatorTitle": "Dónde encontrar cada tema",
+  "documentationNavigatorBody": "Usá estos bloques para encontrar más rápido alquiler, SUS, trabajo, conducir y costos sin leer toda la página de una sola vez.",
+  "documentationNavigatorHousing": "Vivienda y alquiler",
+  "documentationNavigatorHealth": "SUS y salud",
+  "documentationNavigatorWork": "Trabajo e ingresos",
+  "documentationNavigatorDriving": "Conducir en Brasil",
+  "documentationNavigatorCosts": "Costos iniciales",
+  "documentationNavigatorDocuments": "Documentos base",
+  "documentationPathDocumentsTitle": "Documentos y permanencia",
+  "documentationPathDocumentsBody": "CPF, registro, plazo de permanencia y lo que suele destrabar la vida práctica primero.",
+  "documentationPathHealthTitle": "Salud en la rutina diaria",
+  "documentationPathHealthBody": "Entendé cuándo conviene usar el SUS, una UBS, un hospital o un plan privado.",
+  "documentationPathDrivingTitle": "Manejar y moverte",
+  "documentationPathDrivingBody": "Mirá si tu licencia extranjera ayuda al principio y cuándo te conviene revisar el Detran.",
+  "documentationPathWorkTitle": "Trabajo y aportes",
+  "documentationPathWorkBody": "Entendé trabajo con registro, PJ y cómo eso se relaciona con la previsión.",
+  "documentationPathCostsTitle": "Costos iniciales",
+  "documentationPathCostsBody": "Leé costos aproximados en reales, pesos y dólares sin confundir referencia con precio final.",
+  "documentationOpenTopicAction": "Abrir tema",
+  "documentationQuickAnswersTitle": "Respuestas rápidas para las dudas más comunes",
+  "documentationQuickAnswersBody": "Antes de abrir cada card, empieza por estas respuestas cortas. Si alguna ya responde tu duda, ahorras tiempo.",
+  "documentationAnswerWorkQuestion": "¿Puedo trabajar solo con visa de visita?",
+  "documentationAnswerWorkAnswer": "No. Para trabajo formal, necesitás una situación migratoria compatible y registro regular.",
+  "documentationAnswerCpfQuestion": "¿El CPF solo resuelve banco y contrato?",
+  "documentationAnswerCpfAnswer": "No. El CPF ayuda mucho, pero normalmente no reemplaza un documento migratorio regular.",
+  "documentationAnswerRegistrationQuestion": "¿El registro migratorio sale en el momento?",
+  "documentationAnswerRegistrationAnswer": "No. El protocolo ya importa mientras se confecciona la CRNM, así que el proceso no depende de una tarjeta inmediata.",
+  "documentationAnswerStayQuestion": "¿Quedarse más tiempo como visitante es lo mismo que vivir de forma regular?",
+  "documentationAnswerStayAnswer": "No. Para quien va a vivir en Brasil, la residencia regular suele ser el camino correcto.",
+  "documentationAnswerSusQuestion": "¿Una persona extranjera puede usar el SUS?",
+  "documentationAnswerSusAnswer": "Sí. El SUS es universal en Brasil y el propio Ministerio de Salud reafirma el acceso para personas extranjeras.",
+  "documentationAnswerSusCardQuestion": "¿Tengo que esperar la tarjeta del SUS o el CPF para atenderme?",
+  "documentationAnswerSusCardAnswer": "No necesariamente. El registro ayuda, pero el acceso inicial y, sobre todo, las urgencias no deberían depender de tener todo listo.",
+  "documentationAnswerForeignLicenseQuestion": "¿Puedo manejar al principio con mi licencia extranjera?",
+  "documentationAnswerForeignLicenseAnswer": "En general, sí, por un período limitado, con documento válido y según la regla del acuerdo aplicable. Después conviene confirmar con el Detran del estado.",
+  "documentationAnswerBrazilianLicenseQuestion": "¿Después puedo sacar la licencia brasileña?",
+  "documentationAnswerBrazilianLicenseAnswer": "Sí, si estás regular en el país y cumplís los requisitos del Detran. El proceso y las tasas cambian por estado.",
+  "documentationAnswerWorkCardQuestion": "¿Sigue existiendo el trabajo con registro y cómo funciona?",
+  "documentationAnswerWorkCardAnswer": "Sí. En el trabajo formal por CLT, la relación queda registrada y la Carteira de Trabalho Digital concentra el historial laboral.",
+  "documentationAnswerPjQuestion": "¿Trabajar como PJ es igual al monotributo?",
+  "documentationAnswerPjAnswer": "Puede recordar esa lógica de trabajo por cuenta propia y CNPJ, pero no es la misma estructura. En Brasil cambian las reglas fiscales, previsionales y contractuales según el encuadre.",
+  "documentationAnswerInssQuestion": "¿La previsión pública en Brasil es el INSS?",
+  "documentationAnswerInssAnswer": "Sí. El INSS es la puerta central de la previsión pública para beneficios como jubilación, siempre que existan aportes y requisitos cumplidos.",
+  "documentationAnswerRetirementQuestion": "¿La jubilación depende solo de la edad?",
+  "documentationAnswerRetirementAnswer": "No. La edad mínima importa, pero también cuentan el tiempo de aporte y las reglas de transición.",
+  "documentationHealthSectionTitle": "Salud pública x salud privada",
+  "documentationHealthSectionBody": "Lo importante es entender la función de cada camino. La salud pública no es un plan barato, y la salud privada no reemplaza por sí sola una buena lectura de cobertura.",
+  "documentationWorkSectionTitle": "Cómo trabajo y previsión se conectan",
+  "documentationWorkSectionBody": "Acá conviene separar el modelo de trabajo del modo de aportar. Trabajo con registro, trabajo por CNPJ y aporte al INSS no significan exactamente lo mismo.",
+  "documentationDrivingSectionTitle": "Cómo pensar la licencia sin complicarlo",
+  "documentationDrivingSectionBody": "El flujo más seguro es separar tres preguntas: puedo manejar ahora, qué tengo que validar en el estado y cuándo conviene iniciar la licencia brasileña.",
+  "documentationDeepDiveTitle": "Si necesitás ir un nivel más allá",
+  "documentationDeepDiveBody": "Acá quedan los cards completos con fuente oficial. Siguen siendo cortos, pero sirven cuando la respuesta rápida no alcanza.",
+  "documentationCostsTitle": "Costos aproximados que ayudan a orientarte",
+  "documentationCostsBody": "Cuando existe un valor nacional o una referencia oficial util, la app muestra la conversion aproximada para ayudarte en una primera lectura.",
+  "documentationCostsUpdatedAt": "Tipo de cambio aproximado actualizado en {value}",
+  "@documentationCostsUpdatedAt": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "documentationCostsUnavailable": "No fue posible actualizar la cotización ahora. Los valores en reales siguen como referencia.",
+  "documentationCostsDisclaimer": "Usá esto como orientación inicial. Los costos cambian por estado, convenio, edad, cobertura y reglas locales.",
+  "documentationCostFreeValue": "Gratis",
+  "documentationCostVariableValue": "Variable",
+  "documentationCostCpfTitle": "Pedido oficial de CPF",
+  "documentationCostCpfSupporting": "El tramite oficial es gratuito; la app lo trata como costo cero.",
+  "documentationCostSusCardTitle": "Tarjeta del SUS y registro inicial",
+  "documentationCostSusCardSupporting": "La emisión y el registro público no suelen exigir pago directo.",
+  "documentationCostPublicCareTitle": "Atencion inicial en el SUS",
+  "documentationCostPublicCareSupporting": "UBS y otras puertas públicas de entrada no funcionan como una consulta particular paga.",
+  "documentationCostDrivingTitle": "Primera licencia",
+  "documentationCostDrivingValue": "Ejemplo oficial",
+  "documentationCostDrivingSupporting": "Referencia reciente del Detran-ES: R\\$ 533,34. Tu estado y tu autoescuela pueden cobrar distinto.",
+  "documentationCostPrivateHealthTitle": "Plan de salud privado",
+  "documentationCostPrivateHealthSupporting": "No existe un precio único nacional. Edad, cobertura, red y carencias cambian mucho el valor final.",
+  "documentationCpfTitle": "CPF",
+  "documentationCpfSummary": "El primer documento práctico para abrir camino en banco, contrato y registros.",
+  "documentationCpfBulletOne": "Una persona extranjera puede pedir CPF; en Brasil, el tramite puede hacerse online o en entidad conveniada.",
+  "documentationCpfBulletTwo": "El servicio oficial informa un plazo estimado de hasta 30 días corridos.",
+  "documentationCpfBulletThree": "El CPF no reemplaza el documento migratorio, pero suele destrabar gran parte de la vida práctica.",
+  "documentationRegistrationTitle": "Registro migratorio y CRNM",
+  "documentationRegistrationSummary": "Después de entrar de forma regular, el registro ante la Policía Federal suele ser la etapa clave.",
+  "documentationRegistrationBulletOne": "Quien entra con visa temporaria debe hacer el registro dentro de los 90 días posteriores al ingreso.",
+  "documentationRegistrationBulletTwo": "Si la autorización de residencia fue concedida ya en Brasil, el registro debe hacerse dentro de 30 días.",
+  "documentationRegistrationBulletThree": "La CRNM puede tardar cerca de 30 días hábiles en confeccionarse; el servicio oficial admite un plazo total mayor y el protocolo preserva derechos.",
+  "documentationStayTitle": "Cuánto tiempo puedo quedarme",
+  "documentationStaySummary": "Para una persona argentina, lo más práctico suele ser regularizar la residencia y no depender de una estadía de visita.",
+  "documentationStayBulletOne": "La visa de visita no fue pensada para vivir en Brasil ni para trabajo remunerado.",
+  "documentationStayBulletTwo": "La residencia por el Acuerdo del Mercosur puede otorgarse por 2 años.",
+  "documentationStayBulletThree": "Antes de que termine ese plazo, podés pedir conversión a residencia por tiempo indeterminado si cumplís los requisitos.",
+  "documentationWorkBankTitle": "Trabajo y cuenta bancaria",
+  "documentationWorkBankSummary": "Trabajar y abrir cuenta dependen más de tu regularización que de un solo documento milagroso.",
+  "documentationWorkBankBulletOne": "La visa de visita no autoriza actividad remunerada en Brasil.",
+  "documentationWorkBankBulletTwo": "Para trabajar formalmente, necesitás una situación migratoria compatible y registro regular.",
+  "documentationWorkBankBulletThree": "El banco puede pedir documentos adicionales; el CPF ayuda, pero un documento migratorio regular suele pesar en el alta.",
+  "documentationCitizenshipTitle": "Naturalización",
+  "documentationCitizenshipSummary": "La nacionalidad brasileña no llega solo por tiempo de CPF o estadía; depende de residencia regular y reglas propias.",
+  "documentationCitizenshipBulletOne": "La naturalización ordinaria, en general, exige residencia por tiempo indeterminado en Brasil.",
+  "documentationCitizenshipBulletTwo": "La regla general pide 4 años de residencia antes del pedido, además de otros requisitos legales.",
+  "documentationCitizenshipBulletThree": "Hay hipótesis oficiales de reducción de ese plazo, por eso conviene revisar la regla exacta antes de planificar.",
+  "documentationHealthPublicTitle": "SUS, UBS y acceso público",
+  "documentationHealthPublicSummary": "La salud pública en Brasil no funciona como un plan prepago. La lógica es de acceso universal, con puertas distintas según la necesidad.",
+  "documentationHealthPublicBulletOne": "El SUS atiende de forma universal, incluso a personas extranjeras en territorio brasileño.",
+  "documentationHealthPublicBulletTwo": "La UBS suele ser la puerta de entrada para rutina, seguimiento, vacunas y cuidado básico.",
+  "documentationHealthPublicBulletThree": "Urgencias y emergencias siguen otra logica de acceso; no esperes tener todo resuelto en el registro antes de pedir ayuda.",
+  "documentationHealthFlowTitle": "Cómo encontrar la atención correcta",
+  "documentationHealthFlowSummary": "No toda duda de salud empieza en un hospital. Conviene saber cuándo buscar una UBS, una UPA, un hospital o una app oficial.",
+  "documentationHealthFlowBulletOne": "Usá la UBS para rutina, derivaciones, recetas y seguimiento.",
+  "documentationHealthFlowBulletTwo": "Usa UPA u hospital cuando el caso sea urgente, agudo o no pueda esperar una agenda basica.",
+  "documentationHealthFlowBulletThree": "Meu SUS Digital y la secretaría local ayudan a ubicar unidades, exámenes e información de seguimiento.",
+  "documentationHealthPrivateTitle": "Salud privada",
+  "documentationHealthPrivateSummary": "Un plan privado puede acelerar la red y la conveniencia, pero entra como costo recurrente y exige comparar cobertura con cuidado.",
+  "documentationHealthPrivateBulletOne": "El plan de salud privado es pago y está regulado por la ANS.",
+  "documentationHealthPrivateBulletTwo": "Precio, red, alcance y carencias cambian según contrato, edad y operadora.",
+  "documentationHealthPrivateBulletThree": "Antes de contratar, compara red, cobertura y reglas en el material oficial de la ANS, no solo el precio.",
+  "documentationWorkCltTitle": "Trabajo con registro",
+  "documentationWorkCltSummary": "En el trabajo formal, la relación laboral sigue la CLT y el registro aparece en la Carteira de Trabalho Digital.",
+  "documentationWorkCltBulletOne": "El trabajo con registro es la forma más reconocible de trabajo formal en Brasil.",
+  "documentationWorkCltBulletTwo": "El historial laboral puede seguirse en la Carteira de Trabalho Digital.",
+  "documentationWorkCltBulletThree": "En este modelo, la relación con el aporte previsional suele estar más integrada a la nómina salarial.",
+  "documentationWorkPjTitle": "PJ, CNPJ y trabajo por cuenta",
+  "documentationWorkPjSummary": "Trabajar como PJ o con CNPJ cambia la lógica del vínculo. Puede recordar al monotributo en la comparación cultural, pero no es la misma estructura jurídica.",
+  "documentationWorkPjBulletOne": "PJ no es trabajo con registro; el vínculo es empresarial o autónomo, no laboral.",
+  "documentationWorkPjBulletTwo": "Abrir CNPJ y aportar a la previsión son temas conectados, pero no automáticos en todos los casos.",
+  "documentationWorkPjBulletThree": "Antes de aceptar este formato, conviene entender impuestos, contrato y cómo va a funcionar el aporte previsional.",
+  "documentationRetirementTitle": "Previsión pública y jubilación",
+  "documentationRetirementSummary": "En Brasil, la jubilación pública gira alrededor del INSS, con edad mínima, tiempo de aportes y reglas de transición que cambian la lectura de cada caso.",
+  "documentationRetirementBulletOne": "La regla general actual usa edad mínima de 62 años para mujeres y 65 para hombres en la jubilación por edad.",
+  "documentationRetirementBulletTwo": "El tiempo de aportes sigue siendo relevante, sobre todo en las reglas de transición y en la lectura de elegibilidad.",
+  "documentationRetirementBulletThree": "Para quien llega del exterior, lo más seguro es entender pronto cómo será su forma de aportar en Brasil.",
+  "documentationDrivingTitle": "Primera licencia en Brasil",
+  "documentationDrivingSummary": "Si vas a vivir en Brasil, la licencia brasileña depende del Detran del estado y de un proceso local con etapas obligatorias.",
+  "documentationDrivingBulletOne": "El proceso suele incluir examen médico y psicológico, clases, examen teórico y examen práctico.",
+  "documentationDrivingBulletTwo": "Una persona extranjera regularizada puede iniciar el proceso si cumple las exigencias de identificacion y residencia del estado.",
+  "documentationDrivingBulletThree": "Las tasas y el costo final cambian según el Detran y la autoescuela, así que usá el valor mostrado solo como referencia.",
+  "documentationForeignLicenseTitle": "Licencia extranjera y conducción inicial",
+  "documentationForeignLicenseSummary": "Tener una licencia extranjera válida puede ayudar al principio, pero no reemplaza para siempre la necesidad de confirmar la regla brasileña.",
+  "documentationForeignLicenseBulletOne": "La posibilidad de manejar con licencia extranjera depende de validez, identificación y regla aplicable a tu caso.",
+  "documentationForeignLicenseBulletTwo": "El período inicial de uso no significa equivalencia automática para toda tu permanencia en Brasil.",
+  "documentationForeignLicenseBulletThree": "Si vas a fijar residencia, conviene confirmar temprano con el Detran del estado si habrá registro, canje o un proceso nuevo completo.",
+  "citiesPageTitle": "Ciudades",
+  "countriesPageTitle": "Países",
+  "publicAccessLabel": "Acceso público",
+  "loginPageTitle": "Entrar",
+  "loginHeadline": "Entrá solo cuando tenga sentido para vos",
+  "loginDescription": "Movaro deja la exploración abierta. El inicio de sesión aparece solo cuando querés guardar algo personal.",
+  "loginGoogleAction": "Continuar con Google",
+  "loginAppleAction": "Continuar con Apple",
+  "loginDevOnlyHint": "Estos botones usan FakeAuthDataSource solo en desarrollo.",
+  "loginLaterAction": "Ahora no",
+  "loginActionRequired": "Para {action}, necesitamos vincular esta acción con vos.",
+  "@loginActionRequired": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "pendingActionSavePlan": "guardar tu plan",
+  "pendingActionPostCommunity": "publicar en la comunidad",
+  "pendingActionSaveCity": "guardar esta ciudad",
+  "onboardingPageTitle": "Tu contexto",
+  "onboardingHeadline": "Queremos entender tu momento",
+  "onboardingDescription": "Esto ayuda a que la experiencia sea más útil sin pedir demasiada información.",
+  "onboardingOriginLabel": "¿De dónde venís?",
+  "onboardingDestinationLabel": "¿A dónde querés ir?",
+  "onboardingContinueAction": "Continuar",
+  "authenticatedHomeTitle": "Tu espacio",
+  "authenticatedWelcome": "Hola, {name}",
+  "@authenticatedWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "authenticatedHomeDescription": "Acá retomás lo que estabas haciendo y encontrás tus atajos principales.",
+  "authenticatedPlanSectionTitle": "Tu plan",
+  "authenticatedShortcutsTitle": "Atajos útiles",
+  "authenticatedCitiesShortcut": "Ver ciudades",
+  "authenticatedSearchShortcut": "Buscar ciudad",
+  "signOutAction": "Salir",
+  "onboardingSummary": "Origen: {origin}  Destino: {destination}",
+  "@onboardingSummary": {
+    "placeholders": {
+      "origin": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "savedPlansCount": "Planes guardados: {count}",
+  "@savedPlansCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "startNewPlanAction": "Iniciar nuevo plan",
+  "questionnairePageTitle": "Tu plan inicial",
+  "questionnaireLoadingLabel": "Preparando tus preguntas",
+  "questionnaireSupportText": "Toma menos de un minuto. Una pregunta por vez.",
+  "questionProgress": "Pregunta {current} de {total}",
+  "@questionProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "backAction": "Volver",
+  "nextAction": "Continuar",
+  "generatePlanAction": "Ver mi plan",
+  "migrationPlanPageTitle": "Tu plan inicial",
+  "migrationPlanSummaryTitle": "Lo que nos contaste",
+  "planRecommendedCityTitle": "Ciudad sugerida para empezar",
+  "planRecommendedCityDescription": "Según tus respuestas, Movaro sugiere mirar primero {city}, {stateCode}.",
+  "@planRecommendedCityDescription": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      },
+      "stateCode": {
+        "type": "String"
+      }
+    }
+  },
+  "planRecommendedCityAction": "Ver esta ciudad",
+  "planSummaryOrigin": "Origen: {value}",
+  "@planSummaryOrigin": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "planSummaryDestination": "Destino: {value}",
+  "@planSummaryDestination": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "planSummaryGoal": "Objetivo: {value}",
+  "@planSummaryGoal": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "planSummaryTimeline": "Momento de la mudanza: {value}",
+  "@planSummaryTimeline": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "migrationPlanStepsTitle": "Primeros pasos sugeridos",
+  "planNextActionsTitle": "Lo que suele venir justo despues",
+  "planNextActionsBody": "Si este resultado te ayudo, el siguiente paso suele ser confirmar documentos, comparar la ciudad sugerida con otras opciones o rehacer el plan con otra prioridad.",
+  "planNextActionDocumentsTitle": "Confirmar documentos antes de avanzar",
+  "planNextActionDocumentsBody": "Usá la guía práctica para revisar CPF, registro, permanencia, trabajo y banco sin caer en investigación dispersa.",
+  "planNextActionCitiesTitle": "Comparar otras ciudades antes de decidir",
+  "planNextActionCitiesBody": "Mira si la ciudad sugerida sigue teniendo sentido cuando la comparas por costo, idioma, seguridad y trabajo.",
+  "planNextActionRetakeTitle": "Rehacer el plan con otra prioridad",
+  "planNextActionRetakeBody": "Si tu prioridad cambio, conviene responder de nuevo y ver si tambien cambia el orden de los pasos.",
+  "readinessSectionTitle": "Checklist practico para la siguiente fase",
+  "readinessStageNow": "Empieza ahora",
+  "readinessStageSoon": "Prepara despues",
+  "readinessStageLanding": "Antes de llegar",
+  "readinessSummaryResearching": "Como todavía estás explorando, el mejor paso ahora es reducir incertidumbre antes de abrir demasiados frentes.",
+  "readinessSummaryTwelveMonths": "Todavía tienes tiempo para preparar bien la mudanza, así que usa este checklist para reducir fricción con anticipación.",
+  "readinessSummarySixMonths": "Seis meses ya alcanzan para salir de la improvisación y estructurar documentos, dinero y ciudad.",
+  "readinessSummaryAsap": "Como el plan está cerca, la prioridad ahora es ordenar lo esencial y evitar errores evitables.",
+  "readinessItemMigrationPathTitle": "Confirma primero la ruta migratoria",
+  "readinessItemMigrationPathBody": "Antes de banco, vivienda o trabajo, valida qué camino de residencia encaja mejor con tu entrada a Brasil.",
+  "readinessItemDocumentsTitle": "Arma el paquete documental esencial",
+  "readinessItemDocumentsBody": "Separa pasaporte, antecedentes, necesidad de apostilla y documentos que todavía pueden requerir traducción.",
+  "readinessItemBudgetTitle": "Prueba el presupuesto de aterrizaje",
+  "readinessItemBudgetBody": "Proyecta lo que van a exigir los primeros 30 a 90 días, no solo el costo mensual una vez instalada la rutina.",
+  "readinessItemCityTitle": "Convierte la ciudad en un filtro real",
+  "readinessItemCityBody": "Usa tu selección actual de ciudades para reducir incertidumbre de vivienda, transporte y rutina antes de bajar al nivel de barrio.",
+  "readinessItemCityBodyWithCity": "Usa {city} como primer filtro y compárala con alternativas antes de decidir a nivel barrio.",
+  "@readinessItemCityBodyWithCity": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "readinessItemLanguageTitle": "Prepara tu primera capa de idioma",
+  "readinessItemLanguageBody": "Concéntrate en el portugués que reduce fricción en la vida diaria: vivienda, transporte, banco y servicios.",
+  "readinessItemLanguageWorkBody": "Concéntrate en el portugués que afecta entrevistas, rutina laboral, negociación y pedidos básicos de servicio.",
+  "readinessItemLanguageStudyBody": "Concéntrate en el portugués necesario para clases, inscripción, rutina diaria y comunicación institucional.",
+  "readinessGoalWorkTitle": "Mapea empleabilidad antes de llegar",
+  "readinessGoalWorkBody": "Revisa qué tipo de trabajo puedes buscar al inicio, qué documentos pueden frenarte y cómo la ciudad cambia tus posibilidades.",
+  "readinessGoalRemoteTitle": "Estabiliza la base del trabajo remoto",
+  "readinessGoalRemoteBody": "Chequea internet, flujo bancario, costo diario y la estructura local mínima antes de depender del ingreso remoto.",
+  "readinessGoalStudyTitle": "Valida la ruta de estudio",
+  "readinessGoalStudyBody": "Revisa admisión, costo de rutina, tiempos de estudiante y qué debe regularizarse antes de tomar el estudio como base.",
+  "readinessGoalEntrepreneurTitle": "Planifica la entrada para emprender",
+  "readinessGoalEntrepreneurBody": "Mapea la capa práctica inicial: documentos locales, banco, ciudad y estructura mínima para operar con más seguridad.",
+  "readinessGoalRetireTitle": "Protege rutina y previsibilidad",
+  "readinessGoalRetireBody": "Prioriza acceso a salud, rutina de barrio, costo recurrente y los documentos que protegen una llegada tranquila.",
+  "readinessGoalQualityTitle": "Convierte calidad de vida en criterio",
+  "readinessGoalQualityBody": "Transforma estilo de vida en filtros reales: seguridad, rutina, adaptación al idioma y costo de permanencia.",
+  "readinessItemCpfBankTitle": "Prepara CPF y la primera base bancaria",
+  "readinessItemCpfBankBody": "CPF y situación regular influyen en banco, contrato y buena parte de la estructura práctica de la llegada.",
+  "readinessItemHousingTitle": "Reduce la fricción de vivienda antes de buscar",
+  "readinessItemHousingBody": "Revisa garantía, reserva financiera, prioridad de barrio y comprobantes que pueden pedirte antes de hablar con propietarios.",
+  "readinessItemArrivalTitle": "Arma un plan de llegada de 30 días",
+  "readinessItemArrivalBody": "Lista lo que debe funcionar en el primer mes: conectividad, salud, transporte, pagos y seguimiento documental.",
+  "readinessProgressLabel": "{done} de {total} items completados",
+  "@readinessProgressLabel": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "planStepMeta": "Category: {category}  Estimated days: {days}",
+  "planStepOpenDetailsAction": "Abrir detalles",
+  "planStepOpenVisaEyebrow": "Residencia y visa",
+  "planStepOpenVisaSummary": "Antes de decidir banco, trabajo o contrato, conviene confirmar cuál es tu base migratoria correcta para entrar y permanecer de forma regular.",
+  "planStepOpenVisaPointOne": "Para una persona argentina, la residencia por el Acuerdo del Mercosur suele ser uno de los caminos más directos.",
+  "planStepOpenVisaPointTwo": "La visa de visita no fue hecha para vivir en Brasil ni para actividad remunerada.",
+  "planStepOpenVisaPointThree": "Si tu intencion ya es vivir en Brasil, conviene resolver esto antes de asumir alquiler o trabajo.",
+  "planStepOpenCpfEyebrow": "Documento fiscal",
+  "planStepOpenCpfSummary": "El CPF ayuda a destrabar banco, contrato, registro y gran parte de la vida práctica al comienzo.",
+  "planStepOpenCpfPointOne": "El tramite puede empezar online, según la orientacion oficial.",
+  "planStepOpenCpfPointTwo": "El plazo informado oficialmente puede llegar a 30 días corridos.",
+  "planStepOpenCpfPointThree": "El CPF ayuda mucho, pero no reemplaza un documento migratorio regular.",
+  "planStepOpenBankEyebrow": "Cuenta inicial",
+  "planStepOpenBankSummary": "Abrir cuenta depende más de tu regularización y de los documentos presentados que de un banco específico.",
+  "planStepOpenBankPointOne": "Hay bancos tradicionales y digitales, pero los requisitos pueden variar.",
+  "planStepOpenBankPointTwo": "El CPF ayuda, pero la CRNM, el protocolo u otro documento regular pueden influir en el alta.",
+  "planStepOpenBankPointThree": "Empieza comparando cuenta digital para una rutina simple y banco tradicional si necesitas atencion fisica.",
+  "planStepOpenHousingEyebrow": "Vivienda y barrios",
+  "planStepOpenHousingSummary": "Antes de cerrar vivienda, conviene comparar barrios con mejor rutina, acceso y costo.",
+  "planStepOpenHousingSummaryCity": "For {city}, compare neighborhoods with better daily routine, access, and cost before closing a housing deal.",
+  "@planStepOpenHousingSummaryCity": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "planStepOpenHousingPointOne": "Priorizá barrios con buena conexión a lo que necesitás: trabajo, transporte y servicios.",
+  "planStepOpenHousingPointTwo": "Usa la lectura de costo de la ciudad como punto de partida, pero confirma alquiler y contrato antes de decidir.",
+  "planStepOpenHousingPointThree": "El análisis por barrio todavía necesita una base dedicada; por ahora, usá la ciudad recomendada como filtro inicial.",
+  "planStepOpenGeneralEyebrow": "Checklist guiada",
+  "planStepOpenGeneralSummary": "Este paso funciona mejor como una validación práctica dentro de tu llegada a Brasil.",
+  "planStepOpenGeneralPointOne": "Resuelve primero lo esencial para no abrir demasiados frentes al mismo tiempo.",
+  "planStepOpenGeneralPointTwo": "Cuando la etapa dependa de un documento oficial, confirmá el requisito más reciente antes de presentar nada.",
+  "planStepOpenGeneralPointThree": "Usa el plan como orden sugerido, no como una regla fija para todos los casos.",
+  "planStepOpenTagMercosur": "Mercosur",
+  "planStepOpenTagVisitor": "Visita no autoriza trabajo",
+  "planStepOpenTagOnline": "Tramite online",
+  "planStepOpenTagReceitaFederal": "Receita Federal",
+  "planStepOpenTagTraditionalBanks": "Bancos tradicionales",
+  "planStepOpenTagDigitalBanks": "Bancos digitales",
+  "planStepOpenTagNeighborhoods": "Barrios",
+  "planStepOpenTagRent": "Alquiler",
+  "planStepOpenTagChecklist": "Paso a paso",
+  "@planStepMeta": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "savePlanAction": "Guardar plan",
+  "savePlanPageTitle": "Guardar plan",
+  "savePlanSuccessTitle": "Plan guardado por ahora",
+  "savePlanSuccessBody": "Planes guardados temporalmente en esta sesión: {count}",
+  "@savePlanSuccessBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goToProfileAction": "Ir a mi espacio",
+  "citiesExploreTitle": "Ciudades",
+  "citiesExploreHeadline": "Descubrí ciudades con más contexto",
+  "citiesExploreDescription": "Mira sugerencias por intencion y entiende por que cada ciudad aparece aqui.",
+  "citiesLoadingLabel": "Cargando ciudades",
+  "citiesMethodologyNote": "Rankings basados en datos publicos y metodología de Movaro.",
+  "citiesExplorePopularTitle": "Más elegidas por argentinos",
+  "citiesExploreLanguageTitle": "Más fáciles si todavía dependés del español",
+  "citiesExploreEconomicalTitle": "Buenas opciones si priorizas costo",
+  "citiesExploreWorkTitle": "Buenas opciones si buscas trabajo",
+  "citiesExploreHousingEasyTitle": "Mejores para una llegada mas liviana",
+  "citiesExploreHousingPressureTitle": "Piden mas caja al entrar",
+  "citiesExploreSoftLandingTitle": "Buenas para llegar con menos friccion",
+  "citiesExploreFamilyStabilityTitle": "Buenas para llegar con mas previsibilidad",
+  "citiesExploreIncomeStartTitle": "Buenas para llegar buscando ingresos",
+  "citiesExploreCoastalTitle": "Buenas para quien quiere vivir cerca de la playa",
+  "citiesExploreCoastalSoftLandingTitle": "Playa con llegada mas liviana",
+  "citiesExploreCoastalBalancedTitle": "Playa con mejor equilibrio de rutina",
+  "citiesHighlightPopularLabel": "Entre las ciudades analizadas por Movaro",
+  "citiesHighlightLanguageLabel": "Buena opción si la adaptación con el idioma importa para ti",
+  "citiesHighlightEconomicalLabel": "Buena opción si priorizas costo",
+  "citiesHighlightWorkLabel": "Buena opción si buscás más oportunidades de trabajo",
+  "citiesHighlightHousingEasyLabel": "Buena para soft landing",
+  "citiesHighlightHousingPressureLabel": "Presion de vivienda alta",
+  "citiesHighlightSoftLandingLabel": "Buena para un aterrizaje inicial con menos friccion",
+  "citiesHighlightFamilyStabilityLabel": "Buena para equilibrar seguridad, vivienda y rutina",
+  "citiesHighlightIncomeStartLabel": "Buena si necesitas activar ingresos mas temprano",
+  "citiesHighlightCoastalLabel": "Buena para rutina de litoral",
+  "citiesHighlightMetropolisLabel": "Buena si queres un ritmo mas urbano",
+  "citiesHighlightInlandLabel": "Buena si buscas una rutina mas tranquila",
+  "citiesHighlightBorderLabel": "Buena si queres leer mejor una ciudad de frontera",
+  "citiesHighlightCoastalSoftLandingLabel": "Playa con soft landing mejor",
+  "citiesHighlightCoastalBalancedLabel": "Playa con mejor equilibrio entre rutina y costo",
+  "citiesExploreEmptyTitle": "Seguimos ampliando este catalogo",
+  "citiesExploreEmptyDescription": "Las sugerencias de ciudades van a aparecer aca a medida que la base de Movaro crezca.",
+  "citiesSearchTitle": "Buscar ciudades",
+  "citiesSearchHeadline": "Encuentra una ciudad en el catalogo inicial",
+  "citiesSearchDescription": "Busca por nombre o recorre la lista actual de Movaro.",
+  "citiesSearchHint": "Buscar ciudad",
+  "citiesSearchFieldLabel": "Nombre de la ciudad",
+  "citiesQuickFilterAll": "Vista general",
+  "citiesQuickFilterPopular": "Mas populares",
+  "citiesQuickFilterLowCost": "Mejor costo",
+  "citiesQuickFilterWork": "Mas trabajo",
+  "citiesQuickFilterLanguage": "Idioma mas facil",
+  "citiesQuickFilterHousingEasy": "Llegada liviana",
+  "citiesQuickFilterHousingPressure": "Mas caja",
+  "citiesQuickFilterSoftLanding": "Menos friccion",
+  "citiesQuickFilterFamilyStability": "Mas previsible",
+  "citiesQuickFilterIncomeStart": "Ingresos rapidos",
+  "citiesQuickFilterCoastal": "Playa",
+  "citiesSearchingLabel": "Buscando ciudades",
+  "citiesCatalogLoadingLabel": "Cargando catalogo",
+  "citiesSearchEmptyTitle": "No encontramos esa ciudad",
+  "citiesSearchEmptyDescription": "Prueba con otro nombre o explora el catalogo inicial de Movaro.",
+  "citiesCatalogEmptyTitle": "El catalogo aun esta vacio",
+  "citiesCatalogEmptyDescription": "Las ciudades del catalogo de Movaro apareceran aqui.",
+  "cityDetailTitleFallback": "Ciudad",
+  "cityDetailLoadingLabel": "Cargando detalles de la ciudad",
+  "cityDetailEmptyTitle": "Ciudad no disponible",
+  "cityDetailEmptyDescription": "No encontramos los detalles de esta ciudad en este momento.",
+  "cityDetailContextNote": "Usa estos indicadores como punto de partida, no como verdad absoluta.",
+  "cityLifestyleCoastalLabel": "Estilo de vida de litoral",
+  "cityLifestyleMetropolisLabel": "Ritmo de metropoli",
+  "cityLifestyleBorderLabel": "Ciudad de frontera",
+  "cityLifestyleInlandLabel": "Rutina de interior",
+  "cityDetailMapTitle": "Donde queda la ciudad",
+  "cityDetailMapDescription": "Mira la ubicacion de la ciudad en el mapa antes de comparar contexto, distancia y region.",
+  "cityDetailSnapshotTitle": "Vista rápida",
+  "cityDetailPopulationLabel": "Poblacion",
+  "cityDetailCostLabel": "Costo",
+  "cityDetailRentLabel": "Alquiler",
+  "cityDetailSafetyLabel": "Seguridad",
+  "cityDetailPopularityLabel": "Popularidad entre argentinos",
+  "cityDetailLanguageLabel": "Adaptacion con el idioma",
+  "cityDetailWorkLabel": "Mercado laboral",
+  "cityDetailIdhmLabel": "IDHM",
+  "cityDetailIdhmOfficialNote": "dato oficial del Atlas de Desarrollo Humano",
+  "cityDetailUnemploymentLabel": "Tasa de desempleo",
+  "cityDetailIndustriesTitle": "Sectores fuertes",
+  "cityDetailReasonsTitle": "Por que Movaro la recomienda",
+  "cityDetailSourcesTitle": "Fuentes de datos",
+  "cityDetailSourcesSummary": "{count} fuentes disponibles. Expandí solo si querés validar el origen de los datos.",
+  "@cityDetailSourcesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cityDetailSourceOfficialBadge": "Fuente oficial",
+  "cityDetailSourceCuratedBadge": "Fuente curada",
+  "cityDetailSourceProviderLabel": "Proveedor",
+  "cityDetailSourceUrlLabel": "Referencia",
+  "citySourceTerritorialTitle": "Identidad territorial",
+  "citySourceTerritorialDescription": "Nombre oficial, provincia, código IBGE y región municipal.",
+  "citySourcePopulationTitle": "Población",
+  "citySourcePopulationDescription": "Referencia oficial de población del municipio.",
+  "citySourceHumanDevelopmentTitle": "Desarrollo humano",
+  "citySourceHumanDevelopmentDescription": "IDHM municipal oficial con referencia al Censo 2010.",
+  "citySourceCuratedMetricsTitle": "Métricas curadas del producto",
+  "citySourceCuratedMetricsDescription": "Actualmente proviene del dataset curado de Movaro. Las sustituciones oficiales prioritarias son Atlas da Violencia (seguridad), Novo Caged (empleo), FipeZAP (alquiler) e IBGE PIB dos Municipios (actividad económica).",
+  "citySourceRankingTitle": "Metodología de puntaje",
+  "citySourceRankingDescription": "Puntajes de Movaro calculados sobre datos públicos y el dataset curado.",
+  "cityDetailSaveAction": "Guardar ciudad",
+  "cityDetailSavedAction": "Ciudad guardada",
+  "cityDetailSavedFeedback": "Ciudad guardada temporalmente en este dispositivo.",
+  "cityDetailCompareAction": "Comparar otras ciudades",
+  "cityDetailPlanAction": "Armar mi plan",
+  "cityDetailFooterNote": "Estos indicadores ayudan en la exploracion inicial y no reemplazan un analisis individual.",
+  "introPageTitle": "Cómo funciona Movaro",
+  "introHeroTitle": "Entendé la app en menos de un minuto",
+  "introHeroDescription": "Movaro te ayuda a comparar ciudades, entender burocracias prácticas y armar una primera dirección de mudanza sin empezar por un exceso de información.",
+  "introExploreTitle": "Explorá ciudades con contexto",
+  "introExploreDescription": "Mirá costo, seguridad, adaptación al idioma y señales locales para entender por qué una ciudad aparece como buena opción.",
+  "introPlanTitle": "Armá un primer plan",
+  "introPlanDescription": "Respondé pocas preguntas y recibí una dirección práctica para tu próximo paso.",
+  "introDocumentationTitle": "Consultá documentación cuando la necesites",
+  "introDocumentationDescription": "Usá la guía para entender CPF, registro, salud, trabajo y costos aproximados del arranque de la mudanza.",
+  "introBetaTitle": "Qué ya está disponible en este beta",
+  "introBetaDescription": "Esta versión se enfoca en claridad. Ya podés explorar ciudades, comparar señales y generar un plan inicial antes de que lleguen las funciones más profundas de cuenta.",
+  "introBottomSupportLabel": "Siguiente paso",
+  "introPrimaryAction": "Empezar a explorar",
+  "introSkipAction": "Saltar introducción",
+  "cityPracticalAnswersTitle": "Respuestas rápidas para dudas comunes",
+  "cityPracticalLanguageQuestion": "¿La vida diaria sería más fácil si todavía dependés del español?",
+  "cityPracticalCostQuestion": "¿Esta ciudad parece manejable en costo de vida cotidiano?",
+  "cityPracticalWorkQuestion": "¿Parece una buena ciudad para empezar a trabajar?",
+  "cityPracticalSafetyQuestion": "¿Parece más fácil adaptarse con una rutina más estable?",
+  "cityPracticalLanguageEasy": "Se ve más fácil que el promedio para alguien que llega hablando español, porque combina mejor adaptación con el idioma y familiaridad argentina.",
+  "cityPracticalLanguageMedium": "Se ve manejable, pero igual conviene llegar con una base de portugués para la rutina.",
+  "cityPracticalLanguageHard": "Probablemente te exija adaptarte más rápido al portugués, porque el soporte cotidiano en español parece menor.",
+  "cityPracticalCostEasy": "Su señal de costo se ve más amigable para una mudanza inicial dentro del catálogo actual.",
+  "cityPracticalCostMedium": "Se ve equilibrada, pero todavía conviene validar alquiler y barrios con cuidado.",
+  "cityPracticalCostHard": "Puede sentirse más pesada al principio, así que acá pesan más el presupuesto y la búsqueda de vivienda.",
+  "cityPracticalWorkStrong": "Muestra señales más fuertes de oportunidades laborales y estructura económica inicial.",
+  "cityPracticalWorkMedium": "Puede funcionar según tu perfil, pero la elección de ciudad necesita ser más deliberada.",
+  "cityPracticalWorkLow": "Se ve menos atractiva si tu principal preocupación es conseguir trabajo rápido.",
+  "cityPracticalSafetyGood": "Dentro de este catálogo inicial, parece más apta para una rutina diaria más estable.",
+  "cityPracticalSafetyMedium": "Se ve razonable, pero el contexto local y el barrio siguen importando mucho.",
+  "cityPracticalSafetyLow": "Conviene mirarla con más cuidado y validar mejor el contexto local antes de tomarla como opción simple.",
+  "cityMetricBadgePositive": "Lectura favorable",
+  "cityMetricBadgeNeutral": "Pide equilibrio",
+  "cityMetricBadgeAttention": "Pide más atención",
+  "cityMetricCostLowHeadline": "Costo bajo",
+  "cityMetricCostLowSupporting": "Más liviano para el presupuesto del dia a dia.",
+  "cityMetricCostMediumHeadline": "Costo moderado",
+  "cityMetricCostMediumSupporting": "Un equilibrio razonable entre rutina e infraestructura.",
+  "cityMetricCostHighHeadline": "Costo alto",
+  "cityMetricCostHighSupporting": "Va a exigir más cuidado con alquiler y gastos mensuales.",
+  "cityMetricSafetyHighHeadline": "Seguridad alta",
+  "cityMetricSafetyHighSupporting": "Lectura más cómoda para la rutina inicial.",
+  "cityMetricSafetyMediumHeadline": "Seguridad moderada",
+  "cityMetricSafetyMediumSupporting": "Depende más del barrio y del contexto local.",
+  "cityMetricSafetyLowHeadline": "Más cautela",
+  "cityMetricSafetyLowSupporting": "Conviene validar mejor la ciudad antes de tomarla como mudanza simple.",
+  "cityMetricLanguageEasyHeadline": "Adaptacion facil",
+  "cityMetricLanguageEasySupporting": "Suele ser más amigable para quien llega hablando español.",
+  "cityMetricLanguageMediumHeadline": "Adaptacion moderada",
+  "cityMetricLanguageMediumSupporting": "Una base de portugués ayuda bastante en la rutina.",
+  "cityMetricLanguageHardHeadline": "Adaptación más difícil",
+  "cityMetricLanguageHardSupporting": "El idioma tiende a pesar más en la integración diaria.",
+  "cityMetricWorkStrongHeadline": "Mercado fuerte",
+  "cityMetricWorkStrongSupporting": "Ciudad con una lectura más favorable para buscar oportunidades.",
+  "cityMetricWorkMediumHeadline": "Mercado moderado",
+  "cityMetricWorkMediumSupporting": "Puede funcionar bien, pero depende más de tu perfil.",
+  "cityMetricWorkLowHeadline": "Mercado más limitado",
+  "cityMetricWorkLowSupporting": "Pide más estrategia si conseguir trabajo rápido es tu prioridad.",
+  "cityIdhmVeryHigh": "Desarrollo muy alto",
+  "cityIdhmVeryHighSupporting": "Entre los niveles municipales más fuertes del indicador oficial.",
+  "cityIdhmHigh": "Desarrollo alto",
+  "cityIdhmHighSupporting": "Una lectura solida de desarrollo humano en la referencia oficial.",
+  "cityIdhmMedium": "Desarrollo medio",
+  "cityIdhmMediumSupporting": "Conviene leerlo junto con costo y oportunidades.",
+  "cityIdhmLow": "Desarrollo bajo",
+  "cityIdhmLowSupporting": "Pide más cuidado antes de asumir una buena estructura general.",
+  "cityIdhmVeryLow": "Desarrollo muy bajo",
+  "cityIdhmVeryLowSupporting": "Señala una base más frágil en el indicador oficial.",
+  "citySnapshotRentLower": "Alquiler más liviano",
+  "citySnapshotRentLowerSupporting": "Suele pesar menos al inicio de la mudanza.",
+  "citySnapshotRentModerate": "Alquiler moderado",
+  "citySnapshotRentModerateSupporting": "Pide equilibrio entre barrio, contrato y rutina.",
+  "citySnapshotRentHigher": "Alquiler más alto",
+  "citySnapshotRentHigherSupporting": "Va a exigir más cuidado antes de cerrar vivienda.",
+  "cityHousingViabilityTileLabel": "Entrada de vivienda",
+  "cityHousingViabilityEasyHeadline": "Entrada mas liviana",
+  "cityHousingViabilityEasySupporting": "Tiende a permitir un aterrizaje mas suave, con menos presion de alquiler y mas margen para ajustar barrio y rutina.",
+  "cityHousingViabilityEasyBadge": "Buena para soft landing",
+  "cityHousingViabilityBalancedHeadline": "Entrada equilibrada",
+  "cityHousingViabilityBalancedSupporting": "Puede funcionar bien si llegas con reserva y validas barrio, garantia y costo total antes de firmar.",
+  "cityHousingViabilityBalancedBadge": "Necesita validacion",
+  "cityHousingViabilityHardHeadline": "Exige mas caja",
+  "cityHousingViabilityHardSupporting": "Aca alquiler y entrada suelen pesar mas. Conviene tratar vivienda como filtro serio antes de elegir la ciudad.",
+  "cityHousingViabilityHardBadge": "Presion de vivienda alta",
+  "citySnapshotPopularityHigh": "Muy buscada",
+  "citySnapshotPopularityHighSupporting": "Ya aparece con fuerte afinidad entre argentinos.",
+  "citySnapshotPopularityMedium": "Popularidad moderada",
+  "citySnapshotPopularityMediumSupporting": "Tiene una familiaridad razonable dentro del catalogo actual.",
+  "citySnapshotPopularityLow": "Menos recurrente",
+  "citySnapshotPopularityLowSupporting": "Todavía aparece menos en el recorte inicial de interes argentino.",
+  "citySnapshotUnemploymentLower": "Desempleo más bajo",
+  "citySnapshotUnemploymentModerate": "Desempleo moderado",
+  "citySnapshotUnemploymentHigher": "Desempleo más alto",
+  "languageSelectorTooltip": "Elegir idioma",
+  "languageOptionSpanishArgentina": "Español (Argentina)",
+  "languageOptionEnglish": "English",
+  "languageOptionPortuguese": "Portugués",
+  "commonRetryAction": "Intentar de nuevo",
+  "commonBackAction": "Volver",
+  "protectedCommunityCreateTitle": "Crear publicación",
+  "protectedCommunityCreateDescription": "Este espacio va a permitir crear publicaciones cuando la comunidad esté habilitada.",
+  "questionOriginCountryTitle": "¿De dónde venís?",
+  "questionDestinationCountryTitle": "¿A dónde querés ir?",
+  "questionGoalTitle": "¿Qué querés hacer en el nuevo país?",
+  "questionPortugueseFamiliarityTitle": "¿Qué tan cómodo te sentís hoy con el portugués?",
+  "questionTimelineTitle": "¿Cuándo pensás mudarte?",
+  "questionOptionArgentina": "Argentina",
+  "questionOptionBrazil": "Brasil",
+  "questionOptionUnknown": "Todavía no lo sé",
+  "questionOptionWork": "Trabajar",
+  "questionOptionRemoteWork": "Trabajar remoto",
+  "questionOptionStudy": "Estudiar",
+  "questionOptionEntrepreneur": "Emprender",
+  "questionOptionRetire": "Retirarme",
+  "questionOptionQualityOfLife": "Calidad de vida",
+  "questionOptionBeachLife": "Playa y litoral",
+  "questionOptionNoPortuguese": "Todavía dependo principalmente del español",
+  "questionOptionBasicPortuguese": "Me manejo con portugués basico",
+  "questionOptionComfortablePortuguese": "Ya puedo vivir en portugués",
+  "questionOptionResearching": "Solo estoy investigando",
+  "questionOption12Months": "En los próximos 12 meses",
+  "questionOption6Months": "En los próximos 6 meses",
+  "questionOptionAsap": "Lo antes posible",
+  "recommendationReasonEconomical": "Buena opción para quien prioriza costo",
+  "recommendationReasonPopularArgentina": "Popular entre argentinos",
+  "recommendationReasonLanguageSupport": "Adaptacion más facil si todavía dependes del español",
+  "recommendationReasonWorkMarket": "Mercado laboral más fuerte",
+  "recommendationReasonInfrastructure": "Costo más alto, pero mejor infraestructura",
+  "recommendationReasonBalanced": "Opción equilibrada dentro del catálogo inicial de Movaro",
+  "planReasonGoalWork": "Se destaca para quien está buscando más oportunidades de trabajo.",
+  "planReasonGoalRemoteWork": "Encaja mejor para quien quiere trabajar remoto y equilibrar costo con calidad de vida.",
+  "planReasonGoalStudy": "Tiene una buena combinación de estructura urbana y adaptación inicial para estudiar.",
+  "planReasonGoalEntrepreneur": "Muestra mejores señales de actividad económica para quien quiere emprender.",
+  "planReasonGoalRetire": "Hace más sentido para quien busca más seguridad y un costo más controlado.",
+  "planReasonGoalQualityOfLife": "Se ajusta mejor a una búsqueda de más calidad de vida y adaptación gradual.",
+  "planReasonGoalBeachLife": "Tiene más sentido si querés priorizar litoral, playa y una rutina más conectada con el mar.",
+  "planReasonLanguageNeedsSupport": "Como dijiste que todavía dependes del español, dimos más peso a ciudades con mejor adaptación linguistica.",
+  "planReasonLanguageBasic": "Como dijiste que te manejas con portugués basico, la adaptación con el idioma todavía influye en la recomendacion.",
+  "planReasonTimelineAsap": "Puede ayudar en una mudanza más rápida por combinar mejor adaptación inicial y vida práctica.",
+  "planReasonTimeline6Months": "Funciona bien para un horizonte de mudanza más corto.",
+  "planReasonTimeline12Months": "Ofrece una base equilibrada para quien todavía está armando la mudanza.",
+  "planStepTitleVisaResidence": "Revisar el tipo de residencia o visa",
+  "planStepDescriptionVisaResidence": "Mapear la base migratoria adecuada para tu principal motivación de cambio.",
+  "planStepTitleCpf": "Obtener CPF",
+  "planStepDescriptionCpf": "Organizar el registro fiscal necesario para servicios y transacciones en Brasil.",
+  "planStepTitleBankAccount": "Abrir una cuenta bancaria",
+  "planStepDescriptionBankAccount": "Preparar una cuenta local para el movimiento financiero inicial.",
+  "planStepTitleHousing": "Buscar vivienda",
+  "planStepDescriptionHousing": "Investigar barrios, contratos y costos para instalarte con más seguridad.",
+  "planStepTitleSettleDocuments": "Regularizar documentación local",
+  "planStepDescriptionSettleDocuments": "Revisar registros adicionales, comprobantes y pasos administrativos locales.",
+  "planStepTitleMapDestinations": "Mapear destinos posibles",
+  "planStepDescriptionMapDestinations": "Comparar opciones de destino según tu objetivo y tu ventana de cambio.",
+  "planStepTitleDecisionCriteria": "Definir criterios de decisión",
+  "planStepDescriptionDecisionCriteria": "Ordenar prioridades como costo, documentación y calidad de vida.",
+  "planBeachDecisionTitle": "Litoral en la decision",
+  "planBeachDecisionIntro": "Si playa y litoral entran en tu criterio, no alcanza con mirar belleza o turismo. El filtro real pasa por vivienda, ritmo de la ciudad y aterrizaje inicial.",
+  "planBeachDecisionCoastalHeadline": "La recomendacion ya apunta al litoral",
+  "planBeachDecisionCoastalBody": "{cityName} ya entra en el recorte de ciudad costera. El siguiente filtro es entender si la entrada de vivienda y la rutina local encajan con tu momento.",
+  "@planBeachDecisionCoastalBody": {
+    "placeholders": {
+      "cityName": {}
+    }
+  },
+  "planBeachDecisionNotCoastalHeadline": "Tu criterio de playa pide una comparacion extra",
+  "planBeachDecisionNotCoastalBody": "Incluso con este objetivo, conviene comparar ciudades de playa antes de cerrar la decision. No toda ciudad fuerte en el plan entrega la rutina costera que tal vez buscas.",
+  "planBeachDecisionPriorityNote": "Si la playa es prioridad, trata vivienda y rutina local como filtro principal.",
+  "planBeachDecisionHousingHeadline": "Entrada de vivienda en el litoral",
+  "stepCategoryDocumentation": "Documentación",
+  "stepCategoryFinancial": "Finanzas",
+  "stepCategoryHousing": "Vivienda",
+  "stepCategorySettlement": "Instalación",
+  "stepCategoryResearch": "Investigación",
+  "stepCategoryPlanning": "Planificación",
+  "industryAgribusiness": "Agronegocio",
+  "industryCommerce": "Comercio",
+  "industryConstruction": "Construcción",
+  "industryEnergy": "Energía",
+  "industryFinance": "Finanzas",
+  "industryIndustry": "Industria",
+  "industryLogistics": "Logística",
+  "industryPort": "Puerto",
+  "industryHealth": "Salud",
+  "industryServices": "Servicios",
+  "industryTechnology": "Tecnología",
+  "industryTourism": "Turismo",
+  "errorNetworkTitle": "Parece que estás sin conexión.",
+  "errorNetworkDescription": "Revisá tu conexión e intentá de nuevo en un momento.",
+  "errorServerTitle": "Algo salió mal. Intentá de nuevo.",
+  "errorServerDescription": "No pudimos completar esta acción ahora. Intentá de nuevo en unos instantes.",
+  "errorNotFoundTitle": "No encontramos esta información.",
+  "errorNotFoundDescription": "Este contenido no está disponible en este momento o todavía no forma parte de esta base.",
+  "errorUnauthorizedTitle": "Necesitás iniciar sesión para continuar.",
+  "errorUnauthorizedDescription": "Algunas acciones necesitan estar vinculadas con vos antes de poder guardarse.",
+  "errorUnknownTitle": "Ocurrió algo inesperado.",
+  "errorUnknownDescription": "Intentá de nuevo en unos instantes.",
+  "errorValidationTitle": "No fue posible completar la acción.",
+  "errorNetworkMovaroDescription": "No pudimos comunicarnos con Movaro en este momento. Intentá de nuevo en unos instantes.",
+  "errorApiGenericDescription": "No fue posible completar esta acción ahora.",
+  "apiUnavailableTitle": "Movaro no pudo conectarse con la API en este momento.",
+  "apiUnavailableDescription": "La app abrió, pero el servicio principal no está disponible ahora. Sin esa conexión, no puede cargar tu recorrido con datos reales.",
+  "apiUnavailableSupportingText": "Intentá nuevamente en unos instantes. Si el problema sigue, revisá si la API está online y si este ambiente apunta a la URL correcta.",
+  "apiUnavailableRetryAction": "Intentar de nuevo",
+  "sourceProviderIbgeLocalities": "IBGE Localidades",
+  "sourceProviderIbgeCities": "IBGE Ciudades y Estados",
+  "sourceProviderAtlasHumanDevelopment": "Atlas de Desarrollo Humano en Brasil (PNUD, Ipea y FJP)",
+  "sourceProviderMovaroDataset": "Dataset Curado de Movaro v1",
+  "sourceProviderMovaroRanking": "Metodología de Ranking de Movaro v1",
+  "sourceProviderReceitaFederalGovBr": "Receita Federal / Gov.br",
+  "sourceProviderPoliciaFederal": "Policía Federal",
+  "sourceProviderPoliciaFederalGovBr": "Policía Federal / Gov.br",
+  "sourceProviderMrePoliciaFederal": "Cancillería / Policía Federal",
+  "sourceProviderMreBancoCentral": "Cancillería / Banco Central",
+  "sourceProviderMinisterioJustica": "Ministerio de Justicia",
+  "sourceProviderMinisterioSaude": "Gov.br / Ministerio de Salud",
+  "sourceProviderMeuSusDigital": "Meu SUS Digital / Gov.br",
+  "sourceProviderAns": "ANS",
+  "sourceProviderDetranEsMgGov": "Detran-ES / MG.gov.br",
+  "sourceProviderSenatranMgGov": "SENATRAN / MG.gov.br",
+  "sourceProviderMteCtps": "Ministerio de Trabajo / Carteira de Trabalho Digital",
+  "sourceProviderPortalEmpreendedorInss": "Portal del Emprendedor / INSS",
+  "sourceProviderMinisterioPrevidenciaInss": "Ministerio de Previsión / INSS",
+  "sourceProviderBancoCentralBrasil": "Banco Central de Brasil",
+  "sourceProviderMovaro": "Movaro",
+  "documentReadinessSectionTitle": "Preparacion documental antes de la mudanza",
+  "documentReadinessPriorityCritical": "Critico ahora",
+  "documentReadinessPriorityPrepare": "Prepara con anticipacion",
+  "documentReadinessPriorityArrival": "Llevalo listo para la llegada",
+  "documentReadinessSummaryResearching": "Antes de comparar demasiados caminos, confirmá si tu mudanza depende de un paquete documental que realmente pueda armarse sin sorpresas.",
+  "documentReadinessSummaryTwelveMonths": "Con más tiempo, la meta es eliminar riesgo documental evitable temprano, en vez de descubrir faltantes cerca de la mudanza.",
+  "documentReadinessSummarySixMonths": "Seis meses ya alcanzan para ordenar los documentos más sensibles ahora y dejar más liviana la llegada.",
+  "documentReadinessSummaryAsap": "Como la mudanza está cerca, enfocáte primero en los documentos que pueden trabar residencia, banco y vivienda.",
+  "documentReadinessRouteTitle": "Validá la ruta legal de entrada",
+  "documentReadinessRouteBodyBrazil": "Confirmá si tu mudanza va a usar la residencia Mercosur y qué exige ese camino antes de armar el resto sobre supuestos.",
+  "documentReadinessRouteBodyGeneric": "Confirmá primero la ruta legal del destino para que el resto del checklist se apoye en el camino migratorio correcto.",
+  "documentReadinessIdentityPackTitle": "Separá el paquete base de identidad",
+  "documentReadinessIdentityPackBody": "Mantené pasaporte, partidas, antecedentes e identificaciones personales en un solo bloque revisado antes de abrir otros frentes.",
+  "documentReadinessApostilleTitle": "Revisá apostilla y vigencia documental",
+  "documentReadinessApostilleBodyBrazil": "Para Brasil, revisá qué documentos argentinos necesitan apostilla, qué vigencia práctica tienen y qué puede vencer antes de la llegada.",
+  "documentReadinessRuleCheckTitle": "Chequeá temprano las reglas documentales oficiales",
+  "documentReadinessRuleCheckBody": "Mapeá qué documentos deben ser originales, apostillados, traducidos o reemitidos para no depender de supuestos.",
+  "documentReadinessTranslationTitle": "Mapeá la traducción antes de pagar dos veces",
+  "documentReadinessTranslationBodyBrazil": "Separá qué puede quedar en español y qué puede exigir traducción pública en Brasil, sobre todo para residencia y prueba civil.",
+  "documentReadinessTranslationBodyGeneric": "Separá qué puede quedar en el idioma de origen y qué puede exigir traducción certificada en el país de destino.",
+  "documentReadinessHousingProofTitle": "Prepará pruebas para vivienda y rutina inicial",
+  "documentReadinessHousingProofBodyBrazil": "Agrupá comprobante de ingresos, reserva, identidad y documentos de apoyo que puedan pedir propietarios, bancos o garantías en Brasil.",
+  "documentReadinessProofPackTitle": "Armá tu paquete práctico de comprobaciones",
+  "documentReadinessProofPackBody": "Agrupá identidad, prueba de fondos, ingresos y los documentos que suelen destrabar banco, vivienda y servicios esenciales.",
+  "documentReadinessCpfTitle": "Tratà CPF y estatus regular como una sola capa",
+  "documentReadinessCpfBodyBrazil": "CPF, seguimiento de residencia y primer comprobante local suelen destrabar la vida práctica. Dejá ese bloque listo para ejecutar rápido.",
+  "documentReadinessCopiesTitle": "Mantené backup físico y digital alineado",
+  "documentReadinessCopiesBody": "Guardá scans, originales y copias de emergencia en una estructura accesible desde el celular y fácil de usar en persona si hace falta.",
+  "documentReadinessArrivalFolderTitle": "Prepará una carpeta de llegada, no archivos sueltos",
+  "documentReadinessArrivalFolderBodyBrazil": "Armá una carpeta única con seguimiento de residencia, referencias del CPF, notas de dirección y las pruebas que más pueden pedirte en el primer mes.",
+  "documentReadinessArrivalFolderBodyGeneric": "Armá una carpeta única con los primeros documentos, notas de comprobación local y las evidencias que más probablemente necesites en las primeras semanas.",
+  "documentReadinessGoalWorkTitle": "Protegé los documentos de empleabilidad",
+  "documentReadinessGoalWorkBodyBrazil": "Revisá qué puede trabar trabajo temprano en Brasil: consistencia de identidad, seguimiento de residencia y pruebas específicas de tu área.",
+  "documentReadinessGoalWorkBodyGeneric": "Revisá qué puede trabar trabajo temprano en el destino: consistencia de identidad, estatus migratorio y pruebas específicas de tu profesión.",
+  "documentReadinessGoalRemoteTitle": "Estabilizá la base documental del ingreso remoto",
+  "documentReadinessGoalRemoteBodyBrazil": "Mantené identidad fiscal, referencias bancarias y pruebas que sostengan contratos, transferencias y una rutina estable en Brasil.",
+  "documentReadinessGoalRemoteBodyGeneric": "Mantené identidad fiscal, referencias bancarias y pruebas que sostengan contratos y flujo internacional de ingresos en el nuevo país.",
+  "documentReadinessGoalStudyTitle": "Protegé la ruta de estudio con los registros correctos",
+  "documentReadinessGoalStudyBodyBrazil": "Dejá admisión, historial académico, identidad y papeles sensibles a plazo alineados antes de depender del estudio como puerta de entrada.",
+  "documentReadinessGoalStudyBodyGeneric": "Dejá admisión, historial académico, identidad y papeles sensibles a plazo alineados antes de depender del estudio como base.",
+  "documentReadinessGoalEntrepreneurTitle": "Prepará la capa documental para operar",
+  "documentReadinessGoalEntrepreneurBodyBrazil": "Separá las pruebas de identidad, banco y residencia que van a influir en la seguridad para empezar a operar en Brasil.",
+  "documentReadinessGoalEntrepreneurBodyGeneric": "Separá las pruebas de identidad, banco e inmigración que van a influir en la seguridad para empezar a operar en el país de destino.",
+  "documentReadinessGoalRetireTitle": "Protegé una llegada tranquila con papeles revisados",
+  "documentReadinessGoalRetireBodyBrazil": "Priorizá el conjunto documental que reduce sorpresas en salud, banco y rutina recurrente cuando llegues a Brasil.",
+  "documentReadinessGoalRetireBodyGeneric": "Priorizá el conjunto documental que reduce sorpresas en salud, banco y rutina recurrente cuando llegues.",
+  "documentReadinessGoalQualityTitle": "Usá documentos para reducir fricción, no solo para cumplir",
+  "documentReadinessGoalQualityBodyBrazil": "Incluso cuando la prioridad es calidad de vida, la mudanza más suave es la que llega a Brasil con identidad, comprobaciones y carpeta de llegada ya ordenadas.",
+  "documentReadinessGoalQualityBodyGeneric": "Incluso cuando la prioridad es calidad de vida, la mudanza más suave es la que llega con identidad, comprobaciones y carpeta de llegada ya ordenadas.",
+  "documentReadinessRiskBlocking": "Puede trabar la mudanza",
+  "documentReadinessRiskCaution": "Evita demora y retrabajo",
+  "documentReadinessRiskReview": "Revisar en la etapa correcta",
+  "documentReadinessReviewBeforeBooking": "Revisá antes de comprar pasaje",
+  "documentReadinessReviewCloseToMove": "Reconfirmá cerca de la mudanza",
+  "documentReadinessReviewOnArrival": "Dejalo listo para la llegada",
+  "documentReadinessSourceLabel": "Base: {source}",
+  "@documentReadinessSourceLabel": {
+    "placeholders": {
+      "source": {}
+    }
+  },
+  "housingDecisionSectionTitle": "La vivienda es una decision critica antes de la ciudad",
+  "housingDecisionSectionTitleWithCity": "La vivienda puede definir si {city} te sirve de verdad",
+  "@housingDecisionSectionTitleWithCity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "housingDecisionSectionBody": "Antes de decidir la ciudad, conviene entender como funcionan alquiler y garantias en Brasil. El mayor riesgo no es solo el precio mensual: es llegar sin un camino viable para contrato, barrio e instalacion inicial.",
+  "housingDecisionSectionBodyWithCity": "Antes de asumir que {city} es la mejor opcion, validá si alquiler, garantias e instalacion inicial parecen viables para tu momento. El riesgo no esta solo en el precio, sino en el camino real para cerrar vivienda.",
+  "@housingDecisionSectionBodyWithCity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "housingDecisionGuaranteesTitle": "Las garantias pueden trabar el alquiler",
+  "housingDecisionGuaranteesBody": "El fiador local todavia pesa en muchos contratos. Si eso no es realista para vos, compará caucion, seguro-fianza, titulo de capitalizacion y exigencia de ingresos antes de contar con un barrio.",
+  "housingDecisionSoftLandingTitle": "Una llegada suave evita errores caros",
+  "housingDecisionSoftLandingBody": "Temporal, amoblado, coliving o contrato corto por 30 a 90 dias suele ser mas seguro que tomar un alquiler largo antes de entender la rutina local.",
+  "housingDecisionProofPackTitle": "Llevá la carpeta que destraba la conversacion",
+  "housingDecisionProofPackBody": "Agrupá identidad, ingresos, reserva, referencias y comprobantes digitales en una sola carpeta. No garantiza aprobacion, pero reduce friccion desde el primer contacto.",
+  "housingDecisionCityReadTitle": "Leé la ciudad por la presion de vivienda",
+  "housingDecisionCityReadTitleWithCity": "Leé {city} por la presion de vivienda",
+  "@housingDecisionCityReadTitleWithCity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "housingDecisionCityReadBody": "No compares solo el alquiler promedio. Mirá barrios, transporte, servicios cerca, necesidad de muebles, distancia al trabajo y margen de caja para entrada e imprevistos.",
+  "housingDecisionCityReadBodyWithCity": "En {city}, compará barrios, transporte, servicios cerca, necesidad de muebles y margen de caja para entrada e imprevistos antes de tratar la vivienda como resuelta.",
+  "@housingDecisionCityReadBodyWithCity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "housingDecisionSectionNote": "Movaro hoy organiza el contexto para decidir mejor. Contrato, garantia aceptada y politica de cada propietario o plataforma todavia deben validarse en la fuente antes de cerrar vivienda.",
+  "housingEntrySectionTitle": "Estimacion del costo de entrada a la vivienda",
+  "housingEntrySectionTitleWithCity": "Cuanto puede exigir la vivienda para entrar en {city}",
+  "@housingEntrySectionTitleWithCity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "housingEntrySectionBody": "Un alquiler que parece accesible en el anuncio puede exigir mucho mas al entrar. Usá esta lectura para simular caucion, seguro-fianza o un aterrizaje temporario antes de decidir la ciudad.",
+  "housingEntrySectionBodyWithCity": "En {city}, no mires solo el alquiler mensual. Usá esta lectura para estimar cuanto puede exigir la entrada con caucion, seguro-fianza o un aterrizaje temporario.",
+  "@housingEntrySectionBodyWithCity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "housingEntryRentLabel": "Alquiler mensual de referencia: {amount}",
+  "@housingEntryRentLabel": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "housingEntryModeDeposit": "Caucion",
+  "housingEntryModeInsurance": "Seguro-fianza",
+  "housingEntryModeTemporary": "Temporal",
+  "housingEntryModeDepositBody": "Lectura comun cuando el contrato pide cerca de 3 meses de caucion mas el primer mes.",
+  "housingEntryModeInsuranceBody": "Lectura comun cuando el fiador se reemplaza por una tasa anual de seguro o garantia digital.",
+  "housingEntryModeTemporaryBody": "Una lectura mas liviana para los primeros 30 a 90 dias, priorizando flexibilidad antes de tomar un contrato largo.",
+  "housingEntryTotalTitle": "Cuánto puede costar entrar",
+  "housingEntryFirstMonthLabel": "Primer mes",
+  "housingEntryGuaranteeLabel": "Garantia / caucion",
+  "housingEntrySetupLabel": "Tasas e instalacion",
+  "housingEntryPlatformsTitle": "Plataformas y caminos utiles",
+  "housingEntryPlatformsHeadline": "Usá el canal correcto para tu nivel de riesgo",
+  "housingEntryPlatformsBody": "La mejor plataforma depende menos del anuncio lindo y mas de la burocracia que realmente podés sostener ahora.",
+  "housingEntryPlatformsQuintoAndar": "Digital y sin fiador, pero igual exige ingresos y documentacion consistentes.",
+  "housingEntryPlatformsZap": "Usá filtros como alquiler sin fiador para reducir tiempo perdido en la busqueda.",
+  "housingEntryPlatformsCredPago": "Garantia digital aceptada por muchas inmobiliarias como reemplazo del fiador.",
+  "housingEntryPlatformsAirbnb": "Sirve para los primeros 15 a 30 dias mientras visitas barrios antes de tomar un contrato mas largo.",
+  "housingEntryDisclaimer": "Esta simulacion es direccional. El valor real cambia por ciudad, barrio, plataforma, comprobacion de ingresos y politica del propietario. La idea es evitar subestimar el costo de entrada.",
+  "housingSoftLandingTitle": "Como suelen aterrizar los argentinos antes del alquiler fijo",
+  "housingSoftLandingBody": "En los primeros dias, el camino comun no es ir directo al contrato tradicional. La secuencia suele ser llegada, vivienda temporaria y solo despues la busqueda de una base mas estable con menos riesgo.",
+  "housingSoftLandingTemporaryTitle": "Aterrizá por temporada o flat",
+  "housingSoftLandingTemporaryBody": "Airbnb con descuento mensual, apart hotel y flat ayudan a aterrizar sin fiador ni comprobacion local. Eso compra tiempo para visitar barrios y entender la ciudad en la practica.",
+  "housingSoftLandingDirectTitle": "Busqueda directa con dueño o grupos locales",
+  "housingSoftLandingDirectBody": "Facebook Marketplace, OLX y contactos directos suelen ser mas flexibles que la inmobiliaria tradicional. A cambio, sube el riesgo de estafa y la validacion del inmueble debe ser mas estricta.",
+  "housingSoftLandingGuaranteeTitle": "La moneda de cambio es la garantia",
+  "housingSoftLandingGuaranteeBody": "Sin fiador, el argumento mas fuerte suele ser caucion, seguro-fianza, titulo de capitalizacion o algunos meses pagados por adelantado. El punto no es prometer de mas, sino llegar con una estructura creible.",
+  "housingSoftLandingSurvivalTitle": "Checklist de supervivencia al llegar",
+  "housingSoftLandingSurvivalChip": "Comprá un chip brasilero rapido. Sin numero local, inmobiliarias y propietarios suelen responder menos.",
+  "housingSoftLandingSurvivalCpf": "Si el CPF todavia no esta resuelto, tratá eso como prioridad. Pesa en plataformas, banco y conversaciones de alquiler.",
+  "housingSoftLandingSurvivalLocation": "En los primeros dias, priorizá quedarte cerca de mercado, farmacia, transporte y puesto de salud para bajar costo y friccion.",
+  "housingSoftLandingSurvivalScam": "No envies reserva sin visitar el inmueble o tener a alguien de confianza validando en el lugar.",
+  "landingBudgetSectionTitle": "Reserva sugerida para el aterrizaje",
+  "landingBudgetSectionTitleWithCity": "Reserva sugerida para llegar a {city}",
+  "@landingBudgetSectionTitleWithCity": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "landingBudgetSummaryResearching": "Usá esto como referencia de reserva para no diseñar la mudanza mirando solo el costo mensual una vez que todo ya esté estable.",
+  "landingBudgetSummaryTwelveMonths": "Con más tiempo, la meta es formar una reserva realista y reducir el golpe de los costos de instalación antes de que llegue la mudanza.",
+  "landingBudgetSummarySixMonths": "Seis meses ya alcanzan para transformar la mudanza en un plan con reserva, en lugar de una secuencia de gastos reactivos.",
+  "landingBudgetSummaryAsap": "Como la mudanza está cerca, la reserva importa tanto como la ciudad. Usá esta estimación para no llegar con poco margen financiero.",
+  "landingBudgetLeanTitle": "Ajustado",
+  "landingBudgetLeanBody": "Sirve como referencia si pensás llegar con gasto más controlado, vivienda más simple y decisiones iniciales más apretadas.",
+  "landingBudgetBalancedTitle": "Equilibrado",
+  "landingBudgetBalancedBody": "Una lectura intermedia para quien quiere reducir estrés sin asumir una instalación premium desde el día uno.",
+  "landingBudgetComfortableTitle": "Cómodo",
+  "landingBudgetComfortableBody": "Un margen más seguro si querés más aire para fricción con vivienda, adaptación más lenta o costos inesperados de instalación.",
+  "landingBudget30DaysLabel": "Referencia para los primeros 30 días",
+  "landingBudgetMonthlyBaseLabel": "Base mensual",
+  "landingBudgetSetupLabel": "Instalación y entrada",
+  "landingBudgetBufferLabel": "Margen de seguridad",
+  "landingBudget90DaysLabel": "Si querés un colchón de 90 días, usá algo cerca de {amount}",
+  "@landingBudget90DaysLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "landingBudgetDisclaimer": "Estas estimaciones son orientativas, no precios oficiales. Combinan señales de ciudad, presión de instalación y riesgo por timing para ayudarte a planear la reserva antes de la mudanza.",
+  "arrivalExecutionSectionTitle": "Primeros 7 / 30 / 90 días",
+  "arrivalExecutionStageWeek": "Primeros 7 días",
+  "arrivalExecutionStageMonth": "Primeros 30 días",
+  "arrivalExecutionStageQuarter": "Primeros 90 días",
+  "arrivalExecutionSummaryResearching": "Esta es la capa de ejecucion despues de llegar. Usala ahora para entender que van a exigir las primeras semanas ademas del papeleo.",
+  "arrivalExecutionSummaryTwelveMonths": "Con mas tiempo, esta capa ayuda a ver que va a exigir la instalacion, para que la mudanza no se planee solo por documentos y reserva.",
+  "arrivalExecutionSummarySixMonths": "Seis meses ya alcanzan para planear la llegada como secuencia operativa, y no solo como decision de destino.",
+  "arrivalExecutionSummaryAsap": "Si la llegada esta cerca, esta capa 7 / 30 / 90 dias importa ahora. Ahi suele aparecer primero la friccion cotidiana.",
+  "arrivalExecutionConnectivityTitle": "Resolvé conectividad desde el dia uno",
+  "arrivalExecutionConnectivityBody": "Empezá con chip local, internet movil y la estructura digital minima para mapas, banco y seguimiento documental.",
+  "arrivalExecutionTransportTitle": "Aprendé la primera rutina de traslado",
+  "arrivalExecutionTransportBody": "Mapeá como te vas a mover en la primera semana para que vivienda, servicios y burocracia no dependan de improvisacion.",
+  "arrivalExecutionTransportBodyWithCity": "Mapeá como te vas a mover en {city} durante la primera semana para que vivienda, servicios y burocracia no dependan de improvisacion.",
+  "@arrivalExecutionTransportBodyWithCity": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "arrivalExecutionHealthTitle": "Definí tu primer respaldo de salud",
+  "arrivalExecutionHealthBody": "Sabé cual es tu primera puerta de entrada en salud publica o privada para que un problema simple no se vuelva caos al llegar.",
+  "arrivalExecutionBankTitle": "Estabilizá pagos y flujo bancario",
+  "arrivalExecutionBankBody": "Asegurá que tu primer flujo local de pagos funcione: cuenta, Pix, uso de tarjeta y como va a circular el dinero en el primer mes.",
+  "arrivalExecutionHousingTitle": "Convertí vivienda en rutina, no solo en entrada",
+  "arrivalExecutionHousingBody": "Despues de llegar, confirmá si la zona elegida realmente sostiene trabajo, transporte, seguridad y el ritmo de vida que necesitás.",
+  "arrivalExecutionGoalWorkTitle": "Convertí la llegada en empleabilidad",
+  "arrivalExecutionGoalWorkBody": "Usá el primer mes para probar como documentos, idioma y ciudad afectan de verdad tu chance de conseguir trabajo.",
+  "arrivalExecutionGoalRemoteTitle": "Convertí la llegada en base remota estable",
+  "arrivalExecutionGoalRemoteBody": "Validá calidad de internet, rutina silenciosa, flujo bancario y costo real de sostener trabajo remoto desde la nueva ciudad.",
+  "arrivalExecutionGoalStudyTitle": "Convertí la llegada en rutina de estudio",
+  "arrivalExecutionGoalStudyBody": "Usá el primer mes para confirmar si matricula, traslado, clases y costo diario siguen sosteniendo estudio como base del plan.",
+  "arrivalExecutionGoalEntrepreneurTitle": "Convertí la llegada en capacidad de operar",
+  "arrivalExecutionGoalEntrepreneurBody": "Usá el primer mes para validar si banco, documentos, rutina local y contexto de ciudad realmente sostienen operar con seguridad.",
+  "arrivalExecutionGoalRetireTitle": "Convertí la llegada en rutina previsible",
+  "arrivalExecutionGoalRetireBody": "Usá el primer mes para probar si acceso a salud, rutina de barrio y costos recurrentes se sienten sostenibles en la practica.",
+  "arrivalExecutionGoalQualityTitle": "Convertí la llegada en calidad de vida real",
+  "arrivalExecutionGoalQualityBody": "Usá el primer mes para verificar si la ciudad se siente bien en la vida diaria, y no solo en el papel o en rankings.",
+  "arrivalExecutionRealityCheckTitle": "Hacé reality check a los 90 dias",
+  "arrivalExecutionRealityCheckBody": "Compará costo real, friccion de rutina y encaje de la ciudad con lo que sugeria el plan. Ahi la mudanza deja de ser hipotetica.",
+  "arrivalExecutionDocumentsTitle": "Cerrá las puntas documentales abiertas",
+  "arrivalExecutionDocumentsBody": "Hasta los primeros 90 dias, reducí pendientes de residencia, comprobaciones, banco y registros locales que todavia bloquean estabilidad.",
+  "arrivalExecutionReplanTitle": "Replaneá antes de que la inercia mande",
+  "arrivalExecutionReplanBody": "Si ciudad, costo o ritmo no estan encajando con el plan original, ajustá la ruta antes de que la friccion temporal se vuelva tu normal.",
+  "arrivalExecutionReplanBodyWithCity": "Si {city} no esta encajando con el plan original en la practica, ajustá la ruta antes de que la friccion temporal se vuelva tu normal.",
+  "@arrivalExecutionReplanBodyWithCity": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "publicHomeResumePlanAction": "Continuar mi plan",
+  "publicHomeResumePlanTitle": "Retomá desde donde lo dejaste",
+  "publicHomeResumePlanBody": "Tu ultimo plan de mudanza sigue aqui. Reabrilo para continuar el checklist, la preparacion documental y la reserva de aterrizaje.",
+  "publicHomeResumePlanBodyWithCity": "Tu ultimo plan sigue aqui, con {city} ({state}) como ciudad de referencia actual. Reabrilo para continuar el checklist, la preparacion documental y la reserva de aterrizaje.",
+  "@publicHomeResumePlanBodyWithCity": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "publicHomeRetakePlanAction": "Rehacer plan",
+  "migrationPlanCopilotTitle": "Preparación guiada",
+  "migrationPlanCopilotAction": "Abrir preparación",
+  "migrationPlanCopilotIntroTitle": "Cuando quieras pasar de la decisión a la ejecución",
+  "migrationPlanCopilotIntroBody": "Esta etapa organiza checklist, documentos, vivienda y reserva de aterrizaje. Usala cuando ya quieras empezar a preparar la mudanza.",
+  "migrationPlanCopilotIntroBodyWithCity": "Esta etapa organiza checklist, documentos, vivienda y reserva de aterrizaje con {city} ({state}) como referencia principal de tu plan.",
+  "@migrationPlanCopilotIntroBodyWithCity": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "migrationPlanCopilotResultBody": "Primero mirá si la ciudad recomendada realmente encaja con tu contexto. Cuando quieras convertir esa decisión en preparación concreta, abrí la capa guiada con checklist, documentos y reserva de llegada.",
+  "migrationPlanDecisionLabel": "Elección de ciudad",
+  "migrationPlanDecisionTitle": "Ahora compará las ciudades que mejor combinan con {goal}",
+  "@migrationPlanDecisionTitle": {
+    "placeholders": {
+      "goal": {}
+    }
+  },
+  "migrationPlanDecisionBody": "Segun tu plazo de {timeline}, estas opciones aparecen primero porque se acercan mas al perfil que marcaste.",
+  "@migrationPlanDecisionBody": {
+    "placeholders": {
+      "timeline": {}
+    }
+  },
+  "migrationPlanDecisionSummaryTitle": "Cómo usar esta etapa",
+  "migrationPlanDecisionSummaryBody": "Primero elegi la ciudad que mas sentido tenga para vos. El checklist detallado entra solo despues de esa decision.",
+  "migrationPlanCandidateCitiesTitle": "Ciudades mas alineadas con tu perfil",
+  "migrationPlanCandidateCitiesBody": "La lista ya viene ordenada para dejar primero lo que tiende a hacer mas sentido para argentinos con este objetivo.",
+  "migrationPlanCandidateCitiesSheetBody": "Abrí los detalles para entender mejor cada ciudad. La confirmación de la ciudad ocurre dentro de la pantalla de detalle, después de ver más contexto.",
+  "migrationPlanSelectedCityBadge": "Elegida",
+  "migrationPlanSuggestedCityBadge": "Va adelante ahora",
+  "migrationPlanChooseCityAction": "Elegir esta ciudad",
+  "migrationPlanSelectedCityAction": "Ciudad elegida",
+  "migrationPlanInspectCityAction": "Abrir detalles",
+  "migrationPlanOpenCitiesAction": "Ver ciudades sugeridas",
+  "migrationPlanCompareOtherCitiesAction": "Comparar otras ciudades",
+  "migrationPlanSuggestedCityTitle": "{city} va al frente por ahora",
+  "@migrationPlanSuggestedCityTitle": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanSuggestedCityBody": "{city} aparece adelante para el perfil que marcaste, con una lectura de entrada en vivienda en {housing}. Antes de decidir, abrí los detalles y comparala con las otras opciones.",
+  "@migrationPlanSuggestedCityBody": {
+    "placeholders": {
+      "city": {},
+      "housing": {}
+    }
+  },
+  "migrationPlanConfirmedCityTitle": "{city} fue la ciudad que elegiste",
+  "@migrationPlanConfirmedCityTitle": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanSelectedCityTitle": "{city} va al frente por ahora",
+  "@migrationPlanSelectedCityTitle": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanSelectedCityBody": "{city} aparece fuerte para tu contexto actual, con una lectura de entrada en vivienda en {housing}. Si esta ciudad te cierra, ahi si vale abrir la preparacion guiada.",
+  "@migrationPlanSelectedCityBody": {
+    "placeholders": {
+      "city": {},
+      "housing": {}
+    }
+  },
+  "migrationPlanPreparationTitle": "Cuando pasar a la preparacion",
+  "migrationPlanPreparationBody": "Si decidis avanzar con {city}, el copiloto abre checklist, documentos, vivienda y reserva de llegada enfocados en esa ciudad.",
+  "@migrationPlanPreparationBody": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "languageSelectorSystem": "Sistema"
+}

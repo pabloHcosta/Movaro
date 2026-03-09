@@ -1,0 +1,46 @@
+name: movaro_app
+description: "Movaro Flutter application."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_map: ^8.2.2
+  http: ^1.6.0
+  flutter_svg: ^2.2.0
+  latlong2: ^0.9.1
+  intl: ^0.20.2
+  path_provider: ^2.1.5
+  supabase_flutter: ^2.12.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter:
+  generate: true
+  uses-material-design: true
+  assets:
+    - assets/brand/
+    - assets/illustrations/
+    - assets/seed/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/brand/movaro_app_icon.png
+  adaptive_icon_background: "#09111F"
+  adaptive_icon_foreground: assets/brand/movaro_app_icon_foreground.png
+  adaptive_icon_monochrome: assets/brand/movaro_app_icon_monochrome.png
+  image_path_ios_dark_transparent: assets/brand/movaro_app_icon_ios_dark.png
+  image_path_ios_tinted_grayscale: assets/brand/movaro_app_icon_ios_tinted.png
+  desaturate_tinted_to_grayscale_ios: true
+  remove_alpha_ios: true

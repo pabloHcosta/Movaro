@@ -1,0 +1,57 @@
+{
+  "folders": [
+    {
+      "name": "movaro",
+      "path": "."
+    },
+    {
+      "name": "app",
+      "path": "apps/app"
+    },
+    {
+      "name": "api",
+      "path": "apps/api"
+    }
+  ],
+  "settings": {
+    "debug.openDebug": "openOnSessionStart"
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Movaro App (Development - Chrome)",
+        "request": "launch",
+        "type": "dart",
+        "program": "lib/main_development.dart",
+        "cwd": "${workspaceFolder:app}",
+        "deviceId": "chrome",
+        "toolArgs": [
+          "--dart-define=APP_FLAVOR=dev",
+          "--dart-define=APP_ENV=development",
+          "--dart-define=APP_NAME=Movaro Dev",
+          "--dart-define=API_BASE_URL=http://192.168.1.40:3000"
+        ]
+      },
+      {
+        "name": "Movaro API (Development)",
+        "type": "node-terminal",
+        "request": "launch",
+        "command": "npm run start:dev",
+        "cwd": "${workspaceFolder:api}",
+        "env": {
+          "NODE_ENV": "development"
+        }
+      }
+    ],
+    "compounds": [
+      {
+        "name": "Movaro App + API (Development)",
+        "configurations": [
+          "Movaro API (Development)",
+          "Movaro App (Development - Chrome)"
+        ]
+      }
+    ]
+  }
+}

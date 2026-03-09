@@ -1,0 +1,32 @@
+[
+  {
+    "id": "florianopolis",
+    "name": "Florianopolis",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "sao-paulo",
+    "name": "Sao Paulo",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "rio-de-janeiro",
+    "name": "Rio de Janeiro",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "curitiba",
+    "name": "Curitiba",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "balneario-camboriu",
+    "name": "Balneario Camboriu",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  }
+]

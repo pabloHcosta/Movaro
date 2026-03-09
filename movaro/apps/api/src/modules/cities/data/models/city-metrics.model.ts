@@ -1,0 +1,22 @@
+export type CityMetricsModel = {
+  id: string;
+  name: string;
+  displayName?: string;
+  countryCode: string;
+  ibgeCode: number;
+  latitude: number;
+  longitude: number;
+  population: number;
+  idhmScore: number;
+  idhmReferenceYear: number;
+  costOfLivingScore: number;
+  rentScore: number;
+  safetyScore: number;
+  argentinaPopularityScore: number;
+  spanishSupportScore: number;
+  jobMarketScore: number;
+  unemploymentRate: number;
+  economicActivityScore: number;
+  topIndustries: string[];
+  updatedAt: string;
+};

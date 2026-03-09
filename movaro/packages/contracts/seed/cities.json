@@ -1,0 +1,194 @@
+[
+  {
+    "id": "florianopolis",
+    "name": "Florianopolis",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "sao-paulo",
+    "name": "Sao Paulo",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "rio-de-janeiro",
+    "name": "Rio de Janeiro",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "armacao-dos-buzios",
+    "name": "Armacao dos Buzios",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "arraial-do-cabo",
+    "name": "Arraial do Cabo",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "cabo-frio",
+    "name": "Cabo Frio",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "niteroi",
+    "name": "Niteroi",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "curitiba",
+    "name": "Curitiba",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "foz-do-iguacu",
+    "name": "Foz do Iguacu",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "balneario-camboriu",
+    "name": "Balneario Camboriu",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "bombinhas",
+    "name": "Bombinhas",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "maceio",
+    "name": "Maceio",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "maragogi",
+    "name": "Maragogi",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "recife",
+    "name": "Recife",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "natal",
+    "name": "Natal",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "salvador",
+    "name": "Salvador",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "porto-seguro",
+    "name": "Porto Seguro",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "joao-pessoa",
+    "name": "Joao Pessoa",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "aracaju",
+    "name": "Aracaju",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "itajai",
+    "name": "Itajai",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "santos",
+    "name": "Santos",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "ubatuba",
+    "name": "Ubatuba",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "paraty",
+    "name": "Paraty",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "tibau-do-sul",
+    "name": "Pipa (Tibau do Sul)",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "jijoca-de-jericoacoara",
+    "name": "Jericoacoara",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "ilhabela",
+    "name": "Ilhabela",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "guaruja",
+    "name": "Guaruja",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "garopaba",
+    "name": "Garopaba",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "imbituba",
+    "name": "Imbituba",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "itacare",
+    "name": "Itacare",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "sao-miguel-do-gostoso",
+    "name": "Sao Miguel do Gostoso",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  },
+  {
+    "id": "cairu",
+    "name": "Morro de Sao Paulo (Cairu)",
+    "countryId": "brasil",
+    "countryName": "Brasil"
+  }
+]
