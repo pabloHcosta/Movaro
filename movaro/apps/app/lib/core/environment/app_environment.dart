@@ -139,7 +139,7 @@ class AppEnvironment {
       case AppFlavor.staging:
         return 'https://staging.api.movaro.local';
       case AppFlavor.production:
-        return 'https://api.movaro.com';
+        return 'https://movaro-production.up.railway.app';
     }
   }
 
