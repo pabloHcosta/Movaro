@@ -30,7 +30,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Cargando ciudades, costos y contexto práctico para armar tu ruta inicial.';
 
   @override
-  String get splashInitializingLabel => 'Inicializando experiencia';
+  String get splashInitializingLabel => 'Iniciando la experiencia';
 
   @override
   String get loadingCountriesLabel => 'Cargando países';
@@ -47,7 +47,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get journeySetupHeroBody =>
-      'Movaro usa esta elección para armar la experiencia correcta para vos. Hoy el beta está disponible para Argentina -> Brasil, pero la estructura ya está pensada para crecer a nivel global.';
+      'Movaro usa esta elección para armar la experiencia correcta para vos. Hoy, el beta está disponible para Argentina -> Brasil, pero la estructura ya está pensada para crecer a nivel global.';
 
   @override
   String get journeyOriginTitle => 'País de origen';
@@ -77,7 +77,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get journeyAvailabilityNote =>
-      'Hoy solo el trayecto Argentina -> Brasil está disponible para uso completo. Los demás países ya aparecen para señalar la dirección global del producto.';
+      'Hoy, solo el trayecto Argentina -> Brasil está disponible para uso completo. Los demás países ya aparecen para señalar la dirección global del producto.';
 
   @override
   String get journeyContinueAction => 'Continuar con este trayecto';
@@ -103,7 +103,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get publicHomeFocusedDescription =>
-      'Movaro hoy está diseñado para quienes están evaluando una mudanza de Argentina a Brasil. En vez de mostrar todo de una sola vez, te ayuda a elegir el mejor primer paso.';
+      'Hoy, Movaro está diseñado para quienes están evaluando una mudanza de Argentina a Brasil. En vez de mostrar todo de una sola vez, te ayuda a elegir el mejor primer paso.';
 
   @override
   String publicHomeSelectedJourneyDescription(
@@ -119,7 +119,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get publicHomePrimaryQuestionBody =>
-      'Primero definí si necesitás un plan guiado, comparar ciudades o solo una vista rápida de lo que resuelve el producto.';
+      'Primero, definí si necesitás un plan guiado, comparar ciudades o solo una vista rápida de lo que resuelve el producto.';
 
   @override
   String get publicHomeTrustFastTitle => 'Entrada rápida';
@@ -129,7 +129,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Podés empezar sin un formulario largo ni un bloqueo inicial.';
 
   @override
-  String get publicHomeTrustGuestTitle => 'Sin login ahora';
+  String get publicHomeTrustGuestTitle => 'Sin login por ahora';
 
   @override
   String get publicHomeTrustGuestBody =>
@@ -193,7 +193,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get publicHomeCitiesBody =>
-      'Mira sugerencias por costo, trabajo y popularidad entre argentinos.';
+      'Mirá sugerencias por costo, trabajo y popularidad entre argentinos.';
 
   @override
   String get publicHomeCitiesAction => 'Ver ciudades';
@@ -203,7 +203,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get publicHomePlanBody =>
-      'Responde pocas preguntas y recibe un punto de partida simple.';
+      'Respondé pocas preguntas y recibí un punto de partida simple.';
 
   @override
   String get publicHomeStoriesTitle => 'Leer experiencias reales';
@@ -229,7 +229,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get decisionSupportLanguageBody =>
-      'Usá la señal de adaptación con el idioma para ver qué lugares se sienten más fáciles si todavía dependés del español.';
+      'Usá la señal de adaptación al idioma para ver qué lugares se sienten más fáciles si todavía dependés del español.';
 
   @override
   String get decisionSupportCostTitle =>
@@ -245,7 +245,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get decisionSupportPaperworkBody =>
-      'El plan guiado convierte esa duda en una lista corta en vez de una investigación interminable.';
+      'El plan guiado convierte esa duda en una lista corta, en vez de una investigación interminable.';
 
   @override
   String get decisionSupportWorkTitle =>
@@ -291,7 +291,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get commonNeedExploreAllBody =>
-      'La sección Explorar junta ciudades, documentación y otros caminos en un solo lugar.';
+      'La sección Explorar reúne ciudades, documentación y otros caminos en un solo lugar.';
 
   @override
   String get explorePageTitle => 'Explorar';
@@ -308,7 +308,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get exploreDocumentationDescription =>
-      'Entiende documentos, salud, licencia, trabajo y cuenta bancaria con lenguaje simple.';
+      'Entendé documentos, salud, licencia, trabajo y cuenta bancaria con lenguaje simple.';
 
   @override
   String get exploreDocumentationAction => 'Ver documentación';
@@ -340,11 +340,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get exploreIntroAction => 'Abrir introducción';
 
   @override
-  String get exploreChecklistTitle => 'Checklist migratorio';
+  String get exploreChecklistTitle => 'Tu plan inicial';
 
   @override
   String get exploreChecklistDescription =>
-      'Las personas visitantes pueden responder un flujo corto y generar un plan migratorio inicial antes de iniciar sesión.';
+      'Las personas visitantes pueden responder un flujo corto y generar un plan inicial antes de iniciar sesión.';
 
   @override
   String get exploreQuestionnaireAction => 'Iniciar cuestionario';
@@ -367,11 +367,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Compará ciudades y usá señales de litoral, costo, trabajo, idioma y vivienda para ver qué contexto te cierra mejor.';
 
   @override
-  String get exploreTrailDocsTitle => 'Entender burocracia práctica';
+  String get exploreTrailDocsTitle => 'Entender la burocracia práctica';
 
   @override
   String get exploreTrailDocsBody =>
-      'Mirá alquiler, SUS, CPF, trabajo, conducir y costos iniciales en bloques más claros y con menos ruido.';
+      'Mirá alquiler, SUS, CPF, trabajo, conducción y costos iniciales en bloques más claros y con menos ruido.';
 
   @override
   String get exploreTrailPrepTitle => 'Preparar la mudanza';
@@ -432,7 +432,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get documentationOfficialSourceLabel => 'Fuente oficial';
 
   @override
-  String get documentationPathsTitle => 'Empieza por tu duda principal';
+  String get documentationPathsTitle => 'Empezá por tu duda principal';
 
   @override
   String get documentationPathsBody =>
@@ -450,7 +450,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationNavigatorBody =>
-      'Usá estos bloques para encontrar más rápido alquiler, SUS, trabajo, conducir y costos sin leer toda la página de una sola vez.';
+      'Usá estos bloques para encontrar más rápido alquiler, SUS, trabajo, conducir y costos, sin leer toda la página de una sola vez.';
 
   @override
   String get documentationNavigatorHousing => 'Vivienda y alquiler';
@@ -496,14 +496,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationPathWorkBody =>
-      'Entendé trabajo con registro, PJ y cómo eso se relaciona con la previsión.';
+      'Entendé trabajo registrado, PJ y cómo eso se relaciona con la previsión.';
 
   @override
   String get documentationPathCostsTitle => 'Costos iniciales';
 
   @override
   String get documentationPathCostsBody =>
-      'Leé costos aproximados en reales, pesos y dólares sin confundir referencia con precio final.';
+      'Leé costos aproximados en reales, pesos y dólares, sin confundir referencia con precio final.';
 
   @override
   String get documentationOpenTopicAction => 'Abrir tema';
@@ -514,7 +514,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationQuickAnswersBody =>
-      'Antes de abrir cada card, empieza por estas respuestas cortas. Si alguna ya responde tu duda, ahorras tiempo.';
+      'Antes de abrir cada card, empezá por estas respuestas cortas. Si alguna ya responde tu duda, ahorrás tiempo.';
 
   @override
   String get documentationAnswerWorkQuestion =>
@@ -570,7 +570,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationAnswerForeignLicenseAnswer =>
-      'En general, sí, por un período limitado, con documento válido y según la regla del acuerdo aplicable. Después conviene confirmar con el Detran del estado.';
+      'En general, sí, por un período limitado, con documento válido y según la regla del acuerdo aplicable. Después, conviene confirmar con el Detran del estado.';
 
   @override
   String get documentationAnswerBrazilianLicenseQuestion =>
@@ -578,11 +578,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationAnswerBrazilianLicenseAnswer =>
-      'Sí, si estás regular en el país y cumplís los requisitos del Detran. El proceso y las tasas cambian por estado.';
+      'Sí, si estás regular en el país y cumplís los requisitos del Detran. El proceso y las tasas cambian según el estado.';
 
   @override
   String get documentationAnswerWorkCardQuestion =>
-      '¿Sigue existiendo el trabajo con registro y cómo funciona?';
+      '¿Sigue existiendo el trabajo registrado y cómo funciona?';
 
   @override
   String get documentationAnswerWorkCardAnswer =>
@@ -602,7 +602,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationAnswerInssAnswer =>
-      'Sí. El INSS es la puerta central de la previsión pública para beneficios como jubilación, siempre que existan aportes y requisitos cumplidos.';
+      'Sí. El INSS es la puerta principal de la previsión pública para beneficios como la jubilación, siempre que existan aportes y requisitos cumplidos.';
 
   @override
   String get documentationAnswerRetirementQuestion =>
@@ -617,15 +617,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationHealthSectionBody =>
-      'Lo importante es entender la función de cada camino. La salud pública no es un plan barato, y la salud privada no reemplaza por sí sola una buena lectura de cobertura.';
+      'Lo importante es entender la función de cada camino. La salud pública no es un plan barato, y la salud privada no reemplaza, por sí sola, una buena lectura de cobertura.';
 
   @override
   String get documentationWorkSectionTitle =>
-      'Cómo trabajo y previsión se conectan';
+      'Cómo se conectan trabajo y previsión';
 
   @override
   String get documentationWorkSectionBody =>
-      'Acá conviene separar el modelo de trabajo del modo de aportar. Trabajo con registro, trabajo por CNPJ y aporte al INSS no significan exactamente lo mismo.';
+      'Acá conviene separar el modelo de trabajo del modo de aportar. Trabajo registrado, trabajo por CNPJ y aporte al INSS no significan exactamente lo mismo.';
 
   @override
   String get documentationDrivingSectionTitle =>
@@ -633,7 +633,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationDrivingSectionBody =>
-      'El flujo más seguro es separar tres preguntas: puedo manejar ahora, qué tengo que validar en el estado y cuándo conviene iniciar la licencia brasileña.';
+      'El flujo más seguro es separar tres preguntas: si podés manejar ahora, qué tenés que validar en el estado y cuándo conviene iniciar la licencia brasileña.';
 
   @override
   String get documentationDeepDiveTitle => 'Si necesitás ir un nivel más allá';
@@ -648,7 +648,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationCostsBody =>
-      'Cuando existe un valor nacional o una referencia oficial util, la app muestra la conversion aproximada para ayudarte en una primera lectura.';
+      'Cuando existe un valor nacional o una referencia oficial útil, la app muestra la conversión aproximada para ayudarte en una primera lectura.';
 
   @override
   String documentationCostsUpdatedAt(String value) {
@@ -661,7 +661,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationCostsDisclaimer =>
-      'Usá esto como orientación inicial. Los costos cambian por estado, convenio, edad, cobertura y reglas locales.';
+      'Usá esto como orientación inicial. Los costos cambian según el estado, convenio, edad, cobertura y reglas locales.';
 
   @override
   String get documentationCostFreeValue => 'Gratis';
@@ -674,7 +674,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationCostCpfSupporting =>
-      'El tramite oficial es gratuito; la app lo trata como costo cero.';
+      'El trámite oficial es gratuito; la app lo trata como costo cero.';
 
   @override
   String get documentationCostSusCardTitle =>
@@ -685,11 +685,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'La emisión y el registro público no suelen exigir pago directo.';
 
   @override
-  String get documentationCostPublicCareTitle => 'Atencion inicial en el SUS';
+  String get documentationCostPublicCareTitle => 'Atención inicial en el SUS';
 
   @override
   String get documentationCostPublicCareSupporting =>
-      'UBS y otras puertas públicas de entrada no funcionan como una consulta particular paga.';
+      'La UBS y otras puertas públicas de entrada no funcionan como una consulta particular paga.';
 
   @override
   String get documentationCostDrivingTitle => 'Primera licencia';
@@ -699,7 +699,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationCostDrivingSupporting =>
-      'Referencia reciente del Detran-ES: R\\\$ 533,34. Tu estado y tu autoescuela pueden cobrar distinto.';
+      'Referencia reciente del Detran-ES: R\$ 533,34. Tu estado y tu autoescuela pueden cobrar distinto.';
 
   @override
   String get documentationCostPrivateHealthTitle => 'Plan de salud privado';
@@ -717,7 +717,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationCpfBulletOne =>
-      'Una persona extranjera puede pedir CPF; en Brasil, el tramite puede hacerse online o en entidad conveniada.';
+      'Una persona extranjera puede pedir CPF; en Brasil, el trámite puede hacerse online o en una entidad conveniada.';
 
   @override
   String get documentationCpfBulletTwo =>
@@ -763,7 +763,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationStayBulletThree =>
-      'Antes de que termine ese plazo, podés pedir conversión a residencia por tiempo indeterminado si cumplís los requisitos.';
+      'Antes de que termine ese plazo, podés pedir la conversión a residencia por tiempo indeterminado si cumplís los requisitos.';
 
   @override
   String get documentationWorkBankTitle => 'Trabajo y cuenta bancaria';
@@ -820,7 +820,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationHealthPublicBulletThree =>
-      'Urgencias y emergencias siguen otra logica de acceso; no esperes tener todo resuelto en el registro antes de pedir ayuda.';
+      'Urgencias y emergencias siguen otra lógica de acceso; no esperes tener todo resuelto en el registro antes de pedir ayuda.';
 
   @override
   String get documentationHealthFlowTitle =>
@@ -836,7 +836,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationHealthFlowBulletTwo =>
-      'Usa UPA u hospital cuando el caso sea urgente, agudo o no pueda esperar una agenda basica.';
+      'Usá la UPA o un hospital cuando el caso sea urgente, agudo o no pueda esperar una agenda básica.';
 
   @override
   String get documentationHealthFlowBulletThree =>
@@ -847,7 +847,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationHealthPrivateSummary =>
-      'Un plan privado puede acelerar la red y la conveniencia, pero entra como costo recurrente y exige comparar cobertura con cuidado.';
+      'Un plan privado puede acelerar el acceso a la red y la conveniencia, pero entra como costo recurrente y exige comparar cobertura con cuidado.';
 
   @override
   String get documentationHealthPrivateBulletOne =>
@@ -855,14 +855,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationHealthPrivateBulletTwo =>
-      'Precio, red, alcance y carencias cambian según contrato, edad y operadora.';
+      'Precio, red, alcance y carencias cambian según el contrato, la edad y la operadora.';
 
   @override
   String get documentationHealthPrivateBulletThree =>
-      'Antes de contratar, compara red, cobertura y reglas en el material oficial de la ANS, no solo el precio.';
+      'Antes de contratar, compará red, cobertura y reglas en el material oficial de la ANS, no solo el precio.';
 
   @override
-  String get documentationWorkCltTitle => 'Trabajo con registro';
+  String get documentationWorkCltTitle => 'Trabajo registrado';
 
   @override
   String get documentationWorkCltSummary =>
@@ -870,7 +870,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationWorkCltBulletOne =>
-      'El trabajo con registro es la forma más reconocible de trabajo formal en Brasil.';
+      'El trabajo registrado es la forma más reconocible de trabajo formal en Brasil.';
 
   @override
   String get documentationWorkCltBulletTwo =>
@@ -881,7 +881,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'En este modelo, la relación con el aporte previsional suele estar más integrada a la nómina salarial.';
 
   @override
-  String get documentationWorkPjTitle => 'PJ, CNPJ y trabajo por cuenta';
+  String get documentationWorkPjTitle => 'PJ, CNPJ y trabajo por cuenta propia';
 
   @override
   String get documentationWorkPjSummary =>
@@ -889,7 +889,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationWorkPjBulletOne =>
-      'PJ no es trabajo con registro; el vínculo es empresarial o autónomo, no laboral.';
+      'PJ no es trabajo registrado; el vínculo es empresarial o autónomo, no laboral.';
 
   @override
   String get documentationWorkPjBulletTwo =>
@@ -931,7 +931,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationDrivingBulletTwo =>
-      'Una persona extranjera regularizada puede iniciar el proceso si cumple las exigencias de identificacion y residencia del estado.';
+      'Una persona extranjera regularizada puede iniciar el proceso si cumple las exigencias de identificación y residencia del estado.';
 
   @override
   String get documentationDrivingBulletThree =>
@@ -947,7 +947,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationForeignLicenseBulletOne =>
-      'La posibilidad de manejar con licencia extranjera depende de validez, identificación y regla aplicable a tu caso.';
+      'La posibilidad de manejar con licencia extranjera depende de la validez, la identificación y la regla aplicable a tu caso.';
 
   @override
   String get documentationForeignLicenseBulletTwo =>
@@ -1060,7 +1060,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get startNewPlanAction => 'Iniciar nuevo plan';
+  String get startNewPlanAction => 'Iniciar un nuevo plan';
 
   @override
   String get questionnairePageTitle => 'Tu plan inicial';
@@ -1127,11 +1127,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get migrationPlanStepsTitle => 'Primeros pasos sugeridos';
 
   @override
-  String get planNextActionsTitle => 'Lo que suele venir justo despues';
+  String get planNextActionsTitle => 'Lo que suele venir justo después';
 
   @override
   String get planNextActionsBody =>
-      'Si este resultado te ayudo, el siguiente paso suele ser confirmar documentos, comparar la ciudad sugerida con otras opciones o rehacer el plan con otra prioridad.';
+      'Si este resultado te ayudó, el siguiente paso suele ser confirmar documentos, comparar la ciudad sugerida con otras opciones o rehacer el plan con otra prioridad.';
 
   @override
   String get planNextActionDocumentsTitle =>
@@ -1139,7 +1139,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get planNextActionDocumentsBody =>
-      'Usá la guía práctica para revisar CPF, registro, permanencia, trabajo y banco sin caer en investigación dispersa.';
+      'Usá la guía práctica para revisar CPF, registro, permanencia, trabajo y banco sin caer en una investigación dispersa.';
 
   @override
   String get planNextActionCitiesTitle =>
@@ -1147,35 +1147,35 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get planNextActionCitiesBody =>
-      'Mira si la ciudad sugerida sigue teniendo sentido cuando la comparas por costo, idioma, seguridad y trabajo.';
+      'Mirá si la ciudad sugerida sigue teniendo sentido cuando la comparás por costo, idioma, seguridad y trabajo.';
 
   @override
   String get planNextActionRetakeTitle => 'Rehacer el plan con otra prioridad';
 
   @override
   String get planNextActionRetakeBody =>
-      'Si tu prioridad cambio, conviene responder de nuevo y ver si tambien cambia el orden de los pasos.';
+      'Si tu prioridad cambió, conviene responder de nuevo y ver si también cambia el orden de los pasos.';
 
   @override
   String get readinessSectionTitle =>
-      'Checklist practico para la siguiente fase';
+      'Checklist práctico para la siguiente fase';
 
   @override
-  String get readinessStageNow => 'Empieza ahora';
+  String get readinessStageNow => 'Empezá ahora';
 
   @override
-  String get readinessStageSoon => 'Prepara despues';
+  String get readinessStageSoon => 'Prepará después';
 
   @override
   String get readinessStageLanding => 'Antes de llegar';
 
   @override
   String get readinessSummaryResearching =>
-      'Como todavía estás explorando, el mejor paso ahora es reducir incertidumbre antes de abrir demasiados frentes.';
+      'Como todavía estás explorando, el mejor paso ahora es reducir la incertidumbre antes de abrir demasiados frentes.';
 
   @override
   String get readinessSummaryTwelveMonths =>
-      'Todavía tienes tiempo para preparar bien la mudanza, así que usa este checklist para reducir fricción con anticipación.';
+      'Todavía tenés tiempo para preparar bien la mudanza, así que usá este checklist para reducir fricción con anticipación.';
 
   @override
   String get readinessSummarySixMonths =>
@@ -1187,130 +1187,130 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get readinessItemMigrationPathTitle =>
-      'Confirma primero la ruta migratoria';
+      'Confirmá primero la ruta migratoria';
 
   @override
   String get readinessItemMigrationPathBody =>
-      'Antes de banco, vivienda o trabajo, valida qué camino de residencia encaja mejor con tu entrada a Brasil.';
+      'Antes de banco, vivienda o trabajo, validá qué camino de residencia encaja mejor con tu entrada a Brasil.';
 
   @override
   String get readinessItemDocumentsTitle =>
-      'Arma el paquete documental esencial';
+      'Armá el paquete documental esencial';
 
   @override
   String get readinessItemDocumentsBody =>
-      'Separa pasaporte, antecedentes, necesidad de apostilla y documentos que todavía pueden requerir traducción.';
+      'Separá pasaporte, antecedentes, necesidad de apostilla y documentos que todavía pueden requerir traducción.';
 
   @override
-  String get readinessItemBudgetTitle => 'Prueba el presupuesto de aterrizaje';
+  String get readinessItemBudgetTitle => 'Probá el presupuesto de aterrizaje';
 
   @override
   String get readinessItemBudgetBody =>
-      'Proyecta lo que van a exigir los primeros 30 a 90 días, no solo el costo mensual una vez instalada la rutina.';
+      'Proyectá lo que van a exigir los primeros 30 a 90 días, no solo el costo mensual una vez instalada la rutina.';
 
   @override
-  String get readinessItemCityTitle => 'Convierte la ciudad en un filtro real';
+  String get readinessItemCityTitle => 'Convertí la ciudad en un filtro real';
 
   @override
   String get readinessItemCityBody =>
-      'Usa tu selección actual de ciudades para reducir incertidumbre de vivienda, transporte y rutina antes de bajar al nivel de barrio.';
+      'Usá tu selección actual de ciudades para reducir la incertidumbre sobre vivienda, transporte y rutina antes de bajar al nivel de barrio.';
 
   @override
   String readinessItemCityBodyWithCity(String city) {
-    return 'Usa $city como primer filtro y compárala con alternativas antes de decidir a nivel barrio.';
+    return 'Usá $city como primer filtro y comparala con alternativas antes de decidir a nivel de barrio.';
   }
 
   @override
-  String get readinessItemLanguageTitle => 'Prepara tu primera capa de idioma';
+  String get readinessItemLanguageTitle => 'Prepará tu primera capa de idioma';
 
   @override
   String get readinessItemLanguageBody =>
-      'Concéntrate en el portugués que reduce fricción en la vida diaria: vivienda, transporte, banco y servicios.';
+      'Concentrate en el portugués que reduce fricción en la vida diaria: vivienda, transporte, banco y servicios.';
 
   @override
   String get readinessItemLanguageWorkBody =>
-      'Concéntrate en el portugués que afecta entrevistas, rutina laboral, negociación y pedidos básicos de servicio.';
+      'Concentrate en el portugués que afecta entrevistas, rutina laboral, negociación y pedidos básicos de servicio.';
 
   @override
   String get readinessItemLanguageStudyBody =>
-      'Concéntrate en el portugués necesario para clases, inscripción, rutina diaria y comunicación institucional.';
+      'Concentrate en el portugués necesario para clases, inscripción, rutina diaria y comunicación institucional.';
 
   @override
-  String get readinessGoalWorkTitle => 'Mapea empleabilidad antes de llegar';
+  String get readinessGoalWorkTitle => 'Mapeá empleabilidad antes de llegar';
 
   @override
   String get readinessGoalWorkBody =>
-      'Revisa qué tipo de trabajo puedes buscar al inicio, qué documentos pueden frenarte y cómo la ciudad cambia tus posibilidades.';
+      'Revisá qué tipo de trabajo podés buscar al inicio, qué documentos pueden frenarte y cómo la ciudad cambia tus posibilidades.';
 
   @override
   String get readinessGoalRemoteTitle =>
-      'Estabiliza la base del trabajo remoto';
+      'Estabilizá la base del trabajo remoto';
 
   @override
   String get readinessGoalRemoteBody =>
-      'Chequea internet, flujo bancario, costo diario y la estructura local mínima antes de depender del ingreso remoto.';
+      'Chequeá internet, flujo bancario, costo diario y la estructura local mínima antes de depender del ingreso remoto.';
 
   @override
-  String get readinessGoalStudyTitle => 'Valida la ruta de estudio';
+  String get readinessGoalStudyTitle => 'Validá la ruta de estudio';
 
   @override
   String get readinessGoalStudyBody =>
-      'Revisa admisión, costo de rutina, tiempos de estudiante y qué debe regularizarse antes de tomar el estudio como base.';
+      'Revisá admisión, costo de rutina, tiempos de estudiante y qué debe regularizarse antes de tomar el estudio como base.';
 
   @override
   String get readinessGoalEntrepreneurTitle =>
-      'Planifica la entrada para emprender';
+      'Planificá la entrada para emprender';
 
   @override
   String get readinessGoalEntrepreneurBody =>
-      'Mapea la capa práctica inicial: documentos locales, banco, ciudad y estructura mínima para operar con más seguridad.';
+      'Mapeá la capa práctica inicial: documentos locales, banco, ciudad y estructura mínima para operar con más seguridad.';
 
   @override
-  String get readinessGoalRetireTitle => 'Protege rutina y previsibilidad';
+  String get readinessGoalRetireTitle => 'Protegé rutina y previsibilidad';
 
   @override
   String get readinessGoalRetireBody =>
-      'Prioriza acceso a salud, rutina de barrio, costo recurrente y los documentos que protegen una llegada tranquila.';
+      'Priorizá acceso a salud, rutina de barrio, costo recurrente y los documentos que protegen una llegada tranquila.';
 
   @override
   String get readinessGoalQualityTitle =>
-      'Convierte calidad de vida en criterio';
+      'Convertí calidad de vida en criterio';
 
   @override
   String get readinessGoalQualityBody =>
-      'Transforma estilo de vida en filtros reales: seguridad, rutina, adaptación al idioma y costo de permanencia.';
+      'Transformá el estilo de vida en filtros reales: seguridad, rutina, adaptación al idioma y costo de permanencia.';
 
   @override
   String get readinessItemCpfBankTitle =>
-      'Prepara CPF y la primera base bancaria';
+      'Prepará el CPF y la primera base bancaria';
 
   @override
   String get readinessItemCpfBankBody =>
-      'CPF y situación regular influyen en banco, contrato y buena parte de la estructura práctica de la llegada.';
+      'El CPF y la situación regular influyen en banco, contrato y buena parte de la estructura práctica de la llegada.';
 
   @override
   String get readinessItemHousingTitle =>
-      'Reduce la fricción de vivienda antes de buscar';
+      'Reducí la fricción de vivienda antes de buscar';
 
   @override
   String get readinessItemHousingBody =>
-      'Revisa garantía, reserva financiera, prioridad de barrio y comprobantes que pueden pedirte antes de hablar con propietarios.';
+      'Revisá garantía, reserva financiera, prioridad de barrio y comprobantes que pueden pedirte antes de hablar con propietarios.';
 
   @override
-  String get readinessItemArrivalTitle => 'Arma un plan de llegada de 30 días';
+  String get readinessItemArrivalTitle => 'Armá un plan de llegada de 30 días';
 
   @override
   String get readinessItemArrivalBody =>
-      'Lista lo que debe funcionar en el primer mes: conectividad, salud, transporte, pagos y seguimiento documental.';
+      'Listá lo que debe funcionar en el primer mes: conectividad, salud, transporte, pagos y seguimiento documental.';
 
   @override
   String readinessProgressLabel(int done, int total) {
-    return '$done de $total items completados';
+    return '$done de $total ítems completados';
   }
 
   @override
   String planStepMeta(String category, int days) {
-    return 'Category: $category  Estimated days: $days';
+    return 'Categoría: $category  Días estimados: $days';
   }
 
   @override
@@ -1333,7 +1333,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get planStepOpenVisaPointThree =>
-      'Si tu intencion ya es vivir en Brasil, conviene resolver esto antes de asumir alquiler o trabajo.';
+      'Si tu intención ya es vivir en Brasil, conviene resolver esto antes de asumir alquiler o trabajo.';
 
   @override
   String get planStepOpenCpfEyebrow => 'Documento fiscal';
@@ -1344,7 +1344,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get planStepOpenCpfPointOne =>
-      'El tramite puede empezar online, según la orientacion oficial.';
+      'El trámite puede empezar online, según la orientación oficial.';
 
   @override
   String get planStepOpenCpfPointTwo =>
@@ -1371,7 +1371,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get planStepOpenBankPointThree =>
-      'Empieza comparando cuenta digital para una rutina simple y banco tradicional si necesitas atencion fisica.';
+      'Empezá comparando una cuenta digital para una rutina simple y un banco tradicional si necesitás atención presencial.';
 
   @override
   String get planStepOpenHousingEyebrow => 'Vivienda y barrios';
@@ -1382,16 +1382,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String planStepOpenHousingSummaryCity(String city) {
-    return 'For $city, compare neighborhoods with better daily routine, access, and cost before closing a housing deal.';
+    return 'Para $city, compará barrios con mejor rutina, acceso y costo antes de cerrar una vivienda.';
   }
 
   @override
   String get planStepOpenHousingPointOne =>
-      'Priorizá barrios con buena conexión a lo que necesitás: trabajo, transporte y servicios.';
+      'Priorizá barrios con buena conexión con lo que necesitás: trabajo, transporte y servicios.';
 
   @override
   String get planStepOpenHousingPointTwo =>
-      'Usa la lectura de costo de la ciudad como punto de partida, pero confirma alquiler y contrato antes de decidir.';
+      'Usá la lectura de costo de la ciudad como punto de partida, pero confirmá alquiler y contrato antes de decidir.';
 
   @override
   String get planStepOpenHousingPointThree =>
@@ -1406,7 +1406,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get planStepOpenGeneralPointOne =>
-      'Resuelve primero lo esencial para no abrir demasiados frentes al mismo tiempo.';
+      'Resolvé primero lo esencial para no abrir demasiados frentes al mismo tiempo.';
 
   @override
   String get planStepOpenGeneralPointTwo =>
@@ -1414,16 +1414,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get planStepOpenGeneralPointThree =>
-      'Usa el plan como orden sugerido, no como una regla fija para todos los casos.';
+      'Usá el plan como un orden sugerido, no como una regla fija para todos los casos.';
 
   @override
   String get planStepOpenTagMercosur => 'Mercosur';
 
   @override
-  String get planStepOpenTagVisitor => 'Visita no autoriza trabajo';
+  String get planStepOpenTagVisitor => 'La visita no autoriza trabajo';
 
   @override
-  String get planStepOpenTagOnline => 'Tramite online';
+  String get planStepOpenTagOnline => 'Trámite online';
 
   @override
   String get planStepOpenTagReceitaFederal => 'Receita Federal';
@@ -1468,14 +1468,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get citiesExploreDescription =>
-      'Mira sugerencias por intencion y entiende por que cada ciudad aparece aqui.';
+      'Mirá sugerencias por intención y entendé por qué cada ciudad aparece acá.';
 
   @override
   String get citiesLoadingLabel => 'Cargando ciudades';
 
   @override
   String get citiesMethodologyNote =>
-      'Rankings basados en datos publicos y metodología de Movaro.';
+      'Rankings basados en datos públicos y en la metodología de Movaro.';
 
   @override
   String get citiesExplorePopularTitle => 'Más elegidas por argentinos';
@@ -1486,25 +1486,25 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get citiesExploreEconomicalTitle =>
-      'Buenas opciones si priorizas costo';
+      'Buenas opciones si priorizás costo';
 
   @override
-  String get citiesExploreWorkTitle => 'Buenas opciones si buscas trabajo';
+  String get citiesExploreWorkTitle => 'Buenas opciones si buscás trabajo';
 
   @override
   String get citiesExploreHousingEasyTitle =>
-      'Mejores para una llegada mas liviana';
+      'Mejores para una llegada más liviana';
 
   @override
-  String get citiesExploreHousingPressureTitle => 'Piden mas caja al entrar';
+  String get citiesExploreHousingPressureTitle => 'Piden más caja al entrar';
 
   @override
   String get citiesExploreSoftLandingTitle =>
-      'Buenas para llegar con menos friccion';
+      'Buenas para llegar con menos fricción';
 
   @override
   String get citiesExploreFamilyStabilityTitle =>
-      'Buenas para llegar con mas previsibilidad';
+      'Buenas para llegar con más previsibilidad';
 
   @override
   String get citiesExploreIncomeStartTitle =>
@@ -1516,7 +1516,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get citiesExploreCoastalSoftLandingTitle =>
-      'Playa con llegada mas liviana';
+      'Playa con llegada más liviana';
 
   @override
   String get citiesExploreCoastalBalancedTitle =>
@@ -1528,11 +1528,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get citiesHighlightLanguageLabel =>
-      'Buena opción si la adaptación con el idioma importa para ti';
+      'Buena opción si la adaptación al idioma importa para vos';
 
   @override
   String get citiesHighlightEconomicalLabel =>
-      'Buena opción si priorizas costo';
+      'Buena opción si priorizás costo';
 
   @override
   String get citiesHighlightWorkLabel =>
@@ -1542,11 +1542,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get citiesHighlightHousingEasyLabel => 'Buena para soft landing';
 
   @override
-  String get citiesHighlightHousingPressureLabel => 'Presion de vivienda alta';
+  String get citiesHighlightHousingPressureLabel => 'Presión de vivienda alta';
 
   @override
   String get citiesHighlightSoftLandingLabel =>
-      'Buena para un aterrizaje inicial con menos friccion';
+      'Buena para un aterrizaje inicial con menos fricción';
 
   @override
   String get citiesHighlightFamilyStabilityLabel =>
@@ -1554,48 +1554,48 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get citiesHighlightIncomeStartLabel =>
-      'Buena si necesitas activar ingresos mas temprano';
+      'Buena si necesitás activar ingresos más temprano';
 
   @override
-  String get citiesHighlightCoastalLabel => 'Buena para rutina de litoral';
+  String get citiesHighlightCoastalLabel => 'Buena para una rutina de litoral';
 
   @override
   String get citiesHighlightMetropolisLabel =>
-      'Buena si queres un ritmo mas urbano';
+      'Buena si querés un ritmo más urbano';
 
   @override
   String get citiesHighlightInlandLabel =>
-      'Buena si buscas una rutina mas tranquila';
+      'Buena si buscás una rutina más tranquila';
 
   @override
   String get citiesHighlightBorderLabel =>
-      'Buena si queres leer mejor una ciudad de frontera';
+      'Buena si querés entender mejor una ciudad de frontera';
 
   @override
   String get citiesHighlightCoastalSoftLandingLabel =>
-      'Playa con soft landing mejor';
+      'Playa con mejor soft landing';
 
   @override
   String get citiesHighlightCoastalBalancedLabel =>
       'Playa con mejor equilibrio entre rutina y costo';
 
   @override
-  String get citiesExploreEmptyTitle => 'Seguimos ampliando este catalogo';
+  String get citiesExploreEmptyTitle => 'Seguimos ampliando este catálogo';
 
   @override
   String get citiesExploreEmptyDescription =>
-      'Las sugerencias de ciudades van a aparecer aca a medida que la base de Movaro crezca.';
+      'Las sugerencias de ciudades van a aparecer acá a medida que la base de Movaro crezca.';
 
   @override
   String get citiesSearchTitle => 'Buscar ciudades';
 
   @override
   String get citiesSearchHeadline =>
-      'Encuentra una ciudad en el catalogo inicial';
+      'Encontrá una ciudad en el catálogo inicial';
 
   @override
   String get citiesSearchDescription =>
-      'Busca por nombre o recorre la lista actual de Movaro.';
+      'Buscá por nombre o recorré la lista actual de Movaro.';
 
   @override
   String get citiesSearchHint => 'Buscar ciudad';
@@ -1607,31 +1607,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get citiesQuickFilterAll => 'Vista general';
 
   @override
-  String get citiesQuickFilterPopular => 'Mas populares';
+  String get citiesQuickFilterPopular => 'Más populares';
 
   @override
   String get citiesQuickFilterLowCost => 'Mejor costo';
 
   @override
-  String get citiesQuickFilterWork => 'Mas trabajo';
+  String get citiesQuickFilterWork => 'Más trabajo';
 
   @override
-  String get citiesQuickFilterLanguage => 'Idioma mas facil';
+  String get citiesQuickFilterLanguage => 'Idioma más fácil';
 
   @override
   String get citiesQuickFilterHousingEasy => 'Llegada liviana';
 
   @override
-  String get citiesQuickFilterHousingPressure => 'Mas caja';
+  String get citiesQuickFilterHousingPressure => 'Más caja';
 
   @override
-  String get citiesQuickFilterSoftLanding => 'Menos friccion';
+  String get citiesQuickFilterSoftLanding => 'Menos fricción';
 
   @override
-  String get citiesQuickFilterFamilyStability => 'Mas previsible';
+  String get citiesQuickFilterFamilyStability => 'Más previsible';
 
   @override
-  String get citiesQuickFilterIncomeStart => 'Ingresos rapidos';
+  String get citiesQuickFilterIncomeStart => 'Ingresos rápidos';
 
   @override
   String get citiesQuickFilterCoastal => 'Playa';
@@ -1640,21 +1640,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get citiesSearchingLabel => 'Buscando ciudades';
 
   @override
-  String get citiesCatalogLoadingLabel => 'Cargando catalogo';
+  String get citiesCatalogLoadingLabel => 'Cargando catálogo';
 
   @override
   String get citiesSearchEmptyTitle => 'No encontramos esa ciudad';
 
   @override
   String get citiesSearchEmptyDescription =>
-      'Prueba con otro nombre o explora el catalogo inicial de Movaro.';
+      'Probá con otro nombre o explorá el catálogo inicial de Movaro.';
 
   @override
-  String get citiesCatalogEmptyTitle => 'El catalogo aun esta vacio';
+  String get citiesCatalogEmptyTitle => 'El catálogo todavía está vacío';
 
   @override
   String get citiesCatalogEmptyDescription =>
-      'Las ciudades del catalogo de Movaro apareceran aqui.';
+      'Las ciudades del catálogo de Movaro aparecerán acá.';
 
   @override
   String get cityDetailTitleFallback => 'Ciudad';
@@ -1671,13 +1671,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cityDetailContextNote =>
-      'Usa estos indicadores como punto de partida, no como verdad absoluta.';
+      'Usá estos indicadores como punto de partida, no como una verdad absoluta.';
 
   @override
   String get cityLifestyleCoastalLabel => 'Estilo de vida de litoral';
 
   @override
-  String get cityLifestyleMetropolisLabel => 'Ritmo de metropoli';
+  String get cityLifestyleMetropolisLabel => 'Ritmo de metrópoli';
 
   @override
   String get cityLifestyleBorderLabel => 'Ciudad de frontera';
@@ -1686,17 +1686,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cityLifestyleInlandLabel => 'Rutina de interior';
 
   @override
-  String get cityDetailMapTitle => 'Donde queda la ciudad';
+  String get cityDetailMapTitle => 'Dónde queda la ciudad';
 
   @override
   String get cityDetailMapDescription =>
-      'Mira la ubicacion de la ciudad en el mapa antes de comparar contexto, distancia y region.';
+      'Mirá la ubicación de la ciudad en el mapa antes de comparar contexto, distancia y región.';
 
   @override
   String get cityDetailSnapshotTitle => 'Vista rápida';
 
   @override
-  String get cityDetailPopulationLabel => 'Poblacion';
+  String get cityDetailPopulationLabel => 'Población';
 
   @override
   String get cityDetailCostLabel => 'Costo';
@@ -1711,7 +1711,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cityDetailPopularityLabel => 'Popularidad entre argentinos';
 
   @override
-  String get cityDetailLanguageLabel => 'Adaptacion con el idioma';
+  String get cityDetailLanguageLabel => 'Adaptación al idioma';
 
   @override
   String get cityDetailWorkLabel => 'Mercado laboral';
@@ -1730,7 +1730,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cityDetailIndustriesTitle => 'Sectores fuertes';
 
   @override
-  String get cityDetailReasonsTitle => 'Por que Movaro la recomienda';
+  String get cityDetailReasonsTitle => 'Por qué Movaro la recomienda';
 
   @override
   String get cityDetailSourcesTitle => 'Fuentes de datos';
@@ -1757,7 +1757,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get citySourceTerritorialDescription =>
-      'Nombre oficial, provincia, código IBGE y región municipal.';
+      'Nombre oficial, estado, código IBGE y región municipal.';
 
   @override
   String get citySourcePopulationTitle => 'Población';
@@ -1778,7 +1778,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get citySourceCuratedMetricsDescription =>
-      'Actualmente proviene del dataset curado de Movaro. Las sustituciones oficiales prioritarias son Atlas da Violencia (seguridad), Novo Caged (empleo), FipeZAP (alquiler) e IBGE PIB dos Municipios (actividad económica).';
+      'Actualmente, proviene del dataset curado de Movaro. Las sustituciones oficiales prioritarias son Atlas da Violência (seguridad), Novo Caged (empleo), FipeZAP (alquiler) e IBGE PIB dos Municípios (actividad económica).';
 
   @override
   String get citySourceRankingTitle => 'Metodología de puntaje';
@@ -1805,7 +1805,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cityDetailFooterNote =>
-      'Estos indicadores ayudan en la exploracion inicial y no reemplazan un analisis individual.';
+      'Estos indicadores ayudan en la exploración inicial y no reemplazan un análisis individual.';
 
   @override
   String get introPageTitle => 'Cómo funciona Movaro';
@@ -1833,7 +1833,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get introDocumentationTitle =>
-      'Consultá documentación cuando la necesites';
+      'Consultá la documentación cuando la necesites';
 
   @override
   String get introDocumentationDescription =>
@@ -1877,7 +1877,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cityPracticalLanguageEasy =>
-      'Se ve más fácil que el promedio para alguien que llega hablando español, porque combina mejor adaptación con el idioma y familiaridad argentina.';
+      'Se ve más fácil que el promedio para alguien que llega hablando español, porque combina mejor adaptación con el idioma y familiaridad con argentinos.';
 
   @override
   String get cityPracticalLanguageMedium =>
@@ -1885,7 +1885,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cityPracticalLanguageHard =>
-      'Probablemente te exija adaptarte más rápido al portugués, porque el soporte cotidiano en español parece menor.';
+      'Probablemente te exija adaptarte más rápido al portugués, porque el apoyo cotidiano en español parece menor.';
 
   @override
   String get cityPracticalCostEasy =>
@@ -1921,7 +1921,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cityPracticalSafetyLow =>
-      'Conviene mirarla con más cuidado y validar mejor el contexto local antes de tomarla como opción simple.';
+      'Conviene mirarla con más cuidado y validar mejor el contexto local antes de tomarla como una opción simple.';
 
   @override
   String get cityMetricBadgePositive => 'Lectura favorable';
@@ -1937,7 +1937,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cityMetricCostLowSupporting =>
-      'Más liviano para el presupuesto del dia a dia.';
+      'Más liviano para el presupuesto del día a día.';
 
   @override
   String get cityMetricCostMediumHeadline => 'Costo moderado';
@@ -1951,7 +1951,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cityMetricCostHighSupporting =>
-      'Va a exigir más cuidado con alquiler y gastos mensuales.';
+      'Va a exigir más cuidado con el alquiler y los gastos mensuales.';
 
   @override
   String get cityMetricSafetyHighHeadline => 'Seguridad alta';
@@ -1972,17 +1972,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cityMetricSafetyLowSupporting =>
-      'Conviene validar mejor la ciudad antes de tomarla como mudanza simple.';
+      'Conviene validar mejor la ciudad antes de tomarla como una mudanza simple.';
 
   @override
-  String get cityMetricLanguageEasyHeadline => 'Adaptacion facil';
+  String get cityMetricLanguageEasyHeadline => 'Adaptación fácil';
 
   @override
   String get cityMetricLanguageEasySupporting =>
       'Suele ser más amigable para quien llega hablando español.';
 
   @override
-  String get cityMetricLanguageMediumHeadline => 'Adaptacion moderada';
+  String get cityMetricLanguageMediumHeadline => 'Adaptación moderada';
 
   @override
   String get cityMetricLanguageMediumSupporting =>
@@ -2028,7 +2028,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cityIdhmHighSupporting =>
-      'Una lectura solida de desarrollo humano en la referencia oficial.';
+      'Una lectura sólida de desarrollo humano en la referencia oficial.';
 
   @override
   String get cityIdhmMedium => 'Desarrollo medio';
@@ -2076,11 +2076,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cityHousingViabilityTileLabel => 'Entrada de vivienda';
 
   @override
-  String get cityHousingViabilityEasyHeadline => 'Entrada mas liviana';
+  String get cityHousingViabilityEasyHeadline => 'Entrada más liviana';
 
   @override
   String get cityHousingViabilityEasySupporting =>
-      'Tiende a permitir un aterrizaje mas suave, con menos presion de alquiler y mas margen para ajustar barrio y rutina.';
+      'Tiende a permitir un aterrizaje más suave, con menos presión de alquiler y más margen para ajustar barrio y rutina.';
 
   @override
   String get cityHousingViabilityEasyBadge => 'Buena para soft landing';
@@ -2090,20 +2090,20 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cityHousingViabilityBalancedSupporting =>
-      'Puede funcionar bien si llegas con reserva y validas barrio, garantia y costo total antes de firmar.';
+      'Puede funcionar bien si llegás con reserva y validás barrio, garantía y costo total antes de firmar.';
 
   @override
-  String get cityHousingViabilityBalancedBadge => 'Necesita validacion';
+  String get cityHousingViabilityBalancedBadge => 'Necesita validación';
 
   @override
-  String get cityHousingViabilityHardHeadline => 'Exige mas caja';
+  String get cityHousingViabilityHardHeadline => 'Exige más caja';
 
   @override
   String get cityHousingViabilityHardSupporting =>
-      'Aca alquiler y entrada suelen pesar mas. Conviene tratar vivienda como filtro serio antes de elegir la ciudad.';
+      'Acá el alquiler y la entrada suelen pesar más. Conviene tratar la vivienda como un filtro serio antes de elegir la ciudad.';
 
   @override
-  String get cityHousingViabilityHardBadge => 'Presion de vivienda alta';
+  String get cityHousingViabilityHardBadge => 'Presión de vivienda alta';
 
   @override
   String get citySnapshotPopularityHigh => 'Muy buscada';
@@ -2117,14 +2117,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get citySnapshotPopularityMediumSupporting =>
-      'Tiene una familiaridad razonable dentro del catalogo actual.';
+      'Tiene una familiaridad razonable dentro del catálogo actual.';
 
   @override
   String get citySnapshotPopularityLow => 'Menos recurrente';
 
   @override
   String get citySnapshotPopularityLowSupporting =>
-      'Todavía aparece menos en el recorte inicial de interes argentino.';
+      'Todavía aparece menos en el recorte inicial de interés argentino.';
 
   @override
   String get citySnapshotUnemploymentLower => 'Desempleo más bajo';
@@ -2211,7 +2211,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Todavía dependo principalmente del español';
 
   @override
-  String get questionOptionBasicPortuguese => 'Me manejo con portugués basico';
+  String get questionOptionBasicPortuguese => 'Me manejo con portugués básico';
 
   @override
   String get questionOptionComfortablePortuguese =>
@@ -2238,7 +2238,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get recommendationReasonLanguageSupport =>
-      'Adaptacion más facil si todavía dependes del español';
+      'Adaptación más fácil si todavía dependés del español';
 
   @override
   String get recommendationReasonWorkMarket => 'Mercado laboral más fuerte';
@@ -2269,7 +2269,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get planReasonGoalRetire =>
-      'Hace más sentido para quien busca más seguridad y un costo más controlado.';
+      'Tiene más sentido para quien busca más seguridad y un costo más controlado.';
 
   @override
   String get planReasonGoalQualityOfLife =>
@@ -2281,11 +2281,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get planReasonLanguageNeedsSupport =>
-      'Como dijiste que todavía dependes del español, dimos más peso a ciudades con mejor adaptación linguistica.';
+      'Como dijiste que todavía dependés del español, dimos más peso a ciudades con mejor adaptación lingüística.';
 
   @override
   String get planReasonLanguageBasic =>
-      'Como dijiste que te manejas con portugués basico, la adaptación con el idioma todavía influye en la recomendacion.';
+      'Como dijiste que te manejás con portugués básico, la adaptación al idioma todavía influye en la recomendación.';
 
   @override
   String get planReasonTimelineAsap =>
@@ -2329,7 +2329,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'Investigar barrios, contratos y costos para instalarte con más seguridad.';
 
   @override
-  String get planStepTitleSettleDocuments => 'Regularizar documentación local';
+  String get planStepTitleSettleDocuments =>
+      'Regularizar la documentación local';
 
   @override
   String get planStepDescriptionSettleDocuments =>
@@ -2350,7 +2351,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ordenar prioridades como costo, documentación y calidad de vida.';
 
   @override
-  String get planBeachDecisionTitle => 'Litoral en la decision';
+  String get planBeachDecisionTitle => 'Litoral en la decisión';
 
   @override
   String get planBeachDecisionIntro =>
@@ -2358,7 +2359,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get planBeachDecisionCoastalHeadline =>
-      'La recomendacion ya apunta al litoral';
+      'La recomendación ya apunta al litoral';
 
   @override
   String planBeachDecisionCoastalBody(Object cityName) {
@@ -2367,15 +2368,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get planBeachDecisionNotCoastalHeadline =>
-      'Tu criterio de playa pide una comparacion extra';
+      'Tu criterio de playa pide una comparación extra';
 
   @override
   String get planBeachDecisionNotCoastalBody =>
-      'Incluso con este objetivo, conviene comparar ciudades de playa antes de cerrar la decision. No toda ciudad fuerte en el plan entrega la rutina costera que tal vez buscas.';
+      'Incluso con este objetivo, conviene comparar ciudades de playa antes de cerrar la decisión. No toda ciudad fuerte en el plan entrega la rutina costera que tal vez buscás.';
 
   @override
   String get planBeachDecisionPriorityNote =>
-      'Si la playa es prioridad, trata vivienda y rutina local como filtro principal.';
+      'Si la playa es prioridad, tratá la vivienda y la rutina local como filtro principal.';
 
   @override
   String get planBeachDecisionHousingHeadline =>
@@ -2566,13 +2567,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentReadinessSectionTitle =>
-      'Preparacion documental antes de la mudanza';
+      'Preparación documental antes de la mudanza';
 
   @override
-  String get documentReadinessPriorityCritical => 'Critico ahora';
+  String get documentReadinessPriorityCritical => 'Crítico ahora';
 
   @override
-  String get documentReadinessPriorityPrepare => 'Prepara con anticipacion';
+  String get documentReadinessPriorityPrepare => 'Prepará con anticipación';
 
   @override
   String get documentReadinessPriorityArrival =>
@@ -2659,11 +2660,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentReadinessCpfTitle =>
-      'Tratà CPF y estatus regular como una sola capa';
+      'Tratá el CPF y el estatus regular como una sola capa';
 
   @override
   String get documentReadinessCpfBodyBrazil =>
-      'CPF, seguimiento de residencia y primer comprobante local suelen destrabar la vida práctica. Dejá ese bloque listo para ejecutar rápido.';
+      'El CPF, el seguimiento de la residencia y el primer comprobante local suelen destrabar la vida práctica. Dejá ese bloque listo para ejecutar rápido.';
 
   @override
   String get documentReadinessCopiesTitle =>
@@ -2747,7 +2748,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentReadinessGoalQualityTitle =>
-      'Usá documentos para reducir fricción, no solo para cumplir';
+      'Usá los documentos para reducir fricción, no solo para cumplir';
 
   @override
   String get documentReadinessGoalQualityBodyBrazil =>
@@ -2761,14 +2762,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get documentReadinessRiskBlocking => 'Puede trabar la mudanza';
 
   @override
-  String get documentReadinessRiskCaution => 'Evita demora y retrabajo';
+  String get documentReadinessRiskCaution => 'Evita demoras y retrabajo';
 
   @override
   String get documentReadinessRiskReview => 'Revisar en la etapa correcta';
 
   @override
   String get documentReadinessReviewBeforeBooking =>
-      'Revisá antes de comprar pasaje';
+      'Revisá antes de comprar el pasaje';
 
   @override
   String get documentReadinessReviewCloseToMove =>
@@ -2784,29 +2785,29 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get housingDecisionSectionTitle =>
-      'La vivienda es una decision critica antes de la ciudad';
+      'La vivienda es una decisión crítica antes de la ciudad';
 
   @override
   String housingDecisionSectionTitleWithCity(Object city) {
-    return 'La vivienda puede definir si $city te sirve de verdad';
+    return 'La vivienda puede definir si $city realmente te sirve';
   }
 
   @override
   String get housingDecisionSectionBody =>
-      'Antes de decidir la ciudad, conviene entender como funcionan alquiler y garantias en Brasil. El mayor riesgo no es solo el precio mensual: es llegar sin un camino viable para contrato, barrio e instalacion inicial.';
+      'Antes de decidir la ciudad, conviene entender cómo funcionan el alquiler y las garantías en Brasil. El mayor riesgo no es solo el precio mensual: es llegar sin un camino viable para contrato, barrio e instalación inicial.';
 
   @override
   String housingDecisionSectionBodyWithCity(Object city) {
-    return 'Antes de asumir que $city es la mejor opcion, validá si alquiler, garantias e instalacion inicial parecen viables para tu momento. El riesgo no esta solo en el precio, sino en el camino real para cerrar vivienda.';
+    return 'Antes de asumir que $city es la mejor opción, validá si el alquiler, las garantías y la instalación inicial parecen viables para tu momento. El riesgo no está solo en el precio, sino en el camino real para cerrar vivienda.';
   }
 
   @override
   String get housingDecisionGuaranteesTitle =>
-      'Las garantias pueden trabar el alquiler';
+      'Las garantías pueden trabar el alquiler';
 
   @override
   String get housingDecisionGuaranteesBody =>
-      'El fiador local todavia pesa en muchos contratos. Si eso no es realista para vos, compará caucion, seguro-fianza, titulo de capitalizacion y exigencia de ingresos antes de contar con un barrio.';
+      'El fiador local todavía pesa en muchos contratos. Si eso no es realista para vos, compará caución, seguro-fianza, título de capitalización y exigencia de ingresos antes de contar con un barrio.';
 
   @override
   String get housingDecisionSoftLandingTitle =>
@@ -2814,23 +2815,23 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get housingDecisionSoftLandingBody =>
-      'Temporal, amoblado, coliving o contrato corto por 30 a 90 dias suele ser mas seguro que tomar un alquiler largo antes de entender la rutina local.';
+      'Temporal, amoblado, coliving o contrato corto por 30 a 90 días suele ser más seguro que tomar un alquiler largo antes de entender la rutina local.';
 
   @override
   String get housingDecisionProofPackTitle =>
-      'Llevá la carpeta que destraba la conversacion';
+      'Llevá la carpeta que destraba la conversación';
 
   @override
   String get housingDecisionProofPackBody =>
-      'Agrupá identidad, ingresos, reserva, referencias y comprobantes digitales en una sola carpeta. No garantiza aprobacion, pero reduce friccion desde el primer contacto.';
+      'Agrupá identidad, ingresos, reserva, referencias y comprobantes digitales en una sola carpeta. No garantiza aprobación, pero reduce fricción desde el primer contacto.';
 
   @override
   String get housingDecisionCityReadTitle =>
-      'Leé la ciudad por la presion de vivienda';
+      'Leé la ciudad por la presión de vivienda';
 
   @override
   String housingDecisionCityReadTitleWithCity(Object city) {
-    return 'Leé $city por la presion de vivienda';
+    return 'Leé $city por la presión de vivienda';
   }
 
   @override
@@ -2844,24 +2845,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get housingDecisionSectionNote =>
-      'Movaro hoy organiza el contexto para decidir mejor. Contrato, garantia aceptada y politica de cada propietario o plataforma todavia deben validarse en la fuente antes de cerrar vivienda.';
+      'Hoy, Movaro organiza el contexto para decidir mejor. El contrato, la garantía aceptada y la política de cada propietario o plataforma todavía deben validarse en la fuente antes de cerrar vivienda.';
 
   @override
   String get housingEntrySectionTitle =>
-      'Estimacion del costo de entrada a la vivienda';
+      'Estimación del costo de entrada a la vivienda';
 
   @override
   String housingEntrySectionTitleWithCity(Object city) {
-    return 'Cuanto puede exigir la vivienda para entrar en $city';
+    return 'Cuánto puede exigir la vivienda para entrar en $city';
   }
 
   @override
   String get housingEntrySectionBody =>
-      'Un alquiler que parece accesible en el anuncio puede exigir mucho mas al entrar. Usá esta lectura para simular caucion, seguro-fianza o un aterrizaje temporario antes de decidir la ciudad.';
+      'Un alquiler que parece accesible en el anuncio puede exigir mucho más al entrar. Usá esta lectura para simular caución, seguro-fianza o un aterrizaje temporario antes de decidir la ciudad.';
 
   @override
   String housingEntrySectionBodyWithCity(Object city) {
-    return 'En $city, no mires solo el alquiler mensual. Usá esta lectura para estimar cuanto puede exigir la entrada con caucion, seguro-fianza o un aterrizaje temporario.';
+    return 'En $city, no mires solo el alquiler mensual. Usá esta lectura para estimar cuánto puede exigir la entrada con caución, seguro-fianza o un aterrizaje temporario.';
   }
 
   @override
@@ -2870,7 +2871,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get housingEntryModeDeposit => 'Caucion';
+  String get housingEntryModeDeposit => 'Caución';
 
   @override
   String get housingEntryModeInsurance => 'Seguro-fianza';
@@ -2880,15 +2881,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get housingEntryModeDepositBody =>
-      'Lectura comun cuando el contrato pide cerca de 3 meses de caucion mas el primer mes.';
+      'Lectura común cuando el contrato pide cerca de 3 meses de caución más el primer mes.';
 
   @override
   String get housingEntryModeInsuranceBody =>
-      'Lectura comun cuando el fiador se reemplaza por una tasa anual de seguro o garantia digital.';
+      'Lectura común cuando el fiador se reemplaza por una tasa anual de seguro o garantía digital.';
 
   @override
   String get housingEntryModeTemporaryBody =>
-      'Una lectura mas liviana para los primeros 30 a 90 dias, priorizando flexibilidad antes de tomar un contrato largo.';
+      'Una lectura más liviana para los primeros 30 a 90 días, priorizando flexibilidad antes de tomar un contrato largo.';
 
   @override
   String get housingEntryTotalTitle => 'Cuánto puede costar entrar';
@@ -2897,13 +2898,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get housingEntryFirstMonthLabel => 'Primer mes';
 
   @override
-  String get housingEntryGuaranteeLabel => 'Garantia / caucion';
+  String get housingEntryGuaranteeLabel => 'Garantía / caución';
 
   @override
-  String get housingEntrySetupLabel => 'Tasas e instalacion';
+  String get housingEntrySetupLabel => 'Tasas e instalación';
 
   @override
-  String get housingEntryPlatformsTitle => 'Plataformas y caminos utiles';
+  String get housingEntryPlatformsTitle => 'Plataformas y caminos útiles';
 
   @override
   String get housingEntryPlatformsHeadline =>
@@ -2911,35 +2912,35 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get housingEntryPlatformsBody =>
-      'La mejor plataforma depende menos del anuncio lindo y mas de la burocracia que realmente podés sostener ahora.';
+      'La mejor plataforma depende menos del anuncio lindo y más de la burocracia que realmente podés sostener ahora.';
 
   @override
   String get housingEntryPlatformsQuintoAndar =>
-      'Digital y sin fiador, pero igual exige ingresos y documentacion consistentes.';
+      'Digital y sin fiador, pero igual exige ingresos y documentación consistentes.';
 
   @override
   String get housingEntryPlatformsZap =>
-      'Usá filtros como alquiler sin fiador para reducir tiempo perdido en la busqueda.';
+      'Usá filtros como alquiler sin fiador para reducir el tiempo perdido en la búsqueda.';
 
   @override
   String get housingEntryPlatformsCredPago =>
-      'Garantia digital aceptada por muchas inmobiliarias como reemplazo del fiador.';
+      'Garantía digital aceptada por muchas inmobiliarias como reemplazo del fiador.';
 
   @override
   String get housingEntryPlatformsAirbnb =>
-      'Sirve para los primeros 15 a 30 dias mientras visitas barrios antes de tomar un contrato mas largo.';
+      'Sirve para los primeros 15 a 30 días mientras visitás barrios antes de tomar un contrato más largo.';
 
   @override
   String get housingEntryDisclaimer =>
-      'Esta simulacion es direccional. El valor real cambia por ciudad, barrio, plataforma, comprobacion de ingresos y politica del propietario. La idea es evitar subestimar el costo de entrada.';
+      'Esta simulación es orientativa. El valor real cambia según la ciudad, el barrio, la plataforma, la comprobación de ingresos y la política del propietario. La idea es evitar subestimar el costo de entrada.';
 
   @override
   String get housingSoftLandingTitle =>
-      'Como suelen aterrizar los argentinos antes del alquiler fijo';
+      'Cómo suelen aterrizar los argentinos antes del alquiler fijo';
 
   @override
   String get housingSoftLandingBody =>
-      'En los primeros dias, el camino comun no es ir directo al contrato tradicional. La secuencia suele ser llegada, vivienda temporaria y solo despues la busqueda de una base mas estable con menos riesgo.';
+      'En los primeros días, el camino común no es ir directo al contrato tradicional. La secuencia suele ser llegada, vivienda temporaria y, solo después, la búsqueda de una base más estable con menos riesgo.';
 
   @override
   String get housingSoftLandingTemporaryTitle =>
@@ -2947,23 +2948,23 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get housingSoftLandingTemporaryBody =>
-      'Airbnb con descuento mensual, apart hotel y flat ayudan a aterrizar sin fiador ni comprobacion local. Eso compra tiempo para visitar barrios y entender la ciudad en la practica.';
+      'Airbnb con descuento mensual, apart hotel y flat ayudan a aterrizar sin fiador ni comprobación local. Eso compra tiempo para visitar barrios y entender la ciudad en la práctica.';
 
   @override
   String get housingSoftLandingDirectTitle =>
-      'Busqueda directa con dueño o grupos locales';
+      'Búsqueda directa con dueño o grupos locales';
 
   @override
   String get housingSoftLandingDirectBody =>
-      'Facebook Marketplace, OLX y contactos directos suelen ser mas flexibles que la inmobiliaria tradicional. A cambio, sube el riesgo de estafa y la validacion del inmueble debe ser mas estricta.';
+      'Facebook Marketplace, OLX y contactos directos suelen ser más flexibles que la inmobiliaria tradicional. A cambio, sube el riesgo de estafa y la validación del inmueble debe ser más estricta.';
 
   @override
   String get housingSoftLandingGuaranteeTitle =>
-      'La moneda de cambio es la garantia';
+      'La moneda de cambio es la garantía';
 
   @override
   String get housingSoftLandingGuaranteeBody =>
-      'Sin fiador, el argumento mas fuerte suele ser caucion, seguro-fianza, titulo de capitalizacion o algunos meses pagados por adelantado. El punto no es prometer de mas, sino llegar con una estructura creible.';
+      'Sin fiador, el argumento más fuerte suele ser caución, seguro-fianza, título de capitalización o algunos meses pagados por adelantado. El punto no es prometer de más, sino llegar con una estructura creíble.';
 
   @override
   String get housingSoftLandingSurvivalTitle =>
@@ -2971,19 +2972,19 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get housingSoftLandingSurvivalChip =>
-      'Comprá un chip brasilero rapido. Sin numero local, inmobiliarias y propietarios suelen responder menos.';
+      'Comprá un chip brasileño rápido. Sin número local, inmobiliarias y propietarios suelen responder menos.';
 
   @override
   String get housingSoftLandingSurvivalCpf =>
-      'Si el CPF todavia no esta resuelto, tratá eso como prioridad. Pesa en plataformas, banco y conversaciones de alquiler.';
+      'Si el CPF todavía no está resuelto, tratá eso como prioridad. Pesa en plataformas, banco y conversaciones de alquiler.';
 
   @override
   String get housingSoftLandingSurvivalLocation =>
-      'En los primeros dias, priorizá quedarte cerca de mercado, farmacia, transporte y puesto de salud para bajar costo y friccion.';
+      'En los primeros días, priorizá quedarte cerca de mercado, farmacia, transporte y puesto de salud para bajar costo y fricción.';
 
   @override
   String get housingSoftLandingSurvivalScam =>
-      'No envies reserva sin visitar el inmueble o tener a alguien de confianza validando en el lugar.';
+      'No envíes una reserva sin visitar el inmueble o tener a alguien de confianza validando en el lugar.';
 
   @override
   String get landingBudgetSectionTitle => 'Reserva sugerida para el aterrizaje';
@@ -3014,7 +3015,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get landingBudgetLeanBody =>
-      'Sirve como referencia si pensás llegar con gasto más controlado, vivienda más simple y decisiones iniciales más apretadas.';
+      'Sirve como referencia si pensás llegar con un gasto más controlado, una vivienda más simple y decisiones iniciales más apretadas.';
 
   @override
   String get landingBudgetBalancedTitle => 'Equilibrado';
@@ -3028,7 +3029,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get landingBudgetComfortableBody =>
-      'Un margen más seguro si querés más aire para fricción con vivienda, adaptación más lenta o costos inesperados de instalación.';
+      'Un margen más seguro si querés más aire para lidiar con fricción en la vivienda, una adaptación más lenta o costos inesperados de instalación.';
 
   @override
   String get landingBudget30DaysLabel => 'Referencia para los primeros 30 días';
@@ -3065,27 +3066,27 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get arrivalExecutionSummaryResearching =>
-      'Esta es la capa de ejecucion despues de llegar. Usala ahora para entender que van a exigir las primeras semanas ademas del papeleo.';
+      'Esta es la capa de ejecución después de llegar. Usala ahora para entender qué van a exigir las primeras semanas, además del papeleo.';
 
   @override
   String get arrivalExecutionSummaryTwelveMonths =>
-      'Con mas tiempo, esta capa ayuda a ver que va a exigir la instalacion, para que la mudanza no se planee solo por documentos y reserva.';
+      'Con más tiempo, esta capa ayuda a ver qué va a exigir la instalación, para que la mudanza no se planee solo por documentos y reserva.';
 
   @override
   String get arrivalExecutionSummarySixMonths =>
-      'Seis meses ya alcanzan para planear la llegada como secuencia operativa, y no solo como decision de destino.';
+      'Seis meses ya alcanzan para planear la llegada como una secuencia operativa, y no solo como una decisión de destino.';
 
   @override
   String get arrivalExecutionSummaryAsap =>
-      'Si la llegada esta cerca, esta capa 7 / 30 / 90 dias importa ahora. Ahi suele aparecer primero la friccion cotidiana.';
+      'Si la llegada está cerca, esta capa de 7 / 30 / 90 días importa ahora. Ahí suele aparecer primero la fricción cotidiana.';
 
   @override
   String get arrivalExecutionConnectivityTitle =>
-      'Resolvé conectividad desde el dia uno';
+      'Resolvé la conectividad desde el día uno';
 
   @override
   String get arrivalExecutionConnectivityBody =>
-      'Empezá con chip local, internet movil y la estructura digital minima para mapas, banco y seguimiento documental.';
+      'Empezá con chip local, internet móvil y la estructura digital mínima para mapas, banco y seguimiento documental.';
 
   @override
   String get arrivalExecutionTransportTitle =>
@@ -3093,11 +3094,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get arrivalExecutionTransportBody =>
-      'Mapeá como te vas a mover en la primera semana para que vivienda, servicios y burocracia no dependan de improvisacion.';
+      'Mapeá cómo te vas a mover en la primera semana para que vivienda, servicios y burocracia no dependan de la improvisación.';
 
   @override
   String arrivalExecutionTransportBodyWithCity(String city) {
-    return 'Mapeá como te vas a mover en $city durante la primera semana para que vivienda, servicios y burocracia no dependan de improvisacion.';
+    return 'Mapeá cómo te vas a mover en $city durante la primera semana para que vivienda, servicios y burocracia no dependan de la improvisación.';
   }
 
   @override
@@ -3106,22 +3107,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get arrivalExecutionHealthBody =>
-      'Sabé cual es tu primera puerta de entrada en salud publica o privada para que un problema simple no se vuelva caos al llegar.';
+      'Sabé cuál es tu primera puerta de entrada en salud pública o privada para que un problema simple no se vuelva caos al llegar.';
 
   @override
   String get arrivalExecutionBankTitle => 'Estabilizá pagos y flujo bancario';
 
   @override
   String get arrivalExecutionBankBody =>
-      'Asegurá que tu primer flujo local de pagos funcione: cuenta, Pix, uso de tarjeta y como va a circular el dinero en el primer mes.';
+      'Asegurá que tu primer flujo local de pagos funcione: cuenta, Pix, uso de tarjeta y cómo va a circular el dinero en el primer mes.';
 
   @override
   String get arrivalExecutionHousingTitle =>
-      'Convertí vivienda en rutina, no solo en entrada';
+      'Convertí la vivienda en rutina, no solo en entrada';
 
   @override
   String get arrivalExecutionHousingBody =>
-      'Despues de llegar, confirmá si la zona elegida realmente sostiene trabajo, transporte, seguridad y el ritmo de vida que necesitás.';
+      'Después de llegar, confirmá si la zona elegida realmente sostiene trabajo, transporte, seguridad y el ritmo de vida que necesitás.';
 
   @override
   String get arrivalExecutionGoalWorkTitle =>
@@ -3129,11 +3130,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get arrivalExecutionGoalWorkBody =>
-      'Usá el primer mes para probar como documentos, idioma y ciudad afectan de verdad tu chance de conseguir trabajo.';
+      'Usá el primer mes para probar cómo documentos, idioma y ciudad afectan de verdad tu chance de conseguir trabajo.';
 
   @override
   String get arrivalExecutionGoalRemoteTitle =>
-      'Convertí la llegada en base remota estable';
+      'Convertí la llegada en una base remota estable';
 
   @override
   String get arrivalExecutionGoalRemoteBody =>
@@ -3145,7 +3146,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get arrivalExecutionGoalStudyBody =>
-      'Usá el primer mes para confirmar si matricula, traslado, clases y costo diario siguen sosteniendo estudio como base del plan.';
+      'Usá el primer mes para confirmar si matrícula, traslado, clases y costo diario siguen sosteniendo el estudio como base del plan.';
 
   @override
   String get arrivalExecutionGoalEntrepreneurTitle =>
@@ -3157,11 +3158,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get arrivalExecutionGoalRetireTitle =>
-      'Convertí la llegada en rutina previsible';
+      'Convertí la llegada en una rutina previsible';
 
   @override
   String get arrivalExecutionGoalRetireBody =>
-      'Usá el primer mes para probar si acceso a salud, rutina de barrio y costos recurrentes se sienten sostenibles en la practica.';
+      'Usá el primer mes para probar si el acceso a la salud, la rutina de barrio y los costos recurrentes se sienten sostenibles en la práctica.';
 
   @override
   String get arrivalExecutionGoalQualityTitle =>
@@ -3173,11 +3174,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get arrivalExecutionRealityCheckTitle =>
-      'Hacé reality check a los 90 dias';
+      'Hacé un reality check a los 90 días';
 
   @override
   String get arrivalExecutionRealityCheckBody =>
-      'Compará costo real, friccion de rutina y encaje de la ciudad con lo que sugeria el plan. Ahi la mudanza deja de ser hipotetica.';
+      'Compará costo real, fricción de la rutina y encaje de la ciudad con lo que sugería el plan. Ahí la mudanza deja de ser hipotética.';
 
   @override
   String get arrivalExecutionDocumentsTitle =>
@@ -3185,7 +3186,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get arrivalExecutionDocumentsBody =>
-      'Hasta los primeros 90 dias, reducí pendientes de residencia, comprobaciones, banco y registros locales que todavia bloquean estabilidad.';
+      'Hasta los primeros 90 días, reducÍ pendientes de residencia, comprobaciones, banco y registros locales que todavía bloquean estabilidad.';
 
   @override
   String get arrivalExecutionReplanTitle =>
@@ -3193,11 +3194,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get arrivalExecutionReplanBody =>
-      'Si ciudad, costo o ritmo no estan encajando con el plan original, ajustá la ruta antes de que la friccion temporal se vuelva tu normal.';
+      'Si ciudad, costo o ritmo no están encajando con el plan original, ajustá la ruta antes de que la fricción temporal se vuelva tu normal.';
 
   @override
   String arrivalExecutionReplanBodyWithCity(String city) {
-    return 'Si $city no esta encajando con el plan original en la practica, ajustá la ruta antes de que la friccion temporal se vuelva tu normal.';
+    return 'Si $city no está encajando con el plan original en la práctica, ajustá la ruta antes de que la fricción temporal se vuelva tu normal.';
   }
 
   @override
@@ -3208,11 +3209,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get publicHomeResumePlanBody =>
-      'Tu ultimo plan de mudanza sigue aqui. Reabrilo para continuar el checklist, la preparacion documental y la reserva de aterrizaje.';
+      'Tu último plan de mudanza sigue acá. Reabrilo para continuar el checklist, la preparación documental y la reserva de aterrizaje.';
 
   @override
   String publicHomeResumePlanBodyWithCity(String city, String state) {
-    return 'Tu ultimo plan sigue aqui, con $city ($state) como ciudad de referencia actual. Reabrilo para continuar el checklist, la preparacion documental y la reserva de aterrizaje.';
+    return 'Tu último plan sigue acá, con $city ($state) como ciudad de referencia actual. Reabrilo para continuar el checklist, la preparación documental y la reserva de aterrizaje.';
   }
 
   @override
@@ -3251,7 +3252,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String migrationPlanDecisionBody(Object timeline) {
-    return 'Segun tu plazo de $timeline, estas opciones aparecen primero porque se acercan mas al perfil que marcaste.';
+    return 'Según tu plazo de $timeline, estas opciones aparecen primero porque se acercan más al perfil que marcaste.';
   }
 
   @override
@@ -3259,15 +3260,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get migrationPlanDecisionSummaryBody =>
-      'Primero elegi la ciudad que mas sentido tenga para vos. El checklist detallado entra solo despues de esa decision.';
+      'Primero elegí la ciudad que más sentido tenga para vos. El checklist detallado entra solo después de esa decisión.';
 
   @override
   String get migrationPlanCandidateCitiesTitle =>
-      'Ciudades mas alineadas con tu perfil';
+      'Ciudades más alineadas con tu perfil';
 
   @override
   String get migrationPlanCandidateCitiesBody =>
-      'La lista ya viene ordenada para dejar primero lo que tiende a hacer mas sentido para argentinos con este objetivo.';
+      'La lista ya viene ordenada para dejar primero lo que tiende a hacer más sentido para argentinos con este objetivo.';
 
   @override
   String get migrationPlanCandidateCitiesSheetBody =>
@@ -3277,7 +3278,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get migrationPlanSelectedCityBadge => 'Elegida';
 
   @override
-  String get migrationPlanSuggestedCityBadge => 'Va adelante ahora';
+  String get migrationPlanSuggestedCityBadge => 'Va adelante por ahora';
 
   @override
   String get migrationPlanChooseCityAction => 'Elegir esta ciudad';
@@ -3316,15 +3317,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String migrationPlanSelectedCityBody(Object city, Object housing) {
-    return '$city aparece fuerte para tu contexto actual, con una lectura de entrada en vivienda en $housing. Si esta ciudad te cierra, ahi si vale abrir la preparacion guiada.';
+    return '$city aparece fuerte para tu contexto actual, con una lectura de entrada en vivienda en $housing. Si esta ciudad te cierra, ahí sí vale abrir la preparación guiada.';
   }
 
   @override
-  String get migrationPlanPreparationTitle => 'Cuando pasar a la preparacion';
+  String get migrationPlanPreparationTitle => 'Cuándo pasar a la preparación';
 
   @override
   String migrationPlanPreparationBody(Object city) {
-    return 'Si decidis avanzar con $city, el copiloto abre checklist, documentos, vivienda y reserva de llegada enfocados en esa ciudad.';
+    return 'Si decidís avanzar con $city, el copiloto abre checklist, documentos, vivienda y reserva de llegada enfocados en esa ciudad.';
   }
 
   @override

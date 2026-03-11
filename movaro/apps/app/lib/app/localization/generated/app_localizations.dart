@@ -139,7 +139,7 @@ abstract class AppLocalizations {
   /// No description provided for @splashInitializingLabel.
   ///
   /// In en, this message translates to:
-  /// **'Initializing experience'**
+  /// **'Initializing your experience'**
   String get splashInitializingLabel;
 
   /// No description provided for @loadingCountriesLabel.
@@ -169,7 +169,7 @@ abstract class AppLocalizations {
   /// No description provided for @journeySetupHeroBody.
   ///
   /// In en, this message translates to:
-  /// **'Movaro uses this choice to shape the right experience for you. Today the beta is open for Argentina -> Brazil, but the structure is already global.'**
+  /// **'Movaro uses this choice to shape the right experience for you. Today, the beta is open for Argentina -> Brazil, but the structure is already built to grow globally.'**
   String get journeySetupHeroBody;
 
   /// No description provided for @journeyOriginTitle.
@@ -193,7 +193,7 @@ abstract class AppLocalizations {
   /// No description provided for @journeyDestinationBody.
   ///
   /// In en, this message translates to:
-  /// **'Choose the country you want to evaluate. Home and planning will reflect that destination.'**
+  /// **'Choose the country you want to evaluate. The home screen and your plan will reflect that destination.'**
   String get journeyDestinationBody;
 
   /// No description provided for @journeySummaryTitle.
@@ -211,13 +211,13 @@ abstract class AppLocalizations {
   /// No description provided for @journeySummaryPlaceholder.
   ///
   /// In en, this message translates to:
-  /// **'Select origin and destination to continue.'**
+  /// **'Select your origin and destination to continue.'**
   String get journeySummaryPlaceholder;
 
   /// No description provided for @journeyAvailabilityNote.
   ///
   /// In en, this message translates to:
-  /// **'Today only the Argentina -> Brazil route is fully available. Other countries are already visible to signal the global direction of the product.'**
+  /// **'Right now, only the Argentina -> Brazil route is fully available. Other countries are already visible to signal the product’s global direction.'**
   String get journeyAvailabilityNote;
 
   /// No description provided for @journeyContinueAction.
@@ -286,7 +286,7 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomePrimaryQuestionBody.
   ///
   /// In en, this message translates to:
-  /// **'First decide whether you need a guided plan, a city comparison, or just a quick overview of what the product does.'**
+  /// **'First, decide whether you need a guided plan, a city comparison, or just a quick overview of what the product does.'**
   String get publicHomePrimaryQuestionBody;
 
   /// No description provided for @publicHomeTrustFastTitle.
@@ -298,13 +298,13 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomeTrustFastBody.
   ///
   /// In en, this message translates to:
-  /// **'You can begin without a long form or a blocked first session.'**
+  /// **'You can get started without a long form or an initial barrier.'**
   String get publicHomeTrustFastBody;
 
   /// No description provided for @publicHomeTrustGuestTitle.
   ///
   /// In en, this message translates to:
-  /// **'No login now'**
+  /// **'No login for now'**
   String get publicHomeTrustGuestTitle;
 
   /// No description provided for @publicHomeTrustGuestBody.
@@ -328,7 +328,7 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomeTrustSelectedBody.
   ///
   /// In en, this message translates to:
-  /// **'Your navigation is now contextualized for {origin} -> {destination}, without pushing irrelevant content before you choose.'**
+  /// **'Your navigation is now contextualized for {origin} -> {destination}, without surfacing irrelevant content before you choose.'**
   String publicHomeTrustSelectedBody(String origin, String destination);
 
   /// No description provided for @publicHomeFirstStepTitle.
@@ -340,7 +340,7 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomeFirstStepBody.
   ///
   /// In en, this message translates to:
-  /// **'The home screen should orient entry. Deeper content comes later inside the path you choose.'**
+  /// **'The home screen is here to guide your entry point. Deeper content comes later, inside the path you choose.'**
   String get publicHomeFirstStepBody;
 
   /// No description provided for @publicHomeSecondaryTitle.
@@ -388,7 +388,7 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomeGuestSectionBody.
   ///
   /// In en, this message translates to:
-  /// **'You can explore all of this without signing in. Sign in appears only when it makes sense to save something personal.'**
+  /// **'You can explore all of this without signing in. Sign-in only appears when it makes sense to save something personal.'**
   String get publicHomeGuestSectionBody;
 
   /// No description provided for @publicHomeBetaSectionBody.
@@ -412,7 +412,7 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomeCitiesBody.
   ///
   /// In en, this message translates to:
-  /// **'See suggestions by cost, work and popularity among Argentinians.'**
+  /// **'See suggestions based on cost, work, and popularity among Argentinians.'**
   String get publicHomeCitiesBody;
 
   /// No description provided for @publicHomeCitiesAction.
@@ -460,7 +460,7 @@ abstract class AppLocalizations {
   /// No description provided for @decisionSupportBody.
   ///
   /// In en, this message translates to:
-  /// **'People moving abroad usually want quick first answers about language, cost, paperwork and work. Movaro should make that obvious.'**
+  /// **'People moving abroad usually want quick first answers about language, cost, paperwork, and work. Movaro should make that obvious.'**
   String get decisionSupportBody;
 
   /// No description provided for @decisionSupportLanguageTitle.
@@ -508,7 +508,7 @@ abstract class AppLocalizations {
   /// No description provided for @decisionSupportWorkBody.
   ///
   /// In en, this message translates to:
-  /// **'The questionnaire and city ranking help narrow the search to places with better early fit.'**
+  /// **'The questionnaire and city ranking help narrow the search to places with a better early fit.'**
   String get decisionSupportWorkBody;
 
   /// No description provided for @commonNeedsTitle.
@@ -532,7 +532,7 @@ abstract class AppLocalizations {
   /// No description provided for @commonNeedCompareCostBody.
   ///
   /// In en, this message translates to:
-  /// **'Go straight to cities and use cost, rent, language, and work signals as your first reading.'**
+  /// **'Go straight to cities and use cost, rent, language, and work signals as your first read.'**
   String get commonNeedCompareCostBody;
 
   /// No description provided for @commonNeedDocumentsTitle.
@@ -556,7 +556,7 @@ abstract class AppLocalizations {
   /// No description provided for @commonNeedDirectionBody.
   ///
   /// In en, this message translates to:
-  /// **'The guided plan reduces uncertainty into one first city and a short order of first steps.'**
+  /// **'The guided plan reduces uncertainty to one first city and a short order of first steps.'**
   String get commonNeedDirectionBody;
 
   /// No description provided for @commonNeedExploreAllTitle.
@@ -658,7 +658,7 @@ abstract class AppLocalizations {
   /// No description provided for @exploreChecklistTitle.
   ///
   /// In en, this message translates to:
-  /// **'Migration checklist'**
+  /// **'Your initial plan'**
   String get exploreChecklistTitle;
 
   /// No description provided for @exploreChecklistDescription.
@@ -712,7 +712,7 @@ abstract class AppLocalizations {
   /// No description provided for @exploreTrailDocsBody.
   ///
   /// In en, this message translates to:
-  /// **'See rent, SUS, CPF, work, driving, and first costs in clearer blocks with less noise.'**
+  /// **'See rent, SUS, CPF, work, driving, and initial costs in clearer sections with less noise.'**
   String get exploreTrailDocsBody;
 
   /// No description provided for @exploreTrailPrepTitle.
@@ -730,7 +730,7 @@ abstract class AppLocalizations {
   /// No description provided for @exploreTrailPrepBodyReady.
   ///
   /// In en, this message translates to:
-  /// **'Since you already confirmed a city, this track focuses on checklist, documents, housing, and arrival.'**
+  /// **'Since you have already confirmed a city, this track focuses on checklist, documents, housing, and arrival.'**
   String get exploreTrailPrepBodyReady;
 
   /// No description provided for @exploreSavePlanAction.
@@ -952,7 +952,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationPathCostsBody.
   ///
   /// In en, this message translates to:
-  /// **'Read approximate costs in reais, pesos, and dollars without confusing reference with final price.'**
+  /// **'Read approximate costs in reais, pesos, and dollars without confusing a reference value with a final price.'**
   String get documentationPathCostsBody;
 
   /// No description provided for @documentationOpenTopicAction.
@@ -964,13 +964,13 @@ abstract class AppLocalizations {
   /// No description provided for @documentationQuickAnswersTitle.
   ///
   /// In en, this message translates to:
-  /// **'Quick answers for the most common doubts'**
+  /// **'Quick answers for the most common questions'**
   String get documentationQuickAnswersTitle;
 
   /// No description provided for @documentationQuickAnswersBody.
   ///
   /// In en, this message translates to:
-  /// **'Before opening every card, start with these short answers. If one already solves your question, you save time.'**
+  /// **'Before opening every card, start with these short answers. If one already answers your question, you save time.'**
   String get documentationQuickAnswersBody;
 
   /// No description provided for @documentationAnswerWorkQuestion.
@@ -1006,7 +1006,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationAnswerRegistrationAnswer.
   ///
   /// In en, this message translates to:
-  /// **'No. The protocol already matters while the CRNM is being produced, so the process does not depend on an instant card.'**
+  /// **'No. The protocol already matters while the CRNM is being issued, so the process does not depend on an instant card.'**
   String get documentationAnswerRegistrationAnswer;
 
   /// No description provided for @documentationAnswerStayQuestion.
@@ -1042,7 +1042,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationAnswerSusCardAnswer.
   ///
   /// In en, this message translates to:
-  /// **'Not necessarily. Registration helps follow-up care, but initial access and especially urgent care should not depend on having everything ready.'**
+  /// **'Not necessarily. Registration helps with follow-up care, but initial access, and especially urgent care, should not depend on having everything ready.'**
   String get documentationAnswerSusCardAnswer;
 
   /// No description provided for @documentationAnswerForeignLicenseQuestion.
@@ -1054,7 +1054,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationAnswerForeignLicenseAnswer.
   ///
   /// In en, this message translates to:
-  /// **'In general, yes for a limited period, with a valid document and subject to the applicable agreement. After that, it is better to confirm with the state Detran.'**
+  /// **'In general, yes, for a limited period, with a valid document and subject to the applicable agreement. After that, it is better to confirm with the state Detran.'**
   String get documentationAnswerForeignLicenseAnswer;
 
   /// No description provided for @documentationAnswerBrazilianLicenseQuestion.
@@ -1072,7 +1072,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationAnswerWorkCardQuestion.
   ///
   /// In en, this message translates to:
-  /// **'Does formal employment still exist and how does it work?'**
+  /// **'Does formal employment still exist, and how does it work?'**
   String get documentationAnswerWorkCardQuestion;
 
   /// No description provided for @documentationAnswerWorkCardAnswer.
@@ -1096,7 +1096,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationAnswerInssQuestion.
   ///
   /// In en, this message translates to:
-  /// **'Is public retirement in Brazil the INSS?'**
+  /// **'Is public retirement in Brazil handled through INSS?'**
   String get documentationAnswerInssQuestion;
 
   /// No description provided for @documentationAnswerInssAnswer.
@@ -1120,7 +1120,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationHealthSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Public health vs private health'**
+  /// **'Public health vs. private health'**
   String get documentationHealthSectionTitle;
 
   /// No description provided for @documentationHealthSectionBody.
@@ -1138,7 +1138,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationWorkSectionBody.
   ///
   /// In en, this message translates to:
-  /// **'It helps to separate your work model from the way you contribute. Formal employment, CNPJ-based work, and INSS contribution are related, but not the same thing.'**
+  /// **'It helps to separate your work model from the way you contribute. Formal employment, CNPJ-based work, and INSS contributions are related, but not the same thing.'**
   String get documentationWorkSectionBody;
 
   /// No description provided for @documentationDrivingSectionTitle.
@@ -1150,7 +1150,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationDrivingSectionBody.
   ///
   /// In en, this message translates to:
-  /// **'The safest flow is to split this into three questions: can I drive now, what must I validate in the state, and when is it worth starting the Brazilian license process.'**
+  /// **'The safest approach is to split this into three questions: Can I drive now? What must I validate in the state? When is it worth starting the Brazilian license process?'**
   String get documentationDrivingSectionBody;
 
   /// No description provided for @documentationDeepDiveTitle.
@@ -1174,13 +1174,13 @@ abstract class AppLocalizations {
   /// No description provided for @documentationCostsBody.
   ///
   /// In en, this message translates to:
-  /// **'When a national value or useful official reference exists, the app shows an approximate conversion to support your first reading.'**
+  /// **'When a national value or a useful official reference exists, the app shows an approximate conversion to support your first reading.'**
   String get documentationCostsBody;
 
   /// No description provided for @documentationCostsUpdatedAt.
   ///
   /// In en, this message translates to:
-  /// **'Approximate exchange updated at {value}'**
+  /// **'Approximate exchange rate updated at {value}'**
   String documentationCostsUpdatedAt(String value);
 
   /// No description provided for @documentationCostsUnavailable.
@@ -1270,7 +1270,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationCostPrivateHealthSupporting.
   ///
   /// In en, this message translates to:
-  /// **'There is no single national price. Age, coverage, network, and waiting periods can change the final cost a lot.'**
+  /// **'There is no single national price. Age, coverage, network, and waiting periods can significantly change the final cost.'**
   String get documentationCostPrivateHealthSupporting;
 
   /// No description provided for @documentationCpfTitle.
@@ -1330,19 +1330,19 @@ abstract class AppLocalizations {
   /// No description provided for @documentationRegistrationBulletThree.
   ///
   /// In en, this message translates to:
-  /// **'The CRNM may take around 30 business days to be produced; the official service allows a longer total window and the protocol preserves rights.'**
+  /// **'The CRNM may take around 30 business days to be issued; the official service allows a longer total window, and the protocol preserves rights.'**
   String get documentationRegistrationBulletThree;
 
   /// No description provided for @documentationStayTitle.
   ///
   /// In en, this message translates to:
-  /// **'How long can I stay'**
+  /// **'How long can I stay?'**
   String get documentationStayTitle;
 
   /// No description provided for @documentationStaySummary.
   ///
   /// In en, this message translates to:
-  /// **'For an Argentinian user, the practical path is usually regular residence instead of relying on visitor stay.'**
+  /// **'For an Argentinian user, the practical path is usually regular residence instead of relying on visitor status.'**
   String get documentationStaySummary;
 
   /// No description provided for @documentationStayBulletOne.
@@ -1390,7 +1390,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationWorkBankBulletThree.
   ///
   /// In en, this message translates to:
-  /// **'A bank may request additional documents; CPF helps, but a regular migration document usually matters in onboarding.'**
+  /// **'A bank may request additional documents; CPF helps, but a regular migration document usually matters during onboarding.'**
   String get documentationWorkBankBulletThree;
 
   /// No description provided for @documentationCitizenshipTitle.
@@ -1432,7 +1432,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationHealthPublicSummary.
   ///
   /// In en, this message translates to:
-  /// **'Public health in Brazil is not a prepaid entry plan. The logic is universal access, with different entry points depending on what you need.'**
+  /// **'Public health in Brazil is not a prepaid access plan. The logic is universal access, with different entry points depending on what you need.'**
   String get documentationHealthPublicSummary;
 
   /// No description provided for @documentationHealthPublicBulletOne.
@@ -1444,7 +1444,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationHealthPublicBulletTwo.
   ///
   /// In en, this message translates to:
-  /// **'A UBS or local health post is usually the first door for routine care, follow-up, vaccines, and basic care.'**
+  /// **'A UBS or local health post is usually the first point of access for routine care, follow-up, vaccines, and basic care.'**
   String get documentationHealthPublicBulletTwo;
 
   /// No description provided for @documentationHealthPublicBulletThree.
@@ -1630,7 +1630,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationDrivingBulletThree.
   ///
   /// In en, this message translates to:
-  /// **'Fees and final cost vary by Detran and driving school, so treat the displayed value only as orientation.'**
+  /// **'Fees and final costs vary by Detran and driving school, so treat the displayed value only as guidance.'**
   String get documentationDrivingBulletThree;
 
   /// No description provided for @documentationForeignLicenseTitle.
@@ -1696,7 +1696,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginDescription.
   ///
   /// In en, this message translates to:
-  /// **'Movaro keeps exploration open. Sign in appears only when you want to save something personal.'**
+  /// **'Movaro keeps exploration open. Sign-in appears only when you want to save something personal.'**
   String get loginDescription;
 
   /// No description provided for @loginGoogleAction.
@@ -1756,7 +1756,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Let\'s understand your moment'**
+  /// **'Let’s understand your situation'**
   String get onboardingHeadline;
 
   /// No description provided for @onboardingDescription.
@@ -1822,7 +1822,7 @@ abstract class AppLocalizations {
   /// No description provided for @authenticatedSearchShortcut.
   ///
   /// In en, this message translates to:
-  /// **'Search city'**
+  /// **'Search for a city'**
   String get authenticatedSearchShortcut;
 
   /// No description provided for @signOutAction.
@@ -2068,7 +2068,7 @@ abstract class AppLocalizations {
   /// No description provided for @readinessItemDocumentsBody.
   ///
   /// In en, this message translates to:
-  /// **'Separate passport, criminal records, apostille needs, and the documents that may still require translation.'**
+  /// **'Separate your passport, criminal records, apostille needs, and any documents that may still require translation.'**
   String get readinessItemDocumentsBody;
 
   /// No description provided for @readinessItemBudgetTitle.
@@ -2080,7 +2080,7 @@ abstract class AppLocalizations {
   /// No description provided for @readinessItemBudgetBody.
   ///
   /// In en, this message translates to:
-  /// **'Estimate what the first 30 to 90 days will demand, not just monthly living cost after you are settled.'**
+  /// **'Estimate what the first 30 to 90 days will demand, not just the monthly living cost after you are settled.'**
   String get readinessItemBudgetBody;
 
   /// No description provided for @readinessItemCityTitle.
@@ -2110,7 +2110,7 @@ abstract class AppLocalizations {
   /// No description provided for @readinessItemLanguageBody.
   ///
   /// In en, this message translates to:
-  /// **'Focus on the Portuguese needed for daily friction points like housing, transport, banking, and services.'**
+  /// **'Focus on the Portuguese needed for everyday friction points like housing, transport, banking, and services.'**
   String get readinessItemLanguageBody;
 
   /// No description provided for @readinessItemLanguageWorkBody.
@@ -2182,7 +2182,7 @@ abstract class AppLocalizations {
   /// No description provided for @readinessGoalRetireBody.
   ///
   /// In en, this message translates to:
-  /// **'Prioritize health access, neighborhood routine, recurring costs, and the paperwork that protects a calm arrival.'**
+  /// **'Prioritize health access, neighborhood routine, recurring costs, and the paperwork that supports a calm arrival.'**
   String get readinessGoalRetireBody;
 
   /// No description provided for @readinessGoalQualityTitle.
@@ -2194,7 +2194,7 @@ abstract class AppLocalizations {
   /// No description provided for @readinessGoalQualityBody.
   ///
   /// In en, this message translates to:
-  /// **'Convert lifestyle into real filters: safety, daily routine, language adaptation, and the cost of staying longer-term.'**
+  /// **'Convert lifestyle into real filters: safety, daily routine, language adaptation, and the cost of staying longer term.'**
   String get readinessGoalQualityBody;
 
   /// No description provided for @readinessItemCpfBankTitle.
@@ -2332,7 +2332,7 @@ abstract class AppLocalizations {
   /// No description provided for @planStepOpenBankPointTwo.
   ///
   /// In en, this message translates to:
-  /// **'CPF helps, but CRNM, protocol, or another regular document can influence approval.'**
+  /// **'CPF helps, but CRNM, a protocol receipt, or another regular document can influence approval.'**
   String get planStepOpenBankPointTwo;
 
   /// No description provided for @planStepOpenBankPointThree.
@@ -2386,7 +2386,7 @@ abstract class AppLocalizations {
   /// No description provided for @planStepOpenGeneralSummary.
   ///
   /// In en, this message translates to:
-  /// **'This step works best as a practical validation inside your move preparation.'**
+  /// **'This step works best as a practical validation within your move preparation.'**
   String get planStepOpenGeneralSummary;
 
   /// No description provided for @planStepOpenGeneralPointOne.
@@ -2482,7 +2482,7 @@ abstract class AppLocalizations {
   /// No description provided for @savePlanSuccessBody.
   ///
   /// In en, this message translates to:
-  /// **'Temporary saved plans in this session: {count}'**
+  /// **'Temporarily saved plans in this session: {count}'**
   String savePlanSuccessBody(int count);
 
   /// No description provided for @goToProfileAction.
@@ -2518,7 +2518,7 @@ abstract class AppLocalizations {
   /// No description provided for @citiesMethodologyNote.
   ///
   /// In en, this message translates to:
-  /// **'Rankings based on public data and Movaro methodology.'**
+  /// **'Rankings based on public data and the Movaro methodology.'**
   String get citiesMethodologyNote;
 
   /// No description provided for @citiesExplorePopularTitle.
@@ -2656,7 +2656,7 @@ abstract class AppLocalizations {
   /// No description provided for @citiesHighlightMetropolisLabel.
   ///
   /// In en, this message translates to:
-  /// **'Good if you want a more urban rhythm'**
+  /// **'Good if you want a more urban pace'**
   String get citiesHighlightMetropolisLabel;
 
   /// No description provided for @citiesHighlightInlandLabel.
@@ -2668,7 +2668,7 @@ abstract class AppLocalizations {
   /// No description provided for @citiesHighlightBorderLabel.
   ///
   /// In en, this message translates to:
-  /// **'Good if you want a border-city read'**
+  /// **'Good if you want a border-city lens'**
   String get citiesHighlightBorderLabel;
 
   /// No description provided for @citiesHighlightCoastalSoftLandingLabel.
@@ -2866,7 +2866,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityLifestyleMetropolisLabel.
   ///
   /// In en, this message translates to:
-  /// **'Metropolitan rhythm'**
+  /// **'Metropolitan pace'**
   String get cityLifestyleMetropolisLabel;
 
   /// No description provided for @cityLifestyleBorderLabel.
@@ -3016,7 +3016,7 @@ abstract class AppLocalizations {
   /// No description provided for @citySourceTerritorialDescription.
   ///
   /// In en, this message translates to:
-  /// **'Official name, state, IBGE code and municipal region.'**
+  /// **'Official name, state, IBGE code, and municipal region.'**
   String get citySourceTerritorialDescription;
 
   /// No description provided for @citySourcePopulationTitle.
@@ -3040,7 +3040,7 @@ abstract class AppLocalizations {
   /// No description provided for @citySourceHumanDevelopmentDescription.
   ///
   /// In en, this message translates to:
-  /// **'Official municipal HDI with 2010 Census reference.'**
+  /// **'Official municipal HDI with a 2010 Census reference.'**
   String get citySourceHumanDevelopmentDescription;
 
   /// No description provided for @citySourceCuratedMetricsTitle.
@@ -3052,7 +3052,7 @@ abstract class AppLocalizations {
   /// No description provided for @citySourceCuratedMetricsDescription.
   ///
   /// In en, this message translates to:
-  /// **'It currently comes from Movaro\'s curated dataset. The priority official replacements are Atlas da Violencia (safety), Novo Caged (jobs), FipeZAP (rent) and IBGE PIB dos Municipios (economic activity).'**
+  /// **'It currently comes from Movaro\'s curated dataset. The priority official replacements are Atlas da Violência (safety), Novo Caged (jobs), FipeZAP (rent), and IBGE PIB dos Municípios (economic activity).'**
   String get citySourceCuratedMetricsDescription;
 
   /// No description provided for @citySourceRankingTitle.
@@ -3064,7 +3064,7 @@ abstract class AppLocalizations {
   /// No description provided for @citySourceRankingDescription.
   ///
   /// In en, this message translates to:
-  /// **'Movaro scores calculated over public data and a curated dataset.'**
+  /// **'Movaro scores calculated from public data and a curated dataset.'**
   String get citySourceRankingDescription;
 
   /// No description provided for @cityDetailSaveAction.
@@ -3118,7 +3118,7 @@ abstract class AppLocalizations {
   /// No description provided for @introHeroDescription.
   ///
   /// In en, this message translates to:
-  /// **'Movaro helps you compare cities, understand practical bureaucracy, and build a first migration direction without starting from information overload.'**
+  /// **'Movaro helps you compare cities, understand practical bureaucracy, and build an initial direction for your move without starting from information overload.'**
   String get introHeroDescription;
 
   /// No description provided for @introExploreTitle.
@@ -3190,7 +3190,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityPracticalAnswersTitle.
   ///
   /// In en, this message translates to:
-  /// **'Quick answers for common doubts'**
+  /// **'Quick answers for common questions'**
   String get cityPracticalAnswersTitle;
 
   /// No description provided for @cityPracticalLanguageQuestion.
@@ -3202,7 +3202,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityPracticalCostQuestion.
   ///
   /// In en, this message translates to:
-  /// **'Does this city look manageable in day-to-day cost?'**
+  /// **'Does this city look manageable in day-to-day costs?'**
   String get cityPracticalCostQuestion;
 
   /// No description provided for @cityPracticalWorkQuestion.
@@ -3496,7 +3496,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityIdhmLowSupporting.
   ///
   /// In en, this message translates to:
-  /// **'It needs more caution before assuming strong overall structure.'**
+  /// **'It needs more caution before assuming a strong overall structure.'**
   String get cityIdhmLowSupporting;
 
   /// No description provided for @cityIdhmVeryLow.
@@ -3532,7 +3532,7 @@ abstract class AppLocalizations {
   /// No description provided for @citySnapshotRentModerateSupporting.
   ///
   /// In en, this message translates to:
-  /// **'It asks for balance between neighborhood, contract, and routine.'**
+  /// **'It calls for balance between neighborhood, contract, and routine.'**
   String get citySnapshotRentModerateSupporting;
 
   /// No description provided for @citySnapshotRentHigher.
@@ -3580,7 +3580,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityHousingViabilityBalancedSupporting.
   ///
   /// In en, this message translates to:
-  /// **'It can work well if you arrive with reserve and validate neighborhood, guarantee, and total setup cost before signing.'**
+  /// **'It can work well if you arrive with savings and validate the neighborhood, guarantee, and total setup cost before signing.'**
   String get cityHousingViabilityBalancedSupporting;
 
   /// No description provided for @cityHousingViabilityBalancedBadge.
@@ -3598,7 +3598,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityHousingViabilityHardSupporting.
   ///
   /// In en, this message translates to:
-  /// **'Here, rent and entry cost tend to weigh more. Treat housing as a serious filter before choosing the city.'**
+  /// **'Here, rent and entry costs tend to weigh more. Treat housing as a serious filter before choosing the city.'**
   String get cityHousingViabilityHardSupporting;
 
   /// No description provided for @cityHousingViabilityHardBadge.
@@ -3628,13 +3628,13 @@ abstract class AppLocalizations {
   /// No description provided for @citySnapshotPopularityMediumSupporting.
   ///
   /// In en, this message translates to:
-  /// **'It has a reasonable familiarity within the current catalog.'**
+  /// **'It has a reasonable level of familiarity within the current catalog.'**
   String get citySnapshotPopularityMediumSupporting;
 
   /// No description provided for @citySnapshotPopularityLow.
   ///
   /// In en, this message translates to:
-  /// **'Less recurring'**
+  /// **'Less frequent'**
   String get citySnapshotPopularityLow;
 
   /// No description provided for @citySnapshotPopularityLowSupporting.
@@ -3754,7 +3754,7 @@ abstract class AppLocalizations {
   /// No description provided for @questionOptionUnknown.
   ///
   /// In en, this message translates to:
-  /// **'I still don\'t know'**
+  /// **'I still do not know'**
   String get questionOptionUnknown;
 
   /// No description provided for @questionOptionWork.
@@ -3874,7 +3874,7 @@ abstract class AppLocalizations {
   /// No description provided for @recommendationReasonBalanced.
   ///
   /// In en, this message translates to:
-  /// **'Balanced option within the initial Movaro catalog'**
+  /// **'A balanced option within the initial Movaro catalog'**
   String get recommendationReasonBalanced;
 
   /// No description provided for @planReasonGoalWork.
@@ -3910,13 +3910,13 @@ abstract class AppLocalizations {
   /// No description provided for @planReasonGoalQualityOfLife.
   ///
   /// In en, this message translates to:
-  /// **'It fits better if you are prioritizing quality of life and a gradual adaptation.'**
+  /// **'It fits better if you are prioritizing quality of life and gradual adaptation.'**
   String get planReasonGoalQualityOfLife;
 
   /// No description provided for @planReasonGoalBeachLife.
   ///
   /// In en, this message translates to:
-  /// **'It makes more sense if you want to prioritize coast, beach, and a routine more connected to the sea.'**
+  /// **'It makes more sense if you want to prioritize the coast, the beach, and a routine more connected to the sea.'**
   String get planReasonGoalBeachLife;
 
   /// No description provided for @planReasonLanguageNeedsSupport.
@@ -3934,7 +3934,7 @@ abstract class AppLocalizations {
   /// No description provided for @planReasonTimelineAsap.
   ///
   /// In en, this message translates to:
-  /// **'It may help with a faster move by combining easier early adaptation and practical daily life.'**
+  /// **'It may help with a faster move by combining easier early adaptation and more practical daily life.'**
   String get planReasonTimelineAsap;
 
   /// No description provided for @planReasonTimeline6Months.
@@ -3982,7 +3982,7 @@ abstract class AppLocalizations {
   /// No description provided for @planStepDescriptionBankAccount.
   ///
   /// In en, this message translates to:
-  /// **'Set up a local account for your first financial moves.'**
+  /// **'Set up a local account for your first financial steps.'**
   String get planStepDescriptionBankAccount;
 
   /// No description provided for @planStepTitleHousing.
@@ -3994,7 +3994,7 @@ abstract class AppLocalizations {
   /// No description provided for @planStepDescriptionHousing.
   ///
   /// In en, this message translates to:
-  /// **'Research neighborhoods, contracts and costs for a safer move.'**
+  /// **'Research neighborhoods, contracts, and costs for a safer move.'**
   String get planStepDescriptionHousing;
 
   /// No description provided for @planStepTitleSettleDocuments.
@@ -4006,7 +4006,7 @@ abstract class AppLocalizations {
   /// No description provided for @planStepDescriptionSettleDocuments.
   ///
   /// In en, this message translates to:
-  /// **'Review additional registrations, proof documents and local administrative steps.'**
+  /// **'Review additional registrations, proof documents, and local administrative steps.'**
   String get planStepDescriptionSettleDocuments;
 
   /// No description provided for @planStepTitleMapDestinations.
@@ -4030,7 +4030,7 @@ abstract class AppLocalizations {
   /// No description provided for @planStepDescriptionDecisionCriteria.
   ///
   /// In en, this message translates to:
-  /// **'Organize priorities such as cost, paperwork and quality of life.'**
+  /// **'Organize priorities such as cost, paperwork, and quality of life.'**
   String get planStepDescriptionDecisionCriteria;
 
   /// No description provided for @planBeachDecisionTitle.
@@ -4042,7 +4042,7 @@ abstract class AppLocalizations {
   /// No description provided for @planBeachDecisionIntro.
   ///
   /// In en, this message translates to:
-  /// **'If beach and coast are part of your criteria, do not look only at beauty or tourism. The real filter is housing entry, city rhythm, and soft landing.'**
+  /// **'If beach and coast are part of your criteria, do not look only at beauty or tourism. The real filter is housing entry, city pace, and soft landing.'**
   String get planBeachDecisionIntro;
 
   /// No description provided for @planBeachDecisionCoastalHeadline.
@@ -4054,7 +4054,7 @@ abstract class AppLocalizations {
   /// No description provided for @planBeachDecisionCoastalBody.
   ///
   /// In en, this message translates to:
-  /// **'{cityName} already fits the coastal city cut. The next filter is understanding whether housing entry and local routine match your current moment.'**
+  /// **'{cityName} already fits the coastal-city filter. The next step is understanding whether housing entry and local routine match your current situation.'**
   String planBeachDecisionCoastalBody(Object cityName);
 
   /// No description provided for @planBeachDecisionNotCoastalHeadline.
@@ -4066,7 +4066,7 @@ abstract class AppLocalizations {
   /// No description provided for @planBeachDecisionNotCoastalBody.
   ///
   /// In en, this message translates to:
-  /// **'Even with this goal, it is worth comparing beach cities before closing the decision. Not every strong plan city delivers the coastal routine you may be looking for.'**
+  /// **'Even with this goal, it is worth comparing beach cities before making a decision. Not every city that looks strong in the plan delivers the coastal routine you may be looking for.'**
   String get planBeachDecisionNotCoastalBody;
 
   /// No description provided for @planBeachDecisionPriorityNote.
@@ -4456,13 +4456,13 @@ abstract class AppLocalizations {
   /// No description provided for @documentReadinessSummarySixMonths.
   ///
   /// In en, this message translates to:
-  /// **'Six months is enough to organize the hard documents now and leave the arrival layer lighter.'**
+  /// **'Six months is enough to organize the hard documents now and make the arrival layer lighter.'**
   String get documentReadinessSummarySixMonths;
 
   /// No description provided for @documentReadinessSummaryAsap.
   ///
   /// In en, this message translates to:
-  /// **'Since the move is close, focus on the documents that can block residency, banking, and housing before anything else.'**
+  /// **'Since the move is close, focus first on the documents that can block residency, banking, and housing.'**
   String get documentReadinessSummaryAsap;
 
   /// No description provided for @documentReadinessRouteTitle.
@@ -4474,7 +4474,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentReadinessRouteBodyBrazil.
   ///
   /// In en, this message translates to:
-  /// **'Confirm whether your move will rely on the Mercosur residence path and what that route demands before you book around assumptions.'**
+  /// **'Confirm whether your move will rely on the Mercosur residence path and what that route demands before you plan around assumptions.'**
   String get documentReadinessRouteBodyBrazil;
 
   /// No description provided for @documentReadinessRouteBodyGeneric.
@@ -4492,7 +4492,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentReadinessIdentityPackBody.
   ///
   /// In en, this message translates to:
-  /// **'Keep passport, birth records, criminal records, and personal identifiers in one reviewed bundle before opening other fronts.'**
+  /// **'Keep your passport, birth records, criminal records, and personal identifiers in one reviewed bundle before opening other fronts.'**
   String get documentReadinessIdentityPackBody;
 
   /// No description provided for @documentReadinessApostilleTitle.
@@ -4504,7 +4504,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentReadinessApostilleBodyBrazil.
   ///
   /// In en, this message translates to:
-  /// **'For Brazil, check which Argentine documents need apostille, how recent they must be, and what can expire before arrival.'**
+  /// **'For Brazil, check which Argentine documents need an apostille, how recent they must be, and what may expire before arrival.'**
   String get documentReadinessApostilleBodyBrazil;
 
   /// No description provided for @documentReadinessRuleCheckTitle.
@@ -4516,7 +4516,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentReadinessRuleCheckBody.
   ///
   /// In en, this message translates to:
-  /// **'Map which documents must be original, apostilled, translated, or issued again so the move does not depend on assumptions.'**
+  /// **'Map which documents must be original, apostilled, translated, or reissued so the move does not depend on assumptions.'**
   String get documentReadinessRuleCheckBody;
 
   /// No description provided for @documentReadinessTranslationTitle.
@@ -4546,7 +4546,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentReadinessHousingProofBodyBrazil.
   ///
   /// In en, this message translates to:
-  /// **'Group proof of income, reserve, identification, and any supporting papers that landlords, banks, or guarantee products may ask for in Brazil.'**
+  /// **'Group proof of income, savings, identification, and any supporting papers that landlords, banks, or guarantee products may ask for in Brazil.'**
   String get documentReadinessHousingProofBodyBrazil;
 
   /// No description provided for @documentReadinessProofPackTitle.
@@ -4570,7 +4570,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentReadinessCpfBodyBrazil.
   ///
   /// In en, this message translates to:
-  /// **'CPF, residency follow-up, and your first local proof often unlock the practical side of arrival. Keep that bundle ready to execute fast.'**
+  /// **'CPF, residency follow-up, and your first local proof often unlock the practical side of arrival. Keep that bundle ready to execute quickly.'**
   String get documentReadinessCpfBodyBrazil;
 
   /// No description provided for @documentReadinessCopiesTitle.
@@ -4612,7 +4612,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentReadinessGoalWorkBodyBrazil.
   ///
   /// In en, this message translates to:
-  /// **'Review what can block early work in Brazil: identity consistency, residence follow-up, and any profession-specific proof you may need to show fast.'**
+  /// **'Review what can block early work in Brazil: identity consistency, residence follow-up, and any profession-specific proof you may need to show quickly.'**
   String get documentReadinessGoalWorkBodyBrazil;
 
   /// No description provided for @documentReadinessGoalWorkBodyGeneric.
@@ -4648,13 +4648,13 @@ abstract class AppLocalizations {
   /// No description provided for @documentReadinessGoalStudyBodyBrazil.
   ///
   /// In en, this message translates to:
-  /// **'Keep admissions, school records, identity documents, and timing-sensitive paperwork aligned before relying on study as the entry path.'**
+  /// **'Keep admissions, school records, identity documents, and time-sensitive paperwork aligned before relying on study as the entry path.'**
   String get documentReadinessGoalStudyBodyBrazil;
 
   /// No description provided for @documentReadinessGoalStudyBodyGeneric.
   ///
   /// In en, this message translates to:
-  /// **'Keep admissions, school records, identity documents, and timing-sensitive paperwork aligned before relying on study as the base.'**
+  /// **'Keep admissions, school records, identity documents, and time-sensitive paperwork aligned before relying on study as the base.'**
   String get documentReadinessGoalStudyBodyGeneric;
 
   /// No description provided for @documentReadinessGoalEntrepreneurTitle.
@@ -4678,7 +4678,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentReadinessGoalRetireTitle.
   ///
   /// In en, this message translates to:
-  /// **'Protect calm arrival with reviewed paperwork'**
+  /// **'Protect a calm arrival with reviewed paperwork'**
   String get documentReadinessGoalRetireTitle;
 
   /// No description provided for @documentReadinessGoalRetireBodyBrazil.
@@ -4768,13 +4768,13 @@ abstract class AppLocalizations {
   /// No description provided for @housingDecisionSectionBody.
   ///
   /// In en, this message translates to:
-  /// **'Before choosing the city, understand how rent and guarantees work in Brazil. The biggest risk is not only monthly price: it is landing without a viable path for contract, neighborhood, and initial setup.'**
+  /// **'Before choosing the city, understand how rent and guarantees work in Brazil. The biggest risk is not only the monthly price: it is landing without a viable path for the contract, neighborhood, and initial setup.'**
   String get housingDecisionSectionBody;
 
   /// No description provided for @housingDecisionSectionBodyWithCity.
   ///
   /// In en, this message translates to:
-  /// **'Before assuming {city} is the best option, validate whether rent, guarantees, and initial setup look viable for your moment. The risk is not only price, but the real path to secure housing.'**
+  /// **'Before assuming {city} is the best option, validate whether rent, guarantees, and initial setup look viable for your current situation. The risk is not only the price, but the real path to secure housing.'**
   String housingDecisionSectionBodyWithCity(Object city);
 
   /// No description provided for @housingDecisionGuaranteesTitle.
@@ -4786,7 +4786,7 @@ abstract class AppLocalizations {
   /// No description provided for @housingDecisionGuaranteesBody.
   ///
   /// In en, this message translates to:
-  /// **'A local guarantor still matters in many contracts. If that is not realistic for you, compare deposit, guarantee insurance, capitalization products, and income proof demands before counting on a neighborhood.'**
+  /// **'A local guarantor still matters in many contracts. If that is not realistic for you, compare deposit, guarantee insurance, capitalization products, and income-proof requirements before counting on a neighborhood.'**
   String get housingDecisionGuaranteesBody;
 
   /// No description provided for @housingDecisionSoftLandingTitle.
@@ -4798,7 +4798,7 @@ abstract class AppLocalizations {
   /// No description provided for @housingDecisionSoftLandingBody.
   ///
   /// In en, this message translates to:
-  /// **'Temporary, furnished, coliving, or short contracts for 30 to 90 days are usually safer than taking a long lease before you understand local routine.'**
+  /// **'Temporary, furnished, coliving, or short contracts for 30 to 90 days are usually safer than taking a long lease before you understand the local routine.'**
   String get housingDecisionSoftLandingBody;
 
   /// No description provided for @housingDecisionProofPackTitle.
@@ -4840,7 +4840,7 @@ abstract class AppLocalizations {
   /// No description provided for @housingDecisionSectionNote.
   ///
   /// In en, this message translates to:
-  /// **'Movaro currently organizes the context to help you decide better. Contract terms, accepted guarantees, and each landlord or platform policy still need to be validated at the source before signing housing.'**
+  /// **'Movaro currently organizes the context to help you decide better. Contract terms, accepted guarantees, and each landlord’s or platform’s policy still need to be validated at the source before signing for housing.'**
   String get housingDecisionSectionNote;
 
   /// No description provided for @housingEntrySectionTitle.
@@ -4858,13 +4858,13 @@ abstract class AppLocalizations {
   /// No description provided for @housingEntrySectionBody.
   ///
   /// In en, this message translates to:
-  /// **'A rent that looks affordable in the listing can demand much more upfront. Use this view to simulate deposit, guarantee insurance, or a temporary landing before deciding on the city.'**
+  /// **'Rent that looks affordable in the listing can demand much more upfront. Use this view to simulate a deposit, guarantee insurance, or a temporary landing before deciding on the city.'**
   String get housingEntrySectionBody;
 
   /// No description provided for @housingEntrySectionBodyWithCity.
   ///
   /// In en, this message translates to:
-  /// **'In {city}, do not look only at monthly rent. Use this view to estimate what upfront entry may require with deposit, guarantee insurance, or a temporary landing.'**
+  /// **'In {city}, do not look only at monthly rent. Use this view to estimate what upfront entry may require with a deposit, guarantee insurance, or a temporary landing.'**
   String housingEntrySectionBodyWithCity(Object city);
 
   /// No description provided for @housingEntryRentLabel.
@@ -4894,19 +4894,19 @@ abstract class AppLocalizations {
   /// No description provided for @housingEntryModeDepositBody.
   ///
   /// In en, this message translates to:
-  /// **'Typical reading when the lease asks for roughly 3 months of deposit plus the first month.'**
+  /// **'Typical scenario when the lease requires roughly 3 months of deposit plus the first month.'**
   String get housingEntryModeDepositBody;
 
   /// No description provided for @housingEntryModeInsuranceBody.
   ///
   /// In en, this message translates to:
-  /// **'Typical reading when a guarantor is replaced by an annual insurance or digital guarantee fee.'**
+  /// **'Typical scenario when a guarantor is replaced by an annual insurance or digital guarantee fee.'**
   String get housingEntryModeInsuranceBody;
 
   /// No description provided for @housingEntryModeTemporaryBody.
   ///
   /// In en, this message translates to:
-  /// **'A lighter reading for the first 30 to 90 days, prioritizing flexibility before taking a long lease.'**
+  /// **'A lighter scenario for the first 30 to 90 days, prioritizing flexibility before taking a long lease.'**
   String get housingEntryModeTemporaryBody;
 
   /// No description provided for @housingEntryTotalTitle.
@@ -4996,7 +4996,7 @@ abstract class AppLocalizations {
   /// No description provided for @housingSoftLandingTemporaryTitle.
   ///
   /// In en, this message translates to:
-  /// **'Land through short stay or serviced flat'**
+  /// **'Land through short stay or a serviced flat'**
   String get housingSoftLandingTemporaryTitle;
 
   /// No description provided for @housingSoftLandingTemporaryBody.
@@ -5026,7 +5026,7 @@ abstract class AppLocalizations {
   /// No description provided for @housingSoftLandingGuaranteeBody.
   ///
   /// In en, this message translates to:
-  /// **'Without a guarantor, the strongest argument is usually deposit, guarantee insurance, capitalization title, or a few months paid upfront. The point is not to overpromise, but to arrive with a credible structure.'**
+  /// **'Without a guarantor, the strongest argument is usually a deposit, guarantee insurance, a capitalization title, or a few months paid upfront. The point is not to overpromise, but to arrive with a credible structure.'**
   String get housingSoftLandingGuaranteeBody;
 
   /// No description provided for @housingSoftLandingSurvivalTitle.
@@ -5074,13 +5074,13 @@ abstract class AppLocalizations {
   /// No description provided for @landingBudgetSummaryResearching.
   ///
   /// In en, this message translates to:
-  /// **'Use this as a directional reserve reference so your move is not being designed only around monthly cost after everything is already stable.'**
+  /// **'Use this as a directional reserve reference so your move is not designed only around monthly cost after everything is already stable.'**
   String get landingBudgetSummaryResearching;
 
   /// No description provided for @landingBudgetSummaryTwelveMonths.
   ///
   /// In en, this message translates to:
-  /// **'With more time, the goal is to shape a realistic reserve and remove the shock of setup costs before the move gets close.'**
+  /// **'With more time, the goal is to build a realistic reserve and reduce the shock of setup costs before the move gets close.'**
   String get landingBudgetSummaryTwelveMonths;
 
   /// No description provided for @landingBudgetSummarySixMonths.
@@ -5092,7 +5092,7 @@ abstract class AppLocalizations {
   /// No description provided for @landingBudgetSummaryAsap.
   ///
   /// In en, this message translates to:
-  /// **'Since the move is close, the reserve matters as much as the city choice. Use this estimate to avoid arriving with a short runway.'**
+  /// **'Since the move is close, your reserve matters as much as the city choice. Use this estimate to avoid arriving with too little runway.'**
   String get landingBudgetSummaryAsap;
 
   /// No description provided for @landingBudgetLeanTitle.
@@ -5164,7 +5164,7 @@ abstract class AppLocalizations {
   /// No description provided for @landingBudgetDisclaimer.
   ///
   /// In en, this message translates to:
-  /// **'These estimates are directional, not official prices. They combine city signals, setup pressure, and timeline risk to help you plan reserve before the move.'**
+  /// **'These estimates are directional, not official prices. They combine city signals, setup pressure, and timeline risk to help you plan your reserve before the move.'**
   String get landingBudgetDisclaimer;
 
   /// No description provided for @arrivalExecutionSectionTitle.
@@ -5194,13 +5194,13 @@ abstract class AppLocalizations {
   /// No description provided for @arrivalExecutionSummaryResearching.
   ///
   /// In en, this message translates to:
-  /// **'This is the execution layer after arrival. Use it now to understand what the first weeks will need from you beyond paperwork.'**
+  /// **'This is the execution layer after arrival. Use it now to understand what the first weeks will require beyond paperwork.'**
   String get arrivalExecutionSummaryResearching;
 
   /// No description provided for @arrivalExecutionSummaryTwelveMonths.
   ///
   /// In en, this message translates to:
-  /// **'With more time, this layer helps you picture what settling in will demand so the move is not planned only on paperwork and budget.'**
+  /// **'With more time, this layer helps you picture what settling in will demand so the move is not planned only around paperwork and budget.'**
   String get arrivalExecutionSummaryTwelveMonths;
 
   /// No description provided for @arrivalExecutionSummarySixMonths.
@@ -5230,7 +5230,7 @@ abstract class AppLocalizations {
   /// No description provided for @arrivalExecutionTransportTitle.
   ///
   /// In en, this message translates to:
-  /// **'Learn the first transport routine'**
+  /// **'Learn your first transport routine'**
   String get arrivalExecutionTransportTitle;
 
   /// No description provided for @arrivalExecutionTransportBody.
@@ -5302,7 +5302,7 @@ abstract class AppLocalizations {
   /// No description provided for @arrivalExecutionGoalRemoteBody.
   ///
   /// In en, this message translates to:
-  /// **'Validate internet reliability, quiet routine, banking flow, and the real cost of maintaining remote work from the new city.'**
+  /// **'Validate internet reliability, a quiet routine, banking flow, and the real cost of maintaining remote work from the new city.'**
   String get arrivalExecutionGoalRemoteBody;
 
   /// No description provided for @arrivalExecutionGoalStudyTitle.
@@ -5314,7 +5314,7 @@ abstract class AppLocalizations {
   /// No description provided for @arrivalExecutionGoalStudyBody.
   ///
   /// In en, this message translates to:
-  /// **'Use the first month to confirm whether enrollment, commute, classes, and daily cost still support study as the base plan.'**
+  /// **'Use the first month to confirm whether enrollment, commute, classes, and daily costs still support study as the base plan.'**
   String get arrivalExecutionGoalStudyBody;
 
   /// No description provided for @arrivalExecutionGoalEntrepreneurTitle.
@@ -5332,7 +5332,7 @@ abstract class AppLocalizations {
   /// No description provided for @arrivalExecutionGoalRetireTitle.
   ///
   /// In en, this message translates to:
-  /// **'Turn arrival into predictable routine'**
+  /// **'Turn arrival into a predictable routine'**
   String get arrivalExecutionGoalRetireTitle;
 
   /// No description provided for @arrivalExecutionGoalRetireBody.
@@ -5350,7 +5350,7 @@ abstract class AppLocalizations {
   /// No description provided for @arrivalExecutionGoalQualityBody.
   ///
   /// In en, this message translates to:
-  /// **'Use the first month to verify whether the city feels good in daily life, not only on paper or in rankings.'**
+  /// **'Use the first month to verify whether the city feels right in daily life, not only on paper or in rankings.'**
   String get arrivalExecutionGoalQualityBody;
 
   /// No description provided for @arrivalExecutionRealityCheckTitle.
@@ -5362,7 +5362,7 @@ abstract class AppLocalizations {
   /// No description provided for @arrivalExecutionRealityCheckBody.
   ///
   /// In en, this message translates to:
-  /// **'Compare your real cost, routine friction, and city fit against what the plan suggested. This is where the move stops being hypothetical.'**
+  /// **'Compare your real costs, routine friction, and city fit against what the plan suggested. This is where the move stops being hypothetical.'**
   String get arrivalExecutionRealityCheckBody;
 
   /// No description provided for @arrivalExecutionDocumentsTitle.
@@ -5386,7 +5386,7 @@ abstract class AppLocalizations {
   /// No description provided for @arrivalExecutionReplanBody.
   ///
   /// In en, this message translates to:
-  /// **'If the city, cost, or rhythm is not matching the original plan, adjust direction before temporary friction becomes your default.'**
+  /// **'If the city, cost, or pace is not matching the original plan, adjust direction before temporary friction becomes your default.'**
   String get arrivalExecutionReplanBody;
 
   /// No description provided for @arrivalExecutionReplanBodyWithCity.
@@ -5416,7 +5416,7 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomeResumePlanBodyWithCity.
   ///
   /// In en, this message translates to:
-  /// **'Your last plan is still here, with {city} ({state}) as the current city lead. Reopen it to continue the checklist, document readiness, and landing budget.'**
+  /// **'Your last plan is still here, with {city} ({state}) as the current lead city. Reopen it to continue the checklist, document readiness, and landing budget.'**
   String publicHomeResumePlanBodyWithCity(String city, String state);
 
   /// No description provided for @publicHomeRetakePlanAction.
@@ -5446,19 +5446,19 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanCopilotIntroBody.
   ///
   /// In en, this message translates to:
-  /// **'This stage organizes checklist, documents, housing, and landing reserve. Use it when you are ready to start preparing the move.'**
+  /// **'This stage organizes your checklist, documents, housing, and landing reserve. Use it when you are ready to start preparing the move.'**
   String get migrationPlanCopilotIntroBody;
 
   /// No description provided for @migrationPlanCopilotIntroBodyWithCity.
   ///
   /// In en, this message translates to:
-  /// **'This stage organizes checklist, documents, housing, and landing reserve with {city} ({state}) as the main reference of your plan.'**
+  /// **'This stage organizes your checklist, documents, housing, and landing reserve with {city} ({state}) as the main reference in your plan.'**
   String migrationPlanCopilotIntroBodyWithCity(String city, String state);
 
   /// No description provided for @migrationPlanCopilotResultBody.
   ///
   /// In en, this message translates to:
-  /// **'First check whether the recommended city really fits your context. When you want to turn that decision into concrete preparation, open the guided layer with checklist, documents, and arrival reserve.'**
+  /// **'First, check whether the recommended city really fits your context. When you want to turn that decision into concrete preparation, open the guided layer with a checklist, documents, and an arrival reserve.'**
   String get migrationPlanCopilotResultBody;
 
   /// No description provided for @migrationPlanDecisionLabel.
@@ -5590,7 +5590,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanPreparationBody.
   ///
   /// In en, this message translates to:
-  /// **'If you decide to move forward with {city}, the copilot opens checklist, documents, housing, and arrival reserve focused on that city.'**
+  /// **'If you decide to move forward with {city}, the copilot opens a checklist, documents, housing, and an arrival reserve focused on that city.'**
   String migrationPlanPreparationBody(Object city);
 
   /// No description provided for @languageSelectorSystem.
