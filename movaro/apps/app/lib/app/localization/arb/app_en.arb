@@ -684,7 +684,7 @@
   "introBetaDescription": "This version focuses on clarity. You can explore cities, compare signals, and generate an initial plan before deeper account features arrive.",
   "introBottomSupportLabel": "Next step",
   "introPrimaryAction": "Start exploring",
-  "introSkipAction": "Skip introduction",
+  "introSkipAction": "Skip",
   "cityPracticalAnswersTitle": "Quick answers for common questions",
   "cityPracticalLanguageQuestion": "Would daily life feel easier if I still depend on Spanish?",
   "cityPracticalCostQuestion": "Does this city look manageable in day-to-day costs?",

@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/movaro_logo.dart';
 
-class IntroPage extends StatelessWidget {
+class IntroPage extends StatefulWidget {
   const IntroPage({
     required this.journeyContextController,
     this.isFirstLaunch = false,
@@ -20,253 +17,139 @@ class IntroPage extends StatelessWidget {
   final JourneyContextController journeyContextController;
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final isCompact = MediaQuery.sizeOf(context).width < 720;
+  State<IntroPage> createState() => _IntroPageState();
+}
 
-    return Scaffold(
-      bottomNavigationBar: SafeArea(
-        top: false,
-        minimum: EdgeInsets.fromLTRB(
-          context.pageHorizontalPadding,
-          0,
-          context.pageHorizontalPadding,
-          context.pageVerticalPadding,
-        ),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 960),
-          child: _IntroBottomBar(
-            isFirstLaunch: isFirstLaunch,
-            supportLabel: l10n.introBottomSupportLabel,
-            primaryLabel: l10n.introPrimaryAction,
-            skipLabel: l10n.introSkipAction,
-            onPrimaryPressed: () => _finish(context),
-            onSkipPressed: isFirstLaunch ? () => _finish(context) : null,
-          ),
-        ),
-      ),
-      body: Stack(
-        children: [
-          const AmbientBackground(),
-          SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 960),
-                child: ListView(
-                  padding: EdgeInsets.fromLTRB(
-                    context.pageHorizontalPadding,
-                    context.pageVerticalPadding,
-                    context.pageHorizontalPadding,
-                    context.pageVerticalPadding + 132,
-                  ),
-                  children: [
-                    AppGlassHeader(
-                      title: l10n.introPageTitle,
-                      onBack: isFirstLaunch && !Navigator.canPop(context)
-                          ? null
-                          : () => Navigator.maybePop(context),
-                    ),
-                    const SizedBox(height: 20),
-                    FrostedPanel(
-                      padding: EdgeInsets.all(isCompact ? 24 : 32),
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppColors.heroStart,
-                          AppColors.heroMiddle,
-                          AppColors.heroEnd,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      backgroundColor: const Color(0xB30B1320),
-                      borderColor: const Color(0x1AFFFFFF),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const MovaroLogo(
-                            markSize: 18,
-                            textColor: Colors.white,
-                            markColor: Colors.white,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            l10n.introHeroTitle,
-                            style: (isCompact
-                                    ? Theme.of(context).textTheme.headlineLarge
-                                    : Theme.of(context).textTheme.displaySmall)
-                                ?.copyWith(
-                                  color: Colors.white,
-                                  height: 0.98,
-                                  letterSpacing: -0.9,
-                                ),
-                          ),
-                          const SizedBox(height: 12),
-                          ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: isCompact ? 560 : 680,
-                            ),
-                            child: Text(
-                              l10n.introHeroDescription,
-                              style: Theme.of(context).textTheme.bodyLarge
-                                  ?.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.82),
-                                    height: 1.45,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    LayoutBuilder(
-                      builder: (context, constraints) {
-                        final wide = constraints.maxWidth >= 900;
-                        final cardWidth = wide
-                            ? (constraints.maxWidth - 24) / 3
-                            : constraints.maxWidth;
+class _IntroPageState extends State<IntroPage> {
+  late final PageController _pageController = PageController();
+  int _currentPage = 0;
 
-                        return Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
-                          children: [
-                            SizedBox(
-                              width: cardWidth,
-                              child: _IntroCard(
-                                step: '01',
-                                icon: Icons.location_city_outlined,
-                                title: l10n.introExploreTitle,
-                                description: l10n.introExploreDescription,
-                              ),
-                            ),
-                            SizedBox(
-                              width: cardWidth,
-                              child: _IntroCard(
-                                step: '02',
-                                icon: Icons.route_outlined,
-                                title: l10n.introPlanTitle,
-                                description: l10n.introPlanDescription,
-                              ),
-                            ),
-                            SizedBox(
-                              width: cardWidth,
-                              child: _IntroCard(
-                                step: '03',
-                                icon: Icons.description_outlined,
-                                title: l10n.introDocumentationTitle,
-                                description: l10n.introDocumentationDescription,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    FrostedPanel(
-                      padding: const EdgeInsets.all(22),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.introBetaTitle,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l10n.introBetaDescription,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(
-                                  color: AppColors.textSoftFor(context),
-                                  height: 1.45,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   Future<void> _finish(BuildContext context) async {
-    await journeyContextController.markIntroSeen();
+    await widget.journeyContextController.markIntroSeen();
 
     if (!context.mounted) {
       return;
     }
 
-    if (isFirstLaunch) {
+    if (widget.isFirstLaunch) {
       Navigator.pushReplacementNamed(context, AppRoutes.journeySetup);
       return;
     }
 
     Navigator.maybePop(context);
   }
-}
 
-class _IntroCard extends StatelessWidget {
-  const _IntroCard({
-    required this.step,
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
+  void _goNext(BuildContext context) {
+    if (_currentPage == 2) {
+      _finish(context);
+      return;
+    }
 
-  final String step;
-  final IconData icon;
-  final String title;
-  final String description;
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return FrostedPanel(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final l10n = context.l10n;
+    final size = MediaQuery.sizeOf(context);
+    final isCompact = size.width < 720;
+
+    final slides = [
+      _IntroSlideData(
+        webAssetPath: 'assets/illustrations/intro_explore_web.svg',
+        mobileAssetPath: 'assets/illustrations/intro_explore_mobile.svg',
+        title: l10n.introExploreTitle,
+        description: l10n.introExploreDescription,
+      ),
+      _IntroSlideData(
+        webAssetPath: 'assets/illustrations/intro_plan_web.svg',
+        mobileAssetPath: 'assets/illustrations/intro_plan_mobile.svg',
+        title: l10n.introPlanTitle,
+        description: l10n.introPlanDescription,
+      ),
+      _IntroSlideData(
+        webAssetPath: 'assets/illustrations/intro_documents_web.svg',
+        mobileAssetPath: 'assets/illustrations/intro_documents_mobile.svg',
+        title: l10n.introDocumentationTitle,
+        description: l10n.introDocumentationDescription,
+      ),
+    ];
+
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceMutedFor(context),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  step,
-                  style: Theme.of(context).textTheme.labelLarge,
+          const AmbientBackground(),
+          const _IntroBackground(),
+          SafeArea(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1180),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    isCompact ? 20 : 32,
+                    isCompact ? 16 : 28,
+                    isCompact ? 20 : 32,
+                    isCompact ? 18 : 28,
+                  ),
+                  child: Column(
+                    children: [
+                      _IntroTopBar(
+                        title: l10n.introPageTitle,
+                        skipLabel: l10n.introSkipAction,
+                        showBack:
+                            !widget.isFirstLaunch || Navigator.canPop(context),
+                        onBack: () => Navigator.maybePop(context),
+                        onSkip: () => _finish(context),
+                        isCompact: isCompact,
+                      ),
+                      SizedBox(height: isCompact ? 20 : 28),
+                      Expanded(
+                        child: PageView.builder(
+                          controller: _pageController,
+                          itemCount: slides.length,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentPage = index;
+                            });
+                          },
+                          itemBuilder: (context, index) {
+                            return _IntroStepPage(
+                              data: slides[index],
+                              isCompact: isCompact,
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(height: isCompact ? 18 : 28),
+                      _IntroBottomSection(
+                        currentPage: _currentPage,
+                        isCompact: isCompact,
+                        onDotTap: (index) {
+                          _pageController.animateToPage(
+                            index,
+                            duration: const Duration(milliseconds: 320),
+                            curve: Curves.easeOutCubic,
+                          );
+                        },
+                        onNext: () => _goNext(context),
+                        primaryLabel: _currentPage == 2
+                            ? l10n.introPrimaryAction
+                            : 'Next',
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const Spacer(),
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceMutedFor(context),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(icon, size: 22),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(height: 1.1),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            description,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.45,
             ),
           ),
         ],
@@ -275,85 +158,455 @@ class _IntroCard extends StatelessWidget {
   }
 }
 
-class _IntroBottomBar extends StatelessWidget {
-  const _IntroBottomBar({
-    required this.isFirstLaunch,
-    required this.supportLabel,
-    required this.primaryLabel,
-    required this.skipLabel,
-    required this.onPrimaryPressed,
-    required this.onSkipPressed,
+class _IntroSlideData {
+  const _IntroSlideData({
+    required this.webAssetPath,
+    required this.mobileAssetPath,
+    required this.title,
+    required this.description,
   });
 
-  final bool isFirstLaunch;
-  final String supportLabel;
-  final String primaryLabel;
+  final String webAssetPath;
+  final String mobileAssetPath;
+  final String title;
+  final String description;
+}
+
+class _IntroTopBar extends StatelessWidget {
+  const _IntroTopBar({
+    required this.title,
+    required this.skipLabel,
+    required this.showBack,
+    required this.onBack,
+    required this.onSkip,
+    required this.isCompact,
+  });
+
+  final String title;
   final String skipLabel;
-  final VoidCallback onPrimaryPressed;
-  final VoidCallback? onSkipPressed;
+  final bool showBack;
+  final VoidCallback onBack;
+  final VoidCallback onSkip;
+  final bool isCompact;
 
   @override
   Widget build(BuildContext context) {
-    final isCompact = MediaQuery.sizeOf(context).width < 720;
-
-    return FrostedPanel(
-      padding: const EdgeInsets.all(14),
-      borderRadius: BorderRadius.circular(28),
-      backgroundColor: const Color(0xD10A1220),
-      borderColor: Colors.white.withValues(alpha: 0.08),
-      child: isCompact
-          ? Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                FilledButton.icon(
-                  onPressed: onPrimaryPressed,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    textStyle: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  icon: const Icon(Icons.arrow_forward_rounded),
-                  label: Text(primaryLabel),
-                ),
-                if (isFirstLaunch) ...[
-                  const SizedBox(height: 6),
-                  TextButton(
-                    onPressed: onSkipPressed,
-                    child: Text(skipLabel),
-                  ),
-                ],
-              ],
-            )
-          : Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    supportLabel,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.82),
-                    ),
-                  ),
-                ),
-                if (isFirstLaunch)
-                  TextButton(
-                    onPressed: onSkipPressed,
-                    child: Text(skipLabel),
-                  ),
-                const SizedBox(width: 10),
-                FilledButton.icon(
-                  onPressed: onPrimaryPressed,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 18,
-                    ),
-                    textStyle: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  icon: const Icon(Icons.arrow_forward_rounded),
-                  label: Text(primaryLabel),
-                ),
-              ],
+    return Row(
+      children: [
+        if (showBack)
+          _CircleGhostButton(
+            icon: Icons.arrow_back_rounded,
+            onPressed: onBack,
+            size: isCompact ? 40 : 46,
+          )
+        else
+          SizedBox(width: isCompact ? 40 : 46),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: isCompact ? 15 : 17,
+                height: 1.2,
+              ),
             ),
+          ),
+        ),
+        TextButton(
+          onPressed: onSkip,
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.primary,
+            padding: EdgeInsets.symmetric(
+              horizontal: isCompact ? 8 : 12,
+              vertical: 8,
+            ),
+          ),
+          child: Text(
+            skipLabel,
+            style: TextStyle(
+              fontSize: isCompact ? 14 : 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _IntroStepPage extends StatelessWidget {
+  const _IntroStepPage({required this.data, required this.isCompact});
+
+  final _IntroSlideData data;
+  final bool isCompact;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isCompact) {
+      return Column(
+        children: [
+          Expanded(
+            flex: 60,
+            child: _IntroHeroIllustration(
+              assetPath: data.mobileAssetPath,
+              isCompact: true,
+            ),
+          ),
+          const SizedBox(height: 18),
+          Expanded(
+            flex: 24,
+            child: _IntroTextContent(
+              title: data.title,
+              description: data.description,
+              isCompact: true,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          flex: 11,
+          child: _IntroTextContent(
+            title: data.title,
+            description: data.description,
+            isCompact: false,
+          ),
+        ),
+        const SizedBox(width: 36),
+        Expanded(
+          flex: 12,
+          child: _IntroHeroIllustration(
+            assetPath: data.webAssetPath,
+            isCompact: false,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _IntroHeroIllustration extends StatelessWidget {
+  const _IntroHeroIllustration({
+    required this.assetPath,
+    required this.isCompact,
+  });
+
+  final String assetPath;
+  final bool isCompact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(isCompact ? 28 : 36),
+        color: Colors.white.withValues(alpha: 0.04),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.10),
+            blurRadius: isCompact ? 20 : 30,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(isCompact ? 28 : 36),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.heroStart.withValues(alpha: 0.94),
+                    AppColors.heroMiddle.withValues(alpha: 0.84),
+                    AppColors.heroEnd.withValues(alpha: 0.46),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+            ),
+            Positioned(
+              top: -26,
+              right: -12,
+              child: IgnorePointer(
+                child: Container(
+                  width: isCompact ? 170 : 240,
+                  height: isCompact ? 170 : 240,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        AppColors.glowBlue.withValues(alpha: 0.16),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: -36,
+              bottom: -48,
+              child: IgnorePointer(
+                child: Container(
+                  width: isCompact ? 150 : 200,
+                  height: isCompact ? 150 : 200,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        AppColors.glowLavender.withValues(alpha: 0.10),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                isCompact ? 8 : 18,
+                isCompact ? 8 : 18,
+                isCompact ? 8 : 18,
+                isCompact ? 8 : 18,
+              ),
+              child: SvgPicture.asset(
+                assetPath,
+                fit: BoxFit.contain,
+                alignment: Alignment.center,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _IntroTextContent extends StatelessWidget {
+  const _IntroTextContent({
+    required this.title,
+    required this.description,
+    required this.isCompact,
+  });
+
+  final String title;
+  final String description;
+  final bool isCompact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: isCompact
+          ? MainAxisAlignment.start
+          : MainAxisAlignment.center,
+      crossAxisAlignment: isCompact
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
+      children: [
+        if (!isCompact) const SizedBox(height: 22),
+        Text(
+          title,
+          textAlign: isCompact ? TextAlign.center : TextAlign.left,
+          maxLines: isCompact ? 2 : 3,
+          overflow: TextOverflow.ellipsis,
+          style:
+              (isCompact
+                      ? Theme.of(context).textTheme.headlineLarge
+                      : Theme.of(context).textTheme.displaySmall)
+                  ?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    height: 0.98,
+                    letterSpacing: -1.0,
+                  ),
+        ),
+        SizedBox(height: isCompact ? 14 : 16),
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: isCompact ? 340 : 480),
+          child: Text(
+            description,
+            textAlign: isCompact ? TextAlign.center : TextAlign.left,
+            maxLines: isCompact ? 4 : 5,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Colors.white.withValues(alpha: 0.82),
+              height: 1.5,
+              fontSize: isCompact ? 16 : 18,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _IntroBottomSection extends StatelessWidget {
+  const _IntroBottomSection({
+    required this.currentPage,
+    required this.isCompact,
+    required this.onDotTap,
+    required this.onNext,
+    required this.primaryLabel,
+  });
+
+  final int currentPage;
+  final bool isCompact;
+  final ValueChanged<int> onDotTap;
+  final VoidCallback onNext;
+  final String primaryLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _PageDots(
+          currentPage: currentPage,
+          onDotTap: onDotTap,
+          darkStyle: false,
+        ),
+        SizedBox(height: isCompact ? 16 : 18),
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: isCompact ? 340 : 220),
+          child: SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: onNext,
+              style: FilledButton.styleFrom(
+                backgroundColor: currentPage == 2
+                    ? AppColors.primary
+                    : Colors.white,
+                foregroundColor: currentPage == 2
+                    ? Colors.white
+                    : AppColors.primary,
+                padding: EdgeInsets.symmetric(
+                  vertical: isCompact ? 18 : 16,
+                  horizontal: 24,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                  side: BorderSide(
+                    color: currentPage == 2
+                        ? Colors.transparent
+                        : AppColors.primary.withValues(alpha: 0.40),
+                  ),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                primaryLabel,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: isCompact ? 16 : 15,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PageDots extends StatelessWidget {
+  const _PageDots({
+    required this.currentPage,
+    required this.onDotTap,
+    required this.darkStyle,
+  });
+
+  final int currentPage;
+  final ValueChanged<int> onDotTap;
+  final bool darkStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    final activeColor = darkStyle ? Colors.white : AppColors.primary;
+    final inactiveColor = darkStyle
+        ? Colors.white.withValues(alpha: 0.22)
+        : AppColors.primary.withValues(alpha: 0.24);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(3, (index) {
+        final active = currentPage == index;
+        return GestureDetector(
+          onTap: () => onDotTap(index),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            width: active ? 18 : 7,
+            height: 7,
+            decoration: BoxDecoration(
+              color: active ? activeColor : inactiveColor,
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _CircleGhostButton extends StatelessWidget {
+  const _CircleGhostButton({
+    required this.icon,
+    required this.onPressed,
+    required this.size,
+  });
+
+  final IconData icon;
+  final VoidCallback onPressed;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white.withValues(alpha: 0.08),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(icon, color: Colors.white, size: size * 0.46),
+      ),
+    );
+  }
+}
+
+class _IntroBackground extends StatelessWidget {
+  const _IntroBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.heroStart,
+            AppColors.heroMiddle,
+            AppColors.heroEnd,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
     );
   }
 }

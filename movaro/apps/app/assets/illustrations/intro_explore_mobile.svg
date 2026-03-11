@@ -1,0 +1,56 @@
+<svg width="320" height="220" viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="exploreMap" x1="62" y1="54" x2="198" y2="142" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7FAFF"/>
+      <stop offset="1" stop-color="#DCEBFF"/>
+    </linearGradient>
+    <linearGradient id="exploreTower" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#21488C"/>
+      <stop offset="1" stop-color="#183A70"/>
+    </linearGradient>
+    <linearGradient id="exploreTowerAccent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#2991FF"/>
+      <stop offset="1" stop-color="#0071E3"/>
+    </linearGradient>
+    <filter id="shadowExplore" x="34" y="24" width="252" height="168" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#09111F" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+
+  <circle cx="160" cy="110" r="70" fill="#B8D8FF" fill-opacity="0.14"/>
+  <circle cx="224" cy="62" r="28" fill="#D6D9FF" fill-opacity="0.10"/>
+  <circle cx="92" cy="66" r="22" fill="#35C6F4" fill-opacity="0.08"/>
+
+  <g filter="url(#shadowExplore)">
+    <path d="M70 72L114 84L160 70L206 84L250 70V132L206 146L160 132L114 146L70 132V72Z" fill="url(#exploreMap)" stroke="#0071E3" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M114 84V146" stroke="#0071E3" stroke-width="2"/>
+    <path d="M160 70V132" stroke="#0071E3" stroke-width="2"/>
+    <path d="M206 84V146" stroke="#0071E3" stroke-width="2"/>
+  </g>
+
+  <path d="M153 84C153 75.7157 159.716 69 168 69C176.284 69 183 75.7157 183 84C183 95.4 168 107 168 107C168 107 153 95.4 153 84Z" fill="#35C6F4"/>
+  <circle cx="168" cy="84" r="5" fill="#F7FAFF"/>
+
+  <rect x="106" y="130" width="28" height="42" rx="9" fill="#1D1D1F"/>
+  <rect x="142" y="112" width="38" height="60" rx="11" fill="url(#exploreTower)"/>
+  <rect x="188" y="124" width="30" height="48" rx="9" fill="url(#exploreTowerAccent)"/>
+
+  <rect x="114" y="140" width="5" height="5" rx="1.5" fill="#DCEBFF"/>
+  <rect x="123" y="140" width="5" height="5" rx="1.5" fill="#DCEBFF"/>
+  <rect x="114" y="149" width="5" height="5" rx="1.5" fill="#DCEBFF"/>
+  <rect x="123" y="149" width="5" height="5" rx="1.5" fill="#DCEBFF"/>
+
+  <rect x="152" y="122" width="6" height="6" rx="1.5" fill="#D6D9FF"/>
+  <rect x="164" y="122" width="6" height="6" rx="1.5" fill="#D6D9FF"/>
+  <rect x="152" y="133" width="6" height="6" rx="1.5" fill="#D6D9FF"/>
+  <rect x="164" y="133" width="6" height="6" rx="1.5" fill="#D6D9FF"/>
+  <rect x="152" y="144" width="6" height="6" rx="1.5" fill="#D6D9FF"/>
+  <rect x="164" y="144" width="6" height="6" rx="1.5" fill="#D6D9FF"/>
+
+  <rect x="196" y="134" width="5" height="5" rx="1.5" fill="#DCEBFF"/>
+  <rect x="205" y="134" width="5" height="5" rx="1.5" fill="#DCEBFF"/>
+  <rect x="196" y="143" width="5" height="5" rx="1.5" fill="#DCEBFF"/>
+  <rect x="205" y="143" width="5" height="5" rx="1.5" fill="#DCEBFF"/>
+
+  <rect x="122" y="176" width="76" height="8" rx="4" fill="#D6D9FF" fill-opacity="0.9"/>
+</svg>

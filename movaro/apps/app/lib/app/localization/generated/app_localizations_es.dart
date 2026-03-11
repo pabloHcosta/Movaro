@@ -1853,7 +1853,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get introPrimaryAction => 'Empezar a explorar';
 
   @override
-  String get introSkipAction => 'Saltar introducción';
+  String get introSkipAction => 'Saltar';
 
   @override
   String get cityPracticalAnswersTitle =>

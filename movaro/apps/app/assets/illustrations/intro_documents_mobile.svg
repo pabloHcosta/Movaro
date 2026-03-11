@@ -1,0 +1,44 @@
+<svg width="320" height="220" viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="docFront" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#F7FAFF"/>
+      <stop offset="1" stop-color="#EAF3FF"/>
+    </linearGradient>
+    <linearGradient id="docBack" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#DCEBFF"/>
+      <stop offset="1" stop-color="#CFE4FF"/>
+    </linearGradient>
+    <filter id="shadowDocs" x="60" y="30" width="200" height="164" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#09111F" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+
+  <circle cx="160" cy="110" r="72" fill="#B8D8FF" fill-opacity="0.14"/>
+  <circle cx="110" cy="72" r="22" fill="#D6D9FF" fill-opacity="0.10"/>
+  <circle cx="228" cy="72" r="24" fill="#35C6F4" fill-opacity="0.08"/>
+
+  <g filter="url(#shadowDocs)">
+    <g transform="translate(112 58) rotate(-7 42 52)">
+      <rect x="0" y="0" width="84" height="104" rx="16" fill="url(#docBack)"/>
+    </g>
+
+    <g transform="translate(126 54)">
+      <rect x="0" y="0" width="84" height="108" rx="18" fill="url(#docFront)"/>
+      <rect x="16" y="18" width="32" height="9" rx="4.5" fill="#0071E3"/>
+      <rect x="16" y="38" width="48" height="7" rx="3.5" fill="#7C8DFF"/>
+      <rect x="16" y="51" width="40" height="7" rx="3.5" fill="#7C8DFF"/>
+      <rect x="16" y="64" width="52" height="7" rx="3.5" fill="#7C8DFF"/>
+      <rect x="16" y="77" width="28" height="7" rx="3.5" fill="#7C8DFF"/>
+
+      <rect x="54" y="36" width="14" height="14" rx="4" fill="#35C6F4"/>
+      <path d="M58 43L61 46L66 40" stroke="#F7FAFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="54" y="56" width="14" height="14" rx="4" fill="#35C6F4"/>
+      <path d="M58 63L61 66L66 60" stroke="#F7FAFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <circle cx="218" cy="74" r="14" fill="#35C6F4"/>
+  <path d="M212 74L217 79L225 70" stroke="#F7FAFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="112" y="178" width="96" height="8" rx="4" fill="#D6D9FF" fill-opacity="0.9"/>
+</svg>

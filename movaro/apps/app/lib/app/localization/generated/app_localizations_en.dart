@@ -1847,7 +1847,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get introPrimaryAction => 'Start exploring';
 
   @override
-  String get introSkipAction => 'Skip introduction';
+  String get introSkipAction => 'Skip';
 
   @override
   String get cityPracticalAnswersTitle => 'Quick answers for common questions';

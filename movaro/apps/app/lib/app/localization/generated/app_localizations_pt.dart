@@ -1855,7 +1855,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get introPrimaryAction => 'Começar a explorar';
 
   @override
-  String get introSkipAction => 'Pular introdução';
+  String get introSkipAction => 'Pular';
 
   @override
   String get cityPracticalAnswersTitle =>

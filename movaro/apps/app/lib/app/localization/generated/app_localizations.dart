@@ -3184,7 +3184,7 @@ abstract class AppLocalizations {
   /// No description provided for @introSkipAction.
   ///
   /// In en, this message translates to:
-  /// **'Skip introduction'**
+  /// **'Skip'**
   String get introSkipAction;
 
   /// No description provided for @cityPracticalAnswersTitle.
