@@ -35,11 +35,8 @@ class _SplashLoadingViewState extends State<SplashLoadingView>
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isCompact = screenWidth < 520;
 
-    final logoSize = isCompact ? 104.0 : 132.0;
-    final wordmarkWidth = isCompact ? 148.0 : 176.0;
-    final brandSpacing = isCompact ? 24.0 : 30.0;
-    final subtitleTopSpacing = isCompact ? 12.0 : 14.0;
-    final progressTopSpacing = isCompact ? 18.0 : 20.0;
+    final logoSize = isCompact ? 148.0 : 188.0;
+    final progressTopSpacing = isCompact ? 20.0 : 24.0;
 
     return Scaffold(
       body: Stack(
@@ -64,23 +61,6 @@ class _SplashLoadingViewState extends State<SplashLoadingView>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           _SplashMark(size: logoSize, glowValue: glowValue),
-                          SizedBox(height: brandSpacing),
-                          SvgPicture.asset(
-                            'assets/brand/movaro_wordmark_light.svg',
-                            width: wordmarkWidth,
-                          ),
-                          SizedBox(height: subtitleTopSpacing),
-                          Text(
-                            'Iniciando a sua experiência',
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.78),
-                                  fontSize: isCompact ? 16 : 17,
-                                  height: 1.35,
-                                  letterSpacing: -0.1,
-                                ),
-                          ),
                           SizedBox(height: progressTopSpacing),
                           const _SplashProgress(),
                         ],
@@ -190,20 +170,20 @@ class _SplashMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scale = 1 + (glowValue * 0.018);
-    final glowAlpha = 0.10 + (glowValue * 0.06);
+    final scale = 1 + (glowValue * 0.016);
+    final glowAlpha = 0.12 + (glowValue * 0.08);
 
     return Transform.scale(
       scale: scale,
       child: SizedBox(
-        width: size + 56,
-        height: size + 56,
+        width: size + 84,
+        height: size + 84,
         child: Stack(
           alignment: Alignment.center,
           children: [
             Container(
-              width: size + 56,
-              height: size + 56,
+              width: size + 84,
+              height: size + 84,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(

@@ -11,6 +11,8 @@ extension JourneyCountryMetadata on CatalogCountry {
         return '🇨🇱';
       case 'uruguai':
         return '🇺🇾';
+      case 'paraguai':
+        return '🇵🇾';
       default:
         return '🌍';
     }

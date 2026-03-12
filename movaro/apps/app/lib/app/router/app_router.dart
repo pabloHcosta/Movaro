@@ -128,10 +128,7 @@ class AppRouter {
       case AppRoutes.publicHome:
         return _buildRoute(
           settings,
-          PublicHomePage(
-            journeyContextController: journeyContextController,
-            migrationQuestionnaireController: migrationQuestionnaireController,
-          ),
+          PublicHomePage(journeyContextController: journeyContextController),
         );
       case AppRoutes.intro:
         final isFirstLaunch = settings.arguments == true;
@@ -161,14 +158,10 @@ class AppRouter {
       case AppRoutes.documentationGuide:
         return _buildRoute(settings, const DocumentationGuidePage());
       case AppRoutes.documentationTopic:
-        final section =
-            settings.arguments is DocumentationGuideSection
+        final section = settings.arguments is DocumentationGuideSection
             ? settings.arguments! as DocumentationGuideSection
             : DocumentationGuideSection.documents;
-        return _buildRoute(
-          settings,
-          DocumentationTopicPage(section: section),
-        );
+        return _buildRoute(settings, DocumentationTopicPage(section: section));
       case AppRoutes.cities:
         unawaited(citiesController.prefetchExplore());
         return _buildRoute(
@@ -212,9 +205,7 @@ class AppRouter {
       case AppRoutes.migrationPlanResult:
         return _buildRoute(
           settings,
-          MigrationPlanResultPage(
-            controller: migrationQuestionnaireController,
-          ),
+          MigrationPlanResultPage(controller: migrationQuestionnaireController),
         );
       case AppRoutes.migrationPlanCopilot:
         if (migrationQuestionnaireController.generatedPlan?.isCityConfirmed !=

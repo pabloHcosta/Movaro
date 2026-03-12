@@ -421,6 +421,24 @@ abstract class AppLocalizations {
   /// **'See cities'**
   String get publicHomeCitiesAction;
 
+  /// No description provided for @publicHomeQuestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Practical guide'**
+  String get publicHomeQuestionsTitle;
+
+  /// No description provided for @publicHomeQuestionsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the guide to understand documents, healthcare, housing, and first costs without scattered research.'**
+  String get publicHomeQuestionsBody;
+
+  /// No description provided for @publicHomeQuestionsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear my doubts'**
+  String get publicHomeQuestionsAction;
+
   /// No description provided for @publicHomePlanTitle.
   ///
   /// In en, this message translates to:
@@ -430,7 +448,7 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomePlanBody.
   ///
   /// In en, this message translates to:
-  /// **'Answer a few questions and get a simple starting point.'**
+  /// **'Answer a few questions and get a clear starter plan with better suggestions.'**
   String get publicHomePlanBody;
 
   /// No description provided for @publicHomeStoriesTitle.

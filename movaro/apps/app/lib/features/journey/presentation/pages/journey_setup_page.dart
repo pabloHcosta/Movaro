@@ -27,6 +27,8 @@ class JourneySetupPage extends StatefulWidget {
 }
 
 class _JourneySetupPageState extends State<JourneySetupPage> {
+  final PageController _pageController = PageController();
+  int _currentStep = 0;
   String? _originId;
   String? _destinationId;
 
@@ -35,16 +37,33 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
     super.initState();
     _originId = widget.journeyContextController.originCountryId;
     _destinationId = widget.journeyContextController.destinationCountryId;
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await widget.journeyContextController.initialize();
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       setState(() {
         _originId = widget.journeyContextController.originCountryId;
         _destinationId = widget.journeyContextController.destinationCountryId;
       });
     });
+  }
+
+  void _nextStep() {
+    if (_currentStep < 2) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutCubic,
+      );
+    }
+  }
+
+  void _prevStep() {
+    if (_currentStep > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutCubic,
+      );
+    }
   }
 
   @override
@@ -53,199 +72,114 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
     final controller = widget.journeyContextController;
 
     return AnimatedBuilder(
-      animation: controller,
+      animation: Listenable.merge([controller, _pageController]),
       builder: (context, _) {
         final countries = controller.countries;
-        final selectedOrigin = countries
-            .where((country) => country.id == _originId)
-            .toList();
-        final selectedDestination = countries
-            .where((country) => country.id == _destinationId)
-            .toList();
+        final originCountries = _originOptions(countries);
+        final destinationCountries = _destinationOptions(countries);
+        final origin = countries.where((c) => c.id == _originId).firstOrNull;
+        final destination = countries
+            .where((c) => c.id == _destinationId)
+            .firstOrNull;
 
-        final origin = selectedOrigin.isEmpty ? null : selectedOrigin.first;
-        final destination = selectedDestination.isEmpty
-            ? null
-            : selectedDestination.first;
-        final canContinue =
+        final canFinish =
             origin != null &&
             destination != null &&
-            controller.canUseAsOrigin(origin) &&
-            controller.canUseAsDestination(destination);
+            _isOriginEnabled(origin) &&
+            _isDestinationEnabled(destination);
 
         return Scaffold(
           body: Stack(
             children: [
               const AmbientBackground(),
               SafeArea(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1040),
-                    child: ListView(
-                      padding: EdgeInsets.fromLTRB(
-                        context.pageHorizontalPadding,
-                        context.pageVerticalPadding,
-                        context.pageHorizontalPadding,
-                        context.pageVerticalPadding + 24,
-                      ),
-                      children: [
-                        AppGlassHeader(
-                          title: l10n.journeySetupPageTitle,
-                          onBack: Navigator.canPop(context)
-                              ? () => Navigator.maybePop(context)
-                              : null,
-                        ),
-                        const SizedBox(height: 20),
-                        FrostedPanel(
-                          padding: const EdgeInsets.all(32),
-                          backgroundColor: const Color(0xB30B1320),
-                          borderColor: Colors.white.withValues(alpha: 0.12),
-                          gradient: const LinearGradient(
-                            colors: [
-                              AppColors.heroStart,
-                              AppColors.heroMiddle,
-                              AppColors.heroEnd,
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const MovaroLogo(
-                                markSize: 20,
-                                textColor: Colors.white,
-                                markColor: Colors.white,
-                              ),
-                              const SizedBox(height: 18),
-                              Text(
-                                l10n.journeySetupHeroTitle,
-                                style: Theme.of(context).textTheme.displaySmall
-                                    ?.copyWith(color: Colors.white),
-                              ),
-                              const SizedBox(height: 12),
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(maxWidth: 700),
-                                child: Text(
-                                  l10n.journeySetupHeroBody,
-                                  style: Theme.of(context).textTheme.bodyLarge
-                                      ?.copyWith(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.82,
-                                        ),
-                                        height: 1.45,
-                                      ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            final wide = constraints.maxWidth >= 920;
-                            final panelWidth = wide
-                                ? (constraints.maxWidth - 16) / 2
-                                : constraints.maxWidth;
+                child: Column(
+                  children: [
+                    AppGlassHeader(
+                      title: l10n.journeySetupPageTitle,
+                      onBack: _currentStep > 0
+                          ? _prevStep
+                          : (Navigator.canPop(context)
+                                ? () => Navigator.maybePop(context)
+                                : null),
+                    ),
 
-                            return Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: panelWidth,
-                                  child: _CountrySelectionPanel(
-                                    step: '01',
-                                    title: l10n.journeyOriginTitle,
-                                    description: l10n.journeyOriginBody,
-                                    countries: countries,
-                                    selectedCountryId: _originId,
-                                    isSelectable: controller.canUseAsOrigin,
-                                    onSelect: (countryId) {
-                                      setState(() {
-                                        _originId = countryId;
-                                        if (_destinationId == countryId) {
-                                          _destinationId = null;
-                                        }
-                                      });
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: panelWidth,
-                                  child: _CountrySelectionPanel(
-                                    step: '02',
-                                    title: l10n.journeyDestinationTitle,
-                                    description: l10n.journeyDestinationBody,
-                                    countries: countries,
-                                    selectedCountryId: _destinationId,
-                                    isSelectable: controller.canUseAsDestination,
-                                    onSelect: (countryId) {
-                                      setState(() {
-                                        _destinationId = countryId;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        FrostedPanel(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.journeySummaryTitle,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                origin != null && destination != null
-                                    ? l10n.journeySummaryValue(
-                                        '${origin.flagEmoji} ${origin.name}',
-                                        '${destination.flagEmoji} ${destination.name}',
-                                      )
-                                    : l10n.journeySummaryPlaceholder,
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                l10n.journeyAvailabilityNote,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: AppColors.textSoftFor(context),
-                                      height: 1.45,
-                                    ),
-                              ),
-                              const SizedBox(height: 20),
-                              FilledButton.icon(
-                                onPressed: canContinue
-                                    ? () async {
-                                        await controller.completeJourney(
-                                          originCountryId: _originId!,
-                                          destinationCountryId: _destinationId!,
-                                        );
-                                        if (!context.mounted) {
-                                          return;
-                                        }
+                    // Indicador de Progresso Moderno
+                    _StepIndicator(currentStep: _currentStep),
+
+                    Expanded(
+                      child: PageView(
+                        controller: _pageController,
+                        onPageChanged: (index) =>
+                            setState(() => _currentStep = index),
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          // PASSO 1: ORIGEM
+                          _buildStepWrapper(
+                            child: _CountrySelectionPanel(
+                              title: l10n.journeyOriginTitle,
+                              description: l10n.journeyOriginBody,
+                              countries: originCountries,
+                              selectedCountryId: _originId,
+                              isSelectable: _isOriginEnabled,
+                              onSelect: (id) {
+                                setState(() {
+                                  _originId = id;
+                                  if (_destinationId == id) {
+                                    _destinationId = null;
+                                  }
+                                });
+                                Future.delayed(
+                                  const Duration(milliseconds: 350),
+                                  _nextStep,
+                                );
+                              },
+                            ),
+                          ),
+
+                          // PASSO 2: DESTINO
+                          _buildStepWrapper(
+                            child: _CountrySelectionPanel(
+                              title: l10n.journeyDestinationTitle,
+                              description: l10n.journeyDestinationBody,
+                              countries: destinationCountries,
+                              selectedCountryId: _destinationId,
+                              isSelectable: _isDestinationEnabled,
+                              onSelect: (id) {
+                                setState(() => _destinationId = id);
+                                Future.delayed(
+                                  const Duration(milliseconds: 350),
+                                  _nextStep,
+                                );
+                              },
+                            ),
+                          ),
+
+                          // PASSO 3: RESUMO FINAL
+                          _buildStepWrapper(
+                            child: _SummaryStep(
+                              origin: origin,
+                              destination: destination,
+                              onConfirm: canFinish
+                                  ? () async {
+                                      await controller.completeJourney(
+                                        originCountryId: _originId!,
+                                        destinationCountryId: _destinationId!,
+                                      );
+                                      if (context.mounted) {
                                         Navigator.pushReplacementNamed(
                                           context,
                                           AppRoutes.publicHome,
                                         );
                                       }
-                                    : null,
-                                icon: const Icon(Icons.arrow_forward_rounded),
-                                label: Text(l10n.journeyContinueAction),
-                              ),
-                            ],
+                                    }
+                                  : null,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],
@@ -254,11 +188,172 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
       },
     );
   }
+
+  Widget _buildStepWrapper({required Widget child}) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        context.pageHorizontalPadding,
+        12,
+        context.pageHorizontalPadding,
+        24,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  List<CatalogCountry> _originOptions(List<CatalogCountry> countries) {
+    const desiredOrder = ['argentina', 'chile', 'uruguai', 'paraguai'];
+    return _orderedCountries(countries, desiredOrder);
+  }
+
+  List<CatalogCountry> _destinationOptions(List<CatalogCountry> countries) {
+    const desiredOrder = [
+      'brasil',
+      'argentina',
+      'chile',
+      'uruguai',
+      'paraguai',
+    ];
+    return _orderedCountries(
+      countries,
+      desiredOrder.where((countryId) => countryId != _originId).toList(),
+    );
+  }
+
+  List<CatalogCountry> _orderedCountries(
+    List<CatalogCountry> countries,
+    List<String> ids,
+  ) {
+    final byId = {for (final country in countries) country.id: country};
+    return ids.map((id) => byId[id]).whereType<CatalogCountry>().toList();
+  }
+
+  bool _isOriginEnabled(CatalogCountry country) => country.id == 'argentina';
+
+  bool _isDestinationEnabled(CatalogCountry country) =>
+      country.id == 'brasil' && country.id != _originId;
+}
+
+class _StepIndicator extends StatelessWidget {
+  final int currentStep;
+  const _StepIndicator({required this.currentStep});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(3, (index) {
+          final active = index <= currentStep;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            height: 6,
+            width: active ? 48 : 12,
+            decoration: BoxDecoration(
+              color: active
+                  ? AppColors.primary
+                  : Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(3),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+class _SummaryStep extends StatelessWidget {
+  final CatalogCountry? origin;
+  final CatalogCountry? destination;
+  final VoidCallback? onConfirm;
+
+  const _SummaryStep({this.origin, this.destination, this.onConfirm});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      children: [
+        FrostedPanel(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            children: [
+              const MovaroLogo(markSize: 24),
+              const SizedBox(height: 24),
+              Text(
+                l10n.journeySummaryTitle,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildCountryPreview(origin),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    color: AppColors.primary,
+                    size: 28,
+                  ),
+                  _buildCountryPreview(destination),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Text(
+                l10n.journeyAvailabilityNote,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          height: 60,
+          child: FilledButton.icon(
+            onPressed: onConfirm,
+            icon: const Icon(Icons.rocket_launch_rounded),
+            label: Text(
+              l10n.journeyContinueAction,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCountryPreview(CatalogCountry? country) {
+    return Column(
+      children: [
+        Text(country?.flagEmoji ?? '', style: const TextStyle(fontSize: 48)),
+        const SizedBox(height: 8),
+        Text(
+          country?.name ?? '',
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+        ),
+      ],
+    );
+  }
 }
 
 class _CountrySelectionPanel extends StatelessWidget {
   const _CountrySelectionPanel({
-    required this.step,
     required this.title,
     required this.description,
     required this.countries,
@@ -267,7 +362,6 @@ class _CountrySelectionPanel extends StatelessWidget {
     required this.onSelect,
   });
 
-  final String step;
   final String title;
   final String description;
   final List<CatalogCountry> countries;
@@ -277,39 +371,44 @@ class _CountrySelectionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FrostedPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceMutedFor(context),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(step, style: Theme.of(context).textTheme.labelLarge),
+    final l10n = context.l10n;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 10),
+        Text(
+          description,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: AppColors.textSoftFor(context),
           ),
-          const SizedBox(height: 18),
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          Text(
-            description,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-            ),
+        ),
+        const SizedBox(height: 24),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 400,
+            mainAxisExtent: 96,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
           ),
-          const SizedBox(height: 18),
-          for (final country in countries) ...[
-            _CountryChoiceCard(
+          itemCount: countries.length,
+          itemBuilder: (context, index) {
+            final country = countries[index];
+            return _CountryChoiceCard(
               country: country,
               isSelected: selectedCountryId == country.id,
               isEnabled: isSelectable(country),
+              availabilityLabel: isSelectable(country)
+                  ? l10n.journeyAvailableNowLabel
+                  : l10n.journeyComingSoonLabel,
               onTap: isSelectable(country) ? () => onSelect(country.id) : null,
-            ),
-            const SizedBox(height: 12),
-          ],
-        ],
-      ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -319,12 +418,14 @@ class _CountryChoiceCard extends StatelessWidget {
     required this.country,
     required this.isSelected,
     required this.isEnabled,
+    required this.availabilityLabel,
     required this.onTap,
   });
 
   final CatalogCountry country;
   final bool isSelected;
   final bool isEnabled;
+  final String availabilityLabel;
   final VoidCallback? onTap;
 
   @override
@@ -333,49 +434,50 @@ class _CountryChoiceCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(22),
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.all(16),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.10)
-              : AppColors.surfaceFor(context).withValues(
-                  alpha: isEnabled ? 0.62 : 0.35,
-                ),
+              ? AppColors.primary.withValues(alpha: 0.12)
+              : AppColors.surfaceFor(
+                  context,
+                ).withValues(alpha: isEnabled ? 0.65 : 0.35),
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
             color: isSelected
                 ? AppColors.primary
-                : AppColors.borderFor(context).withValues(
-                    alpha: isEnabled ? 1 : 0.45,
-                  ),
+                : AppColors.borderFor(context).withValues(alpha: 0.5),
+            width: isSelected ? 2 : 1,
           ),
         ),
         child: Row(
           children: [
-            Text(
-              country.flagEmoji,
-              style: const TextStyle(fontSize: 28),
-            ),
-            const SizedBox(width: 14),
+            Text(country.flagEmoji, style: const TextStyle(fontSize: 28)),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     country.name,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: isEnabled
                           ? AppColors.textPrimaryFor(context)
                           : AppColors.textSoftFor(context),
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    isEnabled
-                        ? context.l10n.journeyAvailableNowLabel
-                        : context.l10n.journeyComingSoonLabel,
+                    availabilityLabel,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSoftFor(context),
+                      color: isEnabled
+                          ? AppColors.primary
+                          : AppColors.textSoftFor(context),
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -384,10 +486,7 @@ class _CountryChoiceCard extends StatelessWidget {
             if (isSelected)
               const Icon(Icons.check_circle_rounded, color: AppColors.primary)
             else if (!isEnabled)
-              Icon(
-                Icons.lock_outline_rounded,
-                color: AppColors.textSoftFor(context),
-              ),
+              const Icon(Icons.lock_outline_rounded, size: 20),
           ],
         ),
       ),

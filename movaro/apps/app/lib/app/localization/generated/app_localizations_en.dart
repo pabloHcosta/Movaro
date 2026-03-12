@@ -198,11 +198,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publicHomeCitiesAction => 'See cities';
 
   @override
+  String get publicHomeQuestionsTitle => 'Practical guide';
+
+  @override
+  String get publicHomeQuestionsBody =>
+      'Open the guide to understand documents, healthcare, housing, and first costs without scattered research.';
+
+  @override
+  String get publicHomeQuestionsAction => 'Clear my doubts';
+
+  @override
   String get publicHomePlanTitle => 'Build my plan';
 
   @override
   String get publicHomePlanBody =>
-      'Answer a few questions and get a simple starting point.';
+      'Answer a few questions and get a clear starter plan with better suggestions.';
 
   @override
   String get publicHomeStoriesTitle => 'Read real experiences';
