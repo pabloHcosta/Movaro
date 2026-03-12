@@ -14,6 +14,7 @@ import { SupabaseAdminService } from './common/supabase/supabase-admin.service';
 import { CitiesModule } from './modules/cities/cities.module';
 import { HealthModule } from './modules/health/health.module';
 import { MigrationModule } from './modules/migration/migration.module';
+import { ReferenceModule } from './modules/reference/reference.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { MigrationModule } from './modules/migration/migration.module';
     CitiesModule,
     HealthModule,
     MigrationModule,
+    ReferenceModule,
   ],
   providers: [
     HttpDebugLoggerService,

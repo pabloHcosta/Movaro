@@ -133,7 +133,9 @@ class LandingBudgetEstimator {
 
   static int _resolveSetupBase(MigrationPlan plan, int monthlyBase) {
     final city = plan.recommendedCity;
-    final rentPressure = city == null ? 1.0 : (1.05 + ((100 - city.rentScore) / 250));
+    final rentPressure = city == null
+        ? 1.0
+        : (1.05 + ((100 - city.rentScore) / 250));
     final timelineFactor = switch (plan.timeline) {
       'asap' => 1.15,
       '6_months' => 1.0,
@@ -150,7 +152,8 @@ class LandingBudgetEstimator {
       _ => 1.0,
     };
 
-    final estimate = monthlyBase * 1.35 * rentPressure * timelineFactor * goalFactor;
+    final estimate =
+        monthlyBase * 1.35 * rentPressure * timelineFactor * goalFactor;
     return estimate.round().clamp(2500, 12000);
   }
 

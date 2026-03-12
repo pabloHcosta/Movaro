@@ -1,4 +1,5 @@
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_step.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 
 class MigrationPlan {
@@ -8,6 +9,12 @@ class MigrationPlan {
     required this.goal,
     required this.timeline,
     required this.steps,
+    this.variant = QuestionnaireVariant.lean,
+    this.funding = '',
+    this.archetypeKey,
+    this.confidence = 0,
+    this.selectedPriorities = const [],
+    this.selectedConstraints = const [],
     this.recommendedCity,
     this.candidateCities = const [],
     this.cityRecommendationReasons = const [],
@@ -19,6 +26,12 @@ class MigrationPlan {
   final String goal;
   final String timeline;
   final List<MigrationStep> steps;
+  final QuestionnaireVariant variant;
+  final String funding;
+  final String? archetypeKey;
+  final double confidence;
+  final List<String> selectedPriorities;
+  final List<String> selectedConstraints;
   final City? recommendedCity;
   final List<City> candidateCities;
   final List<String> cityRecommendationReasons;
@@ -30,6 +43,12 @@ class MigrationPlan {
     String? goal,
     String? timeline,
     List<MigrationStep>? steps,
+    QuestionnaireVariant? variant,
+    String? funding,
+    String? archetypeKey,
+    double? confidence,
+    List<String>? selectedPriorities,
+    List<String>? selectedConstraints,
     City? recommendedCity,
     List<City>? candidateCities,
     List<String>? cityRecommendationReasons,
@@ -41,6 +60,12 @@ class MigrationPlan {
       goal: goal ?? this.goal,
       timeline: timeline ?? this.timeline,
       steps: steps ?? this.steps,
+      variant: variant ?? this.variant,
+      funding: funding ?? this.funding,
+      archetypeKey: archetypeKey ?? this.archetypeKey,
+      confidence: confidence ?? this.confidence,
+      selectedPriorities: selectedPriorities ?? this.selectedPriorities,
+      selectedConstraints: selectedConstraints ?? this.selectedConstraints,
       recommendedCity: recommendedCity ?? this.recommendedCity,
       candidateCities: candidateCities ?? this.candidateCities,
       cityRecommendationReasons:

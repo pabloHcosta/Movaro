@@ -82,7 +82,7 @@ class _SplashPageState extends State<SplashPage> {
 
     if (!mounted) return;
 
-    final shouldReplayIntroFlow = widget.environment.isDevelopment;
+    const shouldReplayIntroFlow = false;
 
     final nextRoute =
         shouldReplayIntroFlow || !widget.journeyContextController.hasSeenIntro

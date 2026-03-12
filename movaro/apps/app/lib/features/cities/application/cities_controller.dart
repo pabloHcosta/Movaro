@@ -1,18 +1,30 @@
 import 'package:flutter/foundation.dart';
+import 'package:movaro_app/features/cities/application/services/city_favorites_store.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
 
+enum CityFavoriteToggleResult { added, removed, limitReached }
+
 class CitiesController extends ChangeNotifier {
-  CitiesController({required CitiesRepository repository})
-    : _repository = repository;
+  CitiesController({
+    required CitiesRepository repository,
+    CityFavoritesStore? favoritesStore,
+  }) : _repository = repository,
+       _favoritesStore = favoritesStore ?? CityFavoritesStore() {
+    _restoreFavorites();
+  }
 
   final CitiesRepository _repository;
+  final CityFavoritesStore _favoritesStore;
+  static const int maxFavoriteCities = 3;
 
   CityHighlights? _highlights;
   CityMethodology? _methodology;
   final Map<String, City> _cityCache = {};
+  final Map<String, CityWeather> _weatherCache = {};
   final Set<String> _favoriteCityIds = {};
   List<City> _catalog = const [];
   List<City> _searchResults = const [];
@@ -29,12 +41,17 @@ class CitiesController extends ChangeNotifier {
   Future<void>? _pendingCatalogRequest;
   Future<CityMethodology?>? _pendingMethodologyRequest;
   final Map<String, Future<City?>> _pendingCityRequests = {};
+  final Map<String, Future<CityWeather?>> _pendingWeatherRequests = {};
 
   CityHighlights? get highlights => _highlights;
   CityMethodology? get methodology => _methodology;
   List<City> get catalog => _catalog;
   List<City> get searchResults => _searchResults;
   Set<String> get favoriteCityIds => _favoriteCityIds;
+  List<City> get favoriteCities => _favoriteCityIds
+      .map((cityId) => _cityCache[cityId])
+      .whereType<City>()
+      .toList(growable: false);
   bool get isLoadingHighlights => _isLoadingHighlights;
   bool get isLoadingCatalog => _isLoadingCatalog;
   bool get isSearching => _isSearching;
@@ -46,6 +63,7 @@ class CitiesController extends ChangeNotifier {
   Object? get methodologyError => _methodologyError;
 
   bool isFavorite(String cityId) => _favoriteCityIds.contains(cityId);
+  CityWeather? weatherFor(String cityId) => _weatherCache[cityId];
 
   Future<void> prefetchExplore() => loadExplore();
 
@@ -57,6 +75,10 @@ class CitiesController extends ChangeNotifier {
 
   Future<City?> prefetchCityDetail(String id) async {
     return loadCityById(id);
+  }
+
+  Future<CityWeather?> prefetchCityWeather(String cityId) async {
+    return loadWeatherForCity(cityId);
   }
 
   Future<void> loadExplore() async {
@@ -133,6 +155,34 @@ class CitiesController extends ChangeNotifier {
       _isLoadingCity = false;
       _pendingCityRequests.remove(id);
       notifyListeners();
+    }
+  }
+
+  Future<CityWeather?> loadWeatherForCity(String cityId) async {
+    if (_weatherCache.containsKey(cityId)) {
+      return _weatherCache[cityId];
+    }
+
+    final pendingRequest = _pendingWeatherRequests[cityId];
+    if (pendingRequest != null) {
+      return pendingRequest;
+    }
+
+    final request = _performLoadWeatherForCity(cityId);
+    _pendingWeatherRequests[cityId] = request;
+    return request;
+  }
+
+  Future<CityWeather?> _performLoadWeatherForCity(String cityId) async {
+    try {
+      final weather = await _repository.getCityWeather(cityId);
+      _weatherCache[cityId] = weather;
+      notifyListeners();
+      return weather;
+    } catch (_) {
+      return null;
+    } finally {
+      _pendingWeatherRequests.remove(cityId);
     }
   }
 
@@ -226,8 +276,33 @@ class CitiesController extends ChangeNotifier {
     }
   }
 
-  void saveFavoriteLocally(String cityId) {
+  Future<CityFavoriteToggleResult> toggleFavorite(String cityId) async {
+    if (_favoriteCityIds.contains(cityId)) {
+      _favoriteCityIds.remove(cityId);
+      await _favoritesStore.write(_favoriteCityIds.toList(growable: false));
+      notifyListeners();
+      return CityFavoriteToggleResult.removed;
+    }
+
+    if (_favoriteCityIds.length >= maxFavoriteCities) {
+      return CityFavoriteToggleResult.limitReached;
+    }
+
     _favoriteCityIds.add(cityId);
+    await _favoritesStore.write(_favoriteCityIds.toList(growable: false));
+    notifyListeners();
+    return CityFavoriteToggleResult.added;
+  }
+
+  Future<void> _restoreFavorites() async {
+    final stored = await _favoritesStore.read();
+    if (stored.isEmpty) {
+      return;
+    }
+
+    _favoriteCityIds
+      ..clear()
+      ..addAll(stored.take(maxFavoriteCities));
     notifyListeners();
   }
 }

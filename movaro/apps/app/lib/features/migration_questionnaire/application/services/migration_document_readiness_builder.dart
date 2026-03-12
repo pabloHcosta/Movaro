@@ -3,7 +3,9 @@ import 'package:movaro_app/app/localization/generated/app_localizations.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 enum MigrationDocumentReadinessPriority { critical, prepare, arrival }
+
 enum MigrationDocumentReadinessRisk { blocking, caution, review }
+
 enum MigrationDocumentReadinessReviewMoment {
   beforeBooking,
   closeToMove,

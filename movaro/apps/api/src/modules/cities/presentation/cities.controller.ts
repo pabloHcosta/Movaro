@@ -49,6 +49,20 @@ export class CitiesController {
     return this.citiesCatalogService.getCities(query);
   }
 
+  @Get(':id/weather')
+  getCityWeather(@Param('id') id: string) {
+    const normalizedId = id.trim();
+    if (
+      normalizedId.length == 0 ||
+      normalizedId.length > 120 ||
+      !/^[a-z0-9-]+$/.test(normalizedId)
+    ) {
+      throw new BadRequestException('Invalid city id.');
+    }
+
+    return this.citiesCatalogService.getCityWeatherById(normalizedId);
+  }
+
   @Get(':id')
   getCityById(@Param('id') id: string) {
     const normalizedId = id.trim();

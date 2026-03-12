@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/language_selector_button.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 
@@ -49,7 +48,7 @@ class AppGlassHeader extends StatelessWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
           ),
-          trailing ?? const LanguageSelectorButton(),
+          trailing ?? const SizedBox(width: 44),
         ],
       ),
     );

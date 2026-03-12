@@ -12,6 +12,7 @@ import 'package:movaro_app/core/network/api_health_service.dart';
 import 'package:movaro_app/features/auth/application/auth_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
 
 class MovaroApp extends StatelessWidget {
   const MovaroApp({
@@ -20,6 +21,7 @@ class MovaroApp extends StatelessWidget {
     required this.catalogRepository,
     required this.citiesController,
     required this.migrationQuestionnaireController,
+    required this.copilotExchangeRatesService,
     required this.apiHealthService,
     required this.journeyContextController,
     required this.localeController,
@@ -31,6 +33,7 @@ class MovaroApp extends StatelessWidget {
   final CatalogRepository catalogRepository;
   final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
+  final CopilotExchangeRatesService copilotExchangeRatesService;
   final ApiHealthService apiHealthService;
   final JourneyContextController journeyContextController;
   final LocaleController localeController;
@@ -61,6 +64,7 @@ class MovaroApp extends StatelessWidget {
               citiesController: citiesController,
               migrationQuestionnaireController:
                   migrationQuestionnaireController,
+              copilotExchangeRatesService: copilotExchangeRatesService,
               apiHealthService: apiHealthService,
               journeyContextController: journeyContextController,
             ).onGenerateRoute,

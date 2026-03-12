@@ -15,6 +15,8 @@ import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/data/datasources/cities_remote_data_source.dart';
 import 'package:movaro_app/features/cities/data/repositories/cities_repository_impl.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/repositories/in_memory_migration_plan_repository.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/repositories/question_repository_impl.dart';
@@ -50,6 +52,11 @@ Future<void> bootstrap({required AppFlavor defaultFlavor}) async {
     planGenerator: MigrationPlanGenerator(citiesRepository: citiesRepository),
     journeyContextController: journeyContextController,
   );
+  final copilotExchangeRatesService = CopilotExchangeRatesService(
+    remoteDataSource: CopilotExchangeRatesRemoteDataSource(
+      environment: environment,
+    ),
+  );
   final localeController = LocaleController();
 
   runApp(
@@ -59,6 +66,7 @@ Future<void> bootstrap({required AppFlavor defaultFlavor}) async {
       catalogRepository: catalogRepository,
       citiesController: citiesController,
       migrationQuestionnaireController: migrationQuestionnaireController,
+      copilotExchangeRatesService: copilotExchangeRatesService,
       apiHealthService: apiHealthService,
       journeyContextController: journeyContextController,
       localeController: localeController,

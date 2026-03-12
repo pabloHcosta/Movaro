@@ -19,10 +19,8 @@ class MigrationCopilotProgressSnapshot {
 }
 
 class MigrationCopilotProgressStore {
-  MigrationCopilotProgressStore({
-    CopilotDirectoryProvider? directoryProvider,
-  }) : _directoryProvider =
-           directoryProvider ?? getApplicationSupportDirectory;
+  MigrationCopilotProgressStore({CopilotDirectoryProvider? directoryProvider})
+    : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
 
   final CopilotDirectoryProvider _directoryProvider;
 

@@ -149,7 +149,28 @@
   "documentationPageTitle": "Documentação e vida prática",
   "documentationHeroEyebrow": "Guia prático",
   "documentationHeroTitle": "O que costuma destravar a vida prática no Brasil",
-  "documentationHeroDescription": "Sem texto infinito. Aqui você vê documentos, saúde, mobilidade e custos aproximados do que costuma importar primeiro para quem vai morar no Brasil.",
+  "documentationHeroDescription": "Pesquise sua dúvida, filtre por tema e encontre rápido o bloco certo entre documentos, saúde, trabalho, moradia, mobilidade e custos iniciais.",
+  "documentationSearchLabel": "Escreva sua dúvida",
+  "documentationSearchHint": "Ex.: posso trabalhar com visto de visita? / CPF / bank / salud / custos",
+  "documentationSearchSupport": "Você pode pesquisar em português, espanhol ou inglês.",
+  "documentationSearchResultsCount": "{count} itens encontrados",
+  "@documentationSearchResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentationSearchResultsHint": "Toque em um item para abrir o tema ou ir direto para os resultados filtrados.",
+  "documentationFilterAll": "Tudo",
+  "documentationQuickRoutesTitle": "Atalhos rápidos",
+  "documentationQuickRoutesBody": "Deslize para o lado e entre direto no tema que destrava sua próxima decisão.",
+  "documentationResultsTitle": "Resultados do guia",
+  "documentationResultsBody": "Comece por uma resposta rápida ou abra o tema completo para aprofundar.",
+  "documentationResultsFilteredBody": "A busca cruza respostas rápidas e blocos completos para encurtar o caminho até a informação certa.",
+  "documentationViewMatchesAction": "Ver",
+  "documentationNoResultsTitle": "Nada apareceu com esse termo",
+  "documentationNoResultsBody": "Tente CPF, registro, work, visa, saúde, aluguel ou custos.",
   "documentationQuickStepCpf": "CPF",
   "documentationQuickStepRegistration": "Registro",
   "documentationQuickStepStay": "Permanência",
@@ -568,6 +589,9 @@
   "citiesExploreTitle": "Cidades",
   "citiesExploreHeadline": "Descubra cidades com mais contexto",
   "citiesExploreDescription": "Veja sugestões por intenção e entenda por que cada cidade aparece aqui.",
+  "citiesExploreSearchFirstDescription": "Pesquise uma cidade ou use os chips para filtrar o catálogo quando fizer sentido. A lista não abre carregada: os resultados aparecem só quando você buscar ou selecionar um recorte.",
+  "citiesExploreSearchIdleTitle": "Pesquise uma cidade ou escolha um filtro",
+  "citiesExploreSearchIdleDescription": "Digite o nome da cidade para autocomplete imediato ou deslize os chips para explorar por popularidade, praia, trabalho, idioma e chegada.",
   "citiesLoadingLabel": "Carregando cidades",
   "citiesMethodologyNote": "Rankings baseados em dados públicos e na metodologia do Movaro.",
   "citiesExplorePopularTitle": "Mais escolhidas por argentinos",
@@ -604,6 +628,20 @@
   "citiesSearchDescription": "Busque por nome ou explore a lista atual do Movaro.",
   "citiesSearchHint": "Buscar cidade",
   "citiesSearchFieldLabel": "Nome da cidade",
+  "citiesSearchHelper": "Digite para buscar cidades por nome e tocar no autocomplete.",
+  "citiesSearchResultsCount": "{count} cidades encontradas",
+  "@citiesSearchResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "citiesSearchResultsHint": "Toque em uma cidade para abrir direto o detalhe.",
+  "citiesMapOpenAction": "Escolher no mapa",
+  "citiesMapSheetTitle": "Escolha uma cidade no mapa",
+  "citiesMapSheetBody": "Abra o mapa do Brasil, toque em um ponto e selecione a cidade pela posição.",
+  "citiesMapOpenCityAction": "Abrir cidade",
   "citiesQuickFilterAll": "Visão geral",
   "citiesQuickFilterPopular": "Mais populares",
   "citiesQuickFilterLowCost": "Melhor custo",
@@ -617,8 +655,20 @@
   "citiesQuickFilterCoastal": "Praia",
   "citiesSearchingLabel": "Buscando cidades",
   "citiesCatalogLoadingLabel": "Carregando catálogo",
+  "citiesFilterClear": "Limpar",
+  "citiesResultsTitle": "Resultados",
+  "citiesResultsBody": "{count} cidades combinam com esta busca ou filtro.",
+  "@citiesResultsBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "citiesResultsMoreHint": "Role para carregar mais cidades",
   "citiesSearchEmptyTitle": "Nenhuma cidade encontrada",
   "citiesSearchEmptyDescription": "Tente outro nome ou explore o catálogo inicial do Movaro.",
+  "citiesSearchFirstEmptyDescription": "Tente outro nome ou troque o filtro para ampliar os resultados.",
   "citiesCatalogEmptyTitle": "Catálogo ainda vazio",
   "citiesCatalogEmptyDescription": "As cidades do catálogo do Movaro vão aparecer aqui.",
   "cityDetailTitleFallback": "Cidade",
@@ -626,6 +676,38 @@
   "cityDetailEmptyTitle": "Cidade indisponível",
   "cityDetailEmptyDescription": "Não encontramos os detalhes dessa cidade neste momento.",
   "cityDetailContextNote": "Use estes indicadores como ponto de partida, não como verdade absoluta.",
+  "cityDetailDecisionSnapshotTitle": "Resumo para decidir",
+  "cityDetailDecisionSnapshotSubtitle": "O Movaro vê esta cidade como uma boa opção se você prioriza {bestFor}.",
+  "@cityDetailDecisionSnapshotSubtitle": {
+    "placeholders": {
+      "bestFor": {}
+    }
+  },
+  "cityDetailDecisionSnapshotPlanSubtitle": "Para o seu plano, esta cidade aparece forte se você estiver priorizando {bestFor}.",
+  "@cityDetailDecisionSnapshotPlanSubtitle": {
+    "placeholders": {
+      "bestFor": {}
+    }
+  },
+  "cityDetailDecisionSnapshotRecommendedSubtitle": "Esta cidade está na frente no seu plano se o foco atual for {bestFor}.",
+  "@cityDetailDecisionSnapshotRecommendedSubtitle": {
+    "placeholders": {
+      "bestFor": {}
+    }
+  },
+  "cityDetailWatchoutTitle": "O principal ponto para validar",
+  "cityDetailPlanLeadingChip": "Lidera no seu plano",
+  "cityDetailPlanMatchChip": "Combina com seu plano",
+  "cityDetailUpdatedLabel": "Atualizado em {date}",
+  "@cityDetailUpdatedLabel": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "cityDetailAffordabilityTitle": "Custo e moradia",
+  "cityDetailSettleInTitle": "Adaptação e comunidade",
+  "cityDetailCommunityTitle": "Rede de apoio",
+  "cityDetailContextTitle": "Contexto da cidade",
   "cityLifestyleCoastalLabel": "Estilo de vida litorâneo",
   "cityLifestyleMetropolisLabel": "Ritmo de metrópole",
   "cityLifestyleBorderLabel": "Cidade de fronteira",
@@ -633,6 +715,7 @@
   "cityDetailMapTitle": "Onde a cidade fica",
   "cityDetailMapDescription": "Veja a localização da cidade no mapa antes de comparar contexto, distância e região.",
   "cityDetailSnapshotTitle": "Visão rápida",
+  "cityDetailMetricsSummary": "Abra só se quiser ver todos os indicadores e o recorte completo.",
   "cityDetailPopulationLabel": "População",
   "cityDetailCostLabel": "Custo",
   "cityDetailRentLabel": "Aluguel",
@@ -671,9 +754,53 @@
   "cityDetailSaveAction": "Salvar cidade",
   "cityDetailSavedAction": "Cidade salva",
   "cityDetailSavedFeedback": "Cidade salva temporariamente neste dispositivo.",
+  "cityDetailFavoriteAction": "Adicionar aos favoritos",
+  "cityDetailFavoriteRemoveAction": "Remover dos favoritos",
+  "cityDetailFavoriteNote": "Você pode manter até 3 cidades favoritas para voltar a elas rapidamente na home.",
+  "cityDetailFavoriteAddedFeedback": "{city} foi adicionada aos favoritos.",
+  "@cityDetailFavoriteAddedFeedback": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "cityDetailFavoriteRemovedFeedback": "{city} foi removida dos favoritos.",
+  "@cityDetailFavoriteRemovedFeedback": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "cityDetailFavoriteLimitFeedback": "Você pode escolher no máximo {count} cidades favoritas.",
+  "@cityDetailFavoriteLimitFeedback": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "cityDetailCompareAction": "Comparar outras cidades",
   "cityDetailPlanAction": "Montar meu plano",
   "cityDetailFooterNote": "Os indicadores ajudam na exploração inicial e não substituem análise individual.",
+  "publicHomeFavoritesTitle": "Suas cidades favoritas",
+  "publicHomeFavoritesBody": "Guarde até 3 cidades para voltar rápido aos detalhes quando quiser comparar melhor.",
+  "publicHomeFavoritesJumpAction": "Ver cidades favoritas",
+  "publicHomeFavoriteCardHint": "Abra os detalhes para comparar de novo custo, trabalho e encaixe de chegada.",
+  "mainNavHome": "Home",
+  "mainNavFavorites": "Favoritas",
+  "mainNavCopilot": "Guia",
+  "mainNavFavoritesDisabled": "Adicione pelo menos 1 cidade aos favoritos para liberar esta aba.",
+  "mainNavCopilotDisabled": "Confirme uma cidade no seu plano para liberar o guia da mudança.",
+  "favoritesEmptyTitle": "Nenhuma cidade favorita ainda",
+  "favoritesEmptyBody": "Quando você favoritar cidades, elas ficam reunidas aqui para acompanhar detalhes, clima e comparação mais rápido.",
+  "favoritesEmptyHint": "Explore cidades, salve as mais promissoras e volte aqui quando quiser retomar.",
+  "favoritesExploreAction": "Explorar cidades",
+  "publicHomeJourneyResetAction": "Escolher outra rota",
+  "publicHomeJourneyResetTitle": "Escolher outra rota?",
+  "publicHomeJourneyResetBody": "Sua rota atual já está salva neste dispositivo. Se você reiniciar agora, o Movaro vai abrir novamente a seleção para escolher outra origem ou destino.",
+  "publicHomeJourneyResetConfirm": "Refazer rota",
+  "cityWeatherSummary": "{temperature}°C agora",
+  "@cityWeatherSummary": {
+    "placeholders": {
+      "temperature": {}
+    }
+  },
   "introPageTitle": "Como o Movaro funciona",
   "introHeroTitle": "Entenda o app em menos de um minuto",
   "introHeroDescription": "O Movaro ajuda você a comparar cidades, entender burocracias práticas e montar uma primeira direção de mudança sem começar pelo excesso de informação.",
@@ -1077,6 +1204,13 @@
     }
   },
   "landingBudgetDisclaimer": "Estas estimativas são direcionais, não preços oficiais. Elas combinam sinais da cidade, pressão de instalação e risco do timing para ajudar você a planejar a reserva antes da mudança.",
+  "landingBudgetExchangeUpdatedAt": "Câmbio oficial atualizado em {value}",
+  "@landingBudgetExchangeUpdatedAt": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "landingBudgetExchangeUnavailable": "Não foi possível atualizar o câmbio oficial agora. Os valores em reais continuam como referência.",
   "arrivalExecutionSectionTitle": "Primeiros 7 / 30 / 90 dias",
   "arrivalExecutionStageWeek": "Primeiros 7 dias",
   "arrivalExecutionStageMonth": "Primeiros 30 dias",
@@ -1144,8 +1278,8 @@
     }
   },
   "publicHomeRetakePlanAction": "Refazer plano",
-  "migrationPlanCopilotTitle": "Preparação guiada",
-  "migrationPlanCopilotAction": "Abrir preparação",
+  "migrationPlanCopilotTitle": "Guia da mudança",
+  "migrationPlanCopilotAction": "Abrir guia",
   "migrationPlanCopilotIntroTitle": "Quando quiser sair da decisão para a execução",
   "migrationPlanCopilotIntroBody": "Esta etapa organiza checklist, documentos, moradia e reserva de aterrissagem. Use-a quando você já quiser começar a preparar a mudança.",
   "migrationPlanCopilotIntroBodyWithCity": "Esta etapa organiza checklist, documentos, moradia e reserva de aterrissagem com {city} ({state}) como referência principal do seu plano.",
@@ -1160,6 +1294,61 @@
     }
   },
   "migrationPlanCopilotResultBody": "Primeiro, veja se a cidade recomendada faz sentido para você. Quando quiser transformar essa decisão em preparação concreta, abra a camada guiada com checklist, documentos e reserva de chegada.",
+  "migrationPlanCopilotStepCounter": "Etapa {current} de {total}",
+  "@migrationPlanCopilotStepCounter": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
+  "migrationPlanCopilotStepStartTitle": "Comece pelo que destrava a mudança",
+  "migrationPlanCopilotStepStartBody": "Foque primeiro nas checagens que reduzem risco antes de gastar energia com o resto.",
+  "migrationPlanCopilotStepDocumentsTitle": "Organize os documentos-chave",
+  "migrationPlanCopilotStepDocumentsBody": "Use esta etapa para colocar em ordem a camada documental que costuma travar o avanço depois.",
+  "migrationPlanCopilotStepBudgetTitle": "Planeje reserva e entrada de moradia",
+  "migrationPlanCopilotStepBudgetBody": "Estime sua reserva inicial e revise o atrito de moradia antes que a chegada fique urgente.",
+  "migrationPlanCopilotStepArrivalTitle": "Prepare os primeiros 7 / 30 / 90 dias",
+  "migrationPlanCopilotStepArrivalBody": "Transforme o plano em execução para a chegada não depender de improviso.",
+  "migrationPlanCopilotHomeTitle": "O que fazer agora",
+  "migrationPlanCopilotHomeBody": "Use esta home para ver os próximos passos, o principal risco e a etapa que merece atenção primeiro.",
+  "migrationPlanCopilotStageCountLabel": "{count} etapas guiadas",
+  "@migrationPlanCopilotStageCountLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "migrationPlanCopilotNextActionsTitle": "Seus próximos 3 passos",
+  "migrationPlanCopilotNextActionsBody": "Comece pelas tarefas que destravam a mudança antes de aprofundar o restante.",
+  "migrationPlanCopilotNextActionStart": "Reduza os primeiros bloqueios",
+  "migrationPlanCopilotNextActionDocuments": "Coloque os documentos em movimento",
+  "migrationPlanCopilotNextActionBudget": "Revise reserva e entrada de moradia",
+  "migrationPlanCopilotNextActionBudgetBody": "Estime sua reserva inicial e entenda como a entrada de moradia pode pesar na chegada.",
+  "migrationPlanCopilotFallbackActionBody": "Abra esta etapa para ver a primeira ação recomendada.",
+  "migrationPlanCopilotRiskTitle": "Principal risco agora",
+  "migrationPlanCopilotRiskDocuments": "A camada documental ainda é o maior risco. Se ela ficar solta, as etapas seguintes podem travar mesmo com cidade e orçamento já decididos.",
+  "migrationPlanCopilotRiskReadiness": "A mudança ainda precisa de uma base inicial mais forte. Resolva os primeiros bloqueios práticos antes de gastar mais energia com detalhes.",
+  "migrationPlanCopilotRiskHousing": "A entrada em moradia ainda pode gerar atrito na chegada. Revise reserva, garantias e plano de fallback antes de tratar a mudança como operacional.",
+  "migrationPlanCopilotStagesTitle": "Abra uma etapa guiada",
+  "migrationPlanCopilotStagesBody": "Você pode entrar direto na etapa que precisa, mas o Movaro mantém a ordem clara para a mudança não perder prioridade.",
+  "migrationPlanCopilotRecommendedTitle": "Próximo passo recomendado",
+  "migrationPlanCopilotRecommendedReadinessBody": "Comece por esta etapa para destravar os primeiros bloqueios e dar base real para o restante do plano.",
+  "migrationPlanCopilotRecommendedDocumentsBody": "A camada documental ainda merece atenção primeiro. Resolva isso agora para evitar travas mais caras depois.",
+  "migrationPlanCopilotRecommendedBudgetBody": "Agora vale transformar o plano em números reais e revisar a entrada em moradia antes da chegada apertar.",
+  "migrationPlanCopilotRecommendedArrivalBody": "Você já tem base suficiente para organizar a chegada. Use esta etapa para sair do plano e entrar em execução.",
+  "migrationPlanCopilotRecommendedOpen": "Abrir etapa recomendada",
+  "migrationPlanCopilotQuickQuestionsTitle": "Dúvidas rápidas",
+  "migrationPlanCopilotQuickQuestionsBody": "Use estas respostas curtas quando bater uma dúvida prática antes de avançar.",
+  "migrationPlanCopilotQuickQuestionDocumentsTitle": "Quais documentos eu devo mover primeiro?",
+  "migrationPlanCopilotQuickQuestionDocumentsAnswer": "Comece pelos documentos que demoram mais para sair ou vencer primeiro. A etapa documental do Movaro ajuda a separar o que destrava residência, CPF e chegada prática sem te jogar num fluxo burocrático inteiro de uma vez.",
+  "migrationPlanCopilotQuickQuestionHousingTitle": "Preciso resolver moradia definitiva agora?",
+  "migrationPlanCopilotQuickQuestionHousingAnswer": "Nem sempre. Em muitos casos, faz mais sentido entrar com um plano de moradia temporária, entender garantias e só depois assumir um aluguel maior. O importante agora é estimar reserva, custo de entrada e plano de fallback.",
+  "migrationPlanCopilotQuickQuestionArrivalTitle": "O que eu preciso resolver logo na chegada?",
+  "migrationPlanCopilotQuickQuestionArrivalAnswer": "Pense primeiro no que reduz atrito nos primeiros dias: onde ficar, como se mover, o que precisa ser resolvido nos 7 primeiros dias e quais tarefas não podem passar do primeiro mês. A etapa de chegada já organiza isso por prioridade.",
+  "migrationPlanCopilotQuickQuestionOpenStage": "Ir para esta etapa",
+  "migrationPlanCopilotActionOpen": "Resolver agora",
+  "migrationPlanCopilotOverviewAction": "Começar preparação guiada",
+  "migrationPlanCopilotOverviewBackAction": "Voltar ao resumo",
+  "migrationPlanCopilotFinishAction": "Concluir por agora",
   "migrationPlanDecisionLabel": "Escolha da cidade",
   "migrationPlanDecisionTitle": "Agora compare as cidades que mais combinam com {goal}",
   "@migrationPlanDecisionTitle": {
@@ -1175,8 +1364,42 @@
   },
   "migrationPlanDecisionSummaryTitle": "Como ler esta etapa",
   "migrationPlanDecisionSummaryBody": "Primeiro, escolha a cidade que faz mais sentido para você. O checklist detalhada entra só depois dessa decisão.",
+  "migrationPlanHeroTitle": "{city} é sua cidade mais forte para começar agora",
+  "@migrationPlanHeroTitle": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanHeroBody": "Com base no seu prazo de {timeline}, comece olhando as 3 cidades abaixo e abra a que parecer mais forte para a sua mudança.",
+  "@migrationPlanHeroBody": {
+    "placeholders": {
+      "timeline": {}
+    }
+  },
+  "migrationPlanConfidenceLow": "Recomendação inicial",
+  "migrationPlanConfidenceHigh": "Recomendação forte",
+  "migrationPlanSummaryArchetype": "Perfil detectado: {value}",
+  "@migrationPlanSummaryArchetype": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "migrationPlanSummaryVariant": "Modo usado: {value}",
+  "@migrationPlanSummaryVariant": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "migrationPlanSummaryFunding": "Sustento inicial: {value}",
+  "@migrationPlanSummaryFunding": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "migrationPlanCandidateCitiesTitle": "Cidades mais alinhadas ao seu perfil",
   "migrationPlanCandidateCitiesBody": "A lista já vem ordenada para deixar primeiro o que tende a fazer mais sentido para argentinos com esse objetivo.",
+  "migrationPlanShortlistTitle": "3 cidades para revisar agora",
+  "migrationPlanShortlistBody": "Estas são as 3 opções mais fortes para começar. Abra uma cidade para comparar com o seu contexto real.",
   "migrationPlanCandidateCitiesSheetBody": "Abra os detalhes para entender melhor cada cidade. A confirmação da cidade acontece dentro da tela de detalhe, depois de ver mais contexto.",
   "migrationPlanSelectedCityBadge": "Escolhida",
   "migrationPlanSuggestedCityBadge": "Na frente agora",
@@ -1218,11 +1441,258 @@
     }
   },
   "migrationPlanPreparationTitle": "Quando partir para a preparação",
-  "migrationPlanPreparationBody": "Se você decidir seguir com {city}, o copiloto abre checklist, documentos, moradia e reserva de chegada com foco nessa cidade.",
+  "migrationPlanPreparationBody": "Se você decidir seguir com {city}, a preparação guiada abre checklist, documentos, moradia e reserva de chegada com foco nessa cidade.",
   "@migrationPlanPreparationBody": {
     "placeholders": {
       "city": {}
     }
   },
-  "languageSelectorSystem": "Sistema"
+  "migrationPlanScrollHint": "Ver mais",
+  "languageSelectorSystem": "Sistema",
+  "bmpDisclaimer": "Isto monta um ponto de partida. Não é consultoria legal.",
+  "bmpProgressStep": "Etapa {current} de {total}",
+  "@bmpProgressStep": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
+  "bmpCtaBack": "Voltar",
+  "bmpCtaContinue": "Continuar",
+  "bmpCtaSkip": "Pular",
+  "bmpCtaGenerate": "Gerar meu plano",
+  "bmpExitDialogTitle": "Quer sair deste plano?",
+  "bmpExitDialogBody": "Se você voltar para a home, vai perder este fluxo e as respostas atuais.",
+  "bmpExitDialogStay": "Continuar aqui",
+  "bmpExitDialogLeave": "Voltar para a home",
+  "bmpCtaRefineYes": "Sim, refinar",
+  "bmpCtaRefineNo": "Não, gerar meu plano",
+  "bmpVariantTitle": "Como você quer montar seu plano?",
+  "bmpVariantSubtitle": "Você pode ir mais rápido ou responder uma pergunta extra para uma recomendação mais precisa.",
+  "bmpVariantLeanTitle": "Plano rápido",
+  "bmpVariantLeanBody": "3 perguntas e um refinamento opcional para chegar a uma direção inicial com pouca fricção.",
+  "bmpVariantLeanTag": "Mais rápido",
+  "bmpVariantStrategicTitle": "Plano estratégico",
+  "bmpVariantStrategicBody": "Inclui como você pretende se sustentar e gera uma leitura inicial mais precisa para começar.",
+  "bmpVariantStrategicTag": "Mais preciso",
+  "bmpRefineTitle": "Quer refinar a recomendação com mais 1 pergunta?",
+  "bmpRefineSubtitle": "(Opcional) Leva cerca de 5 segundos",
+  "qIntentPrompt": "O que você busca no Brasil agora?",
+  "qFundingPrompt": "Como você pretende se sustentar nos primeiros 3 meses?",
+  "qFundingSubtitle": "Isso ajuda a ajustar seu ponto de partida sem pedir dados pessoais.",
+  "qTimelinePrompt": "Quando você gostaria de estar no Brasil? (aprox.)",
+  "qPrioritiesPrompt": "No seu primeiro ano, quais 2 pontos mais importam na escolha da cidade?",
+  "qPrioritiesHelper": "Selecione 2 para continuar",
+  "qPrioritiesSelectedCount": "{selected}/{total}",
+  "@qPrioritiesSelectedCount": {
+    "placeholders": {
+      "selected": {},
+      "total": {}
+    }
+  },
+  "qPrioritiesValidation": "Escolha 2 opções para continuar",
+  "qConstraintsPrompt": "Existe algo que você NÃO quer negociar?",
+  "qConstraintsSubtitle": "(Opcional) Escolha até 2",
+  "bmpScrollHint": "Ver mais opções",
+  "qConstraintsValidation": "Você pode escolher até 2 opções",
+  "qConstraintsNone": "Não tenho condições fixas",
+  "questionOptionFindJobBr": "Conseguir trabalho no Brasil",
+  "questionOptionRemoteIncome": "Trabalhar remoto (já tenho renda)",
+  "questionOptionFundingSavings": "Tenho reservas para começar",
+  "questionOptionFundingJobSearch": "Vou buscar trabalho no Brasil",
+  "questionOptionFundingJobOffer": "Já tenho oferta ou contrato",
+  "questionOptionFundingFamilySupport": "Ajuda de família ou parceiro",
+  "questionOptionFundingDontKnow": "Ainda não sei",
+  "questionOptionFamilyPartner": "Mudança por parceiro ou família",
+  "questionOptionFreshStart": "Melhor qualidade de vida / recomeçar",
+  "questionOptionExploreUnsure": "Só quero entender as opções",
+  "questionOptionJustExploring": "Só explorando",
+  "questionOptionIn03Months": "Em 0–3 meses",
+  "questionOptionIn36Months": "Em 3–6 meses",
+  "questionOptionIn612Months": "Em 6–12 meses",
+  "questionOptionIn12PlusMonths": "Em mais de 12 meses",
+  "questionOptionDepends": "Depende / ainda estou vendo",
+  "questionOptionLowCost": "Custo de vida mais baixo",
+  "questionOptionJobOpportunities": "Mais oportunidades de trabalho",
+  "questionOptionSafetyPriority": "Segurança / tranquilidade",
+  "questionOptionWarmClimateBeach": "Clima mais quente / praia",
+  "questionOptionTransitInfra": "Boa infraestrutura e transporte",
+  "questionOptionNature": "Natureza",
+  "questionOptionUniversity": "Ambiente universitário",
+  "questionOptionCommunity": "Comunidade / fazer amigos",
+  "questionOptionCloseToArgentina": "Perto da Argentina",
+  "questionOptionBalancedUnsure": "Quero equilíbrio / ainda não sei",
+  "questionOptionPreferSouth": "Prefiro estar no Sul",
+  "questionOptionNeedBigCity": "Preciso de cidade grande",
+  "questionOptionPreferMidCity": "Prefiro cidade média ou tranquila",
+  "questionOptionWantCoast": "Quero litoral ou praia",
+  "questionOptionPreferCooler": "Prefiro clima mais fresco",
+  "questionOptionNeedTransit": "Preciso de transporte forte",
+  "questionOptionAvoidExpensive": "Quero evitar cidades caras",
+  "planReasonBudgetFit": "Melhor encaixe se você quer proteger o orçamento.",
+  "planReasonJobMobility": "Mais espaço para buscar trabalho e se movimentar.",
+  "planReasonSafety": "Combina com sua prioridade de tranquilidade.",
+  "planReasonClimateNature": "Bom ponto de partida se você busca clima e vida ao ar livre.",
+  "planReasonTransit": "Mais prático para se mover sem carro.",
+  "planReasonProximityArgentina": "Mais perto para voltar à Argentina quando precisar.",
+  "planReasonUniversity": "Mais alinhado se o seu plano é estudar.",
+  "planReasonCommunity": "Mais chance de criar rede e comunidade.",
+  "planReasonBalancedProfile": "Aparece como uma opção equilibrada para começar.",
+  "archetypeJobHunter": "Busca de trabalho",
+  "archetypeJobHunterWithOffer": "Trabalho com oferta",
+  "archetypeJobHunterSearching": "Busca ativa de trabalho",
+  "archetypeRemoteWorker": "Trabalho remoto",
+  "archetypeRemoteStable": "Trabalho remoto estável",
+  "archetypeStudent": "Estudo",
+  "archetypeFamilyMove": "Mudança familiar",
+  "archetypeFreshStart": "Recomeço",
+  "archetypeExplorer": "Exploração",
+  "planStepTitleChooseBaseCity": "Escolha sua cidade base",
+  "planStepTitleResidencePath": "Entenda a rota de residência",
+  "planStepTitleCpfStart": "Comece seu CPF",
+  "planStepDescriptionChooseBaseCityExplore": "Escolha 1 cidade para começar e olhe bairros, custo de vida e mobilidade básica. Não é definitivo: é para começar com clareza.",
+  "planStepDescriptionChooseBaseCityBalanced": "Defina uma cidade base e compare 2 bairros, aluguel e mobilidade para tirar o plano do campo da ideia.",
+  "planStepDescriptionChooseBaseCityUrgent": "Defina uma cidade base e uma data tentativa nesta semana para organizar as decisões mais urgentes.",
+  "planStepDescriptionChooseBaseCityOffer": "Como você já tem uma oferta ou contrato, escolha a cidade base e valide bairro, deslocamento e custo de entrada.",
+  "planStepDescriptionResidencePathExplore": "Revise a rota de residência mais comum entre Argentina e Brasil e quais documentos base você vai precisar depois.",
+  "planStepDescriptionResidencePathBalanced": "Entenda a rota de residência e comece a separar os documentos base antes de entrar em burocracia detalhada.",
+  "planStepDescriptionResidencePathUrgent": "Revise a rota de residência e separe agora os documentos base para não travar a execução.",
+  "planStepDescriptionResidencePathFundingUnknown": "Antes de avançar, entenda a rota de residência e esclareça como vai se sustentar nos primeiros meses para evitar bloqueios.",
+  "planStepDescriptionCpfStart": "O CPF destrava várias etapas práticas no Brasil. Comece com a orientação oficial e depois siga no Movaro passo a passo.",
+  "migrationPlanPrepHeroTitle": "Prepare a mudança sem se perder no processo",
+  "migrationPlanPrepHeroBody": "Aqui a ideia não é marcar checklist. Primeiro entenda o que emitir, onde abrir cada tema e qual guia resolve seu próximo passo.",
+  "migrationPlanPrepTabOverview": "Visão geral",
+  "migrationPlanPrepTabDocuments": "Documentação",
+  "migrationPlanPrepTabHousing": "Moradia e custos",
+  "migrationPlanPrepTabWork": "Trabalho e vida prática",
+  "migrationPlanPrepTabArrival": "Chegada",
+  "migrationPlanPrepOverviewTitle": "Comece pela parte que realmente destrava a mudança",
+  "migrationPlanPrepOverviewBody": "Em vez de um checklist longo, esta área virou um guia prático. Documentação entra primeiro, depois moradia, custos, trabalho e chegada.",
+  "migrationPlanPrepChooseCityTitle": "Escolha uma cidade para destravar a preparação",
+  "migrationPlanPrepChooseCityBody": "A preparação só faz sentido com uma cidade-base confirmada. Primeiro eleja a cidade que vai guiar moradia, custos, trabalho e chegada.",
+  "migrationPlanPrepChooseCityAction": "Escolher cidade do plano",
+  "migrationPlanPrepQuestionDocsTitle": "Como regularizar meus documentos?",
+  "migrationPlanPrepQuestionDocsBody": "Abra CPF, registro, banco e contratos de um jeito mais guiado, sem cair em um fluxo burocrático solto.",
+  "migrationPlanPrepQuestionRentTitle": "O que eu preciso para alugar?",
+  "migrationPlanPrepQuestionRentBody": "Veja garantias, caução, aluguel temporário e o que costuma ser pedido para entrar em moradia no começo.",
+  "migrationPlanPrepQuestionMoneyTitle": "Quanto dinheiro levar?",
+  "migrationPlanPrepQuestionMoneyBody": "Use uma leitura mais conservadora da chegada, com margem de segurança e sem empurrar números irreais.",
+  "migrationPlanPrepQuestionHealthTitle": "Saúde é pública ou privada?",
+  "migrationPlanPrepQuestionHealthBody": "Entenda quando faz sentido SUS, posto de saúde, hospital ou plano privado sem misturar tudo.",
+  "migrationPlanPrepQuestionWorkTitle": "Posso trabalhar e abrir conta?",
+  "migrationPlanPrepQuestionWorkBody": "Abra trabalho formal, renda, banco e contrato de forma prática, com foco no que destrava a vida real.",
+  "migrationPlanPrepQuestionArrivalTitle": "O que eu resolvo logo na chegada?",
+  "migrationPlanPrepQuestionArrivalBody": "Organize os primeiros dias, a primeira base de moradia e a rotina inicial para não improvisar tudo.",
+  "migrationPlanPrepQuestionFlightsTitle": "Como consultar voos para a cidade?",
+  "migrationPlanPrepQuestionFlightsBody": "Abra uma busca externa de voos para comparar rotas até a cidade escolhida no Brasil.",
+  "migrationPlanPrepPrimaryEyebrow": "Primeiro passo",
+  "migrationPlanPrepCardToneGuide": "Guia rápido",
+  "migrationPlanPrepCardTonePractical": "Resolver agora",
+  "migrationPlanPrepCardTonePriority": "Prioridade alta",
+  "migrationPlanPrepCardToneArrival": "Primeiros passos",
+  "migrationPlanPrepOpenSection": "Abrir esta área",
+  "migrationPlanPrepOpenOfficialSource": "Abrir fonte oficial",
+  "migrationPlanPrepExternalToolHint": "Use este atalho como orientação rápida. O próximo passo abre a fonte oficial dentro do app para você continuar sem perder o contexto.",
+  "migrationPlanPrepOpenGuide": "Abrir guia completo",
+  "migrationPlanPrepBackToOverview": "Voltar ao resumo",
+  "migrationPlanPrepDocumentsTitle": "Documentos e residência",
+  "migrationPlanPrepDocumentsBody": "Veja o que emitir primeiro, como CPF e registro entram na prática e onde abrir a orientação certa sem cair numa pesquisa solta.",
+  "migrationPlanPrepHousingTitle": "Moradia e custos",
+  "migrationPlanPrepHousingBody": "Entenda reserva, entrada no aluguel, garantia e plano de moradia temporária antes da chegada apertar.",
+  "migrationPlanPrepWorkTitle": "Trabalho e vida prática",
+  "migrationPlanPrepWorkBody": "Abra trabalho, saúde e mobilidade em blocos mais diretos para resolver a vida prática sem excesso de leitura.",
+  "migrationPlanPrepArrivalTitle": "Primeiros dias no Brasil",
+  "migrationPlanPrepArrivalBody": "Organize a chegada por horizonte curto: primeira semana, primeiro mês e os 90 dias que estabilizam a mudança.",
+  "migrationPlanPrepDocumentsGuideTitle": "Comece por documentos, não por checklist",
+  "migrationPlanPrepDocumentsGuideBody": "Se a camada documental estiver confusa, o resto trava. Por isso esta área te leva direto para o que emitir, como funciona e onde continuar.",
+  "migrationPlanPrepOpenDocumentsTopic": "Abrir tópico de documentos",
+  "migrationPlanPrepDocumentsCpfTitle": "CPF e o que ele realmente destrava",
+  "migrationPlanPrepDocumentsCpfBody": "Abra esta parte para entender quando o CPF ajuda, o que ele não resolve sozinho e como ele entra em banco, contratos e vida prática.",
+  "migrationPlanPrepDocumentsResidenceTitle": "Registro e residência sem linguagem burocrática",
+  "migrationPlanPrepDocumentsResidenceBody": "Entenda qual é o caminho de residência mais comum, o papel do protocolo e como isso conversa com a chegada.",
+  "migrationPlanPrepDocumentsBankTitle": "Banco, cadastro e contratos",
+  "migrationPlanPrepDocumentsBankBody": "Veja o que costuma ser pedido para abrir conta, assinar aluguel e não travar a vida prática logo no início.",
+  "migrationPlanPrepTaxesTitle": "Como ficam impostos e residência fiscal",
+  "migrationPlanPrepTaxesBody": "Abra a orientação oficial da Receita para entender entrada no Brasil, residência fiscal e quando isso começa a importar.",
+  "migrationPlanPrepDeadlinesTitle": "Quais prazos não posso perder",
+  "migrationPlanPrepDeadlinesBody": "Abra a rota oficial da residência para não descobrir tarde demais prazo de registro, emissão e etapas críticas.",
+  "migrationPlanPrepHousingGuideTitle": "Transforme a mudança em números reais",
+  "migrationPlanPrepHousingGuideBody": "Aqui você revisa reserva, custo de entrada, garantias e soft landing com uma leitura bem mais prática do que um bloco de checklist.",
+  "migrationPlanPrepWorkGuideTitle": "Vida prática depois da cidade escolhida",
+  "migrationPlanPrepWorkGuideBody": "Use estes blocos para abrir rapidamente trabalho, saúde e mobilidade. São os temas que mais viram dúvida depois da decisão da cidade.",
+  "migrationPlanPrepWorkSignalsTitle": "Sinais de trabalho da cidade",
+  "migrationPlanPrepWorkSignalsBody": "Hoje o Movaro mostra sinais de mercado, atividade econômica e desemprego. A renda média ainda não está integrada no catálogo atual.",
+  "migrationPlanPrepMoneyPracticeTitle": "Banco e dinheiro na prática",
+  "migrationPlanPrepMoneyPracticeBody": "Abra a orientação pública do Banco Central para entender conta, Pix, pagamentos e organização financeira de migrantes.",
+  "migrationPlanPrepDiplomaTitle": "Reconhecer diploma e profissão",
+  "migrationPlanPrepDiplomaBody": "Abra a rota oficial para revalidar diploma estrangeiro e entender quando a profissão pode exigir etapa extra no Brasil.",
+  "migrationPlanPrepWorkSignalJobs": "Mercado de trabalho",
+  "migrationPlanPrepWorkSignalEconomic": "Atividade econômica",
+  "migrationPlanPrepWorkSignalUnemployment": "Desemprego",
+  "migrationPlanPrepArrivalGuideTitle": "O que resolver primeiro quando você chegar",
+  "migrationPlanPrepArrivalGuideBody": "Em vez de marcar tarefas soltas, olhe a chegada como uma sequência curta: aterrissar, estabilizar e consolidar a nova rotina.",
+  "migrationPlanPrepArrivalWeekTitle": "Primeira semana",
+  "migrationPlanPrepArrivalWeekBody": "Foque em onde ficar, como circular, o que comprar no básico e como evitar os primeiros erros de moradia.",
+  "migrationPlanPrepArrivalMonthTitle": "Primeiro mês",
+  "migrationPlanPrepArrivalMonthBody": "Ajuste documentos, rotina de bairro, conta, aluguel e os pontos que fazem a chegada deixar de ser improviso.",
+  "migrationPlanPrepArrivalQuarterTitle": "Primeiros 90 dias",
+  "migrationPlanPrepArrivalQuarterBody": "Consolide trabalho, organização financeira, rotina de saúde e os próximos passos para a mudança ficar sustentável.",
+  "migrationPlanPrepSupportNetworkTitle": "Onde buscar rede de apoio",
+  "migrationPlanPrepSupportNetworkBody": "Abra redes públicas de apoio a migrantes e refugiados para entender onde procurar atendimento, orientação e acolhimento.",
+  "migrationPlanPrepArgentineNetworkTitle": "Embaixada e consulados da Argentina",
+  "migrationPlanPrepArgentineNetworkBody": "Abra a lista oficial da embaixada e dos consulados da Argentina no Brasil para consultar trâmites, contatos e orientação consular oficial.",
+  "migrationPlanPrepFamilyTitle": "Como ficam família e filhos",
+  "migrationPlanPrepFamilyBody": "Abra a orientação pública sobre matrícula e direitos de crianças e adolescentes migrantes no Brasil.",
+  "migrationPlanPrepRiskAlertsTitle": "Golpes e riscos para não cair",
+  "migrationPlanPrepRiskAlertsBody": "Abra alertas públicos sobre ofertas enganosas, promessas falsas e riscos que costumam atingir quem está mudando de país.",
+  "migrationPlanPrepFlightsPlannerTitle": "Planeje a busca de voo",
+  "migrationPlanPrepFlightsPlannerBody": "Escolha a cidade de saída na Argentina e a data que você pretende mudar para abrir a busca pronta até {city}.",
+  "@migrationPlanPrepFlightsPlannerBody": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanPrepFlightsOriginLabel": "Cidade de saída",
+  "migrationPlanPrepFlightsDateLabel": "Data estimada da mudança",
+  "migrationPlanPrepFlightsDatePlaceholder": "Selecione uma data",
+  "migrationPlanPrepFlightsDisclaimer": "Os valores finais variam por data, antecedência e disponibilidade. Use esta busca como ponto de partida e compare antes de comprar.",
+  "migrationPlanPrepFlightsOpenGoogle": "Consultar no Google Flights",
+  "migrationPlanPrepOfficialIncomeTitle": "Ver renda e indicadores oficiais",
+  "migrationPlanPrepOfficialIncomeBody": "Abra a página oficial do IBGE desta cidade para consultar indicadores municipais, incluindo o panorama usado como fonte confiável.",
+  "migrationPlanPrepOfficialJobsTitle": "Buscar vagas no Emprega Brasil",
+  "migrationPlanPrepOfficialJobsBodyNoCity": "Abra o portal oficial de emprego do governo para procurar vagas formais e usar a sua região como base da busca.",
+  "migrationPlanPrepOfficialJobsBodyWithCity": "Abra o portal oficial de emprego do governo para procurar vagas formais e usar {city} ({state}) como referência da busca.",
+  "@migrationPlanPrepOfficialJobsBodyWithCity": {
+    "placeholders": {
+      "city": {},
+      "state": {}
+    }
+  },
+  "migrationPlanPrepOfficialStudyCatalogTitle": "Ver universidades publicas oficiais",
+  "migrationPlanPrepOfficialStudyCatalogBodyNoCity": "Abra o catalogo oficial do MEC para buscar instituicoes de ensino superior publicas e filtrar por estado ou cidade.",
+  "migrationPlanPrepOfficialStudyCatalogBodyWithCity": "Abra o catalogo oficial do MEC para buscar instituicoes de ensino superior publicas e filtrar por {city} ({state}) ou pela regiao mais proxima.",
+  "@migrationPlanPrepOfficialStudyCatalogBodyWithCity": {
+    "placeholders": {
+      "city": {},
+      "state": {}
+    }
+  },
+  "migrationPlanPrepOfficialStudyForeignersTitle": "Entender ingresso de estrangeiros",
+  "migrationPlanPrepOfficialStudyForeignersBody": "Abra a rota oficial do PEC-G para entender como funciona o ingresso de estrangeiros e quais universidades participantes ja recebem esse processo.",
+  "migrationPlanPrepRentalSearchTitle": "Buscar aluguel na cidade",
+  "migrationPlanPrepRentalSearchBody": "Abra uma busca de aluguel já filtrada para {city} ({state}) dentro do app e compare opções por região.",
+  "@migrationPlanPrepRentalSearchBody": {
+    "placeholders": {
+      "city": {},
+      "state": {}
+    }
+  },
+  "migrationPlanPrepRentalProviderLabel": "Portal de aluguel",
+  "migrationPlanPrepRentalProviderZap": "ZAP Imóveis",
+  "migrationPlanPrepRentalProviderVivaReal": "Viva Real",
+  "migrationPlanPrepRentalProviderChaves": "Chaves na Mão",
+  "migrationPlanPrepRentalSearchDisclaimer": "Os portais podem variar em cobertura por cidade e disponibilidade do momento. Use mais de uma fonte antes de decidir.",
+  "migrationPlanPrepRentalSearchOpen": "Abrir busca de aluguel",
+  "migrationPlanPrepScamsTitle": "Como evitar golpes no aluguel",
+  "migrationPlanPrepScamsBody": "Abra um alerta público sobre fraudes comuns em anúncios e aluguéis para não decidir só pelo preço ou pela pressa."
 }

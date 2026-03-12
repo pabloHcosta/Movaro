@@ -16,10 +16,12 @@ import 'package:movaro_app/features/explore/presentation/pages/countries_page.da
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/explore/presentation/pages/explore_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/home_page.dart';
+import 'package:movaro_app/features/home/presentation/pages/favorites_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/public_home_page.dart';
 import 'package:movaro_app/features/intro/presentation/pages/intro_page.dart';
 import 'package:movaro_app/features/journey/presentation/pages/journey_setup_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_result_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_copilot_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_save_page.dart';
@@ -35,6 +37,7 @@ class AppRouter {
     required this.catalogRepository,
     required this.citiesController,
     required this.migrationQuestionnaireController,
+    required this.copilotExchangeRatesService,
     required this.apiHealthService,
     required this.journeyContextController,
   });
@@ -44,6 +47,7 @@ class AppRouter {
   final CatalogRepository catalogRepository;
   final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
+  final CopilotExchangeRatesService copilotExchangeRatesService;
   final ApiHealthService apiHealthService;
   final JourneyContextController journeyContextController;
 
@@ -61,6 +65,7 @@ class AppRouter {
 
     const journeyRequiredPaths = <String>{
       AppRoutes.publicHome,
+      AppRoutes.favorites,
       AppRoutes.explore,
       AppRoutes.documentationGuide,
       AppRoutes.cities,
@@ -126,9 +131,23 @@ class AppRouter {
           ),
         );
       case AppRoutes.publicHome:
+        unawaited(citiesController.prefetchCatalog());
         return _buildRoute(
           settings,
-          PublicHomePage(journeyContextController: journeyContextController),
+          PublicHomePage(
+            journeyContextController: journeyContextController,
+            citiesController: citiesController,
+            migrationQuestionnaireController: migrationQuestionnaireController,
+          ),
+        );
+      case AppRoutes.favorites:
+        unawaited(citiesController.prefetchCatalog());
+        return _buildRoute(
+          settings,
+          FavoritesPage(
+            citiesController: citiesController,
+            migrationQuestionnaireController: migrationQuestionnaireController,
+          ),
         );
       case AppRoutes.intro:
         final isFirstLaunch = settings.arguments == true;
@@ -221,6 +240,8 @@ class AppRouter {
           settings,
           MigrationPlanCopilotPage(
             controller: migrationQuestionnaireController,
+            exchangeRatesService: copilotExchangeRatesService,
+            citiesController: citiesController,
           ),
         );
       case AppRoutes.authenticatedHome:
@@ -255,7 +276,39 @@ class AppRouter {
     }
   }
 
-  MaterialPageRoute<void> _buildRoute(RouteSettings settings, Widget child) {
+  Route<void> _buildRoute(RouteSettings settings, Widget child) {
+    const primaryNavRoutes = <String>{
+      AppRoutes.publicHome,
+      AppRoutes.favorites,
+      AppRoutes.migrationPlanCopilot,
+    };
+
+    if (primaryNavRoutes.contains(settings.name)) {
+      return PageRouteBuilder<void>(
+        settings: settings,
+        transitionDuration: const Duration(milliseconds: 320),
+        reverseTransitionDuration: const Duration(milliseconds: 240),
+        pageBuilder: (context, animation, secondaryAnimation) => child,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final curved = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          );
+          final fade = Tween<double>(begin: 0.72, end: 1).animate(curved);
+          final slide = Tween<Offset>(
+            begin: const Offset(0, 0.035),
+            end: Offset.zero,
+          ).animate(curved);
+
+          return FadeTransition(
+            opacity: fade,
+            child: SlideTransition(position: slide, child: child),
+          );
+        },
+      );
+    }
+
     return MaterialPageRoute<void>(builder: (_) => child, settings: settings);
   }
 }

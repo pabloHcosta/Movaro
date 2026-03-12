@@ -1,6 +1,7 @@
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 
 abstract class CitiesRepository {
   Future<CityHighlights> getHighlights();
@@ -16,4 +17,6 @@ abstract class CitiesRepository {
   Future<City> getCityById(String id);
 
   Future<CityMethodology> getMethodology();
+
+  Future<CityWeather> getCityWeather(String cityId);
 }

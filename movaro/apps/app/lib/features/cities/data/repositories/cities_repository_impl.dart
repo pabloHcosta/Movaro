@@ -2,9 +2,11 @@ import 'package:movaro_app/features/cities/data/datasources/cities_remote_data_s
 import 'package:movaro_app/features/cities/data/models/city_highlights_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_methodology_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_model.dart';
+import 'package:movaro_app/features/cities/data/models/city_weather_model.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
 
 class CitiesRepositoryImpl implements CitiesRepository {
@@ -62,6 +64,14 @@ class CitiesRepositoryImpl implements CitiesRepository {
       '/api/v1/cities/metadata/methodology',
     );
     return CityMethodologyModel.fromJson(response).toEntity();
+  }
+
+  @override
+  Future<CityWeather> getCityWeather(String cityId) async {
+    final response = await _remoteDataSource.getJsonMap(
+      '/api/v1/cities/$cityId/weather',
+    );
+    return CityWeatherModel.fromJson(response).toEntity();
   }
 
   @override

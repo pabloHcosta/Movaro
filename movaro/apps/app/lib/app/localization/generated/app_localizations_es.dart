@@ -409,7 +409,58 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentationHeroDescription =>
-      'Sin texto infinito. Acá ves documentos, salud, movilidad y costos aproximados de lo que suele importar primero para quien va a vivir en Brasil.';
+      'Escribí tu duda, filtrá por tema y encontrá rápido el bloque correcto entre documentos, salud, trabajo, vivienda, movilidad y costos iniciales.';
+
+  @override
+  String get documentationSearchLabel => 'Escribí tu duda';
+
+  @override
+  String get documentationSearchHint =>
+      'Ej.: puedo trabajar con visa de visita? / CPF / bank / salud / costos';
+
+  @override
+  String get documentationSearchSupport =>
+      'Podés buscar en español, portugués o inglés.';
+
+  @override
+  String documentationSearchResultsCount(int count) {
+    return '$count ítems encontrados';
+  }
+
+  @override
+  String get documentationSearchResultsHint =>
+      'Tocá un ítem para abrir el tema o ir directo a los resultados filtrados.';
+
+  @override
+  String get documentationFilterAll => 'Todo';
+
+  @override
+  String get documentationQuickRoutesTitle => 'Atajos rápidos';
+
+  @override
+  String get documentationQuickRoutesBody =>
+      'Deslizá hacia el costado y entrá directo al tema que destraba tu próxima decisión.';
+
+  @override
+  String get documentationResultsTitle => 'Resultados de la guía';
+
+  @override
+  String get documentationResultsBody =>
+      'Empezá por una respuesta rápida o abrí el tema completo para profundizar.';
+
+  @override
+  String get documentationResultsFilteredBody =>
+      'La búsqueda cruza respuestas rápidas y bloques completos para acortar el camino hasta la información correcta.';
+
+  @override
+  String get documentationViewMatchesAction => 'Ver';
+
+  @override
+  String get documentationNoResultsTitle => 'No apareció nada con ese término';
+
+  @override
+  String get documentationNoResultsBody =>
+      'Probá con CPF, registro, work, visa, salud, alquiler o costos.';
 
   @override
   String get documentationQuickStepCpf => 'CPF';
@@ -1481,6 +1532,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mirá sugerencias por intención y entendé por qué cada ciudad aparece acá.';
 
   @override
+  String get citiesExploreSearchFirstDescription =>
+      'Buscá una ciudad o usá los chips para filtrar el catálogo cuando tenga sentido. La lista no abre cargada: los resultados aparecen solo cuando buscás o elegís un recorte.';
+
+  @override
+  String get citiesExploreSearchIdleTitle =>
+      'Buscá una ciudad o elegí un filtro';
+
+  @override
+  String get citiesExploreSearchIdleDescription =>
+      'Escribí el nombre de la ciudad para tener autocomplete inmediato o deslizá los chips para explorar por popularidad, playa, trabajo, idioma y llegada.';
+
+  @override
   String get citiesLoadingLabel => 'Cargando ciudades';
 
   @override
@@ -1614,6 +1677,32 @@ class AppLocalizationsEs extends AppLocalizations {
   String get citiesSearchFieldLabel => 'Nombre de la ciudad';
 
   @override
+  String get citiesSearchHelper =>
+      'Escribí para buscar ciudades por nombre y tocar el autocomplete.';
+
+  @override
+  String citiesSearchResultsCount(int count) {
+    return '$count ciudades encontradas';
+  }
+
+  @override
+  String get citiesSearchResultsHint =>
+      'Tocá una ciudad para abrir directo el detalle.';
+
+  @override
+  String get citiesMapOpenAction => 'Elegir en el mapa';
+
+  @override
+  String get citiesMapSheetTitle => 'Elegí una ciudad en el mapa';
+
+  @override
+  String get citiesMapSheetBody =>
+      'Abrí el mapa de Brasil, tocá un punto y seleccioná la ciudad por su posición.';
+
+  @override
+  String get citiesMapOpenCityAction => 'Abrir ciudad';
+
+  @override
   String get citiesQuickFilterAll => 'Vista general';
 
   @override
@@ -1653,11 +1742,29 @@ class AppLocalizationsEs extends AppLocalizations {
   String get citiesCatalogLoadingLabel => 'Cargando catálogo';
 
   @override
+  String get citiesFilterClear => 'Limpiar';
+
+  @override
+  String get citiesResultsTitle => 'Resultados';
+
+  @override
+  String citiesResultsBody(int count) {
+    return '$count ciudades coinciden con esta búsqueda o filtro.';
+  }
+
+  @override
+  String get citiesResultsMoreHint => 'Deslizá para cargar más ciudades';
+
+  @override
   String get citiesSearchEmptyTitle => 'No encontramos esa ciudad';
 
   @override
   String get citiesSearchEmptyDescription =>
       'Probá con otro nombre o explorá el catálogo inicial de Movaro.';
+
+  @override
+  String get citiesSearchFirstEmptyDescription =>
+      'Probá otro nombre o cambiá el filtro para ampliar los resultados.';
 
   @override
   String get citiesCatalogEmptyTitle => 'El catálogo todavía está vacío';
@@ -1684,6 +1791,50 @@ class AppLocalizationsEs extends AppLocalizations {
       'Usá estos indicadores como punto de partida, no como una verdad absoluta.';
 
   @override
+  String get cityDetailDecisionSnapshotTitle => 'Resumen para decidir';
+
+  @override
+  String cityDetailDecisionSnapshotSubtitle(Object bestFor) {
+    return 'Movaro ve esta ciudad como una buena opción si hoy priorizás $bestFor.';
+  }
+
+  @override
+  String cityDetailDecisionSnapshotPlanSubtitle(Object bestFor) {
+    return 'Para tu plan, esta ciudad aparece fuerte si hoy priorizás $bestFor.';
+  }
+
+  @override
+  String cityDetailDecisionSnapshotRecommendedSubtitle(Object bestFor) {
+    return 'Esta ciudad hoy lidera en tu plan si tu foco es $bestFor.';
+  }
+
+  @override
+  String get cityDetailWatchoutTitle => 'El principal punto a validar';
+
+  @override
+  String get cityDetailPlanLeadingChip => 'Lidera en tu plan';
+
+  @override
+  String get cityDetailPlanMatchChip => 'Encaja con tu plan';
+
+  @override
+  String cityDetailUpdatedLabel(Object date) {
+    return 'Actualizado el $date';
+  }
+
+  @override
+  String get cityDetailAffordabilityTitle => 'Costo y vivienda';
+
+  @override
+  String get cityDetailSettleInTitle => 'Adaptación y comunidad';
+
+  @override
+  String get cityDetailCommunityTitle => 'Red de apoyo';
+
+  @override
+  String get cityDetailContextTitle => 'Contexto de la ciudad';
+
+  @override
   String get cityLifestyleCoastalLabel => 'Estilo de vida de litoral';
 
   @override
@@ -1704,6 +1855,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cityDetailSnapshotTitle => 'Vista rápida';
+
+  @override
+  String get cityDetailMetricsSummary =>
+      'Abrí solo si querés ver todos los indicadores y el recorte completo.';
 
   @override
   String get cityDetailPopulationLabel => 'Población';
@@ -1808,6 +1963,31 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ciudad guardada temporalmente en este dispositivo.';
 
   @override
+  String get cityDetailFavoriteAction => 'Agregar a favoritas';
+
+  @override
+  String get cityDetailFavoriteRemoveAction => 'Quitar de favoritas';
+
+  @override
+  String get cityDetailFavoriteNote =>
+      'Podés guardar hasta 3 ciudades favoritas para volver rápido desde la home.';
+
+  @override
+  String cityDetailFavoriteAddedFeedback(Object city) {
+    return '$city fue agregada a favoritas.';
+  }
+
+  @override
+  String cityDetailFavoriteRemovedFeedback(Object city) {
+    return '$city fue quitada de favoritas.';
+  }
+
+  @override
+  String cityDetailFavoriteLimitFeedback(Object count) {
+    return 'Podés elegir hasta $count ciudades favoritas.';
+  }
+
+  @override
   String get cityDetailCompareAction => 'Comparar otras ciudades';
 
   @override
@@ -1816,6 +1996,69 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get cityDetailFooterNote =>
       'Estos indicadores ayudan en la exploración inicial y no reemplazan un análisis individual.';
+
+  @override
+  String get publicHomeFavoritesTitle => 'Tus ciudades favoritas';
+
+  @override
+  String get publicHomeFavoritesBody =>
+      'Guardá hasta 3 ciudades para volver rápido a sus detalles cuando quieras compararlas mejor.';
+
+  @override
+  String get publicHomeFavoritesJumpAction => 'Ver ciudades favoritas';
+
+  @override
+  String get publicHomeFavoriteCardHint =>
+      'Abrí los detalles para volver a comparar costo, trabajo y encaje de llegada.';
+
+  @override
+  String get mainNavHome => 'Home';
+
+  @override
+  String get mainNavFavorites => 'Favoritas';
+
+  @override
+  String get mainNavCopilot => 'Guía';
+
+  @override
+  String get mainNavFavoritesDisabled =>
+      'Agregá al menos 1 ciudad a favoritas para habilitar esta pestaña.';
+
+  @override
+  String get mainNavCopilotDisabled =>
+      'Confirmá una ciudad en tu plan para habilitar la guía de la mudanza.';
+
+  @override
+  String get favoritesEmptyTitle => 'Todavía no hay ciudades favoritas';
+
+  @override
+  String get favoritesEmptyBody =>
+      'Cuando guardes ciudades favoritas, quedan reunidas acá para seguir detalles, clima y comparación más rápido.';
+
+  @override
+  String get favoritesEmptyHint =>
+      'Explorá ciudades, guardá las más fuertes y volvé acá cuando quieras retomar.';
+
+  @override
+  String get favoritesExploreAction => 'Explorar ciudades';
+
+  @override
+  String get publicHomeJourneyResetAction => 'Elegir otra ruta';
+
+  @override
+  String get publicHomeJourneyResetTitle => '¿Elegir otra ruta?';
+
+  @override
+  String get publicHomeJourneyResetBody =>
+      'Tu ruta actual ya está guardada en este dispositivo. Si la reiniciás ahora, Movaro va a abrir de nuevo la selección para que elijas otro origen o destino.';
+
+  @override
+  String get publicHomeJourneyResetConfirm => 'Rehacer ruta';
+
+  @override
+  String cityWeatherSummary(Object temperature) {
+    return '$temperature°C ahora';
+  }
 
   @override
   String get introPageTitle => 'Cómo funciona Movaro';
@@ -3063,6 +3306,15 @@ class AppLocalizationsEs extends AppLocalizations {
       'Estas estimaciones son orientativas, no precios oficiales. Combinan señales de ciudad, presión de instalación y riesgo por timing para ayudarte a planear la reserva antes de la mudanza.';
 
   @override
+  String landingBudgetExchangeUpdatedAt(Object value) {
+    return 'Tipo de cambio oficial actualizado en $value';
+  }
+
+  @override
+  String get landingBudgetExchangeUnavailable =>
+      'No fue posible actualizar el tipo de cambio oficial ahora. Los valores en reales siguen como referencia.';
+
+  @override
   String get arrivalExecutionSectionTitle => 'Primeros 7 / 30 / 90 días';
 
   @override
@@ -3230,10 +3482,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get publicHomeRetakePlanAction => 'Rehacer plan';
 
   @override
-  String get migrationPlanCopilotTitle => 'Preparación guiada';
+  String get migrationPlanCopilotTitle => 'Guía de la mudanza';
 
   @override
-  String get migrationPlanCopilotAction => 'Abrir preparación';
+  String get migrationPlanCopilotAction => 'Abrir guía';
 
   @override
   String get migrationPlanCopilotIntroTitle =>
@@ -3251,6 +3503,173 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get migrationPlanCopilotResultBody =>
       'Primero mirá si la ciudad recomendada realmente encaja con tu contexto. Cuando quieras convertir esa decisión en preparación concreta, abrí la capa guiada con checklist, documentos y reserva de llegada.';
+
+  @override
+  String migrationPlanCopilotStepCounter(Object current, Object total) {
+    return 'Paso $current de $total';
+  }
+
+  @override
+  String get migrationPlanCopilotStepStartTitle =>
+      'Empezá por lo que destraba la mudanza';
+
+  @override
+  String get migrationPlanCopilotStepStartBody =>
+      'Primero enfocáte en los chequeos que bajan riesgo antes de gastar energía en el resto.';
+
+  @override
+  String get migrationPlanCopilotStepDocumentsTitle =>
+      'Ordená los documentos clave';
+
+  @override
+  String get migrationPlanCopilotStepDocumentsBody =>
+      'Usá esta etapa para ordenar la capa documental que suele frenar el avance después.';
+
+  @override
+  String get migrationPlanCopilotStepBudgetTitle =>
+      'Planificá reserva y entrada de vivienda';
+
+  @override
+  String get migrationPlanCopilotStepBudgetBody =>
+      'Estimá tu reserva inicial y revisá la fricción de vivienda antes de que la llegada se vuelva urgente.';
+
+  @override
+  String get migrationPlanCopilotStepArrivalTitle =>
+      'Prepará los primeros 7 / 30 / 90 días';
+
+  @override
+  String get migrationPlanCopilotStepArrivalBody =>
+      'Convertí el plan en ejecución para que la llegada no dependa de improvisación.';
+
+  @override
+  String get migrationPlanCopilotHomeTitle => 'Qué hacer ahora';
+
+  @override
+  String get migrationPlanCopilotHomeBody =>
+      'Usá esta home para ver los próximos pasos, el riesgo principal y la etapa que merece atención primero.';
+
+  @override
+  String migrationPlanCopilotStageCountLabel(Object count) {
+    return '$count etapas guiadas';
+  }
+
+  @override
+  String get migrationPlanCopilotNextActionsTitle => 'Tus próximos 3 pasos';
+
+  @override
+  String get migrationPlanCopilotNextActionsBody =>
+      'Empezá por las tareas que destraban la mudanza antes de profundizar el resto.';
+
+  @override
+  String get migrationPlanCopilotNextActionStart =>
+      'Reducí los primeros bloqueos';
+
+  @override
+  String get migrationPlanCopilotNextActionDocuments =>
+      'Poné los documentos en movimiento';
+
+  @override
+  String get migrationPlanCopilotNextActionBudget =>
+      'Revisá reserva y entrada de vivienda';
+
+  @override
+  String get migrationPlanCopilotNextActionBudgetBody =>
+      'Estimá tu reserva inicial y entendé cómo la entrada de vivienda puede pesar en la llegada.';
+
+  @override
+  String get migrationPlanCopilotFallbackActionBody =>
+      'Abrí esta etapa para ver la primera acción recomendada.';
+
+  @override
+  String get migrationPlanCopilotRiskTitle => 'Riesgo principal ahora';
+
+  @override
+  String get migrationPlanCopilotRiskDocuments =>
+      'La capa documental sigue siendo el mayor riesgo. Si queda suelta, las etapas siguientes pueden trabarse aunque ciudad y presupuesto ya estén decididos.';
+
+  @override
+  String get migrationPlanCopilotRiskReadiness =>
+      'La mudanza todavía necesita una base inicial más fuerte. Resolvé primero los bloqueos prácticos antes de gastar más energía en detalles.';
+
+  @override
+  String get migrationPlanCopilotRiskHousing =>
+      'La entrada a vivienda todavía puede generar fricción en la llegada. Revisá reserva, garantías y plan de fallback antes de tratar la mudanza como algo operativo.';
+
+  @override
+  String get migrationPlanCopilotStagesTitle => 'Abrí una etapa guiada';
+
+  @override
+  String get migrationPlanCopilotStagesBody =>
+      'Podés entrar directo en la etapa que necesitás, pero Movaro mantiene el orden claro para que la mudanza no pierda prioridad.';
+
+  @override
+  String get migrationPlanCopilotRecommendedTitle =>
+      'Siguiente paso recomendado';
+
+  @override
+  String get migrationPlanCopilotRecommendedReadinessBody =>
+      'Empezá por esta etapa para destrabar los primeros bloqueos y darle una base real al resto del plan.';
+
+  @override
+  String get migrationPlanCopilotRecommendedDocumentsBody =>
+      'La capa documental todavía merece atención primero. Resolvela ahora para evitar trabas más caras después.';
+
+  @override
+  String get migrationPlanCopilotRecommendedBudgetBody =>
+      'Ahora conviene convertir el plan en números reales y revisar la entrada a vivienda antes de que la llegada se vuelva ajustada.';
+
+  @override
+  String get migrationPlanCopilotRecommendedArrivalBody =>
+      'Ya tenés base suficiente para organizar la llegada. Usá esta etapa para pasar del plan a la ejecución.';
+
+  @override
+  String get migrationPlanCopilotRecommendedOpen => 'Abrir etapa recomendada';
+
+  @override
+  String get migrationPlanCopilotQuickQuestionsTitle => 'Dudas rápidas';
+
+  @override
+  String get migrationPlanCopilotQuickQuestionsBody =>
+      'Usá estas respuestas cortas cuando aparezca una duda práctica antes de avanzar.';
+
+  @override
+  String get migrationPlanCopilotQuickQuestionDocumentsTitle =>
+      '¿Qué documentos debería mover primero?';
+
+  @override
+  String get migrationPlanCopilotQuickQuestionDocumentsAnswer =>
+      'Empezá por los documentos que tardan más en salir o vencen antes. La etapa documental de Movaro te ayuda a separar lo que destraba residencia, CPF y llegada práctica sin empujarte de golpe a un flujo burocrático completo.';
+
+  @override
+  String get migrationPlanCopilotQuickQuestionHousingTitle =>
+      '¿Tengo que resolver vivienda definitiva ahora?';
+
+  @override
+  String get migrationPlanCopilotQuickQuestionHousingAnswer =>
+      'No siempre. En muchos casos conviene entrar con un plan de vivienda temporal, entender garantías y recién después asumir un alquiler mayor. Lo importante ahora es estimar reserva, costo de entrada y plan de fallback.';
+
+  @override
+  String get migrationPlanCopilotQuickQuestionArrivalTitle =>
+      '¿Qué tengo que resolver apenas llego?';
+
+  @override
+  String get migrationPlanCopilotQuickQuestionArrivalAnswer =>
+      'Pensá primero en lo que baja fricción en los primeros días: dónde quedarte, cómo moverte, qué se resuelve en los primeros 7 días y qué tareas no pueden pasar del primer mes. La etapa de llegada ya organiza eso por prioridad.';
+
+  @override
+  String get migrationPlanCopilotQuickQuestionOpenStage => 'Ir a esta etapa';
+
+  @override
+  String get migrationPlanCopilotActionOpen => 'Resolver ahora';
+
+  @override
+  String get migrationPlanCopilotOverviewAction => 'Empezar preparación guiada';
+
+  @override
+  String get migrationPlanCopilotOverviewBackAction => 'Volver al resumen';
+
+  @override
+  String get migrationPlanCopilotFinishAction => 'Cerrar por ahora';
 
   @override
   String get migrationPlanDecisionLabel => 'Elección de ciudad';
@@ -3273,12 +3692,50 @@ class AppLocalizationsEs extends AppLocalizations {
       'Primero elegí la ciudad que más sentido tenga para vos. El checklist detallado entra solo después de esa decisión.';
 
   @override
+  String migrationPlanHeroTitle(Object city) {
+    return '$city es tu mejor punto de partida por ahora';
+  }
+
+  @override
+  String migrationPlanHeroBody(Object timeline) {
+    return 'Según tu plazo de $timeline, empezá revisando las 3 ciudades de abajo y abrí la que más fuerza tenga para tu mudanza.';
+  }
+
+  @override
+  String get migrationPlanConfidenceLow => 'Recomendación inicial';
+
+  @override
+  String get migrationPlanConfidenceHigh => 'Recomendación fuerte';
+
+  @override
+  String migrationPlanSummaryArchetype(Object value) {
+    return 'Perfil detectado: $value';
+  }
+
+  @override
+  String migrationPlanSummaryVariant(Object value) {
+    return 'Modo usado: $value';
+  }
+
+  @override
+  String migrationPlanSummaryFunding(Object value) {
+    return 'Sostén inicial: $value';
+  }
+
+  @override
   String get migrationPlanCandidateCitiesTitle =>
       'Ciudades más alineadas con tu perfil';
 
   @override
   String get migrationPlanCandidateCitiesBody =>
       'La lista ya viene ordenada para dejar primero lo que tiende a hacer más sentido para argentinos con este objetivo.';
+
+  @override
+  String get migrationPlanShortlistTitle => '3 ciudades para revisar ahora';
+
+  @override
+  String get migrationPlanShortlistBody =>
+      'Estas son las 3 opciones más fuertes para empezar. Abrí una ciudad para compararla con tu contexto real.';
 
   @override
   String get migrationPlanCandidateCitiesSheetBody =>
@@ -3335,9 +3792,756 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String migrationPlanPreparationBody(Object city) {
-    return 'Si decidís avanzar con $city, el copiloto abre checklist, documentos, vivienda y reserva de llegada enfocados en esa ciudad.';
+    return 'Si decidís avanzar con $city, la preparación guiada abre checklist, documentos, vivienda y reserva de llegada enfocados en esa ciudad.';
   }
 
   @override
+  String get migrationPlanScrollHint => 'Ver más';
+
+  @override
   String get languageSelectorSystem => 'Sistema';
+
+  @override
+  String get bmpDisclaimer =>
+      'Es para armar un punto de partida. No es asesoría legal.';
+
+  @override
+  String bmpProgressStep(Object current, Object total) {
+    return 'Paso $current de $total';
+  }
+
+  @override
+  String get bmpCtaBack => 'Volver';
+
+  @override
+  String get bmpCtaContinue => 'Continuar';
+
+  @override
+  String get bmpCtaSkip => 'Omitir';
+
+  @override
+  String get bmpCtaGenerate => 'Generar mi plan';
+
+  @override
+  String get bmpExitDialogTitle => '¿Querés salir del plan?';
+
+  @override
+  String get bmpExitDialogBody =>
+      'Si volvés al inicio, vas a perder este flujo y tus respuestas actuales.';
+
+  @override
+  String get bmpExitDialogStay => 'Seguir acá';
+
+  @override
+  String get bmpExitDialogLeave => 'Volver al inicio';
+
+  @override
+  String get bmpCtaRefineYes => 'Sí, afinar';
+
+  @override
+  String get bmpCtaRefineNo => 'No, generar mi plan';
+
+  @override
+  String get bmpVariantTitle => '¿Cómo querés armar tu plan?';
+
+  @override
+  String get bmpVariantSubtitle =>
+      'Podés ir rápido o responder una pregunta extra para una recomendación más afinada.';
+
+  @override
+  String get bmpVariantLeanTitle => 'Plan rápido';
+
+  @override
+  String get bmpVariantLeanBody =>
+      '3 preguntas y una refinación opcional para tener una dirección inicial sin fricción.';
+
+  @override
+  String get bmpVariantLeanTag => 'Más rápido';
+
+  @override
+  String get bmpVariantStrategicTitle => 'Plan estratégico';
+
+  @override
+  String get bmpVariantStrategicBody =>
+      'Incluye cómo pensás sostenerte al llegar y genera una lectura más precisa para empezar.';
+
+  @override
+  String get bmpVariantStrategicTag => 'Más preciso';
+
+  @override
+  String get bmpRefineTitle =>
+      '¿Querés afinar la recomendación con 1 pregunta más?';
+
+  @override
+  String get bmpRefineSubtitle => '(Opcional) Tarda ~5 segundos';
+
+  @override
+  String get qIntentPrompt => '¿Qué buscás en Brasil ahora?';
+
+  @override
+  String get qFundingPrompt => '¿Cómo pensás sostenerte los primeros 3 meses?';
+
+  @override
+  String get qFundingSubtitle =>
+      'Nos ayuda a ajustar el punto de partida sin pedir datos personales.';
+
+  @override
+  String get qTimelinePrompt => '¿Cuándo te gustaría estar en Brasil? (aprox.)';
+
+  @override
+  String get qPrioritiesPrompt =>
+      'Para tu primer año, ¿qué 2 puntos pesan más al elegir ciudad?';
+
+  @override
+  String get qPrioritiesHelper => 'Elegí 2 para seguir';
+
+  @override
+  String qPrioritiesSelectedCount(Object selected, Object total) {
+    return '$selected/$total';
+  }
+
+  @override
+  String get qPrioritiesValidation => 'Elegí 2 opciones para seguir';
+
+  @override
+  String get qConstraintsPrompt => '¿Hay algo que NO querés negociar?';
+
+  @override
+  String get qConstraintsSubtitle => '(Opcional) Elegí hasta 2';
+
+  @override
+  String get bmpScrollHint => 'Ver más opciones';
+
+  @override
+  String get qConstraintsValidation => 'Podés elegir hasta 2 opciones';
+
+  @override
+  String get qConstraintsNone => 'No tengo condiciones fijas';
+
+  @override
+  String get questionOptionFindJobBr => 'Conseguir trabajo en Brasil';
+
+  @override
+  String get questionOptionRemoteIncome =>
+      'Trabajar remoto (ya tengo ingresos)';
+
+  @override
+  String get questionOptionFundingSavings => 'Tengo ahorros para arrancar';
+
+  @override
+  String get questionOptionFundingJobSearch => 'Voy a buscar trabajo en Brasil';
+
+  @override
+  String get questionOptionFundingJobOffer => 'Ya tengo oferta o contrato';
+
+  @override
+  String get questionOptionFundingFamilySupport => 'Ayuda de familia o pareja';
+
+  @override
+  String get questionOptionFundingDontKnow => 'Todavía no lo sé';
+
+  @override
+  String get questionOptionFamilyPartner => 'Mudanza por pareja o familia';
+
+  @override
+  String get questionOptionFreshStart =>
+      'Mejor calidad de vida / empezar de cero';
+
+  @override
+  String get questionOptionExploreUnsure => 'Solo quiero entender opciones';
+
+  @override
+  String get questionOptionJustExploring => 'Solo explorando';
+
+  @override
+  String get questionOptionIn03Months => 'En 0–3 meses';
+
+  @override
+  String get questionOptionIn36Months => 'En 3–6 meses';
+
+  @override
+  String get questionOptionIn612Months => 'En 6–12 meses';
+
+  @override
+  String get questionOptionIn12PlusMonths => 'En más de 12 meses';
+
+  @override
+  String get questionOptionDepends => 'Depende / estoy viendo';
+
+  @override
+  String get questionOptionLowCost => 'Costo de vida más bajo';
+
+  @override
+  String get questionOptionJobOpportunities => 'Más oportunidades de trabajo';
+
+  @override
+  String get questionOptionSafetyPriority => 'Seguridad / tranquilidad';
+
+  @override
+  String get questionOptionWarmClimateBeach => 'Clima más cálido / playa';
+
+  @override
+  String get questionOptionTransitInfra => 'Buena infraestructura y transporte';
+
+  @override
+  String get questionOptionNature => 'Naturaleza';
+
+  @override
+  String get questionOptionUniversity => 'Ambiente universitario';
+
+  @override
+  String get questionOptionCommunity => 'Comunidad / hacer amigos';
+
+  @override
+  String get questionOptionCloseToArgentina => 'Cerca de Argentina';
+
+  @override
+  String get questionOptionBalancedUnsure => 'Quiero un balance / no sé';
+
+  @override
+  String get questionOptionPreferSouth => 'Prefiero estar en el Sur';
+
+  @override
+  String get questionOptionNeedBigCity => 'Necesito ciudad grande';
+
+  @override
+  String get questionOptionPreferMidCity =>
+      'Prefiero ciudad mediana o tranquila';
+
+  @override
+  String get questionOptionWantCoast => 'Quiero costa o playa';
+
+  @override
+  String get questionOptionPreferCooler => 'Prefiero clima más fresco';
+
+  @override
+  String get questionOptionNeedTransit => 'Necesito transporte fuerte';
+
+  @override
+  String get questionOptionAvoidExpensive => 'Quiero evitar ciudades caras';
+
+  @override
+  String get planReasonBudgetFit =>
+      'Mejor encaje si querés cuidar el presupuesto.';
+
+  @override
+  String get planReasonJobMobility =>
+      'Más opciones para buscar trabajo y moverte.';
+
+  @override
+  String get planReasonSafety => 'Encaja con tu prioridad de tranquilidad.';
+
+  @override
+  String get planReasonClimateNature =>
+      'Buen punto de partida si buscás clima y aire libre.';
+
+  @override
+  String get planReasonTransit => 'Más práctico para moverte sin auto.';
+
+  @override
+  String get planReasonProximityArgentina =>
+      'Más cerca para volver a Argentina cuando lo necesites.';
+
+  @override
+  String get planReasonUniversity => 'Más alineado si tu plan es estudiar.';
+
+  @override
+  String get planReasonCommunity => 'Más chances de armar red y comunidad.';
+
+  @override
+  String get planReasonBalancedProfile =>
+      'Aparece como una opción equilibrada para empezar.';
+
+  @override
+  String get archetypeJobHunter => 'Búsqueda laboral';
+
+  @override
+  String get archetypeJobHunterWithOffer => 'Trabajo con oferta';
+
+  @override
+  String get archetypeJobHunterSearching => 'Búsqueda laboral activa';
+
+  @override
+  String get archetypeRemoteWorker => 'Trabajo remoto';
+
+  @override
+  String get archetypeRemoteStable => 'Trabajo remoto estable';
+
+  @override
+  String get archetypeStudent => 'Estudio';
+
+  @override
+  String get archetypeFamilyMove => 'Mudanza familiar';
+
+  @override
+  String get archetypeFreshStart => 'Nuevo comienzo';
+
+  @override
+  String get archetypeExplorer => 'Exploración';
+
+  @override
+  String get planStepTitleChooseBaseCity => 'Elegí tu ciudad base';
+
+  @override
+  String get planStepTitleResidencePath => 'Entendé la ruta de residencia';
+
+  @override
+  String get planStepTitleCpfStart => 'Empezá tu CPF';
+
+  @override
+  String get planStepDescriptionChooseBaseCityExplore =>
+      'Elegí 1 ciudad para empezar y mirá barrios, costo de vida y movilidad básica. No es definitivo: es para arrancar con claridad.';
+
+  @override
+  String get planStepDescriptionChooseBaseCityBalanced =>
+      'Definí una ciudad base y compará 2 barrios, alquiler y movilidad para pasar de la idea a un plan concreto.';
+
+  @override
+  String get planStepDescriptionChooseBaseCityUrgent =>
+      'Definí ciudad base y fecha tentativa esta semana para ordenar las decisiones más urgentes.';
+
+  @override
+  String get planStepDescriptionChooseBaseCityOffer =>
+      'Como ya tenés una oferta o contrato, elegí la ciudad base y validá barrio, tiempo de traslado y costo de entrada.';
+
+  @override
+  String get planStepDescriptionResidencePathExplore =>
+      'Revisá la ruta de residencia más común para Argentina→Brasil y qué documentos base vas a necesitar después.';
+
+  @override
+  String get planStepDescriptionResidencePathBalanced =>
+      'Entendé la ruta de residencia y empezá a juntar los documentos base antes de entrar en burocracia fina.';
+
+  @override
+  String get planStepDescriptionResidencePathUrgent =>
+      'Revisá la ruta de residencia y separá ya los documentos base para no trabarte en la ejecución.';
+
+  @override
+  String get planStepDescriptionResidencePathFundingUnknown =>
+      'Antes de avanzar, entendé la ruta de residencia y aclará cómo vas a sostenerte los primeros meses para evitar bloqueos.';
+
+  @override
+  String get planStepDescriptionCpfStart =>
+      'El CPF te destraba muchas cosas en Brasil. Empezá con la guía oficial y seguí después en Movaro paso a paso.';
+
+  @override
+  String get migrationPlanPrepHeroTitle =>
+      'Prepará la mudanza sin perderte en el proceso';
+
+  @override
+  String get migrationPlanPrepHeroBody =>
+      'La idea acá no es marcar checklist. Primero entendé qué emitir, dónde abrir cada tema y qué guía resuelve tu próximo paso.';
+
+  @override
+  String get migrationPlanPrepTabOverview => 'Resumen';
+
+  @override
+  String get migrationPlanPrepTabDocuments => 'Documentos';
+
+  @override
+  String get migrationPlanPrepTabHousing => 'Vivienda y costos';
+
+  @override
+  String get migrationPlanPrepTabWork => 'Trabajo y vida práctica';
+
+  @override
+  String get migrationPlanPrepTabArrival => 'Llegada';
+
+  @override
+  String get migrationPlanPrepOverviewTitle =>
+      'Empezá por la parte que realmente destraba la mudanza';
+
+  @override
+  String get migrationPlanPrepOverviewBody =>
+      'En vez de un checklist largo, esta área pasó a ser una guía práctica. Primero documentos, después vivienda, costos, trabajo y llegada.';
+
+  @override
+  String get migrationPlanPrepChooseCityTitle =>
+      'Elegí una ciudad para destrabar la preparación';
+
+  @override
+  String get migrationPlanPrepChooseCityBody =>
+      'La preparación sólo tiene sentido con una ciudad base confirmada. Primero elegí la ciudad que va a guiar vivienda, costos, trabajo y llegada.';
+
+  @override
+  String get migrationPlanPrepChooseCityAction => 'Elegir ciudad del plan';
+
+  @override
+  String get migrationPlanPrepQuestionDocsTitle =>
+      '¿Cómo regularizo mis documentos?';
+
+  @override
+  String get migrationPlanPrepQuestionDocsBody =>
+      'Abrí CPF, registro, banco y contratos de una forma más guiada, sin caer en un flujo burocrático suelto.';
+
+  @override
+  String get migrationPlanPrepQuestionRentTitle =>
+      '¿Qué necesito para alquilar?';
+
+  @override
+  String get migrationPlanPrepQuestionRentBody =>
+      'Mirá garantías, depósito, alquiler temporal y lo que suelen pedir para entrar a vivienda al principio.';
+
+  @override
+  String get migrationPlanPrepQuestionMoneyTitle =>
+      '¿Cuánto dinero debería llevar?';
+
+  @override
+  String get migrationPlanPrepQuestionMoneyBody =>
+      'Usá una mirada más conservadora de la llegada, con margen de seguridad y sin empujar números irreales.';
+
+  @override
+  String get migrationPlanPrepQuestionHealthTitle =>
+      '¿La salud es pública o privada?';
+
+  @override
+  String get migrationPlanPrepQuestionHealthBody =>
+      'Entendé cuándo conviene SUS, puesto de salud, hospital o plan privado sin mezclar todo.';
+
+  @override
+  String get migrationPlanPrepQuestionWorkTitle =>
+      '¿Puedo trabajar y abrir cuenta?';
+
+  @override
+  String get migrationPlanPrepQuestionWorkBody =>
+      'Abrí trabajo formal, ingresos, banco y contratos de forma práctica, con foco en lo que destraba la vida real.';
+
+  @override
+  String get migrationPlanPrepQuestionArrivalTitle =>
+      '¿Qué resuelvo apenas llego?';
+
+  @override
+  String get migrationPlanPrepQuestionArrivalBody =>
+      'Ordená los primeros días, la primera base de vivienda y la rutina inicial para no improvisar todo.';
+
+  @override
+  String get migrationPlanPrepQuestionFlightsTitle =>
+      '¿Cómo consulto vuelos a esta ciudad?';
+
+  @override
+  String get migrationPlanPrepQuestionFlightsBody =>
+      'Abrí una búsqueda externa de vuelos para comparar rutas hasta la ciudad elegida en Brasil.';
+
+  @override
+  String get migrationPlanPrepPrimaryEyebrow => 'Primer paso';
+
+  @override
+  String get migrationPlanPrepCardToneGuide => 'Guía rápida';
+
+  @override
+  String get migrationPlanPrepCardTonePractical => 'Resolver ahora';
+
+  @override
+  String get migrationPlanPrepCardTonePriority => 'Alta prioridad';
+
+  @override
+  String get migrationPlanPrepCardToneArrival => 'Primeros pasos';
+
+  @override
+  String get migrationPlanPrepOpenSection => 'Abrir esta área';
+
+  @override
+  String get migrationPlanPrepOpenOfficialSource => 'Abrir fuente oficial';
+
+  @override
+  String get migrationPlanPrepExternalToolHint =>
+      'Usá este atajo como orientación rápida. El siguiente paso abre la fuente oficial dentro de la app para que sigas sin perder contexto.';
+
+  @override
+  String get migrationPlanPrepOpenGuide => 'Abrir guía completa';
+
+  @override
+  String get migrationPlanPrepBackToOverview => 'Volver al resumen';
+
+  @override
+  String get migrationPlanPrepDocumentsTitle => 'Documentos y residencia';
+
+  @override
+  String get migrationPlanPrepDocumentsBody =>
+      'Mirá qué emitir primero, cómo funcionan CPF y registro en la práctica y dónde abrir la orientación correcta sin caer en una investigación dispersa.';
+
+  @override
+  String get migrationPlanPrepHousingTitle => 'Vivienda y costos';
+
+  @override
+  String get migrationPlanPrepHousingBody =>
+      'Entendé reserva, entrada al alquiler, garantías y plan de vivienda temporal antes de que la llegada se vuelva ajustada.';
+
+  @override
+  String get migrationPlanPrepWorkTitle => 'Trabajo y vida práctica';
+
+  @override
+  String get migrationPlanPrepWorkBody =>
+      'Abrí trabajo, salud y movilidad en bloques más directos para resolver la vida práctica sin exceso de lectura.';
+
+  @override
+  String get migrationPlanPrepArrivalTitle => 'Primeros días en Brasil';
+
+  @override
+  String get migrationPlanPrepArrivalBody =>
+      'Ordená la llegada por horizonte corto: primera semana, primer mes y los 90 días que estabilizan la mudanza.';
+
+  @override
+  String get migrationPlanPrepDocumentsGuideTitle =>
+      'Empezá por documentos, no por un checklist';
+
+  @override
+  String get migrationPlanPrepDocumentsGuideBody =>
+      'Si la capa documental está confusa, el resto se traba. Por eso esta área te lleva directo a qué emitir, cómo funciona y dónde seguir.';
+
+  @override
+  String get migrationPlanPrepOpenDocumentsTopic => 'Abrir tema de documentos';
+
+  @override
+  String get migrationPlanPrepDocumentsCpfTitle =>
+      'CPF y lo que realmente destraba';
+
+  @override
+  String get migrationPlanPrepDocumentsCpfBody =>
+      'Abrí esta parte para entender cuándo el CPF ayuda, qué no resuelve por sí solo y cómo entra en banco, contratos y vida práctica.';
+
+  @override
+  String get migrationPlanPrepDocumentsResidenceTitle =>
+      'Registro y residencia sin lenguaje burocrático';
+
+  @override
+  String get migrationPlanPrepDocumentsResidenceBody =>
+      'Entendé cuál es la ruta de residencia más común, el papel del protocolo y cómo eso conversa con la llegada.';
+
+  @override
+  String get migrationPlanPrepDocumentsBankTitle =>
+      'Banco, registros y contratos';
+
+  @override
+  String get migrationPlanPrepDocumentsBankBody =>
+      'Mirá qué suelen pedir para abrir cuenta, firmar alquiler y no trabar la vida práctica apenas empezás.';
+
+  @override
+  String get migrationPlanPrepTaxesTitle =>
+      'Cómo funcionan impuestos y residencia fiscal';
+
+  @override
+  String get migrationPlanPrepTaxesBody =>
+      'Abrí la guía oficial de la Receita para entender entrada a Brasil, residencia fiscal y cuándo esto empieza a importar.';
+
+  @override
+  String get migrationPlanPrepDeadlinesTitle => 'Qué plazos no podés perder';
+
+  @override
+  String get migrationPlanPrepDeadlinesBody =>
+      'Abrí la ruta oficial de residencia para no descubrir demasiado tarde plazos de registro, emisión y etapas críticas.';
+
+  @override
+  String get migrationPlanPrepHousingGuideTitle =>
+      'Convertí la mudanza en números reales';
+
+  @override
+  String get migrationPlanPrepHousingGuideBody =>
+      'Acá revisás reserva, costo de entrada, garantías y soft landing con una lectura mucho más práctica que un bloque de checklist.';
+
+  @override
+  String get migrationPlanPrepWorkGuideTitle =>
+      'Vida práctica después de elegir ciudad';
+
+  @override
+  String get migrationPlanPrepWorkGuideBody =>
+      'Usá estos bloques para abrir rápido trabajo, salud y movilidad. Son los temas que más se vuelven duda después de decidir la ciudad.';
+
+  @override
+  String get migrationPlanPrepWorkSignalsTitle =>
+      'Señales de trabajo de la ciudad';
+
+  @override
+  String get migrationPlanPrepWorkSignalsBody =>
+      'Hoy Movaro muestra señales de mercado laboral, actividad económica y desempleo. El ingreso promedio todavía no está integrado al catálogo.';
+
+  @override
+  String get migrationPlanPrepMoneyPracticeTitle =>
+      'Banco y dinero en la práctica';
+
+  @override
+  String get migrationPlanPrepMoneyPracticeBody =>
+      'Abrí la guía pública del Banco Central para entender cuenta, Pix, pagos y organización financiera para migrantes.';
+
+  @override
+  String get migrationPlanPrepDiplomaTitle => 'Reconocer diploma y profesión';
+
+  @override
+  String get migrationPlanPrepDiplomaBody =>
+      'Abrí la ruta oficial para revalidar diploma extranjero y entender cuándo la profesión puede exigir un paso extra en Brasil.';
+
+  @override
+  String get migrationPlanPrepWorkSignalJobs => 'Mercado laboral';
+
+  @override
+  String get migrationPlanPrepWorkSignalEconomic => 'Actividad económica';
+
+  @override
+  String get migrationPlanPrepWorkSignalUnemployment => 'Desempleo';
+
+  @override
+  String get migrationPlanPrepArrivalGuideTitle =>
+      'Qué resolver primero cuando llegás';
+
+  @override
+  String get migrationPlanPrepArrivalGuideBody =>
+      'En vez de marcar tareas sueltas, mirá la llegada como una secuencia corta: aterrizar, estabilizar y consolidar la nueva rutina.';
+
+  @override
+  String get migrationPlanPrepArrivalWeekTitle => 'Primera semana';
+
+  @override
+  String get migrationPlanPrepArrivalWeekBody =>
+      'Enfocate en dónde quedarte, cómo moverte, qué comprar al principio y cómo evitar los primeros errores de vivienda.';
+
+  @override
+  String get migrationPlanPrepArrivalMonthTitle => 'Primer mes';
+
+  @override
+  String get migrationPlanPrepArrivalMonthBody =>
+      'Ajustá documentos, rutina de barrio, cuenta, alquiler y los puntos que hacen que la llegada deje de ser improvisada.';
+
+  @override
+  String get migrationPlanPrepArrivalQuarterTitle => 'Primeros 90 días';
+
+  @override
+  String get migrationPlanPrepArrivalQuarterBody =>
+      'Consolidá trabajo, organización financiera, rutina de salud y los próximos pasos para que la mudanza sea sostenible.';
+
+  @override
+  String get migrationPlanPrepSupportNetworkTitle =>
+      'Dónde buscar red de apoyo';
+
+  @override
+  String get migrationPlanPrepSupportNetworkBody =>
+      'Abrí redes públicas de apoyo a migrantes y refugiados para entender dónde buscar atención, orientación y acogida.';
+
+  @override
+  String get migrationPlanPrepArgentineNetworkTitle =>
+      'Embajada y consulados de Argentina';
+
+  @override
+  String get migrationPlanPrepArgentineNetworkBody =>
+      'Abrí la lista oficial de la embajada y los consulados de Argentina en Brasil para consultar trámites, contactos y orientación consular oficial.';
+
+  @override
+  String get migrationPlanPrepFamilyTitle => 'Cómo quedan familia e hijos';
+
+  @override
+  String get migrationPlanPrepFamilyBody =>
+      'Abrí la guía pública sobre matrícula y derechos de niños y adolescentes migrantes en Brasil.';
+
+  @override
+  String get migrationPlanPrepRiskAlertsTitle =>
+      'Estafas y riesgos para evitar';
+
+  @override
+  String get migrationPlanPrepRiskAlertsBody =>
+      'Abrí alertas públicas sobre ofertas engañosas, falsas promesas y riesgos que suelen afectar a quienes se mudan de país.';
+
+  @override
+  String get migrationPlanPrepFlightsPlannerTitle =>
+      'Planificá la búsqueda de vuelo';
+
+  @override
+  String migrationPlanPrepFlightsPlannerBody(Object city) {
+    return 'Elegí la ciudad de salida en Argentina y la fecha en la que pensás mudarte para abrir la búsqueda lista hacia $city.';
+  }
+
+  @override
+  String get migrationPlanPrepFlightsOriginLabel => 'Ciudad de salida';
+
+  @override
+  String get migrationPlanPrepFlightsDateLabel => 'Fecha estimada de mudanza';
+
+  @override
+  String get migrationPlanPrepFlightsDatePlaceholder => 'Elegí una fecha';
+
+  @override
+  String get migrationPlanPrepFlightsDisclaimer =>
+      'Los valores finales cambian según la fecha, la anticipación y la disponibilidad. Usá esta búsqueda como punto de partida y compará antes de comprar.';
+
+  @override
+  String get migrationPlanPrepFlightsOpenGoogle =>
+      'Consultar en Google Flights';
+
+  @override
+  String get migrationPlanPrepOfficialIncomeTitle =>
+      'Ver ingreso e indicadores oficiales';
+
+  @override
+  String get migrationPlanPrepOfficialIncomeBody =>
+      'Abrí la página oficial del IBGE de esta ciudad para consultar indicadores municipales, incluido el panorama usado como fuente confiable.';
+
+  @override
+  String get migrationPlanPrepOfficialJobsTitle =>
+      'Buscar empleo en Emprega Brasil';
+
+  @override
+  String get migrationPlanPrepOfficialJobsBodyNoCity =>
+      'Abrí el portal oficial de empleo del gobierno para buscar vacantes formales y usar tu región como base de la búsqueda.';
+
+  @override
+  String migrationPlanPrepOfficialJobsBodyWithCity(Object city, Object state) {
+    return 'Abrí el portal oficial de empleo del gobierno para buscar vacantes formales y usar $city ($state) como referencia de la búsqueda.';
+  }
+
+  @override
+  String get migrationPlanPrepOfficialStudyCatalogTitle =>
+      'Ver universidades publicas oficiales';
+
+  @override
+  String get migrationPlanPrepOfficialStudyCatalogBodyNoCity =>
+      'Abrí el catalogo oficial del MEC para buscar instituciones publicas de educacion superior y filtrar por estado o ciudad.';
+
+  @override
+  String migrationPlanPrepOfficialStudyCatalogBodyWithCity(
+    Object city,
+    Object state,
+  ) {
+    return 'Abrí el catalogo oficial del MEC para buscar instituciones publicas de educacion superior y filtrar por $city ($state) o por la region mas cercana.';
+  }
+
+  @override
+  String get migrationPlanPrepOfficialStudyForeignersTitle =>
+      'Entender ingreso de extranjeros';
+
+  @override
+  String get migrationPlanPrepOfficialStudyForeignersBody =>
+      'Abrí la ruta oficial del PEC-G para entender como funciona el ingreso de extranjeros y que universidades participantes ya reciben ese proceso.';
+
+  @override
+  String get migrationPlanPrepRentalSearchTitle =>
+      'Buscar alquiler en esta ciudad';
+
+  @override
+  String migrationPlanPrepRentalSearchBody(Object city, Object state) {
+    return 'Abrí una búsqueda de alquiler ya filtrada para $city ($state) dentro de la app y compará opciones por zona.';
+  }
+
+  @override
+  String get migrationPlanPrepRentalProviderLabel => 'Portal de alquiler';
+
+  @override
+  String get migrationPlanPrepRentalProviderZap => 'ZAP Imóveis';
+
+  @override
+  String get migrationPlanPrepRentalProviderVivaReal => 'Viva Real';
+
+  @override
+  String get migrationPlanPrepRentalProviderChaves => 'Chaves na Mão';
+
+  @override
+  String get migrationPlanPrepRentalSearchDisclaimer =>
+      'La cobertura y los avisos pueden variar según la ciudad y la disponibilidad del momento. Revisá más de una fuente antes de decidir.';
+
+  @override
+  String get migrationPlanPrepRentalSearchOpen => 'Abrir búsqueda de alquiler';
+
+  @override
+  String get migrationPlanPrepScamsTitle => 'Cómo evitar estafas en alquiler';
+
+  @override
+  String get migrationPlanPrepScamsBody =>
+      'Abrí una alerta pública sobre fraudes comunes en avisos y alquileres para no decidir sólo por precio o urgencia.';
 }

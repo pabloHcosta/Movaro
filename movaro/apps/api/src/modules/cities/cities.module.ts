@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { IbgeCityNormalizerService } from '../../integrations/ibge/ibge-city-normalizer.service';
 import { IbgeHttpClient } from '../../integrations/ibge/ibge-http.client';
 import { IbgeLocalitiesService } from '../../integrations/ibge/ibge-localities.service';
+import { OpenMeteoWeatherService } from '../../integrations/weather/open-meteo-weather.service';
 import { CitiesCatalogService } from './application/services/cities-catalog.service';
 import { CityMergeService } from './application/services/city-merge.service';
 import { CityRankingService } from './application/services/city-ranking.service';
@@ -16,6 +17,7 @@ import { CitiesController } from './presentation/cities.controller';
     IbgeHttpClient,
     IbgeCityNormalizerService,
     IbgeLocalitiesService,
+    OpenMeteoWeatherService,
     CityRankingService,
     CityMergeService,
     CitiesCatalogService,

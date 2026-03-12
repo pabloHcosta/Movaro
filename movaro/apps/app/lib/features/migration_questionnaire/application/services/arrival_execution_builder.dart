@@ -21,10 +21,7 @@ class ArrivalExecutionItem {
 }
 
 class ArrivalExecutionChecklist {
-  const ArrivalExecutionChecklist({
-    required this.summary,
-    required this.items,
-  });
+  const ArrivalExecutionChecklist({required this.summary, required this.items});
 
   final String summary;
   final List<ArrivalExecutionItem> items;

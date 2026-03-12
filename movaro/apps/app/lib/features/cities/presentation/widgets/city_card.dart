@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_score_badge.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_weather_badge.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/recommendation_reason_list.dart';
 
 class CityCard extends StatelessWidget {
@@ -14,12 +16,18 @@ class CityCard extends StatelessWidget {
     required this.city,
     required this.highlightLabel,
     required this.onTap,
+    required this.citiesController,
+    this.isFavorite = false,
+    this.onFavoriteToggle,
     super.key,
   });
 
   final City city;
   final String highlightLabel;
   final VoidCallback onTap;
+  final CitiesController citiesController;
+  final bool isFavorite;
+  final VoidCallback? onFavoriteToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +76,9 @@ class CityCard extends StatelessWidget {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.10),
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.10,
+                                ),
                                 borderRadius: BorderRadius.circular(999),
                                 border: Border.all(
                                   color: AppColors.primary.withValues(
@@ -87,7 +97,9 @@ class CityCard extends StatelessWidget {
                                   const SizedBox(width: 6),
                                   Text(
                                     context.l10n.citiesQuickFilterCoastal,
-                                    style: Theme.of(context).textTheme.labelSmall
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
                                         ?.copyWith(
                                           color: AppColors.primary,
                                           fontWeight: FontWeight.w700,
@@ -102,22 +114,57 @@ class CityCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Icon(Icons.arrow_outward_rounded, color: textSoft),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: onFavoriteToggle,
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.surfaceMutedFor(context),
+                        foregroundColor: isFavorite
+                            ? const Color(0xFFE25273)
+                            : textSoft,
+                      ),
+                      icon: Icon(
+                        isFavorite
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.arrow_outward_rounded, color: textSoft),
+                  ],
+                ),
               ],
             ),
             const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                highlightLabel,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelMedium?.copyWith(color: AppColors.primary),
-              ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    highlightLabel,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelMedium?.copyWith(color: AppColors.primary),
+                  ),
+                ),
+                CityWeatherBadge(
+                  cityId: city.id,
+                  citiesController: citiesController,
+                  compact: true,
+                ),
+              ],
             ),
             const SizedBox(height: 10),
             Container(
@@ -192,10 +239,8 @@ class CityCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           housing.supporting,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: textSoft,
-                            height: 1.35,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: textSoft, height: 1.35),
                         ),
                       ],
                     ),

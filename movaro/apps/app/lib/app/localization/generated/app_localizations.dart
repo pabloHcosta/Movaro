@@ -778,8 +778,92 @@ abstract class AppLocalizations {
   /// No description provided for @documentationHeroDescription.
   ///
   /// In en, this message translates to:
-  /// **'No endless text. This page covers documents, health, mobility, and approximate costs for the things that usually matter first when someone plans to live in Brazil.'**
+  /// **'Type your question, filter by topic, and quickly reach the right block across documents, health, work, housing, mobility, and early costs.'**
   String get documentationHeroDescription;
+
+  /// No description provided for @documentationSearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your question'**
+  String get documentationSearchLabel;
+
+  /// No description provided for @documentationSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex.: can I work with visitor status? / CPF / banco / salud / costs'**
+  String get documentationSearchHint;
+
+  /// No description provided for @documentationSearchSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'You can search in English, Portuguese, or Spanish.'**
+  String get documentationSearchSupport;
+
+  /// No description provided for @documentationSearchResultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items found'**
+  String documentationSearchResultsCount(int count);
+
+  /// No description provided for @documentationSearchResultsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap an item to open the topic or jump straight to filtered results.'**
+  String get documentationSearchResultsHint;
+
+  /// No description provided for @documentationFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get documentationFilterAll;
+
+  /// No description provided for @documentationQuickRoutesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick routes'**
+  String get documentationQuickRoutesTitle;
+
+  /// No description provided for @documentationQuickRoutesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe sideways and jump straight into the topic that unlocks your next decision.'**
+  String get documentationQuickRoutesBody;
+
+  /// No description provided for @documentationResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guide results'**
+  String get documentationResultsTitle;
+
+  /// No description provided for @documentationResultsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with a quick answer or open the full topic when you need more depth.'**
+  String get documentationResultsBody;
+
+  /// No description provided for @documentationResultsFilteredBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Search mixes quick answers and full topic blocks to shorten the path to the right information.'**
+  String get documentationResultsFilteredBody;
+
+  /// No description provided for @documentationViewMatchesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get documentationViewMatchesAction;
+
+  /// No description provided for @documentationNoResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matched that term'**
+  String get documentationNoResultsTitle;
+
+  /// No description provided for @documentationNoResultsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try CPF, registration, work, visa, health, rent, or costs.'**
+  String get documentationNoResultsBody;
 
   /// No description provided for @documentationQuickStepCpf.
   ///
@@ -2527,6 +2611,24 @@ abstract class AppLocalizations {
   /// **'See suggestions by intention and understand why each city appears here.'**
   String get citiesExploreDescription;
 
+  /// No description provided for @citiesExploreSearchFirstDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a city or use the chips to filter the catalog when it makes sense. The list does not open preloaded: results appear only after you search or pick a slice.'**
+  String get citiesExploreSearchFirstDescription;
+
+  /// No description provided for @citiesExploreSearchIdleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a city or choose a filter'**
+  String get citiesExploreSearchIdleTitle;
+
+  /// No description provided for @citiesExploreSearchIdleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a city name for immediate autocomplete or swipe the chips to explore by popularity, beach, work, language, and arrival profile.'**
+  String get citiesExploreSearchIdleDescription;
+
   /// No description provided for @citiesLoadingLabel.
   ///
   /// In en, this message translates to:
@@ -2743,6 +2845,48 @@ abstract class AppLocalizations {
   /// **'City name'**
   String get citiesSearchFieldLabel;
 
+  /// No description provided for @citiesSearchHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Type to search cities by name and tap autocomplete.'**
+  String get citiesSearchHelper;
+
+  /// No description provided for @citiesSearchResultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cities found'**
+  String citiesSearchResultsCount(int count);
+
+  /// No description provided for @citiesSearchResultsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a city to open the detail directly.'**
+  String get citiesSearchResultsHint;
+
+  /// No description provided for @citiesMapOpenAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose on map'**
+  String get citiesMapOpenAction;
+
+  /// No description provided for @citiesMapSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a city on the map'**
+  String get citiesMapSheetTitle;
+
+  /// No description provided for @citiesMapSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the Brazil map, tap a point, and select the city by its position.'**
+  String get citiesMapSheetBody;
+
+  /// No description provided for @citiesMapOpenCityAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open city'**
+  String get citiesMapOpenCityAction;
+
   /// No description provided for @citiesQuickFilterAll.
   ///
   /// In en, this message translates to:
@@ -2821,6 +2965,30 @@ abstract class AppLocalizations {
   /// **'Loading catalog'**
   String get citiesCatalogLoadingLabel;
 
+  /// No description provided for @citiesFilterClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get citiesFilterClear;
+
+  /// No description provided for @citiesResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get citiesResultsTitle;
+
+  /// No description provided for @citiesResultsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cities match this search or filter.'**
+  String citiesResultsBody(int count);
+
+  /// No description provided for @citiesResultsMoreHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to load more cities'**
+  String get citiesResultsMoreHint;
+
   /// No description provided for @citiesSearchEmptyTitle.
   ///
   /// In en, this message translates to:
@@ -2832,6 +3000,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try another name or explore the initial Movaro catalog.'**
   String get citiesSearchEmptyDescription;
+
+  /// No description provided for @citiesSearchFirstEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another name or change the filter to widen results.'**
+  String get citiesSearchFirstEmptyDescription;
 
   /// No description provided for @citiesCatalogEmptyTitle.
   ///
@@ -2875,6 +3049,78 @@ abstract class AppLocalizations {
   /// **'Use these indicators as a starting point, not as absolute truth.'**
   String get cityDetailContextNote;
 
+  /// No description provided for @cityDetailDecisionSnapshotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision snapshot'**
+  String get cityDetailDecisionSnapshotTitle;
+
+  /// No description provided for @cityDetailDecisionSnapshotSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Movaro sees this city as a strong option if you are prioritizing {bestFor}.'**
+  String cityDetailDecisionSnapshotSubtitle(Object bestFor);
+
+  /// No description provided for @cityDetailDecisionSnapshotPlanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'For your plan, this city stands out if you are prioritizing {bestFor}.'**
+  String cityDetailDecisionSnapshotPlanSubtitle(Object bestFor);
+
+  /// No description provided for @cityDetailDecisionSnapshotRecommendedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This city is currently leading in your plan if your focus is {bestFor}.'**
+  String cityDetailDecisionSnapshotRecommendedSubtitle(Object bestFor);
+
+  /// No description provided for @cityDetailWatchoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Main point to validate'**
+  String get cityDetailWatchoutTitle;
+
+  /// No description provided for @cityDetailPlanLeadingChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Leading in your plan'**
+  String get cityDetailPlanLeadingChip;
+
+  /// No description provided for @cityDetailPlanMatchChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Fits your plan'**
+  String get cityDetailPlanMatchChip;
+
+  /// No description provided for @cityDetailUpdatedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated on {date}'**
+  String cityDetailUpdatedLabel(Object date);
+
+  /// No description provided for @cityDetailAffordabilityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost and housing'**
+  String get cityDetailAffordabilityTitle;
+
+  /// No description provided for @cityDetailSettleInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adaptation and community'**
+  String get cityDetailSettleInTitle;
+
+  /// No description provided for @cityDetailCommunityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support network'**
+  String get cityDetailCommunityTitle;
+
+  /// No description provided for @cityDetailContextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'City context'**
+  String get cityDetailContextTitle;
+
   /// No description provided for @cityLifestyleCoastalLabel.
   ///
   /// In en, this message translates to:
@@ -2916,6 +3162,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Quick view'**
   String get cityDetailSnapshotTitle;
+
+  /// No description provided for @cityDetailMetricsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Open only if you want to review every indicator and the full data slice.'**
+  String get cityDetailMetricsSummary;
 
   /// No description provided for @cityDetailPopulationLabel.
   ///
@@ -3103,6 +3355,42 @@ abstract class AppLocalizations {
   /// **'City saved temporarily on this device.'**
   String get cityDetailSavedFeedback;
 
+  /// No description provided for @cityDetailFavoriteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to favorites'**
+  String get cityDetailFavoriteAction;
+
+  /// No description provided for @cityDetailFavoriteRemoveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get cityDetailFavoriteRemoveAction;
+
+  /// No description provided for @cityDetailFavoriteNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can keep up to 3 favorite cities to return to them quickly from home.'**
+  String get cityDetailFavoriteNote;
+
+  /// No description provided for @cityDetailFavoriteAddedFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} was added to favorites.'**
+  String cityDetailFavoriteAddedFeedback(Object city);
+
+  /// No description provided for @cityDetailFavoriteRemovedFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} was removed from favorites.'**
+  String cityDetailFavoriteRemovedFeedback(Object city);
+
+  /// No description provided for @cityDetailFavoriteLimitFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'You can choose up to {count} favorite cities.'**
+  String cityDetailFavoriteLimitFeedback(Object count);
+
   /// No description provided for @cityDetailCompareAction.
   ///
   /// In en, this message translates to:
@@ -3120,6 +3408,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'These indicators help with initial exploration and do not replace individual analysis.'**
   String get cityDetailFooterNote;
+
+  /// No description provided for @publicHomeFavoritesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your favorite cities'**
+  String get publicHomeFavoritesTitle;
+
+  /// No description provided for @publicHomeFavoritesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep up to 3 cities here so you can jump back into their details whenever you want.'**
+  String get publicHomeFavoritesBody;
+
+  /// No description provided for @publicHomeFavoritesJumpAction.
+  ///
+  /// In en, this message translates to:
+  /// **'See favorite cities'**
+  String get publicHomeFavoritesJumpAction;
+
+  /// No description provided for @publicHomeFavoriteCardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the city details to compare costs, work, and arrival fit again.'**
+  String get publicHomeFavoriteCardHint;
+
+  /// No description provided for @mainNavHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get mainNavHome;
+
+  /// No description provided for @mainNavFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get mainNavFavorites;
+
+  /// No description provided for @mainNavCopilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Move guide'**
+  String get mainNavCopilot;
+
+  /// No description provided for @mainNavFavoritesDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least 1 city to favorites to unlock this tab.'**
+  String get mainNavFavoritesDisabled;
+
+  /// No description provided for @mainNavCopilotDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm a city in your plan to unlock the move guide.'**
+  String get mainNavCopilotDisabled;
+
+  /// No description provided for @favoritesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorite cities yet'**
+  String get favoritesEmptyTitle;
+
+  /// No description provided for @favoritesEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When you favorite cities, they stay here together so you can track details, weather, and comparison faster.'**
+  String get favoritesEmptyBody;
+
+  /// No description provided for @favoritesEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore cities, save the strongest ones, and come back here whenever you want to resume.'**
+  String get favoritesEmptyHint;
+
+  /// No description provided for @favoritesExploreAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore cities'**
+  String get favoritesExploreAction;
+
+  /// No description provided for @publicHomeJourneyResetAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another route'**
+  String get publicHomeJourneyResetAction;
+
+  /// No description provided for @publicHomeJourneyResetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another route?'**
+  String get publicHomeJourneyResetTitle;
+
+  /// No description provided for @publicHomeJourneyResetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current route is already saved on this device. If you restart it now, Movaro will open the route selection again so you can choose a different origin or destination.'**
+  String get publicHomeJourneyResetBody;
+
+  /// No description provided for @publicHomeJourneyResetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo route'**
+  String get publicHomeJourneyResetConfirm;
+
+  /// No description provided for @cityWeatherSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{temperature}°C now'**
+  String cityWeatherSummary(Object temperature);
 
   /// No description provided for @introPageTitle.
   ///
@@ -5185,6 +5581,18 @@ abstract class AppLocalizations {
   /// **'These estimates are directional, not official prices. They combine city signals, setup pressure, and timeline risk to help you plan your reserve before the move.'**
   String get landingBudgetDisclaimer;
 
+  /// No description provided for @landingBudgetExchangeUpdatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Official exchange rate updated at {value}'**
+  String landingBudgetExchangeUpdatedAt(Object value);
+
+  /// No description provided for @landingBudgetExchangeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The official exchange rate could not be updated right now. BRL values remain as the reference.'**
+  String get landingBudgetExchangeUnavailable;
+
   /// No description provided for @arrivalExecutionSectionTitle.
   ///
   /// In en, this message translates to:
@@ -5446,13 +5854,13 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanCopilotTitle.
   ///
   /// In en, this message translates to:
-  /// **'Guided preparation'**
+  /// **'Move guide'**
   String get migrationPlanCopilotTitle;
 
   /// No description provided for @migrationPlanCopilotAction.
   ///
   /// In en, this message translates to:
-  /// **'Open preparation'**
+  /// **'Open guide'**
   String get migrationPlanCopilotAction;
 
   /// No description provided for @migrationPlanCopilotIntroTitle.
@@ -5478,6 +5886,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'First, check whether the recommended city really fits your context. When you want to turn that decision into concrete preparation, open the guided layer with a checklist, documents, and an arrival reserve.'**
   String get migrationPlanCopilotResultBody;
+
+  /// No description provided for @migrationPlanCopilotStepCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String migrationPlanCopilotStepCounter(Object current, Object total);
+
+  /// No description provided for @migrationPlanCopilotStepStartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with what unlocks the move'**
+  String get migrationPlanCopilotStepStartTitle;
+
+  /// No description provided for @migrationPlanCopilotStepStartBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus first on the checks that reduce risk before you spend more energy on details.'**
+  String get migrationPlanCopilotStepStartBody;
+
+  /// No description provided for @migrationPlanCopilotStepDocumentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get the key documents in order'**
+  String get migrationPlanCopilotStepDocumentsTitle;
+
+  /// No description provided for @migrationPlanCopilotStepDocumentsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this step to organize the document layer that usually blocks progress later.'**
+  String get migrationPlanCopilotStepDocumentsBody;
+
+  /// No description provided for @migrationPlanCopilotStepBudgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan reserve and housing entry'**
+  String get migrationPlanCopilotStepBudgetTitle;
+
+  /// No description provided for @migrationPlanCopilotStepBudgetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate your first reserve and review the housing friction before arrival turns urgent.'**
+  String get migrationPlanCopilotStepBudgetBody;
+
+  /// No description provided for @migrationPlanCopilotStepArrivalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare the first 7 / 30 / 90 days'**
+  String get migrationPlanCopilotStepArrivalTitle;
+
+  /// No description provided for @migrationPlanCopilotStepArrivalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the plan into execution so arrival does not depend on improvisation.'**
+  String get migrationPlanCopilotStepArrivalBody;
+
+  /// No description provided for @migrationPlanCopilotHomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What to do now'**
+  String get migrationPlanCopilotHomeTitle;
+
+  /// No description provided for @migrationPlanCopilotHomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this home to see the next actions, the main risk, and the stage that deserves attention first.'**
+  String get migrationPlanCopilotHomeBody;
+
+  /// No description provided for @migrationPlanCopilotStageCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} guided stages'**
+  String migrationPlanCopilotStageCountLabel(Object count);
+
+  /// No description provided for @migrationPlanCopilotNextActionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next 3 actions'**
+  String get migrationPlanCopilotNextActionsTitle;
+
+  /// No description provided for @migrationPlanCopilotNextActionsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with the tasks that unlock the move before you go deeper.'**
+  String get migrationPlanCopilotNextActionsBody;
+
+  /// No description provided for @migrationPlanCopilotNextActionStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce the first blockers'**
+  String get migrationPlanCopilotNextActionStart;
+
+  /// No description provided for @migrationPlanCopilotNextActionDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Put documents in motion'**
+  String get migrationPlanCopilotNextActionDocuments;
+
+  /// No description provided for @migrationPlanCopilotNextActionBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Review reserve and housing entry'**
+  String get migrationPlanCopilotNextActionBudget;
+
+  /// No description provided for @migrationPlanCopilotNextActionBudgetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate your first reserve and understand how housing entry may weigh on arrival.'**
+  String get migrationPlanCopilotNextActionBudgetBody;
+
+  /// No description provided for @migrationPlanCopilotFallbackActionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open this stage to see the first recommended action.'**
+  String get migrationPlanCopilotFallbackActionBody;
+
+  /// No description provided for @migrationPlanCopilotRiskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Main risk now'**
+  String get migrationPlanCopilotRiskTitle;
+
+  /// No description provided for @migrationPlanCopilotRiskDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'The document layer is still the biggest risk. If it stays loose, later steps may feel blocked even with city and budget already decided.'**
+  String get migrationPlanCopilotRiskDocuments;
+
+  /// No description provided for @migrationPlanCopilotRiskReadiness.
+  ///
+  /// In en, this message translates to:
+  /// **'The move still needs a stronger starting base. Resolve the first practical blockers before investing more energy in details.'**
+  String get migrationPlanCopilotRiskReadiness;
+
+  /// No description provided for @migrationPlanCopilotRiskHousing.
+  ///
+  /// In en, this message translates to:
+  /// **'Housing entry can still create friction on arrival. Review reserve, guarantees, and fallback strategy before treating the move as operational.'**
+  String get migrationPlanCopilotRiskHousing;
+
+  /// No description provided for @migrationPlanCopilotStagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a guided stage'**
+  String get migrationPlanCopilotStagesTitle;
+
+  /// No description provided for @migrationPlanCopilotStagesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can jump directly to the stage you need, but Movaro keeps the order clear so the move does not lose priority.'**
+  String get migrationPlanCopilotStagesBody;
+
+  /// No description provided for @migrationPlanCopilotRecommendedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended next step'**
+  String get migrationPlanCopilotRecommendedTitle;
+
+  /// No description provided for @migrationPlanCopilotRecommendedReadinessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with this stage to remove the first blockers and give the rest of the plan a stronger base.'**
+  String get migrationPlanCopilotRecommendedReadinessBody;
+
+  /// No description provided for @migrationPlanCopilotRecommendedDocumentsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The document layer still deserves attention first. Resolve it now to avoid more expensive blockers later.'**
+  String get migrationPlanCopilotRecommendedDocumentsBody;
+
+  /// No description provided for @migrationPlanCopilotRecommendedBudgetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Now it is worth turning the plan into real numbers and reviewing housing entry before arrival gets tight.'**
+  String get migrationPlanCopilotRecommendedBudgetBody;
+
+  /// No description provided for @migrationPlanCopilotRecommendedArrivalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have enough base to organize the arrival. Use this stage to move from plan to execution.'**
+  String get migrationPlanCopilotRecommendedArrivalBody;
+
+  /// No description provided for @migrationPlanCopilotRecommendedOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open recommended stage'**
+  String get migrationPlanCopilotRecommendedOpen;
+
+  /// No description provided for @migrationPlanCopilotQuickQuestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick questions'**
+  String get migrationPlanCopilotQuickQuestionsTitle;
+
+  /// No description provided for @migrationPlanCopilotQuickQuestionsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use these short answers when a practical doubt shows up before you move forward.'**
+  String get migrationPlanCopilotQuickQuestionsBody;
+
+  /// No description provided for @migrationPlanCopilotQuickQuestionDocumentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Which documents should I move first?'**
+  String get migrationPlanCopilotQuickQuestionDocumentsTitle;
+
+  /// No description provided for @migrationPlanCopilotQuickQuestionDocumentsAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with the documents that take longer to obtain or expire sooner. The document stage helps you separate what unlocks residence, CPF, and practical arrival without pushing you into a full bureaucratic flow all at once.'**
+  String get migrationPlanCopilotQuickQuestionDocumentsAnswer;
+
+  /// No description provided for @migrationPlanCopilotQuickQuestionHousingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Do I need to solve permanent housing now?'**
+  String get migrationPlanCopilotQuickQuestionHousingTitle;
+
+  /// No description provided for @migrationPlanCopilotQuickQuestionHousingAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Not always. In many cases, it is better to start with a temporary housing plan, understand guarantees, and only then commit to a larger rental. What matters now is estimating your reserve, entry costs, and fallback plan.'**
+  String get migrationPlanCopilotQuickQuestionHousingAnswer;
+
+  /// No description provided for @migrationPlanCopilotQuickQuestionArrivalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What should I solve right after arrival?'**
+  String get migrationPlanCopilotQuickQuestionArrivalTitle;
+
+  /// No description provided for @migrationPlanCopilotQuickQuestionArrivalAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Think first about what reduces friction in the first days: where to stay, how to move around, what must be solved in the first 7 days, and which tasks cannot slip past the first month. The arrival stage already organizes this by priority.'**
+  String get migrationPlanCopilotQuickQuestionArrivalAnswer;
+
+  /// No description provided for @migrationPlanCopilotQuickQuestionOpenStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to this stage'**
+  String get migrationPlanCopilotQuickQuestionOpenStage;
+
+  /// No description provided for @migrationPlanCopilotActionOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve now'**
+  String get migrationPlanCopilotActionOpen;
+
+  /// No description provided for @migrationPlanCopilotOverviewAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start guided preparation'**
+  String get migrationPlanCopilotOverviewAction;
+
+  /// No description provided for @migrationPlanCopilotOverviewBackAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to overview'**
+  String get migrationPlanCopilotOverviewBackAction;
+
+  /// No description provided for @migrationPlanCopilotFinishAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish for now'**
+  String get migrationPlanCopilotFinishAction;
 
   /// No description provided for @migrationPlanDecisionLabel.
   ///
@@ -5509,6 +6181,48 @@ abstract class AppLocalizations {
   /// **'Choose the city that makes the most sense first. The detailed checklist only comes after that decision.'**
   String get migrationPlanDecisionSummaryBody;
 
+  /// No description provided for @migrationPlanHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} is your strongest starting city for now'**
+  String migrationPlanHeroTitle(Object city);
+
+  /// No description provided for @migrationPlanHeroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on your {timeline} horizon, start by reviewing the 3 cities below and open the one that feels strongest for your move.'**
+  String migrationPlanHeroBody(Object timeline);
+
+  /// No description provided for @migrationPlanConfidenceLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial recommendation'**
+  String get migrationPlanConfidenceLow;
+
+  /// No description provided for @migrationPlanConfidenceHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong recommendation'**
+  String get migrationPlanConfidenceHigh;
+
+  /// No description provided for @migrationPlanSummaryArchetype.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected profile: {value}'**
+  String migrationPlanSummaryArchetype(Object value);
+
+  /// No description provided for @migrationPlanSummaryVariant.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode used: {value}'**
+  String migrationPlanSummaryVariant(Object value);
+
+  /// No description provided for @migrationPlanSummaryFunding.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial support: {value}'**
+  String migrationPlanSummaryFunding(Object value);
+
   /// No description provided for @migrationPlanCandidateCitiesTitle.
   ///
   /// In en, this message translates to:
@@ -5520,6 +6234,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The list is already ordered to keep first what tends to make more sense for Argentinians with this goal.'**
   String get migrationPlanCandidateCitiesBody;
+
+  /// No description provided for @migrationPlanShortlistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'3 cities to review now'**
+  String get migrationPlanShortlistTitle;
+
+  /// No description provided for @migrationPlanShortlistBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These are the 3 strongest starting options right now. Open one city to compare it with your move context.'**
+  String get migrationPlanShortlistBody;
 
   /// No description provided for @migrationPlanCandidateCitiesSheetBody.
   ///
@@ -5608,14 +6334,1289 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanPreparationBody.
   ///
   /// In en, this message translates to:
-  /// **'If you decide to move forward with {city}, the copilot opens a checklist, documents, housing, and an arrival reserve focused on that city.'**
+  /// **'If you decide to move forward with {city}, guided preparation opens a checklist, documents, housing, and an arrival reserve focused on that city.'**
   String migrationPlanPreparationBody(Object city);
+
+  /// No description provided for @migrationPlanScrollHint.
+  ///
+  /// In en, this message translates to:
+  /// **'See more'**
+  String get migrationPlanScrollHint;
 
   /// No description provided for @languageSelectorSystem.
   ///
   /// In en, this message translates to:
   /// **'System'**
   String get languageSelectorSystem;
+
+  /// No description provided for @bmpDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'This builds a starting point. It is not legal advice.'**
+  String get bmpDisclaimer;
+
+  /// No description provided for @bmpProgressStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String bmpProgressStep(Object current, Object total);
+
+  /// No description provided for @bmpCtaBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get bmpCtaBack;
+
+  /// No description provided for @bmpCtaContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get bmpCtaContinue;
+
+  /// No description provided for @bmpCtaSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get bmpCtaSkip;
+
+  /// No description provided for @bmpCtaGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate my plan'**
+  String get bmpCtaGenerate;
+
+  /// No description provided for @bmpExitDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to leave this plan?'**
+  String get bmpExitDialogTitle;
+
+  /// No description provided for @bmpExitDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If you go back home, you will lose this flow and your current answers.'**
+  String get bmpExitDialogBody;
+
+  /// No description provided for @bmpExitDialogStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay here'**
+  String get bmpExitDialogStay;
+
+  /// No description provided for @bmpExitDialogLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to home'**
+  String get bmpExitDialogLeave;
+
+  /// No description provided for @bmpCtaRefineYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, refine'**
+  String get bmpCtaRefineYes;
+
+  /// No description provided for @bmpCtaRefineNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No, generate my plan'**
+  String get bmpCtaRefineNo;
+
+  /// No description provided for @bmpVariantTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you want to build your plan?'**
+  String get bmpVariantTitle;
+
+  /// No description provided for @bmpVariantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You can go faster or answer one extra question for a more precise recommendation.'**
+  String get bmpVariantSubtitle;
+
+  /// No description provided for @bmpVariantLeanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick plan'**
+  String get bmpVariantLeanTitle;
+
+  /// No description provided for @bmpVariantLeanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'3 questions and one optional refinement to get an initial direction with low friction.'**
+  String get bmpVariantLeanBody;
+
+  /// No description provided for @bmpVariantLeanTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Faster'**
+  String get bmpVariantLeanTag;
+
+  /// No description provided for @bmpVariantStrategicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Strategic plan'**
+  String get bmpVariantStrategicTitle;
+
+  /// No description provided for @bmpVariantStrategicBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes how you plan to support yourself and gives you a sharper starting recommendation.'**
+  String get bmpVariantStrategicBody;
+
+  /// No description provided for @bmpVariantStrategicTag.
+  ///
+  /// In en, this message translates to:
+  /// **'More precise'**
+  String get bmpVariantStrategicTag;
+
+  /// No description provided for @bmpRefineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to refine the recommendation with 1 more question?'**
+  String get bmpRefineTitle;
+
+  /// No description provided for @bmpRefineSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'(Optional) It takes about 5 seconds'**
+  String get bmpRefineSubtitle;
+
+  /// No description provided for @qIntentPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you looking for in Brazil right now?'**
+  String get qIntentPrompt;
+
+  /// No description provided for @qFundingPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you plan to support yourself during the first 3 months?'**
+  String get qFundingPrompt;
+
+  /// No description provided for @qFundingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This helps us adjust your starting point without asking for personal data.'**
+  String get qFundingSubtitle;
+
+  /// No description provided for @qTimelinePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'When would you like to be in Brazil? (roughly)'**
+  String get qTimelinePrompt;
+
+  /// No description provided for @qPrioritiesPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'For your first year, which 2 points matter most in a city choice?'**
+  String get qPrioritiesPrompt;
+
+  /// No description provided for @qPrioritiesHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Select 2 to continue'**
+  String get qPrioritiesHelper;
+
+  /// No description provided for @qPrioritiesSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{selected}/{total}'**
+  String qPrioritiesSelectedCount(Object selected, Object total);
+
+  /// No description provided for @qPrioritiesValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick 2 options to continue'**
+  String get qPrioritiesValidation;
+
+  /// No description provided for @qConstraintsPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Is there anything you do NOT want to compromise on?'**
+  String get qConstraintsPrompt;
+
+  /// No description provided for @qConstraintsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'(Optional) Pick up to 2'**
+  String get qConstraintsSubtitle;
+
+  /// No description provided for @bmpScrollHint.
+  ///
+  /// In en, this message translates to:
+  /// **'See more options'**
+  String get bmpScrollHint;
+
+  /// No description provided for @qConstraintsValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'You can pick up to 2 options'**
+  String get qConstraintsValidation;
+
+  /// No description provided for @qConstraintsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'I do not have fixed constraints'**
+  String get qConstraintsNone;
+
+  /// No description provided for @questionOptionFindJobBr.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a job in Brazil'**
+  String get questionOptionFindJobBr;
+
+  /// No description provided for @questionOptionRemoteIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Work remotely (I already have income)'**
+  String get questionOptionRemoteIncome;
+
+  /// No description provided for @questionOptionFundingSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'I have savings to get started'**
+  String get questionOptionFundingSavings;
+
+  /// No description provided for @questionOptionFundingJobSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'I will look for a job in Brazil'**
+  String get questionOptionFundingJobSearch;
+
+  /// No description provided for @questionOptionFundingJobOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'I already have an offer or contract'**
+  String get questionOptionFundingJobOffer;
+
+  /// No description provided for @questionOptionFundingFamilySupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Support from family or partner'**
+  String get questionOptionFundingFamilySupport;
+
+  /// No description provided for @questionOptionFundingDontKnow.
+  ///
+  /// In en, this message translates to:
+  /// **'I still do not know'**
+  String get questionOptionFundingDontKnow;
+
+  /// No description provided for @questionOptionFamilyPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Move because of partner or family'**
+  String get questionOptionFamilyPartner;
+
+  /// No description provided for @questionOptionFreshStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Better quality of life / start over'**
+  String get questionOptionFreshStart;
+
+  /// No description provided for @questionOptionExploreUnsure.
+  ///
+  /// In en, this message translates to:
+  /// **'I just want to understand my options'**
+  String get questionOptionExploreUnsure;
+
+  /// No description provided for @questionOptionJustExploring.
+  ///
+  /// In en, this message translates to:
+  /// **'Just exploring'**
+  String get questionOptionJustExploring;
+
+  /// No description provided for @questionOptionIn03Months.
+  ///
+  /// In en, this message translates to:
+  /// **'In 0-3 months'**
+  String get questionOptionIn03Months;
+
+  /// No description provided for @questionOptionIn36Months.
+  ///
+  /// In en, this message translates to:
+  /// **'In 3-6 months'**
+  String get questionOptionIn36Months;
+
+  /// No description provided for @questionOptionIn612Months.
+  ///
+  /// In en, this message translates to:
+  /// **'In 6-12 months'**
+  String get questionOptionIn612Months;
+
+  /// No description provided for @questionOptionIn12PlusMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'In more than 12 months'**
+  String get questionOptionIn12PlusMonths;
+
+  /// No description provided for @questionOptionDepends.
+  ///
+  /// In en, this message translates to:
+  /// **'It depends / I am still figuring it out'**
+  String get questionOptionDepends;
+
+  /// No description provided for @questionOptionLowCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower cost of living'**
+  String get questionOptionLowCost;
+
+  /// No description provided for @questionOptionJobOpportunities.
+  ///
+  /// In en, this message translates to:
+  /// **'More job opportunities'**
+  String get questionOptionJobOpportunities;
+
+  /// No description provided for @questionOptionSafetyPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety / peace of mind'**
+  String get questionOptionSafetyPriority;
+
+  /// No description provided for @questionOptionWarmClimateBeach.
+  ///
+  /// In en, this message translates to:
+  /// **'Warmer climate / beach'**
+  String get questionOptionWarmClimateBeach;
+
+  /// No description provided for @questionOptionTransitInfra.
+  ///
+  /// In en, this message translates to:
+  /// **'Good infrastructure and transit'**
+  String get questionOptionTransitInfra;
+
+  /// No description provided for @questionOptionNature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature'**
+  String get questionOptionNature;
+
+  /// No description provided for @questionOptionUniversity.
+  ///
+  /// In en, this message translates to:
+  /// **'University environment'**
+  String get questionOptionUniversity;
+
+  /// No description provided for @questionOptionCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Community / making friends'**
+  String get questionOptionCommunity;
+
+  /// No description provided for @questionOptionCloseToArgentina.
+  ///
+  /// In en, this message translates to:
+  /// **'Closer to Argentina'**
+  String get questionOptionCloseToArgentina;
+
+  /// No description provided for @questionOptionBalancedUnsure.
+  ///
+  /// In en, this message translates to:
+  /// **'I want balance / I am not sure'**
+  String get questionOptionBalancedUnsure;
+
+  /// No description provided for @questionOptionPreferSouth.
+  ///
+  /// In en, this message translates to:
+  /// **'I prefer the South'**
+  String get questionOptionPreferSouth;
+
+  /// No description provided for @questionOptionNeedBigCity.
+  ///
+  /// In en, this message translates to:
+  /// **'I need a big city'**
+  String get questionOptionNeedBigCity;
+
+  /// No description provided for @questionOptionPreferMidCity.
+  ///
+  /// In en, this message translates to:
+  /// **'I prefer a mid-size or calmer city'**
+  String get questionOptionPreferMidCity;
+
+  /// No description provided for @questionOptionWantCoast.
+  ///
+  /// In en, this message translates to:
+  /// **'I want coast or beach'**
+  String get questionOptionWantCoast;
+
+  /// No description provided for @questionOptionPreferCooler.
+  ///
+  /// In en, this message translates to:
+  /// **'I prefer cooler weather'**
+  String get questionOptionPreferCooler;
+
+  /// No description provided for @questionOptionNeedTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'I need strong public transit'**
+  String get questionOptionNeedTransit;
+
+  /// No description provided for @questionOptionAvoidExpensive.
+  ///
+  /// In en, this message translates to:
+  /// **'I want to avoid expensive cities'**
+  String get questionOptionAvoidExpensive;
+
+  /// No description provided for @planReasonBudgetFit.
+  ///
+  /// In en, this message translates to:
+  /// **'A better match if you want to protect your budget.'**
+  String get planReasonBudgetFit;
+
+  /// No description provided for @planReasonJobMobility.
+  ///
+  /// In en, this message translates to:
+  /// **'More room to search for work and move around.'**
+  String get planReasonJobMobility;
+
+  /// No description provided for @planReasonSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'It matches your priority for peace of mind.'**
+  String get planReasonSafety;
+
+  /// No description provided for @planReasonClimateNature.
+  ///
+  /// In en, this message translates to:
+  /// **'A good starting point if you want climate and outdoor life.'**
+  String get planReasonClimateNature;
+
+  /// No description provided for @planReasonTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'More practical if you want to get around without a car.'**
+  String get planReasonTransit;
+
+  /// No description provided for @planReasonProximityArgentina.
+  ///
+  /// In en, this message translates to:
+  /// **'Closer if you want to return to Argentina when needed.'**
+  String get planReasonProximityArgentina;
+
+  /// No description provided for @planReasonUniversity.
+  ///
+  /// In en, this message translates to:
+  /// **'More aligned if your plan is to study.'**
+  String get planReasonUniversity;
+
+  /// No description provided for @planReasonCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Better chances to build network and community.'**
+  String get planReasonCommunity;
+
+  /// No description provided for @planReasonBalancedProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'It appears as a balanced place to start.'**
+  String get planReasonBalancedProfile;
+
+  /// No description provided for @archetypeJobHunter.
+  ///
+  /// In en, this message translates to:
+  /// **'Job search'**
+  String get archetypeJobHunter;
+
+  /// No description provided for @archetypeJobHunterWithOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Job with offer'**
+  String get archetypeJobHunterWithOffer;
+
+  /// No description provided for @archetypeJobHunterSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Active job search'**
+  String get archetypeJobHunterSearching;
+
+  /// No description provided for @archetypeRemoteWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote work'**
+  String get archetypeRemoteWorker;
+
+  /// No description provided for @archetypeRemoteStable.
+  ///
+  /// In en, this message translates to:
+  /// **'Stable remote work'**
+  String get archetypeRemoteStable;
+
+  /// No description provided for @archetypeStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Study'**
+  String get archetypeStudent;
+
+  /// No description provided for @archetypeFamilyMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Family move'**
+  String get archetypeFamilyMove;
+
+  /// No description provided for @archetypeFreshStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh start'**
+  String get archetypeFreshStart;
+
+  /// No description provided for @archetypeExplorer.
+  ///
+  /// In en, this message translates to:
+  /// **'Exploration'**
+  String get archetypeExplorer;
+
+  /// No description provided for @planStepTitleChooseBaseCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your base city'**
+  String get planStepTitleChooseBaseCity;
+
+  /// No description provided for @planStepTitleResidencePath.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand the residence path'**
+  String get planStepTitleResidencePath;
+
+  /// No description provided for @planStepTitleCpfStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your CPF'**
+  String get planStepTitleCpfStart;
+
+  /// No description provided for @planStepDescriptionChooseBaseCityExplore.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose 1 city to start with and review neighborhoods, living costs, and basic mobility. It is not final: it is just to begin with clarity.'**
+  String get planStepDescriptionChooseBaseCityExplore;
+
+  /// No description provided for @planStepDescriptionChooseBaseCityBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Define a base city and compare 2 neighborhoods, rent, and mobility to turn the idea into a practical plan.'**
+  String get planStepDescriptionChooseBaseCityBalanced;
+
+  /// No description provided for @planStepDescriptionChooseBaseCityUrgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Define a base city and a tentative date this week to organize the most urgent decisions.'**
+  String get planStepDescriptionChooseBaseCityUrgent;
+
+  /// No description provided for @planStepDescriptionChooseBaseCityOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Since you already have an offer or contract, choose the base city and validate neighborhood, commute, and starting costs.'**
+  String get planStepDescriptionChooseBaseCityOffer;
+
+  /// No description provided for @planStepDescriptionResidencePathExplore.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the most common residence path for Argentina to Brazil and which base documents you will need later.'**
+  String get planStepDescriptionResidencePathExplore;
+
+  /// No description provided for @planStepDescriptionResidencePathBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand the residence path and start gathering the base documents before getting into detailed bureaucracy.'**
+  String get planStepDescriptionResidencePathBalanced;
+
+  /// No description provided for @planStepDescriptionResidencePathUrgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the residence path and separate the base documents now so execution does not get blocked.'**
+  String get planStepDescriptionResidencePathUrgent;
+
+  /// No description provided for @planStepDescriptionResidencePathFundingUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Before moving ahead, understand the residence path and clarify how you will support yourself during the first months to avoid blockers.'**
+  String get planStepDescriptionResidencePathFundingUnknown;
+
+  /// No description provided for @planStepDescriptionCpfStart.
+  ///
+  /// In en, this message translates to:
+  /// **'CPF unlocks many practical steps in Brazil. Start with the official guidance and continue later in Movaro step by step.'**
+  String get planStepDescriptionCpfStart;
+
+  /// No description provided for @migrationPlanPrepHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare the move without getting lost in the process'**
+  String get migrationPlanPrepHeroTitle;
+
+  /// No description provided for @migrationPlanPrepHeroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The goal here is not to tick checkboxes. First understand what to issue, where to open each topic, and which guide solves your next step.'**
+  String get migrationPlanPrepHeroBody;
+
+  /// No description provided for @migrationPlanPrepTabOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get migrationPlanPrepTabOverview;
+
+  /// No description provided for @migrationPlanPrepTabDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get migrationPlanPrepTabDocuments;
+
+  /// No description provided for @migrationPlanPrepTabHousing.
+  ///
+  /// In en, this message translates to:
+  /// **'Housing and costs'**
+  String get migrationPlanPrepTabHousing;
+
+  /// No description provided for @migrationPlanPrepTabWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work and daily life'**
+  String get migrationPlanPrepTabWork;
+
+  /// No description provided for @migrationPlanPrepTabArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrival'**
+  String get migrationPlanPrepTabArrival;
+
+  /// No description provided for @migrationPlanPrepOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with what really unlocks the move'**
+  String get migrationPlanPrepOverviewTitle;
+
+  /// No description provided for @migrationPlanPrepOverviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Instead of a long checklist, this area now works as a practical guide. Documents come first, then housing, costs, work, and arrival.'**
+  String get migrationPlanPrepOverviewBody;
+
+  /// No description provided for @migrationPlanPrepChooseCityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a city to unlock preparation'**
+  String get migrationPlanPrepChooseCityTitle;
+
+  /// No description provided for @migrationPlanPrepChooseCityBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparation only makes sense with a confirmed base city. First choose the city that will guide housing, costs, work, and arrival.'**
+  String get migrationPlanPrepChooseCityBody;
+
+  /// No description provided for @migrationPlanPrepChooseCityAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose plan city'**
+  String get migrationPlanPrepChooseCityAction;
+
+  /// No description provided for @migrationPlanPrepQuestionDocsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I regularize my documents?'**
+  String get migrationPlanPrepQuestionDocsTitle;
+
+  /// No description provided for @migrationPlanPrepQuestionDocsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open CPF, registration, banking, and contracts in a more guided way without falling into a loose bureaucratic flow.'**
+  String get migrationPlanPrepQuestionDocsBody;
+
+  /// No description provided for @migrationPlanPrepQuestionRentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What do I need to rent a place?'**
+  String get migrationPlanPrepQuestionRentTitle;
+
+  /// No description provided for @migrationPlanPrepQuestionRentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'See guarantees, deposit, temporary rent, and what is usually requested to enter housing at the beginning.'**
+  String get migrationPlanPrepQuestionRentBody;
+
+  /// No description provided for @migrationPlanPrepQuestionMoneyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How much money should I bring?'**
+  String get migrationPlanPrepQuestionMoneyTitle;
+
+  /// No description provided for @migrationPlanPrepQuestionMoneyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a more conservative arrival view with a safety margin instead of unrealistic numbers.'**
+  String get migrationPlanPrepQuestionMoneyBody;
+
+  /// No description provided for @migrationPlanPrepQuestionHealthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Is healthcare public or private?'**
+  String get migrationPlanPrepQuestionHealthTitle;
+
+  /// No description provided for @migrationPlanPrepQuestionHealthBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand when SUS, a local clinic, a hospital, or a private plan makes sense without mixing everything together.'**
+  String get migrationPlanPrepQuestionHealthBody;
+
+  /// No description provided for @migrationPlanPrepQuestionWorkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I work and open a bank account?'**
+  String get migrationPlanPrepQuestionWorkTitle;
+
+  /// No description provided for @migrationPlanPrepQuestionWorkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open formal work, income, banking, and contracts in a practical way, focused on what unlocks real life.'**
+  String get migrationPlanPrepQuestionWorkBody;
+
+  /// No description provided for @migrationPlanPrepQuestionArrivalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What should I solve right after arrival?'**
+  String get migrationPlanPrepQuestionArrivalTitle;
+
+  /// No description provided for @migrationPlanPrepQuestionArrivalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize the first days, the first housing base, and the initial routine so everything is not improvised.'**
+  String get migrationPlanPrepQuestionArrivalBody;
+
+  /// No description provided for @migrationPlanPrepQuestionFlightsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How can I check flights to this city?'**
+  String get migrationPlanPrepQuestionFlightsTitle;
+
+  /// No description provided for @migrationPlanPrepQuestionFlightsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open an external flight search to compare routes to the chosen city in Brazil.'**
+  String get migrationPlanPrepQuestionFlightsBody;
+
+  /// No description provided for @migrationPlanPrepPrimaryEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'First step'**
+  String get migrationPlanPrepPrimaryEyebrow;
+
+  /// No description provided for @migrationPlanPrepCardToneGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick guide'**
+  String get migrationPlanPrepCardToneGuide;
+
+  /// No description provided for @migrationPlanPrepCardTonePractical.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve now'**
+  String get migrationPlanPrepCardTonePractical;
+
+  /// No description provided for @migrationPlanPrepCardTonePriority.
+  ///
+  /// In en, this message translates to:
+  /// **'High priority'**
+  String get migrationPlanPrepCardTonePriority;
+
+  /// No description provided for @migrationPlanPrepCardToneArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'First steps'**
+  String get migrationPlanPrepCardToneArrival;
+
+  /// No description provided for @migrationPlanPrepOpenSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Open this area'**
+  String get migrationPlanPrepOpenSection;
+
+  /// No description provided for @migrationPlanPrepOpenOfficialSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Open official source'**
+  String get migrationPlanPrepOpenOfficialSource;
+
+  /// No description provided for @migrationPlanPrepExternalToolHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this shortcut as quick orientation. The next step opens the official source inside the app so you can continue without losing context.'**
+  String get migrationPlanPrepExternalToolHint;
+
+  /// No description provided for @migrationPlanPrepOpenGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Open full guide'**
+  String get migrationPlanPrepOpenGuide;
+
+  /// No description provided for @migrationPlanPrepBackToOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to overview'**
+  String get migrationPlanPrepBackToOverview;
+
+  /// No description provided for @migrationPlanPrepDocumentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents and residence'**
+  String get migrationPlanPrepDocumentsTitle;
+
+  /// No description provided for @migrationPlanPrepDocumentsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'See what to issue first, how CPF and registration work in practice, and where to open the right guidance without getting lost in scattered research.'**
+  String get migrationPlanPrepDocumentsBody;
+
+  /// No description provided for @migrationPlanPrepHousingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Housing and costs'**
+  String get migrationPlanPrepHousingTitle;
+
+  /// No description provided for @migrationPlanPrepHousingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand reserve, rental entry, guarantees, and a temporary housing plan before arrival gets tight.'**
+  String get migrationPlanPrepHousingBody;
+
+  /// No description provided for @migrationPlanPrepWorkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Work and daily life'**
+  String get migrationPlanPrepWorkTitle;
+
+  /// No description provided for @migrationPlanPrepWorkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open work, health, and mobility in more direct blocks to solve daily life without excessive reading.'**
+  String get migrationPlanPrepWorkBody;
+
+  /// No description provided for @migrationPlanPrepArrivalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First days in Brazil'**
+  String get migrationPlanPrepArrivalTitle;
+
+  /// No description provided for @migrationPlanPrepArrivalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize arrival by short horizon: first week, first month, and the 90 days that stabilize the move.'**
+  String get migrationPlanPrepArrivalBody;
+
+  /// No description provided for @migrationPlanPrepDocumentsGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with documents, not with a checklist'**
+  String get migrationPlanPrepDocumentsGuideTitle;
+
+  /// No description provided for @migrationPlanPrepDocumentsGuideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If the document layer is confusing, the rest gets blocked. That is why this area sends you straight to what to issue, how it works, and where to continue.'**
+  String get migrationPlanPrepDocumentsGuideBody;
+
+  /// No description provided for @migrationPlanPrepOpenDocumentsTopic.
+  ///
+  /// In en, this message translates to:
+  /// **'Open documents topic'**
+  String get migrationPlanPrepOpenDocumentsTopic;
+
+  /// No description provided for @migrationPlanPrepDocumentsCpfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CPF and what it really unlocks'**
+  String get migrationPlanPrepDocumentsCpfTitle;
+
+  /// No description provided for @migrationPlanPrepDocumentsCpfBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open this part to understand when CPF helps, what it cannot solve alone, and how it connects to banking, contracts, and daily life.'**
+  String get migrationPlanPrepDocumentsCpfBody;
+
+  /// No description provided for @migrationPlanPrepDocumentsResidenceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration and residence without bureaucratic language'**
+  String get migrationPlanPrepDocumentsResidenceTitle;
+
+  /// No description provided for @migrationPlanPrepDocumentsResidenceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand the most common residence path, the role of the protocol, and how that connects with arrival.'**
+  String get migrationPlanPrepDocumentsResidenceBody;
+
+  /// No description provided for @migrationPlanPrepDocumentsBankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Banking, records, and contracts'**
+  String get migrationPlanPrepDocumentsBankTitle;
+
+  /// No description provided for @migrationPlanPrepDocumentsBankBody.
+  ///
+  /// In en, this message translates to:
+  /// **'See what is usually required to open an account, sign a rental agreement, and avoid blocking daily life right at the start.'**
+  String get migrationPlanPrepDocumentsBankBody;
+
+  /// No description provided for @migrationPlanPrepTaxesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How taxes and tax residence work'**
+  String get migrationPlanPrepTaxesTitle;
+
+  /// No description provided for @migrationPlanPrepTaxesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the official Receita guidance to understand entry into Brazil, tax residence, and when this starts to matter.'**
+  String get migrationPlanPrepTaxesBody;
+
+  /// No description provided for @migrationPlanPrepDeadlinesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Which deadlines you cannot miss'**
+  String get migrationPlanPrepDeadlinesTitle;
+
+  /// No description provided for @migrationPlanPrepDeadlinesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the official residence route so you do not discover registration, issuance, and critical deadlines too late.'**
+  String get migrationPlanPrepDeadlinesBody;
+
+  /// No description provided for @migrationPlanPrepHousingGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the move into real numbers'**
+  String get migrationPlanPrepHousingGuideTitle;
+
+  /// No description provided for @migrationPlanPrepHousingGuideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Here you review reserve, entry costs, guarantees, and soft landing with a much more practical structure than a checklist block.'**
+  String get migrationPlanPrepHousingGuideBody;
+
+  /// No description provided for @migrationPlanPrepWorkGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily life after the city is chosen'**
+  String get migrationPlanPrepWorkGuideTitle;
+
+  /// No description provided for @migrationPlanPrepWorkGuideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use these blocks to open work, health, and mobility quickly. These are the topics that most often become doubts after the city decision.'**
+  String get migrationPlanPrepWorkGuideBody;
+
+  /// No description provided for @migrationPlanPrepWorkSignalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Work signals for this city'**
+  String get migrationPlanPrepWorkSignalsTitle;
+
+  /// No description provided for @migrationPlanPrepWorkSignalsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Movaro currently shows labor-market, economic-activity, and unemployment signals. Average income is not integrated into the catalog yet.'**
+  String get migrationPlanPrepWorkSignalsBody;
+
+  /// No description provided for @migrationPlanPrepMoneyPracticeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Banking and money in practice'**
+  String get migrationPlanPrepMoneyPracticeTitle;
+
+  /// No description provided for @migrationPlanPrepMoneyPracticeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the public Central Bank guidance to understand accounts, Pix, payments, and financial organization for migrants.'**
+  String get migrationPlanPrepMoneyPracticeBody;
+
+  /// No description provided for @migrationPlanPrepDiplomaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognize diploma and profession'**
+  String get migrationPlanPrepDiplomaTitle;
+
+  /// No description provided for @migrationPlanPrepDiplomaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the official route to revalidate a foreign diploma and understand when the profession may require an extra step in Brazil.'**
+  String get migrationPlanPrepDiplomaBody;
+
+  /// No description provided for @migrationPlanPrepWorkSignalJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Job market'**
+  String get migrationPlanPrepWorkSignalJobs;
+
+  /// No description provided for @migrationPlanPrepWorkSignalEconomic.
+  ///
+  /// In en, this message translates to:
+  /// **'Economic activity'**
+  String get migrationPlanPrepWorkSignalEconomic;
+
+  /// No description provided for @migrationPlanPrepWorkSignalUnemployment.
+  ///
+  /// In en, this message translates to:
+  /// **'Unemployment'**
+  String get migrationPlanPrepWorkSignalUnemployment;
+
+  /// No description provided for @migrationPlanPrepArrivalGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What to solve first when you arrive'**
+  String get migrationPlanPrepArrivalGuideTitle;
+
+  /// No description provided for @migrationPlanPrepArrivalGuideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Instead of marking loose tasks, look at arrival as a short sequence: land, stabilize, and consolidate the new routine.'**
+  String get migrationPlanPrepArrivalGuideBody;
+
+  /// No description provided for @migrationPlanPrepArrivalWeekTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First week'**
+  String get migrationPlanPrepArrivalWeekTitle;
+
+  /// No description provided for @migrationPlanPrepArrivalWeekBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on where to stay, how to move around, what to buy first, and how to avoid the first housing mistakes.'**
+  String get migrationPlanPrepArrivalWeekBody;
+
+  /// No description provided for @migrationPlanPrepArrivalMonthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First month'**
+  String get migrationPlanPrepArrivalMonthTitle;
+
+  /// No description provided for @migrationPlanPrepArrivalMonthBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust documents, neighborhood routine, bank account, rent, and the points that turn arrival into something less improvised.'**
+  String get migrationPlanPrepArrivalMonthBody;
+
+  /// No description provided for @migrationPlanPrepArrivalQuarterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First 90 days'**
+  String get migrationPlanPrepArrivalQuarterTitle;
+
+  /// No description provided for @migrationPlanPrepArrivalQuarterBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Consolidate work, financial organization, health routine, and the next steps that make the move sustainable.'**
+  String get migrationPlanPrepArrivalQuarterBody;
+
+  /// No description provided for @migrationPlanPrepSupportNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to find support networks'**
+  String get migrationPlanPrepSupportNetworkTitle;
+
+  /// No description provided for @migrationPlanPrepSupportNetworkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open public support networks for migrants and refugees to understand where to look for assistance, orientation, and reception.'**
+  String get migrationPlanPrepSupportNetworkBody;
+
+  /// No description provided for @migrationPlanPrepArgentineNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Argentine embassy and consulates'**
+  String get migrationPlanPrepArgentineNetworkTitle;
+
+  /// No description provided for @migrationPlanPrepArgentineNetworkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the official list of the Argentine embassy and consulates in Brazil to check procedures, contact details, and official consular guidance.'**
+  String get migrationPlanPrepArgentineNetworkBody;
+
+  /// No description provided for @migrationPlanPrepFamilyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What about family and children'**
+  String get migrationPlanPrepFamilyTitle;
+
+  /// No description provided for @migrationPlanPrepFamilyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the public guidance on school enrollment and rights for migrant children and teenagers in Brazil.'**
+  String get migrationPlanPrepFamilyBody;
+
+  /// No description provided for @migrationPlanPrepRiskAlertsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scams and risks to avoid'**
+  String get migrationPlanPrepRiskAlertsTitle;
+
+  /// No description provided for @migrationPlanPrepRiskAlertsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open public alerts about misleading offers, false promises, and risks that often affect people moving to another country.'**
+  String get migrationPlanPrepRiskAlertsBody;
+
+  /// No description provided for @migrationPlanPrepFlightsPlannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan the flight search'**
+  String get migrationPlanPrepFlightsPlannerTitle;
+
+  /// No description provided for @migrationPlanPrepFlightsPlannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the departure city in Argentina and the date you expect to move to open the search already prepared for {city}.'**
+  String migrationPlanPrepFlightsPlannerBody(Object city);
+
+  /// No description provided for @migrationPlanPrepFlightsOriginLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Departure city'**
+  String get migrationPlanPrepFlightsOriginLabel;
+
+  /// No description provided for @migrationPlanPrepFlightsDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated move date'**
+  String get migrationPlanPrepFlightsDateLabel;
+
+  /// No description provided for @migrationPlanPrepFlightsDatePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a date'**
+  String get migrationPlanPrepFlightsDatePlaceholder;
+
+  /// No description provided for @migrationPlanPrepFlightsDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Final prices vary by date, how early you book, and availability. Use this search as a starting point and compare before buying.'**
+  String get migrationPlanPrepFlightsDisclaimer;
+
+  /// No description provided for @migrationPlanPrepFlightsOpenGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check on Google Flights'**
+  String get migrationPlanPrepFlightsOpenGoogle;
+
+  /// No description provided for @migrationPlanPrepOfficialIncomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View official income and city indicators'**
+  String get migrationPlanPrepOfficialIncomeTitle;
+
+  /// No description provided for @migrationPlanPrepOfficialIncomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the official IBGE page for this city to consult municipal indicators, including the panorama used as a reliable source.'**
+  String get migrationPlanPrepOfficialIncomeBody;
+
+  /// No description provided for @migrationPlanPrepOfficialJobsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search jobs on Emprega Brasil'**
+  String get migrationPlanPrepOfficialJobsTitle;
+
+  /// No description provided for @migrationPlanPrepOfficialJobsBodyNoCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the official government employment portal to look for formal jobs and use your region as the basis of the search.'**
+  String get migrationPlanPrepOfficialJobsBodyNoCity;
+
+  /// No description provided for @migrationPlanPrepOfficialJobsBodyWithCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the official government employment portal to look for formal jobs and use {city} ({state}) as the basis of the search.'**
+  String migrationPlanPrepOfficialJobsBodyWithCity(Object city, Object state);
+
+  /// No description provided for @migrationPlanPrepOfficialStudyCatalogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View official public universities'**
+  String get migrationPlanPrepOfficialStudyCatalogTitle;
+
+  /// No description provided for @migrationPlanPrepOfficialStudyCatalogBodyNoCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the official MEC catalog to search public higher education institutions and filter by state or city.'**
+  String get migrationPlanPrepOfficialStudyCatalogBodyNoCity;
+
+  /// No description provided for @migrationPlanPrepOfficialStudyCatalogBodyWithCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the official MEC catalog to search public higher education institutions and filter by {city} ({state}) or the nearest region.'**
+  String migrationPlanPrepOfficialStudyCatalogBodyWithCity(
+    Object city,
+    Object state,
+  );
+
+  /// No description provided for @migrationPlanPrepOfficialStudyForeignersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand foreign student admission'**
+  String get migrationPlanPrepOfficialStudyForeignersTitle;
+
+  /// No description provided for @migrationPlanPrepOfficialStudyForeignersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the official PEC-G route to understand how foreign student admission works and which participating universities already receive this process.'**
+  String get migrationPlanPrepOfficialStudyForeignersBody;
+
+  /// No description provided for @migrationPlanPrepRentalSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search rentals in this city'**
+  String get migrationPlanPrepRentalSearchTitle;
+
+  /// No description provided for @migrationPlanPrepRentalSearchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a rental search already filtered for {city} ({state}) inside the app and compare options by area.'**
+  String migrationPlanPrepRentalSearchBody(Object city, Object state);
+
+  /// No description provided for @migrationPlanPrepRentalProviderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental portal'**
+  String get migrationPlanPrepRentalProviderLabel;
+
+  /// No description provided for @migrationPlanPrepRentalProviderZap.
+  ///
+  /// In en, this message translates to:
+  /// **'ZAP Imóveis'**
+  String get migrationPlanPrepRentalProviderZap;
+
+  /// No description provided for @migrationPlanPrepRentalProviderVivaReal.
+  ///
+  /// In en, this message translates to:
+  /// **'Viva Real'**
+  String get migrationPlanPrepRentalProviderVivaReal;
+
+  /// No description provided for @migrationPlanPrepRentalProviderChaves.
+  ///
+  /// In en, this message translates to:
+  /// **'Chaves na Mão'**
+  String get migrationPlanPrepRentalProviderChaves;
+
+  /// No description provided for @migrationPlanPrepRentalSearchDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage and listings may vary by city and current availability. Check more than one source before deciding.'**
+  String get migrationPlanPrepRentalSearchDisclaimer;
+
+  /// No description provided for @migrationPlanPrepRentalSearchOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open rental search'**
+  String get migrationPlanPrepRentalSearchOpen;
+
+  /// No description provided for @migrationPlanPrepScamsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to avoid rental scams'**
+  String get migrationPlanPrepScamsTitle;
+
+  /// No description provided for @migrationPlanPrepScamsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a public alert about common fraud in listings and rentals so you do not decide only on price or urgency.'**
+  String get migrationPlanPrepScamsBody;
 }
 
 class _AppLocalizationsDelegate

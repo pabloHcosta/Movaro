@@ -88,7 +88,9 @@ class MigrationReadinessSection extends StatelessWidget {
                     child: _StagePanel(
                       title: l10n.readinessStageLanding,
                       badge: '03',
-                      items: checklist.itemsFor(MigrationReadinessStage.landing),
+                      items: checklist.itemsFor(
+                        MigrationReadinessStage.landing,
+                      ),
                       completedItemIds: completedItemIds,
                       onToggleItem: onToggleItem,
                     ),
@@ -135,10 +137,7 @@ class _StagePanel extends StatelessWidget {
               color: AppColors.surfaceMutedFor(context),
               borderRadius: BorderRadius.circular(999),
             ),
-            child: Text(
-              badge,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
+            child: Text(badge, style: Theme.of(context).textTheme.labelLarge),
           ),
           const SizedBox(height: 12),
           Text(title, style: Theme.of(context).textTheme.titleSmall),
@@ -185,64 +184,61 @@ class _ReadinessItemTile extends StatelessWidget {
           ),
         ),
         child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: (completed ? AppColors.success : AppColors.primary)
-                  .withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(12),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: (completed ? AppColors.success : AppColors.primary)
+                    .withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                completed ? Icons.check_rounded : item.icon,
+                size: 19,
+                color: completed ? AppColors.success : AppColors.primary,
+              ),
             ),
-            child: Icon(
-              completed ? Icons.check_rounded : item.icon,
-              size: 19,
-              color: completed ? AppColors.success : AppColors.primary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    height: 1.15,
-                    decoration: completed ? TextDecoration.lineThrough : null,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      height: 1.15,
+                      decoration: completed ? TextDecoration.lineThrough : null,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  item.description,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSoftFor(context),
-                    height: 1.4,
-                    decoration: completed ? TextDecoration.lineThrough : null,
+                  const SizedBox(height: 6),
+                  Text(
+                    item.description,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                      height: 1.4,
+                      decoration: completed ? TextDecoration.lineThrough : null,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Checkbox.adaptive(
-            value: completed,
-            onChanged: (_) => onToggle(),
-            activeColor: AppColors.success,
-          ),
-        ],
-      ),
+            const SizedBox(width: 10),
+            Checkbox.adaptive(
+              value: completed,
+              onChanged: (_) => onToggle(),
+              activeColor: AppColors.success,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _ProgressRow extends StatelessWidget {
-  const _ProgressRow({
-    required this.label,
-    required this.progress,
-  });
+  const _ProgressRow({required this.label, required this.progress});
 
   final String label;
   final double progress;

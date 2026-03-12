@@ -20,12 +20,46 @@ enum DocumentationGuideSection {
   costs,
 }
 
-class DocumentationGuidePage extends StatelessWidget {
+class DocumentationGuidePage extends StatefulWidget {
   const DocumentationGuidePage({super.key});
+
+  @override
+  State<DocumentationGuidePage> createState() => _DocumentationGuidePageState();
+}
+
+class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
+  late final TextEditingController _searchController;
+  late final ScrollController _scrollController;
+  final GlobalKey _resultsKey = GlobalKey();
+  String _searchQuery = '';
+  DocumentationGuideSection? _selectedSection;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final paths = _guidePaths(context);
+    assert(_topics(context).isNotEmpty);
+    final filteredPaths = paths.where(_matchesPath).toList();
+    final quickAnswers = _guideQuickAnswers(context);
+    final filteredAnswers = quickAnswers.where(_matchesAnswer).toList();
+    final searchResults = _buildSearchResults(filteredPaths, filteredAnswers);
+    final displayedAnswers = _searchQuery.isEmpty && _selectedSection == null
+        ? filteredAnswers.take(4).toList()
+        : filteredAnswers;
 
     return Scaffold(
       body: Stack(
@@ -36,6 +70,7 @@ class DocumentationGuidePage extends StatelessWidget {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1120),
                 child: ListView(
+                  controller: _scrollController,
                   padding: EdgeInsets.fromLTRB(
                     context.pageHorizontalPadding,
                     context.pageVerticalPadding,
@@ -89,54 +124,99 @@ class DocumentationGuidePage extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          Wrap(
-                            spacing: 10,
-                            runSpacing: 10,
-                            children: [
-                              _QuickStepChip(
-                                label: l10n.documentationQuickStepCpf,
-                                icon: Icons.badge_outlined,
+                          _GuideSearchField(
+                            controller: _searchController,
+                            label: l10n.documentationSearchLabel,
+                            hint: l10n.documentationSearchHint,
+                            helper: l10n.documentationSearchSupport,
+                            onSubmitted: (_) => _handlePrimarySearchAction(
+                              context,
+                              searchResults,
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value;
+                                if (value.trim().isNotEmpty) {
+                                  _selectedSection = null;
+                                }
+                              });
+                            },
+                            onClear: _searchQuery.isEmpty
+                                ? null
+                                : () {
+                                    _searchController.clear();
+                                    setState(() {
+                                      _searchQuery = '';
+                                    });
+                                  },
+                          ),
+                          if (_searchQuery.trim().isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            _SearchMatchPanel(
+                              l10n: l10n,
+                              results: searchResults,
+                              onTapResult: (result) =>
+                                  _handleSearchResultTap(context, result),
+                            ),
+                          ],
+                          const SizedBox(height: 14),
+                          _SectionFilterRail(
+                            l10n: l10n,
+                            paths: paths,
+                            selectedSection: _selectedSection,
+                            onSelected: (section) {
+                              setState(() {
+                                _selectedSection = _selectedSection == section
+                                    ? null
+                                    : section;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 14),
+                          _PromptRail(
+                            prompts: [
+                              (
+                                label: l10n.documentationAnswerWorkQuestion,
+                                query: l10n.documentationAnswerWorkQuestion,
                               ),
-                              _QuickStepChip(
-                                label: l10n.documentationQuickStepRegistration,
-                                icon: Icons.perm_identity_rounded,
+                              (
+                                label: l10n.documentationAnswerCpfQuestion,
+                                query: l10n.documentationAnswerCpfQuestion,
                               ),
-                              _QuickStepChip(
-                                label: l10n.documentationQuickStepStay,
-                                icon: Icons.schedule_rounded,
+                              (
+                                label: l10n.documentationAnswerSusCardQuestion,
+                                query: l10n.documentationAnswerSusCardQuestion,
                               ),
-                              _QuickStepChip(
-                                label: l10n.documentationQuickStepWorkBank,
-                                icon: Icons.account_balance_wallet_outlined,
-                              ),
-                              _QuickStepChip(
-                                label: l10n.documentationQuickStepCitizenship,
-                                icon: Icons.flag_outlined,
-                              ),
-                              _QuickStepChip(
-                                label: l10n.documentationQuickStepHealth,
-                                icon: Icons.health_and_safety_outlined,
-                              ),
-                              _QuickStepChip(
-                                label: l10n.documentationQuickStepDriving,
-                                icon: Icons.directions_car_outlined,
-                              ),
-                              _QuickStepChip(
-                                label: l10n.documentationQuickStepWork,
-                                icon: Icons.work_outline_rounded,
-                              ),
-                              _QuickStepChip(
-                                label: l10n.documentationQuickStepRetirement,
-                                icon: Icons.savings_outlined,
+                              (
+                                label: l10n.documentationPathCostsTitle,
+                                query: l10n.documentationPathCostsTitle,
                               ),
                             ],
+                            onTap: _applySuggestedQuery,
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _GuidePathsSection(
+                    _QuickRoutesCarousel(
                       l10n: l10n,
+                      paths: paths,
+                      selectedSection: _selectedSection,
+                      onOpenSection: (section) => Navigator.pushNamed(
+                        context,
+                        AppRoutes.documentationTopic,
+                        arguments: section,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _GuideResultsSection(
+                      key: _resultsKey,
+                      l10n: l10n,
+                      filteredPaths: filteredPaths,
+                      filteredAnswers: displayedAnswers,
+                      hasActiveFilter:
+                          _searchQuery.trim().isNotEmpty ||
+                          _selectedSection != null,
                       onOpenSection: (section) => Navigator.pushNamed(
                         context,
                         AppRoutes.documentationTopic,
@@ -153,179 +233,561 @@ class DocumentationGuidePage extends StatelessWidget {
     );
   }
 
-  List<_DocumentationTopic> _topics(BuildContext context) {
+  void _applySuggestedQuery(String value) {
+    _searchController
+      ..text = value
+      ..selection = TextSelection.collapsed(offset: value.length);
+    setState(() {
+      _searchQuery = value;
+      _selectedSection = null;
+    });
+  }
+
+  List<_GuideSearchResultMeta> _buildSearchResults(
+    List<_GuidePathMeta> filteredPaths,
+    List<_GuideQuickAnswerMeta> filteredAnswers,
+  ) {
+    final sectionsById = <DocumentationGuideSection, _GuideSearchResultMeta>{};
+
+    for (final path in filteredPaths) {
+      sectionsById[path.section] = _GuideSearchResultMeta(
+        icon: path.icon,
+        title: path.title,
+        subtitle: path.description,
+        section: path.section,
+      );
+    }
+
+    final allPaths = _guidePaths(context);
+    for (final answer in filteredAnswers) {
+      final fallbackPath = allPaths.firstWhere(
+        (path) => path.section == answer.section,
+      );
+      sectionsById.putIfAbsent(
+        answer.section,
+        () => _GuideSearchResultMeta(
+          icon: fallbackPath.icon,
+          title: fallbackPath.title,
+          subtitle: fallbackPath.description,
+          section: fallbackPath.section,
+        ),
+      );
+    }
+
+    return sectionsById.values.toList();
+  }
+
+  void _handlePrimarySearchAction(
+    BuildContext context,
+    List<_GuideSearchResultMeta> results,
+  ) {
+    if (results.isEmpty) {
+      _scrollToResults();
+      return;
+    }
+
+    _handleSearchResultTap(context, results.first);
+  }
+
+  void _handleSearchResultTap(
+    BuildContext context,
+    _GuideSearchResultMeta result,
+  ) {
+    Navigator.pushNamed(
+      context,
+      AppRoutes.documentationTopic,
+      arguments: result.section,
+    );
+  }
+
+  void _scrollToResults() {
+    final targetContext = _resultsKey.currentContext;
+    if (targetContext == null) {
+      return;
+    }
+
+    Scrollable.ensureVisible(
+      targetContext,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+      alignment: 0.08,
+    );
+  }
+
+  bool _matchesPath(_GuidePathMeta path) {
+    if (_selectedSection != null && path.section != _selectedSection) {
+      return false;
+    }
+    return _matchesSearch([path.title, path.description, ...path.keywords]);
+  }
+
+  bool _matchesAnswer(_GuideQuickAnswerMeta answer) {
+    if (_selectedSection != null && answer.section != _selectedSection) {
+      return false;
+    }
+    return _matchesSearch([answer.question, answer.answer, ...answer.keywords]);
+  }
+
+  bool _matchesSearch(List<String> values) {
+    final normalizedQuery = _normalizeSearch(_searchQuery);
+    if (normalizedQuery.isEmpty) {
+      return true;
+    }
+    final haystack = _normalizeSearch(values.join(' '));
+    final tokens = normalizedQuery
+        .split(RegExp(r'\s+'))
+        .where((token) => token.isNotEmpty);
+    return tokens.every(haystack.contains);
+  }
+
+  List<_DocumentationTopic> _topics(BuildContext context) =>
+      _documentationTopics(context);
+
+  List<_GuidePathMeta> _guidePaths(BuildContext context) {
     final l10n = context.l10n;
 
     return [
-      _DocumentationTopic(
+      _GuidePathMeta(
+        section: DocumentationGuideSection.documents,
         icon: Icons.badge_outlined,
-        title: l10n.documentationCpfTitle,
-        summary: l10n.documentationCpfSummary,
-        bullets: [
-          l10n.documentationCpfBulletOne,
-          l10n.documentationCpfBulletTwo,
-          l10n.documentationCpfBulletThree,
+        title: l10n.documentationPathDocumentsTitle,
+        description: l10n.documentationPathDocumentsBody,
+        accent: const Color(0xFFE7F0FF),
+        keywords: const [
+          'cpf',
+          'registro',
+          'registration',
+          'registro migratorio',
+          'crnm',
+          'residencia',
+          'residence',
+          'permanencia',
+          'stay',
+          'visa',
+          'visto',
+          'bank',
+          'banco',
+          'contrato',
+          'contract',
+          'documentos',
+          'documents',
         ],
-        sourceNameKey: 'receita_federal_govbr',
-        sourceUrl:
-            'https://www.gov.br/pt-br/servicos/inscrever-no-cpf-no-exterior',
       ),
-      _DocumentationTopic(
-        icon: Icons.perm_identity_rounded,
-        title: l10n.documentationRegistrationTitle,
-        summary: l10n.documentationRegistrationSummary,
-        bullets: [
-          l10n.documentationRegistrationBulletOne,
-          l10n.documentationRegistrationBulletTwo,
-          l10n.documentationRegistrationBulletThree,
+      _GuidePathMeta(
+        section: DocumentationGuideSection.housing,
+        icon: Icons.home_work_outlined,
+        title: l10n.documentationHousingArrivalSectionTitle,
+        description: l10n.documentationHousingArrivalSectionBody,
+        accent: const Color(0xFFFFF5E7),
+        keywords: const [
+          'moradia',
+          'vivienda',
+          'housing',
+          'aluguel',
+          'alquiler',
+          'rent',
+          'garantia',
+          'deposito',
+          'deposit',
+          'soft landing',
+          'chegada',
+          'arrival',
         ],
-        sourceNameKey: 'policia_federal',
-        sourceUrl:
-            'https://www.gov.br/pf/pt-br/assuntos/imigracao/duvidas-frequentes/autorizacao-de-residencia-e-registro-nacional-migratorio-rnm/como-devo-realizar-o-registro-de-rnm',
       ),
-      _DocumentationTopic(
-        icon: Icons.schedule_rounded,
-        title: l10n.documentationStayTitle,
-        summary: l10n.documentationStaySummary,
-        bullets: [
-          l10n.documentationStayBulletOne,
-          l10n.documentationStayBulletTwo,
-          l10n.documentationStayBulletThree,
-        ],
-        sourceNameKey: 'mre_policia_federal',
-        sourceUrl:
-            'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia-resolucao-mercosul',
-      ),
-      _DocumentationTopic(
-        icon: Icons.account_balance_wallet_outlined,
-        title: l10n.documentationWorkBankTitle,
-        summary: l10n.documentationWorkBankSummary,
-        bullets: [
-          l10n.documentationWorkBankBulletOne,
-          l10n.documentationWorkBankBulletTwo,
-          l10n.documentationWorkBankBulletThree,
-        ],
-        sourceNameKey: 'mre_banco_central',
-        sourceUrl:
-            'https://www.bcb.gov.br/content/cidadaniafinanceira/documentos_cidadania/Cartilha_Migrantes_Refugiados/cartilha_BC_PORTUGUES.pdf',
-      ),
-      _DocumentationTopic(
-        icon: Icons.flag_outlined,
-        title: l10n.documentationCitizenshipTitle,
-        summary: l10n.documentationCitizenshipSummary,
-        bullets: [
-          l10n.documentationCitizenshipBulletOne,
-          l10n.documentationCitizenshipBulletTwo,
-          l10n.documentationCitizenshipBulletThree,
-        ],
-        sourceNameKey: 'ministerio_justica',
-        sourceUrl:
-            'https://www.gov.br/mj/pt-br/assuntos/seus-direitos/migracoes/naturalizacao/o-que-e-naturalizacao/naturalizacao-ordinaria',
-      ),
-      _DocumentationTopic(
+      _GuidePathMeta(
+        section: DocumentationGuideSection.health,
         icon: Icons.health_and_safety_outlined,
-        title: l10n.documentationHealthPublicTitle,
-        summary: l10n.documentationHealthPublicSummary,
-        bullets: [
-          l10n.documentationHealthPublicBulletOne,
-          l10n.documentationHealthPublicBulletTwo,
-          l10n.documentationHealthPublicBulletThree,
+        title: l10n.documentationPathHealthTitle,
+        description: l10n.documentationPathHealthBody,
+        accent: const Color(0xFFEAF7EF),
+        keywords: const [
+          'sus',
+          'saude',
+          'salud',
+          'health',
+          'ubs',
+          'hospital',
+          'plano',
+          'plan',
+          'seguro',
+          'insurance',
+          'clinica',
         ],
-        sourceNameKey: 'ministerio_saude',
-        sourceUrl:
-            'https://www.gov.br/saude/pt-br/assuntos/noticias/2025/marco/sus-estrangeiros-podem-contar-com-acesso-ao-sistema-publico-de-saude',
       ),
-      _DocumentationTopic(
-        icon: Icons.local_hospital_outlined,
-        title: l10n.documentationHealthFlowTitle,
-        summary: l10n.documentationHealthFlowSummary,
-        bullets: [
-          l10n.documentationHealthFlowBulletOne,
-          l10n.documentationHealthFlowBulletTwo,
-          l10n.documentationHealthFlowBulletThree,
-        ],
-        sourceNameKey: 'meu_sus_digital',
-        sourceUrl:
-            'https://www.gov.br/saude/pt-br/acesso-a-informacao/acoes-e-programas/meu-sus-digital',
-      ),
-      _DocumentationTopic(
-        icon: Icons.favorite_outline_rounded,
-        title: l10n.documentationHealthPrivateTitle,
-        summary: l10n.documentationHealthPrivateSummary,
-        bullets: [
-          l10n.documentationHealthPrivateBulletOne,
-          l10n.documentationHealthPrivateBulletTwo,
-          l10n.documentationHealthPrivateBulletThree,
-        ],
-        sourceNameKey: 'ans',
-        sourceUrl:
-            'https://www.gov.br/ans/pt-br/assuntos/consumidor/guia-de-contratacao-de-planos-de-saude',
-      ),
-      _DocumentationTopic(
+      _GuidePathMeta(
+        section: DocumentationGuideSection.driving,
         icon: Icons.directions_car_outlined,
-        title: l10n.documentationDrivingTitle,
-        summary: l10n.documentationDrivingSummary,
-        bullets: [
-          l10n.documentationDrivingBulletOne,
-          l10n.documentationDrivingBulletTwo,
-          l10n.documentationDrivingBulletThree,
+        title: l10n.documentationPathDrivingTitle,
+        description: l10n.documentationPathDrivingBody,
+        accent: const Color(0xFFFFF5E7),
+        keywords: const [
+          'habilitacao',
+          'habilitacion',
+          'licencia',
+          'license',
+          'driving',
+          'dirigir',
+          'conducir',
+          'detran',
+          'carteira',
+          'cnh',
         ],
-        sourceNameKey: 'detran_es_mg_gov',
-        sourceUrl: 'https://www.detran.es.gov.br/primeira-habilitacao',
       ),
-      _DocumentationTopic(
-        icon: Icons.drive_eta_outlined,
-        title: l10n.documentationForeignLicenseTitle,
-        summary: l10n.documentationForeignLicenseSummary,
-        bullets: [
-          l10n.documentationForeignLicenseBulletOne,
-          l10n.documentationForeignLicenseBulletTwo,
-          l10n.documentationForeignLicenseBulletThree,
+      _GuidePathMeta(
+        section: DocumentationGuideSection.work,
+        icon: Icons.work_outline_rounded,
+        title: l10n.documentationPathWorkTitle,
+        description: l10n.documentationPathWorkBody,
+        accent: const Color(0xFFEFF5EA),
+        keywords: const [
+          'trabalho',
+          'trabajo',
+          'work',
+          'clt',
+          'pj',
+          'mei',
+          'cnpj',
+          'inss',
+          'aposentadoria',
+          'jubilacion',
+          'retirement',
+          'renda',
+          'income',
         ],
-        sourceNameKey: 'senatran_mg_gov',
-        sourceUrl:
-            'https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/dirigir-no-brasil',
       ),
-      _DocumentationTopic(
-        icon: Icons.badge_outlined,
-        title: l10n.documentationWorkCltTitle,
-        summary: l10n.documentationWorkCltSummary,
-        bullets: [
-          l10n.documentationWorkCltBulletOne,
-          l10n.documentationWorkCltBulletTwo,
-          l10n.documentationWorkCltBulletThree,
+      _GuidePathMeta(
+        section: DocumentationGuideSection.costs,
+        icon: Icons.wallet_outlined,
+        title: l10n.documentationPathCostsTitle,
+        description: l10n.documentationPathCostsBody,
+        accent: const Color(0xFFF5ECFF),
+        keywords: const [
+          'custos',
+          'costos',
+          'costs',
+          'preco',
+          'precio',
+          'price',
+          'taxa',
+          'fee',
+          'fees',
+          'orcamento',
+          'presupuesto',
+          'budget',
         ],
-        sourceNameKey: 'mte_ctps',
-        sourceUrl: 'https://www.gov.br/pt-br/apps/ctps-digital',
-      ),
-      _DocumentationTopic(
-        icon: Icons.business_center_outlined,
-        title: l10n.documentationWorkPjTitle,
-        summary: l10n.documentationWorkPjSummary,
-        bullets: [
-          l10n.documentationWorkPjBulletOne,
-          l10n.documentationWorkPjBulletTwo,
-          l10n.documentationWorkPjBulletThree,
-        ],
-        sourceNameKey: 'portal_empreendedor_inss',
-        sourceUrl:
-            'https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/quero-ser-mei/passo-a-passo-para-se-formalizar',
-      ),
-      _DocumentationTopic(
-        icon: Icons.savings_outlined,
-        title: l10n.documentationRetirementTitle,
-        summary: l10n.documentationRetirementSummary,
-        bullets: [
-          l10n.documentationRetirementBulletOne,
-          l10n.documentationRetirementBulletTwo,
-          l10n.documentationRetirementBulletThree,
-        ],
-        sourceNameKey: 'ministerio_previdencia_inss',
-        sourceUrl:
-            'https://www.gov.br/previdencia/pt-br/noticias/2026/janeiro/guia-de-aposentadoria-2026-entenda-as-regras-de-transicao-da-reforma-da-previdencia-de-2019',
       ),
     ];
   }
+
+  List<_GuideQuickAnswerMeta> _guideQuickAnswers(BuildContext context) {
+    final l10n = context.l10n;
+
+    return [
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.work,
+        icon: Icons.work_outline_rounded,
+        question: l10n.documentationAnswerWorkQuestion,
+        answer: l10n.documentationAnswerWorkAnswer,
+        keywords: const [
+          'work visa',
+          'visto de visita',
+          'visa de visita',
+          'visitor visa',
+          'trabalho formal',
+          'trabajo formal',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.documents,
+        icon: Icons.badge_outlined,
+        question: l10n.documentationAnswerCpfQuestion,
+        answer: l10n.documentationAnswerCpfAnswer,
+        keywords: const [
+          'cpf banco',
+          'cpf bank',
+          'contrato',
+          'contract',
+          'cadastro',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.documents,
+        icon: Icons.perm_identity_rounded,
+        question: l10n.documentationAnswerRegistrationQuestion,
+        answer: l10n.documentationAnswerRegistrationAnswer,
+        keywords: const [
+          'crnm',
+          'protocolo',
+          'registro migratorio',
+          'migration registration',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.documents,
+        icon: Icons.schedule_rounded,
+        question: l10n.documentationAnswerStayQuestion,
+        answer: l10n.documentationAnswerStayAnswer,
+        keywords: const [
+          'permanencia',
+          'stay',
+          'visitor',
+          'residencia',
+          'residence',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.health,
+        icon: Icons.health_and_safety_outlined,
+        question: l10n.documentationAnswerSusQuestion,
+        answer: l10n.documentationAnswerSusAnswer,
+        keywords: const [
+          'sus',
+          'public health',
+          'saude publica',
+          'salud publica',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.health,
+        icon: Icons.local_hospital_outlined,
+        question: l10n.documentationAnswerSusCardQuestion,
+        answer: l10n.documentationAnswerSusCardAnswer,
+        keywords: const [
+          'sus card',
+          'cartao sus',
+          'tarjeta sus',
+          'cpf before care',
+          'atendimento',
+          'atencion',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.driving,
+        icon: Icons.drive_eta_outlined,
+        question: l10n.documentationAnswerForeignLicenseQuestion,
+        answer: l10n.documentationAnswerForeignLicenseAnswer,
+        keywords: const [
+          'foreign license',
+          'licencia extranjera',
+          'carteira estrangeira',
+          'detran',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.work,
+        icon: Icons.badge_rounded,
+        question: l10n.documentationAnswerWorkCardQuestion,
+        answer: l10n.documentationAnswerWorkCardAnswer,
+        keywords: const [
+          'clt',
+          'formal employment',
+          'carteira de trabalho',
+          'trabajo registrado',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.work,
+        icon: Icons.business_center_outlined,
+        question: l10n.documentationAnswerPjQuestion,
+        answer: l10n.documentationAnswerPjAnswer,
+        keywords: const [
+          'pj',
+          'monotributo',
+          'cnpj',
+          'self employed',
+          'cuenta propia',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.costs,
+        icon: Icons.savings_outlined,
+        question: l10n.documentationPathCostsTitle,
+        answer: l10n.documentationPathCostsBody,
+        keywords: const [
+          'custos iniciais',
+          'costos iniciales',
+          'initial costs',
+          'budget',
+          'orcamento',
+          'presupuesto',
+        ],
+      ),
+    ];
+  }
+}
+
+List<_DocumentationTopic> _documentationTopics(BuildContext context) {
+  final l10n = context.l10n;
+
+  return [
+    _DocumentationTopic(
+      icon: Icons.badge_outlined,
+      title: l10n.documentationCpfTitle,
+      summary: l10n.documentationCpfSummary,
+      bullets: [
+        l10n.documentationCpfBulletOne,
+        l10n.documentationCpfBulletTwo,
+        l10n.documentationCpfBulletThree,
+      ],
+      sourceNameKey: 'receita_federal_govbr',
+      sourceUrl:
+          'https://www.gov.br/pt-br/servicos/inscrever-no-cpf-no-exterior',
+    ),
+    _DocumentationTopic(
+      icon: Icons.perm_identity_rounded,
+      title: l10n.documentationRegistrationTitle,
+      summary: l10n.documentationRegistrationSummary,
+      bullets: [
+        l10n.documentationRegistrationBulletOne,
+        l10n.documentationRegistrationBulletTwo,
+        l10n.documentationRegistrationBulletThree,
+      ],
+      sourceNameKey: 'policia_federal',
+      sourceUrl:
+          'https://www.gov.br/pf/pt-br/assuntos/imigracao/duvidas-frequentes/autorizacao-de-residencia-e-registro-nacional-migratorio-rnm/como-devo-realizar-o-registro-de-rnm',
+    ),
+    _DocumentationTopic(
+      icon: Icons.schedule_rounded,
+      title: l10n.documentationStayTitle,
+      summary: l10n.documentationStaySummary,
+      bullets: [
+        l10n.documentationStayBulletOne,
+        l10n.documentationStayBulletTwo,
+        l10n.documentationStayBulletThree,
+      ],
+      sourceNameKey: 'mre_policia_federal',
+      sourceUrl:
+          'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia-resolucao-mercosul',
+    ),
+    _DocumentationTopic(
+      icon: Icons.account_balance_wallet_outlined,
+      title: l10n.documentationWorkBankTitle,
+      summary: l10n.documentationWorkBankSummary,
+      bullets: [
+        l10n.documentationWorkBankBulletOne,
+        l10n.documentationWorkBankBulletTwo,
+        l10n.documentationWorkBankBulletThree,
+      ],
+      sourceNameKey: 'mre_banco_central',
+      sourceUrl:
+          'https://www.bcb.gov.br/content/cidadaniafinanceira/documentos_cidadania/Cartilha_Migrantes_Refugiados/cartilha_BC_PORTUGUES.pdf',
+    ),
+    _DocumentationTopic(
+      icon: Icons.flag_outlined,
+      title: l10n.documentationCitizenshipTitle,
+      summary: l10n.documentationCitizenshipSummary,
+      bullets: [
+        l10n.documentationCitizenshipBulletOne,
+        l10n.documentationCitizenshipBulletTwo,
+        l10n.documentationCitizenshipBulletThree,
+      ],
+      sourceNameKey: 'ministerio_justica',
+      sourceUrl:
+          'https://www.gov.br/mj/pt-br/assuntos/seus-direitos/migracoes/naturalizacao/o-que-e-naturalizacao/naturalizacao-ordinaria',
+    ),
+    _DocumentationTopic(
+      icon: Icons.health_and_safety_outlined,
+      title: l10n.documentationHealthPublicTitle,
+      summary: l10n.documentationHealthPublicSummary,
+      bullets: [
+        l10n.documentationHealthPublicBulletOne,
+        l10n.documentationHealthPublicBulletTwo,
+        l10n.documentationHealthPublicBulletThree,
+      ],
+      sourceNameKey: 'ministerio_saude',
+      sourceUrl:
+          'https://www.gov.br/saude/pt-br/assuntos/noticias/2025/marco/sus-estrangeiros-podem-contar-com-acesso-ao-sistema-publico-de-saude',
+    ),
+    _DocumentationTopic(
+      icon: Icons.local_hospital_outlined,
+      title: l10n.documentationHealthFlowTitle,
+      summary: l10n.documentationHealthFlowSummary,
+      bullets: [
+        l10n.documentationHealthFlowBulletOne,
+        l10n.documentationHealthFlowBulletTwo,
+        l10n.documentationHealthFlowBulletThree,
+      ],
+      sourceNameKey: 'meu_sus_digital',
+      sourceUrl:
+          'https://www.gov.br/saude/pt-br/acesso-a-informacao/acoes-e-programas/meu-sus-digital',
+    ),
+    _DocumentationTopic(
+      icon: Icons.favorite_outline_rounded,
+      title: l10n.documentationHealthPrivateTitle,
+      summary: l10n.documentationHealthPrivateSummary,
+      bullets: [
+        l10n.documentationHealthPrivateBulletOne,
+        l10n.documentationHealthPrivateBulletTwo,
+        l10n.documentationHealthPrivateBulletThree,
+      ],
+      sourceNameKey: 'ans',
+      sourceUrl:
+          'https://www.gov.br/ans/pt-br/assuntos/consumidor/guia-de-contratacao-de-planos-de-saude',
+    ),
+    _DocumentationTopic(
+      icon: Icons.directions_car_outlined,
+      title: l10n.documentationDrivingTitle,
+      summary: l10n.documentationDrivingSummary,
+      bullets: [
+        l10n.documentationDrivingBulletOne,
+        l10n.documentationDrivingBulletTwo,
+        l10n.documentationDrivingBulletThree,
+      ],
+      sourceNameKey: 'detran_es_mg_gov',
+      sourceUrl: 'https://www.detran.es.gov.br/primeira-habilitacao',
+    ),
+    _DocumentationTopic(
+      icon: Icons.drive_eta_outlined,
+      title: l10n.documentationForeignLicenseTitle,
+      summary: l10n.documentationForeignLicenseSummary,
+      bullets: [
+        l10n.documentationForeignLicenseBulletOne,
+        l10n.documentationForeignLicenseBulletTwo,
+        l10n.documentationForeignLicenseBulletThree,
+      ],
+      sourceNameKey: 'senatran_mg_gov',
+      sourceUrl:
+          'https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/dirigir-no-brasil',
+    ),
+    _DocumentationTopic(
+      icon: Icons.badge_outlined,
+      title: l10n.documentationWorkCltTitle,
+      summary: l10n.documentationWorkCltSummary,
+      bullets: [
+        l10n.documentationWorkCltBulletOne,
+        l10n.documentationWorkCltBulletTwo,
+        l10n.documentationWorkCltBulletThree,
+      ],
+      sourceNameKey: 'mte_ctps',
+      sourceUrl: 'https://www.gov.br/pt-br/apps/ctps-digital',
+    ),
+    _DocumentationTopic(
+      icon: Icons.business_center_outlined,
+      title: l10n.documentationWorkPjTitle,
+      summary: l10n.documentationWorkPjSummary,
+      bullets: [
+        l10n.documentationWorkPjBulletOne,
+        l10n.documentationWorkPjBulletTwo,
+        l10n.documentationWorkPjBulletThree,
+      ],
+      sourceNameKey: 'portal_empreendedor_inss',
+      sourceUrl:
+          'https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/quero-ser-mei/passo-a-passo-para-se-formalizar',
+    ),
+    _DocumentationTopic(
+      icon: Icons.savings_outlined,
+      title: l10n.documentationRetirementTitle,
+      summary: l10n.documentationRetirementSummary,
+      bullets: [
+        l10n.documentationRetirementBulletOne,
+        l10n.documentationRetirementBulletTwo,
+        l10n.documentationRetirementBulletThree,
+      ],
+      sourceNameKey: 'ministerio_previdencia_inss',
+      sourceUrl:
+          'https://www.gov.br/previdencia/pt-br/noticias/2026/janeiro/guia-de-aposentadoria-2026-entenda-as-regras-de-transicao-da-reforma-da-previdencia-de-2019',
+    ),
+  ];
 }
 
 class DocumentationTopicPage extends StatelessWidget {
@@ -402,8 +864,7 @@ class DocumentationTopicPage extends StatelessWidget {
     DocumentationGuideSection section,
   ) {
     final l10n = context.l10n;
-    final guidePage = const DocumentationGuidePage();
-    final topics = guidePage._topics(context);
+    final topics = _documentationTopics(context);
 
     switch (section) {
       case DocumentationGuideSection.documents:
@@ -489,9 +950,7 @@ class DocumentationTopicPage extends StatelessWidget {
         return _DocumentationSectionDetails(
           title: l10n.documentationPathCostsTitle,
           description: l10n.documentationPathCostsBody,
-          sections: const [
-            PracticalCostEstimator(),
-          ],
+          sections: const [PracticalCostEstimator()],
         );
     }
   }
@@ -630,126 +1089,548 @@ class _QuickAnswersSection extends StatelessWidget {
   }
 }
 
-class _GuidePathsSection extends StatelessWidget {
-  const _GuidePathsSection({
+class _GuideSearchField extends StatelessWidget {
+  const _GuideSearchField({
+    required this.controller,
+    required this.label,
+    required this.hint,
+    required this.helper,
+    required this.onSubmitted,
+    required this.onChanged,
+    required this.onClear,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final String hint;
+  final String helper;
+  final ValueChanged<String> onSubmitted;
+  final ValueChanged<String> onChanged;
+  final VoidCallback? onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(color: Colors.white),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: controller,
+          onSubmitted: onSubmitted,
+          onChanged: onChanged,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withValues(alpha: 0.62),
+            ),
+            prefixIcon: const Icon(Icons.search_rounded, color: Colors.white),
+            suffixIcon: onClear == null
+                ? null
+                : IconButton(
+                    onPressed: onClear,
+                    icon: const Icon(Icons.close_rounded, color: Colors.white),
+                  ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(22),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.14),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(22),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.14),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(22),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.30),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          helper,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Colors.white.withValues(alpha: 0.74),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SearchMatchPanel extends StatelessWidget {
+  const _SearchMatchPanel({
     required this.l10n,
+    required this.results,
+    required this.onTapResult,
+  });
+
+  final dynamic l10n;
+  final List<_GuideSearchResultMeta> results;
+  final ValueChanged<_GuideSearchResultMeta> onTapResult;
+
+  @override
+  Widget build(BuildContext context) {
+    final visibleResults = results.take(4).toList();
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.documentationSearchResultsCount(results.length),
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.documentationSearchResultsHint,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.72),
+            ),
+          ),
+          if (visibleResults.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            for (var index = 0; index < visibleResults.length; index++) ...[
+              _SearchResultTile(
+                result: visibleResults[index],
+                onTap: () => onTapResult(visibleResults[index]),
+                actionLabel: l10n.documentationOpenTopicAction,
+              ),
+              if (index != visibleResults.length - 1) const SizedBox(height: 8),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SearchResultTile extends StatelessWidget {
+  const _SearchResultTile({
+    required this.result,
+    required this.onTap,
+    required this.actionLabel,
+  });
+
+  final _GuideSearchResultMeta result;
+  final VoidCallback onTap;
+  final String actionLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(result.icon, size: 18, color: Colors.white),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      result.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      result.subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.76),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                actionLabel,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PromptRail extends StatelessWidget {
+  const _PromptRail({required this.prompts, required this.onTap});
+
+  final List<({String label, String query})> prompts;
+  final ValueChanged<String> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 40,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: prompts.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          final prompt = prompts[index];
+          return _PromptChip(
+            label: prompt.label,
+            onTap: () => onTap(prompt.query),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _SectionFilterRail extends StatelessWidget {
+  const _SectionFilterRail({
+    required this.l10n,
+    required this.paths,
+    required this.selectedSection,
+    required this.onSelected,
+  });
+
+  final dynamic l10n;
+  final List<_GuidePathMeta> paths;
+  final DocumentationGuideSection? selectedSection;
+  final ValueChanged<DocumentationGuideSection?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: paths.length + 1,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return _FilterChipButton(
+              label: l10n.documentationFilterAll,
+              selected: selectedSection == null,
+              onTap: () => onSelected(null),
+              icon: Icons.apps_rounded,
+            );
+          }
+
+          final path = paths[index - 1];
+          return _FilterChipButton(
+            label: path.title,
+            selected: selectedSection == path.section,
+            onTap: () => onSelected(path.section),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _QuickRoutesCarousel extends StatelessWidget {
+  const _QuickRoutesCarousel({
+    required this.l10n,
+    required this.paths,
+    required this.selectedSection,
     required this.onOpenSection,
   });
 
   final dynamic l10n;
+  final List<_GuidePathMeta> paths;
+  final DocumentationGuideSection? selectedSection;
   final ValueChanged<DocumentationGuideSection> onOpenSection;
 
   @override
   Widget build(BuildContext context) {
+    final visiblePaths = selectedSection == null
+        ? paths
+        : paths.where((path) => path.section == selectedSection).toList();
+
     return FrostedPanel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.documentationPathsTitle,
+            l10n.documentationQuickRoutesTitle,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 10),
           Text(
-            l10n.documentationPathsBody,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(
+            l10n.documentationQuickRoutesBody,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSoftFor(context),
             ),
           ),
           const SizedBox(height: 18),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final wide = constraints.maxWidth >= 980;
-              final medium = constraints.maxWidth >= 640;
-              final cardWidth = wide
-                  ? (constraints.maxWidth - 24) / 3
-                  : medium
-                  ? (constraints.maxWidth - 12) / 2
-                  : constraints.maxWidth;
-
-              return Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  SizedBox(
-                    width: cardWidth,
-                    child: _PathCard(
-                      icon: Icons.badge_outlined,
-                      title: l10n.documentationPathDocumentsTitle,
-                      description: l10n.documentationPathDocumentsBody,
-                      accent: const Color(0xFFE7F0FF),
-                      actionLabel: l10n.documentationOpenTopicAction,
-                      onTap: () =>
-                          onOpenSection(DocumentationGuideSection.documents),
-                    ),
+          SizedBox(
+            height: 260,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: visiblePaths.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final path = visiblePaths[index];
+                return SizedBox(
+                  width: 280,
+                  child: _QuickRouteCard(
+                    icon: path.icon,
+                    title: path.title,
+                    description: path.description,
+                    accent: path.accent,
+                    actionLabel: l10n.documentationOpenTopicAction,
+                    onTap: () => onOpenSection(path.section),
                   ),
-                  SizedBox(
-                    width: cardWidth,
-                    child: _PathCard(
-                      icon: Icons.home_work_outlined,
-                      title: l10n.documentationHousingArrivalSectionTitle,
-                      description: l10n.documentationHousingArrivalSectionBody,
-                      accent: const Color(0xFFFFF5E7),
-                      actionLabel: l10n.documentationOpenTopicAction,
-                      onTap: () =>
-                          onOpenSection(DocumentationGuideSection.housing),
-                    ),
-                  ),
-                  SizedBox(
-                    width: cardWidth,
-                    child: _PathCard(
-                      icon: Icons.health_and_safety_outlined,
-                      title: l10n.documentationPathHealthTitle,
-                      description: l10n.documentationPathHealthBody,
-                      accent: const Color(0xFFEAF7EF),
-                      actionLabel: l10n.documentationOpenTopicAction,
-                      onTap: () =>
-                          onOpenSection(DocumentationGuideSection.health),
-                    ),
-                  ),
-                  SizedBox(
-                    width: cardWidth,
-                    child: _PathCard(
-                      icon: Icons.directions_car_outlined,
-                      title: l10n.documentationPathDrivingTitle,
-                      description: l10n.documentationPathDrivingBody,
-                      accent: const Color(0xFFFFF5E7),
-                      actionLabel: l10n.documentationOpenTopicAction,
-                      onTap: () =>
-                          onOpenSection(DocumentationGuideSection.driving),
-                    ),
-                  ),
-                  SizedBox(
-                    width: cardWidth,
-                    child: _PathCard(
-                      icon: Icons.work_outline_rounded,
-                      title: l10n.documentationPathWorkTitle,
-                      description: l10n.documentationPathWorkBody,
-                      accent: const Color(0xFFEFF5EA),
-                      actionLabel: l10n.documentationOpenTopicAction,
-                      onTap: () =>
-                          onOpenSection(DocumentationGuideSection.work),
-                    ),
-                  ),
-                  SizedBox(
-                    width: cardWidth,
-                    child: _PathCard(
-                      icon: Icons.wallet_outlined,
-                      title: l10n.documentationPathCostsTitle,
-                      description: l10n.documentationPathCostsBody,
-                      accent: const Color(0xFFF5ECFF),
-                      actionLabel: l10n.documentationOpenTopicAction,
-                      onTap: () =>
-                          onOpenSection(DocumentationGuideSection.costs),
-                    ),
-                  ),
-                ],
-              );
-            },
+                );
+              },
+            ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _GuideResultsSection extends StatelessWidget {
+  const _GuideResultsSection({
+    super.key,
+    required this.l10n,
+    required this.filteredPaths,
+    required this.filteredAnswers,
+    required this.hasActiveFilter,
+    required this.onOpenSection,
+  });
+
+  final dynamic l10n;
+  final List<_GuidePathMeta> filteredPaths;
+  final List<_GuideQuickAnswerMeta> filteredAnswers;
+  final bool hasActiveFilter;
+  final ValueChanged<DocumentationGuideSection> onOpenSection;
+
+  @override
+  Widget build(BuildContext context) {
+    if (filteredPaths.isEmpty && filteredAnswers.isEmpty) {
+      return FrostedPanel(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.documentationNoResultsTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              l10n.documentationNoResultsBody,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSoftFor(context),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return FrostedPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.documentationResultsTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            hasActiveFilter
+                ? l10n.documentationResultsFilteredBody
+                : l10n.documentationResultsBody,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
+          ),
+          if (filteredAnswers.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final wide = constraints.maxWidth >= 980;
+                final cardWidth = wide
+                    ? (constraints.maxWidth - 16) / 2
+                    : constraints.maxWidth;
+
+                return Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  children: [
+                    for (final answer in filteredAnswers)
+                      SizedBox(
+                        width: cardWidth,
+                        child: _QuickAnswerCard(
+                          icon: answer.icon,
+                          question: answer.question,
+                          answer: answer.answer,
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ],
+          if (filteredPaths.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final wide = constraints.maxWidth >= 980;
+                final medium = constraints.maxWidth >= 640;
+                final cardWidth = wide
+                    ? (constraints.maxWidth - 24) / 3
+                    : medium
+                    ? (constraints.maxWidth - 12) / 2
+                    : constraints.maxWidth;
+
+                return Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    for (final path in filteredPaths)
+                      SizedBox(
+                        width: cardWidth,
+                        child: _PathCard(
+                          icon: path.icon,
+                          title: path.title,
+                          description: path.description,
+                          accent: path.accent,
+                          actionLabel: l10n.documentationOpenTopicAction,
+                          onTap: () => onOpenSection(path.section),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChipButton extends StatelessWidget {
+  const _FilterChipButton({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.icon,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? Colors.white : Colors.white.withValues(alpha: 0.10),
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(
+                  icon,
+                  size: 16,
+                  color: selected ? AppColors.primary : Colors.white,
+                ),
+                const SizedBox(width: 8),
+              ],
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: selected ? AppColors.primary : Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PromptChip extends StatelessWidget {
+  const _PromptChip({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -778,9 +1659,7 @@ class _HealthDecisionsSection extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             l10n.documentationHealthSectionBody,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSoftFor(context),
             ),
           ),
@@ -896,9 +1775,7 @@ class _DrivingJourneySection extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             l10n.documentationDrivingSectionBody,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSoftFor(context),
             ),
           ),
@@ -971,9 +1848,7 @@ class _WorkModelsSection extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             l10n.documentationWorkSectionBody,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSoftFor(context),
             ),
           ),
@@ -1157,37 +2032,88 @@ class _TopicGrid extends StatelessWidget {
   }
 }
 
-class _QuickStepChip extends StatelessWidget {
-  const _QuickStepChip({required this.label, required this.icon});
+String _normalizeSearch(String value) {
+  const replacements = {
+    'á': 'a',
+    'à': 'a',
+    'â': 'a',
+    'ã': 'a',
+    'ä': 'a',
+    'é': 'e',
+    'è': 'e',
+    'ê': 'e',
+    'ë': 'e',
+    'í': 'i',
+    'ì': 'i',
+    'î': 'i',
+    'ï': 'i',
+    'ó': 'o',
+    'ò': 'o',
+    'ô': 'o',
+    'õ': 'o',
+    'ö': 'o',
+    'ú': 'u',
+    'ù': 'u',
+    'û': 'u',
+    'ü': 'u',
+    'ç': 'c',
+    'ñ': 'n',
+  };
 
-  final String label;
+  var normalized = value.toLowerCase();
+  replacements.forEach((from, to) {
+    normalized = normalized.replaceAll(from, to);
+  });
+
+  return normalized.replaceAll(RegExp(r'[^a-z0-9\s]'), ' ');
+}
+
+class _GuidePathMeta {
+  const _GuidePathMeta({
+    required this.section,
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.accent,
+    required this.keywords,
+  });
+
+  final DocumentationGuideSection section;
   final IconData icon;
+  final String title;
+  final String description;
+  final Color accent;
+  final List<String> keywords;
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: Colors.white),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+class _GuideQuickAnswerMeta {
+  const _GuideQuickAnswerMeta({
+    required this.section,
+    required this.icon,
+    required this.question,
+    required this.answer,
+    required this.keywords,
+  });
+
+  final DocumentationGuideSection section;
+  final IconData icon;
+  final String question;
+  final String answer;
+  final List<String> keywords;
+}
+
+class _GuideSearchResultMeta {
+  const _GuideSearchResultMeta({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.section,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final DocumentationGuideSection section;
 }
 
 class _PathCard extends StatelessWidget {
@@ -1247,6 +2173,8 @@ class _PathCard extends StatelessWidget {
             style: Theme.of(
               context,
             ).textTheme.titleSmall?.copyWith(color: textPrimary),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
           Text(
@@ -1254,8 +2182,100 @@ class _PathCard extends StatelessWidget {
             style: Theme.of(
               context,
             ).textTheme.bodyMedium?.copyWith(color: textSoft),
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 14),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: onTap,
+              icon: const Icon(Icons.arrow_forward_rounded),
+              label: Text(actionLabel),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickRouteCard extends StatelessWidget {
+  const _QuickRouteCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.accent,
+    required this.actionLabel,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final Color accent;
+  final String actionLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final textPrimary = AppColors.textPrimaryFor(context);
+    final textSoft = AppColors.textSoftFor(context);
+    final resolvedBackground = isDark
+        ? Color.alphaBlend(
+            accent.withValues(alpha: 0.12),
+            const Color(0xFF101823),
+          )
+        : accent;
+    final resolvedBorder = isDark
+        ? accent.withValues(alpha: 0.24)
+        : accent.withValues(alpha: 0.7);
+    final iconSurface = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.white.withValues(alpha: 0.82);
+
+    return FrostedPanel(
+      padding: const EdgeInsets.all(18),
+      backgroundColor: resolvedBackground,
+      borderColor: resolvedBorder,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: iconSurface,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: textPrimary),
+          ),
+          const SizedBox(height: 14),
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleSmall?.copyWith(color: textPrimary),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    description,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: textSoft),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
@@ -1417,9 +2437,7 @@ class _InlineHighlight extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textPrimaryFor(context),
             ),
           ),
@@ -1527,9 +2545,7 @@ class _DocumentationBullet extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textPrimaryFor(context),
             ),
           ),

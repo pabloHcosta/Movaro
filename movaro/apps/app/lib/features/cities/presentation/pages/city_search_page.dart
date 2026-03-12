@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/localization/language_selector_button.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/errors/error_handler.dart';
@@ -60,6 +59,28 @@ class _CitySearchPageState extends State<CitySearchPage> {
     setState(() {});
   }
 
+  Future<void> _toggleFavoriteCity(City city) async {
+    final result = await widget.citiesController.toggleFavorite(city.id);
+    if (!mounted) {
+      return;
+    }
+
+    final message = switch (result) {
+      CityFavoriteToggleResult.added =>
+        context.l10n.cityDetailFavoriteAddedFeedback(city.name),
+      CityFavoriteToggleResult.removed =>
+        context.l10n.cityDetailFavoriteRemovedFeedback(city.name),
+      CityFavoriteToggleResult.limitReached =>
+        context.l10n.cityDetailFavoriteLimitFeedback(
+          CitiesController.maxFavoriteCities,
+        ),
+    };
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
@@ -90,7 +111,6 @@ class _CitySearchPageState extends State<CitySearchPage> {
                     AppGlassHeader(
                       title: l10n.citiesSearchTitle,
                       onBack: _goBackToCities,
-                      trailing: const LanguageSelectorButton(),
                     ),
                     const SizedBox(height: 16),
                     ConstrainedBox(
@@ -159,7 +179,9 @@ class _CitySearchPageState extends State<CitySearchPage> {
                               children: [
                                 for (final filter in _CityQuickFilter.values)
                                   ChoiceChip(
-                                    label: Text(_quickFilterLabel(l10n, filter)),
+                                    label: Text(
+                                      _quickFilterLabel(l10n, filter),
+                                    ),
                                     selected: _quickFilter == filter,
                                     onSelected: (_) {
                                       setState(() {
@@ -249,6 +271,11 @@ class _CitySearchPageState extends State<CitySearchPage> {
                                     l10n,
                                     _quickFilter,
                                   ),
+                                  citiesController: widget.citiesController,
+                                  isFavorite: widget.citiesController
+                                      .isFavorite(city.id),
+                                  onFavoriteToggle: () =>
+                                      _toggleFavoriteCity(city),
                                   onTap: () => _openCityDetail(city),
                                 ),
                                 const SizedBox(height: 12),
@@ -278,10 +305,11 @@ class _CitySearchPageState extends State<CitySearchPage> {
 
     switch (_quickFilter) {
       case _CityQuickFilter.all:
-        final ranked = filteredCities
-            .map((city) => (city: city, score: semanticSearch.score(city)))
-            .toList()
-          ..sort((left, right) => right.score.compareTo(left.score));
+        final ranked =
+            filteredCities
+                .map((city) => (city: city, score: semanticSearch.score(city)))
+                .toList()
+              ..sort((left, right) => right.score.compareTo(left.score));
         return ranked.map((entry) => entry.city).toList();
       case _CityQuickFilter.popular:
         filteredCities.sort(
@@ -292,9 +320,8 @@ class _CitySearchPageState extends State<CitySearchPage> {
         return filteredCities;
       case _CityQuickFilter.lowCost:
         filteredCities.sort(
-          (a, b) => b.movaroScores.economical.compareTo(
-            a.movaroScores.economical,
-          ),
+          (a, b) =>
+              b.movaroScores.economical.compareTo(a.movaroScores.economical),
         );
         return filteredCities;
       case _CityQuickFilter.work:
@@ -715,12 +742,7 @@ class _CitySemanticSearch {
     'small',
     'menor',
   };
-  static const _borderTerms = {
-    'fronteira',
-    'frontera',
-    'border',
-    'fronteriza',
-  };
+  static const _borderTerms = {'fronteira', 'frontera', 'border', 'fronteriza'};
 
   bool matches(City city) {
     if (query.isEmpty) {
@@ -781,32 +803,33 @@ class _CitySemanticSearch {
     if (_hasAny(_softLandingTerms)) {
       total +=
           CityArrivalProfileRanker.score(
-                city,
-                profile: CityArrivalProfile.softLanding,
-              ) ~/
+            city,
+            profile: CityArrivalProfile.softLanding,
+          ) ~/
           100;
     }
     if (_hasAny(_familyTerms)) {
       total +=
           CityArrivalProfileRanker.score(
-                city,
-                profile: CityArrivalProfile.familyStability,
-              ) ~/
+            city,
+            profile: CityArrivalProfile.familyStability,
+          ) ~/
           100;
     }
     if (_hasAny(_incomeStartTerms)) {
       total +=
           CityArrivalProfileRanker.score(
-                city,
-                profile: CityArrivalProfile.incomeStart,
-              ) ~/
+            city,
+            profile: CityArrivalProfile.incomeStart,
+          ) ~/
           100;
     }
     if (_hasAny(_coastalTerms) && CityCoastalProfile.isCoastal(city)) {
       total += 140;
     }
     if (_hasAny(_metropolisTerms) &&
-        CityCoastalProfile.lifestyleKind(city) == CityLifestyleKind.metropolis) {
+        CityCoastalProfile.lifestyleKind(city) ==
+            CityLifestyleKind.metropolis) {
       total += 120;
     }
     if (_hasAny(_inlandTerms) &&
@@ -831,10 +854,6 @@ class _CitySemanticSearch {
     final state = _normalizeSearch(city.stateName);
     return region.contains('sul') ||
         region.contains('south') ||
-        {
-          'parana',
-          'santa catarina',
-          'rio grande do sul',
-        }.contains(state);
+        {'parana', 'santa catarina', 'rio grande do sul'}.contains(state);
   }
 }

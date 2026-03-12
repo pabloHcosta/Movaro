@@ -3,9 +3,11 @@ import { Injectable } from '@nestjs/common';
 import { AppErrorFactory } from '../../../../common/errors/app-error.factory';
 import { GetCitiesQueryDto } from '../../presentation/dto/get-cities-query.dto';
 import { CityCardEntity } from '../../domain/entities/city-card.entity';
+import { CurrentCityWeatherEntity } from '../../domain/entities/current-city-weather.entity';
 import { CityMetricsRepository } from '../../domain/repositories/city-metrics.repository';
 import { CityMergeService } from './city-merge.service';
 import { CityRankingService } from './city-ranking.service';
+import { OpenMeteoWeatherService } from '../../../../integrations/weather/open-meteo-weather.service';
 
 @Injectable()
 export class CitiesCatalogService {
@@ -13,6 +15,7 @@ export class CitiesCatalogService {
     private readonly cityMetricsRepository: CityMetricsRepository,
     private readonly cityMergeService: CityMergeService,
     private readonly cityRankingService: CityRankingService,
+    private readonly openMeteoWeatherService: OpenMeteoWeatherService,
   ) {}
 
   async getCities(query: GetCitiesQueryDto): Promise<CityCardEntity[]> {
@@ -57,6 +60,22 @@ export class CitiesCatalogService {
     }
 
     return city;
+  }
+
+  async getCityWeatherById(id: string): Promise<CurrentCityWeatherEntity> {
+    const city = await this.getCityById(id);
+    const currentWeather = await this.openMeteoWeatherService.getCurrentWeather(
+      city.latitude,
+      city.longitude,
+    );
+
+    return new CurrentCityWeatherEntity(
+      currentWeather.temperatureCelsius,
+      currentWeather.weatherCode,
+      currentWeather.isDay,
+      currentWeather.windSpeedKmh,
+      currentWeather.fetchedAt,
+    );
   }
 
   async search(query: string): Promise<CityCardEntity[]> {

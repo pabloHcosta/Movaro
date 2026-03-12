@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
@@ -13,22 +15,75 @@ import 'package:movaro_app/features/cities/presentation/widgets/city_housing_via
 import 'package:movaro_app/features/cities/presentation/widgets/recommendation_reason_list.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 
-class MigrationPlanResultPage extends StatelessWidget {
-  const MigrationPlanResultPage({
-    required this.controller,
-    super.key,
-  });
+class MigrationPlanResultPage extends StatefulWidget {
+  const MigrationPlanResultPage({required this.controller, super.key});
 
   final MigrationQuestionnaireController controller;
 
   @override
+  State<MigrationPlanResultPage> createState() =>
+      _MigrationPlanResultPageState();
+}
+
+class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
+  final ScrollController _scrollController = ScrollController();
+  bool _showScrollHint = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_syncScrollHint);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncScrollHint());
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_syncScrollHint)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _syncScrollHint() {
+    if (!_scrollController.hasClients) {
+      return;
+    }
+
+    final position = _scrollController.position;
+    final shouldShow =
+        position.maxScrollExtent > 48 &&
+        position.pixels < position.maxScrollExtent - 36;
+
+    if (shouldShow != _showScrollHint && mounted) {
+      setState(() {
+        _showScrollHint = shouldShow;
+      });
+    }
+  }
+
+  Future<void> _scrollDown() async {
+    if (!_scrollController.hasClients) {
+      return;
+    }
+
+    final position = _scrollController.position;
+    final target = (position.pixels + 420).clamp(0, position.maxScrollExtent);
+    await _scrollController.animateTo(
+      target.toDouble(),
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: controller,
+      animation: widget.controller,
       builder: (context, _) {
         final l10n = context.l10n;
-        final plan = controller.generatedPlan;
+        final plan = widget.controller.generatedPlan;
 
         if (plan == null) {
           return Scaffold(
@@ -51,6 +106,12 @@ class MigrationPlanResultPage extends StatelessWidget {
           );
         }
 
+        final shortlist = plan.candidateCities.isNotEmpty
+            ? plan.candidateCities.take(3).toList()
+            : plan.recommendedCity == null
+            ? const <City>[]
+            : [plan.recommendedCity!];
+
         return Scaffold(
           body: Stack(
             children: [
@@ -59,37 +120,50 @@ class MigrationPlanResultPage extends StatelessWidget {
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1040),
-                    child: ListView(
-                      padding: EdgeInsets.fromLTRB(
-                        context.pageHorizontalPadding,
-                        context.pageVerticalPadding,
-                        context.pageHorizontalPadding,
-                        context.pageVerticalPadding + 20,
-                      ),
+                    child: Stack(
                       children: [
-                        AppGlassHeader(
-                          title: l10n.migrationPlanPageTitle,
-                          onBack: () => Navigator.maybePop(context),
-                        ),
-                        const SizedBox(height: 20),
-                        _DecisionHero(
-                          plan: plan,
-                          onOpenCities: () =>
-                              _openCandidateCitiesSheet(context, plan),
-                        ),
-                        const SizedBox(height: 16),
-                        _DecisionExplanation(plan: plan),
-                        if (plan.recommendedCity != null) ...[
-                          const SizedBox(height: 16),
-                          if (plan.isCityConfirmed)
-                            _ConfirmedCityPanel(plan: plan)
-                          else
-                            _SuggestedCityPanel(
-                              plan: plan,
-                              onOpenCities: () =>
-                                  _openCandidateCitiesSheet(context, plan),
+                        ListView(
+                          controller: _scrollController,
+                          padding: EdgeInsets.fromLTRB(
+                            context.pageHorizontalPadding,
+                            context.pageVerticalPadding,
+                            context.pageHorizontalPadding,
+                            context.pageVerticalPadding + 96,
+                          ),
+                          children: [
+                            AppGlassHeader(
+                              title: l10n.migrationPlanPageTitle,
+                              onBack: () => Navigator.maybePop(context),
                             ),
-                        ],
+                            const SizedBox(height: 20),
+                            _DecisionHero(plan: plan),
+                            if (plan.recommendedCity != null) ...[
+                              const SizedBox(height: 16),
+                              _LeadCityShowcase(
+                                city: plan.recommendedCity!,
+                                plan: plan,
+                              ),
+                            ],
+                            if (shortlist.isNotEmpty) ...[
+                              const SizedBox(height: 16),
+                              _CityShortlist(plan: plan, cities: shortlist),
+                            ],
+                            const SizedBox(height: 16),
+                            if (plan.isCityConfirmed)
+                              _ConfirmedCityPanel(plan: plan)
+                            else
+                              _PreparationPrompt(plan: plan),
+                          ],
+                        ),
+                        if (_showScrollHint)
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 8,
+                            child: Center(
+                              child: _ScrollHintButton(onTap: _scrollDown),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -101,94 +175,27 @@ class MigrationPlanResultPage extends StatelessWidget {
       },
     );
   }
-
-  Future<void> _openCandidateCitiesSheet(
-    BuildContext context,
-    MigrationPlan plan,
-  ) {
-    final cities = plan.candidateCities.isNotEmpty
-        ? plan.candidateCities
-        : plan.recommendedCity == null
-        ? const <City>[]
-        : [plan.recommendedCity!];
-
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        final l10n = context.l10n;
-        final media = MediaQuery.of(context);
-
-        return SafeArea(
-          top: false,
-          child: Container(
-            height: media.size.height * 0.82,
-            margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            child: FrostedPanel(
-              borderRadius: BorderRadius.circular(32),
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.migrationPlanCandidateCitiesTitle,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.migrationPlanCandidateCitiesSheetBody,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSoftFor(context),
-                      height: 1.45,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: ListView.separated(
-                      itemCount: cities.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final city = cities[index];
-                        return _CandidateCityCard(
-                          city: city,
-                          isSuggested: plan.recommendedCity?.id == city.id,
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 }
 
 class _DecisionHero extends StatelessWidget {
-  const _DecisionHero({
-    required this.plan,
-    required this.onOpenCities,
-  });
+  const _DecisionHero({required this.plan});
 
   final MigrationPlan plan;
-  final VoidCallback onOpenCities;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final city = plan.recommendedCity;
+    final title = city == null
+        ? l10n.migrationPlanDecisionTitle(l10n.goalLabel(plan.goal))
+        : plan.isCityConfirmed
+        ? l10n.migrationPlanConfirmedCityTitle(city.name)
+        : l10n.migrationPlanHeroTitle(city.name);
 
     return FrostedPanel(
       padding: const EdgeInsets.all(28),
       gradient: const LinearGradient(
-        colors: [
-          AppColors.heroStart,
-          AppColors.heroMiddle,
-          AppColors.heroEnd,
-        ],
+        colors: [AppColors.heroStart, AppColors.heroMiddle, AppColors.heroEnd],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
@@ -205,35 +212,41 @@ class _DecisionHero extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            l10n.migrationPlanDecisionTitle(l10n.goalLabel(plan.goal)),
+            title,
             style: Theme.of(
               context,
             ).textTheme.headlineMedium?.copyWith(color: Colors.white),
           ),
           const SizedBox(height: 12),
           Text(
-            l10n.migrationPlanDecisionBody(l10n.timelineLabel(plan.timeline)),
+            plan.isCityConfirmed && city != null
+                ? l10n.migrationPlanPreparationBody(city.name)
+                : l10n.migrationPlanHeroBody(l10n.timelineLabel(plan.timeline)),
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Colors.white.withValues(alpha: 0.82),
               height: 1.45,
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
           Wrap(
             spacing: 10,
             runSpacing: 10,
             children: [
-              _SummaryChip(label: l10n.countryLabel(plan.originCountry)),
-              _SummaryChip(label: l10n.countryLabel(plan.destinationCountry)),
+              _SummaryChip(
+                label: plan.confidence >= 0.68
+                    ? l10n.migrationPlanConfidenceHigh
+                    : l10n.migrationPlanConfidenceLow,
+              ),
+              if (plan.isCityConfirmed)
+                _SummaryChip(label: l10n.migrationPlanSelectedCityBadge),
               _SummaryChip(label: l10n.goalLabel(plan.goal)),
               _SummaryChip(label: l10n.timelineLabel(plan.timeline)),
+              _SummaryChip(
+                label: l10n.questionnaireVariantLabel(plan.variant.id),
+              ),
+              if (plan.funding.isNotEmpty)
+                _SummaryChip(label: l10n.fundingLabel(plan.funding)),
             ],
-          ),
-          const SizedBox(height: 18),
-          FilledButton.icon(
-            onPressed: onOpenCities,
-            icon: const Icon(Icons.location_city_rounded),
-            label: Text(l10n.migrationPlanOpenCitiesAction),
           ),
         ],
       ),
@@ -241,14 +254,350 @@ class _DecisionHero extends StatelessWidget {
   }
 }
 
-class _DecisionExplanation extends StatelessWidget {
-  const _DecisionExplanation({required this.plan});
+class _LeadCityShowcase extends StatelessWidget {
+  const _LeadCityShowcase({required this.city, required this.plan});
+
+  final City city;
+  final MigrationPlan plan;
+
+  @override
+  Widget build(BuildContext context) {
+    final housing = CityHousingViabilityPresenter.resolve(
+      context,
+      rentScore: city.rentScore,
+    );
+    final compact = MediaQuery.sizeOf(context).width < 760;
+
+    return FrostedPanel(
+      child: compact
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _LeadCityContent(city: city, plan: plan, housing: housing),
+                const SizedBox(height: 16),
+                _MiniCityMap(city: city),
+              ],
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 6,
+                  child: _LeadCityContent(
+                    city: city,
+                    plan: plan,
+                    housing: housing,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(flex: 4, child: _MiniCityMap(city: city)),
+              ],
+            ),
+    );
+  }
+}
+
+class _LeadCityContent extends StatelessWidget {
+  const _LeadCityContent({
+    required this.city,
+    required this.plan,
+    required this.housing,
+  });
+
+  final City city;
+  final MigrationPlan plan;
+  final CityHousingViabilityPresentation housing;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isSelected = plan.isCityConfirmed;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                isSelected
+                    ? l10n.migrationPlanConfirmedCityTitle(city.name)
+                    : l10n.migrationPlanSuggestedCityTitle(city.name),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: (isSelected ? AppColors.primary : AppColors.accent)
+                    .withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                isSelected
+                    ? l10n.migrationPlanSelectedCityBadge
+                    : l10n.migrationPlanSuggestedCityBadge,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: isSelected ? AppColors.primary : AppColors.accent,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          '${city.stateName} (${city.stateCode})',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: AppColors.textSoftFor(context),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _MetaPill(
+              icon: _lifestyleIcon(city),
+              label: _lifestyleLabel(context, city),
+            ),
+            _MetaPill(
+              icon: Icons.home_work_outlined,
+              label: housing.badge,
+              tint: housing.tint,
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        RecommendationReasonList(reasons: plan.cityRecommendationReasons),
+        const SizedBox(height: 18),
+        FilledButton.icon(
+          onPressed: () => isSelected
+              ? Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot)
+              : Navigator.pushNamed(
+                  context,
+                  AppRoutes.cityDetail(city.id),
+                  arguments: const {'selectForPlan': true},
+                ),
+          icon: Icon(
+            isSelected ? Icons.checklist_rounded : Icons.open_in_new_rounded,
+          ),
+          label: Text(
+            isSelected
+                ? l10n.migrationPlanCopilotAction
+                : l10n.migrationPlanInspectCityAction,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _lifestyleLabel(BuildContext context, City city) {
+    final l10n = context.l10n;
+    return switch (CityCoastalProfile.lifestyleKind(city)) {
+      CityLifestyleKind.coastal => l10n.cityLifestyleCoastalLabel,
+      CityLifestyleKind.metropolis => l10n.cityLifestyleMetropolisLabel,
+      CityLifestyleKind.border => l10n.cityLifestyleBorderLabel,
+      CityLifestyleKind.inland => l10n.cityLifestyleInlandLabel,
+    };
+  }
+
+  IconData _lifestyleIcon(City city) {
+    return switch (CityCoastalProfile.lifestyleKind(city)) {
+      CityLifestyleKind.coastal => Icons.waves_rounded,
+      CityLifestyleKind.metropolis => Icons.location_city_rounded,
+      CityLifestyleKind.border => Icons.compare_arrows_rounded,
+      CityLifestyleKind.inland => Icons.terrain_rounded,
+    };
+  }
+}
+
+class _CityShortlist extends StatelessWidget {
+  const _CityShortlist({required this.plan, required this.cities});
+
+  final MigrationPlan plan;
+  final List<City> cities;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return FrostedPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.migrationPlanShortlistTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.migrationPlanShortlistBody,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 16),
+          for (var index = 0; index < cities.length; index++) ...[
+            _CityOptionCard(
+              city: cities[index],
+              isLeading: plan.recommendedCity?.id == cities[index].id,
+              isSelected:
+                  plan.isCityConfirmed &&
+                  plan.recommendedCity?.id == cities[index].id,
+            ),
+            if (index != cities.length - 1) const SizedBox(height: 12),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CityOptionCard extends StatelessWidget {
+  const _CityOptionCard({
+    required this.city,
+    required this.isLeading,
+    required this.isSelected,
+  });
+
+  final City city;
+  final bool isLeading;
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final housing = CityHousingViabilityPresenter.resolve(
+      context,
+      rentScore: city.rentScore,
+    );
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.tintedSurfaceFor(
+          context,
+          tint: isLeading ? AppColors.primary : AppColors.accent,
+          lightColor: isLeading
+              ? const Color(0xFFEFF5FF)
+              : const Color(0xFFF7FAFD),
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isLeading
+              ? AppColors.tintedBorderFor(
+                  context,
+                  tint: AppColors.primary,
+                  lightColor: const Color(0x290071E3),
+                )
+              : AppColors.borderFor(context),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      city.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${city.stateName} (${city.stateCode})',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isLeading)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    isSelected
+                        ? l10n.migrationPlanSelectedCityBadge
+                        : l10n.migrationPlanSuggestedCityBadge,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelMedium?.copyWith(color: AppColors.primary),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _MetaPill(
+                icon: Icons.home_work_outlined,
+                label: housing.badge,
+                tint: housing.tint,
+              ),
+              _MetaPill(
+                icon: Icons.trending_up_rounded,
+                label: context.l10n.recommendationReasonLabel(
+                  city.recommendationReasons.isEmpty
+                      ? 'plan_reason_balanced_profile'
+                      : city.recommendationReasons.first,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton.icon(
+              onPressed: () => isSelected
+                  ? Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot)
+                  : Navigator.pushNamed(
+                      context,
+                      AppRoutes.cityDetail(city.id),
+                      arguments: const {'selectForPlan': true},
+                    ),
+              icon: Icon(
+                isSelected
+                    ? Icons.checklist_rounded
+                    : Icons.open_in_new_rounded,
+              ),
+              label: Text(
+                isSelected
+                    ? l10n.migrationPlanSelectedCityAction
+                    : l10n.migrationPlanInspectCityAction,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PreparationPrompt extends StatelessWidget {
+  const _PreparationPrompt({required this.plan});
 
   final MigrationPlan plan;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final city = plan.recommendedCity;
 
     return FrostedPanel(
       child: Column(
@@ -258,81 +607,15 @@ class _DecisionExplanation extends StatelessWidget {
             l10n.migrationPlanDecisionSummaryTitle,
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          const SizedBox(height: 12),
-          _SummaryLine(
-            label: l10n.planSummaryGoal(l10n.goalLabel(plan.goal)),
-          ),
-          _SummaryLine(
-            label: l10n.planSummaryTimeline(l10n.timelineLabel(plan.timeline)),
-          ),
-          _SummaryLine(label: l10n.migrationPlanDecisionSummaryBody),
-        ],
-      ),
-    );
-  }
-}
-
-class _SuggestedCityPanel extends StatelessWidget {
-  const _SuggestedCityPanel({
-    required this.plan,
-    required this.onOpenCities,
-  });
-
-  final MigrationPlan plan;
-  final VoidCallback onOpenCities;
-
-  @override
-  Widget build(BuildContext context) {
-    final city = plan.recommendedCity!;
-    final l10n = context.l10n;
-    final housing = CityHousingViabilityPresenter.resolve(
-      context,
-      rentScore: city.rentScore,
-    );
-
-    return FrostedPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.migrationPlanSuggestedCityTitle(city.name),
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
           const SizedBox(height: 10),
           Text(
-            l10n.migrationPlanSuggestedCityBody(
-              city.name,
-              housing.headline,
-            ),
+            city == null
+                ? l10n.migrationPlanDecisionSummaryBody
+                : l10n.migrationPlanPreparationBody(city.name),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSoftFor(context),
               height: 1.45,
             ),
-          ),
-          const SizedBox(height: 14),
-          RecommendationReasonList(
-            reasons: plan.cityRecommendationReasons,
-          ),
-          const SizedBox(height: 18),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              FilledButton.icon(
-                onPressed: () => Navigator.pushNamed(
-                  context,
-                  AppRoutes.cityDetail(city.id),
-                  arguments: const {'selectForPlan': true},
-                ),
-                icon: const Icon(Icons.open_in_new_rounded),
-                label: Text(l10n.migrationPlanInspectCityAction),
-              ),
-              OutlinedButton.icon(
-                onPressed: onOpenCities,
-                icon: const Icon(Icons.unfold_more_rounded),
-                label: Text(l10n.migrationPlanCompareOtherCitiesAction),
-              ),
-            ],
           ),
         ],
       ),
@@ -373,9 +656,9 @@ class _ConfirmedCityPanel extends StatelessWidget {
                 ),
                 child: Text(
                   l10n.migrationPlanSelectedCityBadge,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: AppColors.primary,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelMedium?.copyWith(color: AppColors.primary),
                 ),
               ),
             ],
@@ -389,28 +672,11 @@ class _ConfirmedCityPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              FilledButton.icon(
-                onPressed: () => Navigator.pushNamed(
-                  context,
-                  AppRoutes.migrationPlanCopilot,
-                ),
-                icon: const Icon(Icons.checklist_rounded),
-                label: Text(l10n.migrationPlanCopilotAction),
-              ),
-              OutlinedButton.icon(
-                onPressed: () => Navigator.pushNamed(
-                  context,
-                  AppRoutes.cityDetail(city.id),
-                  arguments: const {'selectForPlan': true},
-                ),
-                icon: const Icon(Icons.open_in_new_rounded),
-                label: Text(l10n.planRecommendedCityAction),
-              ),
-            ],
+          FilledButton.icon(
+            onPressed: () =>
+                Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot),
+            icon: const Icon(Icons.checklist_rounded),
+            label: Text(l10n.migrationPlanCopilotAction),
           ),
         ],
       ),
@@ -418,132 +684,139 @@ class _ConfirmedCityPanel extends StatelessWidget {
   }
 }
 
-class _CandidateCityCard extends StatelessWidget {
-  const _CandidateCityCard({
-    required this.city,
-    required this.isSuggested,
-  });
+class _MiniCityMap extends StatelessWidget {
+  const _MiniCityMap({required this.city});
 
   final City city;
-  final bool isSuggested;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final housing = CityHousingViabilityPresenter.resolve(
-      context,
-      rentScore: city.rentScore,
-    );
+    final center = LatLng(city.latitude, city.longitude);
 
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMutedFor(context),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.borderFor(context)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      city.name,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${city.stateName} (${city.stateCode})',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSoftFor(context),
-                      ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: SizedBox(
+        height: 180,
+        child: Stack(
+          children: [
+            FlutterMap(
+              options: MapOptions(
+                initialCenter: center,
+                initialZoom: 9.5,
+                interactionOptions: const InteractionOptions(
+                  flags: InteractiveFlag.none,
+                ),
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.movaro.app',
+                ),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: center,
+                      width: 42,
+                      height: 42,
+                      child: const _MiniMapMarker(),
                     ),
                   ],
                 ),
-              ),
-              if (isSuggested)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.tintedSurfaceFor(
-                      context,
-                      tint: AppColors.primary,
-                      lightColor: const Color(0xFFEFF5FF),
-                    ),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    l10n.migrationPlanSuggestedCityBadge,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.primary,
-                    ),
-                  ),
+              ],
+            ),
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 12,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
                 ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _MetaPill(
-                icon: _lifestyleIcon(city),
-                label: _lifestyleLabel(context, city),
+                decoration: BoxDecoration(
+                  color: const Color(0xCC0D1625),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  '${city.name}, ${city.stateCode}',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(color: Colors.white),
+                ),
               ),
-              _MetaPill(
-                icon: Icons.home_work_outlined,
-                label: housing.badge,
-                tint: housing.tint,
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          RecommendationReasonList(
-            reasons: city.recommendationReasons.take(2).toList(),
-          ),
-          const SizedBox(height: 14),
-          FilledButton.icon(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(
-                context,
-                AppRoutes.cityDetail(city.id),
-                arguments: const {'selectForPlan': true},
-              );
-            },
-            icon: const Icon(Icons.open_in_new_rounded),
-            label: Text(l10n.migrationPlanInspectCityAction),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  String _lifestyleLabel(BuildContext context, City city) {
-    final l10n = context.l10n;
-    return switch (CityCoastalProfile.lifestyleKind(city)) {
-      CityLifestyleKind.coastal => l10n.cityLifestyleCoastalLabel,
-      CityLifestyleKind.metropolis => l10n.cityLifestyleMetropolisLabel,
-      CityLifestyleKind.border => l10n.cityLifestyleBorderLabel,
-      CityLifestyleKind.inland => l10n.cityLifestyleInlandLabel,
-    };
+class _ScrollHintButton extends StatelessWidget {
+  const _ScrollHintButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.isDark(context)
+                ? const Color(0xE5121C2A)
+                : const Color(0xF8FFFFFF),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.12),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                context.l10n.migrationPlanScrollHint,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: AppColors.textPrimaryFor(context),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.keyboard_arrow_down_rounded),
+            ],
+          ),
+        ),
+      ),
+    );
   }
+}
 
-  IconData _lifestyleIcon(City city) {
-    return switch (CityCoastalProfile.lifestyleKind(city)) {
-      CityLifestyleKind.coastal => Icons.waves_rounded,
-      CityLifestyleKind.metropolis => Icons.location_city_rounded,
-      CityLifestyleKind.border => Icons.compare_arrows_rounded,
-      CityLifestyleKind.inland => Icons.terrain_rounded,
-    };
+class _MiniMapMarker extends StatelessWidget {
+  const _MiniMapMarker();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 3),
+        boxShadow: const [
+          BoxShadow(color: Color(0x330071E3), blurRadius: 16, spreadRadius: 2),
+        ],
+      ),
+      child: const Icon(Icons.location_on, color: Colors.white, size: 20),
+    );
   }
 }
 
@@ -571,32 +844,8 @@ class _SummaryChip extends StatelessWidget {
   }
 }
 
-class _SummaryLine extends StatelessWidget {
-  const _SummaryLine({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: AppColors.textSoftFor(context),
-          height: 1.45,
-        ),
-      ),
-    );
-  }
-}
-
 class _MetaPill extends StatelessWidget {
-  const _MetaPill({
-    required this.icon,
-    required this.label,
-    this.tint,
-  });
+  const _MetaPill({required this.icon, required this.label, this.tint});
 
   final IconData icon;
   final String label;
@@ -621,10 +870,12 @@ class _MetaPill extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: resolvedTint),
           const SizedBox(width: 8),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: resolvedTint,
+          Flexible(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: AppColors.textPrimaryFor(context),
+              ),
             ),
           ),
         ],

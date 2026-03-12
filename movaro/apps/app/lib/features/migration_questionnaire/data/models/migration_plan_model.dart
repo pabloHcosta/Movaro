@@ -2,6 +2,7 @@ import 'package:movaro_app/features/cities/data/models/city_model.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/models/migration_step_model.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 
 class MigrationPlanModel {
   const MigrationPlanModel({
@@ -10,6 +11,12 @@ class MigrationPlanModel {
     required this.goal,
     required this.timeline,
     required this.steps,
+    this.variant = QuestionnaireVariant.lean,
+    this.funding = '',
+    this.archetypeKey,
+    this.confidence = 0,
+    this.selectedPriorities = const [],
+    this.selectedConstraints = const [],
     this.recommendedCity,
     this.candidateCities = const [],
     this.cityRecommendationReasons = const [],
@@ -22,6 +29,20 @@ class MigrationPlanModel {
       destinationCountry: json['destinationCountry'] as String,
       goal: json['goal'] as String,
       timeline: json['timeline'] as String,
+      variant:
+          QuestionnaireVariantX.fromId(json['variant'] as String?) ??
+          QuestionnaireVariant.lean,
+      funding: json['funding'] as String? ?? '',
+      archetypeKey: json['archetypeKey'] as String?,
+      confidence: (json['confidence'] as num?)?.toDouble() ?? 0,
+      selectedPriorities:
+          (json['selectedPriorities'] as List<dynamic>? ?? const [])
+              .map((item) => item as String)
+              .toList(),
+      selectedConstraints:
+          (json['selectedConstraints'] as List<dynamic>? ?? const [])
+              .map((item) => item as String)
+              .toList(),
       steps: (json['steps'] as List<dynamic>)
           .map(
             (item) => MigrationStepModel.fromJson(item as Map<String, dynamic>),
@@ -29,11 +50,13 @@ class MigrationPlanModel {
           .toList(),
       recommendedCity: json['recommendedCity'] == null
           ? null
-          : CityModel.fromJson(json['recommendedCity'] as Map<String, dynamic>)
-                .toEntity(),
+          : CityModel.fromJson(
+              json['recommendedCity'] as Map<String, dynamic>,
+            ).toEntity(),
       candidateCities: (json['candidateCities'] as List<dynamic>? ?? const [])
           .map(
-            (item) => CityModel.fromJson(item as Map<String, dynamic>).toEntity(),
+            (item) =>
+                CityModel.fromJson(item as Map<String, dynamic>).toEntity(),
           )
           .toList(),
       cityRecommendationReasons:
@@ -50,6 +73,12 @@ class MigrationPlanModel {
       destinationCountry: plan.destinationCountry,
       goal: plan.goal,
       timeline: plan.timeline,
+      variant: plan.variant,
+      funding: plan.funding,
+      archetypeKey: plan.archetypeKey,
+      confidence: plan.confidence,
+      selectedPriorities: plan.selectedPriorities,
+      selectedConstraints: plan.selectedConstraints,
       steps: plan.steps.map(MigrationStepModel.fromEntity).toList(),
       recommendedCity: plan.recommendedCity,
       candidateCities: plan.candidateCities,
@@ -62,6 +91,12 @@ class MigrationPlanModel {
   final String destinationCountry;
   final String goal;
   final String timeline;
+  final QuestionnaireVariant variant;
+  final String funding;
+  final String? archetypeKey;
+  final double confidence;
+  final List<String> selectedPriorities;
+  final List<String> selectedConstraints;
   final List<MigrationStepModel> steps;
   final City? recommendedCity;
   final List<City> candidateCities;
@@ -73,6 +108,12 @@ class MigrationPlanModel {
     'destinationCountry': destinationCountry,
     'goal': goal,
     'timeline': timeline,
+    'variant': variant.id,
+    'funding': funding,
+    'archetypeKey': archetypeKey,
+    'confidence': confidence,
+    'selectedPriorities': selectedPriorities,
+    'selectedConstraints': selectedConstraints,
     'steps': steps.map((step) => step.toJson()).toList(),
     'recommendedCity': recommendedCity == null
         ? null
@@ -89,6 +130,12 @@ class MigrationPlanModel {
     destinationCountry: destinationCountry,
     goal: goal,
     timeline: timeline,
+    variant: variant,
+    funding: funding,
+    archetypeKey: archetypeKey,
+    confidence: confidence,
+    selectedPriorities: selectedPriorities,
+    selectedConstraints: selectedConstraints,
     steps: steps.map((step) => step.toEntity()).toList(),
     recommendedCity: recommendedCity,
     candidateCities: candidateCities,

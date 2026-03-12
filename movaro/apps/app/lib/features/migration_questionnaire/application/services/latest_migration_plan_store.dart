@@ -8,10 +8,8 @@ import 'package:movaro_app/features/migration_questionnaire/domain/entities/migr
 typedef MigrationPlanDirectoryProvider = Future<Directory> Function();
 
 class LatestMigrationPlanStore {
-  LatestMigrationPlanStore({
-    MigrationPlanDirectoryProvider? directoryProvider,
-  }) : _directoryProvider =
-           directoryProvider ?? getApplicationSupportDirectory;
+  LatestMigrationPlanStore({MigrationPlanDirectoryProvider? directoryProvider})
+    : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
 
   final MigrationPlanDirectoryProvider _directoryProvider;
 

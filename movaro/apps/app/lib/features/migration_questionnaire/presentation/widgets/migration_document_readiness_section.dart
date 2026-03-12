@@ -146,16 +146,19 @@ class _PriorityPanel extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   badge,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: accent,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(color: accent),
                 ),
               ),
               const SizedBox(width: 10),
@@ -372,10 +375,7 @@ class _MetaChip extends StatelessWidget {
 }
 
 class _ProgressRow extends StatelessWidget {
-  const _ProgressRow({
-    required this.label,
-    required this.progress,
-  });
+  const _ProgressRow({required this.label, required this.progress});
 
   final String label;
   final double progress;

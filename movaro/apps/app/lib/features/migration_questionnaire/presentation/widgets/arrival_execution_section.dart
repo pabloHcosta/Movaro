@@ -69,7 +69,9 @@ class ArrivalExecutionSection extends StatelessWidget {
                       title: l10n.arrivalExecutionStageWeek,
                       badge: '07',
                       accent: AppColors.primary,
-                      items: checklist.itemsFor(ArrivalExecutionStage.firstWeek),
+                      items: checklist.itemsFor(
+                        ArrivalExecutionStage.firstWeek,
+                      ),
                       completedItemIds: completedItemIds,
                       onToggleItem: onToggleItem,
                     ),
@@ -80,7 +82,9 @@ class ArrivalExecutionSection extends StatelessWidget {
                       title: l10n.arrivalExecutionStageMonth,
                       badge: '30',
                       accent: AppColors.warning,
-                      items: checklist.itemsFor(ArrivalExecutionStage.firstMonth),
+                      items: checklist.itemsFor(
+                        ArrivalExecutionStage.firstMonth,
+                      ),
                       completedItemIds: completedItemIds,
                       onToggleItem: onToggleItem,
                     ),
@@ -139,21 +143,27 @@ class _StagePanel extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   badge,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: accent,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(color: accent),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(title, style: Theme.of(context).textTheme.titleSmall),
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
               ),
             ],
           ),
@@ -258,10 +268,7 @@ class _ExecutionItemTile extends StatelessWidget {
 }
 
 class _ProgressRow extends StatelessWidget {
-  const _ProgressRow({
-    required this.label,
-    required this.progress,
-  });
+  const _ProgressRow({required this.label, required this.progress});
 
   final String label;
   final double progress;
