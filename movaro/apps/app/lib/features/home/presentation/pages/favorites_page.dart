@@ -8,6 +8,7 @@ import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_weather_badge.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
@@ -190,9 +191,6 @@ class FavoriteCityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    final textPrimary = AppColors.textPrimaryFor(context);
-    final textSoft = AppColors.textSoftFor(context);
     final housing = city.rentScore >= 70
         ? context.l10n.cityHousingViabilityEasyBadge
         : city.rentScore >= 45
@@ -207,30 +205,20 @@ class FavoriteCityCard extends StatelessWidget {
             Navigator.pushNamed(context, AppRoutes.cityDetail(city.id)),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? const [Color(0xFF142033), Color(0xFF0E1728)]
-                  : const [Color(0xFFFFFFFF), Color(0xFFF1F6FF)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : AppColors.primary.withValues(alpha: 0.10),
-            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
             boxShadow: [
               BoxShadow(
-                color: (isDark ? Colors.black : AppColors.primary).withValues(
-                  alpha: isDark ? 0.18 : 0.08,
-                ),
+                color: Colors.black.withValues(alpha: 0.16),
                 blurRadius: 18,
                 offset: const Offset(0, 10),
               ),
             ],
           ),
-          child: Padding(
+          child: CityImageBackdrop(
+            city: city,
+            borderRadius: BorderRadius.circular(24),
+            overlayOpacity: 0.76,
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,9 +229,7 @@ class FavoriteCityCard extends StatelessWidget {
                       width: 38,
                       height: 38,
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? const Color(0x33E25273)
-                            : const Color(0xFFFFF2F4),
+                        color: const Color(0x33E25273),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
@@ -256,7 +242,7 @@ class FavoriteCityCard extends StatelessWidget {
                     const Icon(
                       Icons.arrow_outward_rounded,
                       size: 18,
-                      color: AppColors.textSoft,
+                      color: Colors.white70,
                     ),
                   ],
                 ),
@@ -273,7 +259,7 @@ class FavoriteCityCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: textPrimary,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -283,7 +269,7 @@ class FavoriteCityCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodyMedium?.copyWith(color: textSoft),
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
                 ),
                 const SizedBox(height: 12),
                 Container(
@@ -292,17 +278,18 @@ class FavoriteCityCard extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.06)
-                        : AppColors.primary.withValues(alpha: 0.06),
+                    color: Colors.white.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.14),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.home_work_outlined,
                         size: 15,
-                        color: isDark ? Colors.white70 : AppColors.primary,
+                        color: Colors.white70,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -312,9 +299,7 @@ class FavoriteCityCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.labelMedium
                               ?.copyWith(
-                                color: isDark
-                                    ? Colors.white
-                                    : AppColors.primary,
+                                color: Colors.white,
                                 fontWeight: FontWeight.w700,
                               ),
                         ),
@@ -329,7 +314,10 @@ class FavoriteCityCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: textSoft, height: 1.3),
+                  ).textTheme.bodySmall?.copyWith(
+                    color: Colors.white70,
+                    height: 1.3,
+                  ),
                 ),
               ],
             ),

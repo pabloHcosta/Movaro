@@ -5,7 +5,7 @@ class CitySnapshotTile extends StatelessWidget {
   const CitySnapshotTile({
     required this.label,
     required this.value,
-    required this.supporting,
+    required this.footer,
     required this.tint,
     required this.background,
     required this.icon,
@@ -14,7 +14,7 @@ class CitySnapshotTile extends StatelessWidget {
 
   final String label;
   final String value;
-  final String supporting;
+  final String footer;
   final Color tint;
   final Color background;
   final IconData icon;
@@ -68,17 +68,22 @@ class CitySnapshotTile extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 3),
-          Text(
-            supporting,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(
-              color: textSoft,
-              height: 1.2,
-              fontSize: 11.5,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            decoration: BoxDecoration(
+              color: tint.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(999),
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+            child: Text(
+              footer,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: tint,
+                fontWeight: FontWeight.w700,
+                height: 1,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),

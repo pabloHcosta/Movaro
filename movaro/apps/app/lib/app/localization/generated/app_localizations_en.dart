@@ -1852,6 +1852,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cityDetailSnapshotTitle => 'Quick view';
 
   @override
+  String get cityDetailSnapshotPositiveTag => 'Strong point';
+
+  @override
+  String get cityDetailSnapshotWatchoutTag => 'Watch out';
+
+  @override
+  String get cityDetailSnapshotContextTag => 'Context';
+
+  @override
   String get cityDetailMetricsSummary =>
       'Open only if you want to review every indicator and the full data slice.';
 

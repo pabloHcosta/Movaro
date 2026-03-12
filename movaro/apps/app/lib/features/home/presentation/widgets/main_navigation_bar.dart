@@ -21,97 +21,105 @@ class MainNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasFavorites = citiesController.favoriteCityIds.isNotEmpty;
-    final hasCopilot =
-        migrationQuestionnaireController.generatedPlan?.isCityConfirmed == true;
-    final isDark = AppColors.isDark(context);
+    return AnimatedBuilder(
+      animation: Listenable.merge([
+        citiesController,
+        migrationQuestionnaireController,
+      ]),
+      builder: (context, _) {
+        final hasFavorites = citiesController.favoriteCityIds.isNotEmpty;
+        final hasCopilot =
+            migrationQuestionnaireController.generatedPlan?.isCityConfirmed ==
+            true;
+        final isDark = AppColors.isDark(context);
 
-    return SafeArea(
-      top: false,
-      minimum: const EdgeInsets.fromLTRB(14, 0, 14, 10),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isDark
-                    ? const [Color(0xF0161D29), Color(0xF00C1320)]
-                    : const [Color(0xF9FFFFFF), Color(0xF1F3F9FF)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.white.withValues(alpha: 0.78),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: (isDark ? Colors.black : AppColors.primary).withValues(
-                    alpha: isDark ? 0.24 : 0.10,
+        return SafeArea(
+          top: false,
+          minimum: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isDark
+                        ? const [Color(0xF0161D29), Color(0xF00C1320)]
+                        : const [Color(0xF9FFFFFF), Color(0xF1F3F9FF)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  blurRadius: 28,
-                  offset: const Offset(0, 14),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.white.withValues(alpha: 0.78),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (isDark ? Colors.black : AppColors.primary)
+                          .withValues(alpha: isDark ? 0.24 : 0.10),
+                      blurRadius: 28,
+                      offset: const Offset(0, 14),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _NavItem(
-                      label: context.l10n.mainNavHome,
-                      icon: Icons.home_rounded,
-                      isSelected: currentIndex == 0,
-                      isEnabled: true,
-                      onTap: () => _handleTap(
-                        context,
-                        index: 0,
-                        hasFavorites: hasFavorites,
-                        hasCopilot: hasCopilot,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _NavItem(
+                          label: context.l10n.mainNavHome,
+                          icon: Icons.home_rounded,
+                          isSelected: currentIndex == 0,
+                          isEnabled: true,
+                          onTap: () => _handleTap(
+                            context,
+                            index: 0,
+                            hasFavorites: hasFavorites,
+                            hasCopilot: hasCopilot,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _NavItem(
-                      label: context.l10n.mainNavFavorites,
-                      icon: Icons.favorite_rounded,
-                      isSelected: currentIndex == 1,
-                      isEnabled: hasFavorites,
-                      onTap: () => _handleTap(
-                        context,
-                        index: 1,
-                        hasFavorites: hasFavorites,
-                        hasCopilot: hasCopilot,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _NavItem(
+                          label: context.l10n.mainNavFavorites,
+                          icon: Icons.favorite_rounded,
+                          isSelected: currentIndex == 1,
+                          isEnabled: hasFavorites,
+                          onTap: () => _handleTap(
+                            context,
+                            index: 1,
+                            hasFavorites: hasFavorites,
+                            hasCopilot: hasCopilot,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _NavItem(
-                      label: context.l10n.mainNavCopilot,
-                      icon: Icons.auto_awesome_rounded,
-                      isSelected: currentIndex == 2,
-                      isEnabled: hasCopilot,
-                      onTap: () => _handleTap(
-                        context,
-                        index: 2,
-                        hasFavorites: hasFavorites,
-                        hasCopilot: hasCopilot,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _NavItem(
+                          label: context.l10n.mainNavCopilot,
+                          icon: Icons.auto_awesome_rounded,
+                          isSelected: currentIndex == 2,
+                          isEnabled: hasCopilot,
+                          onTap: () => _handleTap(
+                            context,
+                            index: 2,
+                            hasFavorites: hasFavorites,
+                            hasCopilot: hasCopilot,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

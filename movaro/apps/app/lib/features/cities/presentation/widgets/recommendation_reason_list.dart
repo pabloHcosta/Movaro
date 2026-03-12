@@ -6,15 +6,23 @@ class RecommendationReasonList extends StatelessWidget {
   const RecommendationReasonList({
     required this.reasons,
     this.maxItems,
+    this.backgroundColor,
+    this.textColor,
+    this.iconColor,
     super.key,
   });
 
   final List<String> reasons;
   final int? maxItems;
+  final Color? backgroundColor;
+  final Color? textColor;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
-    final background = AppColors.surfaceMutedFor(context);
+    final background = backgroundColor ?? AppColors.surfaceMutedFor(context);
+    final resolvedTextColor = textColor;
+    final resolvedIconColor = iconColor ?? AppColors.accent;
     final visibleReasons = maxItems == null
         ? reasons
         : reasons.take(maxItems!).toList();
@@ -32,17 +40,22 @@ class RecommendationReasonList extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 2),
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
                   child: Icon(
                     Icons.check_circle_rounded,
                     size: 16,
-                    color: AppColors.accent,
+                    color: resolvedIconColor,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(context.l10n.recommendationReasonLabel(reason)),
+                  child: Text(
+                    context.l10n.recommendationReasonLabel(reason),
+                    style: resolvedTextColor == null
+                        ? null
+                        : TextStyle(color: resolvedTextColor),
+                  ),
                 ),
               ],
             ),

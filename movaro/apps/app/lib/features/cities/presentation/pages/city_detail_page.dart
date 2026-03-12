@@ -18,6 +18,7 @@ import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_map_card.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_snapshot_tile.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_sources_section.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_weather_badge.dart';
@@ -176,6 +177,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  _CityHeroPhoto(city: city),
+                                  const SizedBox(height: 18),
                                   Text(
                                     city.name,
                                     style: Theme.of(context)
@@ -595,6 +598,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
     return _DecisionSnapshotPanel.defaultWatchoutText(context, city);
   }
 }
+
+enum _SnapshotAlertTone { positive, watchout, context }
 
 class _PlanCityContext {
   const _PlanCityContext({
@@ -1260,6 +1265,49 @@ class _WatchoutCard extends StatelessWidget {
   }
 }
 
+class _CityHeroPhoto extends StatelessWidget {
+  const _CityHeroPhoto({required this.city});
+
+  final City city;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 196,
+      width: double.infinity,
+      child: CityImageBackdrop(
+        city: city,
+        borderRadius: BorderRadius.circular(24),
+        padding: EdgeInsets.zero,
+        overlayOpacity: 0.46,
+        child: const SizedBox.expand(),
+      ),
+    );
+  }
+}
+
+_SnapshotAlertTone _toneForScore(int value) {
+  if (value >= 67) {
+    return _SnapshotAlertTone.positive;
+  }
+  if (value < 55) {
+    return _SnapshotAlertTone.watchout;
+  }
+  return _SnapshotAlertTone.context;
+}
+
+String _snapshotFooter(BuildContext context, _SnapshotAlertTone tone) {
+  switch (tone) {
+    case _SnapshotAlertTone.positive:
+      return context.l10n.cityDetailSnapshotPositiveTag;
+    case _SnapshotAlertTone.watchout:
+      return context.l10n.cityDetailSnapshotWatchoutTag;
+    case _SnapshotAlertTone.context:
+      return context.l10n.cityDetailSnapshotContextTag;
+  }
+}
+
+
 class _ContextChip extends StatelessWidget {
   const _ContextChip({required this.label});
 
@@ -1542,9 +1590,9 @@ class _SnapshotPanel extends StatelessWidget {
                       value: city.population,
                       locale: localeName,
                     ),
-                    supporting: NumberFormatters.fullInteger(
-                      value: city.population,
-                      locale: localeName,
+                    footer: _snapshotFooter(
+                      context,
+                      _SnapshotAlertTone.context,
                     ),
                     tint: AppColors.primary,
                     background: AppColors.surfaceMutedFor(context),
@@ -1554,7 +1602,14 @@ class _SnapshotPanel extends StatelessWidget {
                     label:
                         '${context.l10n.cityDetailIdhmLabel} ${city.idhmReferenceYear}',
                     value: idhm.headline,
-                    supporting: context.l10n.cityDetailIdhmOfficialNote,
+                    footer: _snapshotFooter(
+                      context,
+                      city.idhmScore >= 0.8
+                          ? _SnapshotAlertTone.positive
+                          : city.idhmScore < 0.7
+                          ? _SnapshotAlertTone.watchout
+                          : _SnapshotAlertTone.context,
+                    ),
                     tint: idhm.tint,
                     background: idhm.background,
                     icon: Icons.public_rounded,
@@ -1562,7 +1617,10 @@ class _SnapshotPanel extends StatelessWidget {
                   CitySnapshotTile(
                     label: context.l10n.cityDetailCostLabel,
                     value: cost.headline,
-                    supporting: cost.supporting,
+                    footer: _snapshotFooter(
+                      context,
+                      _toneForScore(city.movaroScores.economical),
+                    ),
                     tint: cost.tint,
                     background: cost.background,
                     icon: Icons.payments_outlined,
@@ -1570,7 +1628,14 @@ class _SnapshotPanel extends StatelessWidget {
                   CitySnapshotTile(
                     label: context.l10n.cityDetailRentLabel,
                     value: _rentHeadline(context, city.rentScore),
-                    supporting: _rentSupporting(context, city.rentScore),
+                    footer: _snapshotFooter(
+                      context,
+                      city.rentScore >= 67
+                          ? _SnapshotAlertTone.positive
+                          : city.rentScore < 55
+                          ? _SnapshotAlertTone.watchout
+                          : _SnapshotAlertTone.context,
+                    ),
                     tint: _rentTint(city.rentScore),
                     background: _rentBackground(context, city.rentScore),
                     icon: Icons.house_rounded,
@@ -1578,7 +1643,14 @@ class _SnapshotPanel extends StatelessWidget {
                   CitySnapshotTile(
                     label: context.l10n.cityHousingViabilityTileLabel,
                     value: housing.headline,
-                    supporting: housing.supporting,
+                    footer: _snapshotFooter(
+                      context,
+                      city.rentScore >= 67
+                          ? _SnapshotAlertTone.positive
+                          : city.rentScore < 55
+                          ? _SnapshotAlertTone.watchout
+                          : _SnapshotAlertTone.context,
+                    ),
                     tint: housing.tint,
                     background: housing.background,
                     icon: Icons.home_work_outlined,
@@ -1586,7 +1658,10 @@ class _SnapshotPanel extends StatelessWidget {
                   CitySnapshotTile(
                     label: context.l10n.cityDetailSafetyLabel,
                     value: safety.headline,
-                    supporting: safety.supporting,
+                    footer: _snapshotFooter(
+                      context,
+                      _toneForScore(city.safetyScore),
+                    ),
                     tint: safety.tint,
                     background: safety.background,
                     icon: Icons.shield_outlined,
@@ -1597,9 +1672,9 @@ class _SnapshotPanel extends StatelessWidget {
                       context,
                       city.argentinaPopularityScore,
                     ),
-                    supporting: _popularitySupporting(
+                    footer: _snapshotFooter(
                       context,
-                      city.argentinaPopularityScore,
+                      _toneForScore(city.argentinaPopularityScore),
                     ),
                     tint: _popularityTint(city.argentinaPopularityScore),
                     background: _popularityBackground(
@@ -1611,7 +1686,10 @@ class _SnapshotPanel extends StatelessWidget {
                   CitySnapshotTile(
                     label: context.l10n.cityDetailLanguageLabel,
                     value: language.headline,
-                    supporting: language.supporting,
+                    footer: _snapshotFooter(
+                      context,
+                      _toneForScore(city.movaroScores.languageAdaptation),
+                    ),
                     tint: language.tint,
                     background: language.background,
                     icon: Icons.translate_rounded,
@@ -1619,7 +1697,10 @@ class _SnapshotPanel extends StatelessWidget {
                   CitySnapshotTile(
                     label: context.l10n.cityDetailWorkLabel,
                     value: work.headline,
-                    supporting: work.supporting,
+                    footer: _snapshotFooter(
+                      context,
+                      _toneForScore(city.movaroScores.workOpportunity),
+                    ),
                     tint: work.tint,
                     background: work.background,
                     icon: Icons.work_outline_rounded,
@@ -1630,7 +1711,14 @@ class _SnapshotPanel extends StatelessWidget {
                       context,
                       city.unemploymentRate,
                     ),
-                    supporting: '${city.unemploymentRate.toStringAsFixed(1)}%',
+                    footer: _snapshotFooter(
+                      context,
+                      city.unemploymentRate <= 6
+                          ? _SnapshotAlertTone.positive
+                          : city.unemploymentRate >= 9
+                          ? _SnapshotAlertTone.watchout
+                          : _SnapshotAlertTone.context,
+                    ),
                     tint: _unemploymentTint(city.unemploymentRate),
                     background: _unemploymentBackground(
                       context,
@@ -1655,16 +1743,6 @@ class _SnapshotPanel extends StatelessWidget {
       return context.l10n.citySnapshotRentModerate;
     }
     return context.l10n.citySnapshotRentHigher;
-  }
-
-  String _rentSupporting(BuildContext context, int score) {
-    if (score >= 72) {
-      return context.l10n.citySnapshotRentLowerSupporting;
-    }
-    if (score >= 55) {
-      return context.l10n.citySnapshotRentModerateSupporting;
-    }
-    return context.l10n.citySnapshotRentHigherSupporting;
   }
 
   Color _rentTint(int score) {
@@ -1707,16 +1785,6 @@ class _SnapshotPanel extends StatelessWidget {
       return context.l10n.citySnapshotPopularityMedium;
     }
     return context.l10n.citySnapshotPopularityLow;
-  }
-
-  String _popularitySupporting(BuildContext context, int score) {
-    if (score >= 80) {
-      return context.l10n.citySnapshotPopularityHighSupporting;
-    }
-    if (score >= 60) {
-      return context.l10n.citySnapshotPopularityMediumSupporting;
-    }
-    return context.l10n.citySnapshotPopularityLowSupporting;
   }
 
   Color _popularityTint(int score) {

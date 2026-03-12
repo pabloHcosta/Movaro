@@ -3163,6 +3163,24 @@ abstract class AppLocalizations {
   /// **'Quick view'**
   String get cityDetailSnapshotTitle;
 
+  /// No description provided for @cityDetailSnapshotPositiveTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong point'**
+  String get cityDetailSnapshotPositiveTag;
+
+  /// No description provided for @cityDetailSnapshotWatchoutTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch out'**
+  String get cityDetailSnapshotWatchoutTag;
+
+  /// No description provided for @cityDetailSnapshotContextTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Context'**
+  String get cityDetailSnapshotContextTag;
+
   /// No description provided for @cityDetailMetricsSummary.
   ///
   /// In en, this message translates to:

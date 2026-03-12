@@ -75,6 +75,8 @@ class _PublicHomePageState extends State<PublicHomePage> {
                     _LandingHero(
                       journeyContextController: widget.journeyContextController,
                       citiesController: widget.citiesController,
+                      migrationQuestionnaireController:
+                          widget.migrationQuestionnaireController,
                       onRestartJourney: _restartJourneyFlow,
                     ),
                   ],
@@ -98,11 +100,13 @@ class _LandingHero extends StatelessWidget {
   const _LandingHero({
     required this.journeyContextController,
     required this.citiesController,
+    required this.migrationQuestionnaireController,
     required this.onRestartJourney,
   });
 
   final JourneyContextController journeyContextController;
   final CitiesController citiesController;
+  final MigrationQuestionnaireController migrationQuestionnaireController;
   final Future<void> Function() onRestartJourney;
 
   @override
@@ -116,23 +120,25 @@ class _LandingHero extends StatelessWidget {
     final primary = _PrimaryIntroBlock(
       origin: origin,
       destination: destination,
-      title: l10n.publicHomeHeadline,
+      title: l10n.publicHomeFirstStepTitle,
       body: origin != null && destination != null
           ? l10n.publicHomeSelectedJourneyDescription(
               origin.name,
               destination.name,
             )
-          : l10n.publicHomeFocusedDescription,
+          : l10n.publicHomeFirstStepBody,
       onRestartJourney: onRestartJourney,
     );
 
-    final actions = const _ActionStage();
+    final actions = _ActionStage(
+      migrationQuestionnaireController: migrationQuestionnaireController,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FrostedPanel(
-          padding: EdgeInsets.all(stacked ? 24 : 32),
+          padding: EdgeInsets.all(stacked ? 22 : 26),
           backgroundColor: const Color(0xB30B1320),
           borderColor: Colors.white.withValues(alpha: 0.12),
           gradient: const LinearGradient(
@@ -147,14 +153,14 @@ class _LandingHero extends StatelessWidget {
           child: stacked
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [primary, const SizedBox(height: 22), actions],
+                  children: [primary, const SizedBox(height: 18), actions],
                 )
               : Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(flex: 5, child: primary),
-                    const SizedBox(width: 26),
-                    Expanded(flex: 4, child: actions),
+                    Expanded(flex: 11, child: primary),
+                    const SizedBox(width: 22),
+                    Expanded(flex: 12, child: actions),
                   ],
                 ),
         ),
@@ -198,21 +204,21 @@ class _PrimaryIntroBlock extends StatelessWidget {
           title,
           style:
               (compact
-                      ? Theme.of(context).textTheme.headlineLarge
-                      : Theme.of(context).textTheme.displayMedium)
+                      ? Theme.of(context).textTheme.headlineMedium
+                      : Theme.of(context).textTheme.displaySmall)
                   ?.copyWith(
                     color: Colors.white,
-                    letterSpacing: compact ? -0.8 : -1.3,
-                    height: 0.94,
+                    letterSpacing: compact ? -0.6 : -1.0,
+                    height: 0.96,
                     fontWeight: FontWeight.w700,
                   ),
         ),
         const SizedBox(height: 10),
         ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 440),
+          constraints: const BoxConstraints(maxWidth: 400),
           child: Text(
             body,
-            maxLines: 3,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.white.withValues(alpha: 0.82),
@@ -226,32 +232,69 @@ class _PrimaryIntroBlock extends StatelessWidget {
 }
 
 class _ActionStage extends StatelessWidget {
-  const _ActionStage();
+  const _ActionStage({required this.migrationQuestionnaireController});
+
+  final MigrationQuestionnaireController migrationQuestionnaireController;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final width = MediaQuery.sizeOf(context).width;
+    final plan = migrationQuestionnaireController.generatedPlan;
+    final leadCity = plan?.recommendedCity;
+    final hasPlan = plan != null;
+    final planTitle = hasPlan
+        ? l10n.publicHomeResumePlanTitle
+        : l10n.publicHomePlanTitle;
+    final planDescription = hasPlan
+        ? leadCity != null
+              ? l10n.publicHomeResumePlanBodyWithCity(
+                  leadCity.name,
+                  leadCity.stateCode,
+                )
+              : l10n.publicHomeResumePlanBody
+        : l10n.publicHomePlanBody;
+    final planAction = hasPlan
+        ? l10n.publicHomeResumePlanAction
+        : l10n.publicHomeQuestionnaireAction;
+    final planStatus = hasPlan && leadCity != null
+        ? '${leadCity.name} (${leadCity.stateCode})'
+        : null;
+
     final planCard = _VisualActionCard(
-      title: l10n.publicHomePlanTitle,
-      description: l10n.publicHomePlanBody,
-      onTap: () =>
-          Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire),
+      title: planTitle,
+      description: planDescription,
+      actionLabel: planAction,
+      statusLine: planStatus,
+      onTap: () => Navigator.pushNamed(
+        context,
+        hasPlan
+            ? AppRoutes.migrationPlanResult
+            : AppRoutes.migrationQuestionnaire,
+      ),
       isPrimary: true,
+      compact: width < 920,
       scene: const _PlanScene(),
+      icon: hasPlan ? Icons.playlist_play_rounded : Icons.edit_note_rounded,
+      accent: AppColors.primary,
     );
 
     final citiesCard = _VisualActionCard(
       title: l10n.publicHomeCitiesTitle,
       description: l10n.publicHomeCitiesBody,
+      actionLabel: l10n.publicHomeCitiesAction,
       onTap: () => Navigator.pushNamed(context, AppRoutes.cities),
       scene: const _CitiesScene(),
       compact: true,
+      subdued: true,
+      icon: Icons.location_city_rounded,
+      accent: const Color(0xFF35A8FF),
     );
 
     final questionsCard = _VisualActionCard(
       title: l10n.publicHomeQuestionsTitle,
       description: l10n.publicHomeQuestionsBody,
+      actionLabel: l10n.publicHomeQuestionsAction,
       onTap: () => Navigator.pushNamed(
         context,
         AppRoutes.documentationGuide,
@@ -259,26 +302,44 @@ class _ActionStage extends StatelessWidget {
       ),
       scene: const _QuestionsScene(),
       compact: true,
+      subdued: true,
+      icon: Icons.folder_open_rounded,
+      accent: const Color(0xFF4DC2A8),
     );
+
+    if (width >= 920) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(flex: 8, child: planCard),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 7,
+            child: Column(
+              children: [
+                citiesCard,
+                const SizedBox(height: 12),
+                questionsCard,
+              ],
+            ),
+          ),
+        ],
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         planCard,
-        const SizedBox(height: 8),
-        if (width < 420)
-          Column(
-            children: [citiesCard, const SizedBox(height: 10), questionsCard],
-          )
-        else
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: citiesCard),
-              const SizedBox(width: 10),
-              Expanded(child: questionsCard),
-            ],
-          ),
+        const SizedBox(height: 12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: citiesCard),
+            const SizedBox(width: 12),
+            Expanded(child: questionsCard),
+          ],
+        ),
       ],
     );
   }
@@ -288,18 +349,28 @@ class _VisualActionCard extends StatelessWidget {
   const _VisualActionCard({
     required this.title,
     required this.description,
+    required this.actionLabel,
     required this.onTap,
     required this.scene,
+    required this.icon,
+    required this.accent,
+    this.statusLine,
     this.isPrimary = false,
     this.compact = false,
+    this.subdued = false,
   });
 
   final String title;
   final String description;
+  final String actionLabel;
   final VoidCallback onTap;
   final Widget scene;
+  final IconData icon;
+  final Color accent;
+  final String? statusLine;
   final bool isPrimary;
   final bool compact;
+  final bool subdued;
 
   @override
   Widget build(BuildContext context) {
@@ -307,21 +378,6 @@ class _VisualActionCard extends StatelessWidget {
     final textPrimary = AppColors.textPrimaryFor(context);
     final textSoft = AppColors.textSoftFor(context);
     final borderColor = AppColors.borderFor(context);
-    final sceneGradient = isDark
-        ? const LinearGradient(
-            colors: [Color(0xFF244978), Color(0xFF17345F), Color(0xFF0E213C)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          )
-        : const LinearGradient(
-            colors: [
-              Color(0xFF7BC8F2),
-              Color(0xFF69B8EE),
-              Color(0xFF4E9FF0),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          );
     final cardGradient = isPrimary
         ? LinearGradient(
             colors: isDark
@@ -343,7 +399,9 @@ class _VisualActionCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
-    final fixedHeight = compact ? 194.0 : 250.0;
+    final fixedHeight = isPrimary
+        ? (compact ? 174.0 : 188.0)
+        : 154.0;
 
     return Material(
       color: Colors.transparent,
@@ -359,72 +417,166 @@ class _VisualActionCard extends StatelessWidget {
                   ? borderColor
                   : Colors.white.withValues(alpha: isPrimary ? 0.48 : 0.28),
             ),
-            boxShadow: AppColors.frostedShadowFor(context),
+            boxShadow: subdued
+                ? [
+                    BoxShadow(
+                      color: (isDark ? Colors.black : AppColors.primary)
+                          .withValues(alpha: isDark ? 0.12 : 0.05),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : AppColors.frostedShadowFor(context),
           ),
           child: SizedBox(
             height: fixedHeight,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                compact ? 10 : 12,
-                compact ? 10 : 12,
-                compact ? 10 : 12,
-                compact ? 8 : 10,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: compact ? 66 : (isPrimary ? 108 : 86),
+            child: Stack(
+              children: [
+                Positioned(
+                  top: compact ? 14 : 16,
+                  right: compact ? 12 : 16,
+                  width: isPrimary
+                      ? (compact ? 74 : 96)
+                      : 68,
+                  height: isPrimary
+                      ? (compact ? 54 : 66)
+                      : 50,
+                  child: IgnorePointer(
+                    child: Opacity(
+                      opacity: subdued ? 0.82 : 0.94,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(22),
+                        child: scene,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 18,
+                  right: 18,
+                  child: Container(
+                    width: compact ? 38 : 44,
+                    height: compact ? 38 : 44,
                     decoration: BoxDecoration(
-                      gradient: sceneGradient,
-                      borderRadius: BorderRadius.circular(24),
+                      color: accent.withValues(
+                        alpha: isDark ? 0.20 : (subdued ? 0.09 : 0.12),
+                      ),
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(24),
-                      child: scene,
-                    ),
+                    child: Icon(icon, color: accent, size: compact ? 20 : 22),
                   ),
-                  SizedBox(height: compact ? 8 : 10),
-                  Text(
-                    title,
-                    maxLines: compact ? 1 : 2,
-                    overflow: TextOverflow.ellipsis,
-                    style:
-                        (compact
-                                ? Theme.of(context).textTheme.titleSmall
-                                : (isPrimary
-                                      ? Theme.of(context).textTheme.titleLarge
-                                      : Theme.of(
-                                          context,
-                                        ).textTheme.titleMedium))
-                            ?.copyWith(
-                              color: textPrimary,
-                              height: 1.05,
-                              fontWeight: FontWeight.w700,
-                              fontSize: compact ? 16 : null,
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    compact ? 16 : 18,
+                    compact ? 16 : 18,
+                    compact ? 16 : 18,
+                    compact ? 14 : 16,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: accent.withValues(alpha: isDark ? 0.22 : 0.10),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          actionLabel,
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: accent,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                      ),
+                      const Spacer(),
+                      if (statusLine != null) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: accent.withValues(
+                              alpha: isDark ? 0.14 : 0.08,
                             ),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            statusLine!,
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: isDark
+                                      ? Colors.white
+                                      : AppColors.textPrimaryFor(context),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      SizedBox(
+                        width: compact ? 210 : (isPrimary ? 280 : 220),
+                        child: Text(
+                          title,
+                          maxLines: compact ? 2 : 2,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              (compact
+                                      ? Theme.of(context).textTheme.titleMedium
+                                      : (isPrimary
+                                            ? Theme.of(
+                                                context,
+                                              ).textTheme.titleLarge
+                                            : Theme.of(
+                                                context,
+                                              ).textTheme.titleMedium))
+                                  ?.copyWith(
+                                    color: textPrimary,
+                                    height: 1.05,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        width: compact ? 240 : (isPrimary ? 330 : 230),
+                        child: Text(
+                          description,
+                          maxLines: compact ? 2 : 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: textSoft, height: 1.28),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Text(
+                            actionLabel,
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(
+                                  color: isPrimary ? AppColors.primary : accent,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                          const Spacer(),
+                          Icon(
+                            Icons.arrow_outward_rounded,
+                            size: compact ? 18 : 20,
+                            color: isPrimary ? AppColors.primary : accent,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  SizedBox(height: compact ? 4 : 6),
-                  Text(
-                    description,
-                    maxLines: compact ? 2 : 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: textSoft,
-                      height: 1.25,
-                    ),
-                  ),
-                  const Spacer(),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Icon(
-                      Icons.arrow_outward_rounded,
-                      size: compact ? 18 : 20,
-                      color: isPrimary ? AppColors.primary : textSoft,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -600,7 +752,7 @@ class _RoutePlate extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 520;
+        final compact = constraints.maxWidth < 620;
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -621,47 +773,102 @@ class _RoutePlate extends StatelessWidget {
                   destinationName: destinationName,
                 ),
                 const SizedBox(height: 10),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: LanguageSelectorButton(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Color(0x1AFFFFFF),
-                  ),
-                ),
-              ] else
-                Row(
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
                   children: [
-                    Expanded(
-                      child: _RouteJourneyRow(
-                        originEmoji: originEmoji,
-                        originName: originName,
-                        destinationEmoji: destinationEmoji,
-                        destinationName: destinationName,
-                      ),
+                    _RouteActionPill(
+                      icon: Icons.swap_horiz_rounded,
+                      label: context.l10n.publicHomeJourneyResetAction,
+                      onTap: onRestartJourney,
+                      compact: true,
                     ),
-                    const SizedBox(width: 12),
                     const LanguageSelectorButton(
                       foregroundColor: Colors.white,
                       backgroundColor: Color(0x1AFFFFFF),
                     ),
                   ],
                 ),
-              const SizedBox(height: 10),
-              TextButton.icon(
-                onPressed: onRestartJourney,
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(0, 0),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ] else
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    _RouteJourneyRow(
+                      originEmoji: originEmoji,
+                      originName: originName,
+                      destinationEmoji: destinationEmoji,
+                      destinationName: destinationName,
+                    ),
+                    _RouteActionPill(
+                      icon: Icons.swap_horiz_rounded,
+                      label: context.l10n.publicHomeJourneyResetAction,
+                      onTap: onRestartJourney,
+                      compact: false,
+                    ),
+                    const LanguageSelectorButton(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Color(0x1AFFFFFF),
+                    ),
+                  ],
                 ),
-                icon: const Icon(Icons.swap_horiz_rounded, size: 16),
-                label: Text(context.l10n.publicHomeJourneyResetAction),
-              ),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class _RouteActionPill extends StatelessWidget {
+  const _RouteActionPill({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    required this.compact,
+  });
+
+  final IconData icon;
+  final String label;
+  final Future<void> Function() onTap;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: onTap,
+        child: Ink(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 10 : 12,
+            vertical: 10,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: Colors.white),
+              if (!compact) ...[
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

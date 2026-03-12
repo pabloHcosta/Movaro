@@ -1859,6 +1859,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cityDetailSnapshotTitle => 'Visão rápida';
 
   @override
+  String get cityDetailSnapshotPositiveTag => 'Ponto forte';
+
+  @override
+  String get cityDetailSnapshotWatchoutTag => 'Atenção';
+
+  @override
+  String get cityDetailSnapshotContextTag => 'Contexto';
+
+  @override
   String get cityDetailMetricsSummary =>
       'Abra só se quiser ver todos os indicadores e o recorte completo.';
 

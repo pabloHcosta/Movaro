@@ -12,6 +12,7 @@ import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/recommendation_reason_list.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
@@ -269,30 +270,37 @@ class _LeadCityShowcase extends StatelessWidget {
     final compact = MediaQuery.sizeOf(context).width < 760;
 
     return FrostedPanel(
-      child: compact
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _LeadCityContent(city: city, plan: plan, housing: housing),
-                const SizedBox(height: 16),
-                _MiniCityMap(city: city),
-              ],
-            )
-          : Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 6,
-                  child: _LeadCityContent(
-                    city: city,
-                    plan: plan,
-                    housing: housing,
+      padding: EdgeInsets.zero,
+      child: CityImageBackdrop(
+        city: city,
+        borderRadius: BorderRadius.circular(32),
+        overlayOpacity: 0.78,
+        padding: const EdgeInsets.all(22),
+        child: compact
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _LeadCityContent(city: city, plan: plan, housing: housing),
+                  const SizedBox(height: 16),
+                  _MiniCityMap(city: city),
+                ],
+              )
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 6,
+                    child: _LeadCityContent(
+                      city: city,
+                      plan: plan,
+                      housing: housing,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(flex: 4, child: _MiniCityMap(city: city)),
-              ],
-            ),
+                  const SizedBox(width: 16),
+                  Expanded(flex: 4, child: _MiniCityMap(city: city)),
+                ],
+              ),
+      ),
     );
   }
 }
@@ -312,6 +320,7 @@ class _LeadCityContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final isSelected = plan.isCityConfirmed;
+    final textSoft = Colors.white.withValues(alpha: 0.8);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,7 +333,9 @@ class _LeadCityContent extends StatelessWidget {
                 isSelected
                     ? l10n.migrationPlanConfirmedCityTitle(city.name)
                     : l10n.migrationPlanSuggestedCityTitle(city.name),
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(color: Colors.white),
               ),
             ),
             const SizedBox(width: 10),
@@ -335,12 +346,12 @@ class _LeadCityContent extends StatelessWidget {
                     .withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(999),
               ),
-              child: Text(
+                child: Text(
                 isSelected
                     ? l10n.migrationPlanSelectedCityBadge
                     : l10n.migrationPlanSuggestedCityBadge,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: isSelected ? AppColors.primary : AppColors.accent,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -350,7 +361,7 @@ class _LeadCityContent extends StatelessWidget {
         Text(
           '${city.stateName} (${city.stateCode})',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSoftFor(context),
+            color: textSoft,
           ),
         ),
         const SizedBox(height: 12),
@@ -361,16 +372,27 @@ class _LeadCityContent extends StatelessWidget {
             _MetaPill(
               icon: _lifestyleIcon(city),
               label: _lifestyleLabel(context, city),
+              textColor: Colors.white,
+              iconColor: Colors.white,
+              backgroundColor: Colors.white.withValues(alpha: 0.12),
             ),
             _MetaPill(
               icon: Icons.home_work_outlined,
               label: housing.badge,
               tint: housing.tint,
+              textColor: Colors.white,
+              iconColor: Colors.white,
+              backgroundColor: Colors.white.withValues(alpha: 0.12),
             ),
           ],
         ),
         const SizedBox(height: 14),
-        RecommendationReasonList(reasons: plan.cityRecommendationReasons),
+        RecommendationReasonList(
+          reasons: plan.cityRecommendationReasons,
+          backgroundColor: Colors.white.withValues(alpha: 0.12),
+          textColor: Colors.white,
+          iconColor: Colors.white,
+        ),
         const SizedBox(height: 18),
         FilledButton.icon(
           onPressed: () => isSelected
@@ -475,115 +497,115 @@ class _CityOptionCard extends StatelessWidget {
       rentScore: city.rentScore,
     );
 
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.tintedSurfaceFor(
-          context,
-          tint: isLeading ? AppColors.primary : AppColors.accent,
-          lightColor: isLeading
-              ? const Color(0xFFEFF5FF)
-              : const Color(0xFFF7FAFD),
-        ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: CityImageBackdrop(
+        city: city,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isLeading
-              ? AppColors.tintedBorderFor(
-                  context,
-                  tint: AppColors.primary,
-                  lightColor: const Color(0x290071E3),
-                )
-              : AppColors.borderFor(context),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      city.name,
-                      style: Theme.of(context).textTheme.titleMedium,
+        overlayOpacity: 0.8,
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        city.name,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(color: Colors.white),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${city.stateName} (${city.stateCode})',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (isLeading)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${city.stateName} (${city.stateCode})',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSoftFor(context),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.14),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              if (isLeading)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    isSelected
-                        ? l10n.migrationPlanSelectedCityBadge
-                        : l10n.migrationPlanSuggestedCityBadge,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.labelMedium?.copyWith(color: AppColors.primary),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _MetaPill(
-                icon: Icons.home_work_outlined,
-                label: housing.badge,
-                tint: housing.tint,
-              ),
-              _MetaPill(
-                icon: Icons.trending_up_rounded,
-                label: context.l10n.recommendationReasonLabel(
-                  city.recommendationReasons.isEmpty
-                      ? 'plan_reason_balanced_profile'
-                      : city.recommendationReasons.first,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: FilledButton.icon(
-              onPressed: () => isSelected
-                  ? Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot)
-                  : Navigator.pushNamed(
-                      context,
-                      AppRoutes.cityDetail(city.id),
-                      arguments: const {'selectForPlan': true},
+                    child: Text(
+                      isSelected
+                          ? l10n.migrationPlanSelectedCityBadge
+                          : l10n.migrationPlanSuggestedCityBadge,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: Colors.white,
+                      ),
                     ),
-              icon: Icon(
-                isSelected
-                    ? Icons.checklist_rounded
-                    : Icons.open_in_new_rounded,
-              ),
-              label: Text(
-                isSelected
-                    ? l10n.migrationPlanSelectedCityAction
-                    : l10n.migrationPlanInspectCityAction,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _MetaPill(
+                  icon: Icons.home_work_outlined,
+                  label: housing.badge,
+                  tint: housing.tint,
+                  textColor: Colors.white,
+                  iconColor: Colors.white,
+                  backgroundColor: Colors.white.withValues(alpha: 0.12),
+                ),
+                _MetaPill(
+                  icon: Icons.trending_up_rounded,
+                  label: context.l10n.recommendationReasonLabel(
+                    city.recommendationReasons.isEmpty
+                        ? 'plan_reason_balanced_profile'
+                        : city.recommendationReasons.first,
+                  ),
+                  textColor: Colors.white,
+                  iconColor: Colors.white,
+                  backgroundColor: Colors.white.withValues(alpha: 0.12),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FilledButton.icon(
+                onPressed: () => isSelected
+                    ? Navigator.pushNamed(
+                        context,
+                        AppRoutes.migrationPlanCopilot,
+                      )
+                    : Navigator.pushNamed(
+                        context,
+                        AppRoutes.cityDetail(city.id),
+                        arguments: const {'selectForPlan': true},
+                      ),
+                icon: Icon(
+                  isSelected
+                      ? Icons.checklist_rounded
+                      : Icons.open_in_new_rounded,
+                ),
+                label: Text(
+                  isSelected
+                      ? l10n.migrationPlanSelectedCityAction
+                      : l10n.migrationPlanInspectCityAction,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -845,11 +867,21 @@ class _SummaryChip extends StatelessWidget {
 }
 
 class _MetaPill extends StatelessWidget {
-  const _MetaPill({required this.icon, required this.label, this.tint});
+  const _MetaPill({
+    required this.icon,
+    required this.label,
+    this.tint,
+    this.backgroundColor,
+    this.textColor,
+    this.iconColor,
+  });
 
   final IconData icon;
   final String label;
   final Color? tint;
+  final Color? backgroundColor;
+  final Color? textColor;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -858,23 +890,25 @@ class _MetaPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
-        color: AppColors.tintedSurfaceFor(
-          context,
-          tint: resolvedTint,
-          lightColor: const Color(0xFFF4F7FB),
-        ),
+        color:
+            backgroundColor ??
+            AppColors.tintedSurfaceFor(
+              context,
+              tint: resolvedTint,
+              lightColor: const Color(0xFFF4F7FB),
+            ),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: resolvedTint),
+          Icon(icon, size: 16, color: iconColor ?? resolvedTint),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
               label,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: AppColors.textPrimaryFor(context),
+                color: textColor ?? AppColors.textPrimaryFor(context),
               ),
             ),
           ),
