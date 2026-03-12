@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { Injectable } from '@nestjs/common';
@@ -15,10 +15,12 @@ export class LocalCityMetricsRepository implements CityMetricsRepository {
       return this.cache;
     }
 
-    const filePath = resolve(
+    const distFilePath = resolve(__dirname, '../seeds/movaro_city_metrics.json');
+    const sourceFilePath = resolve(
       process.cwd(),
-      '../../packages/contracts/seed/movaro_city_metrics.json',
+      'src/modules/cities/data/seeds/movaro_city_metrics.json',
     );
+    const filePath = existsSync(distFilePath) ? distFilePath : sourceFilePath;
     const fileContent = readFileSync(filePath, 'utf-8');
     this.cache = JSON.parse(fileContent) as CityMetricsModel[];
     return this.cache;

@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { Injectable } from '@nestjs/common';
@@ -13,10 +13,12 @@ type CountrySeedRecord = {
 @Injectable()
 export class ContractsSeedRepository implements SeedCatalogRepository {
   getCountryNames(): string[] {
-    const filePath = resolve(
+    const distFilePath = resolve(__dirname, '../seeds/countries.json');
+    const sourceFilePath = resolve(
       process.cwd(),
-      '../../packages/contracts/seed/countries.json',
+      'src/modules/migration/data/seeds/countries.json',
     );
+    const filePath = existsSync(distFilePath) ? distFilePath : sourceFilePath;
     const fileContent = readFileSync(filePath, 'utf-8');
     const countries = JSON.parse(fileContent) as CountrySeedRecord[];
 
