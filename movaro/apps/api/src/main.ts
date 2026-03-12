@@ -191,13 +191,9 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin && !isProductionLike) {
-        callback(null, true);
-        return;
-      }
-
+      // Native mobile clients typically do not send an Origin header.
       if (!origin) {
-        callback(new Error('Origin header is required.'), false);
+        callback(null, true);
         return;
       }
 
