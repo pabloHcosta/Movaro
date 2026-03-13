@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { GooglePlacesCityOpinionService } from '../../integrations/google/google-places-city-opinion.service';
 import { IbgeCityNormalizerService } from '../../integrations/ibge/ibge-city-normalizer.service';
 import { IbgeHttpClient } from '../../integrations/ibge/ibge-http.client';
 import { IbgeLocalitiesService } from '../../integrations/ibge/ibge-localities.service';
@@ -17,6 +18,7 @@ import { CitiesController } from './presentation/cities.controller';
     IbgeHttpClient,
     IbgeCityNormalizerService,
     IbgeLocalitiesService,
+    GooglePlacesCityOpinionService,
     OpenMeteoWeatherService,
     CityRankingService,
     CityMergeService,

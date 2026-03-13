@@ -1,27 +1,28 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 
 class PracticalCostEstimator extends StatefulWidget {
-  const PracticalCostEstimator({super.key});
+  const PracticalCostEstimator({required this.exchangeRatesService, super.key});
+
+  final CopilotExchangeRatesService exchangeRatesService;
 
   @override
   State<PracticalCostEstimator> createState() => _PracticalCostEstimatorState();
 }
 
 class _PracticalCostEstimatorState extends State<PracticalCostEstimator> {
-  late final Future<_ExchangeSnapshot> _exchangeFuture;
+  late final Future<CopilotExchangeRates?> _exchangeFuture;
 
   @override
   void initState() {
     super.initState();
-    _exchangeFuture = _ExchangeRateService().fetch();
+    _exchangeFuture = widget.exchangeRatesService.fetchLatest();
   }
 
   @override
@@ -30,7 +31,7 @@ class _PracticalCostEstimatorState extends State<PracticalCostEstimator> {
     final textSoft = AppColors.textSoftFor(context);
     final surfaceMuted = AppColors.surfaceMutedFor(context);
 
-    return FutureBuilder<_ExchangeSnapshot>(
+    return FutureBuilder<CopilotExchangeRates?>(
       future: _exchangeFuture,
       builder: (context, snapshot) {
         final exchange = snapshot.data;
@@ -65,7 +66,7 @@ class _PracticalCostEstimatorState extends State<PracticalCostEstimator> {
                 child: Text(
                   hasExchange
                       ? l10n.documentationCostsUpdatedAt(
-                          _formatUpdatedAt(context, exchange.updatedAt),
+                          _formatUpdatedAt(context, exchange.fetchedAt),
                         )
                       : l10n.documentationCostsUnavailable,
                   style: Theme.of(
@@ -152,9 +153,14 @@ class _PracticalCostEstimatorState extends State<PracticalCostEstimator> {
     ];
   }
 
-  String _formatUpdatedAt(BuildContext context, DateTime value) {
+  String _formatUpdatedAt(BuildContext context, String rawValue) {
     final localeName = Localizations.localeOf(context).toString();
-    return DateFormat('dd/MM HH:mm', localeName).format(value);
+    final parsed = DateTime.tryParse(rawValue);
+    if (parsed == null) {
+      return rawValue;
+    }
+
+    return DateFormat('dd/MM HH:mm', localeName).format(parsed.toLocal());
   }
 }
 
@@ -162,7 +168,7 @@ class _CostItemCard extends StatelessWidget {
   const _CostItemCard({required this.item, required this.exchange});
 
   final _CostItem item;
-  final _ExchangeSnapshot? exchange;
+  final CopilotExchangeRates? exchange;
 
   @override
   Widget build(BuildContext context) {
@@ -205,75 +211,13 @@ class _CostItemCard extends StatelessWidget {
           ),
           if (hasRates) ...[
             const SizedBox(height: 14),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _AmountChip(
-                  label: _formatCurrency(
-                    locale: Localizations.localeOf(context).toString(),
-                    currencyCode: 'BRL',
-                    amount: item.amountInBrl!,
-                  ),
-                ),
-                _AmountChip(
-                  label: _formatCurrency(
-                    locale: 'en_US',
-                    currencyCode: 'USD',
-                    amount: item.amountInBrl! / exchange!.usdToBrl,
-                  ),
-                ),
-                _AmountChip(
-                  label: _formatCurrency(
-                    locale: 'es_AR',
-                    currencyCode: 'ARS',
-                    amount: item.amountInBrl! / exchange!.arsToBrl,
-                  ),
-                ),
-              ],
+            MultiCurrencyAmount(
+              amountInBrl: item.amountInBrl!,
+              exchangeRates: exchange,
             ),
           ],
         ],
       ),
-    );
-  }
-
-  String _formatCurrency({
-    required String locale,
-    required String currencyCode,
-    required double amount,
-  }) {
-    final formatter = NumberFormat.currency(
-      locale: locale,
-      name: currencyCode,
-      symbol: currencyCode == 'USD'
-          ? 'US\$'
-          : currencyCode == 'ARS'
-          ? 'AR\$'
-          : 'R\$',
-      decimalDigits: amount == amount.roundToDouble() ? 0 : 2,
-    );
-
-    return formatter.format(amount);
-  }
-}
-
-class _AmountChip extends StatelessWidget {
-  const _AmountChip({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final surfaceMuted = AppColors.surfaceMutedFor(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: surfaceMuted,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(label, style: Theme.of(context).textTheme.labelMedium),
     );
   }
 }
@@ -292,46 +236,4 @@ class _CostItem {
   final String headline;
   final String supporting;
   final double? amountInBrl;
-}
-
-class _ExchangeSnapshot {
-  const _ExchangeSnapshot({
-    required this.usdToBrl,
-    required this.arsToBrl,
-    required this.updatedAt,
-  });
-
-  final double usdToBrl;
-  final double arsToBrl;
-  final DateTime updatedAt;
-}
-
-class _ExchangeRateService {
-  static final Uri _uri = Uri.parse(
-    'https://economia.awesomeapi.com.br/json/last/USD-BRL,ARS-BRL',
-  );
-
-  Future<_ExchangeSnapshot> fetch() async {
-    final response = await http.get(_uri).timeout(const Duration(seconds: 6));
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception('Failed to load exchange rates');
-    }
-
-    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
-    final usd =
-        decoded['USDBRL'] as Map<String, dynamic>? ?? const <String, dynamic>{};
-    final ars =
-        decoded['ARSBRL'] as Map<String, dynamic>? ?? const <String, dynamic>{};
-
-    final usdBid = double.parse(usd['bid'] as String);
-    final arsBid = double.parse(ars['bid'] as String);
-    final updatedAt = DateTime.parse(usd['create_date'] as String);
-
-    return _ExchangeSnapshot(
-      usdToBrl: usdBid,
-      arsToBrl: arsBid,
-      updatedAt: updatedAt,
-    );
-  }
 }

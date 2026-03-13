@@ -404,14 +404,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get documentationHeroTitle =>
-      'What usually unlocks practical life in Brazil';
+      'Understand practical life in Brazil with more clarity';
 
   @override
   String get documentationHeroDescription =>
-      'Type your question, filter by topic, and quickly reach the right block across documents, health, work, housing, mobility, and early costs.';
+      'Type a question or choose a topic. Movaro helps you find the right guidance and guide across documents, health, work, housing, mobility, and early costs.';
 
   @override
-  String get documentationSearchLabel => 'Type your question';
+  String get documentationHeroStepOneTitle => 'Type a question';
+
+  @override
+  String get documentationHeroStepOneBody =>
+      'You can search in English, Portuguese, or Spanish.';
+
+  @override
+  String get documentationHeroStepTwoTitle => 'Choose a topic';
+
+  @override
+  String get documentationHeroStepTwoBody =>
+      'Filter by documents, health, work, housing, mobility, and costs.';
+
+  @override
+  String get documentationHeroStepThreeTitle => 'Open the right guide';
+
+  @override
+  String get documentationHeroStepThreeBody =>
+      'Jump into a quick answer or the full block when you need more context.';
+
+  @override
+  String get documentationSearchLabel => 'What do you need to understand?';
 
   @override
   String get documentationSearchHint =>
@@ -420,6 +441,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get documentationSearchSupport =>
       'You can search in English, Portuguese, or Spanish.';
+
+  @override
+  String get documentationSearchPanelTitle => 'Start with search or a topic';
+
+  @override
+  String get documentationSearchPanelBody =>
+      'Type your question or tap a topic to reach the right block faster.';
+
+  @override
+  String get documentationGuideHideNextTime => 'Do not show again';
+
+  @override
+  String get documentationGuideStepsLabel => '3 steps';
+
+  @override
+  String get documentationGuideDismissAction => 'Not now';
+
+  @override
+  String get documentationGuidePrimaryAction => 'Got it';
 
   @override
   String documentationSearchResultsCount(int count) {
@@ -434,11 +474,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get documentationFilterAll => 'All';
 
   @override
-  String get documentationQuickRoutesTitle => 'Quick routes';
+  String get documentationQuickRoutesTitle => 'Topic shortcuts';
 
   @override
   String get documentationQuickRoutesBody =>
-      'Swipe sideways and jump straight into the topic that unlocks your next decision.';
+      'Swipe and jump straight into the right block if you already know which topic you want to solve.';
+
+  @override
+  String get documentationQuickChoicesTitle => 'Quick choices';
+
+  @override
+  String get documentationQuickChoicesBody =>
+      'Filter by topic or use ready-made questions to reach the right block faster.';
 
   @override
   String get documentationResultsTitle => 'Guide results';
@@ -586,6 +633,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'No. Formal work requires a compatible migration status and regular registration.';
 
   @override
+  String get documentationAnswerTravelDocQuestion =>
+      'Do I need a passport to travel from Argentina to Brazil?';
+
+  @override
+  String get documentationAnswerTravelDocAnswer =>
+      'Not necessarily. Argentine citizens can travel to Brazil with a valid physical DNI in good condition and with a photo that clearly identifies the holder. A proof of document renewal or issuance is not enough.';
+
+  @override
   String get documentationAnswerCpfQuestion =>
       'Does CPF alone solve banking and contracts?';
 
@@ -656,6 +711,22 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get documentationAnswerPjAnswer =>
       'It may feel similar as a self-employed or company-based model, but it is not the same legal structure. Tax, retirement, and contract rules vary by arrangement in Brazil.';
+
+  @override
+  String get documentationAnswerMarketQuestion =>
+      'Is Brazil a good place to build income from work?';
+
+  @override
+  String get documentationAnswerMarketAnswer =>
+      'Yes, but the practical expectation is steady income and gradual growth, not exceptionally high pay right away. Brazil has a large and diversified labor market, but earnings vary a lot by city, sector, language, and your legal work status.';
+
+  @override
+  String get documentationAnswerSafetyQuestion =>
+      'Is safety in Brazil the same everywhere?';
+
+  @override
+  String get documentationAnswerSafetyAnswer =>
+      'No. Safety varies a lot by state, city, neighborhood, and daily routine. The safest way to plan is to compare the specific area where you want to live and move around, not to treat the whole country as one block.';
 
   @override
   String get documentationAnswerInssQuestion =>
@@ -787,6 +858,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get documentationCpfBulletThree =>
       'CPF does not replace your migration document, but it usually unlocks a large part of daily life.';
+
+  @override
+  String get documentationTravelDocsTitle =>
+      'Travel document from Argentina to Brazil';
+
+  @override
+  String get documentationTravelDocsSummary =>
+      'For tourism and initial entry, a passport is not the only option. The key is traveling with a recognized physical identity document that is valid for Mercosur travel.';
+
+  @override
+  String get documentationTravelDocsBulletOne =>
+      'Argentine citizens may travel to Brazil with a national identity document (DNI) or a passport.';
+
+  @override
+  String get documentationTravelDocsBulletTwo =>
+      'The document must be in good condition and allow the holder to be clearly identified through the photo.';
+
+  @override
+  String get documentationTravelDocsBulletThree =>
+      'A document-in-process receipt, damaged documents, or older documents not accepted under migration rules may block departure or boarding.';
 
   @override
   String get documentationRegistrationTitle =>
@@ -963,6 +1054,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'Before accepting this model, understand taxes, contract terms, and how retirement contributions will work.';
 
   @override
+  String get documentationWorkMarketTitle =>
+      'Labor market and income expectations';
+
+  @override
+  String get documentationWorkMarketSummary =>
+      'Brazil offers scale and many work formats, but migration planning should assume moderate income and gradual progression rather than unusually high salaries in the first stage.';
+
+  @override
+  String get documentationWorkMarketBulletOne =>
+      'In the rolling quarter ending in October 2025, IBGE recorded unemployment at 5.4%, habitual average earnings at R\$ 3,528, and a record 39.2 million formally registered private-sector workers.';
+
+  @override
+  String get documentationWorkMarketBulletTwo =>
+      'That combination shows a large and active market, with room in services, commerce, logistics, health, education, technology, and local business networks.';
+
+  @override
+  String get documentationWorkMarketBulletThree =>
+      'For someone arriving from abroad, the safest reading is to plan around realistic income, reserve capital, and city-by-city differences in wages and formalization.';
+
+  @override
   String get documentationRetirementTitle =>
       'Public retirement and pension system';
 
@@ -981,6 +1092,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get documentationRetirementBulletThree =>
       'For someone arriving from abroad, it is safest to understand early how contributions will happen in Brazil.';
+
+  @override
+  String get documentationSafetyTitle =>
+      'Safety: read it by city and neighborhood';
+
+  @override
+  String get documentationSafetySummary =>
+      'Safety in Brazil is not uniform. The useful decision is not whether the country is \'safe\' in the abstract, but how the exact city, neighborhood, commute, and schedule fit your routine.';
+
+  @override
+  String get documentationSafetyBulletOne =>
+      'The 2025 Brazilian Public Security Yearbook is based on official public security data from states and police forces and is the broadest snapshot of the sector in the country.';
+
+  @override
+  String get documentationSafetyBulletTwo =>
+      'Its data shows strong variation across states and crime categories, which is why national averages alone are not enough to choose where to live.';
+
+  @override
+  String get documentationSafetyBulletThree =>
+      'Before renting or accepting a job, compare neighborhood context, nighttime mobility, route patterns, and the practical routine you will actually have.';
 
   @override
   String get documentationDrivingTitle => 'First driving license in Brazil';
@@ -1534,6 +1665,49 @@ class AppLocalizationsEn extends AppLocalizations {
       'Search for a city or use the chips to filter the catalog when it makes sense. The list does not open preloaded: results appear only after you search or pick a slice.';
 
   @override
+  String get citiesGuideEyebrow => 'Quick guide';
+
+  @override
+  String get citiesGuideTitle => 'How to use city discovery';
+
+  @override
+  String get citiesGuideBody =>
+      'Here you can search by name, filter the catalog with quick slices, or open the map to choose by location.';
+
+  @override
+  String get citiesGuideStepOneTitle => 'Search a city';
+
+  @override
+  String get citiesGuideStepOneBody =>
+      'Type the name and tap the closest result to open the detail.';
+
+  @override
+  String get citiesGuideStepTwoTitle => 'Use a quick slice';
+
+  @override
+  String get citiesGuideStepTwoBody =>
+      'The chips narrow the list by popularity, cost, work, language, and other signals.';
+
+  @override
+  String get citiesGuideStepThreeTitle => 'Choose on the map';
+
+  @override
+  String get citiesGuideStepThreeBody =>
+      'Open the map, tap a city, and continue to the detail when you want to decide by location.';
+
+  @override
+  String get citiesGuideHideNextTime => 'Do not show again';
+
+  @override
+  String get citiesGuideStepsLabel => '3 steps';
+
+  @override
+  String get citiesGuideDismissAction => 'Not now';
+
+  @override
+  String get citiesGuidePrimaryAction => 'Got it';
+
+  @override
   String get citiesExploreSearchIdleTitle =>
       'Search for a city or choose a filter';
 
@@ -1676,6 +1850,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Type to search cities by name and tap autocomplete.';
 
   @override
+  String get citiesQuickChoicesTitle => 'Quick choices';
+
+  @override
+  String get citiesQuickChoicesBody =>
+      'Use a slice to narrow the list faster or go by map if location is your starting point.';
+
+  @override
   String citiesSearchResultsCount(int count) {
     return '$count cities found';
   }
@@ -1686,6 +1867,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get citiesMapOpenAction => 'Choose on map';
+
+  @override
+  String get citiesMapCalloutBody =>
+      'Prefer to decide by location? Open the map and compare cities by the place where you want to start.';
+
+  @override
+  String get citiesMapCalloutStepOne => 'Open map';
+
+  @override
+  String get citiesMapCalloutStepTwo => 'Tap city';
+
+  @override
+  String get citiesMapCalloutStepThree => 'Open detail';
 
   @override
   String get citiesMapSheetTitle => 'Choose a city on the map';
@@ -1922,6 +2116,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cityDetailSourceUrlLabel => 'Reference';
 
   @override
+  String get cityDetailPublicOpinionTitle => 'What visitors tend to mention';
+
+  @override
+  String cityDetailPublicOpinionSubtitle(Object provider) {
+    return 'A reading of recurring themes in public $provider reviews. It does not represent the opinion of the whole city.';
+  }
+
+  @override
+  String cityDetailPublicOpinionRating(Object rating) {
+    return 'Rating $rating';
+  }
+
+  @override
+  String cityDetailPublicOpinionSample(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reviews',
+      one: '1 review',
+      zero: 'No reviews',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cityDetailPublicOpinionFallbackSummary =>
+      'These topics reflect themes that show up often in the public reviews found for this locality.';
+
+  @override
+  String get cityDetailPublicOpinionPositiveTitle => 'What people praise most';
+
+  @override
+  String get cityDetailPublicOpinionCriticalTitle =>
+      'What people criticize most';
+
+  @override
+  String cityDetailPublicOpinionNote(Object date) {
+    return 'Automatic summary checked on $date. Use it as a signal of recurring public perception, not as absolute consensus.';
+  }
+
+  @override
   String get citySourceTerritorialTitle => 'Territorial identity';
 
   @override
@@ -1955,6 +2190,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get citySourceRankingDescription =>
       'Movaro scores calculated from public data and a curated dataset.';
+
+  @override
+  String get citySourcePublicReviewsTitle =>
+      'Public perception of the locality';
+
+  @override
+  String get citySourcePublicReviewsDescription =>
+      'Recurring themes extracted from public Google reviews about the locality. It does not represent the opinion of the whole city.';
 
   @override
   String get cityDetailSaveAction => 'Save city';
@@ -2063,6 +2306,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get favoritesExploreAction => 'Explore cities';
+
+  @override
+  String get favoritesGuideEyebrow => 'Quick guide';
+
+  @override
+  String get favoritesGuideTitle => 'How to use Favorites';
+
+  @override
+  String get favoritesGuideBody =>
+      'Here you can keep up to 3 cities to revisit later without repeating your search. Use this area to compare better, reopen details, and decide with more clarity.';
+
+  @override
+  String get favoritesGuideStepOneTitle => 'Save the most promising cities';
+
+  @override
+  String get favoritesGuideStepOneBody =>
+      'Use the heart on cards or in the detail page to keep the cities that make sense for you.';
+
+  @override
+  String get favoritesGuideStepTwoTitle => 'Come back for quick comparison';
+
+  @override
+  String get favoritesGuideStepTwoBody =>
+      'Favorites keeps your picks in one place so you do not get lost between searches and filters.';
+
+  @override
+  String get favoritesGuideStepThreeTitle =>
+      'Open the detail when you want to decide';
+
+  @override
+  String get favoritesGuideStepThreeBody =>
+      'Tap a city to review context, weather, cost, and the main signals before moving forward.';
+
+  @override
+  String get favoritesGuideHideNextTime => 'Do not show again';
+
+  @override
+  String get favoritesGuideStepsLabel => '3 steps';
+
+  @override
+  String get favoritesGuideDismissAction => 'Not now';
+
+  @override
+  String get favoritesGuidePrimaryAction => 'Got it';
 
   @override
   String get publicHomeJourneyResetAction => 'Choose another route';
@@ -2386,6 +2673,117 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cityHousingViabilityHardBadge => 'High housing pressure';
 
   @override
+  String get cityMetricInsightTapHint =>
+      'Tap to understand the data behind this read.';
+
+  @override
+  String get cityMetricInsightMeaningTitle => 'What this means';
+
+  @override
+  String get cityMetricInsightMethodTitle => 'How this read was built';
+
+  @override
+  String get cityMetricInsightFactsTitle => 'Data used today';
+
+  @override
+  String get cityMetricInsightValidateTitle =>
+      'What to validate before deciding';
+
+  @override
+  String get cityMetricInsightSourcesTitle => 'Base and sources';
+
+  @override
+  String get cityMetricInsightDisclaimer =>
+      'Use this card as an early triage. The final decision still depends on neighborhood, real prices, and local validation.';
+
+  @override
+  String get cityMetricInsightCurrentBaseBadge => 'Current base';
+
+  @override
+  String get cityMetricInsightMappedBaseBadge => 'Mapped reference';
+
+  @override
+  String get cityMetricInsightOpenSourceAction => 'Open source';
+
+  @override
+  String get cityMetricInsightRangeLabel => 'This card range';
+
+  @override
+  String get cityMetricInsightSpanishSupportLabel => 'Spanish support';
+
+  @override
+  String get cityMetricInsightLanguageCurrentBaseTitle =>
+      'Practical adaptation read';
+
+  @override
+  String get cityMetricInsightHousingMeaning =>
+      'When this block drops into alert territory, it means rent and housing entry costs tend to weigh more in the first move to this city.';
+
+  @override
+  String get cityMetricInsightHousingMethod =>
+      'Today the app combines the city\'s rentScore with its broader economical score. When housing stays below 55, the product treats housing entry as a critical filter.';
+
+  @override
+  String get cityMetricInsightHousingValidate =>
+      'Compare real rent, deposit, guarantees, furniture, and neighborhood cost before signing. Housing mistakes usually cost more here.';
+
+  @override
+  String get cityMetricInsightHousingMappedSource =>
+      'FipeZAP is the strongest reference already mapped in the project to recalibrate rent and housing pressure where municipal coverage exists.';
+
+  @override
+  String get cityMetricInsightSafetyMeaning =>
+      'This alert does not mean the city is unworkable. It means neighborhood choice, routine, and local validation matter more before treating the move as simple.';
+
+  @override
+  String get cityMetricInsightSafetyMethod =>
+      'Today the card uses Movaro\'s catalog safetyScore. Below 55, the read becomes caution; between 55 and 69 it stays moderate; from 70 onward it becomes more favorable.';
+
+  @override
+  String get cityMetricInsightSafetyValidate =>
+      'Check neighborhood by neighborhood, nighttime travel, the real routine of residents, and the difference between tourist and residential areas.';
+
+  @override
+  String get cityMetricInsightSafetyMappedSource =>
+      'Atlas da Violência is the official reference already mapped in the project to recalibrate this group with public data and open methodology.';
+
+  @override
+  String get cityMetricInsightWorkMeaning =>
+      'Moderate market is not a blocker. It means the city can work, but the result depends more on your field, seniority, and entry path.';
+
+  @override
+  String get cityMetricInsightWorkMethod =>
+      'The work score combines jobMarketScore, economicActivityScore, and inverted unemployment. Between 62 and 77, the read stays moderate; above 78, it becomes strong.';
+
+  @override
+  String get cityMetricInsightWorkValidate =>
+      'Look for real openings in your field, see which sectors pull the city, and estimate how much runway you have until your first income.';
+
+  @override
+  String get cityMetricInsightWorkMappedSource =>
+      'Novo Caged is the main official reference mapped to measure municipal formal-employment momentum.';
+
+  @override
+  String get cityMetricInsightWorkEconomicMappedSource =>
+      'IBGE\'s PIB dos Municipios is the mapped official reference for calibrating the city\'s economic activity weight.';
+
+  @override
+  String get cityMetricInsightLanguageMeaning =>
+      'Harder adaptation means Portuguese is likely to weigh more in day-to-day integration and that informal Spanish support appears weaker.';
+
+  @override
+  String get cityMetricInsightLanguageMethod =>
+      'This read uses the language-adaptation score, supported by Spanish support and familiarity among Argentinians. Below 65, friction tends to be higher.';
+
+  @override
+  String get cityMetricInsightLanguageValidate =>
+      'Test the routine without relying on Spanish: housing, groceries, healthcare, services, and work. If that becomes a blocker, real adaptation in the city is tougher for your profile.';
+
+  @override
+  String get cityMetricInsightLanguageMappedSource =>
+      'There is still no single official source for this read. Today it remains a curated product heuristic for practical adaptation.';
+
+  @override
   String get citySnapshotPopularityHigh => 'Highly sought after';
 
   @override
@@ -2461,6 +2859,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get questionOptionBrazil => 'Brazil';
+
+  @override
+  String get questionOptionChile => 'Chile';
+
+  @override
+  String get questionOptionUruguay => 'Uruguay';
+
+  @override
+  String get questionOptionParaguay => 'Paraguay';
 
   @override
   String get questionOptionUnknown => 'I still do not know';
@@ -2789,7 +3196,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sourceProviderMovaroRanking => 'Movaro Ranking Methodology v1';
 
   @override
+  String get sourceProviderGoogleMaps => 'Google Maps';
+
+  @override
   String get sourceProviderReceitaFederalGovBr => 'Federal Revenue / Gov.br';
+
+  @override
+  String get sourceProviderArgentinaMigraciones =>
+      'Argentina.gob.ar / Migration Office';
 
   @override
   String get sourceProviderPoliciaFederal => 'Federal Police';
@@ -2832,6 +3246,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sourceProviderMinisterioPrevidenciaInss =>
       'Ministry of Social Security / INSS';
+
+  @override
+  String get sourceProviderIbgePnadContinua => 'IBGE / Continuous PNAD';
+
+  @override
+  String get sourceProviderForumBrasileiroSegurancaPublica =>
+      'Brazilian Forum of Public Security';
 
   @override
   String get sourceProviderBancoCentralBrasil => 'Central Bank of Brazil';
@@ -3501,6 +3922,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String get migrationPlanCopilotAction => 'Open guide';
 
   @override
+  String get migrationPlanCopilotGuideEyebrow => 'Quick guide';
+
+  @override
+  String get migrationPlanCopilotGuideTitle => 'How to use the move guide';
+
+  @override
+  String get migrationPlanCopilotGuideBody =>
+      'This area turns your chosen city into practical preparation. Open the right stage, resolve the current priority, and return to the overview without losing the order of the plan.';
+
+  @override
+  String get migrationPlanCopilotGuideStepOneTitle => 'Start from the overview';
+
+  @override
+  String get migrationPlanCopilotGuideStepOneBody =>
+      'The overview shows the most important stage right now and helps you avoid spreading your energy.';
+
+  @override
+  String get migrationPlanCopilotGuideStepTwoTitle =>
+      'Enter the priority stage';
+
+  @override
+  String get migrationPlanCopilotGuideStepTwoBody =>
+      'Documents, housing, work, and arrival are split so you can solve one block at a time.';
+
+  @override
+  String get migrationPlanCopilotGuideStepThreeTitle =>
+      'Use the practical shortcuts';
+
+  @override
+  String get migrationPlanCopilotGuideStepThreeBody =>
+      'Open links, sources, and guided blocks inside the app to move from planning into execution.';
+
+  @override
+  String get migrationPlanCopilotGuideHideNextTime => 'Do not show again';
+
+  @override
+  String get migrationPlanCopilotGuideStepsLabel => '3 steps';
+
+  @override
+  String get migrationPlanCopilotGuideDismissAction => 'Not now';
+
+  @override
+  String get migrationPlanCopilotGuidePrimaryAction => 'Got it';
+
+  @override
   String get migrationPlanCopilotIntroTitle =>
       'When you want to move from decision to execution';
 
@@ -3880,6 +4346,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bmpVariantStrategicTag => 'More precise';
 
   @override
+  String get bmpGuideEyebrow => 'Build my plan';
+
+  @override
+  String get bmpGuideTitle => 'How this plan builder works';
+
+  @override
+  String get bmpGuideBody =>
+      'Start with the mode that matches how much detail you want right now. Both options lead to a suggested city and a first sequence of actions, but they differ in depth.';
+
+  @override
+  String get bmpGuideStepsLabel => 'What changes between the two modes';
+
+  @override
+  String get bmpGuideStepQuickTitle => 'Quick plan';
+
+  @override
+  String get bmpGuideStepQuickBody =>
+      'This is the fastest path. You answer the core questions, get an initial direction, and can refine later if the first result is still too broad.';
+
+  @override
+  String get bmpGuideStepStrategicTitle => 'Strategic plan';
+
+  @override
+  String get bmpGuideStepStrategicBody =>
+      'This adds one extra layer about how you intend to support yourself after the move, so the recommendation becomes more precise and more practical.';
+
+  @override
+  String get bmpGuideStepUseTitle => 'How to use the result';
+
+  @override
+  String get bmpGuideStepUseBody =>
+      'Use the plan as a starting point, not a final verdict. The best next move is usually to compare the suggested city, confirm documents, and adjust the plan if your priority changes.';
+
+  @override
+  String get bmpGuideHideNextTime =>
+      'Do not open this explanation automatically again';
+
+  @override
+  String get bmpGuideDismissAction => 'Close';
+
+  @override
+  String get bmpGuidePrimaryAction => 'Start planning';
+
+  @override
   String get bmpRefineTitle =>
       'Do you want to refine the recommendation with 1 more question?';
 
@@ -4150,6 +4660,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get migrationPlanPrepHeroBody =>
       'The goal here is not to tick checkboxes. First understand what to issue, where to open each topic, and which guide solves your next step.';
+
+  @override
+  String get migrationPlanPrepHeroBodyCompact =>
+      'Open the right stage and prepare the move without losing the order of the plan.';
 
   @override
   String get migrationPlanPrepTabOverview => 'Overview';

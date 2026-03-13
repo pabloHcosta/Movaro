@@ -5,11 +5,14 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/features/explore/application/services/documentation_guide_preferences_store.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_decision_support_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_entry_cost_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_soft_landing_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/practical_cost_estimator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
 
 enum DocumentationGuideSection {
   documents,
@@ -21,7 +24,9 @@ enum DocumentationGuideSection {
 }
 
 class DocumentationGuidePage extends StatefulWidget {
-  const DocumentationGuidePage({super.key});
+  const DocumentationGuidePage({required this.exchangeRatesService, super.key});
+
+  final CopilotExchangeRatesService exchangeRatesService;
 
   @override
   State<DocumentationGuidePage> createState() => _DocumentationGuidePageState();
@@ -30,22 +35,48 @@ class DocumentationGuidePage extends StatefulWidget {
 class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
   late final TextEditingController _searchController;
   late final ScrollController _scrollController;
+  late final DocumentationGuidePreferencesStore _preferencesStore;
   final GlobalKey _resultsKey = GlobalKey();
   String _searchQuery = '';
   DocumentationGuideSection? _selectedSection;
+  bool _didTryAutoGuide = false;
+  bool _showScrollHint = false;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController();
     _scrollController = ScrollController();
+    _scrollController.addListener(_handleScroll);
+    _preferencesStore = DocumentationGuidePreferencesStore();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshScrollHint();
+      _maybeShowGuide();
+    });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    _scrollController.dispose();
+    _scrollController
+      ..removeListener(_handleScroll)
+      ..dispose();
     super.dispose();
+  }
+
+  Future<void> _maybeShowGuide() async {
+    if (_didTryAutoGuide) {
+      return;
+    }
+    _didTryAutoGuide = true;
+
+    final shouldShowGuide = await _preferencesStore.shouldShowGuide();
+    if (!mounted || !shouldShowGuide) {
+      return;
+    }
+
+    await _preferencesStore.markIntroSeen();
+    await _showGuideModal();
   }
 
   @override
@@ -59,7 +90,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     final filteredAnswers = quickAnswers.where(_matchesAnswer).toList();
     final searchResults = _buildSearchResults(filteredPaths, filteredAnswers);
     final displayedAnswers = _searchQuery.isEmpty && _selectedSection == null
-        ? filteredAnswers.take(4).toList()
+        ? filteredAnswers.take(6).toList()
         : filteredAnswers;
 
     return Scaffold(
@@ -67,184 +98,214 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
         children: [
           const AmbientBackground(),
           SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1120),
-                child: ListView(
-                  controller: _scrollController,
-                  padding: EdgeInsets.fromLTRB(
-                    context.pageHorizontalPadding,
-                    context.pageVerticalPadding,
-                    context.pageHorizontalPadding,
-                    context.pageVerticalPadding + 20,
-                  ),
-                  children: [
-                    AppGlassHeader(
-                      title: l10n.documentationPageTitle,
-                      onBack: () => Navigator.maybePop(context),
-                    ),
-                    const SizedBox(height: 20),
-                    FrostedPanel(
-                      padding: const EdgeInsets.all(32),
-                      gradient: LinearGradient(
-                        colors: isDark
-                            ? const [
-                                AppColors.heroStart,
-                                AppColors.heroMiddle,
-                                AppColors.heroEnd,
-                              ]
-                            : const [
-                                Color(0xFFF8FBFF),
-                                Color(0xFFEAF3FF),
-                                Color(0xFFD9EAFF),
-                              ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+            child: Stack(
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1120),
+                    child: ListView(
+                      controller: _scrollController,
+                      padding: EdgeInsets.fromLTRB(
+                        context.pageHorizontalPadding,
+                        context.pageVerticalPadding,
+                        context.pageHorizontalPadding,
+                        context.pageVerticalPadding + 96,
                       ),
-                      backgroundColor: isDark
-                          ? const Color(0xB30B1320)
-                          : const Color(0xF5FFFFFF),
-                      borderColor: isDark
-                          ? const Color(0x1AFFFFFF)
-                          : AppColors.primary.withValues(alpha: 0.10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.documentationHeroEyebrow,
-                            style: Theme.of(context).textTheme.labelLarge
-                                ?.copyWith(
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.82)
-                                      : AppColors.primary,
+                      children: [
+                        AppGlassHeader(
+                          title: l10n.documentationPageTitle,
+                          onBack: () => Navigator.maybePop(context),
+                          trailing: IconButton(
+                            onPressed: _showGuideModal,
+                            icon: const Icon(Icons.help_outline_rounded),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        FrostedPanel(
+                          padding: const EdgeInsets.all(32),
+                          gradient: LinearGradient(
+                            colors: isDark
+                                ? const [
+                                    AppColors.heroStart,
+                                    AppColors.heroMiddle,
+                                    AppColors.heroEnd,
+                                  ]
+                                : const [
+                                    Color(0xFFF8FBFF),
+                                    Color(0xFFEAF3FF),
+                                    Color(0xFFD9EAFF),
+                                  ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          backgroundColor: isDark
+                              ? const Color(0xB30B1320)
+                              : const Color(0xF5FFFFFF),
+                          borderColor: isDark
+                              ? const Color(0x1AFFFFFF)
+                              : AppColors.primary.withValues(alpha: 0.10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.documentationHeroEyebrow,
+                                style: Theme.of(context).textTheme.labelLarge
+                                    ?.copyWith(
+                                      color: isDark
+                                          ? Colors.white.withValues(alpha: 0.82)
+                                          : AppColors.primary,
+                                    ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                l10n.documentationHeroTitle,
+                                style: Theme.of(context).textTheme.displaySmall
+                                    ?.copyWith(
+                                      color: isDark
+                                          ? Colors.white
+                                          : AppColors.textPrimaryFor(context),
+                                    ),
+                              ),
+                              const SizedBox(height: 16),
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 720),
+                                child: Text(
+                                  l10n.documentationHeroDescription,
+                                  style: Theme.of(context).textTheme.bodyLarge
+                                      ?.copyWith(
+                                        color: isDark
+                                            ? Colors.white.withValues(
+                                                alpha: 0.78,
+                                              )
+                                            : AppColors.textSoftFor(context),
+                                      ),
                                 ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            l10n.documentationHeroTitle,
-                            style: Theme.of(context).textTheme.displaySmall
-                                ?.copyWith(
-                                  color: isDark
-                                      ? Colors.white
-                                      : AppColors.textPrimaryFor(context),
+                              ),
+                              const SizedBox(height: 24),
+                              _GuideSearchField(
+                                controller: _searchController,
+                                label: l10n.documentationSearchLabel,
+                                hint: l10n.documentationSearchHint,
+                                helper: l10n.documentationSearchSupport,
+                                onSubmitted: (_) => _handlePrimarySearchAction(
+                                  context,
+                                  searchResults,
                                 ),
-                          ),
-                          const SizedBox(height: 16),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 720),
-                            child: Text(
-                              l10n.documentationHeroDescription,
-                              style: Theme.of(context).textTheme.bodyLarge
-                                  ?.copyWith(
-                                    color: isDark
-                                        ? Colors.white.withValues(alpha: 0.78)
-                                        : AppColors.textSoftFor(context),
-                                  ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          _GuideSearchField(
-                            controller: _searchController,
-                            label: l10n.documentationSearchLabel,
-                            hint: l10n.documentationSearchHint,
-                            helper: l10n.documentationSearchSupport,
-                            onSubmitted: (_) => _handlePrimarySearchAction(
-                              context,
-                              searchResults,
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                _searchQuery = value;
-                                if (value.trim().isNotEmpty) {
-                                  _selectedSection = null;
-                                }
-                              });
-                            },
-                            onClear: _searchQuery.isEmpty
-                                ? null
-                                : () {
-                                    _searchController.clear();
-                                    setState(() {
-                                      _searchQuery = '';
-                                    });
-                                  },
-                          ),
-                          if (_searchQuery.trim().isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            _SearchMatchPanel(
-                              l10n: l10n,
-                              results: searchResults,
-                              onTapResult: (result) =>
-                                  _handleSearchResultTap(context, result),
-                            ),
-                          ],
-                          const SizedBox(height: 14),
-                          _SectionFilterRail(
-                            l10n: l10n,
-                            paths: paths,
-                            selectedSection: _selectedSection,
-                            onSelected: (section) {
-                              setState(() {
-                                _selectedSection = _selectedSection == section
+                                onChanged: (value) {
+                                  setState(() {
+                                    _searchQuery = value;
+                                    if (value.trim().isNotEmpty) {
+                                      _selectedSection = null;
+                                    }
+                                  });
+                                },
+                                onClear: _searchQuery.isEmpty
                                     ? null
-                                    : section;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 14),
-                          _PromptRail(
-                            prompts: [
-                              (
-                                label: l10n.documentationAnswerWorkQuestion,
-                                query: l10n.documentationAnswerWorkQuestion,
+                                    : () {
+                                        _searchController.clear();
+                                        setState(() {
+                                          _searchQuery = '';
+                                        });
+                                      },
                               ),
-                              (
-                                label: l10n.documentationAnswerCpfQuestion,
-                                query: l10n.documentationAnswerCpfQuestion,
+                              if (_searchQuery.trim().isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                _SearchMatchPanel(
+                                  l10n: l10n,
+                                  results: searchResults,
+                                  onTapResult: (result) =>
+                                      _handleSearchResultTap(context, result),
+                                ),
+                              ],
+                              const SizedBox(height: 14),
+                              _SectionFilterRail(
+                                l10n: l10n,
+                                paths: paths,
+                                selectedSection: _selectedSection,
+                                onSelected: (section) {
+                                  setState(() {
+                                    _selectedSection = _selectedSection == section
+                                        ? null
+                                        : section;
+                                  });
+                                },
                               ),
-                              (
-                                label: l10n.documentationAnswerSusCardQuestion,
-                                query: l10n.documentationAnswerSusCardQuestion,
-                              ),
-                              (
-                                label: l10n.documentationPathCostsTitle,
-                                query: l10n.documentationPathCostsTitle,
+                              const SizedBox(height: 14),
+                              _PromptRail(
+                                prompts: [
+                                  (
+                                    label: l10n.documentationAnswerWorkQuestion,
+                                    query: l10n.documentationAnswerWorkQuestion,
+                                  ),
+                                  (
+                                    label:
+                                        l10n.documentationAnswerTravelDocQuestion,
+                                    query:
+                                        l10n.documentationAnswerTravelDocQuestion,
+                                  ),
+                                  (
+                                    label: l10n.documentationAnswerCpfQuestion,
+                                    query: l10n.documentationAnswerCpfQuestion,
+                                  ),
+                                  (
+                                    label:
+                                        l10n.documentationAnswerSusCardQuestion,
+                                    query:
+                                        l10n.documentationAnswerSusCardQuestion,
+                                  ),
+                                  (
+                                    label: l10n.documentationAnswerMarketQuestion,
+                                    query:
+                                        l10n.documentationAnswerMarketQuestion,
+                                  ),
+                                  (
+                                    label: l10n.documentationAnswerSafetyQuestion,
+                                    query:
+                                        l10n.documentationAnswerSafetyQuestion,
+                                  ),
+                                ],
+                                onTap: _applySuggestedQuery,
                               ),
                             ],
-                            onTap: _applySuggestedQuery,
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 16),
+                        _QuickRoutesCarousel(
+                          l10n: l10n,
+                          paths: paths,
+                          selectedSection: _selectedSection,
+                          onOpenSection: (section) => Navigator.pushNamed(
+                            context,
+                            AppRoutes.documentationTopic,
+                            arguments: section,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _GuideResultsSection(
+                          key: _resultsKey,
+                          l10n: l10n,
+                          filteredPaths: filteredPaths,
+                          filteredAnswers: displayedAnswers,
+                          hasActiveFilter:
+                              _searchQuery.trim().isNotEmpty ||
+                              _selectedSection != null,
+                          onOpenSection: (section) => Navigator.pushNamed(
+                            context,
+                            AppRoutes.documentationTopic,
+                            arguments: section,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    _QuickRoutesCarousel(
-                      l10n: l10n,
-                      paths: paths,
-                      selectedSection: _selectedSection,
-                      onOpenSection: (section) => Navigator.pushNamed(
-                        context,
-                        AppRoutes.documentationTopic,
-                        arguments: section,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _GuideResultsSection(
-                      key: _resultsKey,
-                      l10n: l10n,
-                      filteredPaths: filteredPaths,
-                      filteredAnswers: displayedAnswers,
-                      hasActiveFilter:
-                          _searchQuery.trim().isNotEmpty ||
-                          _selectedSection != null,
-                      onOpenSection: (section) => Navigator.pushNamed(
-                        context,
-                        AppRoutes.documentationTopic,
-                        arguments: section,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                _ScrollHintOverlay(
+                  visible: _showScrollHint,
+                  label: 'See more',
+                  onTap: _scrollDown,
+                ),
+              ],
             ),
           ),
         ],
@@ -333,6 +394,77 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     );
   }
 
+  void _handleScroll() {
+    _refreshScrollHint();
+  }
+
+  void _refreshScrollHint() {
+    if (!_scrollController.hasClients) {
+      return;
+    }
+
+    final position = _scrollController.position;
+    final nextValue =
+        position.maxScrollExtent > 40 &&
+        position.pixels < position.maxScrollExtent - 32;
+    if (nextValue != _showScrollHint && mounted) {
+      setState(() {
+        _showScrollHint = nextValue;
+      });
+    }
+  }
+
+  void _scrollDown() {
+    if (!_scrollController.hasClients) {
+      return;
+    }
+
+    final nextOffset = _scrollController.offset + 360;
+    _scrollController.animateTo(
+      nextOffset.clamp(0, _scrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  Future<void> _showGuideModal() async {
+    final l10n = context.l10n;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => FeatureGuideDialog(
+        eyebrow: l10n.documentationHeroEyebrow,
+        title: l10n.documentationHeroTitle,
+        body: l10n.documentationHeroDescription,
+        stepsLabel: l10n.documentationGuideStepsLabel,
+        steps: [
+          FeatureGuideStep(
+            number: '1',
+            title: l10n.documentationHeroStepOneTitle,
+            body: l10n.documentationHeroStepOneBody,
+          ),
+          FeatureGuideStep(
+            number: '2',
+            title: l10n.documentationHeroStepTwoTitle,
+            body: l10n.documentationHeroStepTwoBody,
+          ),
+          FeatureGuideStep(
+            number: '3',
+            title: l10n.documentationHeroStepThreeTitle,
+            body: l10n.documentationHeroStepThreeBody,
+          ),
+        ],
+        hideNextTimeLabel: l10n.documentationGuideHideNextTime,
+        dismissLabel: l10n.documentationGuideDismissAction,
+        primaryLabel: l10n.documentationGuidePrimaryAction,
+        onClose: (hideNextTime) async {
+          await _preferencesStore.setHideGuide(hideNextTime);
+        },
+      ),
+    );
+  }
+
   bool _matchesPath(_GuidePathMeta path) {
     if (_selectedSection != null && path.section != _selectedSection) {
       return false;
@@ -374,6 +506,11 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
         accent: const Color(0xFFE7F0FF),
         keywords: const [
           'cpf',
+          'passaporte',
+          'passport',
+          'dni',
+          'mercosul',
+          'mercosur',
           'registro',
           'registration',
           'registro migratorio',
@@ -402,6 +539,11 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
           'moradia',
           'vivienda',
           'housing',
+          'seguranca',
+          'seguridad',
+          'safety',
+          'bairro',
+          'neighborhood',
           'aluguel',
           'alquiler',
           'rent',
@@ -462,6 +604,11 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
           'trabalho',
           'trabajo',
           'work',
+          'mercado de trabalho',
+          'labor market',
+          'job market',
+          'salario',
+          'salary',
           'clt',
           'pj',
           'mei',
@@ -514,6 +661,51 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
           'visitor visa',
           'trabalho formal',
           'trabajo formal',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.documents,
+        icon: Icons.airplane_ticket_outlined,
+        question: l10n.documentationAnswerTravelDocQuestion,
+        answer: l10n.documentationAnswerTravelDocAnswer,
+        keywords: const [
+          'passaporte',
+          'passport',
+          'dni',
+          'documento para viajar',
+          'travel document',
+          'mercosul',
+          'mercosur',
+          'rg',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.work,
+        icon: Icons.trending_up_rounded,
+        question: l10n.documentationAnswerMarketQuestion,
+        answer: l10n.documentationAnswerMarketAnswer,
+        keywords: const [
+          'mercado de trabalho',
+          'mercado laboral',
+          'job market',
+          'renda',
+          'income',
+          'salary',
+          'salario',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.housing,
+        icon: Icons.shield_outlined,
+        question: l10n.documentationAnswerSafetyQuestion,
+        answer: l10n.documentationAnswerSafetyAnswer,
+        keywords: const [
+          'seguranca',
+          'seguridad',
+          'safety',
+          'bairro',
+          'neighborhood',
+          'cidade segura',
         ],
       ),
       _GuideQuickAnswerMeta(
@@ -639,6 +831,19 @@ List<_DocumentationTopic> _documentationTopics(BuildContext context) {
   final l10n = context.l10n;
 
   return [
+    _DocumentationTopic(
+      icon: Icons.airplane_ticket_outlined,
+      title: l10n.documentationTravelDocsTitle,
+      summary: l10n.documentationTravelDocsSummary,
+      bullets: [
+        l10n.documentationTravelDocsBulletOne,
+        l10n.documentationTravelDocsBulletTwo,
+        l10n.documentationTravelDocsBulletThree,
+      ],
+      sourceNameKey: 'argentina_migraciones',
+      sourceUrl:
+          'https://www.argentina.gob.ar/interior/migraciones/documentacion-para-salir-o-ingresar-al-pais',
+    ),
     _DocumentationTopic(
       icon: Icons.badge_outlined,
       title: l10n.documentationCpfTitle,
@@ -794,6 +999,19 @@ List<_DocumentationTopic> _documentationTopics(BuildContext context) {
           'https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/quero-ser-mei/passo-a-passo-para-se-formalizar',
     ),
     _DocumentationTopic(
+      icon: Icons.trending_up_rounded,
+      title: l10n.documentationWorkMarketTitle,
+      summary: l10n.documentationWorkMarketSummary,
+      bullets: [
+        l10n.documentationWorkMarketBulletOne,
+        l10n.documentationWorkMarketBulletTwo,
+        l10n.documentationWorkMarketBulletThree,
+      ],
+      sourceNameKey: 'ibge_pnad_continua',
+      sourceUrl:
+          'https://agenciadenoticias.ibge.gov.br/agencia-noticias/2012-agencia-de-noticias/noticias/45124-pnad-continua-taxa-de-desocupacao-e-de-5-4-e-taxa-de-subutilizacao-e-de-14-9-no-trimestre-encerrado-em-outubro',
+    ),
+    _DocumentationTopic(
       icon: Icons.savings_outlined,
       title: l10n.documentationRetirementTitle,
       summary: l10n.documentationRetirementSummary,
@@ -806,18 +1024,35 @@ List<_DocumentationTopic> _documentationTopics(BuildContext context) {
       sourceUrl:
           'https://www.gov.br/previdencia/pt-br/noticias/2026/janeiro/guia-de-aposentadoria-2026-entenda-as-regras-de-transicao-da-reforma-da-previdencia-de-2019',
     ),
+    _DocumentationTopic(
+      icon: Icons.shield_outlined,
+      title: l10n.documentationSafetyTitle,
+      summary: l10n.documentationSafetySummary,
+      bullets: [
+        l10n.documentationSafetyBulletOne,
+        l10n.documentationSafetyBulletTwo,
+        l10n.documentationSafetyBulletThree,
+      ],
+      sourceNameKey: 'forum_brasileiro_seguranca_publica',
+      sourceUrl: 'https://forumseguranca.org.br/wp-content/uploads/2025/07/anuario-2025.pdf',
+    ),
   ];
 }
 
 class DocumentationTopicPage extends StatelessWidget {
-  const DocumentationTopicPage({required this.section, super.key});
+  const DocumentationTopicPage({
+    required this.section,
+    required this.exchangeRatesService,
+    super.key,
+  });
 
   final DocumentationGuideSection section;
+  final CopilotExchangeRatesService exchangeRatesService;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final details = _sectionDetails(context, section);
+    final details = _sectionDetails(context, section, exchangeRatesService);
 
     return Scaffold(
       body: Stack(
@@ -881,6 +1116,7 @@ class DocumentationTopicPage extends StatelessWidget {
   _DocumentationSectionDetails _sectionDetails(
     BuildContext context,
     DocumentationGuideSection section,
+    CopilotExchangeRatesService exchangeRatesService,
   ) {
     final l10n = context.l10n;
     final topics = _documentationTopics(context);
@@ -897,7 +1133,8 @@ class DocumentationTopicPage extends StatelessWidget {
             const SizedBox(height: 12),
             _TopicGrid(
               topics: topics.where((topic) {
-                return topic.title == l10n.documentationCpfTitle ||
+                return topic.title == l10n.documentationTravelDocsTitle ||
+                    topic.title == l10n.documentationCpfTitle ||
                     topic.title == l10n.documentationRegistrationTitle ||
                     topic.title == l10n.documentationStayTitle ||
                     topic.title == l10n.documentationWorkBankTitle ||
@@ -910,12 +1147,18 @@ class DocumentationTopicPage extends StatelessWidget {
         return _DocumentationSectionDetails(
           title: l10n.documentationHousingArrivalSectionTitle,
           description: l10n.documentationHousingArrivalSectionBody,
-          sections: const [
-            HousingDecisionSupportSection(),
-            SizedBox(height: 12),
-            HousingEntryCostSection(),
-            SizedBox(height: 12),
-            HousingSoftLandingSection(),
+          sections: [
+            const HousingDecisionSupportSection(),
+            const SizedBox(height: 12),
+            HousingEntryCostSection(exchangeRatesService: exchangeRatesService),
+            const SizedBox(height: 12),
+            const HousingSoftLandingSection(),
+            const SizedBox(height: 12),
+            _TopicGrid(
+              topics: topics.where((topic) {
+                return topic.title == l10n.documentationSafetyTitle;
+              }).toList(),
+            ),
           ],
         );
       case DocumentationGuideSection.health:
@@ -945,6 +1188,7 @@ class DocumentationTopicPage extends StatelessWidget {
               topics: topics.where((topic) {
                 return topic.title == l10n.documentationWorkCltTitle ||
                     topic.title == l10n.documentationWorkPjTitle ||
+                    topic.title == l10n.documentationWorkMarketTitle ||
                     topic.title == l10n.documentationRetirementTitle;
               }).toList(),
             ),
@@ -969,7 +1213,9 @@ class DocumentationTopicPage extends StatelessWidget {
         return _DocumentationSectionDetails(
           title: l10n.documentationPathCostsTitle,
           description: l10n.documentationPathCostsBody,
-          sections: const [PracticalCostEstimator()],
+          sections: [
+            PracticalCostEstimator(exchangeRatesService: exchangeRatesService),
+          ],
         );
     }
   }
@@ -1011,6 +1257,30 @@ class _QuickAnswersSection extends StatelessWidget {
                 icon: Icons.work_outline_rounded,
                 question: l10n.documentationAnswerWorkQuestion,
                 answer: l10n.documentationAnswerWorkAnswer,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: _QuickAnswerCard(
+                icon: Icons.airplane_ticket_outlined,
+                question: l10n.documentationAnswerTravelDocQuestion,
+                answer: l10n.documentationAnswerTravelDocAnswer,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: _QuickAnswerCard(
+                icon: Icons.trending_up_rounded,
+                question: l10n.documentationAnswerMarketQuestion,
+                answer: l10n.documentationAnswerMarketAnswer,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: _QuickAnswerCard(
+                icon: Icons.shield_outlined,
+                question: l10n.documentationAnswerSafetyQuestion,
+                answer: l10n.documentationAnswerSafetyAnswer,
               ),
             ),
             SizedBox(
@@ -1154,9 +1424,9 @@ class _GuideSearchField extends StatelessWidget {
           ).textTheme.bodyLarge?.copyWith(color: textPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: textSoft,
-            ),
+            hintStyle: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: textSoft),
             prefixIcon: Icon(Icons.search_rounded, color: textPrimary),
             suffixIcon: onClear == null
                 ? null
@@ -1197,9 +1467,9 @@ class _GuideSearchField extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           helper,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: textSoft,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: textSoft),
         ),
       ],
     );
@@ -1252,9 +1522,9 @@ class _SearchMatchPanel extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             l10n.documentationSearchResultsHint,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: textSoft,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: textSoft),
           ),
           if (visibleResults.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -1334,9 +1604,9 @@ class _SearchResultTile extends StatelessWidget {
                       result.subtitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: textSoft,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: textSoft),
                     ),
                   ],
                 ),
@@ -1547,6 +1817,11 @@ class _GuideResultsSection extends StatelessWidget {
           ),
           if (filteredAnswers.isNotEmpty) ...[
             const SizedBox(height: 18),
+            _ResultsSubsectionHeader(
+              title: l10n.documentationQuickAnswersTitle,
+              body: l10n.documentationQuickAnswersBody,
+            ),
+            const SizedBox(height: 14),
             LayoutBuilder(
               builder: (context, constraints) {
                 final wide = constraints.maxWidth >= 980;
@@ -1573,7 +1848,12 @@ class _GuideResultsSection extends StatelessWidget {
             ),
           ],
           if (filteredPaths.isNotEmpty) ...[
-            const SizedBox(height: 18),
+            SizedBox(height: filteredAnswers.isNotEmpty ? 24 : 18),
+            _ResultsSubsectionHeader(
+              title: l10n.documentationQuickRoutesTitle,
+              body: l10n.documentationQuickRoutesBody,
+            ),
+            const SizedBox(height: 14),
             LayoutBuilder(
               builder: (context, constraints) {
                 final wide = constraints.maxWidth >= 980;
@@ -1606,6 +1886,105 @@ class _GuideResultsSection extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _ResultsSubsectionHeader extends StatelessWidget {
+  const _ResultsSubsectionHeader({required this.title, required this.body});
+
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: AppColors.textPrimaryFor(context),
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          body,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppColors.textSoftFor(context),
+            height: 1.35,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ScrollHintOverlay extends StatelessWidget {
+  const _ScrollHintOverlay({
+    required this.visible,
+    required this.label,
+    required this.onTap,
+  });
+
+  final bool visible;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: !visible,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 180),
+          opacity: visible ? 1 : 0,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: GestureDetector(
+              onTap: onTap,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.isDark(context)
+                      ? const Color(0xE6152232)
+                      : const Color(0xF9FFFFFF),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.10),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimaryFor(context),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

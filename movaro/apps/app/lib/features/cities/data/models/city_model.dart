@@ -1,3 +1,4 @@
+import 'package:movaro_app/features/cities/data/models/city_public_opinion_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_scores_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_sources_model.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
@@ -29,6 +30,7 @@ class CityModel {
     required this.sources,
     required this.updatedAt,
     required this.regionName,
+    this.publicOpinion,
   });
 
   factory CityModel.fromJson(Map<String, dynamic> json) {
@@ -66,6 +68,11 @@ class CityModel {
       ),
       updatedAt: json['updatedAt'] as String,
       regionName: json['regionName'] as String?,
+      publicOpinion: json['publicOpinion'] == null
+          ? null
+          : CityPublicOpinionModel.fromJson(
+              json['publicOpinion'] as Map<String, dynamic>,
+            ),
     );
   }
 
@@ -94,6 +101,7 @@ class CityModel {
   final CitySourcesModel sources;
   final String updatedAt;
   final String? regionName;
+  final CityPublicOpinionModel? publicOpinion;
 
   factory CityModel.fromEntity(City city) {
     return CityModel(
@@ -122,6 +130,9 @@ class CityModel {
       sources: CitySourcesModel.fromEntity(city.sources),
       updatedAt: city.updatedAt,
       regionName: city.regionName,
+      publicOpinion: city.publicOpinion == null
+          ? null
+          : CityPublicOpinionModel.fromEntity(city.publicOpinion!),
     );
   }
 
@@ -151,6 +162,7 @@ class CityModel {
     'sources': sources.toJson(),
     'updatedAt': updatedAt,
     'regionName': regionName,
+    'publicOpinion': publicOpinion?.toJson(),
   };
 
   City toEntity() => City(
@@ -179,5 +191,6 @@ class CityModel {
     sources: sources.toEntity(),
     updatedAt: updatedAt,
     regionName: regionName,
+    publicOpinion: publicOpinion?.toEntity(),
   );
 }

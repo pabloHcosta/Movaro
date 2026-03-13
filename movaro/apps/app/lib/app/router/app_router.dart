@@ -176,12 +176,23 @@ class AppRouter {
           ),
         );
       case AppRoutes.documentationGuide:
-        return _buildRoute(settings, const DocumentationGuidePage());
+        return _buildRoute(
+          settings,
+          DocumentationGuidePage(
+            exchangeRatesService: copilotExchangeRatesService,
+          ),
+        );
       case AppRoutes.documentationTopic:
         final section = settings.arguments is DocumentationGuideSection
             ? settings.arguments! as DocumentationGuideSection
             : DocumentationGuideSection.documents;
-        return _buildRoute(settings, DocumentationTopicPage(section: section));
+        return _buildRoute(
+          settings,
+          DocumentationTopicPage(
+            section: section,
+            exchangeRatesService: copilotExchangeRatesService,
+          ),
+        );
       case AppRoutes.cities:
         unawaited(citiesController.prefetchExplore());
         return _buildRoute(

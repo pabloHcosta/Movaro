@@ -8,6 +8,7 @@ class CitySourcesModel {
     required this.humanDevelopment,
     required this.curatedMetrics,
     required this.ranking,
+    this.publicReviews,
   });
 
   factory CitySourcesModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +28,11 @@ class CitySourcesModel {
       ranking: CitySourceModel.fromJson(
         json['ranking'] as Map<String, dynamic>,
       ),
+      publicReviews: json['publicReviews'] == null
+          ? null
+          : CitySourceModel.fromJson(
+              json['publicReviews'] as Map<String, dynamic>,
+            ),
     );
   }
 
@@ -35,6 +41,7 @@ class CitySourcesModel {
   final CitySourceModel humanDevelopment;
   final CitySourceModel curatedMetrics;
   final CitySourceModel ranking;
+  final CitySourceModel? publicReviews;
 
   factory CitySourcesModel.fromEntity(CitySources sources) {
     return CitySourcesModel(
@@ -45,6 +52,9 @@ class CitySourcesModel {
       humanDevelopment: CitySourceModel.fromEntity(sources.humanDevelopment),
       curatedMetrics: CitySourceModel.fromEntity(sources.curatedMetrics),
       ranking: CitySourceModel.fromEntity(sources.ranking),
+      publicReviews: sources.publicReviews == null
+          ? null
+          : CitySourceModel.fromEntity(sources.publicReviews!),
     );
   }
 
@@ -54,6 +64,7 @@ class CitySourcesModel {
     'humanDevelopment': humanDevelopment.toJson(),
     'curatedMetrics': curatedMetrics.toJson(),
     'ranking': ranking.toJson(),
+    'publicReviews': publicReviews?.toJson(),
   };
 
   CitySources toEntity() => CitySources(
@@ -62,5 +73,6 @@ class CitySourcesModel {
     humanDevelopment: humanDevelopment.toEntity(),
     curatedMetrics: curatedMetrics.toEntity(),
     ranking: ranking.toEntity(),
+    publicReviews: publicReviews?.toEntity(),
   );
 }

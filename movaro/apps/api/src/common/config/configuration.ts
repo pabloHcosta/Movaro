@@ -32,8 +32,12 @@ export default (): AppConfiguration => ({
       null,
     configured: Boolean(
       process.env.SUPABASE_URL?.trim() &&
-          (process.env.SUPABASE_SECRET_KEY?.trim() ||
-              process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()),
+      (process.env.SUPABASE_SECRET_KEY?.trim() ||
+        process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()),
     ),
+  },
+  googlePlaces: {
+    apiKey: process.env.GOOGLE_PLACES_API_KEY?.trim() || null,
+    configured: Boolean(process.env.GOOGLE_PLACES_API_KEY?.trim()),
   },
 });

@@ -16,8 +16,10 @@ import 'package:movaro_app/features/cities/application/services/city_coastal_pro
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_map_card.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_metric_insight_sheet.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_public_opinion_section.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_snapshot_tile.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_sources_section.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_weather_badge.dart';
@@ -176,7 +178,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                 overlayOpacity: 0.8,
                                 child: LayoutBuilder(
                                   builder: (context, constraints) {
-                                    final compactHero = constraints.maxWidth < 760;
+                                    final compactHero =
+                                        constraints.maxWidth < 760;
 
                                     return Column(
                                       crossAxisAlignment:
@@ -237,7 +240,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                             ),
                                             const SizedBox(width: 16),
                                             _HeroIconButton(
-                                              icon: widget.citiesController
+                                              icon:
+                                                  widget.citiesController
                                                       .isFavorite(city.id)
                                                   ? Icons.favorite_rounded
                                                   : Icons
@@ -265,7 +269,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                               prominent: true,
                                             ),
                                             _HeroActionPill(
-                                              icon: Icons.travel_explore_rounded,
+                                              icon:
+                                                  Icons.travel_explore_rounded,
                                               label:
                                                   l10n.cityDetailDiscoverAction,
                                               onTap: () =>
@@ -318,12 +323,13 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                             ),
                                             _TrustChip(
                                               icon: Icons.schedule_rounded,
-                                              label: l10n.cityDetailUpdatedLabel(
-                                                _formatUpdatedAt(
-                                                  context,
-                                                  city.updatedAt,
-                                                ),
-                                              ),
+                                              label: l10n
+                                                  .cityDetailUpdatedLabel(
+                                                    _formatUpdatedAt(
+                                                      context,
+                                                      city.updatedAt,
+                                                    ),
+                                                  ),
                                             ),
                                             _TrustChip(
                                               icon: Icons.verified_outlined,
@@ -366,6 +372,15 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                   _openCityGoogleOverview(city),
                             ),
                           ),
+                          if (city.publicOpinion != null) ...[
+                            const SizedBox(height: 16),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 1160),
+                              child: CityPublicOpinionSection(
+                                opinion: city.publicOpinion!,
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 16),
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 1160),
@@ -721,9 +736,7 @@ class _TrustChip extends StatelessWidget {
           Flexible(
             child: Text(
               label,
-              style: Theme.of(
-                context,
-              ).textTheme.labelMedium?.copyWith(
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
                 color: isDark ? Colors.white : const Color(0xFF183A70),
               ),
             ),
@@ -890,9 +903,7 @@ class _LifestyleBadge extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelLarge?.copyWith(
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
               color: isDark ? Colors.white : const Color(0xFF183A70),
             ),
           ),
@@ -1025,32 +1036,15 @@ class _EssentialsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth >= 1080
-            ? 4
-            : constraints.maxWidth >= 680
-            ? 2
-            : 1;
-        final items = _buildItems(context);
-        final mainAxisExtent = crossAxisCount == 4
-            ? 132.0
-            : crossAxisCount == 2
-            ? 140.0
-            : 116.0;
+    final items = _buildItems(context);
 
-        return GridView(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            mainAxisExtent: mainAxisExtent,
-          ),
-          children: items,
-        );
-      },
+    return Column(
+      children: [
+        for (var index = 0; index < items.length; index++) ...[
+          items[index],
+          if (index != items.length - 1) const SizedBox(height: 12),
+        ],
+      ],
     );
   }
 
@@ -1065,6 +1059,11 @@ class _EssentialsGrid extends StatelessWidget {
             rentScore: city.rentScore,
           ),
           icon: Icons.home_work_outlined,
+          onTap: () => showCityMetricInsightSheet(
+            context,
+            city: city,
+            topic: CityMetricInsightTopic.housing,
+          ),
         ),
       ),
       (
@@ -1075,6 +1074,11 @@ class _EssentialsGrid extends StatelessWidget {
             context,
             kind: CityMetricKind.safety,
             value: city.safetyScore,
+          ),
+          onTap: () => showCityMetricInsightSheet(
+            context,
+            city: city,
+            topic: CityMetricInsightTopic.safety,
           ),
         ),
       ),
@@ -1087,6 +1091,11 @@ class _EssentialsGrid extends StatelessWidget {
             kind: CityMetricKind.work,
             value: city.movaroScores.workOpportunity,
           ),
+          onTap: () => showCityMetricInsightSheet(
+            context,
+            city: city,
+            topic: CityMetricInsightTopic.work,
+          ),
         ),
       ),
       (
@@ -1097,6 +1106,11 @@ class _EssentialsGrid extends StatelessWidget {
             context,
             kind: CityMetricKind.language,
             value: city.movaroScores.languageAdaptation,
+          ),
+          onTap: () => showCityMetricInsightSheet(
+            context,
+            city: city,
+            topic: CityMetricInsightTopic.language,
           ),
         ),
       ),
@@ -1179,11 +1193,13 @@ class _EssentialMetricTile extends StatelessWidget {
   const _EssentialMetricTile({
     required this.label,
     required this.presentation,
+    required this.onTap,
     this.icon,
   });
 
   final String label;
   final dynamic presentation;
+  final VoidCallback onTap;
   final IconData? icon;
 
   @override
@@ -1192,77 +1208,188 @@ class _EssentialMetricTile extends StatelessWidget {
     final tint = presentation.tint as Color;
     final background = presentation.background as Color;
     final headline = presentation.headline as String;
-    final supporting = presentation.supporting as String;
-    final isCompact = MediaQuery.sizeOf(context).width >= 680;
+    final hintColor = AppColors.isDark(context)
+        ? Colors.white.withValues(alpha: 0.08)
+        : tint.withValues(alpha: 0.10);
+    final cardGradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color.alphaBlend(tint.withValues(alpha: 0.16), background),
+        background,
+        Color.alphaBlend(tint.withValues(alpha: 0.07), background),
+      ],
+      stops: const [0, 0.45, 1],
+    );
 
-    return FrostedPanel(
-      backgroundColor: background,
-      borderColor: tint.withValues(alpha: 0.14),
-      padding: EdgeInsets.fromLTRB(
-        isCompact ? 14 : 13,
-        isCompact ? 12 : 11,
-        isCompact ? 14 : 13,
-        isCompact ? 12 : 11,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: isCompact ? 34 : 32,
-                height: isCompact ? 34 : 32,
-                decoration: BoxDecoration(
-                  color: tint.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(11),
+    return Semantics(
+      button: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: onTap,
+          child: Ink(
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
+            child: FrostedPanel(
+              backgroundColor: background,
+              gradient: cardGradient,
+              borderColor: tint.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: tint.withValues(
+                    alpha: AppColors.isDark(context) ? 0.12 : 0.10,
+                  ),
+                  blurRadius: 28,
+                  offset: const Offset(0, 16),
                 ),
-                child: Icon(
-                  resolvedIcon,
-                  color: tint,
-                  size: isCompact ? 18 : 17,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: AppColors.textSoftFor(context),
-                        fontWeight: FontWeight.w700,
+              ],
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: -34,
+                    right: -12,
+                    child: IgnorePointer(
+                      child: Container(
+                        width: 108,
+                        height: 108,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              tint.withValues(alpha: 0.22),
+                              tint.withValues(alpha: 0.05),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      headline,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: tint,
+                  ),
+                  Positioned(
+                    bottom: -52,
+                    left: -28,
+                    child: IgnorePointer(
+                      child: Container(
+                        width: 124,
+                        height: 124,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              Colors.white.withValues(
+                                alpha: AppColors.isDark(context) ? 0.06 : 0.24,
+                              ),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: tint.withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: tint.withValues(alpha: 0.18),
+                              ),
+                            ),
+                            child: Icon(resolvedIcon, color: tint, size: 20),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  label,
+                                  style: Theme.of(context).textTheme.labelLarge
+                                      ?.copyWith(
+                                        color: AppColors.textSoftFor(context),
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  headline,
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w900,
+                                        color: tint,
+                                        height: 1.05,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: hintColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.chevron_right_rounded,
+                              color: tint.withValues(alpha: 0.92),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: hintColor,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: tint.withValues(alpha: 0.12),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.insights_rounded,
+                              size: 16,
+                              color: tint.withValues(alpha: 0.9),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                context.l10n.cityMetricInsightTapHint,
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: AppColors.textSoftFor(context),
+                                      height: 1.25,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
-          const Spacer(),
-          Text(
-            supporting,
-            maxLines: isCompact ? 2 : 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.25,
             ),
           ),
-        ],
+        ),
       ),
     );
   }

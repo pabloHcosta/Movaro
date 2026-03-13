@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { GooglePlacesCityOpinionService } from '../../../../integrations/google/google-places-city-opinion.service';
 import { IbgeLocalitiesService } from '../../../../integrations/ibge/ibge-localities.service';
 import { CityMetricsModel } from '../../data/models/city-metrics.model';
 import { CityCardEntity } from '../../domain/entities/city-card.entity';
@@ -12,6 +13,7 @@ export class CityMergeService {
   constructor(
     private readonly ibgeLocalitiesService: IbgeLocalitiesService,
     private readonly cityRankingService: CityRankingService,
+    private readonly googlePlacesCityOpinionService: GooglePlacesCityOpinionService,
   ) {}
 
   async merge(metrics: CityMetricsModel): Promise<CityCardEntity> {
@@ -23,13 +25,36 @@ export class CityMergeService {
       this.cityRankingService.buildRecommendationReasons(metrics, scores);
     const officialName =
       ibgeData.officialName?.trim() || metrics.displayName || metrics.name;
-    const stateCode = ibgeData.stateCode?.trim() || this.inferStateCode(metrics.id);
+    const stateCode =
+      ibgeData.stateCode?.trim() || this.inferStateCode(metrics.id);
     const stateName =
       ibgeData.stateName?.trim() || this.stateNameFromCode(stateCode);
     const sources = this.buildSources({
       stateCode,
       officialName,
     });
+    const publicOpinion =
+      await this.googlePlacesCityOpinionService.getCityOpinion(
+        metrics,
+        stateName,
+      );
+    const sourcesWithOpinion = publicOpinion
+      ? new CitySourcesEntity(
+          sources.territorialIdentity,
+          sources.population,
+          sources.humanDevelopment,
+          sources.curatedMetrics,
+          sources.ranking,
+          new CitySourceEntity(
+            'public_reviews',
+            'Percepcao publica',
+            'Google Maps',
+            'Leitura automatica de temas recorrentes em avaliacoes publicas da localidade. Nao representa a opiniao de toda a cidade.',
+            false,
+            publicOpinion.placeUrl,
+          ),
+        )
+      : sources;
 
     return new CityCardEntity(
       metrics.id,
@@ -54,9 +79,10 @@ export class CityMergeService {
       metrics.topIndustries,
       scores,
       recommendationReasons,
-      sources,
+      sourcesWithOpinion,
       metrics.updatedAt,
       ibgeData.regionName,
+      publicOpinion,
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/landing_budget_estimator.dart';
@@ -181,15 +182,15 @@ class _ScenarioCard extends StatelessWidget {
     };
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).toString();
-    final total30 = _formatCurrency(
-      locale,
-      'BRL',
-      scenario.breakdown.total30DaysBrl,
+    final total30 = MultiCurrencyAmount.formatCurrency(
+      locale: locale,
+      currencyCode: 'BRL',
+      amount: scenario.breakdown.total30DaysBrl,
     );
-    final total90 = _formatCurrency(
-      locale,
-      'BRL',
-      scenario.breakdown.total90DaysBrl,
+    final total90 = MultiCurrencyAmount.formatCurrency(
+      locale: locale,
+      currencyCode: 'BRL',
+      amount: scenario.breakdown.total90DaysBrl,
     );
 
     return FrostedPanel(
@@ -228,29 +229,11 @@ class _ScenarioCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          if (exchangeRates != null)
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _AmountChip(label: total30),
-                _AmountChip(
-                  label: _formatCurrency(
-                    'en_US',
-                    'USD',
-                    scenario.breakdown.total30DaysBrl * exchangeRates!.brlToUsd,
-                  ),
-                ),
-                _AmountChip(
-                  label: _formatCurrency(
-                    'es_AR',
-                    'ARS',
-                    scenario.breakdown.total30DaysBrl * exchangeRates!.brlToArs,
-                  ),
-                ),
-              ],
-            ),
-          if (exchangeRates != null) const SizedBox(height: 10),
+          MultiCurrencyAmount(
+            amountInBrl: scenario.breakdown.total30DaysBrl,
+            exchangeRates: exchangeRates,
+          ),
+          const SizedBox(height: 10),
           Text(
             description,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -261,19 +244,18 @@ class _ScenarioCard extends StatelessWidget {
           const SizedBox(height: 16),
           _BudgetLine(
             label: l10n.landingBudgetMonthlyBaseLabel,
-            value: _formatCurrency(
-              locale,
-              'BRL',
-              scenario.breakdown.monthlyBaseBrl,
-            ),
+            amountInBrl: scenario.breakdown.monthlyBaseBrl,
+            exchangeRates: exchangeRates,
           ),
           _BudgetLine(
             label: l10n.landingBudgetSetupLabel,
-            value: _formatCurrency(locale, 'BRL', scenario.breakdown.setupBrl),
+            amountInBrl: scenario.breakdown.setupBrl,
+            exchangeRates: exchangeRates,
           ),
           _BudgetLine(
             label: l10n.landingBudgetBufferLabel,
-            value: _formatCurrency(locale, 'BRL', scenario.breakdown.bufferBrl),
+            amountInBrl: scenario.breakdown.bufferBrl,
+            exchangeRates: exchangeRates,
           ),
           const SizedBox(height: 12),
           Container(
@@ -302,51 +284,18 @@ class _ScenarioCard extends StatelessWidget {
       ),
     );
   }
-
-  String _formatCurrency(String locale, String currencyCode, num amount) {
-    final formatter = NumberFormat.currency(
-      locale: locale,
-      name: currencyCode,
-      symbol: currencyCode == 'USD'
-          ? 'US\$'
-          : currencyCode == 'ARS'
-          ? 'AR\$'
-          : 'R\$',
-      decimalDigits: currencyCode == 'BRL' ? 0 : 2,
-    );
-
-    return formatter.format(amount);
-  }
-}
-
-class _AmountChip extends StatelessWidget {
-  const _AmountChip({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMutedFor(context),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: AppColors.textPrimaryFor(context),
-        ),
-      ),
-    );
-  }
 }
 
 class _BudgetLine extends StatelessWidget {
-  const _BudgetLine({required this.label, required this.value});
+  const _BudgetLine({
+    required this.label,
+    required this.amountInBrl,
+    required this.exchangeRates,
+  });
 
   final String label;
-  final String value;
+  final num amountInBrl;
+  final CopilotExchangeRates? exchangeRates;
 
   @override
   Widget build(BuildContext context) {
@@ -363,11 +312,16 @@ class _BudgetLine extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textPrimaryFor(context),
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: MultiCurrencyAmount(
+                amountInBrl: amountInBrl,
+                exchangeRates: exchangeRates,
+                compact: true,
+                wrapSpacing: 6,
+                runSpacing: 6,
+              ),
             ),
           ),
         ],

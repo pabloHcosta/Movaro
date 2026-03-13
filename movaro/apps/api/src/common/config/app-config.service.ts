@@ -65,4 +65,12 @@ export class AppConfigService {
   get isSupabaseConfigured(): boolean {
     return this.config.supabase.configured;
   }
+
+  get googlePlacesApiKey(): string | null {
+    return this.config.googlePlaces.apiKey;
+  }
+
+  get isGooglePlacesConfigured(): boolean {
+    return this.config.googlePlaces.configured;
+  }
 }

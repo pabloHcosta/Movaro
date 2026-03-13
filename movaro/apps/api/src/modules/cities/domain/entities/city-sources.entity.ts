@@ -7,5 +7,6 @@ export class CitySourcesEntity {
     public readonly humanDevelopment: CitySourceEntity,
     public readonly curatedMetrics: CitySourceEntity,
     public readonly ranking: CitySourceEntity,
+    public readonly publicReviews: CitySourceEntity | null = null,
   ) {}
 }

@@ -1,4 +1,5 @@
 import 'package:movaro_app/features/cities/domain/entities/city_scores.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_public_opinion.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_sources.dart';
 
 class City {
@@ -28,6 +29,7 @@ class City {
     required this.sources,
     required this.updatedAt,
     required this.regionName,
+    this.publicOpinion,
   });
 
   final String id;
@@ -55,4 +57,5 @@ class City {
   final CitySources sources;
   final String updatedAt;
   final String? regionName;
+  final CityPublicOpinion? publicOpinion;
 }

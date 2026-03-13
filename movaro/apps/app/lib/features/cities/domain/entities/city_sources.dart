@@ -7,6 +7,7 @@ class CitySources {
     required this.humanDevelopment,
     required this.curatedMetrics,
     required this.ranking,
+    this.publicReviews,
   });
 
   final CitySource territorialIdentity;
@@ -14,6 +15,7 @@ class CitySources {
   final CitySource humanDevelopment;
   final CitySource curatedMetrics;
   final CitySource ranking;
+  final CitySource? publicReviews;
 
   List<CitySource> get all => [
     territorialIdentity,
@@ -21,5 +23,6 @@ class CitySources {
     humanDevelopment,
     curatedMetrics,
     ranking,
+    ?publicReviews,
   ];
 }

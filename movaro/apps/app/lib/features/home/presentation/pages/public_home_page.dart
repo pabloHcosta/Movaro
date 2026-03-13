@@ -3,7 +3,6 @@ import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/localization/language_selector_button.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/catalog/domain/entities/catalog_country.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/journey/journey_country_metadata.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
@@ -111,24 +110,8 @@ class _LandingHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final width = MediaQuery.sizeOf(context).width;
-    final stacked = width < 920;
     final origin = journeyContextController.selectedOrigin;
     final destination = journeyContextController.selectedDestination;
-
-    final primary = _PrimaryIntroBlock(
-      origin: origin,
-      destination: destination,
-      title: l10n.publicHomeFirstStepTitle,
-      body: origin != null && destination != null
-          ? l10n.publicHomeSelectedJourneyDescription(
-              origin.name,
-              destination.name,
-            )
-          : l10n.publicHomeFirstStepBody,
-      onRestartJourney: onRestartJourney,
-    );
 
     final actions = _ActionStage(
       migrationQuestionnaireController: migrationQuestionnaireController,
@@ -137,95 +120,13 @@ class _LandingHero extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        FrostedPanel(
-          padding: EdgeInsets.all(stacked ? 22 : 26),
-          backgroundColor: const Color(0xB30B1320),
-          borderColor: Colors.white.withValues(alpha: 0.12),
-          gradient: const LinearGradient(
-            colors: [
-              AppColors.heroStart,
-              AppColors.heroMiddle,
-              AppColors.heroEnd,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          child: stacked
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [primary, const SizedBox(height: 18), actions],
-                )
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(flex: 11, child: primary),
-                    const SizedBox(width: 22),
-                    Expanded(flex: 12, child: actions),
-                  ],
-                ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PrimaryIntroBlock extends StatelessWidget {
-  const _PrimaryIntroBlock({
-    required this.origin,
-    required this.destination,
-    required this.title,
-    required this.body,
-    required this.onRestartJourney,
-  });
-
-  final CatalogCountry? origin;
-  final CatalogCountry? destination;
-  final String title;
-  final String body;
-  final Future<void> Function() onRestartJourney;
-
-  @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final compact = width < 760;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
         _RoutePlate(
           originEmoji: origin?.flagEmoji ?? '🇦🇷',
-          originName: origin?.name ?? 'Argentina',
           destinationEmoji: destination?.flagEmoji ?? '🇧🇷',
-          destinationName: destination?.name ?? 'Brasil',
           onRestartJourney: onRestartJourney,
         ),
         const SizedBox(height: 18),
-        Text(
-          title,
-          style:
-              (compact
-                      ? Theme.of(context).textTheme.headlineMedium
-                      : Theme.of(context).textTheme.displaySmall)
-                  ?.copyWith(
-                    color: Colors.white,
-                    letterSpacing: compact ? -0.7 : -1.1,
-                    height: 0.92,
-                    fontWeight: FontWeight.w700,
-                  ),
-        ),
-        const SizedBox(height: 8),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: Text(
-            body,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withValues(alpha: 0.82),
-              height: 1.34,
-            ),
-          ),
-        ),
+        actions,
       ],
     );
   }
@@ -347,11 +248,7 @@ class _ActionStage extends StatelessWidget {
           Expanded(
             flex: 7,
             child: Column(
-              children: [
-                citiesCard,
-                const SizedBox(height: 12),
-                questionsCard,
-              ],
+              children: [citiesCard, const SizedBox(height: 12), questionsCard],
             ),
           ),
         ],
@@ -440,9 +337,11 @@ class _VisualActionCard extends StatelessWidget {
         secondaryActionLabel != null && onSecondaryTap != null;
     final fixedHeight = isPrimary
         ? compact
-              ? (hasSecondaryAction ? 252.0 : 226.0)
-              : (hasSecondaryAction ? 264.0 : 244.0)
-        : 148.0;
+              ? (hasSecondaryAction ? 278.0 : 236.0)
+              : (hasSecondaryAction ? 288.0 : 246.0)
+        : compact
+        ? 168.0
+        : 180.0;
 
     return Material(
       color: Colors.transparent,
@@ -452,98 +351,123 @@ class _VisualActionCard extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             gradient: cardGradient,
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(32),
             border: Border.all(
               color: isDark
                   ? borderColor
                   : Colors.white.withValues(alpha: isPrimary ? 0.48 : 0.28),
             ),
-            boxShadow: subdued
-                ? [
-                    BoxShadow(
-                      color: (isDark ? Colors.black : AppColors.primary)
-                          .withValues(alpha: isDark ? 0.12 : 0.05),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                : AppColors.frostedShadowFor(context),
+            boxShadow: [
+              BoxShadow(
+                color: (isDark ? Colors.black : accent).withValues(
+                  alpha: isPrimary
+                      ? (isDark ? 0.24 : 0.12)
+                      : (isDark ? 0.14 : 0.08),
+                ),
+                blurRadius: isPrimary ? 24 : 18,
+                offset: const Offset(0, 12),
+              ),
+            ],
           ),
           child: SizedBox(
             height: fixedHeight,
-            child: Stack(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Positioned(
-                  right: isPrimary ? -18 : -16,
-                  bottom: isPrimary ? -18 : -14,
-                  width: isPrimary ? (compact ? 132 : 168) : 120,
-                  height: isPrimary ? (compact ? 112 : 138) : 96,
-                  child: IgnorePointer(
-                    child: Opacity(
-                      opacity: isDark ? 0.06 : (subdued ? 0.11 : 0.09),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(28),
-                        child: scene,
-                      ),
-                    ),
+                Container(
+                  width: 4,
+                  margin: const EdgeInsets.symmetric(vertical: 18),
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: isDark ? 0.72 : 0.50),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
-                Positioned(
-                  top: 18,
-                  right: 18,
-                  child: Container(
-                    width: compact ? 38 : 44,
-                    height: compact ? 38 : 44,
-                    decoration: BoxDecoration(
-                      color: accent.withValues(
-                        alpha: isDark ? 0.16 : (subdued ? 0.07 : 0.10),
-                      ),
-                      borderRadius: BorderRadius.circular(14),
+                Expanded(
+                  flex: isPrimary ? 10 : 9,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      compact ? 14 : 18,
+                      compact ? 16 : 18,
+                      compact ? 12 : 14,
+                      compact ? 16 : 18,
                     ),
-                    child: Icon(icon, color: accent, size: compact ? 20 : 22),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    compact ? 16 : 20,
-                    compact ? 15 : 18,
-                    compact ? 16 : 20,
-                    compact ? 14 : 16,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Spacer(),
-                      if (statusLine != null) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: accent.withValues(
-                              alpha: isDark ? 0.10 : 0.06,
-                            ),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            statusLine!,
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  color: isDark
-                                      ? Colors.white
-                                      : AppColors.textPrimaryFor(context),
-                                  fontWeight: FontWeight.w700,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: compact ? 48 : 56,
+                              height: compact ? 48 : 56,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    accent.withValues(
+                                      alpha: isDark ? 0.24 : 0.16,
+                                    ),
+                                    accent.withValues(
+                                      alpha: isDark ? 0.14 : 0.08,
+                                    ),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
-                          ),
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: accent.withValues(
+                                    alpha: isDark ? 0.22 : 0.12,
+                                  ),
+                                ),
+                              ),
+                              child: Icon(
+                                icon,
+                                color: accent,
+                                size: compact ? 24 : 28,
+                              ),
+                            ),
+                            if (statusLine != null) ...[
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: accent.withValues(
+                                        alpha: isDark ? 0.10 : 0.06,
+                                      ),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      statusLine!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(
+                                            color: isDark
+                                                ? Colors.white
+                                                : AppColors.textPrimaryFor(
+                                                    context,
+                                                  ),
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                      ],
-                      SizedBox(
-                        width: compact ? 210 : (isPrimary ? 280 : 220),
-                        child: Text(
+                        const SizedBox(height: 12),
+                        Text(
                           title,
-                          maxLines: compact ? 2 : 2,
+                          maxLines: isPrimary ? 2 : 3,
                           overflow: TextOverflow.ellipsis,
                           style:
                               (compact
@@ -557,54 +481,50 @@ class _VisualActionCard extends StatelessWidget {
                                               ).textTheme.titleMedium))
                                   ?.copyWith(
                                     color: textPrimary,
-                                    height: 1.0,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: -0.2,
+                                    height: 0.98,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.3,
                                   ),
                         ),
-                      ),
-                      const SizedBox(height: 5),
-                      SizedBox(
-                        width: compact ? 240 : (isPrimary ? 330 : 230),
-                        child: Text(
+                        const SizedBox(height: 8),
+                        Text(
                           description,
-                          maxLines: compact ? 2 : 2,
+                          maxLines: isPrimary ? 3 : 2,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: textSoft, height: 1.22),
-                        ),
-                      ),
-                      if (secondaryActionLabel != null &&
-                          onSecondaryTap != null) ...[
-                        const SizedBox(height: 12),
-                        _SecondaryInlineAction(
-                          label: secondaryActionLabel!,
-                          onTap: onSecondaryTap!,
-                          isPrimary: isPrimary,
-                          compact: compact,
+                              ?.copyWith(color: textSoft, height: 1.30),
                         ),
                         const SizedBox(height: 12),
-                      ] else
-                        const SizedBox(height: 14),
-                      if (!hidePrimaryAction && isPrimary)
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: compact ? 12 : 14,
-                            vertical: compact ? 10 : 12,
+                        _CardCueRow(accent: accent, compact: compact),
+                        const Spacer(),
+                        if (secondaryActionLabel != null &&
+                            onSecondaryTap != null) ...[
+                          _SecondaryInlineAction(
+                            label: secondaryActionLabel!,
+                            onTap: onSecondaryTap!,
+                            isPrimary: isPrimary,
+                            compact: compact,
                           ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(
-                              alpha: isDark ? 0.12 : 0.08,
+                          const SizedBox(height: 12),
+                        ] else
+                          const SizedBox(height: 8),
+                        if (!hidePrimaryAction && isPrimary)
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: compact ? 12 : 14,
+                              vertical: compact ? 10 : 12,
                             ),
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(
+                            decoration: BoxDecoration(
                               color: AppColors.primary.withValues(
-                                alpha: isDark ? 0.18 : 0.12,
+                                alpha: isDark ? 0.12 : 0.08,
+                              ),
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: AppColors.primary.withValues(
+                                  alpha: isDark ? 0.18 : 0.12,
+                                ),
                               ),
                             ),
-                          ),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
                             child: Row(
                               children: [
                                 Expanded(
@@ -612,7 +532,9 @@ class _VisualActionCard extends StatelessWidget {
                                     actionLabel,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: Theme.of(context).textTheme.labelLarge
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
                                         ?.copyWith(
                                           color: AppColors.primary,
                                           fontWeight: FontWeight.w700,
@@ -628,33 +550,60 @@ class _VisualActionCard extends StatelessWidget {
                                 ),
                               ],
                             ),
-                          ),
-                        )
-                      else if (!hidePrimaryAction)
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                actionLabel,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.labelLarge
-                                    ?.copyWith(
-                                      color: accent,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.0,
-                                    ),
+                          )
+                        else if (!hidePrimaryAction)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  actionLabel,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.labelLarge
+                                      ?.copyWith(
+                                        color: accent,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.0,
+                                      ),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              Icons.arrow_outward_rounded,
-                              size: compact ? 18 : 20,
-                              color: accent,
-                            ),
-                          ],
-                        ),
-                    ],
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.arrow_outward_rounded,
+                                size: compact ? 18 : 20,
+                                color: accent,
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                Container(
+                  width: isPrimary ? (compact ? 132 : 188) : (compact ? 112 : 128),
+                  margin: EdgeInsets.fromLTRB(
+                    0,
+                    compact ? 14 : 16,
+                    compact ? 10 : 12,
+                    compact ? 14 : 16,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: LinearGradient(
+                      colors: [
+                        accent.withValues(alpha: isDark ? 0.10 : 0.12),
+                        Colors.transparent,
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                  child: Opacity(
+                    opacity: isDark ? 0.22 : (isPrimary ? 0.50 : 0.40),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: scene,
+                    ),
                   ),
                 ),
               ],
@@ -662,6 +611,44 @@ class _VisualActionCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CardCueRow extends StatelessWidget {
+  const _CardCueRow({required this.accent, required this.compact});
+
+  final Color accent;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = compact ? 8.0 : 9.0;
+
+    return Row(
+      children: [
+        _CardCueDot(size: size, color: accent),
+        const SizedBox(width: 8),
+        _CardCueDot(size: size, color: accent.withValues(alpha: 0.68)),
+        const SizedBox(width: 8),
+        _CardCueDot(size: size, color: accent.withValues(alpha: 0.42)),
+      ],
+    );
+  }
+}
+
+class _CardCueDot extends StatelessWidget {
+  const _CardCueDot({required this.size, required this.color});
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }
@@ -887,16 +874,12 @@ class _QuestionSheet extends StatelessWidget {
 class _RoutePlate extends StatelessWidget {
   const _RoutePlate({
     required this.originEmoji,
-    required this.originName,
     required this.destinationEmoji,
-    required this.destinationName,
     required this.onRestartJourney,
   });
 
   final String originEmoji;
-  final String originName;
   final String destinationEmoji;
-  final String destinationName;
   final Future<void> Function() onRestartJourney;
 
   @override
@@ -904,23 +887,16 @@ class _RoutePlate extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 620;
-        final titleStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: Colors.white.withValues(alpha: 0.64),
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.3,
-        );
 
         return Container(
           width: double.infinity,
-          padding: EdgeInsets.fromLTRB(
-            compact ? 16 : 18,
-            compact ? 16 : 18,
-            compact ? 16 : 18,
-            compact ? 14 : 16,
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 14 : 16,
+            vertical: compact ? 12 : 14,
           ),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(26),
+            borderRadius: BorderRadius.circular(22),
             border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
             gradient: LinearGradient(
               colors: [
@@ -931,103 +907,38 @@ class _RoutePlate extends StatelessWidget {
               end: Alignment.bottomRight,
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          context.l10n.publicHomeFirstStepTitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: titleStyle,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          compact
-                              ? '$originName → $destinationName'
-                              : '$originName to $destinationName',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.2,
-                              ),
-                        ),
-                      ],
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: compact ? 12 : 14,
+                    vertical: compact ? 10 : 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.12),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  const LanguageSelectorButton(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Color(0x1FFFFFFF),
+                  child: _RouteJourneyRow(
+                    originEmoji: originEmoji,
+                    destinationEmoji: destinationEmoji,
+                    compact: compact,
                   ),
-                ],
+                ),
               ),
-              const SizedBox(height: 14),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(
-                  horizontal: compact ? 12 : 14,
-                  vertical: compact ? 12 : 14,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.12),
-                  ),
-                ),
-                child: compact
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _RouteJourneyRow(
-                            originEmoji: originEmoji,
-                            originName: originName,
-                            destinationEmoji: destinationEmoji,
-                            destinationName: destinationName,
-                            compact: compact,
-                          ),
-                          const SizedBox(height: 10),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: _RouteActionPill(
-                              icon: Icons.swap_horiz_rounded,
-                              label: context.l10n.publicHomeJourneyResetAction,
-                              onTap: onRestartJourney,
-                              compact: compact,
-                            ),
-                          ),
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          Expanded(
-                            child: _RouteJourneyRow(
-                              originEmoji: originEmoji,
-                              originName: originName,
-                              destinationEmoji: destinationEmoji,
-                              destinationName: destinationName,
-                              compact: compact,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          _RouteActionPill(
-                            icon: Icons.swap_horiz_rounded,
-                            label: context.l10n.publicHomeJourneyResetAction,
-                            onTap: onRestartJourney,
-                            compact: compact,
-                          ),
-                        ],
-                      ),
+              const SizedBox(width: 10),
+              const LanguageSelectorButton(
+                foregroundColor: Colors.white,
+                backgroundColor: Color(0x1FFFFFFF),
+              ),
+              const SizedBox(width: 8),
+              _RouteActionPill(
+                icon: Icons.swap_horiz_rounded,
+                onTap: onRestartJourney,
+                compact: compact,
               ),
             ],
           ),
@@ -1040,13 +951,11 @@ class _RoutePlate extends StatelessWidget {
 class _RouteActionPill extends StatelessWidget {
   const _RouteActionPill({
     required this.icon,
-    required this.label,
     required this.onTap,
     required this.compact,
   });
 
   final IconData icon;
-  final String label;
   final Future<void> Function() onTap;
   final bool compact;
 
@@ -1059,28 +968,15 @@ class _RouteActionPill extends StatelessWidget {
         onTap: onTap,
         child: Ink(
           padding: EdgeInsets.symmetric(
-            horizontal: compact ? 12 : 14,
-            vertical: 11,
+            horizontal: compact ? 12 : 13,
+            vertical: compact ? 12 : 13,
           ),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(999),
             border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 16, color: Colors.white),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
+          child: Icon(icon, size: compact ? 18 : 20, color: Colors.white),
         ),
       ),
     );
@@ -1090,57 +986,29 @@ class _RouteActionPill extends StatelessWidget {
 class _RouteJourneyRow extends StatelessWidget {
   const _RouteJourneyRow({
     required this.originEmoji,
-    required this.originName,
     required this.destinationEmoji,
-    required this.destinationName,
     required this.compact,
   });
 
   final String originEmoji;
-  final String originName;
   final String destinationEmoji;
-  final String destinationName;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    if (compact) {
-      return Wrap(
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 0,
-        runSpacing: 8,
-        children: [
-          _RouteNode(emoji: originEmoji, name: originName),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Icon(
-              Icons.arrow_forward_rounded,
-              size: 18,
-              color: Colors.white.withValues(alpha: 0.82),
-            ),
-          ),
-          _RouteNode(emoji: destinationEmoji, name: destinationName),
-        ],
-      );
-    }
-
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(child: _RouteNode(emoji: originEmoji, name: originName)),
+        _RouteNode(emoji: originEmoji),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 10),
           child: Icon(
             Icons.arrow_forward_rounded,
-            size: 18,
+            size: compact ? 16 : 18,
             color: Colors.white.withValues(alpha: 0.82),
           ),
         ),
-        Expanded(
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: _RouteNode(emoji: destinationEmoji, name: destinationName),
-          ),
-        ),
+        _RouteNode(emoji: destinationEmoji),
       ],
     );
   }
@@ -1265,26 +1133,22 @@ class _PlanResetSheet extends StatelessWidget {
 }
 
 class _RouteNode extends StatelessWidget {
-  const _RouteNode({required this.emoji, required this.name});
+  const _RouteNode({required this.emoji});
 
   final String emoji;
-  final String name;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(emoji, style: const TextStyle(fontSize: 16)),
-        const SizedBox(width: 8),
-        Text(
-          name,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: Colors.white.withValues(alpha: 0.88),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
+    return Container(
+      width: 34,
+      height: 34,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+      ),
+      child: Text(emoji, style: const TextStyle(fontSize: 18)),
     );
   }
 }

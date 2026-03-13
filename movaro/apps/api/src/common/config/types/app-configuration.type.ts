@@ -21,4 +21,8 @@ export type AppConfiguration = {
     secretKey: string | null;
     configured: boolean;
   };
+  googlePlaces: {
+    apiKey: string | null;
+    configured: boolean;
+  };
 };

@@ -772,19 +772,55 @@ abstract class AppLocalizations {
   /// No description provided for @documentationHeroTitle.
   ///
   /// In en, this message translates to:
-  /// **'What usually unlocks practical life in Brazil'**
+  /// **'Understand practical life in Brazil with more clarity'**
   String get documentationHeroTitle;
 
   /// No description provided for @documentationHeroDescription.
   ///
   /// In en, this message translates to:
-  /// **'Type your question, filter by topic, and quickly reach the right block across documents, health, work, housing, mobility, and early costs.'**
+  /// **'Type a question or choose a topic. Movaro helps you find the right guidance and guide across documents, health, work, housing, mobility, and early costs.'**
   String get documentationHeroDescription;
+
+  /// No description provided for @documentationHeroStepOneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a question'**
+  String get documentationHeroStepOneTitle;
+
+  /// No description provided for @documentationHeroStepOneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can search in English, Portuguese, or Spanish.'**
+  String get documentationHeroStepOneBody;
+
+  /// No description provided for @documentationHeroStepTwoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a topic'**
+  String get documentationHeroStepTwoTitle;
+
+  /// No description provided for @documentationHeroStepTwoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by documents, health, work, housing, mobility, and costs.'**
+  String get documentationHeroStepTwoBody;
+
+  /// No description provided for @documentationHeroStepThreeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the right guide'**
+  String get documentationHeroStepThreeTitle;
+
+  /// No description provided for @documentationHeroStepThreeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump into a quick answer or the full block when you need more context.'**
+  String get documentationHeroStepThreeBody;
 
   /// No description provided for @documentationSearchLabel.
   ///
   /// In en, this message translates to:
-  /// **'Type your question'**
+  /// **'What do you need to understand?'**
   String get documentationSearchLabel;
 
   /// No description provided for @documentationSearchHint.
@@ -798,6 +834,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can search in English, Portuguese, or Spanish.'**
   String get documentationSearchSupport;
+
+  /// No description provided for @documentationSearchPanelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with search or a topic'**
+  String get documentationSearchPanelTitle;
+
+  /// No description provided for @documentationSearchPanelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your question or tap a topic to reach the right block faster.'**
+  String get documentationSearchPanelBody;
+
+  /// No description provided for @documentationGuideHideNextTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not show again'**
+  String get documentationGuideHideNextTime;
+
+  /// No description provided for @documentationGuideStepsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'3 steps'**
+  String get documentationGuideStepsLabel;
+
+  /// No description provided for @documentationGuideDismissAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get documentationGuideDismissAction;
+
+  /// No description provided for @documentationGuidePrimaryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get documentationGuidePrimaryAction;
 
   /// No description provided for @documentationSearchResultsCount.
   ///
@@ -820,14 +892,26 @@ abstract class AppLocalizations {
   /// No description provided for @documentationQuickRoutesTitle.
   ///
   /// In en, this message translates to:
-  /// **'Quick routes'**
+  /// **'Topic shortcuts'**
   String get documentationQuickRoutesTitle;
 
   /// No description provided for @documentationQuickRoutesBody.
   ///
   /// In en, this message translates to:
-  /// **'Swipe sideways and jump straight into the topic that unlocks your next decision.'**
+  /// **'Swipe and jump straight into the right block if you already know which topic you want to solve.'**
   String get documentationQuickRoutesBody;
+
+  /// No description provided for @documentationQuickChoicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick choices'**
+  String get documentationQuickChoicesTitle;
+
+  /// No description provided for @documentationQuickChoicesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by topic or use ready-made questions to reach the right block faster.'**
+  String get documentationQuickChoicesBody;
 
   /// No description provided for @documentationResultsTitle.
   ///
@@ -1087,6 +1171,18 @@ abstract class AppLocalizations {
   /// **'No. Formal work requires a compatible migration status and regular registration.'**
   String get documentationAnswerWorkAnswer;
 
+  /// No description provided for @documentationAnswerTravelDocQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Do I need a passport to travel from Argentina to Brazil?'**
+  String get documentationAnswerTravelDocQuestion;
+
+  /// No description provided for @documentationAnswerTravelDocAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Not necessarily. Argentine citizens can travel to Brazil with a valid physical DNI in good condition and with a photo that clearly identifies the holder. A proof of document renewal or issuance is not enough.'**
+  String get documentationAnswerTravelDocAnswer;
+
   /// No description provided for @documentationAnswerCpfQuestion.
   ///
   /// In en, this message translates to:
@@ -1194,6 +1290,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'It may feel similar as a self-employed or company-based model, but it is not the same legal structure. Tax, retirement, and contract rules vary by arrangement in Brazil.'**
   String get documentationAnswerPjAnswer;
+
+  /// No description provided for @documentationAnswerMarketQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Is Brazil a good place to build income from work?'**
+  String get documentationAnswerMarketQuestion;
+
+  /// No description provided for @documentationAnswerMarketAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, but the practical expectation is steady income and gradual growth, not exceptionally high pay right away. Brazil has a large and diversified labor market, but earnings vary a lot by city, sector, language, and your legal work status.'**
+  String get documentationAnswerMarketAnswer;
+
+  /// No description provided for @documentationAnswerSafetyQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Is safety in Brazil the same everywhere?'**
+  String get documentationAnswerSafetyQuestion;
+
+  /// No description provided for @documentationAnswerSafetyAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'No. Safety varies a lot by state, city, neighborhood, and daily routine. The safest way to plan is to compare the specific area where you want to live and move around, not to treat the whole country as one block.'**
+  String get documentationAnswerSafetyAnswer;
 
   /// No description provided for @documentationAnswerInssQuestion.
   ///
@@ -1404,6 +1524,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'CPF does not replace your migration document, but it usually unlocks a large part of daily life.'**
   String get documentationCpfBulletThree;
+
+  /// No description provided for @documentationTravelDocsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel document from Argentina to Brazil'**
+  String get documentationTravelDocsTitle;
+
+  /// No description provided for @documentationTravelDocsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'For tourism and initial entry, a passport is not the only option. The key is traveling with a recognized physical identity document that is valid for Mercosur travel.'**
+  String get documentationTravelDocsSummary;
+
+  /// No description provided for @documentationTravelDocsBulletOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Argentine citizens may travel to Brazil with a national identity document (DNI) or a passport.'**
+  String get documentationTravelDocsBulletOne;
+
+  /// No description provided for @documentationTravelDocsBulletTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'The document must be in good condition and allow the holder to be clearly identified through the photo.'**
+  String get documentationTravelDocsBulletTwo;
+
+  /// No description provided for @documentationTravelDocsBulletThree.
+  ///
+  /// In en, this message translates to:
+  /// **'A document-in-process receipt, damaged documents, or older documents not accepted under migration rules may block departure or boarding.'**
+  String get documentationTravelDocsBulletThree;
 
   /// No description provided for @documentationRegistrationTitle.
   ///
@@ -1675,6 +1825,36 @@ abstract class AppLocalizations {
   /// **'Before accepting this model, understand taxes, contract terms, and how retirement contributions will work.'**
   String get documentationWorkPjBulletThree;
 
+  /// No description provided for @documentationWorkMarketTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Labor market and income expectations'**
+  String get documentationWorkMarketTitle;
+
+  /// No description provided for @documentationWorkMarketSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Brazil offers scale and many work formats, but migration planning should assume moderate income and gradual progression rather than unusually high salaries in the first stage.'**
+  String get documentationWorkMarketSummary;
+
+  /// No description provided for @documentationWorkMarketBulletOne.
+  ///
+  /// In en, this message translates to:
+  /// **'In the rolling quarter ending in October 2025, IBGE recorded unemployment at 5.4%, habitual average earnings at R\$ 3,528, and a record 39.2 million formally registered private-sector workers.'**
+  String get documentationWorkMarketBulletOne;
+
+  /// No description provided for @documentationWorkMarketBulletTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'That combination shows a large and active market, with room in services, commerce, logistics, health, education, technology, and local business networks.'**
+  String get documentationWorkMarketBulletTwo;
+
+  /// No description provided for @documentationWorkMarketBulletThree.
+  ///
+  /// In en, this message translates to:
+  /// **'For someone arriving from abroad, the safest reading is to plan around realistic income, reserve capital, and city-by-city differences in wages and formalization.'**
+  String get documentationWorkMarketBulletThree;
+
   /// No description provided for @documentationRetirementTitle.
   ///
   /// In en, this message translates to:
@@ -1704,6 +1884,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'For someone arriving from abroad, it is safest to understand early how contributions will happen in Brazil.'**
   String get documentationRetirementBulletThree;
+
+  /// No description provided for @documentationSafetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety: read it by city and neighborhood'**
+  String get documentationSafetyTitle;
+
+  /// No description provided for @documentationSafetySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety in Brazil is not uniform. The useful decision is not whether the country is \'safe\' in the abstract, but how the exact city, neighborhood, commute, and schedule fit your routine.'**
+  String get documentationSafetySummary;
+
+  /// No description provided for @documentationSafetyBulletOne.
+  ///
+  /// In en, this message translates to:
+  /// **'The 2025 Brazilian Public Security Yearbook is based on official public security data from states and police forces and is the broadest snapshot of the sector in the country.'**
+  String get documentationSafetyBulletOne;
+
+  /// No description provided for @documentationSafetyBulletTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Its data shows strong variation across states and crime categories, which is why national averages alone are not enough to choose where to live.'**
+  String get documentationSafetyBulletTwo;
+
+  /// No description provided for @documentationSafetyBulletThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Before renting or accepting a job, compare neighborhood context, nighttime mobility, route patterns, and the practical routine you will actually have.'**
+  String get documentationSafetyBulletThree;
 
   /// No description provided for @documentationDrivingTitle.
   ///
@@ -2617,6 +2827,84 @@ abstract class AppLocalizations {
   /// **'Search for a city or use the chips to filter the catalog when it makes sense. The list does not open preloaded: results appear only after you search or pick a slice.'**
   String get citiesExploreSearchFirstDescription;
 
+  /// No description provided for @citiesGuideEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick guide'**
+  String get citiesGuideEyebrow;
+
+  /// No description provided for @citiesGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use city discovery'**
+  String get citiesGuideTitle;
+
+  /// No description provided for @citiesGuideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Here you can search by name, filter the catalog with quick slices, or open the map to choose by location.'**
+  String get citiesGuideBody;
+
+  /// No description provided for @citiesGuideStepOneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a city'**
+  String get citiesGuideStepOneTitle;
+
+  /// No description provided for @citiesGuideStepOneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the name and tap the closest result to open the detail.'**
+  String get citiesGuideStepOneBody;
+
+  /// No description provided for @citiesGuideStepTwoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a quick slice'**
+  String get citiesGuideStepTwoTitle;
+
+  /// No description provided for @citiesGuideStepTwoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The chips narrow the list by popularity, cost, work, language, and other signals.'**
+  String get citiesGuideStepTwoBody;
+
+  /// No description provided for @citiesGuideStepThreeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose on the map'**
+  String get citiesGuideStepThreeTitle;
+
+  /// No description provided for @citiesGuideStepThreeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the map, tap a city, and continue to the detail when you want to decide by location.'**
+  String get citiesGuideStepThreeBody;
+
+  /// No description provided for @citiesGuideHideNextTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not show again'**
+  String get citiesGuideHideNextTime;
+
+  /// No description provided for @citiesGuideStepsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'3 steps'**
+  String get citiesGuideStepsLabel;
+
+  /// No description provided for @citiesGuideDismissAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get citiesGuideDismissAction;
+
+  /// No description provided for @citiesGuidePrimaryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get citiesGuidePrimaryAction;
+
   /// No description provided for @citiesExploreSearchIdleTitle.
   ///
   /// In en, this message translates to:
@@ -2851,6 +3139,18 @@ abstract class AppLocalizations {
   /// **'Type to search cities by name and tap autocomplete.'**
   String get citiesSearchHelper;
 
+  /// No description provided for @citiesQuickChoicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick choices'**
+  String get citiesQuickChoicesTitle;
+
+  /// No description provided for @citiesQuickChoicesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a slice to narrow the list faster or go by map if location is your starting point.'**
+  String get citiesQuickChoicesBody;
+
   /// No description provided for @citiesSearchResultsCount.
   ///
   /// In en, this message translates to:
@@ -2868,6 +3168,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose on map'**
   String get citiesMapOpenAction;
+
+  /// No description provided for @citiesMapCalloutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer to decide by location? Open the map and compare cities by the place where you want to start.'**
+  String get citiesMapCalloutBody;
+
+  /// No description provided for @citiesMapCalloutStepOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Open map'**
+  String get citiesMapCalloutStepOne;
+
+  /// No description provided for @citiesMapCalloutStepTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap city'**
+  String get citiesMapCalloutStepTwo;
+
+  /// No description provided for @citiesMapCalloutStepThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Open detail'**
+  String get citiesMapCalloutStepThree;
 
   /// No description provided for @citiesMapSheetTitle.
   ///
@@ -3295,6 +3619,54 @@ abstract class AppLocalizations {
   /// **'Reference'**
   String get cityDetailSourceUrlLabel;
 
+  /// No description provided for @cityDetailPublicOpinionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What visitors tend to mention'**
+  String get cityDetailPublicOpinionTitle;
+
+  /// No description provided for @cityDetailPublicOpinionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A reading of recurring themes in public {provider} reviews. It does not represent the opinion of the whole city.'**
+  String cityDetailPublicOpinionSubtitle(Object provider);
+
+  /// No description provided for @cityDetailPublicOpinionRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating {rating}'**
+  String cityDetailPublicOpinionRating(Object rating);
+
+  /// No description provided for @cityDetailPublicOpinionSample.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {No reviews} =1 {1 review} other {{count} reviews}}'**
+  String cityDetailPublicOpinionSample(int count);
+
+  /// No description provided for @cityDetailPublicOpinionFallbackSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'These topics reflect themes that show up often in the public reviews found for this locality.'**
+  String get cityDetailPublicOpinionFallbackSummary;
+
+  /// No description provided for @cityDetailPublicOpinionPositiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What people praise most'**
+  String get cityDetailPublicOpinionPositiveTitle;
+
+  /// No description provided for @cityDetailPublicOpinionCriticalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What people criticize most'**
+  String get cityDetailPublicOpinionCriticalTitle;
+
+  /// No description provided for @cityDetailPublicOpinionNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic summary checked on {date}. Use it as a signal of recurring public perception, not as absolute consensus.'**
+  String cityDetailPublicOpinionNote(Object date);
+
   /// No description provided for @citySourceTerritorialTitle.
   ///
   /// In en, this message translates to:
@@ -3354,6 +3726,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Movaro scores calculated from public data and a curated dataset.'**
   String get citySourceRankingDescription;
+
+  /// No description provided for @citySourcePublicReviewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Public perception of the locality'**
+  String get citySourcePublicReviewsTitle;
+
+  /// No description provided for @citySourcePublicReviewsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring themes extracted from public Google reviews about the locality. It does not represent the opinion of the whole city.'**
+  String get citySourcePublicReviewsDescription;
 
   /// No description provided for @cityDetailSaveAction.
   ///
@@ -3534,6 +3918,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Explore cities'**
   String get favoritesExploreAction;
+
+  /// No description provided for @favoritesGuideEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick guide'**
+  String get favoritesGuideEyebrow;
+
+  /// No description provided for @favoritesGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use Favorites'**
+  String get favoritesGuideTitle;
+
+  /// No description provided for @favoritesGuideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Here you can keep up to 3 cities to revisit later without repeating your search. Use this area to compare better, reopen details, and decide with more clarity.'**
+  String get favoritesGuideBody;
+
+  /// No description provided for @favoritesGuideStepOneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the most promising cities'**
+  String get favoritesGuideStepOneTitle;
+
+  /// No description provided for @favoritesGuideStepOneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the heart on cards or in the detail page to keep the cities that make sense for you.'**
+  String get favoritesGuideStepOneBody;
+
+  /// No description provided for @favoritesGuideStepTwoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Come back for quick comparison'**
+  String get favoritesGuideStepTwoTitle;
+
+  /// No description provided for @favoritesGuideStepTwoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites keeps your picks in one place so you do not get lost between searches and filters.'**
+  String get favoritesGuideStepTwoBody;
+
+  /// No description provided for @favoritesGuideStepThreeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the detail when you want to decide'**
+  String get favoritesGuideStepThreeTitle;
+
+  /// No description provided for @favoritesGuideStepThreeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a city to review context, weather, cost, and the main signals before moving forward.'**
+  String get favoritesGuideStepThreeBody;
+
+  /// No description provided for @favoritesGuideHideNextTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not show again'**
+  String get favoritesGuideHideNextTime;
+
+  /// No description provided for @favoritesGuideStepsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'3 steps'**
+  String get favoritesGuideStepsLabel;
+
+  /// No description provided for @favoritesGuideDismissAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get favoritesGuideDismissAction;
+
+  /// No description provided for @favoritesGuidePrimaryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get favoritesGuidePrimaryAction;
 
   /// No description provided for @publicHomeJourneyResetAction.
   ///
@@ -4081,6 +4543,186 @@ abstract class AppLocalizations {
   /// **'High housing pressure'**
   String get cityHousingViabilityHardBadge;
 
+  /// No description provided for @cityMetricInsightTapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to understand the data behind this read.'**
+  String get cityMetricInsightTapHint;
+
+  /// No description provided for @cityMetricInsightMeaningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What this means'**
+  String get cityMetricInsightMeaningTitle;
+
+  /// No description provided for @cityMetricInsightMethodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How this read was built'**
+  String get cityMetricInsightMethodTitle;
+
+  /// No description provided for @cityMetricInsightFactsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data used today'**
+  String get cityMetricInsightFactsTitle;
+
+  /// No description provided for @cityMetricInsightValidateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What to validate before deciding'**
+  String get cityMetricInsightValidateTitle;
+
+  /// No description provided for @cityMetricInsightSourcesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Base and sources'**
+  String get cityMetricInsightSourcesTitle;
+
+  /// No description provided for @cityMetricInsightDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this card as an early triage. The final decision still depends on neighborhood, real prices, and local validation.'**
+  String get cityMetricInsightDisclaimer;
+
+  /// No description provided for @cityMetricInsightCurrentBaseBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Current base'**
+  String get cityMetricInsightCurrentBaseBadge;
+
+  /// No description provided for @cityMetricInsightMappedBaseBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Mapped reference'**
+  String get cityMetricInsightMappedBaseBadge;
+
+  /// No description provided for @cityMetricInsightOpenSourceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source'**
+  String get cityMetricInsightOpenSourceAction;
+
+  /// No description provided for @cityMetricInsightRangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'This card range'**
+  String get cityMetricInsightRangeLabel;
+
+  /// No description provided for @cityMetricInsightSpanishSupportLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Spanish support'**
+  String get cityMetricInsightSpanishSupportLabel;
+
+  /// No description provided for @cityMetricInsightLanguageCurrentBaseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Practical adaptation read'**
+  String get cityMetricInsightLanguageCurrentBaseTitle;
+
+  /// No description provided for @cityMetricInsightHousingMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'When this block drops into alert territory, it means rent and housing entry costs tend to weigh more in the first move to this city.'**
+  String get cityMetricInsightHousingMeaning;
+
+  /// No description provided for @cityMetricInsightHousingMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Today the app combines the city\'s rentScore with its broader economical score. When housing stays below 55, the product treats housing entry as a critical filter.'**
+  String get cityMetricInsightHousingMethod;
+
+  /// No description provided for @cityMetricInsightHousingValidate.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare real rent, deposit, guarantees, furniture, and neighborhood cost before signing. Housing mistakes usually cost more here.'**
+  String get cityMetricInsightHousingValidate;
+
+  /// No description provided for @cityMetricInsightHousingMappedSource.
+  ///
+  /// In en, this message translates to:
+  /// **'FipeZAP is the strongest reference already mapped in the project to recalibrate rent and housing pressure where municipal coverage exists.'**
+  String get cityMetricInsightHousingMappedSource;
+
+  /// No description provided for @cityMetricInsightSafetyMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'This alert does not mean the city is unworkable. It means neighborhood choice, routine, and local validation matter more before treating the move as simple.'**
+  String get cityMetricInsightSafetyMeaning;
+
+  /// No description provided for @cityMetricInsightSafetyMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Today the card uses Movaro\'s catalog safetyScore. Below 55, the read becomes caution; between 55 and 69 it stays moderate; from 70 onward it becomes more favorable.'**
+  String get cityMetricInsightSafetyMethod;
+
+  /// No description provided for @cityMetricInsightSafetyValidate.
+  ///
+  /// In en, this message translates to:
+  /// **'Check neighborhood by neighborhood, nighttime travel, the real routine of residents, and the difference between tourist and residential areas.'**
+  String get cityMetricInsightSafetyValidate;
+
+  /// No description provided for @cityMetricInsightSafetyMappedSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Atlas da Violência is the official reference already mapped in the project to recalibrate this group with public data and open methodology.'**
+  String get cityMetricInsightSafetyMappedSource;
+
+  /// No description provided for @cityMetricInsightWorkMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate market is not a blocker. It means the city can work, but the result depends more on your field, seniority, and entry path.'**
+  String get cityMetricInsightWorkMeaning;
+
+  /// No description provided for @cityMetricInsightWorkMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'The work score combines jobMarketScore, economicActivityScore, and inverted unemployment. Between 62 and 77, the read stays moderate; above 78, it becomes strong.'**
+  String get cityMetricInsightWorkMethod;
+
+  /// No description provided for @cityMetricInsightWorkValidate.
+  ///
+  /// In en, this message translates to:
+  /// **'Look for real openings in your field, see which sectors pull the city, and estimate how much runway you have until your first income.'**
+  String get cityMetricInsightWorkValidate;
+
+  /// No description provided for @cityMetricInsightWorkMappedSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Novo Caged is the main official reference mapped to measure municipal formal-employment momentum.'**
+  String get cityMetricInsightWorkMappedSource;
+
+  /// No description provided for @cityMetricInsightWorkEconomicMappedSource.
+  ///
+  /// In en, this message translates to:
+  /// **'IBGE\'s PIB dos Municipios is the mapped official reference for calibrating the city\'s economic activity weight.'**
+  String get cityMetricInsightWorkEconomicMappedSource;
+
+  /// No description provided for @cityMetricInsightLanguageMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Harder adaptation means Portuguese is likely to weigh more in day-to-day integration and that informal Spanish support appears weaker.'**
+  String get cityMetricInsightLanguageMeaning;
+
+  /// No description provided for @cityMetricInsightLanguageMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'This read uses the language-adaptation score, supported by Spanish support and familiarity among Argentinians. Below 65, friction tends to be higher.'**
+  String get cityMetricInsightLanguageMethod;
+
+  /// No description provided for @cityMetricInsightLanguageValidate.
+  ///
+  /// In en, this message translates to:
+  /// **'Test the routine without relying on Spanish: housing, groceries, healthcare, services, and work. If that becomes a blocker, real adaptation in the city is tougher for your profile.'**
+  String get cityMetricInsightLanguageValidate;
+
+  /// No description provided for @cityMetricInsightLanguageMappedSource.
+  ///
+  /// In en, this message translates to:
+  /// **'There is still no single official source for this read. Today it remains a curated product heuristic for practical adaptation.'**
+  String get cityMetricInsightLanguageMappedSource;
+
   /// No description provided for @citySnapshotPopularityHigh.
   ///
   /// In en, this message translates to:
@@ -4224,6 +4866,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Brazil'**
   String get questionOptionBrazil;
+
+  /// No description provided for @questionOptionChile.
+  ///
+  /// In en, this message translates to:
+  /// **'Chile'**
+  String get questionOptionChile;
+
+  /// No description provided for @questionOptionUruguay.
+  ///
+  /// In en, this message translates to:
+  /// **'Uruguay'**
+  String get questionOptionUruguay;
+
+  /// No description provided for @questionOptionParaguay.
+  ///
+  /// In en, this message translates to:
+  /// **'Paraguay'**
+  String get questionOptionParaguay;
 
   /// No description provided for @questionOptionUnknown.
   ///
@@ -4795,11 +5455,23 @@ abstract class AppLocalizations {
   /// **'Movaro Ranking Methodology v1'**
   String get sourceProviderMovaroRanking;
 
+  /// No description provided for @sourceProviderGoogleMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Maps'**
+  String get sourceProviderGoogleMaps;
+
   /// No description provided for @sourceProviderReceitaFederalGovBr.
   ///
   /// In en, this message translates to:
   /// **'Federal Revenue / Gov.br'**
   String get sourceProviderReceitaFederalGovBr;
+
+  /// No description provided for @sourceProviderArgentinaMigraciones.
+  ///
+  /// In en, this message translates to:
+  /// **'Argentina.gob.ar / Migration Office'**
+  String get sourceProviderArgentinaMigraciones;
 
   /// No description provided for @sourceProviderPoliciaFederal.
   ///
@@ -4878,6 +5550,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ministry of Social Security / INSS'**
   String get sourceProviderMinisterioPrevidenciaInss;
+
+  /// No description provided for @sourceProviderIbgePnadContinua.
+  ///
+  /// In en, this message translates to:
+  /// **'IBGE / Continuous PNAD'**
+  String get sourceProviderIbgePnadContinua;
+
+  /// No description provided for @sourceProviderForumBrasileiroSegurancaPublica.
+  ///
+  /// In en, this message translates to:
+  /// **'Brazilian Forum of Public Security'**
+  String get sourceProviderForumBrasileiroSegurancaPublica;
 
   /// No description provided for @sourceProviderBancoCentralBrasil.
   ///
@@ -5923,6 +6607,84 @@ abstract class AppLocalizations {
   /// **'Open guide'**
   String get migrationPlanCopilotAction;
 
+  /// No description provided for @migrationPlanCopilotGuideEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick guide'**
+  String get migrationPlanCopilotGuideEyebrow;
+
+  /// No description provided for @migrationPlanCopilotGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use the move guide'**
+  String get migrationPlanCopilotGuideTitle;
+
+  /// No description provided for @migrationPlanCopilotGuideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This area turns your chosen city into practical preparation. Open the right stage, resolve the current priority, and return to the overview without losing the order of the plan.'**
+  String get migrationPlanCopilotGuideBody;
+
+  /// No description provided for @migrationPlanCopilotGuideStepOneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from the overview'**
+  String get migrationPlanCopilotGuideStepOneTitle;
+
+  /// No description provided for @migrationPlanCopilotGuideStepOneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The overview shows the most important stage right now and helps you avoid spreading your energy.'**
+  String get migrationPlanCopilotGuideStepOneBody;
+
+  /// No description provided for @migrationPlanCopilotGuideStepTwoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the priority stage'**
+  String get migrationPlanCopilotGuideStepTwoTitle;
+
+  /// No description provided for @migrationPlanCopilotGuideStepTwoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents, housing, work, and arrival are split so you can solve one block at a time.'**
+  String get migrationPlanCopilotGuideStepTwoBody;
+
+  /// No description provided for @migrationPlanCopilotGuideStepThreeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the practical shortcuts'**
+  String get migrationPlanCopilotGuideStepThreeTitle;
+
+  /// No description provided for @migrationPlanCopilotGuideStepThreeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open links, sources, and guided blocks inside the app to move from planning into execution.'**
+  String get migrationPlanCopilotGuideStepThreeBody;
+
+  /// No description provided for @migrationPlanCopilotGuideHideNextTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not show again'**
+  String get migrationPlanCopilotGuideHideNextTime;
+
+  /// No description provided for @migrationPlanCopilotGuideStepsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'3 steps'**
+  String get migrationPlanCopilotGuideStepsLabel;
+
+  /// No description provided for @migrationPlanCopilotGuideDismissAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get migrationPlanCopilotGuideDismissAction;
+
+  /// No description provided for @migrationPlanCopilotGuidePrimaryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get migrationPlanCopilotGuidePrimaryAction;
+
   /// No description provided for @migrationPlanCopilotIntroTitle.
   ///
   /// In en, this message translates to:
@@ -6529,6 +7291,84 @@ abstract class AppLocalizations {
   /// **'More precise'**
   String get bmpVariantStrategicTag;
 
+  /// No description provided for @bmpGuideEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Build my plan'**
+  String get bmpGuideEyebrow;
+
+  /// No description provided for @bmpGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How this plan builder works'**
+  String get bmpGuideTitle;
+
+  /// No description provided for @bmpGuideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with the mode that matches how much detail you want right now. Both options lead to a suggested city and a first sequence of actions, but they differ in depth.'**
+  String get bmpGuideBody;
+
+  /// No description provided for @bmpGuideStepsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What changes between the two modes'**
+  String get bmpGuideStepsLabel;
+
+  /// No description provided for @bmpGuideStepQuickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick plan'**
+  String get bmpGuideStepQuickTitle;
+
+  /// No description provided for @bmpGuideStepQuickBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the fastest path. You answer the core questions, get an initial direction, and can refine later if the first result is still too broad.'**
+  String get bmpGuideStepQuickBody;
+
+  /// No description provided for @bmpGuideStepStrategicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Strategic plan'**
+  String get bmpGuideStepStrategicTitle;
+
+  /// No description provided for @bmpGuideStepStrategicBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This adds one extra layer about how you intend to support yourself after the move, so the recommendation becomes more precise and more practical.'**
+  String get bmpGuideStepStrategicBody;
+
+  /// No description provided for @bmpGuideStepUseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use the result'**
+  String get bmpGuideStepUseTitle;
+
+  /// No description provided for @bmpGuideStepUseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the plan as a starting point, not a final verdict. The best next move is usually to compare the suggested city, confirm documents, and adjust the plan if your priority changes.'**
+  String get bmpGuideStepUseBody;
+
+  /// No description provided for @bmpGuideHideNextTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not open this explanation automatically again'**
+  String get bmpGuideHideNextTime;
+
+  /// No description provided for @bmpGuideDismissAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get bmpGuideDismissAction;
+
+  /// No description provided for @bmpGuidePrimaryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start planning'**
+  String get bmpGuidePrimaryAction;
+
   /// No description provided for @bmpRefineTitle.
   ///
   /// In en, this message translates to:
@@ -7008,6 +7848,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The goal here is not to tick checkboxes. First understand what to issue, where to open each topic, and which guide solves your next step.'**
   String get migrationPlanPrepHeroBody;
+
+  /// No description provided for @migrationPlanPrepHeroBodyCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the right stage and prepare the move without losing the order of the plan.'**
+  String get migrationPlanPrepHeroBodyCompact;
 
   /// No description provided for @migrationPlanPrepTabOverview.
   ///

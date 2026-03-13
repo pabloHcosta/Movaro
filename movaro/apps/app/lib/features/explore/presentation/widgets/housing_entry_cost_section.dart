@@ -1,170 +1,208 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 
 enum _HousingGuaranteeMode { deposit, insurance, temporary }
 
 class HousingEntryCostSection extends StatefulWidget {
   const HousingEntryCostSection({
+    required this.exchangeRatesService,
     this.cityName,
     super.key,
   });
 
+  final CopilotExchangeRatesService exchangeRatesService;
   final String? cityName;
 
   @override
-  State<HousingEntryCostSection> createState() => _HousingEntryCostSectionState();
+  State<HousingEntryCostSection> createState() =>
+      _HousingEntryCostSectionState();
 }
 
 class _HousingEntryCostSectionState extends State<HousingEntryCostSection> {
   double _monthlyRent = 2000;
   _HousingGuaranteeMode _mode = _HousingGuaranteeMode.deposit;
+  late final Future<CopilotExchangeRates?> _exchangeRatesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _exchangeRatesFuture = widget.exchangeRatesService.fetchLatest();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final breakdown = _estimate(_monthlyRent, _mode);
-    final locale = Localizations.localeOf(context).toString();
 
-    return FrostedPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            widget.cityName == null
-                ? l10n.housingEntrySectionTitle
-                : l10n.housingEntrySectionTitleWithCity(widget.cityName!),
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            widget.cityName == null
-                ? l10n.housingEntrySectionBody
-                : l10n.housingEntrySectionBodyWithCity(widget.cityName!),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.45,
-            ),
-          ),
-          const SizedBox(height: 18),
-          Text(
-            l10n.housingEntryRentLabel(_formatCurrency(locale, _monthlyRent)),
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: AppColors.textSoftFor(context),
-            ),
-          ),
-          Slider(
-            value: _monthlyRent,
-            min: 1200,
-            max: 5000,
-            divisions: 19,
-            label: _formatCurrency(locale, _monthlyRent),
-            onChanged: (value) => setState(() => _monthlyRent = value),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
+    return FutureBuilder<CopilotExchangeRates?>(
+      future: _exchangeRatesFuture,
+      builder: (context, snapshot) {
+        final exchangeRates = snapshot.data;
+
+        return FrostedPanel(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _ModeChip(
-                selected: _mode == _HousingGuaranteeMode.deposit,
-                label: l10n.housingEntryModeDeposit,
-                onTap: () => setState(() => _mode = _HousingGuaranteeMode.deposit),
+              Text(
+                widget.cityName == null
+                    ? l10n.housingEntrySectionTitle
+                    : l10n.housingEntrySectionTitleWithCity(widget.cityName!),
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-              _ModeChip(
-                selected: _mode == _HousingGuaranteeMode.insurance,
-                label: l10n.housingEntryModeInsurance,
-                onTap: () =>
-                    setState(() => _mode = _HousingGuaranteeMode.insurance),
+              const SizedBox(height: 10),
+              Text(
+                widget.cityName == null
+                    ? l10n.housingEntrySectionBody
+                    : l10n.housingEntrySectionBodyWithCity(widget.cityName!),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.45,
+                ),
               ),
-              _ModeChip(
-                selected: _mode == _HousingGuaranteeMode.temporary,
-                label: l10n.housingEntryModeTemporary,
-                onTap: () =>
-                    setState(() => _mode = _HousingGuaranteeMode.temporary),
+              const SizedBox(height: 18),
+              MultiCurrencyAmount(
+                amountInBrl: _monthlyRent,
+                exchangeRates: exchangeRates,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.housingEntryRentLabel(
+                  MultiCurrencyAmount.formatCurrency(
+                    locale: Localizations.localeOf(context).toString(),
+                    currencyCode: 'BRL',
+                    amount: _monthlyRent,
+                  ),
+                ),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                ),
+              ),
+              Slider(
+                value: _monthlyRent,
+                min: 1200,
+                max: 5000,
+                divisions: 19,
+                label: MultiCurrencyAmount.formatCurrency(
+                  locale: Localizations.localeOf(context).toString(),
+                  currencyCode: 'BRL',
+                  amount: _monthlyRent,
+                ),
+                onChanged: (value) => setState(() => _monthlyRent = value),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  _ModeChip(
+                    selected: _mode == _HousingGuaranteeMode.deposit,
+                    label: l10n.housingEntryModeDeposit,
+                    onTap: () =>
+                        setState(() => _mode = _HousingGuaranteeMode.deposit),
+                  ),
+                  _ModeChip(
+                    selected: _mode == _HousingGuaranteeMode.insurance,
+                    label: l10n.housingEntryModeInsurance,
+                    onTap: () =>
+                        setState(() => _mode = _HousingGuaranteeMode.insurance),
+                  ),
+                  _ModeChip(
+                    selected: _mode == _HousingGuaranteeMode.temporary,
+                    label: l10n.housingEntryModeTemporary,
+                    onTap: () =>
+                        setState(() => _mode = _HousingGuaranteeMode.temporary),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final wide = constraints.maxWidth >= 900;
+                  final cardWidth = wide
+                      ? (constraints.maxWidth - 12) / 2
+                      : constraints.maxWidth;
+
+                  return Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      SizedBox(
+                        width: cardWidth,
+                        child: _BreakdownCard(
+                          title: l10n.housingEntryTotalTitle,
+                          amountInBrl: breakdown.total,
+                          exchangeRates: exchangeRates,
+                          description: _modeDescription(context, _mode),
+                          lines: [
+                            _BreakdownLine(
+                              l10n.housingEntryFirstMonthLabel,
+                              breakdown.firstMonth,
+                            ),
+                            _BreakdownLine(
+                              l10n.housingEntryGuaranteeLabel,
+                              breakdown.guarantee,
+                            ),
+                            _BreakdownLine(
+                              l10n.housingEntrySetupLabel,
+                              breakdown.setup,
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        width: cardWidth,
+                        child: _BreakdownCard(
+                          title: l10n.housingEntryPlatformsTitle,
+                          headlineText: l10n.housingEntryPlatformsHeadline,
+                          description: l10n.housingEntryPlatformsBody,
+                          lines: [
+                            _BreakdownLine.text(
+                              'QuintoAndar',
+                              l10n.housingEntryPlatformsQuintoAndar,
+                            ),
+                            _BreakdownLine.text(
+                              'ZAP / VivaReal',
+                              l10n.housingEntryPlatformsZap,
+                            ),
+                            _BreakdownLine.text(
+                              'CredPago',
+                              l10n.housingEntryPlatformsCredPago,
+                            ),
+                            _BreakdownLine.text(
+                              'Airbnb / Booking',
+                              l10n.housingEntryPlatformsAirbnb,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 14),
+              Text(
+                l10n.housingEntryDisclaimer,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.45,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 18),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final wide = constraints.maxWidth >= 900;
-              final cardWidth = wide
-                  ? (constraints.maxWidth - 12) / 2
-                  : constraints.maxWidth;
-
-              return Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  SizedBox(
-                    width: cardWidth,
-                    child: _BreakdownCard(
-                      title: l10n.housingEntryTotalTitle,
-                      headline: _formatCurrency(locale, breakdown.total),
-                      description: _modeDescription(context, _mode),
-                      lines: [
-                        _BreakdownLine(
-                          l10n.housingEntryFirstMonthLabel,
-                          _formatCurrency(locale, breakdown.firstMonth),
-                        ),
-                        _BreakdownLine(
-                          l10n.housingEntryGuaranteeLabel,
-                          _formatCurrency(locale, breakdown.guarantee),
-                        ),
-                        _BreakdownLine(
-                          l10n.housingEntrySetupLabel,
-                          _formatCurrency(locale, breakdown.setup),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    width: cardWidth,
-                    child: _BreakdownCard(
-                      title: l10n.housingEntryPlatformsTitle,
-                      headline: l10n.housingEntryPlatformsHeadline,
-                      description: l10n.housingEntryPlatformsBody,
-                      lines: [
-                        _BreakdownLine(
-                          'QuintoAndar',
-                          l10n.housingEntryPlatformsQuintoAndar,
-                        ),
-                        _BreakdownLine(
-                          'ZAP / VivaReal',
-                          l10n.housingEntryPlatformsZap,
-                        ),
-                        _BreakdownLine(
-                          'CredPago',
-                          l10n.housingEntryPlatformsCredPago,
-                        ),
-                        _BreakdownLine(
-                          'Airbnb / Booking',
-                          l10n.housingEntryPlatformsAirbnb,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 14),
-          Text(
-            l10n.housingEntryDisclaimer,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.45,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  _HousingEntryBreakdown _estimate(double monthlyRent, _HousingGuaranteeMode mode) {
+  _HousingEntryBreakdown _estimate(
+    double monthlyRent,
+    _HousingGuaranteeMode mode,
+  ) {
     switch (mode) {
       case _HousingGuaranteeMode.deposit:
         return _HousingEntryBreakdown(
@@ -197,16 +235,6 @@ class _HousingEntryCostSectionState extends State<HousingEntryCostSection> {
       case _HousingGuaranteeMode.temporary:
         return l10n.housingEntryModeTemporaryBody;
     }
-  }
-
-  String _formatCurrency(String locale, num amount) {
-    final formatter = NumberFormat.currency(
-      locale: locale,
-      name: 'BRL',
-      symbol: 'R\$',
-      decimalDigits: 0,
-    );
-    return formatter.format(amount);
   }
 }
 
@@ -269,13 +297,17 @@ class _ModeChip extends StatelessWidget {
 class _BreakdownCard extends StatelessWidget {
   const _BreakdownCard({
     required this.title,
-    required this.headline,
     required this.description,
     required this.lines,
+    this.amountInBrl,
+    this.exchangeRates,
+    this.headlineText,
   });
 
   final String title;
-  final String headline;
+  final double? amountInBrl;
+  final CopilotExchangeRates? exchangeRates;
+  final String? headlineText;
   final String description;
   final List<_BreakdownLine> lines;
 
@@ -291,12 +323,30 @@ class _BreakdownCard extends StatelessWidget {
         children: [
           Text(title, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 10),
-          Text(
-            headline,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: AppColors.textPrimaryFor(context),
+          if (amountInBrl != null) ...[
+            Text(
+              MultiCurrencyAmount.formatCurrency(
+                locale: Localizations.localeOf(context).toString(),
+                currencyCode: 'BRL',
+                amount: amountInBrl!,
+              ),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppColors.textPrimaryFor(context),
+              ),
             ),
-          ),
+            const SizedBox(height: 8),
+            MultiCurrencyAmount(
+              amountInBrl: amountInBrl!,
+              exchangeRates: exchangeRates,
+            ),
+          ] else if (headlineText != null) ...[
+            Text(
+              headlineText!,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppColors.textPrimaryFor(context),
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
           Text(
             description,
@@ -320,14 +370,26 @@ class _BreakdownCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Flexible(
-                  child: Text(
-                    line.value,
-                    textAlign: TextAlign.end,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textPrimaryFor(context),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: line.amountInBrl == null
+                      ? Text(
+                          line.textValue ?? '',
+                          textAlign: TextAlign.end,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: AppColors.textPrimaryFor(context),
+                                fontWeight: FontWeight.w600,
+                              ),
+                        )
+                      : Align(
+                          alignment: Alignment.centerRight,
+                          child: MultiCurrencyAmount(
+                            amountInBrl: line.amountInBrl!,
+                            exchangeRates: exchangeRates,
+                            compact: true,
+                            wrapSpacing: 6,
+                            runSpacing: 6,
+                          ),
+                        ),
                 ),
               ],
             ),
@@ -340,8 +402,11 @@ class _BreakdownCard extends StatelessWidget {
 }
 
 class _BreakdownLine {
-  const _BreakdownLine(this.label, this.value);
+  const _BreakdownLine(this.label, this.amountInBrl) : textValue = null;
+
+  const _BreakdownLine.text(this.label, this.textValue) : amountInBrl = null;
 
   final String label;
-  final String value;
+  final double? amountInBrl;
+  final String? textValue;
 }

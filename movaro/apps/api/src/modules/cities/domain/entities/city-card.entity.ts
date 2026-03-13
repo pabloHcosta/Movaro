@@ -1,5 +1,6 @@
 import { MovaroScoresEntity } from './movaro-scores.entity';
 import { CitySourcesEntity } from './city-sources.entity';
+import { CityPublicOpinionEntity } from './city-public-opinion.entity';
 
 export class CityCardEntity {
   constructor(
@@ -28,5 +29,6 @@ export class CityCardEntity {
     public readonly sources: CitySourcesEntity,
     public readonly updatedAt: string,
     public readonly regionName: string | null,
+    public readonly publicOpinion: CityPublicOpinionEntity | null,
   ) {}
 }

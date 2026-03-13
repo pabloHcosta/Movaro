@@ -113,6 +113,19 @@ extension AppLocalizationsFormatting on AppLocalizations {
       case 'brazil':
       case 'Brasil':
         return questionOptionBrazil;
+      case 'chile':
+      case 'Chile':
+        return questionOptionChile;
+      case 'uruguai':
+      case 'Uruguai':
+      case 'uruguay':
+      case 'Uruguay':
+        return questionOptionUruguay;
+      case 'paraguai':
+      case 'Paraguai':
+      case 'paraguay':
+      case 'Paraguay':
+        return questionOptionParaguay;
       case 'unknown':
       case 'Ainda não sei':
         return questionOptionUnknown;
@@ -508,6 +521,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
         return citySourceCuratedMetricsTitle;
       case 'ranking':
         return citySourceRankingTitle;
+      case 'public_reviews':
+        return citySourcePublicReviewsTitle;
       default:
         return value;
     }
@@ -525,6 +540,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
         return citySourceCuratedMetricsDescription;
       case 'ranking':
         return citySourceRankingDescription;
+      case 'public_reviews':
+        return citySourcePublicReviewsDescription;
       default:
         return value;
     }
@@ -542,6 +559,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
         return sourceProviderMovaroDataset;
       case 'ranking':
         return sourceProviderMovaroRanking;
+      case 'public_reviews':
+        return sourceProviderGoogleMaps;
       default:
         return value;
     }
@@ -549,6 +568,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
 
   String referenceSourceName(String value) {
     switch (value) {
+      case 'argentina_migraciones':
+        return sourceProviderArgentinaMigraciones;
       case 'receita_federal_govbr':
         return sourceProviderReceitaFederalGovBr;
       case 'policia_federal':
@@ -577,6 +598,10 @@ extension AppLocalizationsFormatting on AppLocalizations {
         return sourceProviderPortalEmpreendedorInss;
       case 'ministerio_previdencia_inss':
         return sourceProviderMinisterioPrevidenciaInss;
+      case 'ibge_pnad_continua':
+        return sourceProviderIbgePnadContinua;
+      case 'forum_brasileiro_seguranca_publica':
+        return sourceProviderForumBrasileiroSegurancaPublica;
       case 'banco_central_brasil':
         return sourceProviderBancoCentralBrasil;
       case 'movaro':
