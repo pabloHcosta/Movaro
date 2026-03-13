@@ -35,13 +35,8 @@ class _CitySearchPageState extends State<CitySearchPage> {
   void initState() {
     super.initState();
     _searchController.addListener(_handleSearchInputChange);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-
-      widget.citiesController.loadCatalog();
-    });
+    widget.citiesController.loadCatalog();
+    widget.citiesController.loadMethodology();
   }
 
   @override
@@ -94,6 +89,8 @@ class _CitySearchPageState extends State<CitySearchPage> {
         final l10n = context.l10n;
         final hasSearchQuery = _searchController.text.isNotEmpty;
         final visibleCities = _visibleCities(controller);
+        final isCatalogBootstrapping =
+            controller.catalog.isEmpty && controller.catalogError == null;
 
         return Scaffold(
           body: Stack(
@@ -234,9 +231,10 @@ class _CitySearchPageState extends State<CitySearchPage> {
                           );
                         },
                       )
-                    else if (!hasSearchQuery &&
-                        controller.isLoadingCatalog &&
-                        controller.catalog.isEmpty)
+                    else if ((!hasSearchQuery &&
+                            controller.isLoadingCatalog &&
+                            controller.catalog.isEmpty) ||
+                        isCatalogBootstrapping)
                       Semantics(
                         container: true,
                         liveRegion: true,

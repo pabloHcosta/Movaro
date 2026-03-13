@@ -90,7 +90,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = AppColors.isDark(context);
     final surfaceMuted = AppColors.surfaceMutedFor(context);
     final textSoft = AppColors.textSoftFor(context);
     final borderColor = AppColors.borderFor(context);
@@ -236,11 +235,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                           ? AppColors.primary.withValues(
                                               alpha: 0.08,
                                             )
-                                          : (isDark
-                                                ? const Color(0xB3171E29)
-                                                : Colors.white.withValues(
-                                                    alpha: 0.72,
-                                                  )),
+                                          : AppColors.surfaceFor(context),
                                       child: Row(
                                         children: [
                                           const Icon(Icons.public_rounded),

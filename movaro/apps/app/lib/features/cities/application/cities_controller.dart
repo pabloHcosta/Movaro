@@ -13,9 +13,7 @@ class CitiesController extends ChangeNotifier {
     required CitiesRepository repository,
     CityFavoritesStore? favoritesStore,
   }) : _repository = repository,
-       _favoritesStore = favoritesStore ?? CityFavoritesStore() {
-    _restoreFavorites();
-  }
+       _favoritesStore = favoritesStore ?? CityFavoritesStore();
 
   final CitiesRepository _repository;
   final CityFavoritesStore _favoritesStore;
@@ -40,6 +38,8 @@ class CitiesController extends ChangeNotifier {
   Future<void>? _pendingExploreRequest;
   Future<void>? _pendingCatalogRequest;
   Future<CityMethodology?>? _pendingMethodologyRequest;
+  Future<void>? _pendingInitialization;
+  bool _isInitialized = false;
   final Map<String, Future<City?>> _pendingCityRequests = {};
   final Map<String, Future<CityWeather?>> _pendingWeatherRequests = {};
 
@@ -56,6 +56,7 @@ class CitiesController extends ChangeNotifier {
   bool get isLoadingCatalog => _isLoadingCatalog;
   bool get isSearching => _isSearching;
   bool get isLoadingCity => _isLoadingCity;
+  bool get isInitialized => _isInitialized;
   Object? get exploreError => _exploreError;
   Object? get catalogError => _catalogError;
   Object? get searchError => _searchError;
@@ -64,6 +65,40 @@ class CitiesController extends ChangeNotifier {
 
   bool isFavorite(String cityId) => _favoriteCityIds.contains(cityId);
   CityWeather? weatherFor(String cityId) => _weatherCache[cityId];
+
+  Future<void> initialize({bool preloadData = false}) async {
+    if (_isInitialized && !preloadData) {
+      return;
+    }
+
+    final pendingInitialization = _pendingInitialization;
+    if (pendingInitialization != null) {
+      return pendingInitialization;
+    }
+
+    final request = _performInitialize(preloadData: preloadData);
+    _pendingInitialization = request;
+    await request;
+  }
+
+  Future<void> _performInitialize({required bool preloadData}) async {
+    try {
+      await _restoreFavorites();
+
+      if (preloadData) {
+        await Future.wait([
+          loadCatalog().catchError((_) {}),
+          loadExplore().catchError((_) {}),
+          loadMethodology().catchError((_) => null),
+        ]);
+      }
+
+      _isInitialized = true;
+      notifyListeners();
+    } finally {
+      _pendingInitialization = null;
+    }
+  }
 
   Future<void> prefetchExplore() => loadExplore();
 
@@ -296,10 +331,6 @@ class CitiesController extends ChangeNotifier {
 
   Future<void> _restoreFavorites() async {
     final stored = await _favoritesStore.read();
-    if (stored.isEmpty) {
-      return;
-    }
-
     _favoriteCityIds
       ..clear()
       ..addAll(stored.take(maxFavoriteCities));

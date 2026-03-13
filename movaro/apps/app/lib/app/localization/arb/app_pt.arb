@@ -778,6 +778,17 @@
       "count": {}
     }
   },
+  "cityDetailDiscoverTitle": "Conheça melhor a cidade",
+  "cityDetailDiscoverBody": "Se quiser ver fotos, buscas e contexto geral de {city} ({state}), abra a visão do Google sem sair do app.",
+  "@cityDetailDiscoverBody": {
+    "placeholders": {
+      "city": {},
+      "state": {}
+    }
+  },
+  "cityDetailDiscoverAction": "Conhecer a cidade",
+  "cityDetailDeepDiveTitle": "Análise detalhada",
+  "cityDetailDeepDiveSummary": "Abra esta área se quiser ver todos os indicadores, contexto e leitura mais profunda da cidade.",
   "cityDetailCompareAction": "Comparar outras cidades",
   "cityDetailPlanAction": "Montar meu plano",
   "cityDetailFooterNote": "Os indicadores ajudam na exploração inicial e não substituem análise individual.",
@@ -798,6 +809,8 @@
   "publicHomeJourneyResetTitle": "Escolher outra rota?",
   "publicHomeJourneyResetBody": "Sua rota atual já está salva neste dispositivo. Se você reiniciar agora, o Movaro vai abrir novamente a seleção para escolher outra origem ou destino.",
   "publicHomeJourneyResetConfirm": "Refazer rota",
+  "publicHomePlanResetTitle": "Montar outro plano?",
+  "publicHomePlanResetBody": "Seu plano atual será removido deste dispositivo para que você possa responder o questionário novamente do zero.",
   "cityWeatherSummary": "{temperature}°C agora",
   "@cityWeatherSummary": {
     "placeholders": {

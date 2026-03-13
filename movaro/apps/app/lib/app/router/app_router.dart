@@ -125,6 +125,7 @@ class AppRouter {
           SplashPage(
             environment: environment,
             authController: authController,
+            citiesController: citiesController,
             migrationQuestionnaireController: migrationQuestionnaireController,
             apiHealthService: apiHealthService,
             journeyContextController: journeyContextController,

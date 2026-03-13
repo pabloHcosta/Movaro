@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -36,7 +38,13 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_syncScrollHint);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _syncScrollHint());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      unawaited(widget.controller.initialize());
+      _syncScrollHint();
+    });
   }
 
   @override
@@ -58,8 +66,13 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
         position.pixels < position.maxScrollExtent - 36;
 
     if (shouldShow != _showScrollHint && mounted) {
-      setState(() {
-        _showScrollHint = shouldShow;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || shouldShow == _showScrollHint) {
+          return;
+        }
+        setState(() {
+          _showScrollHint = shouldShow;
+        });
       });
     }
   }
@@ -86,7 +99,7 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
         final l10n = context.l10n;
         final plan = widget.controller.generatedPlan;
 
-        if (plan == null) {
+        if (widget.controller.isInitializing || plan == null) {
           return Scaffold(
             body: Stack(
               children: [
@@ -321,6 +334,9 @@ class _LeadCityContent extends StatelessWidget {
     final l10n = context.l10n;
     final isSelected = plan.isCityConfirmed;
     final textSoft = Colors.white.withValues(alpha: 0.8);
+    final visibleReasons = plan.cityRecommendationReasons.isNotEmpty
+        ? plan.cityRecommendationReasons
+        : city.recommendationReasons;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,7 +404,7 @@ class _LeadCityContent extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         RecommendationReasonList(
-          reasons: plan.cityRecommendationReasons,
+          reasons: visibleReasons,
           backgroundColor: Colors.white.withValues(alpha: 0.12),
           textColor: Colors.white,
           iconColor: Colors.white,
@@ -491,6 +507,7 @@ class _CityOptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
     final l10n = context.l10n;
     final housing = CityHousingViabilityPresenter.resolve(
       context,
@@ -499,14 +516,32 @@ class _CityOptionCard extends StatelessWidget {
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
-      child: CityImageBackdrop(
-        city: city,
-        borderRadius: BorderRadius.circular(24),
-        overlayOpacity: 0.8,
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : AppColors.primary.withValues(alpha: 0.10),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: (isDark ? Colors.black : AppColors.primary).withValues(
+                alpha: isDark ? 0.16 : 0.05,
+              ),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: CityImageBackdrop(
+          city: city,
+          borderRadius: BorderRadius.circular(24),
+          overlayOpacity: isDark ? 0.8 : 0.72,
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             Row(
               children: [
                 Expanded(
@@ -535,10 +570,14 @@ class _CityOptionCard extends StatelessWidget {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.14),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.14)
+                          : const Color(0xCCFFFFFF),
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.14),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.14)
+                            : AppColors.primary.withValues(alpha: 0.10),
                       ),
                     ),
                     child: Text(
@@ -563,7 +602,9 @@ class _CityOptionCard extends StatelessWidget {
                   tint: housing.tint,
                   textColor: Colors.white,
                   iconColor: Colors.white,
-                  backgroundColor: Colors.white.withValues(alpha: 0.12),
+                  backgroundColor: isDark
+                      ? Colors.white.withValues(alpha: 0.12)
+                      : const Color(0xCCFFFFFF),
                 ),
                 _MetaPill(
                   icon: Icons.trending_up_rounded,
@@ -574,7 +615,9 @@ class _CityOptionCard extends StatelessWidget {
                   ),
                   textColor: Colors.white,
                   iconColor: Colors.white,
-                  backgroundColor: Colors.white.withValues(alpha: 0.12),
+                  backgroundColor: isDark
+                      ? Colors.white.withValues(alpha: 0.12)
+                      : const Color(0xCCFFFFFF),
                 ),
               ],
             ),
@@ -604,7 +647,8 @@ class _CityOptionCard extends StatelessWidget {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -849,18 +893,27 @@ class _SummaryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.12)
+            : const Color(0xCCFFFFFF),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : AppColors.primary.withValues(alpha: 0.10),
+        ),
       ),
       child: Text(
         label,
         style: Theme.of(
           context,
-        ).textTheme.labelLarge?.copyWith(color: Colors.white),
+        ).textTheme.labelLarge?.copyWith(
+          color: isDark ? Colors.white : const Color(0xFF183A70),
+        ),
       ),
     );
   }

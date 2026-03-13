@@ -152,6 +152,19 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> clearCurrentPlan() async {
+    _answers = const [];
+    _syncJourneyAnswers();
+    _generatedPlan = null;
+    _selectedVariant = null;
+    _currentIndex = 0;
+    _showRefinePrompt = false;
+    _isRefineResolved = false;
+    _includeConstraints = false;
+    await _latestPlanStore.clear();
+    notifyListeners();
+  }
+
   void selectVariant(QuestionnaireVariant variant) {
     _selectedVariant = variant;
     _currentIndex = 0;

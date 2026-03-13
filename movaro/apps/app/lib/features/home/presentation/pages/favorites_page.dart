@@ -191,11 +191,26 @@ class FavoriteCityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
     final housing = city.rentScore >= 70
         ? context.l10n.cityHousingViabilityEasyBadge
         : city.rentScore >= 45
         ? context.l10n.cityHousingViabilityBalancedBadge
         : context.l10n.cityHousingViabilityHardBadge;
+    final cardBorder = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : AppColors.primary.withValues(alpha: 0.10);
+    final cardShadow = isDark
+        ? Colors.black.withValues(alpha: 0.16)
+        : const Color(0x1A315A8A);
+    final accentPanel = isDark
+        ? Colors.white.withValues(alpha: 0.12)
+        : const Color(0xCCFFFFFF);
+    final accentBorder = isDark
+        ? Colors.white.withValues(alpha: 0.14)
+        : AppColors.primary.withValues(alpha: 0.10);
+    final chrome = Colors.white;
+    final textSoft = Colors.white.withValues(alpha: 0.82);
 
     return Material(
       color: Colors.transparent,
@@ -206,10 +221,10 @@ class FavoriteCityCard extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            border: Border.all(color: cardBorder),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.16),
+                color: cardShadow,
                 blurRadius: 18,
                 offset: const Offset(0, 10),
               ),
@@ -218,31 +233,68 @@ class FavoriteCityCard extends StatelessWidget {
           child: CityImageBackdrop(
             city: city,
             borderRadius: BorderRadius.circular(24),
-            overlayOpacity: 0.76,
+            overlayOpacity: isDark ? 0.76 : 0.68,
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: const Color(0x33E25273),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.favorite_rounded,
-                        size: 18,
-                        color: Color(0xFFE25273),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            city.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  height: 1.0,
+                                ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '${city.stateName} (${city.stateCode})',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(
+                              color: textSoft,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const Spacer(),
-                    const Icon(
-                      Icons.arrow_outward_rounded,
-                      size: 18,
-                      color: Colors.white70,
+                    const SizedBox(width: 12),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () => citiesController.toggleFavorite(
+                            city.id,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: const Color(0x33E25273),
+                            foregroundColor: const Color(0xFFE25273),
+                          ),
+                          icon: const Icon(
+                            Icons.favorite_rounded,
+                            size: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Icon(
+                          Icons.arrow_outward_rounded,
+                          size: 18,
+                          color: chrome.withValues(alpha: 0.84),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -250,26 +302,7 @@ class FavoriteCityCard extends StatelessWidget {
                 CityWeatherBadge(
                   cityId: city.id,
                   citiesController: citiesController,
-                  compact: true,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  city.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${city.stateName} (${city.stateCode})',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                  prominent: true,
                 ),
                 const SizedBox(height: 12),
                 Container(
@@ -278,18 +311,18 @@ class FavoriteCityCard extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.12),
+                    color: accentPanel,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.14),
+                      color: accentBorder,
                     ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.home_work_outlined,
                         size: 15,
-                        color: Colors.white70,
+                        color: chrome.withValues(alpha: 0.82),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -315,7 +348,7 @@ class FavoriteCityCard extends StatelessWidget {
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(
-                    color: Colors.white70,
+                    color: textSoft,
                     height: 1.3,
                   ),
                 ),

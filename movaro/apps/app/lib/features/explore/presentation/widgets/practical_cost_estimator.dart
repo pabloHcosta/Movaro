@@ -167,16 +167,14 @@ class _CostItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasRates = exchange != null && item.amountInBrl != null;
-    final isDark = AppColors.isDark(context);
     final surfaceMuted = AppColors.surfaceMutedFor(context);
     final textPrimary = AppColors.textPrimaryFor(context);
     final textSoft = AppColors.textSoftFor(context);
 
     return FrostedPanel(
       padding: const EdgeInsets.all(18),
-      backgroundColor: isDark
-          ? const Color(0xB3171E29)
-          : Colors.white.withValues(alpha: 0.62),
+      backgroundColor: AppColors.surfaceFor(context),
+      borderColor: AppColors.borderFor(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

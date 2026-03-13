@@ -195,9 +195,8 @@ class _ScenarioCard extends StatelessWidget {
     return FrostedPanel(
       padding: const EdgeInsets.all(18),
       borderRadius: BorderRadius.circular(24),
-      backgroundColor: AppColors.isDark(context)
-          ? const Color(0xCC111927)
-          : Colors.white.withValues(alpha: 0.68),
+      backgroundColor: AppColors.surfaceFor(context),
+      borderColor: AppColors.borderFor(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

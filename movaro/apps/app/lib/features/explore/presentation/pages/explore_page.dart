@@ -19,6 +19,7 @@ class ExplorePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isDark = AppColors.isDark(context);
 
     return Scaffold(
       body: Stack(
@@ -45,17 +46,27 @@ class ExplorePage extends StatelessWidget {
                     const SizedBox(height: 20),
                     FrostedPanel(
                       padding: const EdgeInsets.all(32),
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppColors.heroStart,
-                          AppColors.heroMiddle,
-                          AppColors.heroEnd,
-                        ],
+                      gradient: LinearGradient(
+                        colors: isDark
+                            ? const [
+                                AppColors.heroStart,
+                                AppColors.heroMiddle,
+                                AppColors.heroEnd,
+                              ]
+                            : const [
+                                Color(0xFFF8FBFF),
+                                Color(0xFFEAF3FF),
+                                Color(0xFFD9EAFF),
+                              ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      backgroundColor: const Color(0xB30B1320),
-                      borderColor: const Color(0x1AFFFFFF),
+                      backgroundColor: isDark
+                          ? const Color(0xB30B1320)
+                          : const Color(0xF5FFFFFF),
+                      borderColor: isDark
+                          ? const Color(0x1AFFFFFF)
+                          : AppColors.primary.withValues(alpha: 0.10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -63,14 +74,20 @@ class ExplorePage extends StatelessWidget {
                             l10n.exploreTrailsEyebrow,
                             style: Theme.of(context).textTheme.labelLarge
                                 ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.82),
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.82)
+                                      : AppColors.primary,
                                 ),
                           ),
                           const SizedBox(height: 10),
                           Text(
                             l10n.exploreTrailsTitle,
                             style: Theme.of(context).textTheme.displaySmall
-                                ?.copyWith(color: Colors.white),
+                                ?.copyWith(
+                                  color: isDark
+                                      ? Colors.white
+                                      : AppColors.textPrimaryFor(context),
+                                ),
                           ),
                           const SizedBox(height: 16),
                           ConstrainedBox(
@@ -79,7 +96,9 @@ class ExplorePage extends StatelessWidget {
                               l10n.exploreTrailsBody,
                               style: Theme.of(context).textTheme.bodyLarge
                                   ?.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.78),
+                                    color: isDark
+                                        ? Colors.white.withValues(alpha: 0.78)
+                                        : AppColors.textSoftFor(context),
                                     height: 1.45,
                                   ),
                             ),
@@ -191,6 +210,22 @@ class _TrailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final textPrimary = AppColors.textPrimaryFor(context);
+    final cardBackground = isPrimary
+        ? AppColors.tintedSurfaceFor(
+            context,
+            tint: AppColors.primary,
+            lightColor: const Color(0xFFF4F8FF),
+          )
+        : AppColors.surfaceFor(context);
+    final cardBorder = isPrimary
+        ? AppColors.tintedBorderFor(
+            context,
+            tint: AppColors.primary,
+            lightColor: const Color(0xFFD3E6FF),
+          )
+        : AppColors.borderFor(context);
     final iconBox = Container(
       width: 48,
       height: 48,
@@ -203,13 +238,24 @@ class _TrailCard extends StatelessWidget {
       ),
       child: Icon(
         icon,
-        color: isPrimary ? Colors.white : AppColors.textPrimaryFor(context),
+        color: isPrimary ? Colors.white : textPrimary,
       ),
     );
 
     return FrostedPanel(
       padding: const EdgeInsets.all(20),
       borderRadius: BorderRadius.circular(28),
+      backgroundColor: cardBackground,
+      borderColor: cardBorder,
+      boxShadow: [
+        BoxShadow(
+          color: (isDark ? Colors.black : AppColors.primary).withValues(
+            alpha: isDark ? 0.12 : 0.05,
+          ),
+          blurRadius: isPrimary ? 24 : 18,
+          offset: const Offset(0, 10),
+        ),
+      ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

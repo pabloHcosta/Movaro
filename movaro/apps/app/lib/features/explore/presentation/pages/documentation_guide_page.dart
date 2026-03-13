@@ -51,6 +51,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isDark = AppColors.isDark(context);
     final paths = _guidePaths(context);
     assert(_topics(context).isNotEmpty);
     final filteredPaths = paths.where(_matchesPath).toList();
@@ -85,17 +86,27 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                     const SizedBox(height: 20),
                     FrostedPanel(
                       padding: const EdgeInsets.all(32),
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppColors.heroStart,
-                          AppColors.heroMiddle,
-                          AppColors.heroEnd,
-                        ],
+                      gradient: LinearGradient(
+                        colors: isDark
+                            ? const [
+                                AppColors.heroStart,
+                                AppColors.heroMiddle,
+                                AppColors.heroEnd,
+                              ]
+                            : const [
+                                Color(0xFFF8FBFF),
+                                Color(0xFFEAF3FF),
+                                Color(0xFFD9EAFF),
+                              ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      backgroundColor: const Color(0xB30B1320),
-                      borderColor: const Color(0x1AFFFFFF),
+                      backgroundColor: isDark
+                          ? const Color(0xB30B1320)
+                          : const Color(0xF5FFFFFF),
+                      borderColor: isDark
+                          ? const Color(0x1AFFFFFF)
+                          : AppColors.primary.withValues(alpha: 0.10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -103,14 +114,20 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                             l10n.documentationHeroEyebrow,
                             style: Theme.of(context).textTheme.labelLarge
                                 ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.82),
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.82)
+                                      : AppColors.primary,
                                 ),
                           ),
                           const SizedBox(height: 10),
                           Text(
                             l10n.documentationHeroTitle,
                             style: Theme.of(context).textTheme.displaySmall
-                                ?.copyWith(color: Colors.white),
+                                ?.copyWith(
+                                  color: isDark
+                                      ? Colors.white
+                                      : AppColors.textPrimaryFor(context),
+                                ),
                           ),
                           const SizedBox(height: 16),
                           ConstrainedBox(
@@ -119,7 +136,9 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                               l10n.documentationHeroDescription,
                               style: Theme.of(context).textTheme.bodyLarge
                                   ?.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.78),
+                                    color: isDark
+                                        ? Colors.white.withValues(alpha: 0.78)
+                                        : AppColors.textSoftFor(context),
                                   ),
                             ),
                           ),
@@ -1110,6 +1129,12 @@ class _GuideSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final textPrimary = isDark ? Colors.white : const Color(0xFF10233F);
+    final textSoft = isDark
+        ? Colors.white.withValues(alpha: 0.74)
+        : const Color(0xCC28476D);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1117,7 +1142,7 @@ class _GuideSearchField extends StatelessWidget {
           label,
           style: Theme.of(
             context,
-          ).textTheme.titleSmall?.copyWith(color: Colors.white),
+          ).textTheme.titleSmall?.copyWith(color: textPrimary),
         ),
         const SizedBox(height: 10),
         TextField(
@@ -1126,37 +1151,45 @@ class _GuideSearchField extends StatelessWidget {
           onChanged: onChanged,
           style: Theme.of(
             context,
-          ).textTheme.bodyLarge?.copyWith(color: Colors.white),
+          ).textTheme.bodyLarge?.copyWith(color: textPrimary),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withValues(alpha: 0.62),
+              color: textSoft,
             ),
-            prefixIcon: const Icon(Icons.search_rounded, color: Colors.white),
+            prefixIcon: Icon(Icons.search_rounded, color: textPrimary),
             suffixIcon: onClear == null
                 ? null
                 : IconButton(
                     onPressed: onClear,
-                    icon: const Icon(Icons.close_rounded, color: Colors.white),
+                    icon: Icon(Icons.close_rounded, color: textPrimary),
                   ),
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.12),
+            fillColor: isDark
+                ? Colors.white.withValues(alpha: 0.12)
+                : Colors.white.withValues(alpha: 0.82),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(22),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.14),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.14)
+                    : AppColors.primary.withValues(alpha: 0.12),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(22),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.14),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.14)
+                    : AppColors.primary.withValues(alpha: 0.12),
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(22),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.30),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.30)
+                    : AppColors.primary.withValues(alpha: 0.26),
               ),
             ),
           ),
@@ -1165,7 +1198,7 @@ class _GuideSearchField extends StatelessWidget {
         Text(
           helper,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.white.withValues(alpha: 0.74),
+            color: textSoft,
           ),
         ),
       ],
@@ -1186,14 +1219,25 @@ class _SearchMatchPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final textPrimary = isDark ? Colors.white : const Color(0xFF10233F);
+    final textSoft = isDark
+        ? Colors.white.withValues(alpha: 0.72)
+        : const Color(0xCC28476D);
     final visibleResults = results.take(4).toList();
 
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.10),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.10)
+            : Colors.white.withValues(alpha: 0.80),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.10)
+              : AppColors.primary.withValues(alpha: 0.10),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1201,7 +1245,7 @@ class _SearchMatchPanel extends StatelessWidget {
           Text(
             l10n.documentationSearchResultsCount(results.length),
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Colors.white,
+              color: textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -1209,7 +1253,7 @@ class _SearchMatchPanel extends StatelessWidget {
           Text(
             l10n.documentationSearchResultsHint,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white.withValues(alpha: 0.72),
+              color: textSoft,
             ),
           ),
           if (visibleResults.isNotEmpty) ...[
@@ -1242,8 +1286,15 @@ class _SearchResultTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final textPrimary = isDark ? Colors.white : const Color(0xFF10233F);
+    final textSoft = isDark
+        ? Colors.white.withValues(alpha: 0.76)
+        : const Color(0xCC28476D);
     return Material(
-      color: Colors.white.withValues(alpha: 0.08),
+      color: isDark
+          ? Colors.white.withValues(alpha: 0.08)
+          : Colors.white.withValues(alpha: 0.88),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -1257,10 +1308,12 @@ class _SearchResultTile extends StatelessWidget {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.12)
+                      : AppColors.primary.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(result.icon, size: 18, color: Colors.white),
+                child: Icon(result.icon, size: 18, color: textPrimary),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -1272,7 +1325,7 @@ class _SearchResultTile extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Colors.white,
+                        color: textPrimary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -1282,7 +1335,7 @@ class _SearchResultTile extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.76),
+                        color: textSoft,
                       ),
                     ),
                   ],
@@ -1292,7 +1345,7 @@ class _SearchResultTile extends StatelessWidget {
               Text(
                 actionLabel,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Colors.white,
+                  color: isDark ? Colors.white : AppColors.primary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -1573,8 +1626,17 @@ class _FilterChipButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final selectedColor = isDark ? Colors.white : AppColors.primary;
+    final unselectedColor = isDark
+        ? Colors.white
+        : AppColors.textPrimaryFor(context);
     return Material(
-      color: selected ? Colors.white : Colors.white.withValues(alpha: 0.10),
+      color: selected
+          ? (isDark ? Colors.white : Colors.white)
+          : (isDark
+                ? Colors.white.withValues(alpha: 0.10)
+                : Colors.white.withValues(alpha: 0.78)),
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         onTap: onTap,
@@ -1588,14 +1650,14 @@ class _FilterChipButton extends StatelessWidget {
                 Icon(
                   icon,
                   size: 16,
-                  color: selected ? AppColors.primary : Colors.white,
+                  color: selected ? selectedColor : unselectedColor,
                 ),
                 const SizedBox(width: 8),
               ],
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: selected ? AppColors.primary : Colors.white,
+                  color: selected ? selectedColor : unselectedColor,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -1615,8 +1677,11 @@ class _PromptChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
     return Material(
-      color: Colors.white.withValues(alpha: 0.12),
+      color: isDark
+          ? Colors.white.withValues(alpha: 0.12)
+          : Colors.white.withValues(alpha: 0.82),
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         onTap: onTap,
@@ -1626,7 +1691,7 @@ class _PromptChip extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Colors.white,
+              color: isDark ? Colors.white : AppColors.textPrimaryFor(context),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -1953,15 +2018,13 @@ class _DeepDiveIntro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
     final surfaceMuted = AppColors.surfaceMutedFor(context);
     final textSoft = AppColors.textSoftFor(context);
 
     return FrostedPanel(
       padding: const EdgeInsets.all(20),
-      backgroundColor: isDark
-          ? const Color(0xCC111927)
-          : Colors.white.withValues(alpha: 0.62),
+      backgroundColor: AppColors.surfaceFor(context),
+      borderColor: AppColors.borderFor(context),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2136,20 +2199,29 @@ class _PathCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
-    final textPrimary = AppColors.textPrimaryFor(context);
-    final textSoft = AppColors.textSoftFor(context);
+    final textPrimary = isDark ? Colors.white : const Color(0xFF10233F);
+    final textSoft = isDark
+        ? Colors.white.withValues(alpha: 0.76)
+        : const Color(0xCC28476D);
     final resolvedBackground = isDark
         ? Color.alphaBlend(
             accent.withValues(alpha: 0.12),
             const Color(0xFF101823),
           )
-        : accent;
+        : AppColors.tintedSurfaceFor(
+            context,
+            tint: accent,
+            lightColor: Color.alphaBlend(
+              accent.withValues(alpha: 0.10),
+              Colors.white,
+            ),
+          );
     final resolvedBorder = isDark
         ? accent.withValues(alpha: 0.24)
-        : accent.withValues(alpha: 0.7);
+        : accent.withValues(alpha: 0.34);
     final iconSurface = isDark
         ? Colors.white.withValues(alpha: 0.08)
-        : Colors.white.withValues(alpha: 0.82);
+        : Colors.white.withValues(alpha: 0.94);
 
     return FrostedPanel(
       padding: const EdgeInsets.all(18),
@@ -2190,6 +2262,24 @@ class _PathCard extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               onPressed: onTap,
+              style: TextButton.styleFrom(
+                foregroundColor: isDark ? Colors.white : accent,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                backgroundColor: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.white.withValues(alpha: 0.72),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: BorderSide(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.10)
+                        : accent.withValues(alpha: 0.16),
+                  ),
+                ),
+              ),
               icon: const Icon(Icons.arrow_forward_rounded),
               label: Text(actionLabel),
             ),
@@ -2220,20 +2310,29 @@ class _QuickRouteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
-    final textPrimary = AppColors.textPrimaryFor(context);
-    final textSoft = AppColors.textSoftFor(context);
+    final textPrimary = isDark ? Colors.white : const Color(0xFF10233F);
+    final textSoft = isDark
+        ? Colors.white.withValues(alpha: 0.76)
+        : const Color(0xCC28476D);
     final resolvedBackground = isDark
         ? Color.alphaBlend(
             accent.withValues(alpha: 0.12),
             const Color(0xFF101823),
           )
-        : accent;
+        : AppColors.tintedSurfaceFor(
+            context,
+            tint: accent,
+            lightColor: Color.alphaBlend(
+              accent.withValues(alpha: 0.10),
+              Colors.white,
+            ),
+          );
     final resolvedBorder = isDark
         ? accent.withValues(alpha: 0.24)
-        : accent.withValues(alpha: 0.7);
+        : accent.withValues(alpha: 0.34);
     final iconSurface = isDark
         ? Colors.white.withValues(alpha: 0.08)
-        : Colors.white.withValues(alpha: 0.82);
+        : Colors.white.withValues(alpha: 0.94);
 
     return FrostedPanel(
       padding: const EdgeInsets.all(18),
@@ -2280,6 +2379,24 @@ class _QuickRouteCard extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               onPressed: onTap,
+              style: TextButton.styleFrom(
+                foregroundColor: isDark ? Colors.white : accent,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                backgroundColor: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.white.withValues(alpha: 0.72),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: BorderSide(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.10)
+                        : accent.withValues(alpha: 0.16),
+                  ),
+                ),
+              ),
               icon: const Icon(Icons.arrow_forward_rounded),
               label: Text(actionLabel),
             ),
@@ -2379,15 +2496,13 @@ class _JourneyStepCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
     final surfaceMuted = AppColors.surfaceMutedFor(context);
     final textSoft = AppColors.textSoftFor(context);
 
     return FrostedPanel(
       padding: const EdgeInsets.all(18),
-      backgroundColor: isDark
-          ? const Color(0xCC111927)
-          : Colors.white.withValues(alpha: 0.62),
+      backgroundColor: AppColors.surfaceFor(context),
+      borderColor: AppColors.borderFor(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2568,16 +2683,14 @@ class _QuickAnswerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
     final surfaceMuted = AppColors.surfaceMutedFor(context);
     final textPrimary = AppColors.textPrimaryFor(context);
     final textSoft = AppColors.textSoftFor(context);
 
     return FrostedPanel(
       padding: const EdgeInsets.all(18),
-      backgroundColor: isDark
-          ? const Color(0xCC111927)
-          : Colors.white.withValues(alpha: 0.62),
+      backgroundColor: AppColors.surfaceFor(context),
+      borderColor: AppColors.borderFor(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

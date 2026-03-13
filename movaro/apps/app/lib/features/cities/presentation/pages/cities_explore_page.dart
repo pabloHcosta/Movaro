@@ -45,12 +45,9 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
     super.initState();
     _searchController = TextEditingController();
     _scrollController = ScrollController()..addListener(_handleScroll);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      widget.citiesController.loadMethodology();
-    });
+    widget.citiesController.loadExplore();
+    widget.citiesController.loadCatalog();
+    widget.citiesController.loadMethodology();
   }
 
   @override
@@ -86,6 +83,10 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
             : _quickFilter != null
             ? controller.catalogError
             : null;
+        final isCatalogBootstrapping =
+            controller.catalog.isEmpty &&
+            controller.catalogError == null &&
+            (controller.isLoadingCatalog || hasQuery || _quickFilter != null);
 
         return Scaffold(
           body: Stack(
@@ -228,7 +229,8 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                           );
                         },
                       )
-                    else if (isLoadingResults && pagedCities.isEmpty)
+                    else if ((isLoadingResults && pagedCities.isEmpty) ||
+                        isCatalogBootstrapping)
                       Semantics(
                         container: true,
                         liveRegion: true,
@@ -256,7 +258,7 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                             _ResultsHeader(
                               title: l10n.citiesResultsTitle,
                               body: l10n.citiesResultsBody(
-                                visibleCities.length,
+                                pagedCities.length,
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -709,12 +711,19 @@ class _CityAutocompletePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : AppColors.surfaceFor(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.10)
+              : AppColors.borderFor(context),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1229,7 +1238,7 @@ class _MapCityListTile extends StatelessWidget {
     return Material(
       color: selected
           ? AppColors.primary.withValues(alpha: 0.10)
-          : Colors.white.withValues(alpha: 0.04),
+          : AppColors.surfaceMutedFor(context),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,

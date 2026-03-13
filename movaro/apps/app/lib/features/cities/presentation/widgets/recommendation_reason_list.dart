@@ -21,7 +21,7 @@ class RecommendationReasonList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final background = backgroundColor ?? AppColors.surfaceMutedFor(context);
-    final resolvedTextColor = textColor;
+    final resolvedTextColor = textColor ?? AppColors.textPrimaryFor(context);
     final resolvedIconColor = iconColor ?? AppColors.accent;
     final visibleReasons = maxItems == null
         ? reasons
@@ -52,9 +52,7 @@ class RecommendationReasonList extends StatelessWidget {
                 Expanded(
                   child: Text(
                     context.l10n.recommendationReasonLabel(reason),
-                    style: resolvedTextColor == null
-                        ? null
-                        : TextStyle(color: resolvedTextColor),
+                    style: TextStyle(color: resolvedTextColor),
                   ),
                 ),
               ],

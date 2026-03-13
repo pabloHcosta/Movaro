@@ -1997,6 +1997,24 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get cityDetailDiscoverTitle => 'Conoce mejor la ciudad';
+
+  @override
+  String cityDetailDiscoverBody(Object city, Object state) {
+    return 'Si quieres ver fotos, búsquedas y contexto general de $city ($state), abre la vista de Google sin salir de la app.';
+  }
+
+  @override
+  String get cityDetailDiscoverAction => 'Conocer la ciudad';
+
+  @override
+  String get cityDetailDeepDiveTitle => 'Análisis detallado';
+
+  @override
+  String get cityDetailDeepDiveSummary =>
+      'Abrí esta área si querés ver todos los indicadores, el contexto y una lectura más profunda de la ciudad.';
+
+  @override
   String get cityDetailCompareAction => 'Comparar otras ciudades';
 
   @override
@@ -2063,6 +2081,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get publicHomeJourneyResetConfirm => 'Rehacer ruta';
+
+  @override
+  String get publicHomePlanResetTitle => '¿Iniciar otro plan?';
+
+  @override
+  String get publicHomePlanResetBody =>
+      'Tu plan actual se va a eliminar de este dispositivo para que puedas responder el cuestionario otra vez desde cero.';
 
   @override
   String cityWeatherSummary(Object temperature) {

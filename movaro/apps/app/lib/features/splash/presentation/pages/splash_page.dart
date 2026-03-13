@@ -5,6 +5,7 @@ import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/network/api_health_service.dart';
 import 'package:movaro_app/features/auth/application/auth_controller.dart';
+import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/splash/presentation/pages/splash_loading_view.dart';
 import 'package:movaro_app/features/splash/presentation/pages/splash_offline_page.dart';
@@ -13,6 +14,7 @@ class SplashPage extends StatefulWidget {
   const SplashPage({
     required this.environment,
     required this.authController,
+    required this.citiesController,
     required this.migrationQuestionnaireController,
     required this.apiHealthService,
     required this.journeyContextController,
@@ -21,6 +23,7 @@ class SplashPage extends StatefulWidget {
 
   final AppEnvironment environment;
   final AuthController authController;
+  final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
   final ApiHealthService apiHealthService;
   final JourneyContextController journeyContextController;
@@ -68,6 +71,9 @@ class _SplashPageState extends State<SplashPage> {
 
     await widget.journeyContextController.initialize();
     await widget.authController.initialize();
+    await widget.citiesController.initialize(
+      preloadData: widget.journeyContextController.hasSelectedJourney,
+    );
 
     if (widget.journeyContextController.hasSelectedJourney) {
       await widget.migrationQuestionnaireController.initialize();

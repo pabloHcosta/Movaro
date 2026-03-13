@@ -43,6 +43,13 @@ class LatestMigrationPlanStore {
     await file.writeAsString(jsonEncode(model.toJson()));
   }
 
+  Future<void> clear() async {
+    final file = await _file();
+    if (file.existsSync()) {
+      await file.delete();
+    }
+  }
+
   Future<File> _file() async {
     final directory = await _directoryProvider();
     return File('${directory.path}/movaro_latest_migration_plan.json');

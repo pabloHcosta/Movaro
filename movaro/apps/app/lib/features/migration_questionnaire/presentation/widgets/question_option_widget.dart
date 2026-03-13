@@ -16,7 +16,6 @@ class QuestionOptionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
     final textPrimary = AppColors.textPrimaryFor(context);
     final textSoft = AppColors.textSoftFor(context);
 
@@ -35,9 +34,7 @@ class QuestionOptionWidget extends StatelessWidget {
               : Theme.of(context).colorScheme.outlineVariant,
           backgroundColor: isSelected
               ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.08)
-              : (isDark
-                    ? const Color(0xB3171E29)
-                    : Colors.white.withValues(alpha: 0.76)),
+              : AppColors.surfaceFor(context),
           child: Row(
             children: [
               Expanded(

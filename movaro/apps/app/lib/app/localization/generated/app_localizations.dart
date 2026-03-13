@@ -3409,6 +3409,36 @@ abstract class AppLocalizations {
   /// **'You can choose up to {count} favorite cities.'**
   String cityDetailFavoriteLimitFeedback(Object count);
 
+  /// No description provided for @cityDetailDiscoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get to know the city better'**
+  String get cityDetailDiscoverTitle;
+
+  /// No description provided for @cityDetailDiscoverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If you want photos, search results, and broader context for {city} ({state}), open the Google view without leaving the app.'**
+  String cityDetailDiscoverBody(Object city, Object state);
+
+  /// No description provided for @cityDetailDiscoverAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore the city'**
+  String get cityDetailDiscoverAction;
+
+  /// No description provided for @cityDetailDeepDiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed analysis'**
+  String get cityDetailDeepDiveTitle;
+
+  /// No description provided for @cityDetailDeepDiveSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Open this area if you want the full set of indicators, context, and a deeper reading of the city.'**
+  String get cityDetailDeepDiveSummary;
+
   /// No description provided for @cityDetailCompareAction.
   ///
   /// In en, this message translates to:
@@ -3528,6 +3558,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Redo route'**
   String get publicHomeJourneyResetConfirm;
+
+  /// No description provided for @publicHomePlanResetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start another plan?'**
+  String get publicHomePlanResetTitle;
+
+  /// No description provided for @publicHomePlanResetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current plan will be removed from this device so you can answer the questionnaire again from the beginning.'**
+  String get publicHomePlanResetBody;
 
   /// No description provided for @cityWeatherSummary.
   ///

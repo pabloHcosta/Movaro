@@ -80,6 +80,13 @@ class PreparationResourceLinks {
     );
   }
 
+  static Uri buildCityGoogleSearch(City city) {
+    final query = '${city.name}, ${city.stateName}, Brasil';
+    return Uri.parse(
+      'https://www.google.com/search?q=${Uri.encodeComponent(query)}',
+    );
+  }
+
   static Uri buildRentalSearch(City city, RentalProvider provider) {
     final state = city.stateCode.toLowerCase();
     final plusCity = _slugify(city.name).replaceAll('-', '+');

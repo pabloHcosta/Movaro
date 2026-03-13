@@ -9,12 +9,14 @@ class CityWeatherBadge extends StatefulWidget {
     required this.cityId,
     required this.citiesController,
     this.compact = false,
+    this.prominent = false,
     super.key,
   });
 
   final String cityId;
   final CitiesController citiesController;
   final bool compact;
+  final bool prominent;
 
   @override
   State<CityWeatherBadge> createState() => _CityWeatherBadgeState();
@@ -44,6 +46,41 @@ class _CityWeatherBadgeState extends State<CityWeatherBadge> {
           alpha: AppColors.isDark(context) ? 0.16 : 0.12,
         );
         final icon = _resolveIcon(weather);
+        final textTheme = Theme.of(context).textTheme;
+
+        if (widget.prominent) {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(icon, size: 22, color: tint),
+              const SizedBox(width: 10),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${weather.temperatureCelsius.round()}°C',
+                    style: textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      height: 1.0,
+                    ),
+                  ),
+                  Text(
+                    context.l10n.cityWeatherSummary(
+                      weather.temperatureCelsius.round(),
+                    ),
+                    style: textTheme.labelMedium?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.78),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        }
 
         return Container(
           padding: EdgeInsets.symmetric(

@@ -37,6 +37,9 @@ class _QuestionPageState extends State<QuestionPage> {
   void initState() {
     super.initState();
     _optionsScrollController.addListener(_updateScrollHint);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(controller.initialize());
+    });
   }
 
   @override
@@ -94,6 +97,15 @@ class _QuestionPageState extends State<QuestionPage> {
                           else if (question != null)
                             Expanded(
                               child: _buildQuestionFlow(context, question),
+                            )
+                          else
+                            const Expanded(
+                              child: SingleChildScrollView(
+                                child: FormSkeleton(
+                                  fieldCount: 4,
+                                  compact: true,
+                                ),
+                              ),
                             ),
                         ],
                       ),
