@@ -337,11 +337,11 @@ class _VisualActionCard extends StatelessWidget {
         secondaryActionLabel != null && onSecondaryTap != null;
     final fixedHeight = isPrimary
         ? compact
-              ? (hasSecondaryAction ? 278.0 : 236.0)
-              : (hasSecondaryAction ? 288.0 : 246.0)
+              ? (hasSecondaryAction ? 210.0 : 190.0)
+              : (hasSecondaryAction ? 220.0 : 200.0)
         : compact
-        ? 168.0
-        : 180.0;
+        ? 210.0
+        : 230.0;
 
     return Material(
       color: Colors.transparent,
@@ -369,242 +369,221 @@ class _VisualActionCard extends StatelessWidget {
               ),
             ],
           ),
-          child: SizedBox(
-            height: fixedHeight,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: fixedHeight),
+            child: Stack(
               children: [
-                Container(
-                  width: 4,
-                  margin: const EdgeInsets.symmetric(vertical: 18),
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: isDark ? 0.72 : 0.50),
-                    borderRadius: BorderRadius.circular(999),
+                /// Background illustration (decorative, no layout impact)
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(32),
+                    child: Opacity(
+                      opacity: isDark ? 0.12 : (isPrimary ? 0.18 : 0.14),
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: SizedBox(
+                          width: isPrimary ? (compact ? 200 : 260) : (compact ? 160 : 200),
+                          child: scene,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                Expanded(
-                  flex: isPrimary ? 10 : 9,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      compact ? 14 : 18,
-                      compact ? 16 : 18,
-                      compact ? 12 : 14,
-                      compact ? 16 : 18,
+
+                /// Content layer
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 4,
+                      margin: const EdgeInsets.symmetric(vertical: 18),
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: isDark ? 0.72 : 0.50),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          compact ? 14 : 18,
+                          compact ? 16 : 18,
+                          compact ? 14 : 18,
+                          compact ? 16 : 18,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: compact ? 48 : 56,
-                              height: compact ? 48 : 56,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    accent.withValues(
-                                      alpha: isDark ? 0.24 : 0.16,
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: compact ? 44 : 52,
+                                  height: compact ? 44 : 52,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        accent.withValues(alpha: isDark ? 0.24 : 0.16),
+                                        accent.withValues(alpha: isDark ? 0.14 : 0.08),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
                                     ),
-                                    accent.withValues(
-                                      alpha: isDark ? 0.14 : 0.08,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: accent.withValues(alpha: isDark ? 0.22 : 0.12),
                                     ),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(18),
-                                border: Border.all(
-                                  color: accent.withValues(
-                                    alpha: isDark ? 0.22 : 0.12,
+                                  ),
+                                  child: Icon(
+                                    icon,
+                                    color: accent,
+                                    size: compact ? 22 : 26,
                                   ),
                                 ),
-                              ),
-                              child: Icon(
-                                icon,
-                                color: accent,
-                                size: compact ? 24 : 28,
-                              ),
-                            ),
-                            if (statusLine != null) ...[
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Align(
-                                  alignment: Alignment.topLeft,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: accent.withValues(
-                                        alpha: isDark ? 0.10 : 0.06,
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        title,
+                                        maxLines: isPrimary ? 2 : 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: (compact
+                                                ? Theme.of(context).textTheme.titleMedium
+                                                : (isPrimary
+                                                    ? Theme.of(context).textTheme.titleLarge
+                                                    : Theme.of(context).textTheme.titleMedium))
+                                            ?.copyWith(
+                                              color: textPrimary,
+                                              height: 1.05,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: -0.2,
+                                            ),
                                       ),
-                                      borderRadius: BorderRadius.circular(999),
+                                      if (statusLine != null) ...[
+                                        const SizedBox(height: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                          decoration: BoxDecoration(
+                                            color: accent.withValues(alpha: isDark ? 0.10 : 0.06),
+                                            borderRadius: BorderRadius.circular(999),
+                                          ),
+                                          child: Text(
+                                            statusLine!,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                  color: isDark
+                                                      ? Colors.white
+                                                      : AppColors.textPrimaryFor(context),
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            Text(
+                              description,
+                              maxLines: isPrimary ? 4 : 4,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: textSoft, height: 1.30),
+                            ),
+
+                            const SizedBox(height: 8),
+                            _CardCueRow(accent: accent, compact: compact),
+
+                            const SizedBox(height: 4),
+
+                            if (secondaryActionLabel != null && onSecondaryTap != null) ...[
+                              _SecondaryInlineAction(
+                                label: secondaryActionLabel!,
+                                onTap: onSecondaryTap!,
+                                isPrimary: isPrimary,
+                                compact: compact,
+                              ),
+                              const SizedBox(height: 12),
+                            ] else
+                              const SizedBox(height: 8),
+
+                            if (!hidePrimaryAction && isPrimary)
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: compact ? 12 : 14,
+                                  vertical: compact ? 10 : 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(
+                                    alpha: isDark ? 0.12 : 0.08,
+                                  ),
+                                  borderRadius: BorderRadius.circular(18),
+                                  border: Border.all(
+                                    color: AppColors.primary.withValues(
+                                      alpha: isDark ? 0.18 : 0.12,
                                     ),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        actionLabel,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge
+                                            ?.copyWith(
+                                              color: AppColors.primary,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      Icons.arrow_outward_rounded,
+                                      size: compact ? 18 : 20,
+                                      color: AppColors.primary,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else if (!hidePrimaryAction)
+                              Row(
+                                children: [
+                                  Expanded(
                                     child: Text(
-                                      statusLine!,
+                                      actionLabel,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelSmall
+                                      style: Theme.of(context).textTheme.labelLarge
                                           ?.copyWith(
-                                            color: isDark
-                                                ? Colors.white
-                                                : AppColors.textPrimaryFor(
-                                                    context,
-                                                  ),
+                                            color: accent,
                                             fontWeight: FontWeight.w700,
                                           ),
                                     ),
                                   ),
-                                ),
+                                  const SizedBox(width: 8),
+                                  Icon(
+                                    Icons.arrow_outward_rounded,
+                                    size: compact ? 18 : 20,
+                                    color: accent,
+                                  ),
+                                ],
                               ),
-                            ],
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          title,
-                          maxLines: isPrimary ? 2 : 3,
-                          overflow: TextOverflow.ellipsis,
-                          style:
-                              (compact
-                                      ? Theme.of(context).textTheme.titleMedium
-                                      : (isPrimary
-                                            ? Theme.of(
-                                                context,
-                                              ).textTheme.titleLarge
-                                            : Theme.of(
-                                                context,
-                                              ).textTheme.titleMedium))
-                                  ?.copyWith(
-                                    color: textPrimary,
-                                    height: 0.98,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.3,
-                                  ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          description,
-                          maxLines: isPrimary ? 3 : 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: textSoft, height: 1.30),
-                        ),
-                        const SizedBox(height: 12),
-                        _CardCueRow(accent: accent, compact: compact),
-                        const Spacer(),
-                        if (secondaryActionLabel != null &&
-                            onSecondaryTap != null) ...[
-                          _SecondaryInlineAction(
-                            label: secondaryActionLabel!,
-                            onTap: onSecondaryTap!,
-                            isPrimary: isPrimary,
-                            compact: compact,
-                          ),
-                          const SizedBox(height: 12),
-                        ] else
-                          const SizedBox(height: 8),
-                        if (!hidePrimaryAction && isPrimary)
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: compact ? 12 : 14,
-                              vertical: compact ? 10 : 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(
-                                alpha: isDark ? 0.12 : 0.08,
-                              ),
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color: AppColors.primary.withValues(
-                                  alpha: isDark ? 0.18 : 0.12,
-                                ),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    actionLabel,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelLarge
-                                        ?.copyWith(
-                                          color: AppColors.primary,
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 0.0,
-                                        ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Icon(
-                                  Icons.arrow_outward_rounded,
-                                  size: compact ? 18 : 20,
-                                  color: AppColors.primary,
-                                ),
-                              ],
-                            ),
-                          )
-                        else if (!hidePrimaryAction)
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  actionLabel,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.labelLarge
-                                      ?.copyWith(
-                                        color: accent,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.0,
-                                      ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Icon(
-                                Icons.arrow_outward_rounded,
-                                size: compact ? 18 : 20,
-                                color: accent,
-                              ),
-                            ],
-                          ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-                Container(
-                  width: isPrimary ? (compact ? 132 : 188) : (compact ? 112 : 128),
-                  margin: EdgeInsets.fromLTRB(
-                    0,
-                    compact ? 14 : 16,
-                    compact ? 10 : 12,
-                    compact ? 14 : 16,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    gradient: LinearGradient(
-                      colors: [
-                        accent.withValues(alpha: isDark ? 0.10 : 0.12),
-                        Colors.transparent,
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                  ),
-                  child: Opacity(
-                    opacity: isDark ? 0.22 : (isPrimary ? 0.50 : 0.40),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(24),
-                      child: scene,
-                    ),
-                  ),
+                  ],
                 ),
               ],
             ),
