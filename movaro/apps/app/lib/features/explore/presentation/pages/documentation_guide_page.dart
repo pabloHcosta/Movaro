@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -12,6 +13,7 @@ import 'package:movaro_app/features/explore/presentation/widgets/housing_decisio
 import 'package:movaro_app/features/explore/presentation/widgets/housing_entry_cost_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_soft_landing_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/practical_cost_estimator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
 
 enum DocumentationGuideSection {
@@ -24,9 +26,18 @@ enum DocumentationGuideSection {
 }
 
 class DocumentationGuidePage extends StatefulWidget {
-  const DocumentationGuidePage({required this.exchangeRatesService, super.key});
+  const DocumentationGuidePage({
+    required this.exchangeRatesService,
+    this.initialSection,
+    this.journeyContextController,
+    this.migrationQuestionnaireController,
+    super.key,
+  });
 
   final CopilotExchangeRatesService exchangeRatesService;
+  final DocumentationGuideSection? initialSection;
+  final JourneyContextController? journeyContextController;
+  final MigrationQuestionnaireController? migrationQuestionnaireController;
 
   @override
   State<DocumentationGuidePage> createState() => _DocumentationGuidePageState();
@@ -49,6 +60,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     _scrollController = ScrollController();
     _scrollController.addListener(_handleScroll);
     _preferencesStore = DocumentationGuidePreferencesStore();
+    _selectedSection = widget.initialSection;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshScrollHint();
       _maybeShowGuide();
@@ -89,6 +101,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     final quickAnswers = _guideQuickAnswers(context);
     final filteredAnswers = quickAnswers.where(_matchesAnswer).toList();
     final searchResults = _buildSearchResults(filteredPaths, filteredAnswers);
+    final focusCards = _buildFocusCards(context);
     final displayedAnswers = _searchQuery.isEmpty && _selectedSection == null
         ? filteredAnswers.take(6).toList()
         : filteredAnswers;
@@ -231,6 +244,14 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                                   });
                                 },
                               ),
+                              if (focusCards.isNotEmpty) ...[
+                                const SizedBox(height: 14),
+                                _JourneyFocusStrip(
+                                  title: l10n.documentationFocusTitle,
+                                  body: _focusBody(context),
+                                  cards: focusCards,
+                                ),
+                              ],
                               const SizedBox(height: 14),
                               _PromptRail(
                                 prompts: [
@@ -493,6 +514,58 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
 
   List<_DocumentationTopic> _topics(BuildContext context) =>
       _documentationTopics(context);
+
+  String _focusBody(BuildContext context) {
+    final selection = widget.journeyContextController?.selection;
+    if (selection?.isComplete == true) {
+      return context.l10n.documentationFocusBody(
+        selection!.origin!.name,
+        selection.destination!.name,
+      );
+    }
+    if (selection?.destination != null) {
+      return context.l10n.documentationFocusBodyDestination(
+        selection!.destination!.name,
+      );
+    }
+    return context.l10n.documentationFocusBodyDefault;
+  }
+
+  List<_FocusCardMeta> _buildFocusCards(BuildContext context) {
+    final cards = <_FocusCardMeta>[
+      _FocusCardMeta(
+        title: context.l10n.documentationPathDocumentsTitle,
+        body: context.l10n.exploreContentDocumentsBody,
+        icon: Icons.badge_outlined,
+        section: DocumentationGuideSection.documents,
+      ),
+      _FocusCardMeta(
+        title: context.l10n.documentationHousingArrivalSectionTitle,
+        body: context.l10n.exploreContentHousingBody,
+        icon: Icons.home_work_outlined,
+        section: DocumentationGuideSection.housing,
+      ),
+      _FocusCardMeta(
+        title: context.l10n.documentationPathWorkTitle,
+        body: context.l10n.exploreContentWorkBody,
+        icon: Icons.work_outline_rounded,
+        section: DocumentationGuideSection.work,
+      ),
+    ];
+
+    final priorities =
+        widget.migrationQuestionnaireController?.generatedPlan?.selectedPriorities;
+    if (priorities == null || priorities.isEmpty) {
+      return cards;
+    }
+    if (priorities.contains('job_opportunities')) {
+      return [cards[2], cards[0], cards[1]];
+    }
+    if (priorities.contains('low_cost')) {
+      return [cards[1], cards[0], cards[2]];
+    }
+    return cards;
+  }
 
   List<_GuidePathMeta> _guidePaths(BuildContext context) {
     final l10n = context.l10n;
@@ -3095,6 +3168,119 @@ class _QuickAnswerCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _JourneyFocusStrip extends StatelessWidget {
+  const _JourneyFocusStrip({
+    required this.title,
+    required this.body,
+    required this.cards,
+  });
+
+  final String title;
+  final String body;
+  final List<_FocusCardMeta> cards;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 6),
+        Text(
+          body,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppColors.textSoftFor(context),
+            height: 1.4,
+          ),
+        ),
+        const SizedBox(height: 12),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final threeColumns = constraints.maxWidth >= 900;
+            final twoColumns = constraints.maxWidth >= 620;
+            final cardWidth = threeColumns
+                ? (constraints.maxWidth - 24) / 3
+                : twoColumns
+                ? (constraints.maxWidth - 12) / 2
+                : constraints.maxWidth;
+
+            return Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                for (final card in cards)
+                  SizedBox(
+                    width: cardWidth,
+                    child: _FocusCard(card: card),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _FocusCard extends StatelessWidget {
+  const _FocusCard({required this.card});
+
+  final _FocusCardMeta card;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => Navigator.pushNamed(
+          context,
+          AppRoutes.documentationTopic,
+          arguments: card.section,
+        ),
+        child: Ink(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceFor(context),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.borderFor(context)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(card.icon, color: AppColors.primary),
+              const SizedBox(height: 12),
+              Text(card.title, style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 6),
+              Text(
+                card.body,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FocusCardMeta {
+  const _FocusCardMeta({
+    required this.title,
+    required this.body,
+    required this.icon,
+    required this.section,
+  });
+
+  final String title;
+  final String body;
+  final IconData icon;
+  final DocumentationGuideSection section;
 }
 
 class _DocumentationTopic {

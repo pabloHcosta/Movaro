@@ -95,6 +95,13 @@
   "publicHomeQuestionsAction": "Tirar dúvidas",
   "publicHomePlanTitle": "Gerar meu plano",
   "publicHomePlanBody": "Responda poucas perguntas e receba um plano inicial com sugestões mais claras.",
+  "publicHomeJourneyDraftTitle": "Comece seu plano com o destino já definido",
+  "publicHomeJourneyDraftBody": "Seu destino é {destination}. Agora responda poucas perguntas e conte de onde você sai para que o Movaro gere o plano certo.",
+  "@publicHomeJourneyDraftBody": {
+    "placeholders": {
+      "destination": {}
+    }
+  },
   "publicHomeStoriesTitle": "Ler experiências reais",
   "publicHomeStoriesBody": "Entenda o que outras pessoas estão buscando antes de decidir seu próximo passo.",
   "publicHomeStoriesAction": "Explorar histórias",
@@ -428,6 +435,20 @@
   "questionnairePageTitle": "Seu plano inicial",
   "questionnaireLoadingLabel": "Preparando suas perguntas",
   "questionnaireSupportText": "Leva menos de um minuto. Uma pergunta por vez.",
+  "questionnaireSectionOrigin": "Origem",
+  "questionnaireSectionBasicProfile": "Perfil básico",
+  "questionnaireSectionPreferences": "Preferências",
+  "questionnaireSectionFinancial": "Situação financeira",
+  "questionnaireSectionGoal": "Objetivo migratório",
+  "questionnaireNextSection": "Próxima: {section}",
+  "@questionnaireNextSection": {
+    "placeholders": {
+      "section": {}
+    }
+  },
+  "questionnaireReadyForPlan": "Depois disso, vamos transformar suas respostas no seu primeiro plano.",
+  "questionnaireProcessingTitle": "Montando seu primeiro plano",
+  "questionnaireProcessingBody": "Estamos conectando sua jornada, seu perfil e suas prioridades em um ponto de partida claro.",
   "questionProgress": "Pergunta {current} de {total}",
   "@questionProgress": {
     "placeholders": {
@@ -1048,6 +1069,17 @@
   "protectedCommunityCreateTitle": "Criar post",
   "protectedCommunityCreateDescription": "Esta área vai permitir criar posts quando esse fluxo da comunidade estiver habilitado.",
   "questionOriginCountryTitle": "De onde você vem?",
+  "journeyEntryTitle": "Escolha seu destino e comece mais rápido",
+  "journeyEntryBody": "Primeiro escolha para onde você quer ir. O Movaro salva essa decisão agora e coleta sua origem na primeira parte do questionário.",
+  "journeyEntryDestinationLabel": "Para onde você quer ir?",
+  "journeyEntryStartAction": "Começar meu plano",
+  "journeyEntrySelectedDestination": "Destino escolhido: {destination}",
+  "@journeyEntrySelectedDestination": {
+    "placeholders": {
+      "destination": {}
+    }
+  },
+  "journeyEntryOriginPending": "Vamos coletar sua origem na primeira pergunta antes de gerar o plano.",
   "questionDestinationCountryTitle": "Para onde você quer ir?",
   "questionGoalTitle": "O que você quer fazer no novo país?",
   "questionPortugueseFamiliarityTitle": "Qual é a sua familiaridade com o português hoje?",
@@ -1612,6 +1644,49 @@
       "city": {}
     }
   },
+  "migrationPlanResultPrimaryCtaEyebrow": "Próximo passo",
+  "migrationPlanResultStartPlanTitle": "Começar meu plano",
+  "migrationPlanResultStartPlanBody": "Revise {city} com um pouco mais de contexto e confirme quando estiver pronto para liberar o plano guiado completo.",
+  "@migrationPlanResultStartPlanBody": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultStartPlanAction": "Começar meu plano",
+  "migrationPlanResultOpenPlanTitle": "Ver plano completo",
+  "migrationPlanResultOpenPlanAction": "Ver plano completo",
+  "migrationPlanResultCompatibilityHigh": "Alta compatibilidade",
+  "migrationPlanResultCompatibilityMedium": "Boa compatibilidade",
+  "migrationPlanResultCompatibilityInitial": "Compatibilidade inicial",
+  "migrationPlanResultCostLabel": "Custo estimado",
+  "migrationPlanResultCostSupporting": "Uma leitura orientativa baseada nos sinais de custo e aluguel da cidade.",
+  "migrationPlanResultCostLower": "Mais baixo",
+  "migrationPlanResultCostMedium": "Médio",
+  "migrationPlanResultCostHigher": "Mais alto",
+  "migrationPlanResultDifficultyLabel": "Nível de dificuldade",
+  "migrationPlanResultDifficultySupporting": "Quanta coordenação este plano pode exigir antes da chegada.",
+  "migrationPlanResultDifficultyFocused": "Focado",
+  "migrationPlanResultDifficultyModerate": "Moderado",
+  "migrationPlanResultDifficultyStructured": "Mais estruturado",
+  "migrationPlanResultTimelineLabel": "Tempo estimado",
+  "migrationPlanResultTimelineValue": "~{days} dias",
+  "@migrationPlanResultTimelineValue": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "migrationPlanResultCitySectionTitle": "Por que esta cidade está na frente",
+  "migrationPlanResultCitySectionBody": "Abra o contexto da cidade quando quiser mais detalhes, não antes de a decisão principal ficar clara.",
+  "migrationPlanResultPlanSectionTitle": "O que acontece depois deste resultado",
+  "migrationPlanResultPlanSectionBody": "A preparação só ganha valor quando a escolha da cidade já parece firme o suficiente para avançar.",
+  "migrationPlanResultProgressSupporting": "Itens do checklist concluídos dentro do plano guiado.",
+  "migrationPlanCopilotProgressValue": "{done} de {total} itens do checklist concluídos",
+  "@migrationPlanCopilotProgressValue": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
   "migrationPlanScrollHint": "Ver mais",
   "languageSelectorSystem": "Sistema",
   "bmpDisclaimer": "Isto monta um ponto de partida. Não é consultoria legal.",
@@ -1635,10 +1710,10 @@
   "bmpVariantTitle": "Como você quer montar seu plano?",
   "bmpVariantSubtitle": "Você pode ir mais rápido ou responder uma pergunta extra para uma recomendação mais precisa.",
   "bmpVariantLeanTitle": "Plano rápido",
-  "bmpVariantLeanBody": "3 perguntas e um refinamento opcional para chegar a uma direção inicial com pouca fricção.",
+  "bmpVariantLeanBody": "4 perguntas objetivas para chegar a uma direção inicial com pouca fricção.",
   "bmpVariantLeanTag": "Mais rápido",
   "bmpVariantStrategicTitle": "Plano estratégico",
-  "bmpVariantStrategicBody": "Inclui como você pretende se sustentar e gera uma leitura inicial mais precisa para começar.",
+  "bmpVariantStrategicBody": "Adiciona uma preferência extra para gerar uma recomendação inicial mais precisa.",
   "bmpVariantStrategicTag": "Mais preciso",
   "bmpGuideEyebrow": "Monte seu plano",
   "bmpGuideTitle": "Como este planejador funciona",

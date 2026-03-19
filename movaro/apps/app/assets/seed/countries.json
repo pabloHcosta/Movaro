@@ -1,22 +1,62 @@
 [
   {
     "id": "argentina",
-    "name": "Argentina"
+    "name": "Argentina",
+    "isoCode": "AR",
+    "locationAliases": ["argentina", "republica argentina", "argentine republic"],
+    "coverage": {
+      "originStatus": "full",
+      "destinationStatus": "unsupported",
+      "publicContentStatus": "partial",
+      "supportedDestinationIds": ["brasil"]
+    }
   },
   {
     "id": "brasil",
-    "name": "Brasil"
+    "name": "Brasil",
+    "isoCode": "BR",
+    "locationAliases": ["brasil", "brazil", "federative republic of brazil"],
+    "coverage": {
+      "originStatus": "partial",
+      "destinationStatus": "full",
+      "publicContentStatus": "full",
+      "supportedDestinationIds": []
+    }
   },
   {
     "id": "chile",
-    "name": "Chile"
+    "name": "Chile",
+    "isoCode": "CL",
+    "locationAliases": ["chile", "republic of chile"],
+    "coverage": {
+      "originStatus": "partial",
+      "destinationStatus": "partial",
+      "publicContentStatus": "partial",
+      "supportedDestinationIds": []
+    }
   },
   {
     "id": "uruguai",
-    "name": "Uruguai"
+    "name": "Uruguai",
+    "isoCode": "UY",
+    "locationAliases": ["uruguay", "uruguai", "oriental republic of uruguay"],
+    "coverage": {
+      "originStatus": "partial",
+      "destinationStatus": "partial",
+      "publicContentStatus": "partial",
+      "supportedDestinationIds": []
+    }
   },
   {
     "id": "paraguai",
-    "name": "Paraguai"
+    "name": "Paraguai",
+    "isoCode": "PY",
+    "locationAliases": ["paraguay", "paraguai", "republic of paraguay"],
+    "coverage": {
+      "originStatus": "partial",
+      "destinationStatus": "partial",
+      "publicContentStatus": "partial",
+      "supportedDestinationIds": []
+    }
   }
 ]

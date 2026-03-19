@@ -1,5 +1,6 @@
 import 'package:movaro_app/core/catalog/domain/repositories/catalog_repository.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
+import 'package:movaro_app/core/journey/journey_country_metadata.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/models/option_model.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/models/question_model.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/question.dart';
@@ -20,70 +21,40 @@ class QuestionRepositoryImpl implements QuestionRepository {
   Future<List<Question>> getQuestions() async {
     await _catalogRepository.getCountries();
 
-    if (!_journeyContextController.hasSelectedJourney) {
+    final destinationCountryId = _journeyContextController.destinationCountryId;
+    final selectedDestination = _journeyContextController.selectedDestination;
+    if (destinationCountryId == null ||
+        selectedDestination == null ||
+        !_journeyContextController.canUseAsDestination(selectedDestination)) {
       return const [];
     }
 
+    final originOptions = _journeyContextController.availableOrigins
+        .where(
+          (country) =>
+              _journeyContextController.canUseAsOrigin(country) &&
+              country.id != destinationCountryId &&
+              _journeyContextController.isRouteSupported(
+                originCountryId: country.id,
+                destinationCountryId: destinationCountryId,
+              ),
+        )
+        .map(
+          (country) => OptionModel(
+            id: country.id,
+            label: country.name,
+            value: country.journeyValue,
+          ),
+        )
+        .toList(growable: false);
+
     return [
       QuestionModel(
-        id: 'intent',
-        title: 'intent',
+        id: 'origin_country',
+        title: 'origin_country',
         type: 'single_card',
         variants: QuestionnaireVariant.values,
-        options: const [
-          OptionModel(
-            id: 'find_job_br',
-            label: 'find_job_br',
-            value: 'find_job_br',
-          ),
-          OptionModel(
-            id: 'remote_income',
-            label: 'remote_income',
-            value: 'remote_income',
-          ),
-          OptionModel(id: 'study', label: 'study', value: 'study'),
-          OptionModel(
-            id: 'family_partner',
-            label: 'family_partner',
-            value: 'family_partner',
-          ),
-          OptionModel(
-            id: 'fresh_start',
-            label: 'fresh_start',
-            value: 'fresh_start',
-          ),
-          OptionModel(
-            id: 'explore_unsure',
-            label: 'explore_unsure',
-            value: 'explore_unsure',
-          ),
-        ],
-      ).toEntity(),
-      QuestionModel(
-        id: 'funding',
-        title: 'funding',
-        type: 'single_card',
-        variants: [QuestionnaireVariant.strategic],
-        options: const [
-          OptionModel(id: 'savings', label: 'savings', value: 'savings'),
-          OptionModel(
-            id: 'remote_income',
-            label: 'remote_income',
-            value: 'remote_income',
-          ),
-          OptionModel(
-            id: 'job_search',
-            label: 'job_search',
-            value: 'job_search',
-          ),
-          OptionModel(id: 'job_offer', label: 'job_offer', value: 'job_offer'),
-          OptionModel(
-            id: 'family_support',
-            label: 'family_support',
-            value: 'family_support',
-          ),
-          OptionModel(id: 'dont_know', label: 'dont_know', value: 'dont_know'),
-        ],
+        options: originOptions,
       ).toEntity(),
       QuestionModel(
         id: 'timeline',
@@ -156,7 +127,7 @@ class QuestionRepositoryImpl implements QuestionRepository {
         type: 'multi_chip',
         maxSelections: 2,
         isOptional: true,
-        variants: QuestionnaireVariant.values,
+        variants: [QuestionnaireVariant.strategic],
         options: const [
           OptionModel(
             id: 'prefer_south',
@@ -197,6 +168,66 @@ class QuestionRepositoryImpl implements QuestionRepository {
             id: 'no_constraints',
             label: 'no_constraints',
             value: 'no_constraints',
+          ),
+        ],
+      ).toEntity(),
+      QuestionModel(
+        id: 'funding',
+        title: 'funding',
+        type: 'single_card',
+        variants: QuestionnaireVariant.values,
+        options: const [
+          OptionModel(id: 'savings', label: 'savings', value: 'savings'),
+          OptionModel(
+            id: 'remote_income',
+            label: 'remote_income',
+            value: 'remote_income',
+          ),
+          OptionModel(
+            id: 'job_search',
+            label: 'job_search',
+            value: 'job_search',
+          ),
+          OptionModel(id: 'job_offer', label: 'job_offer', value: 'job_offer'),
+          OptionModel(
+            id: 'family_support',
+            label: 'family_support',
+            value: 'family_support',
+          ),
+          OptionModel(id: 'dont_know', label: 'dont_know', value: 'dont_know'),
+        ],
+      ).toEntity(),
+      QuestionModel(
+        id: 'intent',
+        title: 'intent',
+        type: 'single_card',
+        variants: QuestionnaireVariant.values,
+        options: const [
+          OptionModel(
+            id: 'find_job_br',
+            label: 'find_job_br',
+            value: 'find_job_br',
+          ),
+          OptionModel(
+            id: 'remote_income',
+            label: 'remote_income',
+            value: 'remote_income',
+          ),
+          OptionModel(id: 'study', label: 'study', value: 'study'),
+          OptionModel(
+            id: 'family_partner',
+            label: 'family_partner',
+            value: 'family_partner',
+          ),
+          OptionModel(
+            id: 'fresh_start',
+            label: 'fresh_start',
+            value: 'fresh_start',
+          ),
+          OptionModel(
+            id: 'explore_unsure',
+            label: 'explore_unsure',
+            value: 'explore_unsure',
           ),
         ],
       ).toEntity(),

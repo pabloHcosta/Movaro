@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -12,14 +13,17 @@ import 'package:movaro_app/features/cities/presentation/widgets/city_image_backd
 import 'package:movaro_app/features/cities/presentation/widgets/city_weather_badge.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_structure_widgets.dart';
 
 class FavoritesPage extends StatelessWidget {
   const FavoritesPage({
+    required this.journeyContextController,
     required this.citiesController,
     required this.migrationQuestionnaireController,
     super.key,
   });
 
+  final JourneyContextController journeyContextController;
   final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
 
@@ -48,20 +52,26 @@ class FavoritesPage extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 18),
                           child: AppGlassHeader(
-                            title: context.l10n.mainNavFavorites,
+                            title: context.l10n.mainNavProfile,
                             onBack: () => Navigator.pushReplacementNamed(
                               context,
                               AppRoutes.publicHome,
                             ),
                           ),
                         ),
+                        _ProfileOverviewPanel(
+                          journeyContextController: journeyContextController,
+                          migrationQuestionnaireController:
+                              migrationQuestionnaireController,
+                        ),
+                        const SizedBox(height: 16),
                         FrostedPanel(
                           padding: const EdgeInsets.all(22),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                context.l10n.publicHomeFavoritesTitle,
+                                context.l10n.profileSavedCitiesTitle,
                                 style: Theme.of(
                                   context,
                                 ).textTheme.headlineSmall,
@@ -70,7 +80,7 @@ class FavoritesPage extends StatelessWidget {
                               Text(
                                 favorites.isEmpty
                                     ? context.l10n.favoritesEmptyBody
-                                    : context.l10n.publicHomeFavoritesBody,
+                                    : context.l10n.profileSavedCitiesBody,
                                 style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(
                                       color: AppColors.textSoftFor(context),
@@ -171,10 +181,74 @@ class FavoritesPage extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: MainNavigationBar(
-        currentIndex: 1,
+        currentIndex: 3,
+        journeyContextController: journeyContextController,
         citiesController: citiesController,
         migrationQuestionnaireController: migrationQuestionnaireController,
       ),
+    );
+  }
+}
+
+class _ProfileOverviewPanel extends StatelessWidget {
+  const _ProfileOverviewPanel({
+    required this.journeyContextController,
+    required this.migrationQuestionnaireController,
+  });
+
+  final JourneyContextController journeyContextController;
+  final MigrationQuestionnaireController migrationQuestionnaireController;
+
+  @override
+  Widget build(BuildContext context) {
+    final journey = journeyContextController.selection;
+    final plan = migrationQuestionnaireController.generatedPlan;
+    final journeyValue = journey.isComplete
+        ? context.l10n.profileJourneyValue(
+            journey.origin!.name,
+            journey.destination!.name,
+          )
+        : journey.destination != null
+        ? context.l10n.profileJourneyPendingValue(journey.destination!.name)
+        : context.l10n.profileJourneyEmptyValue;
+    final planValue = plan == null
+        ? context.l10n.profilePlanEmptyValue
+        : plan.isCityConfirmed
+        ? context.l10n.profilePlanReadyValue(plan.recommendedCity?.name ?? '')
+        : context.l10n.profilePlanDraftValue;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final twoColumns = constraints.maxWidth >= 700;
+        final cardWidth = twoColumns
+            ? (constraints.maxWidth - 12) / 2
+            : constraints.maxWidth;
+
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            SizedBox(
+              width: cardWidth,
+              child: PlanSummaryCard(
+                label: context.l10n.profileJourneyTitle,
+                value: journeyValue,
+                supporting: context.l10n.profileJourneyBody,
+                icon: Icons.route_rounded,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: PlanSummaryCard(
+                label: context.l10n.profilePlanTitle,
+                value: planValue,
+                supporting: context.l10n.profilePlanBody,
+                icon: Icons.checklist_rounded,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

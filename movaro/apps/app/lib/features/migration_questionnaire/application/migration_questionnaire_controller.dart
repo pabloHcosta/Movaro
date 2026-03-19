@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/latest_migration_plan_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/answer.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/question.dart';
@@ -17,17 +20,20 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     required MigrationPlanGenerator planGenerator,
     required JourneyContextController journeyContextController,
     LatestMigrationPlanStore? latestPlanStore,
+    QuestionnaireFlowDraftStore? flowDraftStore,
   }) : _questionRepository = questionRepository,
        _migrationPlanRepository = migrationPlanRepository,
        _planGenerator = planGenerator,
        _journeyContextController = journeyContextController,
-       _latestPlanStore = latestPlanStore ?? LatestMigrationPlanStore();
+       _latestPlanStore = latestPlanStore ?? LatestMigrationPlanStore(),
+       _flowDraftStore = flowDraftStore ?? QuestionnaireFlowDraftStore();
 
   final QuestionRepository _questionRepository;
   final MigrationPlanRepository _migrationPlanRepository;
   final MigrationPlanGenerator _planGenerator;
   final JourneyContextController _journeyContextController;
   final LatestMigrationPlanStore _latestPlanStore;
+  final QuestionnaireFlowDraftStore _flowDraftStore;
 
   List<Question> _questions = const [];
   List<Answer> _answers = const [];
@@ -44,6 +50,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   bool _includeConstraints = false;
 
   List<Question> get questions => _questions;
+  List<Question> get activeQuestions => _activeQuestions;
   List<Answer> get answers => _answers;
   List<MigrationPlan> get savedPlans => _savedPlans;
   MigrationPlan? get generatedPlan => _generatedPlan;
@@ -56,6 +63,13 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   bool get isGeneratingPlan => _isGeneratingPlan;
   bool get isSavingPlan => _isSavingPlan;
   bool get isRefinePromptVisible => _showRefinePrompt;
+  bool get hasInProgressDraft =>
+      _selectedVariant != null ||
+      _answers.any(
+        (answer) =>
+            answer.questionId != 'origin_country' &&
+            answer.questionId != 'destination_country',
+      );
 
   List<Question> get coreQuestions {
     final variant = _selectedVariant;
@@ -65,7 +79,6 @@ class MigrationQuestionnaireController extends ChangeNotifier {
 
     return _questions
         .where((question) => question.variants.contains(variant))
-        .where((question) => question.id != 'constraints')
         .toList(growable: false);
   }
 
@@ -79,11 +92,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   }
 
   List<Question> get _activeQuestions {
-    final base = List<Question>.from(coreQuestions);
-    if (_includeConstraints && optionalConstraintsQuestion != null) {
-      base.add(optionalConstraintsQuestion!);
-    }
-    return base;
+    return coreQuestions;
   }
 
   Question? get currentQuestion {
@@ -130,9 +139,14 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _setInitializing(true);
     try {
       _questions = await _questionRepository.getQuestions();
-      _syncJourneyAnswers();
       _savedPlans = await _migrationPlanRepository.getSavedPlans();
       _generatedPlan = await _latestPlanStore.read();
+      final draft = _generatedPlan == null
+          ? await _flowDraftStore.read()
+          : null;
+      _restoreDraft(draft);
+      _syncJourneyAnswers();
+      _clampCurrentIndex();
       _isInitialized = true;
       notifyListeners();
     } finally {
@@ -140,7 +154,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     }
   }
 
-  void resetFlow() {
+  Future<void> resetFlow() async {
     _answers = const [];
     _syncJourneyAnswers();
     _generatedPlan = null;
@@ -149,6 +163,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _showRefinePrompt = false;
     _isRefineResolved = false;
     _includeConstraints = false;
+    await _flowDraftStore.clear();
     notifyListeners();
   }
 
@@ -162,6 +177,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _isRefineResolved = false;
     _includeConstraints = false;
     await _latestPlanStore.clear();
+    await _flowDraftStore.clear();
     notifyListeners();
   }
 
@@ -170,14 +186,17 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _currentIndex = 0;
     _showRefinePrompt = false;
     _isRefineResolved = false;
-    _includeConstraints = variant == QuestionnaireVariant.strategic;
-    _removeAnswer('funding');
-    _removeAnswer('constraints');
+    _includeConstraints = false;
+    if (variant == QuestionnaireVariant.lean) {
+      _removeAnswer('constraints');
+    }
     notifyListeners();
+    _persistDraft();
   }
 
   void selectAnswer(String questionId, String value) {
     _setAnswer(questionId, <String>[value]);
+    _syncJourneySelection(questionId, <String>[value]);
   }
 
   bool toggleAnswer(String questionId, String value) {
@@ -260,26 +279,12 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   }
 
   bool get isLastQuestion {
-    if (_showRefinePrompt) {
-      return false;
-    }
-
     final question = currentQuestion;
     if (question == null) {
       return false;
     }
 
-    if (isStrategicVariant) {
-      return question.id == 'constraints';
-    }
-
-    if (question.id == 'constraints') {
-      return true;
-    }
-
-    return _isRefineResolved &&
-        !_includeConstraints &&
-        question.id == 'priorities';
+    return identical(question, _activeQuestions.last);
   }
 
   void goBack() {
@@ -290,12 +295,14 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     if (_showRefinePrompt) {
       _showRefinePrompt = false;
       notifyListeners();
+      _persistDraft();
       return;
     }
 
     if (_currentIndex > 0) {
       _currentIndex -= 1;
       notifyListeners();
+      _persistDraft();
       return;
     }
 
@@ -303,6 +310,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _includeConstraints = false;
     _isRefineResolved = false;
     notifyListeners();
+    _persistDraft();
   }
 
   Future<bool> goNext() async {
@@ -315,32 +323,22 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       return false;
     }
 
-    if (!isStrategicVariant &&
-        question.id == 'priorities' &&
-        !_isRefineResolved) {
-      _showRefinePrompt = true;
-      notifyListeners();
-      return false;
-    }
-
-    if (question.id == 'constraints' || isLastQuestion) {
+    if (isLastQuestion) {
       return _generatePlan();
     }
 
     _currentIndex += 1;
     notifyListeners();
+    _persistDraft();
     return false;
   }
 
   void acceptRefine() {
-    final constraints = optionalConstraintsQuestion;
     _showRefinePrompt = false;
     _isRefineResolved = true;
-    _includeConstraints = constraints != null;
-    if (_includeConstraints) {
-      _currentIndex = coreQuestions.length;
-    }
+    _includeConstraints = false;
     notifyListeners();
+    _persistDraft();
   }
 
   Future<bool> skipRefine() async {
@@ -349,6 +347,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _includeConstraints = false;
     _removeAnswer('constraints');
     notifyListeners();
+    _persistDraft();
     return _generatePlan();
   }
 
@@ -408,6 +407,14 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   }
 
   Future<bool> _generatePlan() async {
+    _syncJourneyAnswers();
+    if (!_journeyContextController.isJourneyReadyForPlanning ||
+        answerFor('origin_country') == null ||
+        answerFor('destination_country') == null) {
+      notifyListeners();
+      return false;
+    }
+
     _setGeneratingPlan(true);
     try {
       _generatedPlan = await _planGenerator.generate(
@@ -415,6 +422,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
         variant: _selectedVariant ?? QuestionnaireVariant.lean,
       );
       await _latestPlanStore.write(_generatedPlan!);
+      await _flowDraftStore.clear();
       notifyListeners();
       return true;
     } finally {
@@ -434,6 +442,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       }
       _answers = nextAnswers;
       notifyListeners();
+      _persistDraft();
       return;
     }
 
@@ -447,12 +456,35 @@ class MigrationQuestionnaireController extends ChangeNotifier {
 
     _answers = nextAnswers;
     notifyListeners();
+    _persistDraft();
   }
 
   void _removeAnswer(String questionId) {
     _answers = _answers
         .where((answer) => answer.questionId != questionId)
         .toList(growable: false);
+  }
+
+  void _syncJourneySelection(String questionId, List<String> values) {
+    if (questionId != 'origin_country' || values.isEmpty) {
+      return;
+    }
+
+    final destinationCountryId = _journeyContextController.destinationCountryId;
+    final originCountryId = _resolveCountryId(values.first);
+    if (destinationCountryId == null || originCountryId == null) {
+      return;
+    }
+
+    unawaited(
+      _journeyContextController.completeJourney(
+        originCountryId: originCountryId,
+        destinationCountryId: destinationCountryId,
+      ),
+    );
+    _syncJourneyAnswers();
+    notifyListeners();
+    _persistDraft();
   }
 
   void _syncJourneyAnswers() {
@@ -484,5 +516,62 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     }
 
     _answers = nextAnswers;
+  }
+
+  String? _resolveCountryId(String value) {
+    for (final country in _journeyContextController.countries) {
+      if (country.id == value ||
+          _journeyContextController.journeyValueFor(country) == value) {
+        return country.id;
+      }
+    }
+
+    return null;
+  }
+
+  void _restoreDraft(QuestionnaireFlowDraftSnapshot? draft) {
+    if (draft == null) {
+      return;
+    }
+
+    _answers = draft.answers;
+    _selectedVariant = QuestionnaireVariantX.fromId(draft.selectedVariantId);
+    _showRefinePrompt = draft.showRefinePrompt;
+    _isRefineResolved = draft.isRefineResolved;
+    _includeConstraints = draft.includeConstraints;
+    _currentIndex = draft.currentIndex;
+  }
+
+  void _clampCurrentIndex() {
+    final activeQuestions = _activeQuestions;
+    if (activeQuestions.isEmpty) {
+      _currentIndex = 0;
+      return;
+    }
+
+    final maxIndex = activeQuestions.length - 1;
+    if (_currentIndex > maxIndex) {
+      _currentIndex = maxIndex;
+    }
+    if (_currentIndex < 0) {
+      _currentIndex = 0;
+    }
+  }
+
+  void _persistDraft() {
+    if (_generatedPlan != null) {
+      return;
+    }
+
+    unawaited(
+      _flowDraftStore.write(
+        answers: _answers,
+        currentIndex: _currentIndex,
+        selectedVariantId: _selectedVariant?.id,
+        showRefinePrompt: _showRefinePrompt,
+        isRefineResolved: _isRefineResolved,
+        includeConstraints: _includeConstraints,
+      ),
+    );
   }
 }

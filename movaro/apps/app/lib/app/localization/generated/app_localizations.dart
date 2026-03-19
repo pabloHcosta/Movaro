@@ -451,6 +451,18 @@ abstract class AppLocalizations {
   /// **'Answer a few questions and get a clear starter plan with better suggestions.'**
   String get publicHomePlanBody;
 
+  /// No description provided for @publicHomeJourneyDraftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your plan with your destination already set'**
+  String get publicHomeJourneyDraftTitle;
+
+  /// No description provided for @publicHomeJourneyDraftBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re heading toward {destination}. Next, answer a few short questions and tell us where you\'re coming from so Movaro can generate the right plan.'**
+  String publicHomeJourneyDraftBody(Object destination);
+
   /// No description provided for @publicHomeStoriesTitle.
   ///
   /// In en, this message translates to:
@@ -757,6 +769,162 @@ abstract class AppLocalizations {
   /// **'Save plan'**
   String get exploreSavePlanAction;
 
+  /// No description provided for @exploreUnifiedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore cities, content, and your next move in one place'**
+  String get exploreUnifiedTitle;
+
+  /// No description provided for @exploreUnifiedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this area to reinforce your decision, review the city options that still matter, and open the practical content that matches your route.'**
+  String get exploreUnifiedBody;
+
+  /// No description provided for @explorePlanSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on your plan'**
+  String get explorePlanSectionTitle;
+
+  /// No description provided for @explorePlanSectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume the current plan, reopen the leading city, or jump straight into the most useful guide for your next step.'**
+  String get explorePlanSectionBody;
+
+  /// No description provided for @exploreCitiesSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover other cities'**
+  String get exploreCitiesSectionTitle;
+
+  /// No description provided for @exploreCitiesSectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep comparing before locking the decision. These cities are strong alternatives for your current route and profile.'**
+  String get exploreCitiesSectionBody;
+
+  /// No description provided for @exploreContentSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Useful content'**
+  String get exploreContentSectionTitle;
+
+  /// No description provided for @exploreContentSectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the practical guidance that usually matters next: documents, housing, and work.'**
+  String get exploreContentSectionBody;
+
+  /// No description provided for @exploreRouteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Journey: {origin} -> {destination}'**
+  String exploreRouteLabel(Object origin, Object destination);
+
+  /// No description provided for @exploreDestinationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination selected: {destination}'**
+  String exploreDestinationLabel(Object destination);
+
+  /// No description provided for @exploreNoJourneyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a destination to make exploration more relevant.'**
+  String get exploreNoJourneyLabel;
+
+  /// No description provided for @explorePlanEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a plan before you go deeper'**
+  String get explorePlanEmptyTitle;
+
+  /// No description provided for @explorePlanEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your destination, answer a few questions, and let Movaro turn exploration into a practical direction.'**
+  String get explorePlanEmptyBody;
+
+  /// No description provided for @explorePlanReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan is ready to continue'**
+  String get explorePlanReadyTitle;
+
+  /// No description provided for @explorePlanReadyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} is already confirmed. Open your checklist and keep moving through the next actions.'**
+  String explorePlanReadyBody(Object city);
+
+  /// No description provided for @explorePlanDraftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan still needs a decision'**
+  String get explorePlanDraftTitle;
+
+  /// No description provided for @explorePlanDraftBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a draft. Reopen the result and confirm the city before moving into checklist mode.'**
+  String get explorePlanDraftBody;
+
+  /// No description provided for @explorePlanDraftBodyWithCity.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} is currently leading. Reopen the result, compare it, and confirm it when ready.'**
+  String explorePlanDraftBodyWithCity(Object city);
+
+  /// No description provided for @exploreRecommendedCityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leading city right now'**
+  String get exploreRecommendedCityTitle;
+
+  /// No description provided for @exploreRecommendedCityBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the city details to validate cost, quality of life, and fit with your plan.'**
+  String get exploreRecommendedCityBody;
+
+  /// No description provided for @exploreOpenCityAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open city'**
+  String get exploreOpenCityAction;
+
+  /// No description provided for @exploreOpenContentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open guide'**
+  String get exploreOpenContentAction;
+
+  /// No description provided for @explorePlanDocsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents usually unlock the next part of the move faster than more comparison.'**
+  String get explorePlanDocsBody;
+
+  /// No description provided for @exploreContentDocumentsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'See CPF, registration, banking, and legal stay with less noise and clearer routing.'**
+  String get exploreContentDocumentsBody;
+
+  /// No description provided for @exploreContentHousingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Review rent pressure, guarantees, deposits, and first-landing decisions before choosing a neighborhood.'**
+  String get exploreContentHousingBody;
+
+  /// No description provided for @exploreContentWorkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check work setup, contribution paths, and what to validate before treating income as solved.'**
+  String get exploreContentWorkBody;
+
   /// No description provided for @documentationPageTitle.
   ///
   /// In en, this message translates to:
@@ -780,6 +948,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Type a question or choose a topic. Movaro helps you find the right guidance and guide across documents, health, work, housing, mobility, and early costs.'**
   String get documentationHeroDescription;
+
+  /// No description provided for @documentationFocusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Useful for your current journey'**
+  String get documentationFocusTitle;
+
+  /// No description provided for @documentationFocusBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These categories are the strongest starting point for moving from {origin} to {destination}.'**
+  String documentationFocusBody(Object origin, Object destination);
+
+  /// No description provided for @documentationFocusBodyDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'These categories are a strong starting point for your route into {destination}.'**
+  String documentationFocusBodyDestination(Object destination);
+
+  /// No description provided for @documentationFocusBodyDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the category that removes the biggest blocker first: documents, housing, or work.'**
+  String get documentationFocusBodyDefault;
 
   /// No description provided for @documentationHeroStepOneTitle.
   ///
@@ -2179,6 +2371,60 @@ abstract class AppLocalizations {
   /// **'It takes less than a minute. One question at a time.'**
   String get questionnaireSupportText;
 
+  /// No description provided for @questionnaireSectionOrigin.
+  ///
+  /// In en, this message translates to:
+  /// **'Origin'**
+  String get questionnaireSectionOrigin;
+
+  /// No description provided for @questionnaireSectionBasicProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic profile'**
+  String get questionnaireSectionBasicProfile;
+
+  /// No description provided for @questionnaireSectionPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get questionnaireSectionPreferences;
+
+  /// No description provided for @questionnaireSectionFinancial.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial situation'**
+  String get questionnaireSectionFinancial;
+
+  /// No description provided for @questionnaireSectionGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Migration goal'**
+  String get questionnaireSectionGoal;
+
+  /// No description provided for @questionnaireNextSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {section}'**
+  String questionnaireNextSection(Object section);
+
+  /// No description provided for @questionnaireReadyForPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Next, we will turn these answers into your first plan.'**
+  String get questionnaireReadyForPlan;
+
+  /// No description provided for @questionnaireProcessingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Building your first plan'**
+  String get questionnaireProcessingTitle;
+
+  /// No description provided for @questionnaireProcessingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We are connecting your journey, profile, and priorities into a clear starting point.'**
+  String get questionnaireProcessingBody;
+
   /// No description provided for @questionProgress.
   ///
   /// In en, this message translates to:
@@ -3427,6 +3673,84 @@ abstract class AppLocalizations {
   /// **'Cost and housing'**
   String get cityDetailAffordabilityTitle;
 
+  /// No description provided for @cityDetailSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick summary'**
+  String get cityDetailSummaryTitle;
+
+  /// No description provided for @cityDetailSummaryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this top read to understand whether the city looks easier, more balanced, or more demanding before opening the deeper analysis.'**
+  String get cityDetailSummaryBody;
+
+  /// No description provided for @cityDetailAddToPlanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to my plan'**
+  String get cityDetailAddToPlanAction;
+
+  /// No description provided for @cityDetailCompareSavedAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to compare'**
+  String get cityDetailCompareSavedAction;
+
+  /// No description provided for @cityDetailQualityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality of life'**
+  String get cityDetailQualityLabel;
+
+  /// No description provided for @cityDetailQualitySupporting.
+  ///
+  /// In en, this message translates to:
+  /// **'A quick read based on HDI, safety, and language adaptation for arrival.'**
+  String get cityDetailQualitySupporting;
+
+  /// No description provided for @cityDetailQualityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Stronger'**
+  String get cityDetailQualityHigh;
+
+  /// No description provided for @cityDetailQualityBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced'**
+  String get cityDetailQualityBalanced;
+
+  /// No description provided for @cityDetailQualityDeveloping.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs validation'**
+  String get cityDetailQualityDeveloping;
+
+  /// No description provided for @cityDetailDifficultyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Difficulty'**
+  String get cityDetailDifficultyLabel;
+
+  /// No description provided for @cityDetailDifficultyEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Lighter move'**
+  String get cityDetailDifficultyEasy;
+
+  /// No description provided for @cityDetailDifficultyBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate move'**
+  String get cityDetailDifficultyBalanced;
+
+  /// No description provided for @cityDetailDifficultyChallenging.
+  ///
+  /// In en, this message translates to:
+  /// **'More demanding move'**
+  String get cityDetailDifficultyChallenging;
+
   /// No description provided for @cityDetailSettleInTitle.
   ///
   /// In en, this message translates to:
@@ -3883,6 +4207,30 @@ abstract class AppLocalizations {
   /// **'Move guide'**
   String get mainNavCopilot;
 
+  /// No description provided for @mainNavExplore.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore'**
+  String get mainNavExplore;
+
+  /// No description provided for @mainNavPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get mainNavPlan;
+
+  /// No description provided for @mainNavProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get mainNavProfile;
+
+  /// No description provided for @mainNavPlanNeedsJourney.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your destination first so Movaro can open the right plan step.'**
+  String get mainNavPlanNeedsJourney;
+
   /// No description provided for @mainNavFavoritesDisabled.
   ///
   /// In en, this message translates to:
@@ -3996,6 +4344,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Got it'**
   String get favoritesGuidePrimaryAction;
+
+  /// No description provided for @profileJourneyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Journey'**
+  String get profileJourneyTitle;
+
+  /// No description provided for @profileJourneyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Movaro uses this route to keep home, exploration, and content connected to the same move context.'**
+  String get profileJourneyBody;
+
+  /// No description provided for @profileJourneyValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{origin} -> {destination}'**
+  String profileJourneyValue(Object origin, Object destination);
+
+  /// No description provided for @profileJourneyPendingValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination saved: {destination}'**
+  String profileJourneyPendingValue(Object destination);
+
+  /// No description provided for @profileJourneyEmptyValue.
+  ///
+  /// In en, this message translates to:
+  /// **'No journey selected yet'**
+  String get profileJourneyEmptyValue;
+
+  /// No description provided for @profilePlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan status'**
+  String get profilePlanTitle;
+
+  /// No description provided for @profilePlanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your saved plan stays connected to the journey so you can continue without starting from zero.'**
+  String get profilePlanBody;
+
+  /// No description provided for @profilePlanEmptyValue.
+  ///
+  /// In en, this message translates to:
+  /// **'No plan generated yet'**
+  String get profilePlanEmptyValue;
+
+  /// No description provided for @profilePlanReadyValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to continue in {city}'**
+  String profilePlanReadyValue(Object city);
+
+  /// No description provided for @profilePlanDraftValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft result waiting for confirmation'**
+  String get profilePlanDraftValue;
+
+  /// No description provided for @profileSavedCitiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved cities'**
+  String get profileSavedCitiesTitle;
+
+  /// No description provided for @profileSavedCitiesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep up to 3 cities here so you can compare them again without losing your route or plan context.'**
+  String get profileSavedCitiesBody;
 
   /// No description provided for @publicHomeJourneyResetAction.
   ///
@@ -4830,6 +5250,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Where are you coming from?'**
   String get questionOriginCountryTitle;
+
+  /// No description provided for @journeyEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your destination and start faster'**
+  String get journeyEntryTitle;
+
+  /// No description provided for @journeyEntryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick where you want to move first. Movaro will save that choice now and ask for your origin in the first step of the questionnaire.'**
+  String get journeyEntryBody;
+
+  /// No description provided for @journeyEntryDestinationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Where do you want to go?'**
+  String get journeyEntryDestinationLabel;
+
+  /// No description provided for @journeyEntryStartAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start my plan'**
+  String get journeyEntryStartAction;
+
+  /// No description provided for @journeyEntryDynamicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with a route that matches where you are and where you want to go'**
+  String get journeyEntryDynamicTitle;
+
+  /// No description provided for @journeyEntryDynamicBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can use your current location as a quick hint or choose everything manually. Movaro never locks your origin from device location, and you can always override it.'**
+  String get journeyEntryDynamicBody;
+
+  /// No description provided for @journeyEntryUseLocationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my location'**
+  String get journeyEntryUseLocationTitle;
+
+  /// No description provided for @journeyEntryUseLocationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask only now, detect your current country if possible, and let you confirm whether it should be used as origin.'**
+  String get journeyEntryUseLocationBody;
+
+  /// No description provided for @journeyEntryUseLocationAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my location'**
+  String get journeyEntryUseLocationAction;
+
+  /// No description provided for @journeyEntryManualTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose manually'**
+  String get journeyEntryManualTitle;
+
+  /// No description provided for @journeyEntryManualBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip location, set origin and destination yourself, and keep full control over the route.'**
+  String get journeyEntryManualBody;
+
+  /// No description provided for @journeyEntryManualAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose manually'**
+  String get journeyEntryManualAction;
+
+  /// No description provided for @journeyEntryContinueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to questionnaire'**
+  String get journeyEntryContinueAction;
+
+  /// No description provided for @journeyEntrySelectedDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination selected: {destination}'**
+  String journeyEntrySelectedDestination(Object destination);
+
+  /// No description provided for @journeyEntryOriginPending.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll collect your origin in the first question before plan generation.'**
+  String get journeyEntryOriginPending;
+
+  /// No description provided for @journeyLocationPanelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location can save one step, but it never decides for you'**
+  String get journeyLocationPanelTitle;
+
+  /// No description provided for @journeyLocationPanelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If you allow location, Movaro tries to detect your current country and suggests it as origin. You can reject the suggestion and choose manually instead.'**
+  String get journeyLocationPanelBody;
+
+  /// No description provided for @journeyLocationFallbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location did not resolve a usable country'**
+  String get journeyLocationFallbackTitle;
+
+  /// No description provided for @journeyLocationDeniedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission was denied. You can keep going by choosing origin and destination manually.'**
+  String get journeyLocationDeniedBody;
+
+  /// No description provided for @journeyLocationDeniedForeverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is blocked for this app right now. You can still continue with manual selection.'**
+  String get journeyLocationDeniedForeverBody;
+
+  /// No description provided for @journeyLocationUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services are off on this device. Turn them on if you want a location hint, or continue manually.'**
+  String get journeyLocationUnavailableBody;
+
+  /// No description provided for @journeyLocationFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Movaro could not detect your location this time. You can retry or choose manually.'**
+  String get journeyLocationFailedBody;
+
+  /// No description provided for @journeyLocationRetryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get journeyLocationRetryAction;
+
+  /// No description provided for @journeyDetectedLocationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected location: {value}'**
+  String journeyDetectedLocationLabel(Object value);
+
+  /// No description provided for @journeyDetectedConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use {country} as your origin? This only sets a suggestion you can edit at any time.'**
+  String journeyDetectedConfirmBody(Object country);
+
+  /// No description provided for @journeyDetectedUnknownBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Movaro detected {country}, but it could not match that country to the current route catalog. Choose your origin manually to continue.'**
+  String journeyDetectedUnknownBody(Object country);
+
+  /// No description provided for @journeyDetectedConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Use {country} as origin'**
+  String journeyDetectedConfirmAction(Object country);
+
+  /// No description provided for @journeyDetectedManualAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose origin manually'**
+  String get journeyDetectedManualAction;
+
+  /// No description provided for @journeyOriginSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Origin'**
+  String get journeyOriginSectionTitle;
+
+  /// No description provided for @journeyOriginSectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional for now. Confirm it here if you already know it, or skip and answer it in the first questionnaire step.'**
+  String get journeyOriginSectionBody;
+
+  /// No description provided for @journeyOriginSkipAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get journeyOriginSkipAction;
+
+  /// No description provided for @journeyDestinationSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination'**
+  String get journeyDestinationSectionTitle;
+
+  /// No description provided for @journeyDestinationSectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where you want the migration plan to point. Destination is still required before the questionnaire starts.'**
+  String get journeyDestinationSectionBody;
+
+  /// No description provided for @journeyCoverageFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full coverage'**
+  String get journeyCoverageFull;
+
+  /// No description provided for @journeyCoveragePartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial coverage'**
+  String get journeyCoveragePartial;
+
+  /// No description provided for @journeyCoverageUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported'**
+  String get journeyCoverageUnsupported;
+
+  /// No description provided for @journeyCoverageReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This route is ready for planning'**
+  String get journeyCoverageReadyTitle;
+
+  /// No description provided for @journeyCoverageReadyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{origin} -> {destination} is supported in the current migration flow.'**
+  String journeyCoverageReadyBody(Object origin, Object destination);
+
+  /// No description provided for @journeyCoverageDestinationLimitedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination coverage is still limited'**
+  String get journeyCoverageDestinationLimitedTitle;
+
+  /// No description provided for @journeyCoverageDestinationLimitedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{destination} does not yet have full destination coverage for the guided migration flow. You can still explore content while the route expands.'**
+  String journeyCoverageDestinationLimitedBody(Object destination);
+
+  /// No description provided for @journeyCoverageOriginLimitedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Origin coverage is still limited'**
+  String get journeyCoverageOriginLimitedTitle;
+
+  /// No description provided for @journeyCoverageOriginLimitedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{origin} can be saved as your origin, but the current guided plan does not fully support that starting country yet.'**
+  String journeyCoverageOriginLimitedBody(Object origin);
+
+  /// No description provided for @journeyCoverageDetectedUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected country is outside the current catalog'**
+  String get journeyCoverageDetectedUnknownTitle;
+
+  /// No description provided for @journeyCoverageDetectedUnknownBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{country} is not mapped in the current supported-country catalog yet. Choose another origin manually or keep browsing public content.'**
+  String journeyCoverageDetectedUnknownBody(Object country);
+
+  /// No description provided for @journeyCoverageUnsupportedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a supported route to generate a plan'**
+  String get journeyCoverageUnsupportedTitle;
+
+  /// No description provided for @journeyCoverageUnsupportedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Movaro can still show cities and practical content, but the guided migration flow is only available on routes with full coverage.'**
+  String get journeyCoverageUnsupportedBody;
+
+  /// No description provided for @journeyCoverageChooseRouteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another route'**
+  String get journeyCoverageChooseRouteAction;
+
+  /// No description provided for @journeyCoverageBrowseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse explore'**
+  String get journeyCoverageBrowseAction;
+
+  /// No description provided for @journeyCoverageContentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open content'**
+  String get journeyCoverageContentAction;
+
+  /// No description provided for @journeyCoverageWaitlistAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Join waitlist'**
+  String get journeyCoverageWaitlistAction;
+
+  /// No description provided for @journeyCoverageWaitlistStub.
+  ///
+  /// In en, this message translates to:
+  /// **'Waitlist registration is not live yet, but this route can be tracked safely for future coverage.'**
+  String get journeyCoverageWaitlistStub;
 
   /// No description provided for @questionDestinationCountryTitle.
   ///
@@ -7159,6 +7885,168 @@ abstract class AppLocalizations {
   /// **'If you decide to move forward with {city}, guided preparation opens a checklist, documents, housing, and an arrival reserve focused on that city.'**
   String migrationPlanPreparationBody(Object city);
 
+  /// No description provided for @migrationPlanResultPrimaryCtaEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Next step'**
+  String get migrationPlanResultPrimaryCtaEyebrow;
+
+  /// No description provided for @migrationPlanResultStartPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start my plan'**
+  String get migrationPlanResultStartPlanTitle;
+
+  /// No description provided for @migrationPlanResultStartPlanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Review {city} with a little more context and confirm it when you are ready to unlock the full guided plan.'**
+  String migrationPlanResultStartPlanBody(Object city);
+
+  /// No description provided for @migrationPlanResultStartPlanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start my plan'**
+  String get migrationPlanResultStartPlanAction;
+
+  /// No description provided for @migrationPlanResultOpenPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View full plan'**
+  String get migrationPlanResultOpenPlanTitle;
+
+  /// No description provided for @migrationPlanResultOpenPlanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View full plan'**
+  String get migrationPlanResultOpenPlanAction;
+
+  /// No description provided for @migrationPlanResultCompatibilityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High compatibility'**
+  String get migrationPlanResultCompatibilityHigh;
+
+  /// No description provided for @migrationPlanResultCompatibilityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Good compatibility'**
+  String get migrationPlanResultCompatibilityMedium;
+
+  /// No description provided for @migrationPlanResultCompatibilityInitial.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial compatibility'**
+  String get migrationPlanResultCompatibilityInitial;
+
+  /// No description provided for @migrationPlanResultCostLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated cost'**
+  String get migrationPlanResultCostLabel;
+
+  /// No description provided for @migrationPlanResultCostSupporting.
+  ///
+  /// In en, this message translates to:
+  /// **'A directional read based on city cost and rent signals.'**
+  String get migrationPlanResultCostSupporting;
+
+  /// No description provided for @migrationPlanResultCostLower.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower'**
+  String get migrationPlanResultCostLower;
+
+  /// No description provided for @migrationPlanResultCostMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get migrationPlanResultCostMedium;
+
+  /// No description provided for @migrationPlanResultCostHigher.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher'**
+  String get migrationPlanResultCostHigher;
+
+  /// No description provided for @migrationPlanResultDifficultyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Difficulty level'**
+  String get migrationPlanResultDifficultyLabel;
+
+  /// No description provided for @migrationPlanResultDifficultySupporting.
+  ///
+  /// In en, this message translates to:
+  /// **'How much coordination this plan may need before arrival.'**
+  String get migrationPlanResultDifficultySupporting;
+
+  /// No description provided for @migrationPlanResultDifficultyFocused.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused'**
+  String get migrationPlanResultDifficultyFocused;
+
+  /// No description provided for @migrationPlanResultDifficultyModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get migrationPlanResultDifficultyModerate;
+
+  /// No description provided for @migrationPlanResultDifficultyStructured.
+  ///
+  /// In en, this message translates to:
+  /// **'Structured'**
+  String get migrationPlanResultDifficultyStructured;
+
+  /// No description provided for @migrationPlanResultTimelineLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated timeline'**
+  String get migrationPlanResultTimelineLabel;
+
+  /// No description provided for @migrationPlanResultTimelineValue.
+  ///
+  /// In en, this message translates to:
+  /// **'~{days} days'**
+  String migrationPlanResultTimelineValue(Object days);
+
+  /// No description provided for @migrationPlanResultCitySectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why this city is leading'**
+  String get migrationPlanResultCitySectionTitle;
+
+  /// No description provided for @migrationPlanResultCitySectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the city context when you want more detail, not before the main decision is clear.'**
+  String get migrationPlanResultCitySectionBody;
+
+  /// No description provided for @migrationPlanResultPlanSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens after this result'**
+  String get migrationPlanResultPlanSectionTitle;
+
+  /// No description provided for @migrationPlanResultPlanSectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparation becomes useful only after the city choice feels strong enough to move forward.'**
+  String get migrationPlanResultPlanSectionBody;
+
+  /// No description provided for @migrationPlanResultProgressSupporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed checklist items across the guided plan.'**
+  String get migrationPlanResultProgressSupporting;
+
+  /// No description provided for @migrationPlanCopilotProgressValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} checklist items completed'**
+  String migrationPlanCopilotProgressValue(Object done, Object total);
+
   /// No description provided for @migrationPlanScrollHint.
   ///
   /// In en, this message translates to:
@@ -7264,7 +8152,7 @@ abstract class AppLocalizations {
   /// No description provided for @bmpVariantLeanBody.
   ///
   /// In en, this message translates to:
-  /// **'3 questions and one optional refinement to get an initial direction with low friction.'**
+  /// **'4 focused questions to get an initial direction with low friction.'**
   String get bmpVariantLeanBody;
 
   /// No description provided for @bmpVariantLeanTag.
@@ -7282,7 +8170,7 @@ abstract class AppLocalizations {
   /// No description provided for @bmpVariantStrategicBody.
   ///
   /// In en, this message translates to:
-  /// **'Includes how you plan to support yourself and gives you a sharper starting recommendation.'**
+  /// **'Adds one extra preference step for a sharper starting recommendation.'**
   String get bmpVariantStrategicBody;
 
   /// No description provided for @bmpVariantStrategicTag.

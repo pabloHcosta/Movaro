@@ -29,6 +29,7 @@ import 'package:movaro_app/features/migration_questionnaire/application/migratio
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_structure_widgets.dart';
 
 class CityDetailPage extends StatefulWidget {
   const CityDetailPage({
@@ -276,6 +277,15 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                               onTap: () =>
                                                   _openCityGoogleOverview(city),
                                             ),
+                                            _HeroActionPill(
+                                              icon: Icons.compare_arrows_rounded,
+                                              label: widget.citiesController
+                                                      .isFavorite(city.id)
+                                                  ? l10n.cityDetailCompareSavedAction
+                                                  : l10n.cityDetailCompareAction,
+                                              onTap: () =>
+                                                  _handleCompareCity(context, city),
+                                            ),
                                             if (widget.selectForPlan)
                                               _HeroActionPill(
                                                 icon:
@@ -345,6 +355,21 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                   },
                                 ),
                               ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1160),
+                            child: _CitySummaryPanel(
+                              city: city,
+                              planContext: planContext,
+                              isFavorite: widget.citiesController.isFavorite(
+                                city.id,
+                              ),
+                              onPrimaryAction: () =>
+                                  _handlePrimaryPlanAction(context, city),
+                              onCompareAction: () =>
+                                  _handleCompareCity(context, city),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -564,6 +589,31 @@ class _CityDetailPageState extends State<CityDetailPage> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _handleCompareCity(BuildContext context, City city) async {
+    await _toggleFavoriteCity(context, city);
+  }
+
+  Future<void> _handlePrimaryPlanAction(BuildContext context, City city) async {
+    final plan = widget.migrationQuestionnaireController?.generatedPlan;
+    final isConfirmedCity = plan?.isCityConfirmed == true &&
+        plan?.recommendedCity?.id == city.id;
+    if (isConfirmedCity) {
+      Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
+      return;
+    }
+
+    if (plan != null) {
+      await widget.migrationQuestionnaireController?.confirmPlanCity(city);
+      if (!context.mounted) {
+        return;
+      }
+      Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
+      return;
+    }
+
+    Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire);
   }
 
   Future<void> _confirmPlanCity(BuildContext context, City city) async {
@@ -910,6 +960,161 @@ class _LifestyleBadge extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _CitySummaryPanel extends StatelessWidget {
+  const _CitySummaryPanel({
+    required this.city,
+    required this.planContext,
+    required this.isFavorite,
+    required this.onPrimaryAction,
+    required this.onCompareAction,
+  });
+
+  final City city;
+  final _PlanCityContext? planContext;
+  final bool isFavorite;
+  final VoidCallback onPrimaryAction;
+  final VoidCallback onCompareAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final plan = planContext;
+
+    return FrostedPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.cityDetailSummaryTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            context.l10n.cityDetailSummaryBody,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final threeColumns = constraints.maxWidth >= 960;
+              final twoColumns = constraints.maxWidth >= 640;
+              final cardWidth = threeColumns
+                  ? (constraints.maxWidth - 24) / 3
+                  : twoColumns
+                  ? (constraints.maxWidth - 12) / 2
+                  : constraints.maxWidth;
+
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  SizedBox(
+                    width: cardWidth,
+                    child: PlanSummaryCard(
+                      label: context.l10n.cityDetailAffordabilityTitle,
+                      value: _costLabel(context),
+                      supporting: CityHousingViabilityPresenter.resolve(
+                        context,
+                        rentScore: city.rentScore,
+                      ).badge,
+                      icon: Icons.home_work_outlined,
+                    ),
+                  ),
+                  SizedBox(
+                    width: cardWidth,
+                    child: PlanSummaryCard(
+                      label: context.l10n.cityDetailQualityLabel,
+                      value: _qualityLabel(context),
+                      supporting: context.l10n.cityDetailQualitySupporting,
+                      icon: Icons.favorite_outline_rounded,
+                    ),
+                  ),
+                  SizedBox(
+                    width: cardWidth,
+                    child: PlanSummaryCard(
+                      label: context.l10n.cityDetailDifficultyLabel,
+                      value: _difficultyLabel(context),
+                      supporting: plan?.watchout ??
+                          _DecisionSnapshotPanel.defaultWatchoutText(
+                            context,
+                            city,
+                          ),
+                      icon: Icons.route_outlined,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              FilledButton.icon(
+                onPressed: onPrimaryAction,
+                icon: const Icon(Icons.check_circle_outline_rounded),
+                label: Text(
+                  plan?.isRecommended == true
+                      ? context.l10n.migrationPlanChooseCityAction
+                      : context.l10n.cityDetailAddToPlanAction,
+                ),
+              ),
+              OutlinedButton.icon(
+                onPressed: onCompareAction,
+                icon: const Icon(Icons.compare_arrows_rounded),
+                label: Text(
+                  isFavorite
+                      ? context.l10n.cityDetailCompareSavedAction
+                      : context.l10n.cityDetailCompareAction,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _costLabel(BuildContext context) {
+    if (city.rentScore >= 70) {
+      return context.l10n.migrationPlanResultCostLower;
+    }
+    if (city.rentScore >= 45) {
+      return context.l10n.migrationPlanResultCostMedium;
+    }
+    return context.l10n.migrationPlanResultCostHigher;
+  }
+
+  String _qualityLabel(BuildContext context) {
+    final average =
+        ((city.idhmScore * 100).round() + city.safetyScore + city.spanishSupportScore) /
+        3;
+    if (average >= 72) {
+      return context.l10n.cityDetailQualityHigh;
+    }
+    if (average >= 56) {
+      return context.l10n.cityDetailQualityBalanced;
+    }
+    return context.l10n.cityDetailQualityDeveloping;
+  }
+
+  String _difficultyLabel(BuildContext context) {
+    final average =
+        (city.rentScore + city.movaroScores.languageAdaptation + city.movaroScores.workOpportunity) /
+        3;
+    if (average >= 68) {
+      return context.l10n.cityDetailDifficultyEasy;
+    }
+    if (average >= 52) {
+      return context.l10n.cityDetailDifficultyBalanced;
+    }
+    return context.l10n.cityDetailDifficultyChallenging;
   }
 }
 

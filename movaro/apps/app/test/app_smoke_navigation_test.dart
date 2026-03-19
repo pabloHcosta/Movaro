@@ -51,36 +51,41 @@ void main() {
     await harness.dispose();
   });
 
-  testWidgets('public home opens cities flow and renders city detail', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      harness.buildApp(initialRoute: AppRoutes.publicHome),
-    );
-    await _pumpScreen(tester);
+  testWidgets(
+    'public home supports no-journey entry and cities remain accessible',
+    (tester) async {
+      await harness.migrationQuestionnaireController.clearCurrentPlan();
+      await harness.journeyContextController.clearJourney();
 
-    expect(find.text('Gerar meu plano'), findsOneWidget);
-    expect(find.text('Descobrir cidades'), findsOneWidget);
-    expect(find.text('Escolher outra rota'), findsOneWidget);
-    expect(find.text('PT'), findsOneWidget);
+      await tester.pumpWidget(
+        harness.buildApp(initialRoute: AppRoutes.publicHome),
+      );
+      await _pumpScreen(tester);
 
-    Navigator.of(
-      tester.element(find.text('Gerar meu plano')),
-    ).pushNamed(AppRoutes.cities);
-    await _pumpScreen(tester);
+      expect(
+        find.text('Escolha seu destino e comece mais rápido'),
+        findsOneWidget,
+      );
+      expect(find.text('Começar meu plano'), findsOneWidget);
+      expect(find.text('Descobrir cidades'), findsOneWidget);
+      expect(find.text('PT'), findsOneWidget);
 
-    expect(find.text('Cidades'), findsWidgets);
-    expect(find.text('Descubra cidades com mais contexto'), findsOneWidget);
+      await tester.pumpWidget(harness.buildApp(initialRoute: AppRoutes.cities));
+      await _pumpScreen(tester);
 
-    await tester.enterText(find.byType(TextField).first, 'Curitiba');
-    await tester.pump(const Duration(milliseconds: 350));
-    await _pumpScreen(tester);
+      expect(find.text('Cidades'), findsWidgets);
+      expect(find.text('Descubra cidades com mais contexto'), findsOneWidget);
 
-    expect(find.text('Curitiba'), findsWidgets);
+      await tester.enterText(find.byType(TextField).first, 'Curitiba');
+      await tester.pump(const Duration(milliseconds: 350));
+      await _pumpScreen(tester);
 
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump();
-  });
+      expect(find.text('Curitiba'), findsWidgets);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    },
+  );
 
   testWidgets('move guide route guard and confirmed flow both work', (
     tester,
@@ -95,7 +100,9 @@ void main() {
     expect(find.text('Seu plano inicial'), findsOneWidget);
     expect(find.text('Escolha da cidade'), findsOneWidget);
 
-    final city = harness.migrationQuestionnaireController.generatedPlan!
+    final city = harness
+        .migrationQuestionnaireController
+        .generatedPlan!
         .recommendedCity!;
     await harness.migrationQuestionnaireController.confirmPlanCity(city);
 
@@ -250,14 +257,16 @@ class _AppTestHarness {
 
   Future<void> generateLeanPlan() async {
     migrationQuestionnaireController.selectVariant(QuestionnaireVariant.lean);
-    migrationQuestionnaireController.selectAnswer('intent', 'remote_income');
     await migrationQuestionnaireController.goNext();
     migrationQuestionnaireController.selectAnswer('timeline', 'in_3_6m');
     await migrationQuestionnaireController.goNext();
     migrationQuestionnaireController.toggleAnswer('priorities', 'low_cost');
     migrationQuestionnaireController.toggleAnswer('priorities', 'safety');
     await migrationQuestionnaireController.goNext();
-    await migrationQuestionnaireController.skipRefine();
+    migrationQuestionnaireController.selectAnswer('funding', 'remote_income');
+    await migrationQuestionnaireController.goNext();
+    migrationQuestionnaireController.selectAnswer('intent', 'remote_income');
+    await migrationQuestionnaireController.goNext();
   }
 
   Future<void> dispose() async {
@@ -306,9 +315,7 @@ class _FakeCitiesRepository implements CitiesRepository {
   @override
   Future<List<City>> searchCities(String query) async {
     return _allCities
-        .where(
-          (city) => city.name.toLowerCase().contains(query.toLowerCase()),
-        )
+        .where((city) => city.name.toLowerCase().contains(query.toLowerCase()))
         .toList();
   }
 
@@ -328,12 +335,11 @@ class _FakeCopilotExchangeRatesService extends CopilotExchangeRatesService {
   _FakeCopilotExchangeRatesService({
     required AppEnvironment environment,
     required super.store,
-  })
-    : super(
-        remoteDataSource: CopilotExchangeRatesRemoteDataSource(
-          environment: environment,
-        ),
-      );
+  }) : super(
+         remoteDataSource: CopilotExchangeRatesRemoteDataSource(
+           environment: environment,
+         ),
+       );
 
   @override
   Future<CopilotExchangeRates?> fetchLatest() async {
@@ -471,8 +477,4 @@ const _salvador = City(
   regionName: 'Nordeste',
 );
 
-const _allCities = <City>[
-  _curitiba,
-  _portoAlegre,
-  _salvador,
-];
+const _allCities = <City>[_curitiba, _portoAlegre, _salvador];

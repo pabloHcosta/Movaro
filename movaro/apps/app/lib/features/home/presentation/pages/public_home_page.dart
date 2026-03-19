@@ -3,6 +3,7 @@ import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/localization/language_selector_button.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/catalog/domain/entities/catalog_country.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/journey/journey_country_metadata.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
@@ -43,6 +44,7 @@ class _PublicHomePageState extends State<PublicHomePage> {
       return;
     }
 
+    await widget.migrationQuestionnaireController.clearCurrentPlan();
     await widget.journeyContextController.clearJourney();
     if (!mounted) {
       return;
@@ -60,33 +62,43 @@ class _PublicHomePageState extends State<PublicHomePage> {
         children: [
           const AmbientBackground(),
           SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: maxWidth),
-                child: ListView(
-                  padding: EdgeInsets.fromLTRB(
-                    context.pageHorizontalPadding,
-                    context.pageVerticalPadding,
-                    context.pageHorizontalPadding,
-                    context.pageVerticalPadding + 24,
-                  ),
-                  children: [
-                    _LandingHero(
-                      journeyContextController: widget.journeyContextController,
-                      citiesController: widget.citiesController,
-                      migrationQuestionnaireController:
-                          widget.migrationQuestionnaireController,
-                      onRestartJourney: _restartJourneyFlow,
+            child: AnimatedBuilder(
+              animation: Listenable.merge([
+                widget.journeyContextController,
+                widget.migrationQuestionnaireController,
+              ]),
+              builder: (context, _) {
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxWidth),
+                    child: ListView(
+                      padding: EdgeInsets.fromLTRB(
+                        context.pageHorizontalPadding,
+                        context.pageVerticalPadding,
+                        context.pageHorizontalPadding,
+                        context.pageVerticalPadding + 24,
+                      ),
+                      children: [
+                        _LandingHero(
+                          journeyContextController:
+                              widget.journeyContextController,
+                          citiesController: widget.citiesController,
+                          migrationQuestionnaireController:
+                              widget.migrationQuestionnaireController,
+                          onRestartJourney: _restartJourneyFlow,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
           ),
         ],
       ),
       bottomNavigationBar: MainNavigationBar(
         currentIndex: 0,
+        journeyContextController: widget.journeyContextController,
         citiesController: widget.citiesController,
         migrationQuestionnaireController:
             widget.migrationQuestionnaireController,
@@ -112,20 +124,33 @@ class _LandingHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final origin = journeyContextController.selectedOrigin;
     final destination = journeyContextController.selectedDestination;
+    final hasCompleteJourney = journeyContextController.hasSelectedJourney;
 
     final actions = _ActionStage(
+      journeyContextController: journeyContextController,
       migrationQuestionnaireController: migrationQuestionnaireController,
     );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _RoutePlate(
-          originEmoji: origin?.flagEmoji ?? '🇦🇷',
-          destinationEmoji: destination?.flagEmoji ?? '🇧🇷',
-          onRestartJourney: onRestartJourney,
-        ),
-        const SizedBox(height: 18),
+        if (hasCompleteJourney) ...[
+          _RoutePlate(
+            originEmoji: origin?.flagEmoji ?? '🇦🇷',
+            destinationEmoji: destination?.flagEmoji ?? '🇧🇷',
+            onRestartJourney: onRestartJourney,
+          ),
+          const SizedBox(height: 18),
+        ] else if (destination != null) ...[
+          _DestinationPlate(
+            destination: destination,
+            onRestartJourney: onRestartJourney,
+          ),
+          const SizedBox(height: 18),
+        ] else ...[
+          const _HomeUtilityBar(),
+          const SizedBox(height: 18),
+        ],
         actions,
       ],
     );
@@ -133,8 +158,12 @@ class _LandingHero extends StatelessWidget {
 }
 
 class _ActionStage extends StatelessWidget {
-  const _ActionStage({required this.migrationQuestionnaireController});
+  const _ActionStage({
+    required this.journeyContextController,
+    required this.migrationQuestionnaireController,
+  });
 
+  final JourneyContextController journeyContextController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
 
   @override
@@ -143,23 +172,53 @@ class _ActionStage extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
     final plan = migrationQuestionnaireController.generatedPlan;
     final leadCity = plan?.recommendedCity;
-    final hasPlan = plan != null;
-    final planTitle = hasPlan
+    final hasDestination = journeyContextController.hasDestinationSelected;
+    final hasJourney = journeyContextController.isJourneyReadyForPlanning;
+    final needsSupportedRoute =
+        hasDestination &&
+        !journeyContextController.canEnterQuestionnaire &&
+        !journeyContextController.isJourneyReadyForPlanning;
+    final hasPlan = hasJourney && plan != null;
+    final selectedDestination = journeyContextController.selectedDestination;
+
+    if (!hasDestination) {
+      return _JourneyEntryStage(
+        journeyContextController: journeyContextController,
+      );
+    }
+
+    final planTitle = needsSupportedRoute
+        ? l10n.journeyCoverageUnsupportedTitle
+        : hasPlan
         ? l10n.publicHomeResumePlanTitle
+        : !hasJourney
+        ? l10n.publicHomeJourneyDraftTitle
         : l10n.publicHomePlanTitle;
-    final planDescription = hasPlan
+    final planDescription = needsSupportedRoute
+        ? l10n.journeyCoverageUnsupportedBody
+        : hasPlan
         ? leadCity != null
               ? l10n.publicHomeResumePlanBodyWithCity(
                   leadCity.name,
                   leadCity.stateCode,
                 )
               : l10n.publicHomeResumePlanBody
+        : !hasJourney
+        ? l10n.publicHomeJourneyDraftBody(selectedDestination?.name ?? '')
         : l10n.publicHomePlanBody;
-    final planAction = hasPlan
+    final planAction = needsSupportedRoute
+        ? l10n.journeyCoverageChooseRouteAction
+        : hasPlan
         ? l10n.publicHomeResumePlanAction
+        : !hasJourney
+        ? l10n.journeyEntryStartAction
         : l10n.publicHomeQuestionnaireAction;
-    final planStatus = hasPlan && leadCity != null
+    final planStatus = needsSupportedRoute
+        ? selectedDestination?.name
+        : hasPlan && leadCity != null
         ? '${leadCity.name} (${leadCity.stateCode})'
+        : !hasJourney && selectedDestination != null
+        ? selectedDestination.name
         : null;
 
     final planCard = _VisualActionCard(
@@ -175,7 +234,9 @@ class _ActionStage extends StatelessWidget {
 
         Navigator.pushNamed(
           context,
-          hasPlan
+          needsSupportedRoute
+              ? AppRoutes.journeySetup
+              : hasPlan
               ? AppRoutes.migrationPlanResult
               : AppRoutes.migrationQuestionnaire,
         );
@@ -269,6 +330,278 @@ class _ActionStage extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _HomeUtilityBar extends StatelessWidget {
+  const _HomeUtilityBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Align(
+      alignment: Alignment.centerRight,
+      child: LanguageSelectorButton(
+        foregroundColor: Colors.white,
+        backgroundColor: Color(0x1FFFFFFF),
+      ),
+    );
+  }
+}
+
+class _JourneyEntryStage extends StatelessWidget {
+  const _JourneyEntryStage({required this.journeyContextController});
+
+  final JourneyContextController journeyContextController;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final width = MediaQuery.sizeOf(context).width;
+    final destinations = journeyContextController.availableDestinations;
+    final selectedDestination = journeyContextController.selectedDestination;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FrostedPanel(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  l10n.publicHomeScopeBadge,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                l10n.journeyEntryTitle,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                l10n.journeyEntryBody,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 22),
+              Text(
+                l10n.journeyEntryDestinationLabel,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  for (final country in destinations)
+                    SizedBox(
+                      width: 280,
+                      child: _DestinationChoiceCard(
+                        country: country,
+                        isSelected: selectedDestination?.id == country.id,
+                        isEnabled: journeyContextController.canUseAsDestination(
+                          country,
+                        ),
+                        availabilityLabel:
+                            journeyContextController.canUseAsDestination(
+                              country,
+                            )
+                            ? l10n.journeyAvailableNowLabel
+                            : l10n.journeyComingSoonLabel,
+                        onTap:
+                            journeyContextController.canUseAsDestination(
+                              country,
+                            )
+                            ? () => journeyContextController
+                                  .setDestinationCountry(country.id)
+                            : null,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: selectedDestination == null
+                      ? null
+                      : () => Navigator.pushNamed(
+                          context,
+                          AppRoutes.migrationQuestionnaire,
+                        ),
+                  icon: const Icon(Icons.arrow_forward_rounded),
+                  label: Text(l10n.journeyEntryStartAction),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        _SecondaryActionGrid(compact: width < 920),
+      ],
+    );
+  }
+}
+
+class _SecondaryActionGrid extends StatelessWidget {
+  const _SecondaryActionGrid({required this.compact});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final citiesCard = _VisualActionCard(
+      title: l10n.publicHomeCitiesTitle,
+      description: l10n.publicHomeCitiesBody,
+      actionLabel: l10n.publicHomeCitiesAction,
+      onTap: () => Navigator.pushNamed(context, AppRoutes.cities),
+      scene: const _CitiesScene(),
+      compact: true,
+      subdued: true,
+      icon: Icons.location_city_rounded,
+      accent: const Color(0xFF35A8FF),
+    );
+
+    final questionsCard = _VisualActionCard(
+      title: l10n.publicHomeQuestionsTitle,
+      description: l10n.publicHomeQuestionsBody,
+      actionLabel: l10n.publicHomeQuestionsAction,
+      onTap: () => Navigator.pushNamed(
+        context,
+        AppRoutes.documentationGuide,
+        arguments: DocumentationGuideSection.documents,
+      ),
+      scene: const _QuestionsScene(),
+      compact: true,
+      subdued: true,
+      icon: Icons.folder_open_rounded,
+      accent: const Color(0xFF4DC2A8),
+    );
+
+    if (!compact) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: citiesCard),
+          const SizedBox(width: 12),
+          Expanded(child: questionsCard),
+        ],
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: citiesCard),
+        const SizedBox(width: 12),
+        Expanded(child: questionsCard),
+      ],
+    );
+  }
+}
+
+class _DestinationChoiceCard extends StatelessWidget {
+  const _DestinationChoiceCard({
+    required this.country,
+    required this.isSelected,
+    required this.isEnabled,
+    required this.availabilityLabel,
+    required this.onTap,
+  });
+
+  final CatalogCountry country;
+  final bool isSelected;
+  final bool isEnabled;
+  final String availabilityLabel;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppColors.primary.withValues(alpha: 0.10)
+                : Colors.white.withValues(alpha: isEnabled ? 0.08 : 0.04),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.primary
+                  : Colors.white.withValues(alpha: 0.10),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Text(
+                  country.flagEmoji,
+                  style: const TextStyle(fontSize: 22),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      country.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: isEnabled
+                            ? AppColors.textPrimaryFor(context)
+                            : AppColors.textSoftFor(context),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      availabilityLabel,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: isEnabled
+                            ? AppColors.primary
+                            : AppColors.textSoftFor(context),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isSelected)
+                const Icon(Icons.check_circle_rounded, color: AppColors.primary)
+              else if (!isEnabled)
+                const Icon(Icons.lock_outline_rounded, color: Colors.white70),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -382,7 +715,9 @@ class _VisualActionCard extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.bottomRight,
                         child: SizedBox(
-                          width: isPrimary ? (compact ? 200 : 260) : (compact ? 160 : 200),
+                          width: isPrimary
+                              ? (compact ? 200 : 260)
+                              : (compact ? 160 : 200),
                           child: scene,
                         ),
                       ),
@@ -423,15 +758,21 @@ class _VisualActionCard extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
-                                        accent.withValues(alpha: isDark ? 0.24 : 0.16),
-                                        accent.withValues(alpha: isDark ? 0.14 : 0.08),
+                                        accent.withValues(
+                                          alpha: isDark ? 0.24 : 0.16,
+                                        ),
+                                        accent.withValues(
+                                          alpha: isDark ? 0.14 : 0.08,
+                                        ),
                                       ],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
                                     borderRadius: BorderRadius.circular(16),
                                     border: Border.all(
-                                      color: accent.withValues(alpha: isDark ? 0.22 : 0.12),
+                                      color: accent.withValues(
+                                        alpha: isDark ? 0.22 : 0.12,
+                                      ),
                                     ),
                                   ),
                                   child: Icon(
@@ -443,40 +784,60 @@ class _VisualActionCard extends StatelessWidget {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         title,
                                         maxLines: isPrimary ? 2 : 2,
                                         overflow: TextOverflow.ellipsis,
-                                        style: (compact
-                                                ? Theme.of(context).textTheme.titleMedium
-                                                : (isPrimary
-                                                    ? Theme.of(context).textTheme.titleLarge
-                                                    : Theme.of(context).textTheme.titleMedium))
-                                            ?.copyWith(
-                                              color: textPrimary,
-                                              height: 1.05,
-                                              fontWeight: FontWeight.w800,
-                                              letterSpacing: -0.2,
-                                            ),
+                                        style:
+                                            (compact
+                                                    ? Theme.of(
+                                                        context,
+                                                      ).textTheme.titleMedium
+                                                    : (isPrimary
+                                                          ? Theme.of(context)
+                                                                .textTheme
+                                                                .titleLarge
+                                                          : Theme.of(context)
+                                                                .textTheme
+                                                                .titleMedium))
+                                                ?.copyWith(
+                                                  color: textPrimary,
+                                                  height: 1.05,
+                                                  fontWeight: FontWeight.w800,
+                                                  letterSpacing: -0.2,
+                                                ),
                                       ),
                                       if (statusLine != null) ...[
                                         const SizedBox(height: 6),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 5,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: accent.withValues(alpha: isDark ? 0.10 : 0.06),
-                                            borderRadius: BorderRadius.circular(999),
+                                            color: accent.withValues(
+                                              alpha: isDark ? 0.10 : 0.06,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              999,
+                                            ),
                                           ),
                                           child: Text(
                                             statusLine!,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelSmall
+                                                ?.copyWith(
                                                   color: isDark
                                                       ? Colors.white
-                                                      : AppColors.textPrimaryFor(context),
+                                                      : AppColors.textPrimaryFor(
+                                                          context,
+                                                        ),
                                                   fontWeight: FontWeight.w700,
                                                 ),
                                           ),
@@ -503,7 +864,8 @@ class _VisualActionCard extends StatelessWidget {
 
                             const SizedBox(height: 4),
 
-                            if (secondaryActionLabel != null && onSecondaryTap != null) ...[
+                            if (secondaryActionLabel != null &&
+                                onSecondaryTap != null) ...[
                               _SecondaryInlineAction(
                                 label: secondaryActionLabel!,
                                 onTap: onSecondaryTap!,
@@ -564,7 +926,9 @@ class _VisualActionCard extends StatelessWidget {
                                       actionLabel,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context).textTheme.labelLarge
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge
                                           ?.copyWith(
                                             color: accent,
                                             fontWeight: FontWeight.w700,
@@ -843,6 +1207,94 @@ class _QuestionSheet extends StatelessWidget {
               color: const Color(0x332B7BE8),
               borderRadius: BorderRadius.circular(999),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DestinationPlate extends StatelessWidget {
+  const _DestinationPlate({
+    required this.destination,
+    required this.onRestartJourney,
+  });
+
+  final CatalogCountry destination;
+  final Future<void> Function() onRestartJourney;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.08),
+            Colors.white.withValues(alpha: 0.03),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+              ),
+              child: Row(
+                children: [
+                  _RouteNode(emoji: destination.flagEmoji),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          context.l10n.journeyEntrySelectedDestination(
+                            destination.name,
+                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          context.l10n.journeyEntryOriginPending,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.72),
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          const LanguageSelectorButton(
+            foregroundColor: Colors.white,
+            backgroundColor: Color(0x1FFFFFFF),
+          ),
+          const SizedBox(width: 8),
+          _RouteActionPill(
+            icon: Icons.swap_horiz_rounded,
+            onTap: onRestartJourney,
+            compact: false,
           ),
         ],
       ),

@@ -26,7 +26,7 @@ class QuestionPage extends StatefulWidget {
 
 class _QuestionPageState extends State<QuestionPage> {
   String? _inlineHint;
-  bool _isAutoAdvancing = false;
+  bool _showProcessingScreen = false;
   final ScrollController _optionsScrollController = ScrollController();
   String? _scrollScopeKey;
   bool _showScrollHint = false;
@@ -81,7 +81,14 @@ class _QuestionPageState extends State<QuestionPage> {
                             onBack: () => _handleExitFlow(context),
                           ),
                           const SizedBox(height: 20),
-                          if (controller.isInitializing)
+                          if (_showProcessingScreen)
+                            Expanded(
+                              child: _ProcessingState(
+                                title: l10n.questionnaireProcessingTitle,
+                                body: l10n.questionnaireProcessingBody,
+                              ),
+                            )
+                          else if (controller.isInitializing)
                             const Expanded(
                               child: SingleChildScrollView(
                                 child: FormSkeleton(
@@ -275,8 +282,7 @@ class _QuestionPageState extends State<QuestionPage> {
 
   Widget _buildQuestionFlow(BuildContext context, Question question) {
     final l10n = context.l10n;
-    final showPrimaryAction =
-        question.type == 'multi_chip' || question.isOptional;
+    const showPrimaryAction = true;
     _prepareScrollableScope(question.id);
 
     return Column(
@@ -295,9 +301,7 @@ class _QuestionPageState extends State<QuestionPage> {
                 ),
               ),
               const SizedBox(height: 14),
-              _QuestionSupportPill(
-                label: _supportTextForQuestion(context, question),
-              ),
+              _QuestionSupportPill(label: _sectionLabel(context, question)),
               const SizedBox(height: 14),
               Text(
                 l10n.questionTitle(question.id),
@@ -327,6 +331,13 @@ class _QuestionPageState extends State<QuestionPage> {
               ] else if (question.id == 'funding') ...[
                 const SizedBox(height: 10),
                 _QuestionSubnote(label: l10n.qFundingSubtitle),
+              ] else if (question.id == 'origin_country') ...[
+                const SizedBox(height: 10),
+                _QuestionSubnote(label: l10n.journeyEntryOriginPending),
+              ] else if (_sectionTransitionHint(context, question)
+                  case final hint?) ...[
+                const SizedBox(height: 10),
+                _QuestionSubnote(label: hint),
               ] else if (question.id == 'intent' ||
                   question.id == 'timeline') ...[
                 const SizedBox(height: 10),
@@ -485,6 +496,19 @@ class _QuestionPageState extends State<QuestionPage> {
 
   IconData _optionIcon(String questionId, String value) {
     switch (questionId) {
+      case 'origin_country':
+        switch (value) {
+          case 'argentina':
+            return Icons.flag_rounded;
+          case 'chile':
+            return Icons.flag_outlined;
+          case 'uruguai':
+          case 'uruguay':
+            return Icons.explore_outlined;
+          case 'paraguai':
+          case 'paraguay':
+            return Icons.public_rounded;
+        }
       case 'intent':
         switch (value) {
           case 'find_job_br':
@@ -618,8 +642,25 @@ class _QuestionPageState extends State<QuestionPage> {
             ),
             onPressed: isEnabled
                 ? () async {
+                    setState(() {
+                      _showProcessingScreen = controller.isLastQuestion;
+                    });
                     final completed = await controller.goNext();
+                    if (!mounted) {
+                      return;
+                    }
+                    if (!completed) {
+                      setState(() {
+                        _showProcessingScreen = false;
+                      });
+                    }
                     if (completed && context.mounted) {
+                      await Future<void>.delayed(
+                        const Duration(milliseconds: 700),
+                      );
+                      if (!context.mounted) {
+                        return;
+                      }
                       Navigator.pushReplacementNamed(
                         context,
                         AppRoutes.migrationPlanResult,
@@ -704,30 +745,11 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   Future<void> _handleSingleSelect(Question question, Option option) async {
-    if (_isAutoAdvancing) {
-      return;
-    }
-
     setState(() {
       _inlineHint = null;
-      _isAutoAdvancing = true;
     });
 
     controller.selectAnswer(question.id, option.value);
-    await Future<void>.delayed(const Duration(milliseconds: 180));
-    final completed = await controller.goNext();
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _isAutoAdvancing = false;
-    });
-
-    if (completed) {
-      Navigator.pushReplacementNamed(context, AppRoutes.migrationPlanResult);
-    }
   }
 
   void _handleMultiSelect(Question question, Option option) {
@@ -748,15 +770,45 @@ class _QuestionPageState extends State<QuestionPage> {
 
   String _supportTextForQuestion(BuildContext context, Question question) {
     switch (question.id) {
-      case 'intent':
-      case 'funding':
-      case 'timeline':
-      case 'priorities':
-      case 'constraints':
-        return context.l10n.bmpDisclaimer;
+      case 'origin_country':
+        return context.l10n.journeyEntryOriginPending;
       default:
         return context.l10n.questionnaireSupportText;
     }
+  }
+
+  String _sectionLabel(BuildContext context, Question question) {
+    switch (question.id) {
+      case 'origin_country':
+        return context.l10n.questionnaireSectionOrigin;
+      case 'timeline':
+        return context.l10n.questionnaireSectionBasicProfile;
+      case 'priorities':
+      case 'constraints':
+        return context.l10n.questionnaireSectionPreferences;
+      case 'funding':
+        return context.l10n.questionnaireSectionFinancial;
+      case 'intent':
+        return context.l10n.questionnaireSectionGoal;
+      default:
+        return _supportTextForQuestion(context, question);
+    }
+  }
+
+  String? _sectionTransitionHint(BuildContext context, Question question) {
+    final nextIndex = controller.currentIndex + 1;
+    if (nextIndex >= controller.totalStepsForProgress) {
+      return context.l10n.questionnaireReadyForPlan;
+    }
+
+    final nextQuestion = controller.activeQuestions[nextIndex];
+    final currentSection = _sectionLabel(context, question);
+    final nextSection = _sectionLabel(context, nextQuestion);
+    if (currentSection == nextSection) {
+      return null;
+    }
+
+    return context.l10n.questionnaireNextSection(nextSection);
   }
 
   ButtonStyle _primaryButtonStyle(BuildContext context) {
@@ -1361,6 +1413,47 @@ class _QuestionSubnote extends StatelessWidget {
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
         color: AppColors.textSoftFor(context),
         fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+}
+
+class _ProcessingState extends StatelessWidget {
+  const _ProcessingState({required this.title, required this.body});
+
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: FrostedPanel(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              width: 36,
+              height: 36,
+              child: CircularProgressIndicator(strokeWidth: 2.6),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.45,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -4,18 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 
 class MainNavigationBar extends StatelessWidget {
   const MainNavigationBar({
     required this.currentIndex,
+    required this.journeyContextController,
     required this.citiesController,
     required this.migrationQuestionnaireController,
     super.key,
   });
 
   final int currentIndex;
+  final JourneyContextController journeyContextController;
   final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
 
@@ -23,14 +26,11 @@ class MainNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: Listenable.merge([
+        journeyContextController,
         citiesController,
         migrationQuestionnaireController,
       ]),
       builder: (context, _) {
-        final hasFavorites = citiesController.favoriteCityIds.isNotEmpty;
-        final hasCopilot =
-            migrationQuestionnaireController.generatedPlan?.isCityConfirmed ==
-            true;
         final isDark = AppColors.isDark(context);
 
         return SafeArea(
@@ -77,38 +77,45 @@ class MainNavigationBar extends StatelessWidget {
                           onTap: () => _handleTap(
                             context,
                             index: 0,
-                            hasFavorites: hasFavorites,
-                            hasCopilot: hasCopilot,
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: _NavItem(
-                          label: context.l10n.mainNavFavorites,
-                          icon: Icons.favorite_rounded,
+                          label: context.l10n.mainNavExplore,
+                          icon: Icons.travel_explore_rounded,
                           isSelected: currentIndex == 1,
-                          isEnabled: hasFavorites,
+                          isEnabled: true,
                           onTap: () => _handleTap(
                             context,
                             index: 1,
-                            hasFavorites: hasFavorites,
-                            hasCopilot: hasCopilot,
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: _NavItem(
-                          label: context.l10n.mainNavCopilot,
-                          icon: Icons.auto_awesome_rounded,
+                          label: context.l10n.mainNavPlan,
+                          icon: Icons.checklist_rounded,
                           isSelected: currentIndex == 2,
-                          isEnabled: hasCopilot,
+                          isEnabled: true,
                           onTap: () => _handleTap(
                             context,
                             index: 2,
-                            hasFavorites: hasFavorites,
-                            hasCopilot: hasCopilot,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _NavItem(
+                          label: context.l10n.mainNavProfile,
+                          icon: Icons.person_rounded,
+                          isSelected: currentIndex == 3,
+                          isEnabled: true,
+                          onTap: () => _handleTap(
+                            context,
+                            index: 3,
                           ),
                         ),
                       ),
@@ -126,30 +133,37 @@ class MainNavigationBar extends StatelessWidget {
   void _handleTap(
     BuildContext context, {
     required int index,
-    required bool hasFavorites,
-    required bool hasCopilot,
   }) {
     final targetRoute = switch (index) {
       0 => AppRoutes.publicHome,
-      1 => AppRoutes.favorites,
-      _ => AppRoutes.migrationPlanCopilot,
+      1 => AppRoutes.explore,
+      2 => _resolvePlanRoute(),
+      _ => AppRoutes.favorites,
     };
 
     if (index == currentIndex) {
       return;
     }
 
-    if (index == 1 && !hasFavorites) {
-      _showFeedback(context, context.l10n.mainNavFavoritesDisabled);
-      return;
-    }
-
-    if (index == 2 && !hasCopilot) {
-      _showFeedback(context, context.l10n.mainNavCopilotDisabled);
-      return;
+    if (index == 2 && targetRoute == AppRoutes.publicHome) {
+      _showFeedback(context, context.l10n.mainNavPlanNeedsJourney);
     }
 
     Navigator.pushReplacementNamed(context, targetRoute);
+  }
+
+  String _resolvePlanRoute() {
+    final plan = migrationQuestionnaireController.generatedPlan;
+    if (plan?.isCityConfirmed == true) {
+      return AppRoutes.migrationPlanCopilot;
+    }
+    if (plan != null) {
+      return AppRoutes.migrationPlanResult;
+    }
+    if (journeyContextController.canEnterQuestionnaire) {
+      return AppRoutes.migrationQuestionnaire;
+    }
+    return AppRoutes.publicHome;
   }
 
   void _showFeedback(BuildContext context, String message) {

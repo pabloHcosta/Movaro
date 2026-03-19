@@ -215,6 +215,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Answer a few questions and get a clear starter plan with better suggestions.';
 
   @override
+  String get publicHomeJourneyDraftTitle =>
+      'Start your plan with your destination already set';
+
+  @override
+  String publicHomeJourneyDraftBody(Object destination) {
+    return 'You\'re heading toward $destination. Next, answer a few short questions and tell us where you\'re coming from so Movaro can generate the right plan.';
+  }
+
+  @override
   String get publicHomeStoriesTitle => 'Read real experiences';
 
   @override
@@ -397,6 +406,105 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exploreSavePlanAction => 'Save plan';
 
   @override
+  String get exploreUnifiedTitle =>
+      'Explore cities, content, and your next move in one place';
+
+  @override
+  String get exploreUnifiedBody =>
+      'Use this area to reinforce your decision, review the city options that still matter, and open the practical content that matches your route.';
+
+  @override
+  String get explorePlanSectionTitle => 'Based on your plan';
+
+  @override
+  String get explorePlanSectionBody =>
+      'Resume the current plan, reopen the leading city, or jump straight into the most useful guide for your next step.';
+
+  @override
+  String get exploreCitiesSectionTitle => 'Discover other cities';
+
+  @override
+  String get exploreCitiesSectionBody =>
+      'Keep comparing before locking the decision. These cities are strong alternatives for your current route and profile.';
+
+  @override
+  String get exploreContentSectionTitle => 'Useful content';
+
+  @override
+  String get exploreContentSectionBody =>
+      'Open the practical guidance that usually matters next: documents, housing, and work.';
+
+  @override
+  String exploreRouteLabel(Object origin, Object destination) {
+    return 'Journey: $origin -> $destination';
+  }
+
+  @override
+  String exploreDestinationLabel(Object destination) {
+    return 'Destination selected: $destination';
+  }
+
+  @override
+  String get exploreNoJourneyLabel =>
+      'Set a destination to make exploration more relevant.';
+
+  @override
+  String get explorePlanEmptyTitle => 'Start a plan before you go deeper';
+
+  @override
+  String get explorePlanEmptyBody =>
+      'Choose your destination, answer a few questions, and let Movaro turn exploration into a practical direction.';
+
+  @override
+  String get explorePlanReadyTitle => 'Your plan is ready to continue';
+
+  @override
+  String explorePlanReadyBody(Object city) {
+    return '$city is already confirmed. Open your checklist and keep moving through the next actions.';
+  }
+
+  @override
+  String get explorePlanDraftTitle => 'Your plan still needs a decision';
+
+  @override
+  String get explorePlanDraftBody =>
+      'You already have a draft. Reopen the result and confirm the city before moving into checklist mode.';
+
+  @override
+  String explorePlanDraftBodyWithCity(Object city) {
+    return '$city is currently leading. Reopen the result, compare it, and confirm it when ready.';
+  }
+
+  @override
+  String get exploreRecommendedCityTitle => 'Leading city right now';
+
+  @override
+  String get exploreRecommendedCityBody =>
+      'Open the city details to validate cost, quality of life, and fit with your plan.';
+
+  @override
+  String get exploreOpenCityAction => 'Open city';
+
+  @override
+  String get exploreOpenContentAction => 'Open guide';
+
+  @override
+  String get explorePlanDocsBody =>
+      'Documents usually unlock the next part of the move faster than more comparison.';
+
+  @override
+  String get exploreContentDocumentsBody =>
+      'See CPF, registration, banking, and legal stay with less noise and clearer routing.';
+
+  @override
+  String get exploreContentHousingBody =>
+      'Review rent pressure, guarantees, deposits, and first-landing decisions before choosing a neighborhood.';
+
+  @override
+  String get exploreContentWorkBody =>
+      'Check work setup, contribution paths, and what to validate before treating income as solved.';
+
+  @override
   String get documentationPageTitle => 'Documentation and practical life';
 
   @override
@@ -409,6 +517,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get documentationHeroDescription =>
       'Type a question or choose a topic. Movaro helps you find the right guidance and guide across documents, health, work, housing, mobility, and early costs.';
+
+  @override
+  String get documentationFocusTitle => 'Useful for your current journey';
+
+  @override
+  String documentationFocusBody(Object origin, Object destination) {
+    return 'These categories are the strongest starting point for moving from $origin to $destination.';
+  }
+
+  @override
+  String documentationFocusBodyDestination(Object destination) {
+    return 'These categories are a strong starting point for your route into $destination.';
+  }
+
+  @override
+  String get documentationFocusBodyDefault =>
+      'Open the category that removes the biggest blocker first: documents, housing, or work.';
 
   @override
   String get documentationHeroStepOneTitle => 'Type a question';
@@ -1268,6 +1393,37 @@ class AppLocalizationsEn extends AppLocalizations {
       'It takes less than a minute. One question at a time.';
 
   @override
+  String get questionnaireSectionOrigin => 'Origin';
+
+  @override
+  String get questionnaireSectionBasicProfile => 'Basic profile';
+
+  @override
+  String get questionnaireSectionPreferences => 'Preferences';
+
+  @override
+  String get questionnaireSectionFinancial => 'Financial situation';
+
+  @override
+  String get questionnaireSectionGoal => 'Migration goal';
+
+  @override
+  String questionnaireNextSection(Object section) {
+    return 'Next: $section';
+  }
+
+  @override
+  String get questionnaireReadyForPlan =>
+      'Next, we will turn these answers into your first plan.';
+
+  @override
+  String get questionnaireProcessingTitle => 'Building your first plan';
+
+  @override
+  String get questionnaireProcessingBody =>
+      'We are connecting your journey, profile, and priorities into a clear starting point.';
+
+  @override
   String questionProgress(int current, int total) {
     return 'Question $current of $total';
   }
@@ -2015,6 +2171,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cityDetailAffordabilityTitle => 'Cost and housing';
 
   @override
+  String get cityDetailSummaryTitle => 'Quick summary';
+
+  @override
+  String get cityDetailSummaryBody =>
+      'Use this top read to understand whether the city looks easier, more balanced, or more demanding before opening the deeper analysis.';
+
+  @override
+  String get cityDetailAddToPlanAction => 'Add to my plan';
+
+  @override
+  String get cityDetailCompareSavedAction => 'Saved to compare';
+
+  @override
+  String get cityDetailQualityLabel => 'Quality of life';
+
+  @override
+  String get cityDetailQualitySupporting =>
+      'A quick read based on HDI, safety, and language adaptation for arrival.';
+
+  @override
+  String get cityDetailQualityHigh => 'Stronger';
+
+  @override
+  String get cityDetailQualityBalanced => 'Balanced';
+
+  @override
+  String get cityDetailQualityDeveloping => 'Needs validation';
+
+  @override
+  String get cityDetailDifficultyLabel => 'Difficulty';
+
+  @override
+  String get cityDetailDifficultyEasy => 'Lighter move';
+
+  @override
+  String get cityDetailDifficultyBalanced => 'Moderate move';
+
+  @override
+  String get cityDetailDifficultyChallenging => 'More demanding move';
+
+  @override
   String get cityDetailSettleInTitle => 'Adaptation and community';
 
   @override
@@ -2286,6 +2483,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mainNavCopilot => 'Move guide';
 
   @override
+  String get mainNavExplore => 'Explore';
+
+  @override
+  String get mainNavPlan => 'Plan';
+
+  @override
+  String get mainNavProfile => 'Profile';
+
+  @override
+  String get mainNavPlanNeedsJourney =>
+      'Choose your destination first so Movaro can open the right plan step.';
+
+  @override
   String get mainNavFavoritesDisabled =>
       'Add at least 1 city to favorites to unlock this tab.';
 
@@ -2350,6 +2560,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get favoritesGuidePrimaryAction => 'Got it';
+
+  @override
+  String get profileJourneyTitle => 'Journey';
+
+  @override
+  String get profileJourneyBody =>
+      'Movaro uses this route to keep home, exploration, and content connected to the same move context.';
+
+  @override
+  String profileJourneyValue(Object origin, Object destination) {
+    return '$origin -> $destination';
+  }
+
+  @override
+  String profileJourneyPendingValue(Object destination) {
+    return 'Destination saved: $destination';
+  }
+
+  @override
+  String get profileJourneyEmptyValue => 'No journey selected yet';
+
+  @override
+  String get profilePlanTitle => 'Plan status';
+
+  @override
+  String get profilePlanBody =>
+      'Your saved plan stays connected to the journey so you can continue without starting from zero.';
+
+  @override
+  String get profilePlanEmptyValue => 'No plan generated yet';
+
+  @override
+  String profilePlanReadyValue(Object city) {
+    return 'Ready to continue in $city';
+  }
+
+  @override
+  String get profilePlanDraftValue => 'Draft result waiting for confirmation';
+
+  @override
+  String get profileSavedCitiesTitle => 'Saved cities';
+
+  @override
+  String get profileSavedCitiesBody =>
+      'Keep up to 3 cities here so you can compare them again without losing your route or plan context.';
 
   @override
   String get publicHomeJourneyResetAction => 'Choose another route';
@@ -2840,6 +3095,198 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get questionOriginCountryTitle => 'Where are you coming from?';
+
+  @override
+  String get journeyEntryTitle => 'Choose your destination and start faster';
+
+  @override
+  String get journeyEntryBody =>
+      'Pick where you want to move first. Movaro will save that choice now and ask for your origin in the first step of the questionnaire.';
+
+  @override
+  String get journeyEntryDestinationLabel => 'Where do you want to go?';
+
+  @override
+  String get journeyEntryStartAction => 'Start my plan';
+
+  @override
+  String get journeyEntryDynamicTitle =>
+      'Start with a route that matches where you are and where you want to go';
+
+  @override
+  String get journeyEntryDynamicBody =>
+      'You can use your current location as a quick hint or choose everything manually. Movaro never locks your origin from device location, and you can always override it.';
+
+  @override
+  String get journeyEntryUseLocationTitle => 'Use my location';
+
+  @override
+  String get journeyEntryUseLocationBody =>
+      'Ask only now, detect your current country if possible, and let you confirm whether it should be used as origin.';
+
+  @override
+  String get journeyEntryUseLocationAction => 'Use my location';
+
+  @override
+  String get journeyEntryManualTitle => 'Choose manually';
+
+  @override
+  String get journeyEntryManualBody =>
+      'Skip location, set origin and destination yourself, and keep full control over the route.';
+
+  @override
+  String get journeyEntryManualAction => 'Choose manually';
+
+  @override
+  String get journeyEntryContinueAction => 'Continue to questionnaire';
+
+  @override
+  String journeyEntrySelectedDestination(Object destination) {
+    return 'Destination selected: $destination';
+  }
+
+  @override
+  String get journeyEntryOriginPending =>
+      'We\'ll collect your origin in the first question before plan generation.';
+
+  @override
+  String get journeyLocationPanelTitle =>
+      'Location can save one step, but it never decides for you';
+
+  @override
+  String get journeyLocationPanelBody =>
+      'If you allow location, Movaro tries to detect your current country and suggests it as origin. You can reject the suggestion and choose manually instead.';
+
+  @override
+  String get journeyLocationFallbackTitle =>
+      'Location did not resolve a usable country';
+
+  @override
+  String get journeyLocationDeniedBody =>
+      'Location permission was denied. You can keep going by choosing origin and destination manually.';
+
+  @override
+  String get journeyLocationDeniedForeverBody =>
+      'Location permission is blocked for this app right now. You can still continue with manual selection.';
+
+  @override
+  String get journeyLocationUnavailableBody =>
+      'Location services are off on this device. Turn them on if you want a location hint, or continue manually.';
+
+  @override
+  String get journeyLocationFailedBody =>
+      'Movaro could not detect your location this time. You can retry or choose manually.';
+
+  @override
+  String get journeyLocationRetryAction => 'Try again';
+
+  @override
+  String journeyDetectedLocationLabel(Object value) {
+    return 'Detected location: $value';
+  }
+
+  @override
+  String journeyDetectedConfirmBody(Object country) {
+    return 'Use $country as your origin? This only sets a suggestion you can edit at any time.';
+  }
+
+  @override
+  String journeyDetectedUnknownBody(Object country) {
+    return 'Movaro detected $country, but it could not match that country to the current route catalog. Choose your origin manually to continue.';
+  }
+
+  @override
+  String journeyDetectedConfirmAction(Object country) {
+    return 'Use $country as origin';
+  }
+
+  @override
+  String get journeyDetectedManualAction => 'Choose origin manually';
+
+  @override
+  String get journeyOriginSectionTitle => 'Origin';
+
+  @override
+  String get journeyOriginSectionBody =>
+      'Optional for now. Confirm it here if you already know it, or skip and answer it in the first questionnaire step.';
+
+  @override
+  String get journeyOriginSkipAction => 'Skip for now';
+
+  @override
+  String get journeyDestinationSectionTitle => 'Destination';
+
+  @override
+  String get journeyDestinationSectionBody =>
+      'Choose where you want the migration plan to point. Destination is still required before the questionnaire starts.';
+
+  @override
+  String get journeyCoverageFull => 'Full coverage';
+
+  @override
+  String get journeyCoveragePartial => 'Partial coverage';
+
+  @override
+  String get journeyCoverageUnsupported => 'Unsupported';
+
+  @override
+  String get journeyCoverageReadyTitle => 'This route is ready for planning';
+
+  @override
+  String journeyCoverageReadyBody(Object origin, Object destination) {
+    return '$origin -> $destination is supported in the current migration flow.';
+  }
+
+  @override
+  String get journeyCoverageDestinationLimitedTitle =>
+      'Destination coverage is still limited';
+
+  @override
+  String journeyCoverageDestinationLimitedBody(Object destination) {
+    return '$destination does not yet have full destination coverage for the guided migration flow. You can still explore content while the route expands.';
+  }
+
+  @override
+  String get journeyCoverageOriginLimitedTitle =>
+      'Origin coverage is still limited';
+
+  @override
+  String journeyCoverageOriginLimitedBody(Object origin) {
+    return '$origin can be saved as your origin, but the current guided plan does not fully support that starting country yet.';
+  }
+
+  @override
+  String get journeyCoverageDetectedUnknownTitle =>
+      'Detected country is outside the current catalog';
+
+  @override
+  String journeyCoverageDetectedUnknownBody(Object country) {
+    return '$country is not mapped in the current supported-country catalog yet. Choose another origin manually or keep browsing public content.';
+  }
+
+  @override
+  String get journeyCoverageUnsupportedTitle =>
+      'Choose a supported route to generate a plan';
+
+  @override
+  String get journeyCoverageUnsupportedBody =>
+      'Movaro can still show cities and practical content, but the guided migration flow is only available on routes with full coverage.';
+
+  @override
+  String get journeyCoverageChooseRouteAction => 'Choose another route';
+
+  @override
+  String get journeyCoverageBrowseAction => 'Browse explore';
+
+  @override
+  String get journeyCoverageContentAction => 'Open content';
+
+  @override
+  String get journeyCoverageWaitlistAction => 'Join waitlist';
+
+  @override
+  String get journeyCoverageWaitlistStub =>
+      'Waitlist registration is not live yet, but this route can be tracked safely for future coverage.';
 
   @override
   String get questionDestinationCountryTitle => 'Where do you want to go?';
@@ -4273,6 +4720,99 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get migrationPlanResultPrimaryCtaEyebrow => 'Next step';
+
+  @override
+  String get migrationPlanResultStartPlanTitle => 'Start my plan';
+
+  @override
+  String migrationPlanResultStartPlanBody(Object city) {
+    return 'Review $city with a little more context and confirm it when you are ready to unlock the full guided plan.';
+  }
+
+  @override
+  String get migrationPlanResultStartPlanAction => 'Start my plan';
+
+  @override
+  String get migrationPlanResultOpenPlanTitle => 'View full plan';
+
+  @override
+  String get migrationPlanResultOpenPlanAction => 'View full plan';
+
+  @override
+  String get migrationPlanResultCompatibilityHigh => 'High compatibility';
+
+  @override
+  String get migrationPlanResultCompatibilityMedium => 'Good compatibility';
+
+  @override
+  String get migrationPlanResultCompatibilityInitial => 'Initial compatibility';
+
+  @override
+  String get migrationPlanResultCostLabel => 'Estimated cost';
+
+  @override
+  String get migrationPlanResultCostSupporting =>
+      'A directional read based on city cost and rent signals.';
+
+  @override
+  String get migrationPlanResultCostLower => 'Lower';
+
+  @override
+  String get migrationPlanResultCostMedium => 'Moderate';
+
+  @override
+  String get migrationPlanResultCostHigher => 'Higher';
+
+  @override
+  String get migrationPlanResultDifficultyLabel => 'Difficulty level';
+
+  @override
+  String get migrationPlanResultDifficultySupporting =>
+      'How much coordination this plan may need before arrival.';
+
+  @override
+  String get migrationPlanResultDifficultyFocused => 'Focused';
+
+  @override
+  String get migrationPlanResultDifficultyModerate => 'Moderate';
+
+  @override
+  String get migrationPlanResultDifficultyStructured => 'Structured';
+
+  @override
+  String get migrationPlanResultTimelineLabel => 'Estimated timeline';
+
+  @override
+  String migrationPlanResultTimelineValue(Object days) {
+    return '~$days days';
+  }
+
+  @override
+  String get migrationPlanResultCitySectionTitle => 'Why this city is leading';
+
+  @override
+  String get migrationPlanResultCitySectionBody =>
+      'Open the city context when you want more detail, not before the main decision is clear.';
+
+  @override
+  String get migrationPlanResultPlanSectionTitle =>
+      'What happens after this result';
+
+  @override
+  String get migrationPlanResultPlanSectionBody =>
+      'Preparation becomes useful only after the city choice feels strong enough to move forward.';
+
+  @override
+  String get migrationPlanResultProgressSupporting =>
+      'Completed checklist items across the guided plan.';
+
+  @override
+  String migrationPlanCopilotProgressValue(Object done, Object total) {
+    return '$done of $total checklist items completed';
+  }
+
+  @override
   String get migrationPlanScrollHint => 'See more';
 
   @override
@@ -4330,7 +4870,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bmpVariantLeanBody =>
-      '3 questions and one optional refinement to get an initial direction with low friction.';
+      '4 focused questions to get an initial direction with low friction.';
 
   @override
   String get bmpVariantLeanTag => 'Faster';
@@ -4340,7 +4880,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bmpVariantStrategicBody =>
-      'Includes how you plan to support yourself and gives you a sharper starting recommendation.';
+      'Adds one extra preference step for a sharper starting recommendation.';
 
   @override
   String get bmpVariantStrategicTag => 'More precise';

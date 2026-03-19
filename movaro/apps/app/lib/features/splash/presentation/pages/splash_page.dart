@@ -93,8 +93,10 @@ class _SplashPageState extends State<SplashPage> {
     final nextRoute =
         shouldReplayIntroFlow || !widget.journeyContextController.hasSeenIntro
         ? AppRoutes.intro
+        : !widget.journeyContextController.hasDestinationSelected
+        ? AppRoutes.publicHome
         : !widget.journeyContextController.hasSelectedJourney
-        ? AppRoutes.journeySetup
+        ? AppRoutes.publicHome
         : widget.authController.isAuthenticated
         ? (widget.authController.needsOnboarding
               ? AppRoutes.onboarding

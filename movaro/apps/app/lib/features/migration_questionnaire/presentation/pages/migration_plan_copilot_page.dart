@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -12,12 +15,20 @@ import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/arrival_execution_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_readiness_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/arrival_execution_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/landing_budget_estimator_section.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_document_readiness_section.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_readiness_section.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_structure_widgets.dart';
 
 enum _PreparationSection { overview, documents, housing, work, arrival }
 
@@ -26,12 +37,14 @@ class MigrationPlanCopilotPage extends StatefulWidget {
     required this.controller,
     required this.exchangeRatesService,
     required this.citiesController,
+    required this.journeyContextController,
     super.key,
   });
 
   final MigrationQuestionnaireController controller;
   final CopilotExchangeRatesService exchangeRatesService;
   final CitiesController citiesController;
+  final JourneyContextController journeyContextController;
 
   @override
   State<MigrationPlanCopilotPage> createState() =>
@@ -40,7 +53,13 @@ class MigrationPlanCopilotPage extends StatefulWidget {
 
 class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   late final Future<CopilotExchangeRates?> _exchangeRatesFuture;
+  final MigrationCopilotProgressStore _progressStore =
+      MigrationCopilotProgressStore();
   _PreparationSection _selectedSection = _PreparationSection.overview;
+  Set<String> _readinessCompletedIds = <String>{};
+  Set<String> _documentCompletedIds = <String>{};
+  Set<String> _arrivalCompletedIds = <String>{};
+  String? _loadedProgressKey;
 
   @override
   void initState() {
@@ -50,6 +69,71 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
 
   void _openSection(_PreparationSection section) {
     setState(() => _selectedSection = section);
+  }
+
+  Future<void> _loadProgress(MigrationPlan plan) async {
+    final key = _planKey(plan);
+    if (_loadedProgressKey == key) {
+      return;
+    }
+
+    final snapshot = await _progressStore.read(plan);
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _loadedProgressKey = key;
+      _readinessCompletedIds = snapshot.readinessCompletedIds;
+      _documentCompletedIds = snapshot.documentCompletedIds;
+      _arrivalCompletedIds = snapshot.arrivalCompletedIds;
+    });
+  }
+
+  Future<void> _persistProgress(MigrationPlan plan) {
+    return _progressStore.write(
+      plan: plan,
+      readinessCompletedIds: _readinessCompletedIds,
+      documentCompletedIds: _documentCompletedIds,
+      arrivalCompletedIds: _arrivalCompletedIds,
+    );
+  }
+
+  Future<void> _toggleReadinessItem(MigrationPlan plan, String id) async {
+    setState(() {
+      if (!_readinessCompletedIds.add(id)) {
+        _readinessCompletedIds.remove(id);
+      }
+    });
+    await _persistProgress(plan);
+  }
+
+  Future<void> _toggleDocumentItem(MigrationPlan plan, String id) async {
+    setState(() {
+      if (!_documentCompletedIds.add(id)) {
+        _documentCompletedIds.remove(id);
+      }
+    });
+    await _persistProgress(plan);
+  }
+
+  Future<void> _toggleArrivalItem(MigrationPlan plan, String id) async {
+    setState(() {
+      if (!_arrivalCompletedIds.add(id)) {
+        _arrivalCompletedIds.remove(id);
+      }
+    });
+    await _persistProgress(plan);
+  }
+
+  String _planKey(MigrationPlan plan) {
+    return [
+      plan.originCountry,
+      plan.destinationCountry,
+      plan.goal,
+      plan.timeline,
+      plan.recommendedCity?.id ?? 'no-city',
+    ].join('::');
   }
 
   void _openDocumentationTopic(DocumentationGuideSection section) {
@@ -148,6 +232,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
 
     final isOverview = _selectedSection == _PreparationSection.overview;
     final hasConfirmedCity = plan.isCityConfirmed && city != null;
+    unawaited(_loadProgress(plan));
 
     return Scaffold(
       body: Stack(
@@ -204,6 +289,16 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                       },
                                     )
                                   else ...[
+                                    _PlanProgressOverview(
+                                      plan: plan,
+                                      readinessCompletedIds:
+                                          _readinessCompletedIds,
+                                      documentCompletedIds:
+                                          _documentCompletedIds,
+                                      arrivalCompletedIds: _arrivalCompletedIds,
+                                      onOpenSection: _openSection,
+                                    ),
+                                    const SizedBox(height: 16),
                                     _PreparationSectionRail(
                                       selectedSection: _selectedSection,
                                       onSelected: _openSection,
@@ -211,6 +306,19 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                     const SizedBox(height: 16),
                                     if (isOverview)
                                       _PreparationOverview(
+                                        plan: plan,
+                                        readinessCompletedIds:
+                                            _readinessCompletedIds,
+                                        documentCompletedIds:
+                                            _documentCompletedIds,
+                                        arrivalCompletedIds:
+                                            _arrivalCompletedIds,
+                                        onToggleReadinessItem: (id) =>
+                                            _toggleReadinessItem(plan, id),
+                                        onToggleDocumentItem: (id) =>
+                                            _toggleDocumentItem(plan, id),
+                                        onToggleArrivalItem: (id) =>
+                                            _toggleArrivalItem(plan, id),
                                         onOpenSection: _openSection,
                                         onOpenGuide: _openDocumentationGuide,
                                         onOpenFlights: _openFlightsSearch,
@@ -218,6 +326,18 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                     else
                                       _PreparationSectionContent(
                                         section: _selectedSection,
+                                        readinessCompletedIds:
+                                            _readinessCompletedIds,
+                                        documentCompletedIds:
+                                            _documentCompletedIds,
+                                        arrivalCompletedIds:
+                                            _arrivalCompletedIds,
+                                        onToggleReadinessItem: (id) =>
+                                            _toggleReadinessItem(plan, id),
+                                        onToggleDocumentItem: (id) =>
+                                            _toggleDocumentItem(plan, id),
+                                        onToggleArrivalItem: (id) =>
+                                            _toggleArrivalItem(plan, id),
                                         onOpenGuide: _openDocumentationGuide,
                                         onOpenTopic: _openDocumentationTopic,
                                         onOpenIbgePanorama: _openIbgePanorama,
@@ -246,6 +366,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       ),
       bottomNavigationBar: MainNavigationBar(
         currentIndex: 2,
+        journeyContextController: widget.journeyContextController,
         citiesController: widget.citiesController,
         migrationQuestionnaireController: widget.controller,
       ),
@@ -539,13 +660,194 @@ class _SectionChip extends StatelessWidget {
   }
 }
 
+class _PlanProgressOverview extends StatelessWidget {
+  const _PlanProgressOverview({
+    required this.plan,
+    required this.readinessCompletedIds,
+    required this.documentCompletedIds,
+    required this.arrivalCompletedIds,
+    required this.onOpenSection,
+  });
+
+  final MigrationPlan plan;
+  final Set<String> readinessCompletedIds;
+  final Set<String> documentCompletedIds;
+  final Set<String> arrivalCompletedIds;
+  final ValueChanged<_PreparationSection> onOpenSection;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final readinessChecklist = MigrationReadinessBuilder.build(
+      l10n: l10n,
+      plan: plan,
+    );
+    final documentChecklist = MigrationDocumentReadinessBuilder.build(
+      l10n: l10n,
+      plan: plan,
+    );
+    final arrivalChecklist = ArrivalExecutionBuilder.build(
+      l10n: l10n,
+      plan: plan,
+    );
+
+    final totalItems =
+        readinessChecklist.items.length +
+        documentChecklist.items.length +
+        arrivalChecklist.items.length;
+    final completedItems =
+        readinessCompletedIds.length +
+        documentCompletedIds.length +
+        arrivalCompletedIds.length;
+    final progress = totalItems == 0 ? 0.0 : completedItems / totalItems;
+
+    final stepStates = [
+      _PlanStageState(
+        title: l10n.migrationPlanCopilotStepStartTitle,
+        body: l10n.migrationPlanCopilotStepStartBody,
+        section: _PreparationSection.work,
+        isComplete:
+            readinessCompletedIds.length >= readinessChecklist.items.length &&
+            readinessChecklist.items.isNotEmpty,
+      ),
+      _PlanStageState(
+        title: l10n.migrationPlanCopilotStepDocumentsTitle,
+        body: l10n.migrationPlanCopilotStepDocumentsBody,
+        section: _PreparationSection.documents,
+        isComplete:
+            documentCompletedIds.length >= documentChecklist.items.length &&
+            documentChecklist.items.isNotEmpty,
+      ),
+      _PlanStageState(
+        title: l10n.migrationPlanCopilotStepArrivalTitle,
+        body: l10n.migrationPlanCopilotStepArrivalBody,
+        section: _PreparationSection.arrival,
+        isComplete:
+            arrivalCompletedIds.length >= arrivalChecklist.items.length &&
+            arrivalChecklist.items.isNotEmpty,
+      ),
+    ];
+
+    final currentIndex = stepStates.indexWhere((item) => !item.isComplete);
+    final stepNumber = currentIndex == -1 ? stepStates.length : currentIndex + 1;
+    final nextStage = currentIndex == -1 ? stepStates.last : stepStates[currentIndex];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final twoColumns = constraints.maxWidth >= 760;
+            final cardWidth = twoColumns
+                ? (constraints.maxWidth - 12) / 2
+                : constraints.maxWidth;
+
+            return Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                SizedBox(
+                  width: cardWidth,
+                  child: PlanSummaryCard(
+                    label: l10n.migrationPlanCopilotStepCounter(
+                      stepNumber,
+                      stepStates.length,
+                    ),
+                    value: '${(progress * 100).round()}%',
+                    supporting: l10n.migrationPlanResultProgressSupporting,
+                    icon: Icons.timeline_rounded,
+                  ),
+                ),
+                SizedBox(
+                  width: cardWidth,
+                  child: PlanNextActionCard(
+                    eyebrow: l10n.migrationPlanCopilotRecommendedTitle,
+                    title: nextStage.title,
+                    body: nextStage.body,
+                    actionLabel: l10n.migrationPlanCopilotRecommendedOpen,
+                    progressLabel: l10n.migrationPlanCopilotProgressValue(
+                      completedItems,
+                      totalItems,
+                    ),
+                    onTap: () => onOpenSection(nextStage.section),
+                    icon: Icons.play_arrow_rounded,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 16),
+        FrostedPanel(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.migrationPlanCopilotNextActionsTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.migrationPlanCopilotNextActionsBody,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 14),
+              for (final item in stepStates) ...[
+                PlanChecklistItem(
+                  title: item.title,
+                  body: item.body,
+                  completed: item.isComplete,
+                  onTap: () => onOpenSection(item.section),
+                  icon: Icons.flag_outlined,
+                ),
+                if (item != stepStates.last) const SizedBox(height: 10),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PlanStageState {
+  const _PlanStageState({
+    required this.title,
+    required this.body,
+    required this.section,
+    required this.isComplete,
+  });
+
+  final String title;
+  final String body;
+  final _PreparationSection section;
+  final bool isComplete;
+}
+
 class _PreparationOverview extends StatelessWidget {
   const _PreparationOverview({
+    required this.plan,
+    required this.readinessCompletedIds,
+    required this.documentCompletedIds,
+    required this.arrivalCompletedIds,
+    required this.onToggleReadinessItem,
+    required this.onToggleDocumentItem,
+    required this.onToggleArrivalItem,
     required this.onOpenSection,
     required this.onOpenGuide,
     required this.onOpenFlights,
   });
 
+  final MigrationPlan plan;
+  final Set<String> readinessCompletedIds;
+  final Set<String> documentCompletedIds;
+  final Set<String> arrivalCompletedIds;
+  final ValueChanged<String> onToggleReadinessItem;
+  final ValueChanged<String> onToggleDocumentItem;
+  final ValueChanged<String> onToggleArrivalItem;
   final ValueChanged<_PreparationSection> onOpenSection;
   final VoidCallback onOpenGuide;
   final VoidCallback onOpenFlights;
@@ -557,25 +859,32 @@ class _PreparationOverview extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        FrostedPanel(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.migrationPlanPrepOverviewTitle,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                l10n.migrationPlanPrepOverviewBody,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                  height: 1.45,
-                ),
-              ),
-            ],
-          ),
+        PlanNextActionCard(
+          eyebrow: l10n.migrationPlanCopilotHomeTitle,
+          title: l10n.migrationPlanCopilotNextActionsTitle,
+          body: l10n.migrationPlanCopilotNextActionsBody,
+          actionLabel: l10n.migrationPlanCopilotRecommendedOpen,
+          onTap: () => onOpenSection(_PreparationSection.documents),
+          progressLabel: l10n.migrationPlanCopilotStageCountLabel(4),
+          icon: Icons.auto_awesome_rounded,
+        ),
+        const SizedBox(height: 16),
+        MigrationReadinessSection(
+          plan: plan,
+          completedItemIds: readinessCompletedIds,
+          onToggleItem: onToggleReadinessItem,
+        ),
+        const SizedBox(height: 16),
+        MigrationDocumentReadinessSection(
+          plan: plan,
+          completedItemIds: documentCompletedIds,
+          onToggleItem: onToggleDocumentItem,
+        ),
+        const SizedBox(height: 16),
+        ArrivalExecutionSection(
+          plan: plan,
+          completedItemIds: arrivalCompletedIds,
+          onToggleItem: onToggleArrivalItem,
         ),
         const SizedBox(height: 16),
         LayoutBuilder(
@@ -842,6 +1151,12 @@ class _PreparationNeedsCityState extends StatelessWidget {
 class _PreparationSectionContent extends StatelessWidget {
   const _PreparationSectionContent({
     required this.section,
+    required this.readinessCompletedIds,
+    required this.documentCompletedIds,
+    required this.arrivalCompletedIds,
+    required this.onToggleReadinessItem,
+    required this.onToggleDocumentItem,
+    required this.onToggleArrivalItem,
     required this.onOpenGuide,
     required this.onOpenTopic,
     required this.onOpenIbgePanorama,
@@ -853,6 +1168,12 @@ class _PreparationSectionContent extends StatelessWidget {
   });
 
   final _PreparationSection section;
+  final Set<String> readinessCompletedIds;
+  final Set<String> documentCompletedIds;
+  final Set<String> arrivalCompletedIds;
+  final ValueChanged<String> onToggleReadinessItem;
+  final ValueChanged<String> onToggleDocumentItem;
+  final ValueChanged<String> onToggleArrivalItem;
   final VoidCallback onOpenGuide;
   final ValueChanged<DocumentationGuideSection> onOpenTopic;
   final Future<void> Function(City city) onOpenIbgePanorama;
@@ -870,10 +1191,21 @@ class _PreparationSectionContent extends StatelessWidget {
       case _PreparationSection.overview:
         return const SizedBox.shrink();
       case _PreparationSection.documents:
-        return _DocumentsGuideSection(
-          onOpenGuide: onOpenGuide,
-          onOpenTopic: onOpenTopic,
-          onOpenExternalPreparationLink: onOpenExternalPreparationLink,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            MigrationDocumentReadinessSection(
+              plan: plan,
+              completedItemIds: documentCompletedIds,
+              onToggleItem: onToggleDocumentItem,
+            ),
+            const SizedBox(height: 16),
+            _DocumentsGuideSection(
+              onOpenGuide: onOpenGuide,
+              onOpenTopic: onOpenTopic,
+              onOpenExternalPreparationLink: onOpenExternalPreparationLink,
+            ),
+          ],
         );
       case _PreparationSection.housing:
         return _HousingGuideSection(
@@ -886,18 +1218,40 @@ class _PreparationSectionContent extends StatelessWidget {
           onOpenExternalPreparationLink: onOpenExternalPreparationLink,
         );
       case _PreparationSection.work:
-        return _WorkGuideSection(
-          onOpenTopic: onOpenTopic,
-          plan: plan,
-          city: city,
-          onOpenIbgePanorama: onOpenIbgePanorama,
-          onOpenExternalPreparationLink: onOpenExternalPreparationLink,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            MigrationReadinessSection(
+              plan: plan,
+              completedItemIds: readinessCompletedIds,
+              onToggleItem: onToggleReadinessItem,
+            ),
+            const SizedBox(height: 16),
+            _WorkGuideSection(
+              onOpenTopic: onOpenTopic,
+              plan: plan,
+              city: city,
+              onOpenIbgePanorama: onOpenIbgePanorama,
+              onOpenExternalPreparationLink: onOpenExternalPreparationLink,
+            ),
+          ],
         );
       case _PreparationSection.arrival:
-        return _ArrivalGuideSection(
-          onOpenTopic: onOpenTopic,
-          destinationCityName: city?.name,
-          onOpenExternalPreparationLink: onOpenExternalPreparationLink,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ArrivalExecutionSection(
+              plan: plan,
+              completedItemIds: arrivalCompletedIds,
+              onToggleItem: onToggleArrivalItem,
+            ),
+            const SizedBox(height: 16),
+            _ArrivalGuideSection(
+              onOpenTopic: onOpenTopic,
+              destinationCityName: city?.name,
+              onOpenExternalPreparationLink: onOpenExternalPreparationLink,
+            ),
+          ],
         );
     }
   }

@@ -18,7 +18,7 @@ import 'package:movaro_app/features/cities/presentation/widgets/city_image_backd
 import 'package:movaro_app/features/cities/presentation/widgets/recommendation_reason_list.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_structure_widgets.dart';
 
 class MigrationPlanResultPage extends StatefulWidget {
   const MigrationPlanResultPage({required this.controller, super.key});
@@ -150,23 +150,38 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
                               onBack: () => Navigator.maybePop(context),
                             ),
                             const SizedBox(height: 20),
-                            _DecisionHero(plan: plan),
-                            if (plan.recommendedCity != null) ...[
-                              const SizedBox(height: 16),
-                              _LeadCityShowcase(
-                                city: plan.recommendedCity!,
-                                plan: plan,
-                              ),
-                            ],
+                            _ResultHero(plan: plan),
+                            const SizedBox(height: 16),
+                            _ResultSummary(plan: plan),
                             if (shortlist.isNotEmpty) ...[
                               const SizedBox(height: 16),
-                              _CityShortlist(plan: plan, cities: shortlist),
+                              _ResultExpandableSection(
+                                title: l10n.migrationPlanShortlistTitle,
+                                subtitle: l10n.migrationPlanShortlistBody,
+                                initiallyExpanded: !plan.isCityConfirmed,
+                                child: _CityShortlist(plan: plan, cities: shortlist),
+                              ),
+                            ],
+                            if (plan.recommendedCity != null) ...[
+                              const SizedBox(height: 16),
+                              _ResultExpandableSection(
+                                title: l10n.migrationPlanResultCitySectionTitle,
+                                subtitle: l10n.migrationPlanResultCitySectionBody,
+                                child: _LeadCityShowcase(
+                                  city: plan.recommendedCity!,
+                                  plan: plan,
+                                ),
+                              ),
                             ],
                             const SizedBox(height: 16),
-                            if (plan.isCityConfirmed)
-                              _ConfirmedCityPanel(plan: plan)
-                            else
-                              _PreparationPrompt(plan: plan),
+                            _ResultExpandableSection(
+                              title: l10n.migrationPlanResultPlanSectionTitle,
+                              subtitle: l10n.migrationPlanResultPlanSectionBody,
+                              initiallyExpanded: plan.isCityConfirmed,
+                              child: plan.isCityConfirmed
+                                  ? _ConfirmedCityPanel(plan: plan)
+                                  : _PreparationPrompt(plan: plan),
+                            ),
                           ],
                         ),
                         if (_showScrollHint)
@@ -191,8 +206,8 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
   }
 }
 
-class _DecisionHero extends StatelessWidget {
-  const _DecisionHero({required this.plan});
+class _ResultHero extends StatelessWidget {
+  const _ResultHero({required this.plan});
 
   final MigrationPlan plan;
 
@@ -200,11 +215,12 @@ class _DecisionHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final city = plan.recommendedCity;
-    final title = city == null
-        ? l10n.migrationPlanDecisionTitle(l10n.goalLabel(plan.goal))
-        : plan.isCityConfirmed
-        ? l10n.migrationPlanConfirmedCityTitle(city.name)
-        : l10n.migrationPlanHeroTitle(city.name);
+    final reasons = (plan.cityRecommendationReasons.isNotEmpty
+            ? plan.cityRecommendationReasons
+            : city?.recommendationReasons ?? const <String>[])
+        .take(3)
+        .toList(growable: false);
+    final compatibility = _compatibilityLabel(context, plan.confidence);
 
     return FrostedPanel(
       padding: const EdgeInsets.all(28),
@@ -226,44 +242,251 @@ class _DecisionHero extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            title,
+            city == null
+                ? l10n.migrationPlanDecisionTitle(l10n.goalLabel(plan.goal))
+                : city.name,
             style: Theme.of(
               context,
             ).textTheme.headlineMedium?.copyWith(color: Colors.white),
           ),
           const SizedBox(height: 12),
-          Text(
-            plan.isCityConfirmed && city != null
-                ? l10n.migrationPlanPreparationBody(city.name)
-                : l10n.migrationPlanHeroBody(l10n.timelineLabel(plan.timeline)),
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.white.withValues(alpha: 0.82),
-              height: 1.45,
+          if (city != null)
+            Text(
+              '${city.stateName} (${city.stateCode})',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: Colors.white.withValues(alpha: 0.84),
+              ),
             ),
-          ),
           const SizedBox(height: 16),
           Wrap(
             spacing: 10,
             runSpacing: 10,
             children: [
-              _SummaryChip(
-                label: plan.confidence >= 0.68
-                    ? l10n.migrationPlanConfidenceHigh
-                    : l10n.migrationPlanConfidenceLow,
-              ),
+              _SummaryChip(label: compatibility),
               if (plan.isCityConfirmed)
                 _SummaryChip(label: l10n.migrationPlanSelectedCityBadge),
-              _SummaryChip(label: l10n.goalLabel(plan.goal)),
-              _SummaryChip(label: l10n.timelineLabel(plan.timeline)),
-              _SummaryChip(
-                label: l10n.questionnaireVariantLabel(plan.variant.id),
-              ),
-              if (plan.funding.isNotEmpty)
-                _SummaryChip(label: l10n.fundingLabel(plan.funding)),
             ],
+          ),
+          if (reasons.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            for (final reason in reasons) ...[
+              _ResultReasonRow(
+                label: l10n.recommendationReasonLabel(reason),
+              ),
+              if (reason != reasons.last) const SizedBox(height: 10),
+            ],
+          ],
+          const SizedBox(height: 18),
+          PlanNextActionCard(
+            eyebrow: l10n.migrationPlanResultPrimaryCtaEyebrow,
+            title: plan.isCityConfirmed
+                ? l10n.migrationPlanResultOpenPlanTitle
+                : l10n.migrationPlanResultStartPlanTitle,
+            body: city == null
+                ? l10n.migrationPlanDecisionSummaryBody
+                : plan.isCityConfirmed
+                ? l10n.migrationPlanPreparationBody(city.name)
+                : l10n.migrationPlanResultStartPlanBody(city.name),
+            actionLabel: plan.isCityConfirmed
+                ? l10n.migrationPlanResultOpenPlanAction
+                : l10n.migrationPlanResultStartPlanAction,
+            onTap: () => plan.isCityConfirmed
+                ? Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot)
+                : Navigator.pushNamed(
+                    context,
+                    AppRoutes.cityDetail(city!.id),
+                    arguments: const {'selectForPlan': true},
+                  ),
+            icon: plan.isCityConfirmed
+                ? Icons.checklist_rounded
+                : Icons.open_in_new_rounded,
           ),
         ],
       ),
+    );
+  }
+
+  String _compatibilityLabel(BuildContext context, double confidence) {
+    final l10n = context.l10n;
+    if (confidence >= 0.72) {
+      return l10n.migrationPlanResultCompatibilityHigh;
+    }
+    if (confidence >= 0.52) {
+      return l10n.migrationPlanResultCompatibilityMedium;
+    }
+    return l10n.migrationPlanResultCompatibilityInitial;
+  }
+}
+
+class _ResultSummary extends StatelessWidget {
+  const _ResultSummary({required this.plan});
+
+  final MigrationPlan plan;
+
+  @override
+  Widget build(BuildContext context) {
+    final city = plan.recommendedCity;
+    final totalDays = plan.steps.fold<int>(
+      0,
+      (sum, step) => sum + step.estimatedDays,
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= 960;
+        final medium = constraints.maxWidth >= 640;
+        final cardWidth = wide
+            ? (constraints.maxWidth - 24) / 3
+            : medium
+            ? (constraints.maxWidth - 12) / 2
+            : constraints.maxWidth;
+
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            SizedBox(
+              width: cardWidth,
+              child: PlanSummaryCard(
+                label: context.l10n.migrationPlanResultCostLabel,
+                value: _costLabel(context, city),
+                supporting: context.l10n.migrationPlanResultCostSupporting,
+                icon: Icons.payments_outlined,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: PlanSummaryCard(
+                label: context.l10n.migrationPlanResultDifficultyLabel,
+                value: _difficultyLabel(context),
+                supporting:
+                    context.l10n.migrationPlanResultDifficultySupporting,
+                icon: Icons.route_outlined,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: PlanSummaryCard(
+                label: context.l10n.migrationPlanResultTimelineLabel,
+                value: context.l10n.migrationPlanResultTimelineValue(totalDays),
+                supporting: context.l10n.timelineLabel(plan.timeline),
+                icon: Icons.schedule_rounded,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _costLabel(BuildContext context, City? city) {
+    final l10n = context.l10n;
+    if (city == null) {
+      return l10n.migrationPlanResultCostMedium;
+    }
+
+    final combined = (city.costOfLivingScore + city.rentScore) / 2;
+    if (combined <= 45) {
+      return l10n.migrationPlanResultCostLower;
+    }
+    if (combined <= 68) {
+      return l10n.migrationPlanResultCostMedium;
+    }
+    return l10n.migrationPlanResultCostHigher;
+  }
+
+  String _difficultyLabel(BuildContext context) {
+    final l10n = context.l10n;
+    final totalDays = plan.steps.fold<int>(
+      0,
+      (sum, step) => sum + step.estimatedDays,
+    );
+    if (totalDays <= 45) {
+      return l10n.migrationPlanResultDifficultyFocused;
+    }
+    if (totalDays <= 75) {
+      return l10n.migrationPlanResultDifficultyModerate;
+    }
+    return l10n.migrationPlanResultDifficultyStructured;
+  }
+}
+
+class _ResultExpandableSection extends StatelessWidget {
+  const _ResultExpandableSection({
+    required this.title,
+    required this.subtitle,
+    required this.child,
+    this.initiallyExpanded = false,
+  });
+
+  final String title;
+  final String subtitle;
+  final Widget child;
+  final bool initiallyExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    return FrostedPanel(
+      padding: EdgeInsets.zero,
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: initiallyExpanded,
+          tilePadding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+          childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          title: Text(title, style: Theme.of(context).textTheme.titleMedium),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              subtitle,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.4,
+              ),
+            ),
+          ),
+          children: [child],
+        ),
+      ),
+    );
+  }
+}
+
+class _ResultReasonRow extends StatelessWidget {
+  const _ResultReasonRow({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 22,
+          height: 22,
+          margin: const EdgeInsets.only(top: 2),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: const Icon(
+            Icons.check_rounded,
+            size: 14,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withValues(alpha: 0.84),
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

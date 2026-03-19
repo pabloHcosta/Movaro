@@ -63,26 +63,30 @@ class AppRouter {
       );
     }
 
-    const journeyRequiredPaths = <String>{
-      AppRoutes.publicHome,
-      AppRoutes.favorites,
-      AppRoutes.explore,
-      AppRoutes.documentationGuide,
-      AppRoutes.cities,
-      AppRoutes.citiesSearch,
-      AppRoutes.countries,
-      AppRoutes.migrationQuestionnaire,
-      AppRoutes.migrationPlanResult,
-      AppRoutes.migrationPlanCopilot,
-    };
-
-    if (journeyRequiredPaths.contains(routeName) &&
-        !journeyContextController.hasSelectedJourney) {
+    if (routeName == AppRoutes.migrationQuestionnaire &&
+        !journeyContextController.canEnterQuestionnaire) {
       return _buildRoute(
         const RouteSettings(name: AppRoutes.journeySetup),
         JourneySetupPage(
           catalogRepository: catalogRepository,
           journeyContextController: journeyContextController,
+        ),
+      );
+    }
+
+    const completeJourneyRequiredPaths = <String>{
+      AppRoutes.migrationPlanResult,
+      AppRoutes.migrationPlanCopilot,
+    };
+
+    if (completeJourneyRequiredPaths.contains(routeName) &&
+        !journeyContextController.isJourneyReadyForPlanning) {
+      return _buildRoute(
+        const RouteSettings(name: AppRoutes.publicHome),
+        PublicHomePage(
+          journeyContextController: journeyContextController,
+          citiesController: citiesController,
+          migrationQuestionnaireController: migrationQuestionnaireController,
         ),
       );
     }
@@ -146,6 +150,7 @@ class AppRouter {
         return _buildRoute(
           settings,
           FavoritesPage(
+            journeyContextController: journeyContextController,
             citiesController: citiesController,
             migrationQuestionnaireController: migrationQuestionnaireController,
           ),
@@ -169,17 +174,27 @@ class AppRouter {
           ),
         );
       case AppRoutes.explore:
+        unawaited(citiesController.prefetchExplore());
+        unawaited(citiesController.prefetchCatalog());
         return _buildRoute(
           settings,
           ExplorePage(
+            journeyContextController: journeyContextController,
+            citiesController: citiesController,
             migrationQuestionnaireController: migrationQuestionnaireController,
           ),
         );
       case AppRoutes.documentationGuide:
+        final initialSection = settings.arguments is DocumentationGuideSection
+            ? settings.arguments! as DocumentationGuideSection
+            : null;
         return _buildRoute(
           settings,
           DocumentationGuidePage(
             exchangeRatesService: copilotExchangeRatesService,
+            initialSection: initialSection,
+            journeyContextController: journeyContextController,
+            migrationQuestionnaireController: migrationQuestionnaireController,
           ),
         );
       case AppRoutes.documentationTopic:
@@ -228,7 +243,6 @@ class AppRouter {
           ),
         );
       case AppRoutes.migrationQuestionnaire:
-        migrationQuestionnaireController.resetFlow();
         return _buildRoute(
           settings,
           QuestionPage(controller: migrationQuestionnaireController),
@@ -254,6 +268,7 @@ class AppRouter {
             controller: migrationQuestionnaireController,
             exchangeRatesService: copilotExchangeRatesService,
             citiesController: citiesController,
+            journeyContextController: journeyContextController,
           ),
         );
       case AppRoutes.authenticatedHome:
@@ -291,6 +306,7 @@ class AppRouter {
   Route<void> _buildRoute(RouteSettings settings, Widget child) {
     const primaryNavRoutes = <String>{
       AppRoutes.publicHome,
+      AppRoutes.explore,
       AppRoutes.favorites,
       AppRoutes.migrationPlanCopilot,
     };

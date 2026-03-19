@@ -37,7 +37,7 @@ class _IntroPageState extends State<IntroPage> {
     }
 
     if (widget.isFirstLaunch) {
-      Navigator.pushReplacementNamed(context, AppRoutes.journeySetup);
+      Navigator.pushReplacementNamed(context, AppRoutes.publicHome);
       return;
     }
 

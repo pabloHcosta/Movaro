@@ -95,6 +95,13 @@
   "publicHomeQuestionsAction": "Clear my doubts",
   "publicHomePlanTitle": "Build my plan",
   "publicHomePlanBody": "Answer a few questions and get a clear starter plan with better suggestions.",
+  "publicHomeJourneyDraftTitle": "Start your plan with your destination already set",
+  "publicHomeJourneyDraftBody": "You're heading toward {destination}. Next, answer a few short questions and tell us where you're coming from so Movaro can generate the right plan.",
+  "@publicHomeJourneyDraftBody": {
+    "placeholders": {
+      "destination": {}
+    }
+  },
   "publicHomeStoriesTitle": "Read real experiences",
   "publicHomeStoriesBody": "Understand what other people are looking for before deciding your next step.",
   "publicHomeStoriesAction": "Explore stories",
@@ -146,10 +153,72 @@
   "exploreTrailPrepBodyStart": "If you have not confirmed a city yet, start with the initial plan to organize the decision.",
   "exploreTrailPrepBodyReady": "Since you have already confirmed a city, this track focuses on checklist, documents, housing, and arrival.",
   "exploreSavePlanAction": "Save plan",
+  "exploreUnifiedTitle": "Explore cities, content, and your next move in one place",
+  "exploreUnifiedBody": "Use this area to reinforce your decision, review the city options that still matter, and open the practical content that matches your route.",
+  "explorePlanSectionTitle": "Based on your plan",
+  "explorePlanSectionBody": "Resume the current plan, reopen the leading city, or jump straight into the most useful guide for your next step.",
+  "exploreCitiesSectionTitle": "Discover other cities",
+  "exploreCitiesSectionBody": "Keep comparing before locking the decision. These cities are strong alternatives for your current route and profile.",
+  "exploreContentSectionTitle": "Useful content",
+  "exploreContentSectionBody": "Open the practical guidance that usually matters next: documents, housing, and work.",
+  "exploreRouteLabel": "Journey: {origin} -> {destination}",
+  "@exploreRouteLabel": {
+    "placeholders": {
+      "origin": {},
+      "destination": {}
+    }
+  },
+  "exploreDestinationLabel": "Destination selected: {destination}",
+  "@exploreDestinationLabel": {
+    "placeholders": {
+      "destination": {}
+    }
+  },
+  "exploreNoJourneyLabel": "Set a destination to make exploration more relevant.",
+  "explorePlanEmptyTitle": "Start a plan before you go deeper",
+  "explorePlanEmptyBody": "Choose your destination, answer a few questions, and let Movaro turn exploration into a practical direction.",
+  "explorePlanReadyTitle": "Your plan is ready to continue",
+  "explorePlanReadyBody": "{city} is already confirmed. Open your checklist and keep moving through the next actions.",
+  "@explorePlanReadyBody": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "explorePlanDraftTitle": "Your plan still needs a decision",
+  "explorePlanDraftBody": "You already have a draft. Reopen the result and confirm the city before moving into checklist mode.",
+  "explorePlanDraftBodyWithCity": "{city} is currently leading. Reopen the result, compare it, and confirm it when ready.",
+  "@explorePlanDraftBodyWithCity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "exploreRecommendedCityTitle": "Leading city right now",
+  "exploreRecommendedCityBody": "Open the city details to validate cost, quality of life, and fit with your plan.",
+  "exploreOpenCityAction": "Open city",
+  "exploreOpenContentAction": "Open guide",
+  "explorePlanDocsBody": "Documents usually unlock the next part of the move faster than more comparison.",
+  "exploreContentDocumentsBody": "See CPF, registration, banking, and legal stay with less noise and clearer routing.",
+  "exploreContentHousingBody": "Review rent pressure, guarantees, deposits, and first-landing decisions before choosing a neighborhood.",
+  "exploreContentWorkBody": "Check work setup, contribution paths, and what to validate before treating income as solved.",
   "documentationPageTitle": "Documentation and practical life",
   "documentationHeroEyebrow": "Practical guide",
   "documentationHeroTitle": "Understand practical life in Brazil with more clarity",
   "documentationHeroDescription": "Type a question or choose a topic. Movaro helps you find the right guidance and guide across documents, health, work, housing, mobility, and early costs.",
+  "documentationFocusTitle": "Useful for your current journey",
+  "documentationFocusBody": "These categories are the strongest starting point for moving from {origin} to {destination}.",
+  "@documentationFocusBody": {
+    "placeholders": {
+      "origin": {},
+      "destination": {}
+    }
+  },
+  "documentationFocusBodyDestination": "These categories are a strong starting point for your route into {destination}.",
+  "@documentationFocusBodyDestination": {
+    "placeholders": {
+      "destination": {}
+    }
+  },
+  "documentationFocusBodyDefault": "Open the category that removes the biggest blocker first: documents, housing, or work.",
   "documentationHeroStepOneTitle": "Type a question",
   "documentationHeroStepOneBody": "You can search in English, Portuguese, or Spanish.",
   "documentationHeroStepTwoTitle": "Choose a topic",
@@ -428,6 +497,20 @@
   "questionnairePageTitle": "Your first plan",
   "questionnaireLoadingLabel": "Preparing your questions",
   "questionnaireSupportText": "It takes less than a minute. One question at a time.",
+  "questionnaireSectionOrigin": "Origin",
+  "questionnaireSectionBasicProfile": "Basic profile",
+  "questionnaireSectionPreferences": "Preferences",
+  "questionnaireSectionFinancial": "Financial situation",
+  "questionnaireSectionGoal": "Migration goal",
+  "questionnaireNextSection": "Next: {section}",
+  "@questionnaireNextSection": {
+    "placeholders": {
+      "section": {}
+    }
+  },
+  "questionnaireReadyForPlan": "Next, we will turn these answers into your first plan.",
+  "questionnaireProcessingTitle": "Building your first plan",
+  "questionnaireProcessingBody": "We are connecting your journey, profile, and priorities into a clear starting point.",
   "questionProgress": "Question {current} of {total}",
   "@questionProgress": {
     "placeholders": {
@@ -759,6 +842,19 @@
     }
   },
   "cityDetailAffordabilityTitle": "Cost and housing",
+  "cityDetailSummaryTitle": "Quick summary",
+  "cityDetailSummaryBody": "Use this top read to understand whether the city looks easier, more balanced, or more demanding before opening the deeper analysis.",
+  "cityDetailAddToPlanAction": "Add to my plan",
+  "cityDetailCompareSavedAction": "Saved to compare",
+  "cityDetailQualityLabel": "Quality of life",
+  "cityDetailQualitySupporting": "A quick read based on HDI, safety, and language adaptation for arrival.",
+  "cityDetailQualityHigh": "Stronger",
+  "cityDetailQualityBalanced": "Balanced",
+  "cityDetailQualityDeveloping": "Needs validation",
+  "cityDetailDifficultyLabel": "Difficulty",
+  "cityDetailDifficultyEasy": "Lighter move",
+  "cityDetailDifficultyBalanced": "Moderate move",
+  "cityDetailDifficultyChallenging": "More demanding move",
   "cityDetailSettleInTitle": "Adaptation and community",
   "cityDetailCommunityTitle": "Support network",
   "cityDetailContextTitle": "City context",
@@ -885,6 +981,10 @@
   "mainNavHome": "Home",
   "mainNavFavorites": "Favorites",
   "mainNavCopilot": "Move guide",
+  "mainNavExplore": "Explore",
+  "mainNavPlan": "Plan",
+  "mainNavProfile": "Profile",
+  "mainNavPlanNeedsJourney": "Choose your destination first so Movaro can open the right plan step.",
   "mainNavFavoritesDisabled": "Add at least 1 city to favorites to unlock this tab.",
   "mainNavCopilotDisabled": "Confirm a city in your plan to unlock the move guide.",
   "favoritesEmptyTitle": "No favorite cities yet",
@@ -904,6 +1004,34 @@
   "favoritesGuideStepsLabel": "3 steps",
   "favoritesGuideDismissAction": "Not now",
   "favoritesGuidePrimaryAction": "Got it",
+  "profileJourneyTitle": "Journey",
+  "profileJourneyBody": "Movaro uses this route to keep home, exploration, and content connected to the same move context.",
+  "profileJourneyValue": "{origin} -> {destination}",
+  "@profileJourneyValue": {
+    "placeholders": {
+      "origin": {},
+      "destination": {}
+    }
+  },
+  "profileJourneyPendingValue": "Destination saved: {destination}",
+  "@profileJourneyPendingValue": {
+    "placeholders": {
+      "destination": {}
+    }
+  },
+  "profileJourneyEmptyValue": "No journey selected yet",
+  "profilePlanTitle": "Plan status",
+  "profilePlanBody": "Your saved plan stays connected to the journey so you can continue without starting from zero.",
+  "profilePlanEmptyValue": "No plan generated yet",
+  "profilePlanReadyValue": "Ready to continue in {city}",
+  "@profilePlanReadyValue": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "profilePlanDraftValue": "Draft result waiting for confirmation",
+  "profileSavedCitiesTitle": "Saved cities",
+  "profileSavedCitiesBody": "Keep up to 3 cities here so you can compare them again without losing your route or plan context.",
   "publicHomeJourneyResetAction": "Choose another route",
   "publicHomeJourneyResetTitle": "Choose another route?",
   "publicHomeJourneyResetBody": "Your current route is already saved on this device. If you restart it now, Movaro will open the route selection again so you can choose a different origin or destination.",
@@ -1048,6 +1176,103 @@
   "protectedCommunityCreateTitle": "Create post",
   "protectedCommunityCreateDescription": "This area will allow community posting once that flow is enabled.",
   "questionOriginCountryTitle": "Where are you coming from?",
+  "journeyEntryTitle": "Choose your destination and start faster",
+  "journeyEntryBody": "Pick where you want to move first. Movaro will save that choice now and ask for your origin in the first step of the questionnaire.",
+  "journeyEntryDestinationLabel": "Where do you want to go?",
+  "journeyEntryStartAction": "Start my plan",
+  "journeyEntryDynamicTitle": "Start with a route that matches where you are and where you want to go",
+  "journeyEntryDynamicBody": "You can use your current location as a quick hint or choose everything manually. Movaro never locks your origin from device location, and you can always override it.",
+  "journeyEntryUseLocationTitle": "Use my location",
+  "journeyEntryUseLocationBody": "Ask only now, detect your current country if possible, and let you confirm whether it should be used as origin.",
+  "journeyEntryUseLocationAction": "Use my location",
+  "journeyEntryManualTitle": "Choose manually",
+  "journeyEntryManualBody": "Skip location, set origin and destination yourself, and keep full control over the route.",
+  "journeyEntryManualAction": "Choose manually",
+  "journeyEntryContinueAction": "Continue to questionnaire",
+  "journeyEntrySelectedDestination": "Destination selected: {destination}",
+  "@journeyEntrySelectedDestination": {
+    "placeholders": {
+      "destination": {}
+    }
+  },
+  "journeyEntryOriginPending": "We'll collect your origin in the first question before plan generation.",
+  "journeyLocationPanelTitle": "Location can save one step, but it never decides for you",
+  "journeyLocationPanelBody": "If you allow location, Movaro tries to detect your current country and suggests it as origin. You can reject the suggestion and choose manually instead.",
+  "journeyLocationFallbackTitle": "Location did not resolve a usable country",
+  "journeyLocationDeniedBody": "Location permission was denied. You can keep going by choosing origin and destination manually.",
+  "journeyLocationDeniedForeverBody": "Location permission is blocked for this app right now. You can still continue with manual selection.",
+  "journeyLocationUnavailableBody": "Location services are off on this device. Turn them on if you want a location hint, or continue manually.",
+  "journeyLocationFailedBody": "Movaro could not detect your location this time. You can retry or choose manually.",
+  "journeyLocationRetryAction": "Try again",
+  "journeyDetectedLocationLabel": "Detected location: {value}",
+  "@journeyDetectedLocationLabel": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "journeyDetectedConfirmBody": "Use {country} as your origin? This only sets a suggestion you can edit at any time.",
+  "@journeyDetectedConfirmBody": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "journeyDetectedUnknownBody": "Movaro detected {country}, but it could not match that country to the current route catalog. Choose your origin manually to continue.",
+  "@journeyDetectedUnknownBody": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "journeyDetectedConfirmAction": "Use {country} as origin",
+  "@journeyDetectedConfirmAction": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "journeyDetectedManualAction": "Choose origin manually",
+  "journeyOriginSectionTitle": "Origin",
+  "journeyOriginSectionBody": "Optional for now. Confirm it here if you already know it, or skip and answer it in the first questionnaire step.",
+  "journeyOriginSkipAction": "Skip for now",
+  "journeyDestinationSectionTitle": "Destination",
+  "journeyDestinationSectionBody": "Choose where you want the migration plan to point. Destination is still required before the questionnaire starts.",
+  "journeyCoverageFull": "Full coverage",
+  "journeyCoveragePartial": "Partial coverage",
+  "journeyCoverageUnsupported": "Unsupported",
+  "journeyCoverageReadyTitle": "This route is ready for planning",
+  "journeyCoverageReadyBody": "{origin} -> {destination} is supported in the current migration flow.",
+  "@journeyCoverageReadyBody": {
+    "placeholders": {
+      "origin": {},
+      "destination": {}
+    }
+  },
+  "journeyCoverageDestinationLimitedTitle": "Destination coverage is still limited",
+  "journeyCoverageDestinationLimitedBody": "{destination} does not yet have full destination coverage for the guided migration flow. You can still explore content while the route expands.",
+  "@journeyCoverageDestinationLimitedBody": {
+    "placeholders": {
+      "destination": {}
+    }
+  },
+  "journeyCoverageOriginLimitedTitle": "Origin coverage is still limited",
+  "journeyCoverageOriginLimitedBody": "{origin} can be saved as your origin, but the current guided plan does not fully support that starting country yet.",
+  "@journeyCoverageOriginLimitedBody": {
+    "placeholders": {
+      "origin": {}
+    }
+  },
+  "journeyCoverageDetectedUnknownTitle": "Detected country is outside the current catalog",
+  "journeyCoverageDetectedUnknownBody": "{country} is not mapped in the current supported-country catalog yet. Choose another origin manually or keep browsing public content.",
+  "@journeyCoverageDetectedUnknownBody": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "journeyCoverageUnsupportedTitle": "Choose a supported route to generate a plan",
+  "journeyCoverageUnsupportedBody": "Movaro can still show cities and practical content, but the guided migration flow is only available on routes with full coverage.",
+  "journeyCoverageChooseRouteAction": "Choose another route",
+  "journeyCoverageBrowseAction": "Browse explore",
+  "journeyCoverageContentAction": "Open content",
+  "journeyCoverageWaitlistAction": "Join waitlist",
+  "journeyCoverageWaitlistStub": "Waitlist registration is not live yet, but this route can be tracked safely for future coverage.",
   "questionDestinationCountryTitle": "Where do you want to go?",
   "questionGoalTitle": "What do you want to do in the new country?",
   "questionPortugueseFamiliarityTitle": "How comfortable are you with Portuguese today?",
@@ -1612,6 +1837,49 @@
       "city": {}
     }
   },
+  "migrationPlanResultPrimaryCtaEyebrow": "Next step",
+  "migrationPlanResultStartPlanTitle": "Start my plan",
+  "migrationPlanResultStartPlanBody": "Review {city} with a little more context and confirm it when you are ready to unlock the full guided plan.",
+  "@migrationPlanResultStartPlanBody": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultStartPlanAction": "Start my plan",
+  "migrationPlanResultOpenPlanTitle": "View full plan",
+  "migrationPlanResultOpenPlanAction": "View full plan",
+  "migrationPlanResultCompatibilityHigh": "High compatibility",
+  "migrationPlanResultCompatibilityMedium": "Good compatibility",
+  "migrationPlanResultCompatibilityInitial": "Initial compatibility",
+  "migrationPlanResultCostLabel": "Estimated cost",
+  "migrationPlanResultCostSupporting": "A directional read based on city cost and rent signals.",
+  "migrationPlanResultCostLower": "Lower",
+  "migrationPlanResultCostMedium": "Moderate",
+  "migrationPlanResultCostHigher": "Higher",
+  "migrationPlanResultDifficultyLabel": "Difficulty level",
+  "migrationPlanResultDifficultySupporting": "How much coordination this plan may need before arrival.",
+  "migrationPlanResultDifficultyFocused": "Focused",
+  "migrationPlanResultDifficultyModerate": "Moderate",
+  "migrationPlanResultDifficultyStructured": "Structured",
+  "migrationPlanResultTimelineLabel": "Estimated timeline",
+  "migrationPlanResultTimelineValue": "~{days} days",
+  "@migrationPlanResultTimelineValue": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "migrationPlanResultCitySectionTitle": "Why this city is leading",
+  "migrationPlanResultCitySectionBody": "Open the city context when you want more detail, not before the main decision is clear.",
+  "migrationPlanResultPlanSectionTitle": "What happens after this result",
+  "migrationPlanResultPlanSectionBody": "Preparation becomes useful only after the city choice feels strong enough to move forward.",
+  "migrationPlanResultProgressSupporting": "Completed checklist items across the guided plan.",
+  "migrationPlanCopilotProgressValue": "{done} of {total} checklist items completed",
+  "@migrationPlanCopilotProgressValue": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
   "migrationPlanScrollHint": "See more",
   "languageSelectorSystem": "System",
   "bmpDisclaimer": "This builds a starting point. It is not legal advice.",
@@ -1635,10 +1903,10 @@
   "bmpVariantTitle": "How do you want to build your plan?",
   "bmpVariantSubtitle": "You can go faster or answer one extra question for a more precise recommendation.",
   "bmpVariantLeanTitle": "Quick plan",
-  "bmpVariantLeanBody": "3 questions and one optional refinement to get an initial direction with low friction.",
+  "bmpVariantLeanBody": "4 focused questions to get an initial direction with low friction.",
   "bmpVariantLeanTag": "Faster",
   "bmpVariantStrategicTitle": "Strategic plan",
-  "bmpVariantStrategicBody": "Includes how you plan to support yourself and gives you a sharper starting recommendation.",
+  "bmpVariantStrategicBody": "Adds one extra preference step for a sharper starting recommendation.",
   "bmpVariantStrategicTag": "More precise",
   "bmpGuideEyebrow": "Build my plan",
   "bmpGuideTitle": "How this plan builder works",
