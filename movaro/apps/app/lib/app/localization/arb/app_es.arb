@@ -172,6 +172,30 @@
   "documentationGuideStepsLabel": "3 pasos",
   "documentationGuideDismissAction": "Ahora no",
   "documentationGuidePrimaryAction": "Entendido",
+  "documentationGuideModalTitle": "Usá la guía práctica más rápido",
+  "documentationGuideModalBody": "Elegí el país que querés revisar, buscá un tema o una duda y abrí la sección que destraba el próximo paso.",
+  "documentationGuideModalStepCountryTitle": "Elegí el país",
+  "documentationGuideModalStepCountryBody": "La guía abre con el país de destino cuando existe, pero podés cambiar de país en cualquier momento.",
+  "documentationGuideModalStepSearchTitle": "Buscá por necesidad",
+  "documentationGuideModalStepSearchBody": "Escribí un tema, documento o duda cotidiana para ir directo a la sección más relevante.",
+  "documentationGuideModalStepOpenTitle": "Abrí la sección",
+  "documentationGuideModalStepOpenBody": "Usá los filtros o los resultados para entrar directo en documentos, vivienda, salud, trabajo, manejo o costos.",
+  "documentationGuideNoPlanTitle": "Todavía no hay un plan seleccionado",
+  "documentationGuideNoPlanBody": "Igualmente podés usar la guía práctica. Cargamos {country} por ahora, y podés cambiar de país cuando lo necesites.",
+  "@documentationGuideNoPlanBody": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "documentationGuideCountryPendingTitle": "La guía de {country} todavía no está disponible",
+  "@documentationGuideCountryPendingTitle": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "documentationGuideCountryPendingBody": "Por ahora Movaro tiene cobertura de guía práctica para Brasil. Elegí Brasil para seguir navegando el contenido disponible.",
+  "documentationGuideUsingPlanLabel": "Desde tu plan",
+  "documentationGuideManualCountryLabel": "País manual",
   "documentationSearchResultsCount": "{count} ítems encontrados",
   "@documentationSearchResultsCount": {
     "placeholders": {
@@ -463,7 +487,7 @@
   "backAction": "Volver",
   "nextAction": "Continuar",
   "generatePlanAction": "Ver mi plan",
-  "migrationPlanPageTitle": "Tu plan inicial",
+  "migrationPlanPageTitle": "Tu primer plan",
   "migrationPlanSummaryTitle": "Lo que nos contaste",
   "planRecommendedCityTitle": "Ciudad sugerida para empezar",
   "planRecommendedCityDescription": "Según tus respuestas, Movaro sugiere mirar primero {city}, {stateCode}.",
@@ -1066,6 +1090,7 @@
   "languageOptionPortuguese": "Portugués",
   "commonRetryAction": "Intentar de nuevo",
   "commonBackAction": "Volver",
+  "commonGotItAction": "Entendido",
   "protectedCommunityCreateTitle": "Crear publicación",
   "protectedCommunityCreateDescription": "Este espacio va a permitir crear publicaciones cuando la comunidad esté habilitada.",
   "questionOriginCountryTitle": "¿De dónde venís?",
@@ -1658,7 +1683,104 @@
   "migrationPlanResultCompatibilityHigh": "Alta compatibilidad",
   "migrationPlanResultCompatibilityMedium": "Buena compatibilidad",
   "migrationPlanResultCompatibilityInitial": "Compatibilidad inicial",
+  "migrationPlanResultCompatibilityHelpTitle": "Cómo funciona la compatibilidad",
+  "migrationPlanResultCompatibilityHelpBody": "La compatibilidad combina tus prioridades, tu plazo y tu objetivo de mudanza con las señales disponibles de cada ciudad. Es una lectura orientativa para empezar por la ciudad más fuerte para vos.",
+  "migrationPlanResultUnavailableTitle": "No pudimos cargar el resultado de tu ciudad.",
+  "migrationPlanResultUnavailableBody": "Intentá de nuevo para abrir tu recomendación y seguir desde el cuestionario.",
+  "migrationPlanResultBasedOnAnswersTitle": "Basado en tus respuestas",
+  "migrationPlanResultCityDataTitle": "Datos de la ciudad",
+  "migrationPlanResultOtherCitiesTitle": "Otras ciudades compatibles",
+  "migrationPlanResultReviewsMetricTitle": "Reseñas públicas",
+  "migrationPlanResultSafetyMetricTitle": "Seguridad",
+  "migrationPlanResultPrimaryAction": "Iniciar mi plan en {city} ->",
+  "@migrationPlanResultPrimaryAction": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultExploreDetailsAction": "Explorar la ciudad en detalle",
+  "migrationPlanResultReasonFromPriority": "Elegiste: {label}",
+  "@migrationPlanResultReasonFromPriority": {
+    "placeholders": {
+      "label": {}
+    }
+  },
+  "migrationPlanResultReasonBudget": "{city} mantiene el costo de entrada más controlado, lo que ayuda a llegar con menos presión.",
+  "@migrationPlanResultReasonBudget": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultReasonWork": "{city} muestra una señal laboral {signal}, lo que te da más margen para moverte después de llegar.",
+  "@migrationPlanResultReasonWork": {
+    "placeholders": {
+      "city": {},
+      "signal": {}
+    }
+  },
+  "migrationPlanResultReasonQuality": "{city} se destaca con una señal de calidad de vida {signal}, lo que sostiene una rutina más estable en el día a día.",
+  "@migrationPlanResultReasonQuality": {
+    "placeholders": {
+      "city": {},
+      "signal": {}
+    }
+  },
+  "migrationPlanResultReasonClimate": "{city} encaja bien con el estilo de vida que marcaste, con {signal}.",
+  "@migrationPlanResultReasonClimate": {
+    "placeholders": {
+      "city": {},
+      "signal": {}
+    }
+  },
+  "migrationPlanResultReasonTransit": "{city} ofrece una base más práctica si necesitás moverte seguido por la ciudad.",
+  "@migrationPlanResultReasonTransit": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultReasonUniversity": "{city} mantiene más cerca las rutas de estudio y formación si la educación forma parte de tu plan.",
+  "@migrationPlanResultReasonUniversity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultReasonCommunity": "{city} tiene señales más fuertes de adaptación para construir rutina y apoyo cuando llegues.",
+  "@migrationPlanResultReasonCommunity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultReasonProximity": "{city} te deja en una ruta que suele ser más fácil de coordinar desde Argentina.",
+  "@migrationPlanResultReasonProximity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultReasonBalanced": "{city} es la recomendación más equilibrada para tu perfil actual dentro de las señales de ciudad disponibles.",
+  "@migrationPlanResultReasonBalanced": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultWeatherPending": "Clima actualizándose",
+  "migrationPlanResultWeatherDay": "Día",
+  "migrationPlanResultWeatherNight": "Noche",
+  "migrationPlanResultWeatherSunny": "tiempo soleado ahora",
+  "migrationPlanResultWeatherCloudy": "condiciones más nubladas",
+  "migrationPlanResultWeatherRain": "lluvia en la zona",
+  "migrationPlanResultWeatherCold": "temperatura más fresca",
+  "migrationPlanResultWeatherStorm": "clima más inestable",
+  "migrationPlanResultWeatherMild": "clima templado",
+  "migrationPlanResultWeatherClearNight": "noche despejada",
   "migrationPlanResultCostLabel": "Costo estimado",
+  "migrationPlanResultWeatherLabel": "Clima ahora",
+  "migrationPlanResultWhyLabel": "Por qué esta ciudad",
+  "migrationPlanResultReviewsLabel": "{count} reseñas",
+  "@migrationPlanResultReviewsLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "migrationPlanResultCostSupporting": "Una lectura orientativa basada en señales de costo y alquiler de la ciudad.",
   "migrationPlanResultCostLower": "Más bajo",
   "migrationPlanResultCostMedium": "Medio",
@@ -1948,5 +2070,212 @@
   "migrationPlanPrepRentalSearchDisclaimer": "La cobertura y los avisos pueden variar según la ciudad y la disponibilidad del momento. Revisá más de una fuente antes de decidir.",
   "migrationPlanPrepRentalSearchOpen": "Abrir búsqueda de alquiler",
   "migrationPlanPrepScamsTitle": "Cómo evitar estafas en alquiler",
-  "migrationPlanPrepScamsBody": "Abrí una alerta pública sobre fraudes comunes en avisos y alquileres para no decidir sólo por precio o urgencia."
+  "migrationPlanPrepScamsBody": "Abrí una alerta pública sobre fraudes comunes en avisos y alquileres para no decidir sólo por precio o urgencia.",
+  "exploreUnifiedTitle": "Explore cities, content, and your next move in one place",
+  "exploreUnifiedBody": "Use this area to reinforce your decision, review the city options that still matter, and open the practical content that matches your route.",
+  "explorePlanSectionTitle": "Based on your plan",
+  "explorePlanSectionBody": "Resume the current plan, reopen the leading city, or jump straight into the most useful guide for your next step.",
+  "exploreCitiesSectionTitle": "Discover other cities",
+  "exploreCitiesSectionBody": "Keep comparing before locking the decision. These cities are strong alternatives for your current route and profile.",
+  "exploreContentSectionTitle": "Useful content",
+  "exploreContentSectionBody": "Open the practical guidance that usually matters next: documents, housing, and work.",
+  "exploreRouteLabel": "Journey: {origin} -> {destination}",
+  "@exploreRouteLabel": {
+    "placeholders": {
+      "origin": {},
+      "destination": {}
+    }
+  },
+  "exploreDestinationLabel": "Destination selected: {destination}",
+  "@exploreDestinationLabel": {
+    "placeholders": {
+      "destination": {}
+    }
+  },
+  "exploreNoJourneyLabel": "Set a destination to make exploration more relevant.",
+  "explorePlanEmptyTitle": "Start a plan before you go deeper",
+  "explorePlanEmptyBody": "Choose your destination, answer a few questions, and let Movaro turn exploration into a practical direction.",
+  "explorePlanReadyTitle": "Your plan is ready to continue",
+  "explorePlanReadyBody": "{city} is already confirmed. Open your checklist and keep moving through the next actions.",
+  "@explorePlanReadyBody": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "explorePlanDraftTitle": "Your plan still needs a decision",
+  "explorePlanDraftBody": "You already have a draft. Reopen the result and confirm the city before moving into checklist mode.",
+  "explorePlanDraftBodyWithCity": "{city} is currently leading. Reopen the result, compare it, and confirm it when ready.",
+  "@explorePlanDraftBodyWithCity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "exploreRecommendedCityTitle": "Leading city right now",
+  "exploreRecommendedCityBody": "Open the city details to validate cost, quality of life, and fit with your plan.",
+  "exploreOpenCityAction": "Open city",
+  "exploreOpenContentAction": "Open guide",
+  "explorePlanDocsBody": "Documents usually unlock the next part of the move faster than more comparison.",
+  "exploreContentDocumentsBody": "See CPF, registration, banking, and legal stay with less noise and clearer routing.",
+  "exploreContentHousingBody": "Review rent pressure, guarantees, deposits, and first-landing decisions before choosing a neighborhood.",
+  "exploreContentWorkBody": "Check work setup, contribution paths, and what to validate before treating income as solved.",
+  "documentationFocusTitle": "Useful for your current journey",
+  "documentationFocusBody": "These categories are the strongest starting point for moving from {origin} to {destination}.",
+  "@documentationFocusBody": {
+    "placeholders": {
+      "origin": {},
+      "destination": {}
+    }
+  },
+  "documentationFocusBodyDestination": "These categories are a strong starting point for your route into {destination}.",
+  "@documentationFocusBodyDestination": {
+    "placeholders": {
+      "destination": {}
+    }
+  },
+  "documentationFocusBodyDefault": "Open the category that removes the biggest blocker first: documents, housing, or work.",
+  "cityDetailSummaryTitle": "Quick summary",
+  "cityDetailSummaryBody": "Use this top read to understand whether the city looks easier, more balanced, or more demanding before opening the deeper analysis.",
+  "cityDetailAddToPlanAction": "Add to my plan",
+  "cityDetailCompareSavedAction": "Saved to compare",
+  "cityDetailQualityLabel": "Quality of life",
+  "cityDetailQualitySupporting": "A quick read based on HDI, safety, and language adaptation for arrival.",
+  "cityDetailQualityHigh": "Stronger",
+  "cityDetailQualityBalanced": "Balanced",
+  "cityDetailQualityDeveloping": "Needs validation",
+  "cityDetailDifficultyLabel": "Difficulty",
+  "cityDetailDifficultyEasy": "Lighter move",
+  "cityDetailDifficultyBalanced": "Moderate move",
+  "cityDetailDifficultyChallenging": "More demanding move",
+  "mainNavExplore": "Explore",
+  "mainNavPlan": "Plan",
+  "mainNavProfile": "Profile",
+  "mainNavPlanNeedsJourney": "Choose your destination first so Movaro can open the right plan step.",
+  "profileJourneyTitle": "Journey",
+  "profileJourneyBody": "Movaro uses this route to keep home, exploration, and content connected to the same move context.",
+  "profileJourneyValue": "{origin} -> {destination}",
+  "@profileJourneyValue": {
+    "placeholders": {
+      "origin": {},
+      "destination": {}
+    }
+  },
+  "profileJourneyPendingValue": "Destination saved: {destination}",
+  "@profileJourneyPendingValue": {
+    "placeholders": {
+      "destination": {}
+    }
+  },
+  "profileJourneyEmptyValue": "No journey selected yet",
+  "profilePlanTitle": "Plan status",
+  "profilePlanBody": "Your saved plan stays connected to the journey so you can continue without starting from zero.",
+  "profilePlanEmptyValue": "No plan generated yet",
+  "profilePlanReadyValue": "Ready to continue in {city}",
+  "@profilePlanReadyValue": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "profilePlanDraftValue": "Draft result waiting for confirmation",
+  "profileSavedCitiesTitle": "Saved cities",
+  "profileSavedCitiesBody": "Keep up to 3 cities here so you can compare them again without losing your route or plan context.",
+  "journeyEntryDynamicTitle": "Start with a route that matches where you are and where you want to go",
+  "journeyEntryDynamicBody": "You can use your current location as a quick hint or choose everything manually. Movaro never locks your origin from device location, and you can always override it.",
+  "journeyEntryUseLocationTitle": "Use my location",
+  "journeyEntryUseLocationBody": "Ask only now, detect your current country if possible, and let you confirm whether it should be used as origin.",
+  "journeyEntryUseLocationAction": "Use my location",
+  "journeyEntryManualTitle": "Choose manually",
+  "journeyEntryManualBody": "Skip location, set origin and destination yourself, and keep full control over the route.",
+  "journeyEntryManualAction": "Choose manually",
+  "journeyEntryContinueAction": "Continue to questionnaire",
+  "journeyLocationPanelTitle": "Location can save one step, but it never decides for you",
+  "journeyLocationPanelBody": "If you allow location, Movaro tries to detect your current country and suggests it as origin. You can reject the suggestion and choose manually instead.",
+  "journeyLocationFallbackTitle": "Location did not resolve a usable country",
+  "journeyLocationDeniedBody": "Location permission was denied. You can keep going by choosing origin and destination manually.",
+  "journeyLocationDeniedForeverBody": "Location permission is blocked for this app right now. You can still continue with manual selection.",
+  "journeyLocationUnavailableBody": "Location services are off on this device. Turn them on if you want a location hint, or continue manually.",
+  "journeyLocationFailedBody": "Movaro could not detect your location this time. You can retry or choose manually.",
+  "journeyLocationRetryAction": "Try again",
+  "journeyDetectedLocationLabel": "Detected location: {value}",
+  "@journeyDetectedLocationLabel": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "journeyDetectedConfirmBody": "Use {country} as your origin? This only sets a suggestion you can edit at any time.",
+  "@journeyDetectedConfirmBody": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "journeyDetectedUnknownBody": "Movaro detected {country}, but it could not match that country to the current route catalog. Choose your origin manually to continue.",
+  "@journeyDetectedUnknownBody": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "journeyDetectedConfirmAction": "Use {country} as origin",
+  "@journeyDetectedConfirmAction": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "questionnaireOriginAutoDetectTitle": "Encontramos tu ubicación",
+  "questionnaireOriginUnsupportedTitle": "Este país todavía no está cubierto",
+  "questionnaireOriginLocationFailedTitle": "No pudimos detectar tu ubicación",
+  "questionnaireOriginUnsupportedBody": "Movaro detectó {country}, pero el plan guiado solo está disponible para personas que vienen desde Argentina por ahora. Podés elegir Argentina manualmente o usarla para continuar.",
+  "@questionnaireOriginUnsupportedBody": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "questionnaireOriginUseArgentinaAction": "Usar Argentina",
+  "journeyDetectedManualAction": "Choose origin manually",
+  "journeyOriginSectionTitle": "Origin",
+  "journeyOriginSectionBody": "Optional for now. Confirm it here if you already know it, or skip and answer it in the first questionnaire step.",
+  "journeyOriginSkipAction": "Skip for now",
+  "journeyDestinationSectionTitle": "Destination",
+  "journeyDestinationSectionBody": "Choose where you want the migration plan to point. Destination is still required before the questionnaire starts.",
+  "journeyPickerChooseDestinationTitle": "Elegir destino",
+  "journeyPickerChooseOriginTitle": "Elegir origen",
+  "journeyPickerSearchHint": "Buscar país",
+  "journeyPickerNoResults": "No se encontraron países",
+  "journeyCoverageFull": "Full coverage",
+  "journeyCoveragePartial": "Partial coverage",
+  "journeyCoverageUnsupported": "Unsupported",
+  "journeyCoverageReadyTitle": "This route is ready for planning",
+  "journeyCoverageReadyBody": "{origin} -> {destination} is supported in the current migration flow.",
+  "@journeyCoverageReadyBody": {
+    "placeholders": {
+      "origin": {},
+      "destination": {}
+    }
+  },
+  "journeyCoverageDestinationLimitedTitle": "Destination coverage is still limited",
+  "journeyCoverageDestinationLimitedBody": "{destination} does not yet have full destination coverage for the guided migration flow. You can still explore content while the route expands.",
+  "@journeyCoverageDestinationLimitedBody": {
+    "placeholders": {
+      "destination": {}
+    }
+  },
+  "journeyCoverageOriginLimitedTitle": "Origin coverage is still limited",
+  "journeyCoverageOriginLimitedBody": "{origin} can be saved as your origin, but the current guided plan does not fully support that starting country yet.",
+  "@journeyCoverageOriginLimitedBody": {
+    "placeholders": {
+      "origin": {}
+    }
+  },
+  "journeyCoverageDetectedUnknownTitle": "Detected country is outside the current catalog",
+  "journeyCoverageDetectedUnknownBody": "{country} is not mapped in the current supported-country catalog yet. Choose another origin manually or keep browsing public content.",
+  "@journeyCoverageDetectedUnknownBody": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "journeyCoverageUnsupportedTitle": "Choose a supported route to generate a plan",
+  "journeyCoverageUnsupportedBody": "Movaro can still show cities and practical content, but the guided migration flow is only available on routes with full coverage.",
+  "journeyCoverageChooseRouteAction": "Choose another route",
+  "journeyCoverageBrowseAction": "Browse explore",
+  "journeyCoverageContentAction": "Open content",
+  "journeyCoverageWaitlistAction": "Join waitlist",
+  "journeyCoverageWaitlistStub": "Waitlist registration is not live yet, but this route can be tracked safely for future coverage."
 }

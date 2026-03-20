@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 
 class PlanSummaryCard extends StatelessWidget {
   const PlanSummaryCard({
@@ -18,6 +19,7 @@ class PlanSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasSupporting = supporting != null && supporting!.trim().isNotEmpty;
     return FrostedPanel(
       padding: const EdgeInsets.all(18),
       borderRadius: BorderRadius.circular(24),
@@ -45,6 +47,7 @@ class PlanSummaryCard extends StatelessWidget {
                   label,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: AppColors.textSoftFor(context),
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -56,15 +59,15 @@ class PlanSummaryCard extends StatelessWidget {
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          if (supporting != null) ...[
+          if (hasSupporting) ...[
             const SizedBox(height: 8),
-            Text(
-              supporting!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSoftFor(context),
-                height: 1.4,
-              ),
+            ScoreBadge(
+              label: supporting!,
+              icon: icon,
+              tint: AppColors.primary,
             ),
           ],
         ],
@@ -107,15 +110,24 @@ class PlanNextActionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (eyebrow != null) ...[
-            Text(
-              eyebrow!,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: Colors.white.withValues(alpha: 0.78),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              if (eyebrow != null)
+                _HeroPill(
+                  label: eyebrow!,
+                  icon: Icons.auto_awesome_rounded,
+                ),
+              if (progressLabel != null)
+                _HeroPill(
+                  label: progressLabel!,
+                  icon: Icons.timeline_rounded,
+                ),
+            ],
+          ),
+          if (eyebrow != null || progressLabel != null)
+            const SizedBox(height: 12),
           Text(
             title,
             style: Theme.of(
@@ -125,28 +137,13 @@ class PlanNextActionCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             body,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.white.withValues(alpha: 0.82),
-              height: 1.45,
+              height: 1.3,
             ),
           ),
-          if (progressLabel != null) ...[
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                progressLabel!,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
           const SizedBox(height: 18),
           FilledButton.icon(
             onPressed: onTap,
@@ -213,19 +210,32 @@ class PlanChecklistItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      height: 1.15,
-                      decoration: completed ? TextDecoration.lineThrough : null,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                height: 1.15,
+                                decoration: completed
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                              ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      _StatusPill(completed: completed),
+                    ],
                   ),
                   const SizedBox(height: 6),
                   Text(
                     body,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSoftFor(context),
-                      height: 1.4,
+                      height: 1.3,
                       decoration: completed ? TextDecoration.lineThrough : null,
                     ),
                   ),
@@ -233,13 +243,90 @@ class PlanChecklistItem extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Checkbox.adaptive(
-              value: completed,
-              onChanged: (_) => onTap(),
-              activeColor: AppColors.success,
-            ),
+            _ChecklistActionButton(completed: completed),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _HeroPill extends StatelessWidget {
+  const _HeroPill({required this.label, required this.icon});
+
+  final String label;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: Colors.white),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.completed});
+
+  final bool completed;
+
+  @override
+  Widget build(BuildContext context) {
+    final tint = completed ? AppColors.success : AppColors.primary;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: tint.withValues(alpha: 0.14)),
+      ),
+      child: Icon(
+        completed ? Icons.check_rounded : Icons.arrow_forward_rounded,
+        size: 16,
+        color: tint,
+      ),
+    );
+  }
+}
+
+class _ChecklistActionButton extends StatelessWidget {
+  const _ChecklistActionButton({required this.completed});
+
+  final bool completed;
+
+  @override
+  Widget build(BuildContext context) {
+    final tint = completed ? AppColors.success : AppColors.primary;
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        completed ? Icons.check_rounded : Icons.arrow_outward_rounded,
+        size: 18,
+        color: tint,
       ),
     );
   }

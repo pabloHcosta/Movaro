@@ -55,6 +55,8 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   List<MigrationPlan> get savedPlans => _savedPlans;
   MigrationPlan? get generatedPlan => _generatedPlan;
   QuestionnaireVariant? get selectedVariant => _selectedVariant;
+  JourneyContextController get journeyContextController =>
+      _journeyContextController;
   int get currentIndex => _currentIndex;
   bool get hasSelectedVariant => _selectedVariant != null;
   bool get isInitialized => _isInitialized;
@@ -199,6 +201,13 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _syncJourneySelection(questionId, <String>[value]);
   }
 
+  Future<void> setJourneyDestination(String countryId) async {
+    await _journeyContextController.setDestinationCountry(countryId);
+    _syncJourneyAnswers();
+    notifyListeners();
+    _persistDraft();
+  }
+
   bool toggleAnswer(String questionId, String value) {
     Question? question;
     for (final item in _questions) {
@@ -271,8 +280,12 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       return true;
     }
 
+    if (question.id == 'origin_country') {
+      return values.isNotEmpty && answerFor('destination_country') != null;
+    }
+
     if (question.id == 'priorities') {
-      return values.contains('balanced_unsure') || values.length == 2;
+      return values.isNotEmpty;
     }
 
     return values.isNotEmpty;

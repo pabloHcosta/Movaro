@@ -19,13 +19,18 @@ class QuestionRepositoryImpl implements QuestionRepository {
 
   @override
   Future<List<Question>> getQuestions() async {
-    await _catalogRepository.getCountries();
+    final countries = await _catalogRepository.getCountries();
 
     final destinationCountryId = _journeyContextController.destinationCountryId;
     final selectedDestination = _journeyContextController.selectedDestination;
-    if (destinationCountryId == null ||
-        selectedDestination == null ||
-        !_journeyContextController.canUseAsDestination(selectedDestination)) {
+    final effectiveDestination =
+        selectedDestination ??
+        countries.where((country) => country.id == 'brasil').firstOrNull;
+    final effectiveDestinationId =
+        destinationCountryId ?? effectiveDestination?.id;
+    if (effectiveDestination == null ||
+        effectiveDestinationId == null ||
+        !_journeyContextController.canUseAsDestination(effectiveDestination)) {
       return const [];
     }
 
@@ -33,10 +38,10 @@ class QuestionRepositoryImpl implements QuestionRepository {
         .where(
           (country) =>
               _journeyContextController.canUseAsOrigin(country) &&
-              country.id != destinationCountryId &&
+              country.id != effectiveDestinationId &&
               _journeyContextController.isRouteSupported(
                 originCountryId: country.id,
-                destinationCountryId: destinationCountryId,
+                destinationCountryId: effectiveDestinationId,
               ),
         )
         .map(
@@ -82,7 +87,7 @@ class QuestionRepositoryImpl implements QuestionRepository {
         id: 'priorities',
         title: 'priorities',
         type: 'multi_chip',
-        maxSelections: 2,
+        maxSelections: 3,
         variants: QuestionnaireVariant.values,
         options: const [
           OptionModel(id: 'low_cost', label: 'low_cost', value: 'low_cost'),

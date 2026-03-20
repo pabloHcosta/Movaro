@@ -109,8 +109,8 @@ class MainNavigationBar extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: _NavItem(
-                          label: context.l10n.mainNavProfile,
-                          icon: Icons.person_rounded,
+                          label: context.l10n.mainNavFavorites,
+                          icon: Icons.favorite_rounded,
                           isSelected: currentIndex == 3,
                           isEnabled: true,
                           onTap: () => _handleTap(
@@ -163,7 +163,7 @@ class MainNavigationBar extends StatelessWidget {
     if (journeyContextController.canEnterQuestionnaire) {
       return AppRoutes.migrationQuestionnaire;
     }
-    return AppRoutes.publicHome;
+    return AppRoutes.journeySetup;
   }
 
   void _showFeedback(BuildContext context, String message) {

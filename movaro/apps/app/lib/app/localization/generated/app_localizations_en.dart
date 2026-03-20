@@ -587,6 +587,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get documentationGuidePrimaryAction => 'Got it';
 
   @override
+  String get documentationGuideModalTitle => 'Use the practical guide faster';
+
+  @override
+  String get documentationGuideModalBody =>
+      'Choose the country you want to review, search a topic or question, and open the section that removes the next blocker.';
+
+  @override
+  String get documentationGuideModalStepCountryTitle => 'Choose the country';
+
+  @override
+  String get documentationGuideModalStepCountryBody =>
+      'The guide opens with your destination country when available, but you can switch countries at any time.';
+
+  @override
+  String get documentationGuideModalStepSearchTitle => 'Search by need';
+
+  @override
+  String get documentationGuideModalStepSearchBody =>
+      'Type a topic, document, or everyday question to jump to the most relevant section.';
+
+  @override
+  String get documentationGuideModalStepOpenTitle => 'Open the section';
+
+  @override
+  String get documentationGuideModalStepOpenBody =>
+      'Use filters or results to go straight into documents, housing, health, work, driving, or costs.';
+
+  @override
+  String get documentationGuideNoPlanTitle => 'No plan selected yet';
+
+  @override
+  String documentationGuideNoPlanBody(Object country) {
+    return 'You can still use the practical guide. We loaded $country for now, and you can switch countries whenever you need.';
+  }
+
+  @override
+  String documentationGuideCountryPendingTitle(Object country) {
+    return '$country guide is not available yet';
+  }
+
+  @override
+  String get documentationGuideCountryPendingBody =>
+      'Movaro currently has practical guide coverage for Brazil. Choose Brazil to continue browsing the available guidance.';
+
+  @override
+  String get documentationGuideUsingPlanLabel => 'From your plan';
+
+  @override
+  String get documentationGuideManualCountryLabel => 'Manual country';
+
+  @override
   String documentationSearchResultsCount(int count) {
     return '$count items found';
   }
@@ -3087,6 +3138,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonBackAction => 'Back';
 
   @override
+  String get commonGotItAction => 'Got it';
+
+  @override
   String get protectedCommunityCreateTitle => 'Create post';
 
   @override
@@ -3201,6 +3255,25 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get questionnaireOriginAutoDetectTitle => 'We found your location';
+
+  @override
+  String get questionnaireOriginUnsupportedTitle =>
+      'This country is not supported yet';
+
+  @override
+  String get questionnaireOriginLocationFailedTitle =>
+      'We could not detect your location';
+
+  @override
+  String questionnaireOriginUnsupportedBody(Object country) {
+    return 'Movaro detected $country, but the guided plan is only available for people coming from Argentina right now. You can choose Argentina manually or use it to continue.';
+  }
+
+  @override
+  String get questionnaireOriginUseArgentinaAction => 'Use Argentina';
+
+  @override
   String get journeyDetectedManualAction => 'Choose origin manually';
 
   @override
@@ -3219,6 +3292,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get journeyDestinationSectionBody =>
       'Choose where you want the migration plan to point. Destination is still required before the questionnaire starts.';
+
+  @override
+  String get journeyPickerChooseDestinationTitle => 'Choose destination';
+
+  @override
+  String get journeyPickerChooseOriginTitle => 'Choose origin';
+
+  @override
+  String get journeyPickerSearchHint => 'Search country';
+
+  @override
+  String get journeyPickerNoResults => 'No countries found';
 
   @override
   String get journeyCoverageFull => 'Full coverage';
@@ -4749,7 +4834,138 @@ class AppLocalizationsEn extends AppLocalizations {
   String get migrationPlanResultCompatibilityInitial => 'Initial compatibility';
 
   @override
+  String get migrationPlanResultCompatibilityHelpTitle =>
+      'How compatibility works';
+
+  @override
+  String get migrationPlanResultCompatibilityHelpBody =>
+      'Compatibility combines your priorities, timeline, and migration goal with the signals available for each city. It is a directional match to help you start with the strongest city first.';
+
+  @override
+  String get migrationPlanResultUnavailableTitle =>
+      'We could not load your city result.';
+
+  @override
+  String get migrationPlanResultUnavailableBody =>
+      'Try again to reopen your recommendation and continue from the questionnaire.';
+
+  @override
+  String get migrationPlanResultBasedOnAnswersTitle => 'Based on your answers';
+
+  @override
+  String get migrationPlanResultCityDataTitle => 'City data';
+
+  @override
+  String get migrationPlanResultOtherCitiesTitle => 'Other compatible cities';
+
+  @override
+  String get migrationPlanResultReviewsMetricTitle => 'Public reviews';
+
+  @override
+  String get migrationPlanResultSafetyMetricTitle => 'Safety';
+
+  @override
+  String migrationPlanResultPrimaryAction(Object city) {
+    return 'Start my plan in $city ->';
+  }
+
+  @override
+  String get migrationPlanResultExploreDetailsAction =>
+      'Explore the city in detail';
+
+  @override
+  String migrationPlanResultReasonFromPriority(Object label) {
+    return 'You chose: $label';
+  }
+
+  @override
+  String migrationPlanResultReasonBudget(Object city) {
+    return '$city keeps the entry cost more manageable, which helps you arrive with less pressure.';
+  }
+
+  @override
+  String migrationPlanResultReasonWork(Object city, Object signal) {
+    return '$city shows a $signal work signal, which gives you more room to move after arrival.';
+  }
+
+  @override
+  String migrationPlanResultReasonQuality(Object city, Object signal) {
+    return '$city stands out with a $signal quality-of-life signal, which supports a steadier day-to-day routine.';
+  }
+
+  @override
+  String migrationPlanResultReasonClimate(Object city, Object signal) {
+    return '$city aligns well with the lifestyle you signaled, with $signal.';
+  }
+
+  @override
+  String migrationPlanResultReasonTransit(Object city) {
+    return '$city gives you a more practical base if you need to move around the city often.';
+  }
+
+  @override
+  String migrationPlanResultReasonUniversity(Object city) {
+    return '$city keeps study and qualification paths closer if education is part of your plan.';
+  }
+
+  @override
+  String migrationPlanResultReasonCommunity(Object city) {
+    return '$city has stronger adaptation signals for building routine and support once you arrive.';
+  }
+
+  @override
+  String migrationPlanResultReasonProximity(Object city) {
+    return '$city keeps you on a route that feels easier to coordinate from Argentina.';
+  }
+
+  @override
+  String migrationPlanResultReasonBalanced(Object city) {
+    return '$city is the most balanced recommendation for your current profile across the available city signals.';
+  }
+
+  @override
+  String get migrationPlanResultWeatherPending => 'Weather is updating';
+
+  @override
+  String get migrationPlanResultWeatherDay => 'Day';
+
+  @override
+  String get migrationPlanResultWeatherNight => 'Night';
+
+  @override
+  String get migrationPlanResultWeatherSunny => 'sunny right now';
+
+  @override
+  String get migrationPlanResultWeatherCloudy => 'more cloudy conditions';
+
+  @override
+  String get migrationPlanResultWeatherRain => 'rain in the area';
+
+  @override
+  String get migrationPlanResultWeatherCold => 'cooler conditions';
+
+  @override
+  String get migrationPlanResultWeatherStorm => 'more unstable weather';
+
+  @override
+  String get migrationPlanResultWeatherMild => 'mild weather';
+
+  @override
+  String get migrationPlanResultWeatherClearNight => 'clear night';
+
+  @override
   String get migrationPlanResultCostLabel => 'Estimated cost';
+
+  @override
+  String get migrationPlanResultWeatherLabel => 'Weather now';
+
+  @override
+  String get migrationPlanResultWhyLabel => 'Why this city';
+
+  @override
+  String migrationPlanResultReviewsLabel(Object count) {
+    return '$count reviews';
+  }
 
   @override
   String get migrationPlanResultCostSupporting =>

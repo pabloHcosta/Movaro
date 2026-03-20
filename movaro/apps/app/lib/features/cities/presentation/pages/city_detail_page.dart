@@ -11,6 +11,7 @@ import 'package:movaro_app/core/widgets/error_state_widget.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/loading_state_widget.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
+import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
@@ -24,12 +25,10 @@ import 'package:movaro_app/features/cities/presentation/widgets/city_snapshot_ti
 import 'package:movaro_app/features/cities/presentation/widgets/city_sources_section.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_weather_badge.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/methodology_info_banner.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/recommendation_reason_list.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_structure_widgets.dart';
 
 class CityDetailPage extends StatefulWidget {
   const CityDetailPage({
@@ -278,13 +277,17 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                                   _openCityGoogleOverview(city),
                                             ),
                                             _HeroActionPill(
-                                              icon: Icons.compare_arrows_rounded,
-                                              label: widget.citiesController
+                                              icon:
+                                                  Icons.compare_arrows_rounded,
+                                              label:
+                                                  widget.citiesController
                                                       .isFavorite(city.id)
                                                   ? l10n.cityDetailCompareSavedAction
                                                   : l10n.cityDetailCompareAction,
-                                              onTap: () =>
-                                                  _handleCompareCity(context, city),
+                                              onTap: () => _handleCompareCity(
+                                                context,
+                                                city,
+                                              ),
                                             ),
                                             if (widget.selectForPlan)
                                               _HeroActionPill(
@@ -309,26 +312,19 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                               constraints: BoxConstraints(
                                                 maxWidth: compactHero
                                                     ? constraints.maxWidth
-                                                    : 620,
+                                                    : 320,
                                               ),
-                                              child: Text(
-                                                planContext?.heroSummary ??
+                                              child: ScoreBadge(
+                                                label:
+                                                    planContext?.heroSummary ??
                                                     context.l10n
                                                         .recommendationReasonLabel(
                                                           city
                                                               .recommendationReasons
                                                               .first,
                                                         ),
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyMedium
-                                                    ?.copyWith(
-                                                      color: Colors.white
-                                                          .withValues(
-                                                            alpha: 0.72,
-                                                          ),
-                                                      height: 1.4,
-                                                    ),
+                                                icon: Icons.insights_rounded,
+                                                inverse: true,
                                               ),
                                             ),
                                             _TrustChip(
@@ -427,7 +423,6 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                     context,
                                   ).textTheme.titleMedium,
                                 ),
-                                subtitle: Text(l10n.cityDetailDeepDiveSummary),
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.only(bottom: 16),
@@ -597,8 +592,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
 
   Future<void> _handlePrimaryPlanAction(BuildContext context, City city) async {
     final plan = widget.migrationQuestionnaireController?.generatedPlan;
-    final isConfirmedCity = plan?.isCityConfirmed == true &&
-        plan?.recommendedCity?.id == city.id;
+    final isConfirmedCity =
+        plan?.isCityConfirmed == true && plan?.recommendedCity?.id == city.id;
     if (isConfirmedCity) {
       Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
       return;
@@ -986,26 +981,50 @@ class _CitySummaryPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            context.l10n.cityDetailSummaryTitle,
-            style: Theme.of(context).textTheme.titleMedium,
+          CompareCard(
+            title: context.l10n.cityDetailSummaryTitle,
+            subtitle: city.name,
+            badge: plan?.isRecommended == true
+                ? context.l10n.cityDetailPlanLeadingChip
+                : null,
+            metrics: [
+              CompareCardMetric(
+                label: context.l10n.cityDetailAffordabilityTitle,
+                value: _costLabel(context),
+                icon: Icons.home_work_outlined,
+                tone: city.rentScore >= 72
+                    ? ScoreTone.positive
+                    : city.rentScore >= 55
+                    ? ScoreTone.balanced
+                    : ScoreTone.attention,
+              ),
+              CompareCardMetric(
+                label: context.l10n.cityDetailQualityLabel,
+                value: _qualityLabel(context),
+                icon: Icons.favorite_outline_rounded,
+                tone: city.idhmScore >= 0.8
+                    ? ScoreTone.positive
+                    : city.idhmScore >= 0.7
+                    ? ScoreTone.balanced
+                    : ScoreTone.attention,
+              ),
+              CompareCardMetric(
+                label: context.l10n.cityDetailDifficultyLabel,
+                value: _difficultyLabel(context),
+                icon: Icons.route_outlined,
+                tone: city.movaroScores.overall >= 72
+                    ? ScoreTone.positive
+                    : city.movaroScores.overall >= 55
+                    ? ScoreTone.balanced
+                    : ScoreTone.attention,
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            context.l10n.cityDetailSummaryBody,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {
-              final threeColumns = constraints.maxWidth >= 960;
               final twoColumns = constraints.maxWidth >= 640;
-              final cardWidth = threeColumns
-                  ? (constraints.maxWidth - 24) / 3
-                  : twoColumns
+              final cardWidth = twoColumns
                   ? (constraints.maxWidth - 12) / 2
                   : constraints.maxWidth;
 
@@ -1015,36 +1034,27 @@ class _CitySummaryPanel extends StatelessWidget {
                 children: [
                   SizedBox(
                     width: cardWidth,
-                    child: PlanSummaryCard(
-                      label: context.l10n.cityDetailAffordabilityTitle,
-                      value: _costLabel(context),
-                      supporting: CityHousingViabilityPresenter.resolve(
+                    child: InsightCard(
+                      title: context.l10n.cityDetailAffordabilityTitle,
+                      body: CityHousingViabilityPresenter.resolve(
                         context,
                         rentScore: city.rentScore,
                       ).badge,
-                      icon: Icons.home_work_outlined,
+                      icon: Icons.savings_rounded,
                     ),
                   ),
                   SizedBox(
                     width: cardWidth,
-                    child: PlanSummaryCard(
-                      label: context.l10n.cityDetailQualityLabel,
-                      value: _qualityLabel(context),
-                      supporting: context.l10n.cityDetailQualitySupporting,
-                      icon: Icons.favorite_outline_rounded,
-                    ),
-                  ),
-                  SizedBox(
-                    width: cardWidth,
-                    child: PlanSummaryCard(
-                      label: context.l10n.cityDetailDifficultyLabel,
-                      value: _difficultyLabel(context),
-                      supporting: plan?.watchout ??
+                    child: InsightCard(
+                      title: context.l10n.cityDetailWatchoutTitle,
+                      body:
+                          plan?.watchout ??
                           _DecisionSnapshotPanel.defaultWatchoutText(
                             context,
                             city,
                           ),
-                      icon: Icons.route_outlined,
+                      icon: Icons.warning_amber_rounded,
+                      tint: AppColors.warning,
                     ),
                   ),
                 ],
@@ -1093,7 +1103,9 @@ class _CitySummaryPanel extends StatelessWidget {
 
   String _qualityLabel(BuildContext context) {
     final average =
-        ((city.idhmScore * 100).round() + city.safetyScore + city.spanishSupportScore) /
+        ((city.idhmScore * 100).round() +
+            city.safetyScore +
+            city.spanishSupportScore) /
         3;
     if (average >= 72) {
       return context.l10n.cityDetailQualityHigh;
@@ -1106,7 +1118,9 @@ class _CitySummaryPanel extends StatelessWidget {
 
   String _difficultyLabel(BuildContext context) {
     final average =
-        (city.rentScore + city.movaroScores.languageAdaptation + city.movaroScores.workOpportunity) /
+        (city.rentScore +
+            city.movaroScores.languageAdaptation +
+            city.movaroScores.workOpportunity) /
         3;
     if (average >= 68) {
       return context.l10n.cityDetailDifficultyEasy;
@@ -1132,23 +1146,25 @@ class _DecisionSnapshotPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            context.l10n.cityDetailDecisionSnapshotTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            planContext?.isRecommended == true
-                ? context.l10n.cityDetailDecisionSnapshotRecommendedSubtitle(
-                    bestFor,
-                  )
-                : planContext != null
-                ? context.l10n.cityDetailDecisionSnapshotPlanSubtitle(bestFor)
-                : context.l10n.cityDetailDecisionSnapshotSubtitle(bestFor),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.35,
-            ),
+          CompareCard(
+            title: context.l10n.cityDetailDecisionSnapshotTitle,
+            subtitle: bestFor,
+            badge: planContext?.isRecommended == true
+                ? context.l10n.cityDetailPlanLeadingChip
+                : null,
+            metrics: [
+              CompareCardMetric(
+                label: context.l10n.cityDetailDecisionSnapshotTitle,
+                value: bestFor,
+                icon: Icons.center_focus_strong_rounded,
+              ),
+              if (planContext != null)
+                CompareCardMetric(
+                  label: context.l10n.cityDetailWatchoutTitle,
+                  value: planContext!.watchout,
+                  icon: Icons.warning_amber_rounded,
+                ),
+            ],
           ),
           if (planContext != null) ...[
             const SizedBox(height: 12),
@@ -1169,14 +1185,23 @@ class _DecisionSnapshotPanel extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 14),
-          RecommendationReasonList(
-            reasons: planContext?.reasons ?? city.recommendationReasons,
-            maxItems: 3,
-          ),
-          const SizedBox(height: 14),
-          _WatchoutCard(
-            title: context.l10n.cityDetailWatchoutTitle,
-            body: planContext?.watchout ?? defaultWatchoutText(context, city),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              for (final reason
+                  in (planContext?.reasons ?? city.recommendationReasons).take(
+                    3,
+                  ))
+                SizedBox(
+                  width: 260,
+                  child: InsightCard(
+                    title: context.l10n.migrationPlanDecisionLabel,
+                    body: context.l10n.recommendationReasonLabel(reason),
+                    icon: Icons.lightbulb_outline_rounded,
+                  ),
+                ),
+            ],
           ),
         ],
       ),
@@ -1357,18 +1382,13 @@ class _CityExternalOverviewPanel extends StatelessWidget {
           final textContent = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                context.l10n.cityDetailDiscoverTitle,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.l10n.cityDetailDiscoverBody(city.name, city.stateName),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.72),
+              InsightCard(
+                title: context.l10n.cityDetailDiscoverTitle,
+                body: context.l10n.cityDetailDiscoverBody(
+                  city.name,
+                  city.stateName,
                 ),
+                icon: Icons.travel_explore_rounded,
               ),
             ],
           );
@@ -1773,75 +1793,6 @@ class _IdhmContextPanel extends StatelessWidget {
           tint: AppColors.primary,
         ),
       ],
-    );
-  }
-}
-
-class _WatchoutCard extends StatelessWidget {
-  const _WatchoutCard({required this.title, required this.body});
-
-  final String title;
-  final String body;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.tintedSurfaceFor(
-          context,
-          tint: AppColors.warning,
-          lightColor: const Color(0xFFFFF8E7),
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.tintedBorderFor(
-            context,
-            tint: AppColors.warning,
-            lightColor: const Color(0xFFEFCF84),
-          ),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: AppColors.warning.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.visibility_outlined,
-              color: AppColors.warning,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  body,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSoftFor(context),
-                    height: 1.35,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

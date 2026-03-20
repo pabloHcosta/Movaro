@@ -6,16 +6,18 @@ import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/contextual_help.dart';
+import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_structure_widgets.dart';
 
-class ExplorePage extends StatelessWidget {
+class ExplorePage extends StatefulWidget {
   const ExplorePage({
     required this.journeyContextController,
     required this.citiesController,
@@ -28,9 +30,79 @@ class ExplorePage extends StatelessWidget {
   final MigrationQuestionnaireController migrationQuestionnaireController;
 
   @override
+  State<ExplorePage> createState() => _ExplorePageState();
+}
+
+class _ExplorePageState extends State<ExplorePage> {
+  static const _helpPreferenceKey = 'explore_page';
+  bool _didTryAutoHelp = false;
+
+  JourneyContextController get journeyContextController =>
+      widget.journeyContextController;
+  CitiesController get citiesController => widget.citiesController;
+  MigrationQuestionnaireController get migrationQuestionnaireController =>
+      widget.migrationQuestionnaireController;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeShowHelp();
+    });
+  }
+
+  Future<void> _maybeShowHelp() async {
+    if (_didTryAutoHelp) {
+      return;
+    }
+    _didTryAutoHelp = true;
+    await maybeShowContextualHelpGuide(
+      context,
+      preferenceKey: _helpPreferenceKey,
+      content: _helpContent(context),
+    );
+  }
+
+  Future<void> _showHelp() {
+    return showContextualHelpGuide(
+      context,
+      preferenceKey: _helpPreferenceKey,
+      content: _helpContent(context),
+    );
+  }
+
+  ContextualHelpContent _helpContent(BuildContext context) {
+    return ContextualHelpContent(
+      eyebrow: context.l10n.mainNavExplore,
+      title: 'Explore with plan context',
+      body:
+          'Explore groups cities and practical content around your current migration route so discovery still supports a decision.',
+      steps: const [
+        FeatureGuideStep(
+          number: '1',
+          title: 'Check what matches your plan',
+          body:
+              'The first section reflects the active recommendation and route when available.',
+        ),
+        FeatureGuideStep(
+          number: '2',
+          title: 'Browse other cities',
+          body:
+              'Use city cards to compare alternatives without losing your current plan.',
+        ),
+        FeatureGuideStep(
+          number: '3',
+          title: 'Open useful content',
+          body:
+              'The content section points to the practical guides most relevant to documents, housing, and work.',
+        ),
+      ],
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = AppColors.isDark(context);
 
     return Scaffold(
       body: Stack(
@@ -70,86 +142,17 @@ class ExplorePage extends StatelessWidget {
                           onBack: Navigator.canPop(context)
                               ? () => Navigator.maybePop(context)
                               : null,
+                          onHelp: _showHelp,
                         ),
                         const SizedBox(height: 20),
-                        FrostedPanel(
-                          padding: const EdgeInsets.all(32),
-                          gradient: LinearGradient(
-                            colors: isDark
-                                ? const [
-                                    AppColors.heroStart,
-                                    AppColors.heroMiddle,
-                                    AppColors.heroEnd,
-                                  ]
-                                : const [
-                                    Color(0xFFF8FBFF),
-                                    Color(0xFFEAF3FF),
-                                    Color(0xFFD9EAFF),
-                                  ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          backgroundColor: isDark
-                              ? const Color(0xB30B1320)
-                              : const Color(0xF5FFFFFF),
-                          borderColor: isDark
-                              ? const Color(0x1AFFFFFF)
-                              : AppColors.primary.withValues(alpha: 0.10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.exploreTrailsEyebrow,
-                                style: Theme.of(context).textTheme.labelLarge
-                                    ?.copyWith(
-                                      color: isDark
-                                          ? Colors.white.withValues(alpha: 0.82)
-                                          : AppColors.primary,
-                                    ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                l10n.exploreUnifiedTitle,
-                                style: Theme.of(context).textTheme.displaySmall
-                                    ?.copyWith(
-                                      color: isDark
-                                          ? Colors.white
-                                          : AppColors.textPrimaryFor(context),
-                                    ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                routeLabel,
-                                style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(
-                                      color: isDark
-                                          ? Colors.white.withValues(alpha: 0.78)
-                                          : AppColors.primary,
-                                    ),
-                              ),
-                              const SizedBox(height: 14),
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(maxWidth: 720),
-                                child: Text(
-                                  l10n.exploreUnifiedBody,
-                                  style: Theme.of(context).textTheme.bodyLarge
-                                      ?.copyWith(
-                                        color: isDark
-                                            ? Colors.white.withValues(
-                                                alpha: 0.78,
-                                              )
-                                            : AppColors.textSoftFor(context),
-                                        height: 1.45,
-                                      ),
-                                ),
-                              ),
-                            ],
-                          ),
+                        _ExploreHeroPanel(
+                          routeLabel: routeLabel,
+                          plan: plan,
+                          cityCount: suggestedCities.length,
                         ),
                         const SizedBox(height: 18),
-                        _ExploreSection(
+                        _ExploreSectionShell(
                           title: l10n.explorePlanSectionTitle,
-                          body: l10n.explorePlanSectionBody,
                           child: _PlanSection(
                             plan: plan,
                             onOpenPlan: () => Navigator.pushNamed(
@@ -171,20 +174,18 @@ class ExplorePage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        _ExploreSection(
+                        _ExploreSectionShell(
                           title: l10n.exploreCitiesSectionTitle,
-                          body: l10n.exploreCitiesSectionBody,
                           trailing: TextButton(
                             onPressed: () =>
                                 Navigator.pushNamed(context, AppRoutes.cities),
                             child: Text(l10n.exploreCitiesAction),
                           ),
-                          child: _CitySuggestionRail(cities: suggestedCities),
+                          child: _CityShowcaseRail(cities: suggestedCities),
                         ),
                         const SizedBox(height: 16),
-                        _ExploreSection(
+                        _ExploreSectionShell(
                           title: l10n.exploreContentSectionTitle,
-                          body: l10n.exploreContentSectionBody,
                           child: _ContentSection(
                             onOpenSection: (section) => Navigator.pushNamed(
                               context,
@@ -263,22 +264,210 @@ class ExplorePage extends StatelessWidget {
   }
 }
 
-class _ExploreSection extends StatelessWidget {
-  const _ExploreSection({
+class _ExploreHeroPanel extends StatelessWidget {
+  const _ExploreHeroPanel({
+    required this.routeLabel,
+    required this.plan,
+    required this.cityCount,
+  });
+
+  final String routeLabel;
+  final MigrationPlan? plan;
+  final int cityCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final leadCity = plan?.recommendedCity;
+    final planReady = plan?.isCityConfirmed == true;
+    final statusLabel = plan == null
+        ? context.l10n.explorePlanEmptyTitle
+        : planReady
+        ? context.l10n.explorePlanReadyTitle
+        : context.l10n.explorePlanDraftTitle;
+
+    return FrostedPanel(
+      padding: const EdgeInsets.all(28),
+      gradient: LinearGradient(
+        colors: isDark
+            ? const [
+                AppColors.heroStart,
+                AppColors.heroMiddle,
+                AppColors.heroEnd,
+              ]
+            : const [Color(0xFFF6FBFF), Color(0xFFE6F1FF), Color(0xFFD1E7FF)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      backgroundColor: isDark
+          ? const Color(0xB30B1320)
+          : const Color(0xF7FFFFFF),
+      borderColor: isDark
+          ? const Color(0x1AFFFFFF)
+          : AppColors.primary.withValues(alpha: 0.10),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final stacked = constraints.maxWidth < 760;
+          final stats = Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _HeroStatCard(
+                label: context.l10n.mainNavPlan,
+                value: statusLabel,
+                icon: planReady
+                    ? Icons.check_circle_rounded
+                    : Icons.explore_rounded,
+              ),
+              _HeroStatCard(
+                label: context.l10n.exploreCitiesSectionTitle,
+                value: '$cityCount',
+                icon: Icons.location_city_rounded,
+              ),
+              if (leadCity != null)
+                _HeroStatCard(
+                  label: context.l10n.exploreRecommendedCityTitle,
+                  value: leadCity.name,
+                  icon: Icons.place_rounded,
+                ),
+            ],
+          );
+
+          final content = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.exploreTrailsEyebrow,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.82)
+                      : AppColors.primary,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                context.l10n.exploreUnifiedTitle,
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  color: isDark
+                      ? Colors.white
+                      : AppColors.textPrimaryFor(context),
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 14),
+              ScoreBadge(
+                label: routeLabel,
+                icon: Icons.route_rounded,
+                inverse: isDark,
+              ),
+            ],
+          );
+
+          if (stacked) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                content,
+                const SizedBox(height: 18),
+                stats,
+              ],
+            );
+          }
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: 6, child: content),
+              const SizedBox(width: 18),
+              Expanded(flex: 5, child: stats),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _HeroStatCard extends StatelessWidget {
+  const _HeroStatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+
+    return Container(
+      width: 150,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.10)
+            : Colors.white.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.12)
+              : AppColors.primary.withValues(alpha: 0.10),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: isDark ? Colors.white : AppColors.primary,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: isDark ? Colors.white : AppColors.textPrimaryFor(context),
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.74)
+                  : AppColors.textSoftFor(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExploreSectionShell extends StatelessWidget {
+  const _ExploreSectionShell({
     required this.title,
-    required this.body,
     required this.child,
     this.trailing,
   });
 
   final String title;
-  final String body;
   final Widget child;
   final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     return FrostedPanel(
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -290,14 +479,6 @@ class _ExploreSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title, style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 6),
-                    Text(
-                      body,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSoftFor(context),
-                        height: 1.4,
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -329,76 +510,146 @@ class _PlanSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final leadCity = plan?.recommendedCity;
+    final title = plan == null
+        ? l10n.explorePlanEmptyTitle
+        : plan!.isCityConfirmed
+        ? l10n.explorePlanReadyTitle
+        : l10n.explorePlanDraftTitle;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        PlanNextActionCard(
-          eyebrow: l10n.migrationPlanResultPrimaryCtaEyebrow,
-          title: plan == null
-              ? l10n.explorePlanEmptyTitle
-              : plan!.isCityConfirmed
-              ? l10n.explorePlanReadyTitle
-              : l10n.explorePlanDraftTitle,
-          body: plan == null
-              ? l10n.explorePlanEmptyBody
-              : leadCity == null
-              ? l10n.explorePlanDraftBody
-              : plan!.isCityConfirmed
-              ? l10n.explorePlanReadyBody(leadCity.name)
-              : l10n.explorePlanDraftBodyWithCity(leadCity.name),
-          actionLabel: plan?.isCityConfirmed == true
-              ? l10n.mainNavPlan
-              : l10n.publicHomeQuestionnaireAction,
-          onTap: onOpenPlan,
-          icon: plan?.isCityConfirmed == true
-              ? Icons.checklist_rounded
-              : Icons.play_arrow_rounded,
+        _PlanFocusCard(
+          title: title,
+          city: leadCity,
+          isConfirmed: plan?.isCityConfirmed == true,
+          onOpenPlan: onOpenPlan,
         ),
-        const SizedBox(height: 16),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final twoColumns = constraints.maxWidth >= 700;
-            final cardWidth = twoColumns
-                ? (constraints.maxWidth - 12) / 2
-                : constraints.maxWidth;
-
-            return Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                if (leadCity != null)
-                  SizedBox(
-                    width: cardWidth,
-                    child: _CompactCityCard(
-                      city: leadCity,
-                      title: l10n.exploreRecommendedCityTitle,
-                      body: l10n.exploreRecommendedCityBody,
-                      actionLabel: l10n.exploreOpenCityAction,
-                      onTap: () => onOpenCity(leadCity),
-                    ),
-                  ),
-                SizedBox(
-                  width: cardWidth,
-                  child: _ContentCard(
-                    title: l10n.documentationPathDocumentsTitle,
-                    body: l10n.explorePlanDocsBody,
-                    actionLabel: l10n.exploreOpenContentAction,
-                    icon: Icons.badge_outlined,
-                    onTap: () => onOpenDocs(DocumentationGuideSection.documents),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+        if (leadCity != null) ...[
+          const SizedBox(height: 14),
+          _CityFeatureCard(
+            city: leadCity,
+            badge: l10n.migrationPlanSuggestedCityBadge,
+            accent: AppColors.primary,
+            actionLabel: l10n.exploreOpenCityAction,
+            onTap: () => onOpenCity(leadCity),
+          ),
+        ] else ...[
+          const SizedBox(height: 14),
+          _ContentTopicCard(
+            title: l10n.documentationPathDocumentsTitle,
+            subtitle: l10n.exploreOpenContentAction,
+            icon: Icons.badge_outlined,
+            accent: AppColors.primary,
+            onTap: () => onOpenDocs(DocumentationGuideSection.documents),
+          ),
+        ],
       ],
     );
   }
 }
 
-class _CitySuggestionRail extends StatelessWidget {
-  const _CitySuggestionRail({required this.cities});
+class _PlanFocusCard extends StatelessWidget {
+  const _PlanFocusCard({
+    required this.title,
+    required this.city,
+    required this.isConfirmed,
+    required this.onOpenPlan,
+  });
+
+  final String title;
+  final City? city;
+  final bool isConfirmed;
+  final VoidCallback onOpenPlan;
+
+  @override
+  Widget build(BuildContext context) {
+    final actionLabel = isConfirmed
+        ? context.l10n.mainNavPlan
+        : context.l10n.publicHomeQuestionnaireAction;
+
+    return FrostedPanel(
+      padding: const EdgeInsets.all(20),
+      gradient: const LinearGradient(
+        colors: [AppColors.heroStart, AppColors.heroMiddle, AppColors.heroEnd],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      backgroundColor: const Color(0xB30B1320),
+      borderColor: const Color(0x1AFFFFFF),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final stacked = constraints.maxWidth < 720;
+          final metrics = Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              ScoreBadge(
+                label: title,
+                icon: isConfirmed
+                    ? Icons.check_circle_rounded
+                    : Icons.play_arrow_rounded,
+                inverse: true,
+              ),
+              if (city != null)
+                ScoreBadge(
+                  label: '${city!.name} (${city!.stateCode})',
+                  icon: Icons.location_city_rounded,
+                  inverse: true,
+                ),
+            ],
+          );
+
+          final content = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 12),
+              metrics,
+            ],
+          );
+
+          final action = FilledButton.icon(
+            onPressed: onOpenPlan,
+            icon: const Icon(Icons.arrow_forward_rounded),
+            label: Text(actionLabel),
+          );
+
+          if (stacked) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                content,
+                const SizedBox(height: 16),
+                action,
+              ],
+            );
+          }
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: content),
+              const SizedBox(width: 16),
+              action,
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CityShowcaseRail extends StatelessWidget {
+  const _CityShowcaseRail({required this.cities});
 
   final List<City> cities;
 
@@ -408,35 +659,48 @@ class _CitySuggestionRail extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final threeColumns = constraints.maxWidth >= 960;
-        final twoColumns = constraints.maxWidth >= 640;
-        final cardWidth = threeColumns
-            ? (constraints.maxWidth - 24) / 3
-            : twoColumns
-            ? (constraints.maxWidth - 12) / 2
-            : constraints.maxWidth;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _CityFeatureCard(
+          city: cities.first,
+          accent: const Color(0xFF35A8FF),
+          actionLabel: context.l10n.exploreOpenCityAction,
+          onTap: () => Navigator.pushNamed(
+            context,
+            AppRoutes.cityDetail(cities.first.id),
+          ),
+        ),
+        if (cities.length > 1) ...[
+          const SizedBox(height: 14),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final twoColumns = constraints.maxWidth >= 760;
+              final cardWidth = twoColumns
+                  ? (constraints.maxWidth - 12) / 2
+                  : constraints.maxWidth;
 
-        return Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            for (final city in cities)
-              SizedBox(
-                width: cardWidth,
-                child: _CompactCityCard(
-                  city: city,
-                  title: city.name,
-                  body: '${city.stateName} · ${city.regionName ?? city.stateCode}',
-                  actionLabel: context.l10n.exploreOpenCityAction,
-                  onTap: () =>
-                      Navigator.pushNamed(context, AppRoutes.cityDetail(city.id)),
-                ),
-              ),
-          ],
-        );
-      },
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  for (final city in cities.skip(1))
+                    SizedBox(
+                      width: cardWidth,
+                      child: _CityMiniCard(
+                        city: city,
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          AppRoutes.cityDetail(city.id),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ],
+      ],
     );
   }
 }
@@ -464,31 +728,31 @@ class _ContentSection extends StatelessWidget {
           children: [
             SizedBox(
               width: cardWidth,
-              child: _ContentCard(
+              child: _ContentTopicCard(
                 title: context.l10n.documentationPathDocumentsTitle,
-                body: context.l10n.exploreContentDocumentsBody,
-                actionLabel: context.l10n.exploreOpenContentAction,
+                subtitle: context.l10n.exploreOpenContentAction,
                 icon: Icons.badge_outlined,
+                accent: AppColors.primary,
                 onTap: () => onOpenSection(DocumentationGuideSection.documents),
               ),
             ),
             SizedBox(
               width: cardWidth,
-              child: _ContentCard(
+              child: _ContentTopicCard(
                 title: context.l10n.documentationHousingArrivalSectionTitle,
-                body: context.l10n.exploreContentHousingBody,
-                actionLabel: context.l10n.exploreOpenContentAction,
+                subtitle: context.l10n.exploreOpenContentAction,
                 icon: Icons.home_work_outlined,
+                accent: AppColors.success,
                 onTap: () => onOpenSection(DocumentationGuideSection.housing),
               ),
             ),
             SizedBox(
               width: cardWidth,
-              child: _ContentCard(
+              child: _ContentTopicCard(
                 title: context.l10n.documentationPathWorkTitle,
-                body: context.l10n.exploreContentWorkBody,
-                actionLabel: context.l10n.exploreOpenContentAction,
+                subtitle: context.l10n.exploreOpenContentAction,
                 icon: Icons.work_outline_rounded,
+                accent: AppColors.caution,
                 onTap: () => onOpenSection(DocumentationGuideSection.work),
               ),
             ),
@@ -499,53 +763,102 @@ class _ContentSection extends StatelessWidget {
   }
 }
 
-class _CompactCityCard extends StatelessWidget {
-  const _CompactCityCard({
+class _CityFeatureCard extends StatelessWidget {
+  const _CityFeatureCard({
     required this.city,
-    required this.title,
-    required this.body,
     required this.actionLabel,
     required this.onTap,
+    this.badge,
+    this.accent = AppColors.primary,
   });
 
   final City city;
-  final String title;
-  final String body;
   final String actionLabel;
+  final String? badge;
   final VoidCallback onTap;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
     return FrostedPanel(
+      padding: const EdgeInsets.all(18),
+      backgroundColor: AppColors.surfaceFor(context),
+      borderColor: AppColors.borderFor(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 6),
-          Text(
-            body,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _MetricChip(
-                label:
-                    '${context.l10n.cityDetailAffordabilityTitle}: ${city.rentScore}',
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      city.name,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${city.stateName} (${city.stateCode})',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              _MetricChip(
-                label:
-                    '${context.l10n.cityDetailSafetyLabel}: ${city.safetyScore}',
-              ),
+              if (badge != null)
+                ScoreBadge(label: badge!, icon: Icons.auto_awesome_rounded),
             ],
           ),
           const SizedBox(height: 16),
-          OutlinedButton.icon(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final stacked = constraints.maxWidth < 760;
+              final metricWidth = stacked
+                  ? constraints.maxWidth
+                  : (constraints.maxWidth - 24) / 3;
+
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  SizedBox(
+                    width: metricWidth,
+                    child: _CitySignalMetric(
+                      label: context.l10n.cityDetailAffordabilityTitle,
+                      score: city.rentScore,
+                      icon: Icons.home_work_outlined,
+                      accent: accent,
+                    ),
+                  ),
+                  SizedBox(
+                    width: metricWidth,
+                    child: _CitySignalMetric(
+                      label: context.l10n.cityDetailQualityLabel,
+                      score: (city.idhmScore * 100).round(),
+                      icon: Icons.favorite_outline_rounded,
+                      accent: AppColors.success,
+                    ),
+                  ),
+                  SizedBox(
+                    width: metricWidth,
+                    child: _CitySignalMetric(
+                      label: context.l10n.cityDetailWorkLabel,
+                      score: city.movaroScores.workOpportunity,
+                      icon: Icons.work_outline_rounded,
+                      accent: AppColors.caution,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          FilledButton.icon(
             onPressed: onTap,
             icon: const Icon(Icons.arrow_forward_rounded),
             label: Text(actionLabel),
@@ -556,76 +869,196 @@ class _CompactCityCard extends StatelessWidget {
   }
 }
 
-class _ContentCard extends StatelessWidget {
-  const _ContentCard({
-    required this.title,
-    required this.body,
-    required this.actionLabel,
-    required this.icon,
-    required this.onTap,
-  });
+class _CityMiniCard extends StatelessWidget {
+  const _CityMiniCard({required this.city, required this.onTap});
 
-  final String title;
-  final String body;
-  final String actionLabel;
-  final IconData icon;
+  final City city;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return FrostedPanel(
+    return CompareCard(
+      title: city.name,
+      subtitle: '${city.stateName} (${city.stateCode})',
+      metrics: [
+        CompareCardMetric(
+          label: context.l10n.cityDetailAffordabilityTitle,
+          value: city.rentScore.toString(),
+          icon: Icons.home_work_outlined,
+        ),
+        CompareCardMetric(
+          label: context.l10n.cityDetailQualityLabel,
+          value: city.idhmScore.toStringAsFixed(2),
+          icon: Icons.favorite_outline_rounded,
+        ),
+      ],
+      onTap: onTap,
+      actionLabel: context.l10n.exploreOpenCityAction,
+    );
+  }
+}
+
+class _CitySignalMetric extends StatelessWidget {
+  const _CitySignalMetric({
+    required this.label,
+    required this.score,
+    required this.icon,
+    required this.accent,
+  });
+
+  final String label;
+  final int score;
+  final IconData icon;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final tone = _signalTone(score);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: tone.color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: tone.color.withValues(alpha: 0.16)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: AppColors.primary),
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: tone.color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 18, color: tone.color),
+              ),
+              const Spacer(),
+              Icon(tone.icon, size: 18, color: tone.color),
+            ],
           ),
-          const SizedBox(height: 14),
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 6),
+          const SizedBox(height: 12),
           Text(
-            body,
+            '$score',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSoftFor(context),
-              height: 1.4,
             ),
           ),
-          const SizedBox(height: 16),
-          OutlinedButton(
-            onPressed: onTap,
-            child: Text(actionLabel),
+          const SizedBox(height: 6),
+          Text(
+            tone.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: tone.color,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
     );
   }
+
+  _ExploreSignalTone _signalTone(int value) {
+    if (value >= 72) {
+      return _ExploreSignalTone(
+        label: 'Strong',
+        color: AppColors.success,
+        icon: Icons.trending_up_rounded,
+      );
+    }
+    if (value >= 52) {
+      return _ExploreSignalTone(
+        label: 'Balanced',
+        color: AppColors.warning,
+        icon: Icons.remove_rounded,
+      );
+    }
+    return _ExploreSignalTone(
+      label: 'Watch',
+      color: AppColors.caution,
+      icon: Icons.trending_down_rounded,
+    );
+  }
 }
 
-class _MetricChip extends StatelessWidget {
-  const _MetricChip({required this.label});
+class _ExploreSignalTone {
+  const _ExploreSignalTone({
+    required this.label,
+    required this.color,
+    required this.icon,
+  });
 
   final String label;
+  final Color color;
+  final IconData icon;
+}
+
+class _ContentTopicCard extends StatelessWidget {
+  const _ContentTopicCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.accent,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color accent;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMutedFor(context),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.borderFor(context)),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: AppColors.textSoftFor(context),
-        ),
+    return FrostedPanel(
+      padding: const EdgeInsets.all(18),
+      backgroundColor: AppColors.surfaceFor(context),
+      borderColor: AppColors.borderFor(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: accent),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            title,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 6),
+          ScoreBadge(
+            label: subtitle,
+            icon: Icons.arrow_outward_rounded,
+            tint: accent,
+          ),
+          const SizedBox(height: 14),
+          OutlinedButton.icon(
+            onPressed: onTap,
+            icon: const Icon(Icons.open_in_new_rounded),
+            label: Text(context.l10n.exploreOpenContentAction),
+          ),
+        ],
       ),
     );
   }

@@ -6,12 +6,14 @@ class AppGlassHeader extends StatelessWidget {
   const AppGlassHeader({
     required this.title,
     this.onBack,
+    this.onHelp,
     this.trailing,
     super.key,
   });
 
   final String title;
   final VoidCallback? onBack;
+  final VoidCallback? onHelp;
   final Widget? trailing;
 
   @override
@@ -48,7 +50,21 @@ class AppGlassHeader extends StatelessWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
           ),
-          trailing ?? const SizedBox(width: 44),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (onHelp != null)
+                SizedBox(
+                  width: 44,
+                  child: IconButton(
+                    onPressed: onHelp,
+                    icon: const Icon(Icons.help_outline_rounded),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+              trailing ?? const SizedBox(width: 44),
+            ],
+          ),
         ],
       ),
     );

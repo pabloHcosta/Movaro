@@ -14,7 +14,6 @@ import 'package:movaro_app/features/cities/presentation/pages/city_search_page.d
 import 'package:movaro_app/features/auth/presentation/pages/onboarding_page.dart';
 import 'package:movaro_app/features/explore/presentation/pages/countries_page.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
-import 'package:movaro_app/features/explore/presentation/pages/explore_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/home_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/favorites_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/public_home_page.dart';
@@ -178,9 +177,9 @@ class AppRouter {
         unawaited(citiesController.prefetchCatalog());
         return _buildRoute(
           settings,
-          ExplorePage(
-            journeyContextController: journeyContextController,
+          CitiesExplorePage(
             citiesController: citiesController,
+            journeyContextController: journeyContextController,
             migrationQuestionnaireController: migrationQuestionnaireController,
           ),
         );
@@ -212,7 +211,11 @@ class AppRouter {
         unawaited(citiesController.prefetchExplore());
         return _buildRoute(
           settings,
-          CitiesExplorePage(citiesController: citiesController),
+          CitiesExplorePage(
+            citiesController: citiesController,
+            journeyContextController: journeyContextController,
+            migrationQuestionnaireController: migrationQuestionnaireController,
+          ),
         );
       case AppRoutes.citiesSearch:
         unawaited(citiesController.prefetchCatalog());
@@ -250,7 +253,10 @@ class AppRouter {
       case AppRoutes.migrationPlanResult:
         return _buildRoute(
           settings,
-          MigrationPlanResultPage(controller: migrationQuestionnaireController),
+          MigrationPlanResultPage(
+            controller: migrationQuestionnaireController,
+            citiesController: citiesController,
+          ),
         );
       case AppRoutes.migrationPlanCopilot:
         if (migrationQuestionnaireController.generatedPlan?.isCityConfirmed !=
@@ -259,6 +265,7 @@ class AppRouter {
             const RouteSettings(name: AppRoutes.migrationPlanResult),
             MigrationPlanResultPage(
               controller: migrationQuestionnaireController,
+              citiesController: citiesController,
             ),
           );
         }

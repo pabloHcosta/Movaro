@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/localization/language_selector_button.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/catalog/domain/entities/catalog_country.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/journey/journey_country_metadata.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
@@ -31,28 +28,6 @@ class PublicHomePage extends StatefulWidget {
 }
 
 class _PublicHomePageState extends State<PublicHomePage> {
-  Future<void> _restartJourneyFlow() async {
-    final confirmed = await showModalBottomSheet<bool>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) => _JourneyResetSheet(
-        onConfirm: () => Navigator.of(sheetContext).pop(true),
-      ),
-    );
-
-    if (confirmed != true || !mounted) {
-      return;
-    }
-
-    await widget.migrationQuestionnaireController.clearCurrentPlan();
-    await widget.journeyContextController.clearJourney();
-    if (!mounted) {
-      return;
-    }
-
-    Navigator.pushReplacementNamed(context, AppRoutes.journeySetup);
-  }
-
   @override
   Widget build(BuildContext context) {
     final maxWidth = context.isDesktopLayout ? 1160.0 : 920.0;
@@ -85,7 +60,6 @@ class _PublicHomePageState extends State<PublicHomePage> {
                           citiesController: widget.citiesController,
                           migrationQuestionnaireController:
                               widget.migrationQuestionnaireController,
-                          onRestartJourney: _restartJourneyFlow,
                         ),
                       ],
                     ),
@@ -112,47 +86,17 @@ class _LandingHero extends StatelessWidget {
     required this.journeyContextController,
     required this.citiesController,
     required this.migrationQuestionnaireController,
-    required this.onRestartJourney,
   });
 
   final JourneyContextController journeyContextController;
   final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
-  final Future<void> Function() onRestartJourney;
 
   @override
   Widget build(BuildContext context) {
-    final origin = journeyContextController.selectedOrigin;
-    final destination = journeyContextController.selectedDestination;
-    final hasCompleteJourney = journeyContextController.hasSelectedJourney;
-
-    final actions = _ActionStage(
+    return _ActionStage(
       journeyContextController: journeyContextController,
       migrationQuestionnaireController: migrationQuestionnaireController,
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (hasCompleteJourney) ...[
-          _RoutePlate(
-            originEmoji: origin?.flagEmoji ?? '🇦🇷',
-            destinationEmoji: destination?.flagEmoji ?? '🇧🇷',
-            onRestartJourney: onRestartJourney,
-          ),
-          const SizedBox(height: 18),
-        ] else if (destination != null) ...[
-          _DestinationPlate(
-            destination: destination,
-            onRestartJourney: onRestartJourney,
-          ),
-          const SizedBox(height: 18),
-        ] else ...[
-          const _HomeUtilityBar(),
-          const SizedBox(height: 18),
-        ],
-        actions,
-      ],
     );
   }
 }
@@ -169,7 +113,6 @@ class _ActionStage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final width = MediaQuery.sizeOf(context).width;
     final plan = migrationQuestionnaireController.generatedPlan;
     final leadCity = plan?.recommendedCity;
     final hasDestination = journeyContextController.hasDestinationSelected;
@@ -180,53 +123,39 @@ class _ActionStage extends StatelessWidget {
         !journeyContextController.isJourneyReadyForPlanning;
     final hasPlan = hasJourney && plan != null;
     final selectedDestination = journeyContextController.selectedDestination;
-
-    if (!hasDestination) {
-      return _JourneyEntryStage(
-        journeyContextController: journeyContextController,
-      );
-    }
-
-    final planTitle = needsSupportedRoute
-        ? l10n.journeyCoverageUnsupportedTitle
-        : hasPlan
-        ? l10n.publicHomeResumePlanTitle
-        : !hasJourney
-        ? l10n.publicHomeJourneyDraftTitle
-        : l10n.publicHomePlanTitle;
-    final planDescription = needsSupportedRoute
-        ? l10n.journeyCoverageUnsupportedBody
-        : hasPlan
-        ? leadCity != null
-              ? l10n.publicHomeResumePlanBodyWithCity(
-                  leadCity.name,
-                  leadCity.stateCode,
-                )
-              : l10n.publicHomeResumePlanBody
-        : !hasJourney
-        ? l10n.publicHomeJourneyDraftBody(selectedDestination?.name ?? '')
-        : l10n.publicHomePlanBody;
-    final planAction = needsSupportedRoute
-        ? l10n.journeyCoverageChooseRouteAction
-        : hasPlan
-        ? l10n.publicHomeResumePlanAction
-        : !hasJourney
-        ? l10n.journeyEntryStartAction
-        : l10n.publicHomeQuestionnaireAction;
-    final planStatus = needsSupportedRoute
-        ? selectedDestination?.name
-        : hasPlan && leadCity != null
-        ? '${leadCity.name} (${leadCity.stateCode})'
-        : !hasJourney && selectedDestination != null
-        ? selectedDestination.name
-        : null;
-
-    final planCard = _VisualActionCard(
-      title: planTitle,
-      description: planDescription,
-      actionLabel: planAction,
-      statusLine: planStatus,
+    final routeCard = _VisualActionCard(
+      title: !hasDestination
+          ? l10n.journeySetupPageTitle
+          : needsSupportedRoute
+          ? l10n.journeyCoverageUnsupportedTitle
+          : hasPlan
+          ? l10n.publicHomeResumePlanTitle
+          : l10n.publicHomePlanTitle,
+      description: !hasDestination
+          ? l10n.journeyEntryDestinationLabel
+          : needsSupportedRoute
+          ? (selectedDestination?.name ?? l10n.journeyCoverageUnsupported)
+          : hasPlan
+          ? (leadCity != null
+                ? '${leadCity.name} • ${leadCity.stateCode}'
+                : l10n.publicHomeResumePlanAction)
+          : (selectedDestination?.name ?? l10n.journeyEntryStartAction),
+      actionLabel: !hasDestination
+          ? l10n.journeySetupPageTitle
+          : needsSupportedRoute
+          ? l10n.journeyCoverageChooseRouteAction
+          : hasPlan
+          ? l10n.publicHomeResumePlanAction
+          : l10n.journeyEntryStartAction,
+      statusLine: hasPlan && leadCity != null
+          ? '${leadCity.name} (${leadCity.stateCode})'
+          : selectedDestination?.name,
       onTap: () async {
+        if (!hasDestination) {
+          Navigator.pushNamed(context, AppRoutes.journeySetup);
+          return;
+        }
+
         await migrationQuestionnaireController.initialize();
         if (!context.mounted) {
           return;
@@ -241,12 +170,25 @@ class _ActionStage extends StatelessWidget {
               : AppRoutes.migrationQuestionnaire,
         );
       },
-      isPrimary: true,
-      compact: width < 920,
       scene: const _PlanScene(),
-      icon: hasPlan ? Icons.playlist_play_rounded : Icons.edit_note_rounded,
+      icon: !hasDestination
+          ? Icons.route_rounded
+          : hasPlan
+          ? Icons.playlist_play_rounded
+          : Icons.edit_note_rounded,
       accent: AppColors.primary,
-      hidePrimaryAction: hasPlan,
+      highlights: [
+        _CardHighlight(
+          icon: Icons.place_rounded,
+          label: hasDestination
+              ? (selectedDestination?.name ?? l10n.journeySetupPageTitle)
+              : l10n.journeyDestinationSectionTitle,
+        ),
+        _CardHighlight(
+          icon: hasPlan ? Icons.check_circle_rounded : Icons.tune_rounded,
+          label: hasPlan ? l10n.mainNavPlan : l10n.mainNavHome,
+        ),
+      ],
       secondaryActionLabel: hasPlan ? l10n.startNewPlanAction : null,
       onSecondaryTap: hasPlan
           ? () async {
@@ -278,10 +220,18 @@ class _ActionStage extends StatelessWidget {
       actionLabel: l10n.publicHomeCitiesAction,
       onTap: () => Navigator.pushNamed(context, AppRoutes.cities),
       scene: const _CitiesScene(),
-      compact: true,
-      subdued: true,
       icon: Icons.location_city_rounded,
       accent: const Color(0xFF35A8FF),
+      highlights: [
+        _CardHighlight(
+          icon: Icons.payments_outlined,
+          label: l10n.cityDetailAffordabilityTitle,
+        ),
+        _CardHighlight(
+          icon: Icons.work_outline_rounded,
+          label: l10n.cityDetailWorkLabel,
+        ),
+      ],
     );
 
     final questionsCard = _VisualActionCard(
@@ -294,316 +244,84 @@ class _ActionStage extends StatelessWidget {
         arguments: DocumentationGuideSection.documents,
       ),
       scene: const _QuestionsScene(),
-      compact: true,
-      subdued: true,
       icon: Icons.folder_open_rounded,
       accent: const Color(0xFF4DC2A8),
-    );
-
-    if (width >= 920) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(flex: 8, child: planCard),
-          const SizedBox(width: 12),
-          Expanded(
-            flex: 7,
-            child: Column(
-              children: [citiesCard, const SizedBox(height: 12), questionsCard],
-            ),
-          ),
-        ],
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        planCard,
-        const SizedBox(height: 12),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: citiesCard),
-            const SizedBox(width: 12),
-            Expanded(child: questionsCard),
-          ],
+      highlights: [
+        _CardHighlight(
+          icon: Icons.badge_outlined,
+          label: l10n.documentationPathDocumentsTitle,
+        ),
+        _CardHighlight(
+          icon: Icons.home_work_outlined,
+          label: l10n.documentationHousingArrivalSectionTitle,
         ),
       ],
     );
-  }
-}
 
-class _HomeUtilityBar extends StatelessWidget {
-  const _HomeUtilityBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Align(
-      alignment: Alignment.centerRight,
-      child: LanguageSelectorButton(
-        foregroundColor: Colors.white,
-        backgroundColor: Color(0x1FFFFFFF),
-      ),
+    return _HomeCardGrid(
+      primaryCard: routeCard,
+      secondaryCards: [citiesCard, questionsCard],
     );
   }
 }
 
-class _JourneyEntryStage extends StatelessWidget {
-  const _JourneyEntryStage({required this.journeyContextController});
-
-  final JourneyContextController journeyContextController;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final width = MediaQuery.sizeOf(context).width;
-    final destinations = journeyContextController.availableDestinations;
-    final selectedDestination = journeyContextController.selectedDestination;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FrostedPanel(
-          padding: const EdgeInsets.all(28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  l10n.publicHomeScopeBadge,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                l10n.journeyEntryTitle,
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                l10n.journeyEntryBody,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                  height: 1.45,
-                ),
-              ),
-              const SizedBox(height: 22),
-              Text(
-                l10n.journeyEntryDestinationLabel,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 14),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  for (final country in destinations)
-                    SizedBox(
-                      width: 280,
-                      child: _DestinationChoiceCard(
-                        country: country,
-                        isSelected: selectedDestination?.id == country.id,
-                        isEnabled: journeyContextController.canUseAsDestination(
-                          country,
-                        ),
-                        availabilityLabel:
-                            journeyContextController.canUseAsDestination(
-                              country,
-                            )
-                            ? l10n.journeyAvailableNowLabel
-                            : l10n.journeyComingSoonLabel,
-                        onTap:
-                            journeyContextController.canUseAsDestination(
-                              country,
-                            )
-                            ? () => journeyContextController
-                                  .setDestinationCountry(country.id)
-                            : null,
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 22),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: selectedDestination == null
-                      ? null
-                      : () => Navigator.pushNamed(
-                          context,
-                          AppRoutes.migrationQuestionnaire,
-                        ),
-                  icon: const Icon(Icons.arrow_forward_rounded),
-                  label: Text(l10n.journeyEntryStartAction),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        _SecondaryActionGrid(compact: width < 920),
-      ],
-    );
-  }
-}
-
-class _SecondaryActionGrid extends StatelessWidget {
-  const _SecondaryActionGrid({required this.compact});
-
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final citiesCard = _VisualActionCard(
-      title: l10n.publicHomeCitiesTitle,
-      description: l10n.publicHomeCitiesBody,
-      actionLabel: l10n.publicHomeCitiesAction,
-      onTap: () => Navigator.pushNamed(context, AppRoutes.cities),
-      scene: const _CitiesScene(),
-      compact: true,
-      subdued: true,
-      icon: Icons.location_city_rounded,
-      accent: const Color(0xFF35A8FF),
-    );
-
-    final questionsCard = _VisualActionCard(
-      title: l10n.publicHomeQuestionsTitle,
-      description: l10n.publicHomeQuestionsBody,
-      actionLabel: l10n.publicHomeQuestionsAction,
-      onTap: () => Navigator.pushNamed(
-        context,
-        AppRoutes.documentationGuide,
-        arguments: DocumentationGuideSection.documents,
-      ),
-      scene: const _QuestionsScene(),
-      compact: true,
-      subdued: true,
-      icon: Icons.folder_open_rounded,
-      accent: const Color(0xFF4DC2A8),
-    );
-
-    if (!compact) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: citiesCard),
-          const SizedBox(width: 12),
-          Expanded(child: questionsCard),
-        ],
-      );
-    }
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: citiesCard),
-        const SizedBox(width: 12),
-        Expanded(child: questionsCard),
-      ],
-    );
-  }
-}
-
-class _DestinationChoiceCard extends StatelessWidget {
-  const _DestinationChoiceCard({
-    required this.country,
-    required this.isSelected,
-    required this.isEnabled,
-    required this.availabilityLabel,
-    required this.onTap,
+class _HomeCardGrid extends StatelessWidget {
+  const _HomeCardGrid({
+    required this.primaryCard,
+    required this.secondaryCards,
   });
 
-  final CatalogCountry country;
-  final bool isSelected;
-  final bool isEnabled;
-  final String availabilityLabel;
-  final VoidCallback? onTap;
+  final Widget primaryCard;
+  final List<Widget> secondaryCards;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        child: Ink(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.primary.withValues(alpha: 0.10)
-                : Colors.white.withValues(alpha: isEnabled ? 0.08 : 0.04),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: isSelected
-                  ? AppColors.primary
-                  : Colors.white.withValues(alpha: 0.10),
-            ),
-          ),
-          child: Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth >= 1080) {
+          final width = (constraints.maxWidth - 24) / 3;
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Text(
-                  country.flagEmoji,
-                  style: const TextStyle(fontSize: 22),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      country.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: isEnabled
-                            ? AppColors.textPrimaryFor(context)
-                            : AppColors.textSoftFor(context),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      availabilityLabel,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isEnabled
-                            ? AppColors.primary
-                            : AppColors.textSoftFor(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (isSelected)
-                const Icon(Icons.check_circle_rounded, color: AppColors.primary)
-              else if (!isEnabled)
-                const Icon(Icons.lock_outline_rounded, color: Colors.white70),
+              SizedBox(width: width, child: primaryCard),
+              for (final card in secondaryCards) SizedBox(width: width, child: card),
             ],
-          ),
-        ),
-      ),
+          );
+        }
+
+        if (constraints.maxWidth >= 720) {
+          final width = (constraints.maxWidth - 12) / 2;
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              SizedBox(width: constraints.maxWidth, child: primaryCard),
+              for (final card in secondaryCards) SizedBox(width: width, child: card),
+            ],
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            primaryCard,
+            for (final card in secondaryCards) ...[
+              const SizedBox(height: 12),
+              card,
+            ],
+          ],
+        );
+      },
     );
   }
+}
+
+class _CardHighlight {
+  const _CardHighlight({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
 }
 
 class _VisualActionCard extends StatelessWidget {
@@ -615,11 +333,8 @@ class _VisualActionCard extends StatelessWidget {
     required this.scene,
     required this.icon,
     required this.accent,
+    this.highlights = const [],
     this.statusLine,
-    this.isPrimary = false,
-    this.compact = false,
-    this.subdued = false,
-    this.hidePrimaryAction = false,
     this.secondaryActionLabel,
     this.onSecondaryTap,
   });
@@ -631,11 +346,8 @@ class _VisualActionCard extends StatelessWidget {
   final Widget scene;
   final IconData icon;
   final Color accent;
+  final List<_CardHighlight> highlights;
   final String? statusLine;
-  final bool isPrimary;
-  final bool compact;
-  final bool subdued;
-  final bool hidePrimaryAction;
   final String? secondaryActionLabel;
   final Future<void> Function()? onSecondaryTap;
 
@@ -643,38 +355,19 @@ class _VisualActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final textPrimary = AppColors.textPrimaryFor(context);
-    final textSoft = AppColors.textSoftFor(context);
     final borderColor = AppColors.borderFor(context);
-    final cardGradient = isPrimary
-        ? LinearGradient(
-            colors: isDark
-                ? [
-                    AppColors.surfaceElevatedFor(context),
-                    AppColors.surfaceMutedFor(context),
-                  ]
-                : const [Color(0xFFF9FBFF), Color(0xFFEAF3FF)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          )
-        : LinearGradient(
-            colors: isDark
-                ? [
-                    AppColors.surfaceFor(context),
-                    AppColors.surfaceMutedFor(context),
-                  ]
-                : const [Color(0xFFFFFFFF), Color(0xFFF4F7FC)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          );
+    final cardGradient = LinearGradient(
+      colors: isDark
+          ? [
+              AppColors.surfaceFor(context),
+              AppColors.surfaceMutedFor(context),
+            ]
+          : const [Color(0xFFFFFFFF), Color(0xFFF4F7FC)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
     final hasSecondaryAction =
         secondaryActionLabel != null && onSecondaryTap != null;
-    final fixedHeight = isPrimary
-        ? compact
-              ? (hasSecondaryAction ? 210.0 : 190.0)
-              : (hasSecondaryAction ? 220.0 : 200.0)
-        : compact
-        ? 210.0
-        : 230.0;
 
     return Material(
       color: Colors.transparent,
@@ -688,36 +381,33 @@ class _VisualActionCard extends StatelessWidget {
             border: Border.all(
               color: isDark
                   ? borderColor
-                  : Colors.white.withValues(alpha: isPrimary ? 0.48 : 0.28),
+                  : Colors.white.withValues(alpha: 0.28),
             ),
             boxShadow: [
               BoxShadow(
                 color: (isDark ? Colors.black : accent).withValues(
-                  alpha: isPrimary
-                      ? (isDark ? 0.24 : 0.12)
-                      : (isDark ? 0.14 : 0.08),
+                  alpha: isDark ? 0.14 : 0.08,
                 ),
-                blurRadius: isPrimary ? 24 : 18,
+                blurRadius: 18,
                 offset: const Offset(0, 12),
               ),
             ],
           ),
           child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: fixedHeight),
+            constraints: BoxConstraints(
+              minHeight: hasSecondaryAction ? 228 : 208,
+            ),
             child: Stack(
               children: [
-                /// Background illustration (decorative, no layout impact)
                 Positioned.fill(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(32),
                     child: Opacity(
-                      opacity: isDark ? 0.12 : (isPrimary ? 0.18 : 0.14),
+                      opacity: isDark ? 0.12 : 0.14,
                       child: Align(
                         alignment: Alignment.bottomRight,
                         child: SizedBox(
-                          width: isPrimary
-                              ? (compact ? 200 : 260)
-                              : (compact ? 160 : 200),
+                          width: 190,
                           child: scene,
                         ),
                       ),
@@ -725,7 +415,6 @@ class _VisualActionCard extends StatelessWidget {
                   ),
                 ),
 
-                /// Content layer
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -739,12 +428,7 @@ class _VisualActionCard extends StatelessWidget {
                     ),
                     Expanded(
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          compact ? 14 : 18,
-                          compact ? 16 : 18,
-                          compact ? 14 : 18,
-                          compact ? 16 : 18,
-                        ),
+                        padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -753,8 +437,8 @@ class _VisualActionCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  width: compact ? 44 : 52,
-                                  height: compact ? 44 : 52,
+                                  width: 50,
+                                  height: 50,
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
@@ -778,7 +462,7 @@ class _VisualActionCard extends StatelessWidget {
                                   child: Icon(
                                     icon,
                                     color: accent,
-                                    size: compact ? 22 : 26,
+                                    size: 24,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -789,26 +473,17 @@ class _VisualActionCard extends StatelessWidget {
                                     children: [
                                       Text(
                                         title,
-                                        maxLines: isPrimary ? 2 : 2,
+                                        maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
-                                        style:
-                                            (compact
-                                                    ? Theme.of(
-                                                        context,
-                                                      ).textTheme.titleMedium
-                                                    : (isPrimary
-                                                          ? Theme.of(context)
-                                                                .textTheme
-                                                                .titleLarge
-                                                          : Theme.of(context)
-                                                                .textTheme
-                                                                .titleMedium))
-                                                ?.copyWith(
-                                                  color: textPrimary,
-                                                  height: 1.05,
-                                                  fontWeight: FontWeight.w800,
-                                                  letterSpacing: -0.2,
-                                                ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.copyWith(
+                                              color: textPrimary,
+                                              height: 1.05,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: -0.2,
+                                            ),
                                       ),
                                       if (statusLine != null) ...[
                                         const SizedBox(height: 6),
@@ -853,96 +528,68 @@ class _VisualActionCard extends StatelessWidget {
 
                             Text(
                               description,
-                              maxLines: isPrimary ? 4 : 4,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: textSoft, height: 1.30),
+                                  ?.copyWith(
+                                    color: AppColors.textSoftFor(context),
+                                    height: 1.25,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                             ),
 
-                            const SizedBox(height: 8),
-                            _CardCueRow(accent: accent, compact: compact),
-
-                            const SizedBox(height: 4),
+                            if (highlights.isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  for (final highlight in highlights.take(2))
+                                    _CardHighlightChip(
+                                      icon: highlight.icon,
+                                      label: highlight.label,
+                                      tint: accent,
+                                    ),
+                                ],
+                              ),
+                            ],
+                            const SizedBox(height: 16),
 
                             if (secondaryActionLabel != null &&
                                 onSecondaryTap != null) ...[
                               _SecondaryInlineAction(
                                 label: secondaryActionLabel!,
                                 onTap: onSecondaryTap!,
-                                isPrimary: isPrimary,
-                                compact: compact,
+                                isPrimary: false,
+                                compact: false,
                               ),
                               const SizedBox(height: 12),
-                            ] else
-                              const SizedBox(height: 8),
+                            ],
 
-                            if (!hidePrimaryAction && isPrimary)
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: compact ? 12 : 14,
-                                  vertical: compact ? 10 : 12,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    actionLabel,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
+                                        ?.copyWith(
+                                          color: accent,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                  ),
                                 ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(
-                                    alpha: isDark ? 0.12 : 0.08,
-                                  ),
-                                  borderRadius: BorderRadius.circular(18),
-                                  border: Border.all(
-                                    color: AppColors.primary.withValues(
-                                      alpha: isDark ? 0.18 : 0.12,
-                                    ),
-                                  ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  Icons.arrow_outward_rounded,
+                                  size: 20,
+                                  color: accent,
                                 ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        actionLabel,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelLarge
-                                            ?.copyWith(
-                                              color: AppColors.primary,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Icon(
-                                      Icons.arrow_outward_rounded,
-                                      size: compact ? 18 : 20,
-                                      color: AppColors.primary,
-                                    ),
-                                  ],
-                                ),
-                              )
-                            else if (!hidePrimaryAction)
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      actionLabel,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelLarge
-                                          ?.copyWith(
-                                            color: accent,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    Icons.arrow_outward_rounded,
-                                    size: compact ? 18 : 20,
-                                    color: accent,
-                                  ),
-                                ],
-                              ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -958,40 +605,44 @@ class _VisualActionCard extends StatelessWidget {
   }
 }
 
-class _CardCueRow extends StatelessWidget {
-  const _CardCueRow({required this.accent, required this.compact});
+class _CardHighlightChip extends StatelessWidget {
+  const _CardHighlightChip({
+    required this.icon,
+    required this.label,
+    required this.tint,
+  });
 
-  final Color accent;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final size = compact ? 8.0 : 9.0;
-
-    return Row(
-      children: [
-        _CardCueDot(size: size, color: accent),
-        const SizedBox(width: 8),
-        _CardCueDot(size: size, color: accent.withValues(alpha: 0.68)),
-        const SizedBox(width: 8),
-        _CardCueDot(size: size, color: accent.withValues(alpha: 0.42)),
-      ],
-    );
-  }
-}
-
-class _CardCueDot extends StatelessWidget {
-  const _CardCueDot({required this.size, required this.color});
-
-  final double size;
-  final Color color;
+  final IconData icon;
+  final String label;
+  final Color tint;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: tint.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: tint),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimaryFor(context),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1214,296 +865,6 @@ class _QuestionSheet extends StatelessWidget {
   }
 }
 
-class _DestinationPlate extends StatelessWidget {
-  const _DestinationPlate({
-    required this.destination,
-    required this.onRestartJourney,
-  });
-
-  final CatalogCountry destination;
-  final Future<void> Function() onRestartJourney;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withValues(alpha: 0.08),
-            Colors.white.withValues(alpha: 0.03),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-              ),
-              child: Row(
-                children: [
-                  _RouteNode(emoji: destination.flagEmoji),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          context.l10n.journeyEntrySelectedDestination(
-                            destination.name,
-                          ),
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          context.l10n.journeyEntryOriginPending,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.72),
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          const LanguageSelectorButton(
-            foregroundColor: Colors.white,
-            backgroundColor: Color(0x1FFFFFFF),
-          ),
-          const SizedBox(width: 8),
-          _RouteActionPill(
-            icon: Icons.swap_horiz_rounded,
-            onTap: onRestartJourney,
-            compact: false,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RoutePlate extends StatelessWidget {
-  const _RoutePlate({
-    required this.originEmoji,
-    required this.destinationEmoji,
-    required this.onRestartJourney,
-  });
-
-  final String originEmoji;
-  final String destinationEmoji;
-  final Future<void> Function() onRestartJourney;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final compact = constraints.maxWidth < 620;
-
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 14 : 16,
-            vertical: compact ? 12 : 14,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
-            gradient: LinearGradient(
-              colors: [
-                Colors.white.withValues(alpha: 0.08),
-                Colors.white.withValues(alpha: 0.03),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: compact ? 12 : 14,
-                    vertical: compact ? 10 : 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.12),
-                    ),
-                  ),
-                  child: _RouteJourneyRow(
-                    originEmoji: originEmoji,
-                    destinationEmoji: destinationEmoji,
-                    compact: compact,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              const LanguageSelectorButton(
-                foregroundColor: Colors.white,
-                backgroundColor: Color(0x1FFFFFFF),
-              ),
-              const SizedBox(width: 8),
-              _RouteActionPill(
-                icon: Icons.swap_horiz_rounded,
-                onTap: onRestartJourney,
-                compact: compact,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _RouteActionPill extends StatelessWidget {
-  const _RouteActionPill({
-    required this.icon,
-    required this.onTap,
-    required this.compact,
-  });
-
-  final IconData icon;
-  final Future<void> Function() onTap;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(999),
-        onTap: onTap,
-        child: Ink(
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 12 : 13,
-            vertical: compact ? 12 : 13,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
-          ),
-          child: Icon(icon, size: compact ? 18 : 20, color: Colors.white),
-        ),
-      ),
-    );
-  }
-}
-
-class _RouteJourneyRow extends StatelessWidget {
-  const _RouteJourneyRow({
-    required this.originEmoji,
-    required this.destinationEmoji,
-    required this.compact,
-  });
-
-  final String originEmoji;
-  final String destinationEmoji;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _RouteNode(emoji: originEmoji),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 10),
-          child: Icon(
-            Icons.arrow_forward_rounded,
-            size: compact ? 16 : 18,
-            color: Colors.white.withValues(alpha: 0.82),
-          ),
-        ),
-        _RouteNode(emoji: destinationEmoji),
-      ],
-    );
-  }
-}
-
-class _JourneyResetSheet extends StatelessWidget {
-  const _JourneyResetSheet({required this.onConfirm});
-
-  final VoidCallback onConfirm;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: FrostedPanel(
-          padding: const EdgeInsets.all(20),
-          backgroundColor: AppColors.isDark(context)
-              ? const Color(0xF0141E2E)
-              : Colors.white,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.publicHomeJourneyResetTitle,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                l10n.publicHomeJourneyResetBody,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.maybePop(context),
-                      child: Text(l10n.backAction),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: onConfirm,
-                      child: Text(l10n.publicHomeJourneyResetConfirm),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _PlanResetSheet extends StatelessWidget {
   const _PlanResetSheet({required this.onConfirm});
 
@@ -1559,27 +920,6 @@ class _PlanResetSheet extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _RouteNode extends StatelessWidget {
-  const _RouteNode({required this.emoji});
-
-  final String emoji;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 34,
-      height: 34,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
-      ),
-      child: Text(emoji, style: const TextStyle(fontSize: 18)),
     );
   }
 }

@@ -8,8 +8,11 @@ import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/contextual_help.dart';
+import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
+import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
@@ -52,6 +55,7 @@ class MigrationPlanCopilotPage extends StatefulWidget {
 }
 
 class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
+  static const _helpPreferenceKey = 'migration_plan_copilot';
   late final Future<CopilotExchangeRates?> _exchangeRatesFuture;
   final MigrationCopilotProgressStore _progressStore =
       MigrationCopilotProgressStore();
@@ -60,11 +64,63 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   Set<String> _documentCompletedIds = <String>{};
   Set<String> _arrivalCompletedIds = <String>{};
   String? _loadedProgressKey;
+  bool _didTryAutoHelp = false;
 
   @override
   void initState() {
     super.initState();
     _exchangeRatesFuture = widget.exchangeRatesService.fetchLatest();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeShowHelp();
+    });
+  }
+
+  Future<void> _maybeShowHelp() async {
+    if (_didTryAutoHelp) {
+      return;
+    }
+    _didTryAutoHelp = true;
+    await maybeShowContextualHelpGuide(
+      context,
+      preferenceKey: _helpPreferenceKey,
+      content: _helpContent(context),
+    );
+  }
+
+  Future<void> _showHelp() {
+    return showContextualHelpGuide(
+      context,
+      preferenceKey: _helpPreferenceKey,
+      content: _helpContent(context),
+    );
+  }
+
+  ContextualHelpContent _helpContent(BuildContext context) {
+    return ContextualHelpContent(
+      eyebrow: context.l10n.migrationPlanCopilotTitle,
+      title: 'Use the plan one stage at a time',
+      body:
+          'Copilot turns the recommendation into a working checklist so you can focus on the next stage instead of the full move at once.',
+      steps: const [
+        FeatureGuideStep(
+          number: '1',
+          title: 'Watch the current stage',
+          body:
+              'The overview highlights the most important step and your overall progress.',
+        ),
+        FeatureGuideStep(
+          number: '2',
+          title: 'Open the right section',
+          body:
+              'Jump between documents, housing, work, and arrival without losing checklist state.',
+        ),
+        FeatureGuideStep(
+          number: '3',
+          title: 'Complete items as you go',
+          body: 'Checklist progress is saved locally so you can resume later.',
+        ),
+      ],
+    );
   }
 
   void _openSection(_PreparationSection section) {
@@ -253,6 +309,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                     onBack: isOverview
                         ? () => Navigator.maybePop(context)
                         : () => _openSection(_PreparationSection.overview),
+                    onHelp: _showHelp,
                   ),
                 ),
                 Expanded(
@@ -437,6 +494,7 @@ class _PreparationHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final sectionLabel = _sectionLabel(context, section);
 
     return FrostedPanel(
       padding: const EdgeInsets.all(22),
@@ -457,8 +515,7 @@ class _PreparationHero extends StatelessWidget {
               _HeroPill(label: l10n.migrationPlanCopilotTitle),
               if (cityName != null && stateCode != null)
                 _HeroPill(label: '$cityName ($stateCode)'),
-              if (!isOverview)
-                _HeroPill(label: _sectionLabel(context, section)),
+              _HeroPill(label: isOverview ? l10n.migrationPlanPrepTabOverview : sectionLabel),
             ],
           ),
           const SizedBox(height: 14),
@@ -470,15 +527,23 @@ class _PreparationHero extends StatelessWidget {
               context,
             ).textTheme.headlineSmall?.copyWith(color: Colors.white),
           ),
-          const SizedBox(height: 10),
-          Text(
-            isOverview
-                ? l10n.migrationPlanPrepHeroBody
-                : _sectionBody(context, section),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withValues(alpha: 0.84),
-              height: 1.4,
-            ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _PrepHeroStat(
+                label: l10n.migrationPlanCopilotTitle,
+                value: isOverview ? l10n.migrationPlanPrepTabOverview : sectionLabel,
+                icon: Icons.flag_rounded,
+              ),
+              if (cityName != null)
+                _PrepHeroStat(
+                  label: l10n.migrationPlanDecisionLabel,
+                  value: cityName!,
+                  icon: Icons.location_city_rounded,
+                ),
+            ],
           ),
         ],
       ),
@@ -506,16 +571,55 @@ class _PreparationHero extends StatelessWidget {
       _PreparationSection.arrival => l10n.migrationPlanPrepArrivalTitle,
     };
   }
+}
 
-  String _sectionBody(BuildContext context, _PreparationSection section) {
-    final l10n = context.l10n;
-    return switch (section) {
-      _PreparationSection.overview => l10n.migrationPlanPrepHeroBody,
-      _PreparationSection.documents => l10n.migrationPlanPrepDocumentsBody,
-      _PreparationSection.housing => l10n.migrationPlanPrepHousingBody,
-      _PreparationSection.work => l10n.migrationPlanPrepWorkBody,
-      _PreparationSection.arrival => l10n.migrationPlanPrepArrivalBody,
-    };
+class _PrepHeroStat extends StatelessWidget {
+  const _PrepHeroStat({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: Colors.white),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.74),
+                ),
+              ),
+              Text(
+                value,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -562,21 +666,30 @@ class _PreparationSectionRail extends StatelessWidget {
       _PreparationSection.arrival,
     ];
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (final section in sections) ...[
-            _SectionChip(
-              label: _label(context, section),
-              icon: _icon(section),
-              selected: selectedSection == section,
-              onTap: () => onSelected(section),
-            ),
-            if (section != sections.last) const SizedBox(width: 10),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final twoColumns = constraints.maxWidth >= 680;
+        final itemWidth = twoColumns
+            ? (constraints.maxWidth - 12) / 2
+            : constraints.maxWidth;
+
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            for (final section in sections)
+              SizedBox(
+                width: itemWidth,
+                child: _SectionChip(
+                  label: _label(context, section),
+                  icon: _icon(section),
+                  selected: selectedSection == section,
+                  onTap: () => onSelected(section),
+                ),
+              ),
           ],
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -618,40 +731,81 @@ class _SectionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: BorderRadius.circular(24),
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: selected
               ? AppColors.primary.withValues(alpha: 0.14)
               : AppColors.surfaceMutedFor(context),
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: selected
                 ? AppColors.primary.withValues(alpha: 0.28)
                 : AppColors.borderFor(context),
           ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.10),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: (selected ? AppColors.primary : AppColors.textSoftFor(context))
+                    .withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                size: 18,
+                color: selected
+                    ? AppColors.primary
+                    : AppColors.textSoftFor(context),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: selected
+                          ? AppColors.primary
+                          : AppColors.textPrimaryFor(context),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    selected ? 'Current stage' : 'Open stage',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
             Icon(
-              icon,
+              selected ? Icons.check_circle_rounded : Icons.arrow_forward_rounded,
               size: 18,
               color: selected
                   ? AppColors.primary
                   : AppColors.textSoftFor(context),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: selected
-                    ? AppColors.primary
-                    : AppColors.textPrimaryFor(context),
-              ),
             ),
           ],
         ),
@@ -729,8 +883,12 @@ class _PlanProgressOverview extends StatelessWidget {
     ];
 
     final currentIndex = stepStates.indexWhere((item) => !item.isComplete);
-    final stepNumber = currentIndex == -1 ? stepStates.length : currentIndex + 1;
-    final nextStage = currentIndex == -1 ? stepStates.last : stepStates[currentIndex];
+    final stepNumber = currentIndex == -1
+        ? stepStates.length
+        : currentIndex + 1;
+    final nextStage = currentIndex == -1
+        ? stepStates.last
+        : stepStates[currentIndex];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -748,14 +906,27 @@ class _PlanProgressOverview extends StatelessWidget {
               children: [
                 SizedBox(
                   width: cardWidth,
-                  child: PlanSummaryCard(
-                    label: l10n.migrationPlanCopilotStepCounter(
+                  child: CompareCard(
+                    title: l10n.migrationPlanCopilotStepCounter(
                       stepNumber,
                       stepStates.length,
                     ),
-                    value: '${(progress * 100).round()}%',
-                    supporting: l10n.migrationPlanResultProgressSupporting,
-                    icon: Icons.timeline_rounded,
+                    subtitle: l10n.migrationPlanResultProgressSupporting,
+                    metrics: [
+                      CompareCardMetric(
+                        label: l10n.migrationPlanCopilotProgressValue(
+                          completedItems,
+                          totalItems,
+                        ),
+                        value: '${(progress * 100).round()}%',
+                        icon: Icons.timeline_rounded,
+                        tone: progress >= 0.7
+                            ? ScoreTone.positive
+                            : progress >= 0.35
+                            ? ScoreTone.balanced
+                            : ScoreTone.attention,
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(
@@ -782,17 +953,22 @@ class _PlanProgressOverview extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                l10n.migrationPlanCopilotNextActionsTitle,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.migrationPlanCopilotNextActionsBody,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                  height: 1.45,
-                ),
+              CompareCard(
+                title: l10n.migrationPlanCopilotNextActionsTitle,
+                subtitle: l10n.migrationPlanCopilotNextActionsBody,
+                metrics: [
+                  CompareCardMetric(
+                    label: l10n.migrationPlanCopilotStepCounter(
+                      stepNumber,
+                      stepStates.length,
+                    ),
+                    value: nextStage.title,
+                    icon: Icons.flag_outlined,
+                    tone: nextStage.isComplete
+                        ? ScoreTone.positive
+                        : ScoreTone.balanced,
+                  ),
+                ],
               ),
               const SizedBox(height: 14),
               for (final item in stepStates) ...[
@@ -984,116 +1160,18 @@ class _GuideEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(26),
+    return CompareCard(
+      title: title,
+      subtitle: _cardTone(context, tint),
+      metrics: [
+        CompareCardMetric(
+          label: context.l10n.migrationPlanPrepOpenSection,
+          value: body,
+          icon: icon,
+        ),
+      ],
       onTap: onTap,
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 176),
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: AppColors.isDark(context)
-                ? [
-                    AppColors.surfaceFor(context).withValues(alpha: 0.92),
-                    AppColors.surfaceMutedFor(context).withValues(alpha: 0.88),
-                  ]
-                : const [Color(0xFFFBFDFF), Color(0xFFF2F7FF)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(26),
-          border: Border.all(color: tint.withValues(alpha: 0.16)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(
-                alpha: AppColors.isDark(context) ? 0.14 : 0.04,
-              ),
-              blurRadius: 18,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: tint.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(icon, color: tint, size: 22),
-                ),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(
-                      alpha: AppColors.isDark(context) ? 0.08 : 0.72,
-                    ),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: tint.withValues(alpha: 0.12)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        context.l10n.migrationPlanPrepOpenSection,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: tint,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Icon(Icons.arrow_forward_rounded, size: 14, color: tint),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Text(
-              title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(height: 1.15),
-            ),
-            const SizedBox(height: 8),
-            Flexible(
-              fit: FlexFit.loose,
-              child: Text(
-                body,
-                maxLines: 4,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                  height: 1.4,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              _cardTone(context, tint),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: tint,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-      ),
+      actionLabel: context.l10n.migrationPlanPrepOpenSection,
     );
   }
 
@@ -1124,17 +1202,10 @@ class _PreparationNeedsCityState extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            context.l10n.migrationPlanPrepChooseCityTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            context.l10n.migrationPlanPrepChooseCityBody,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.45,
-            ),
+          InsightCard(
+            title: context.l10n.migrationPlanPrepChooseCityTitle,
+            body: context.l10n.migrationPlanPrepChooseCityBody,
+            icon: Icons.location_city_outlined,
           ),
           const SizedBox(height: 16),
           FilledButton.icon(

@@ -7,6 +7,7 @@ import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
@@ -52,7 +53,7 @@ class FavoritesPage extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 18),
                           child: AppGlassHeader(
-                            title: context.l10n.mainNavProfile,
+                            title: context.l10n.mainNavFavorites,
                             onBack: () => Navigator.pushReplacementNamed(
                               context,
                               AppRoutes.publicHome,
@@ -70,22 +71,21 @@ class FavoritesPage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                context.l10n.profileSavedCitiesTitle,
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.headlineSmall,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                favorites.isEmpty
+                              CompareCard(
+                                title: context.l10n.profileSavedCitiesTitle,
+                                subtitle: favorites.isEmpty
                                     ? context.l10n.favoritesEmptyBody
                                     : context.l10n.profileSavedCitiesBody,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: AppColors.textSoftFor(context),
-                                      height: 1.4,
-                                    ),
+                                metrics: [
+                                  CompareCardMetric(
+                                    label: context.l10n.profileSavedCitiesTitle,
+                                    value: '${favorites.length}',
+                                    icon: Icons.favorite_rounded,
+                                    tone: favorites.isEmpty
+                                        ? ScoreTone.neutral
+                                        : ScoreTone.positive,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -118,14 +118,10 @@ class FavoritesPage extends StatelessWidget {
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 8),
-                                Text(
-                                  context.l10n.favoritesEmptyHint,
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(
-                                        color: AppColors.textSoftFor(context),
-                                        height: 1.4,
-                                      ),
+                                ScoreBadge(
+                                  label: context.l10n.favoritesEmptyHint,
+                                  icon: Icons.travel_explore_rounded,
+                                  tint: AppColors.primary,
                                 ),
                                 const SizedBox(height: 18),
                                 FilledButton.icon(

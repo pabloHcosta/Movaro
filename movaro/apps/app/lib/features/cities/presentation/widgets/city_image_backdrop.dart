@@ -93,6 +93,163 @@ class CityImageBackdrop extends StatelessWidget {
   }
 }
 
+class CityImageHeader extends StatelessWidget {
+  const CityImageHeader({
+    required this.city,
+    this.height = 190,
+    this.borderRadius = const BorderRadius.vertical(top: Radius.circular(24)),
+    this.child,
+    super.key,
+  });
+
+  final City city;
+  final double height;
+  final BorderRadius borderRadius;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl = cityImageUrlFor(city.id);
+    final isDark = AppColors.isDark(context);
+    final layers = <Widget>[
+      DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isDark
+                ? const [
+                    AppColors.heroStart,
+                    AppColors.heroMiddle,
+                    AppColors.heroEnd,
+                  ]
+                : const [
+                    Color(0xFFE8F3FF),
+                    Color(0xFFD9EBFF),
+                    Color(0xFFC5E1FF),
+                  ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+      ),
+      if (imageUrl != null)
+        Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          headers: const {'User-Agent': 'Movaro/1.0'},
+          filterQuality: FilterQuality.medium,
+          errorBuilder: (_, _, _) => _CityImageFallback(city: city),
+        )
+      else
+        _CityImageFallback(city: city),
+      DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.transparent,
+              const Color(0xFF07111F).withValues(alpha: 0.18),
+              const Color(0xFF07111F).withValues(alpha: 0.58),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+      ),
+    ];
+    if (child != null) {
+      layers.add(child!);
+    }
+
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: SizedBox(
+        height: height,
+        width: double.infinity,
+        child: Stack(
+          fit: StackFit.expand,
+          children: layers,
+        ),
+      ),
+    );
+  }
+}
+
+class _CityImageFallback extends StatelessWidget {
+  const _CityImageFallback({required this.city});
+
+  final City city;
+
+  @override
+  Widget build(BuildContext context) {
+    final initials = city.name
+        .split(' ')
+        .where((part) => part.isNotEmpty)
+        .take(2)
+        .map((part) => part.substring(0, 1).toUpperCase())
+        .join();
+
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF163457), Color(0xFF2A5F9E), Color(0xFF8AC0FF)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned(
+            top: -20,
+            right: -10,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.10),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -30,
+            left: -20,
+            child: Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Center(
+            child: Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+              ),
+              child: Center(
+                child: Text(
+                  initials.isEmpty
+                      ? city.name.substring(0, 1).toUpperCase()
+                      : initials,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 String? cityImageUrlFor(String cityId) {
   const images = <String, String>{
     'florianopolis':

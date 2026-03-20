@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/catalog/domain/entities/catalog_country.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
@@ -52,6 +53,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
   DocumentationGuideSection? _selectedSection;
   bool _didTryAutoGuide = false;
   bool _showScrollHint = false;
+  String? _selectedCountryId;
 
   @override
   void initState() {
@@ -61,6 +63,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     _scrollController.addListener(_handleScroll);
     _preferencesStore = DocumentationGuidePreferencesStore();
     _selectedSection = widget.initialSection;
+    widget.journeyContextController?.initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshScrollHint();
       _maybeShowGuide();
@@ -94,17 +97,19 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = AppColors.isDark(context);
     final paths = _guidePaths(context);
     assert(_topics(context).isNotEmpty);
     final filteredPaths = paths.where(_matchesPath).toList();
     final quickAnswers = _guideQuickAnswers(context);
     final filteredAnswers = quickAnswers.where(_matchesAnswer).toList();
     final searchResults = _buildSearchResults(filteredPaths, filteredAnswers);
-    final focusCards = _buildFocusCards(context);
     final displayedAnswers = _searchQuery.isEmpty && _selectedSection == null
         ? filteredAnswers.take(6).toList()
         : filteredAnswers;
+    final availableCountries = _availableGuideCountries(context);
+    final selectedCountry = _selectedGuideCountry(context, availableCountries);
+    final hasActivePlan = _hasActivePlan;
+    final hasGuideData = selectedCountry.id == 'brazil';
 
     return Scaffold(
       body: Stack(
@@ -136,83 +141,56 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                         ),
                         const SizedBox(height: 20),
                         FrostedPanel(
-                          padding: const EdgeInsets.all(32),
-                          gradient: LinearGradient(
-                            colors: isDark
-                                ? const [
-                                    AppColors.heroStart,
-                                    AppColors.heroMiddle,
-                                    AppColors.heroEnd,
-                                  ]
-                                : const [
-                                    Color(0xFFF8FBFF),
-                                    Color(0xFFEAF3FF),
-                                    Color(0xFFD9EAFF),
-                                  ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          backgroundColor: isDark
-                              ? const Color(0xB30B1320)
-                              : const Color(0xF5FFFFFF),
-                          borderColor: isDark
-                              ? const Color(0x1AFFFFFF)
-                              : AppColors.primary.withValues(alpha: 0.10),
+                          padding: const EdgeInsets.all(24),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                l10n.documentationHeroEyebrow,
-                                style: Theme.of(context).textTheme.labelLarge
-                                    ?.copyWith(
-                                      color: isDark
-                                          ? Colors.white.withValues(alpha: 0.82)
-                                          : AppColors.primary,
-                                    ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                l10n.documentationHeroTitle,
-                                style: Theme.of(context).textTheme.displaySmall
-                                    ?.copyWith(
-                                      color: isDark
-                                          ? Colors.white
-                                          : AppColors.textPrimaryFor(context),
-                                    ),
-                              ),
-                              const SizedBox(height: 16),
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(maxWidth: 720),
-                                child: Text(
-                                  l10n.documentationHeroDescription,
-                                  style: Theme.of(context).textTheme.bodyLarge
-                                      ?.copyWith(
-                                        color: isDark
-                                            ? Colors.white.withValues(
-                                                alpha: 0.78,
-                                              )
-                                            : AppColors.textSoftFor(context),
-                                      ),
+                              _GuideCountryBar(
+                                selectedCountry: selectedCountry,
+                                hasActivePlan: hasActivePlan,
+                                onTapCountry: () => _showCountryPicker(
+                                  context,
+                                  availableCountries,
+                                  selectedCountry.id,
                                 ),
                               ),
-                              const SizedBox(height: 24),
+                              if (!hasActivePlan) ...[
+                                const SizedBox(height: 14),
+                                _GuideStatusNotice(
+                                  title: l10n.documentationGuideNoPlanTitle,
+                                  body: l10n.documentationGuideNoPlanBody(
+                                    selectedCountry.name,
+                                  ),
+                                ),
+                              ] else if (!hasGuideData) ...[
+                                const SizedBox(height: 14),
+                                _GuideStatusNotice(
+                                  title: l10n
+                                      .documentationGuideCountryPendingTitle(
+                                        selectedCountry.name,
+                                      ),
+                                  body:
+                                      l10n.documentationGuideCountryPendingBody,
+                                ),
+                              ],
+                              const SizedBox(height: 14),
                               _GuideSearchField(
                                 controller: _searchController,
-                                label: l10n.documentationSearchLabel,
                                 hint: l10n.documentationSearchHint,
-                                helper: l10n.documentationSearchSupport,
                                 onSubmitted: (_) => _handlePrimarySearchAction(
                                   context,
                                   searchResults,
                                 ),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _searchQuery = value;
-                                    if (value.trim().isNotEmpty) {
-                                      _selectedSection = null;
-                                    }
-                                  });
-                                },
+                                onChanged: hasGuideData
+                                    ? (value) {
+                                        setState(() {
+                                          _searchQuery = value;
+                                          if (value.trim().isNotEmpty) {
+                                            _selectedSection = null;
+                                          }
+                                        });
+                                      }
+                                    : null,
                                 onClear: _searchQuery.isEmpty
                                     ? null
                                     : () {
@@ -221,8 +199,10 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                                           _searchQuery = '';
                                         });
                                       },
+                                enabled: hasGuideData,
                               ),
-                              if (_searchQuery.trim().isNotEmpty) ...[
+                              if (hasGuideData &&
+                                  _searchQuery.trim().isNotEmpty) ...[
                                 const SizedBox(height: 12),
                                 _SearchMatchPanel(
                                   l10n: l10n,
@@ -231,92 +211,41 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                                       _handleSearchResultTap(context, result),
                                 ),
                               ],
-                              const SizedBox(height: 14),
-                              _SectionFilterRail(
-                                l10n: l10n,
-                                paths: paths,
-                                selectedSection: _selectedSection,
-                                onSelected: (section) {
-                                  setState(() {
-                                    _selectedSection = _selectedSection == section
-                                        ? null
-                                        : section;
-                                  });
-                                },
-                              ),
-                              if (focusCards.isNotEmpty) ...[
+                              if (hasGuideData) ...[
                                 const SizedBox(height: 14),
-                                _JourneyFocusStrip(
-                                  title: l10n.documentationFocusTitle,
-                                  body: _focusBody(context),
-                                  cards: focusCards,
+                                _SectionFilterRail(
+                                  l10n: l10n,
+                                  paths: paths,
+                                  selectedSection: _selectedSection,
+                                  onSelected: (section) {
+                                    setState(() {
+                                      _selectedSection =
+                                          _selectedSection == section
+                                          ? null
+                                          : section;
+                                    });
+                                  },
                                 ),
                               ],
-                              const SizedBox(height: 14),
-                              _PromptRail(
-                                prompts: [
-                                  (
-                                    label: l10n.documentationAnswerWorkQuestion,
-                                    query: l10n.documentationAnswerWorkQuestion,
-                                  ),
-                                  (
-                                    label:
-                                        l10n.documentationAnswerTravelDocQuestion,
-                                    query:
-                                        l10n.documentationAnswerTravelDocQuestion,
-                                  ),
-                                  (
-                                    label: l10n.documentationAnswerCpfQuestion,
-                                    query: l10n.documentationAnswerCpfQuestion,
-                                  ),
-                                  (
-                                    label:
-                                        l10n.documentationAnswerSusCardQuestion,
-                                    query:
-                                        l10n.documentationAnswerSusCardQuestion,
-                                  ),
-                                  (
-                                    label: l10n.documentationAnswerMarketQuestion,
-                                    query:
-                                        l10n.documentationAnswerMarketQuestion,
-                                  ),
-                                  (
-                                    label: l10n.documentationAnswerSafetyQuestion,
-                                    query:
-                                        l10n.documentationAnswerSafetyQuestion,
-                                  ),
-                                ],
-                                onTap: _applySuggestedQuery,
-                              ),
                             ],
                           ),
                         ),
                         const SizedBox(height: 16),
-                        _QuickRoutesCarousel(
-                          l10n: l10n,
-                          paths: paths,
-                          selectedSection: _selectedSection,
-                          onOpenSection: (section) => Navigator.pushNamed(
-                            context,
-                            AppRoutes.documentationTopic,
-                            arguments: section,
+                        if (hasGuideData)
+                          _GuideResultsSection(
+                            key: _resultsKey,
+                            l10n: l10n,
+                            filteredPaths: filteredPaths,
+                            filteredAnswers: displayedAnswers,
+                            hasActiveFilter:
+                                _searchQuery.trim().isNotEmpty ||
+                                _selectedSection != null,
+                            onOpenSection: (section) => Navigator.pushNamed(
+                              context,
+                              AppRoutes.documentationTopic,
+                              arguments: section,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        _GuideResultsSection(
-                          key: _resultsKey,
-                          l10n: l10n,
-                          filteredPaths: filteredPaths,
-                          filteredAnswers: displayedAnswers,
-                          hasActiveFilter:
-                              _searchQuery.trim().isNotEmpty ||
-                              _selectedSection != null,
-                          onOpenSection: (section) => Navigator.pushNamed(
-                            context,
-                            AppRoutes.documentationTopic,
-                            arguments: section,
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -332,16 +261,6 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
         ],
       ),
     );
-  }
-
-  void _applySuggestedQuery(String value) {
-    _searchController
-      ..text = value
-      ..selection = TextSelection.collapsed(offset: value.length);
-    setState(() {
-      _searchQuery = value;
-      _selectedSection = null;
-    });
   }
 
   List<_GuideSearchResultMeta> _buildSearchResults(
@@ -456,24 +375,24 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
       barrierDismissible: true,
       builder: (dialogContext) => FeatureGuideDialog(
         eyebrow: l10n.documentationHeroEyebrow,
-        title: l10n.documentationHeroTitle,
-        body: l10n.documentationHeroDescription,
+        title: l10n.documentationGuideModalTitle,
+        body: l10n.documentationGuideModalBody,
         stepsLabel: l10n.documentationGuideStepsLabel,
         steps: [
           FeatureGuideStep(
             number: '1',
-            title: l10n.documentationHeroStepOneTitle,
-            body: l10n.documentationHeroStepOneBody,
+            title: l10n.documentationGuideModalStepCountryTitle,
+            body: l10n.documentationGuideModalStepCountryBody,
           ),
           FeatureGuideStep(
             number: '2',
-            title: l10n.documentationHeroStepTwoTitle,
-            body: l10n.documentationHeroStepTwoBody,
+            title: l10n.documentationGuideModalStepSearchTitle,
+            body: l10n.documentationGuideModalStepSearchBody,
           ),
           FeatureGuideStep(
             number: '3',
-            title: l10n.documentationHeroStepThreeTitle,
-            body: l10n.documentationHeroStepThreeBody,
+            title: l10n.documentationGuideModalStepOpenTitle,
+            body: l10n.documentationGuideModalStepOpenBody,
           ),
         ],
         hideNextTimeLabel: l10n.documentationGuideHideNextTime,
@@ -484,6 +403,116 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
         },
       ),
     );
+  }
+
+  bool get _hasActivePlan {
+    final selection = widget.journeyContextController?.selection;
+    if (selection?.destination != null) {
+      return true;
+    }
+    return widget.migrationQuestionnaireController?.generatedPlan != null;
+  }
+
+  List<CatalogCountry> _availableGuideCountries(BuildContext context) {
+    final journeyCountries =
+        widget.journeyContextController?.countries ?? const [];
+    final selectable = journeyCountries
+        .where((country) => country.coverage.canChooseAsDestination)
+        .toList(growable: false);
+    if (selectable.isNotEmpty) {
+      return selectable;
+    }
+    return [
+      CatalogCountry(
+        id: 'brazil',
+        name: context.l10n.questionOptionBrazil,
+        isoCode: 'BR',
+      ),
+    ];
+  }
+
+  CatalogCountry _selectedGuideCountry(
+    BuildContext context,
+    List<CatalogCountry> countries,
+  ) {
+    final preferredId =
+        _selectedCountryId ??
+        widget.journeyContextController?.destinationCountryId ??
+        _normalizeCountryId(
+          widget
+              .migrationQuestionnaireController
+              ?.generatedPlan
+              ?.destinationCountry,
+        ) ??
+        'brazil';
+
+    for (final country in countries) {
+      if (country.id == preferredId) {
+        return country;
+      }
+    }
+    return countries.first;
+  }
+
+  String? _normalizeCountryId(String? raw) {
+    if (raw == null) {
+      return null;
+    }
+    final normalized = raw.toLowerCase().trim();
+    return switch (normalized) {
+      'brazil' || 'brasil' => 'brazil',
+      'argentina' => 'argentina',
+      _ => normalized,
+    };
+  }
+
+  Future<void> _showCountryPicker(
+    BuildContext context,
+    List<CatalogCountry> countries,
+    String selectedCountryId,
+  ) async {
+    final selected = await showModalBottomSheet<CatalogCountry>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: FrostedPanel(
+              padding: const EdgeInsets.all(18),
+              borderRadius: BorderRadius.circular(28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var index = 0; index < countries.length; index++) ...[
+                    _GuideCountryOptionTile(
+                      country: countries[index],
+                      selected: countries[index].id == selectedCountryId,
+                      onTap: () =>
+                          Navigator.of(sheetContext).pop(countries[index]),
+                    ),
+                    if (index != countries.length - 1)
+                      const SizedBox(height: 10),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (selected == null || !mounted) {
+      return;
+    }
+
+    setState(() {
+      _selectedCountryId = selected.id;
+      _selectedSection = null;
+      _searchQuery = '';
+      _searchController.clear();
+    });
   }
 
   bool _matchesPath(_GuidePathMeta path) {
@@ -514,58 +543,6 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
 
   List<_DocumentationTopic> _topics(BuildContext context) =>
       _documentationTopics(context);
-
-  String _focusBody(BuildContext context) {
-    final selection = widget.journeyContextController?.selection;
-    if (selection?.isComplete == true) {
-      return context.l10n.documentationFocusBody(
-        selection!.origin!.name,
-        selection.destination!.name,
-      );
-    }
-    if (selection?.destination != null) {
-      return context.l10n.documentationFocusBodyDestination(
-        selection!.destination!.name,
-      );
-    }
-    return context.l10n.documentationFocusBodyDefault;
-  }
-
-  List<_FocusCardMeta> _buildFocusCards(BuildContext context) {
-    final cards = <_FocusCardMeta>[
-      _FocusCardMeta(
-        title: context.l10n.documentationPathDocumentsTitle,
-        body: context.l10n.exploreContentDocumentsBody,
-        icon: Icons.badge_outlined,
-        section: DocumentationGuideSection.documents,
-      ),
-      _FocusCardMeta(
-        title: context.l10n.documentationHousingArrivalSectionTitle,
-        body: context.l10n.exploreContentHousingBody,
-        icon: Icons.home_work_outlined,
-        section: DocumentationGuideSection.housing,
-      ),
-      _FocusCardMeta(
-        title: context.l10n.documentationPathWorkTitle,
-        body: context.l10n.exploreContentWorkBody,
-        icon: Icons.work_outline_rounded,
-        section: DocumentationGuideSection.work,
-      ),
-    ];
-
-    final priorities =
-        widget.migrationQuestionnaireController?.generatedPlan?.selectedPriorities;
-    if (priorities == null || priorities.isEmpty) {
-      return cards;
-    }
-    if (priorities.contains('job_opportunities')) {
-      return [cards[2], cards[0], cards[1]];
-    }
-    if (priorities.contains('low_cost')) {
-      return [cards[1], cards[0], cards[2]];
-    }
-    return cards;
-  }
 
   List<_GuidePathMeta> _guidePaths(BuildContext context) {
     final l10n = context.l10n;
@@ -1107,7 +1084,8 @@ List<_DocumentationTopic> _documentationTopics(BuildContext context) {
         l10n.documentationSafetyBulletThree,
       ],
       sourceNameKey: 'forum_brasileiro_seguranca_publica',
-      sourceUrl: 'https://forumseguranca.org.br/wp-content/uploads/2025/07/anuario-2025.pdf',
+      sourceUrl:
+          'https://forumseguranca.org.br/wp-content/uploads/2025/07/anuario-2025.pdf',
     ),
   ];
 }
@@ -1454,21 +1432,19 @@ class _QuickAnswersSection extends StatelessWidget {
 class _GuideSearchField extends StatelessWidget {
   const _GuideSearchField({
     required this.controller,
-    required this.label,
     required this.hint,
-    required this.helper,
     required this.onSubmitted,
     required this.onChanged,
     required this.onClear,
+    this.enabled = true,
   });
 
   final TextEditingController controller;
-  final String label;
   final String hint;
-  final String helper;
   final ValueChanged<String> onSubmitted;
-  final ValueChanged<String> onChanged;
+  final ValueChanged<String>? onChanged;
   final VoidCallback? onClear;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -1478,73 +1454,202 @@ class _GuideSearchField extends StatelessWidget {
         ? Colors.white.withValues(alpha: 0.74)
         : const Color(0xCC28476D);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(color: textPrimary),
-        ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: controller,
-          onSubmitted: onSubmitted,
-          onChanged: onChanged,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge?.copyWith(color: textPrimary),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: textSoft),
-            prefixIcon: Icon(Icons.search_rounded, color: textPrimary),
-            suffixIcon: onClear == null
-                ? null
-                : IconButton(
-                    onPressed: onClear,
-                    icon: Icon(Icons.close_rounded, color: textPrimary),
-                  ),
-            filled: true,
-            fillColor: isDark
-                ? Colors.white.withValues(alpha: 0.12)
-                : Colors.white.withValues(alpha: 0.82),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(22),
-              borderSide: BorderSide(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.14)
-                    : AppColors.primary.withValues(alpha: 0.12),
+    return TextField(
+      controller: controller,
+      onSubmitted: enabled ? onSubmitted : null,
+      onChanged: enabled ? onChanged : null,
+      enabled: enabled,
+      style: Theme.of(
+        context,
+      ).textTheme.bodyLarge?.copyWith(color: textPrimary),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: textSoft),
+        prefixIcon: Icon(Icons.search_rounded, color: textPrimary),
+        suffixIcon: onClear == null
+            ? null
+            : IconButton(
+                onPressed: onClear,
+                icon: Icon(Icons.close_rounded, color: textPrimary),
               ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(22),
-              borderSide: BorderSide(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.14)
-                    : AppColors.primary.withValues(alpha: 0.12),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(22),
-              borderSide: BorderSide(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.30)
-                    : AppColors.primary.withValues(alpha: 0.26),
-              ),
-            ),
+        filled: true,
+        fillColor: isDark
+            ? Colors.white.withValues(alpha: 0.12)
+            : Colors.white.withValues(alpha: 0.82),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(22),
+          borderSide: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.14)
+                : AppColors.primary.withValues(alpha: 0.12),
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          helper,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: textSoft),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(22),
+          borderSide: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.14)
+                : AppColors.primary.withValues(alpha: 0.12),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(22),
+          borderSide: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.30)
+                : AppColors.primary.withValues(alpha: 0.26),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GuideCountryBar extends StatelessWidget {
+  const _GuideCountryBar({
+    required this.selectedCountry,
+    required this.hasActivePlan,
+    required this.onTapCountry,
+  });
+
+  final CatalogCountry selectedCountry;
+  final bool hasActivePlan;
+  final VoidCallback onTapCountry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: onTapCountry,
+            icon: const Icon(Icons.public_rounded),
+            label: Text(selectedCountry.name),
+          ),
+        ),
+        const SizedBox(width: 12),
+        _GuideStatusChip(
+          label: hasActivePlan
+              ? context.l10n.documentationGuideUsingPlanLabel
+              : context.l10n.documentationGuideManualCountryLabel,
         ),
       ],
+    );
+  }
+}
+
+class _GuideStatusChip extends StatelessWidget {
+  const _GuideStatusChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.14)),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: AppColors.primary,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class _GuideStatusNotice extends StatelessWidget {
+  const _GuideStatusNotice({required this.title, required this.body});
+
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMutedFor(context),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.borderFor(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            body,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.35,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GuideCountryOptionTile extends StatelessWidget {
+  const _GuideCountryOptionTile({
+    required this.country,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final CatalogCountry country;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected
+          ? AppColors.primary.withValues(alpha: 0.12)
+          : Colors.transparent,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          child: Row(
+            children: [
+              Icon(
+                Icons.public_rounded,
+                color: selected
+                    ? AppColors.primary
+                    : AppColors.textSoftFor(context),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  country.name,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ),
+              if (selected)
+                const Icon(Icons.check_rounded, color: AppColors.primary),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1700,32 +1805,6 @@ class _SearchResultTile extends StatelessWidget {
   }
 }
 
-class _PromptRail extends StatelessWidget {
-  const _PromptRail({required this.prompts, required this.onTap});
-
-  final List<({String label, String query})> prompts;
-  final ValueChanged<String> onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: prompts.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          final prompt = prompts[index];
-          return _PromptChip(
-            label: prompt.label,
-            onTap: () => onTap(prompt.query),
-          );
-        },
-      ),
-    );
-  }
-}
-
 class _SectionFilterRail extends StatelessWidget {
   const _SectionFilterRail({
     required this.l10n,
@@ -1764,69 +1843,6 @@ class _SectionFilterRail extends StatelessWidget {
             onTap: () => onSelected(path.section),
           );
         },
-      ),
-    );
-  }
-}
-
-class _QuickRoutesCarousel extends StatelessWidget {
-  const _QuickRoutesCarousel({
-    required this.l10n,
-    required this.paths,
-    required this.selectedSection,
-    required this.onOpenSection,
-  });
-
-  final dynamic l10n;
-  final List<_GuidePathMeta> paths;
-  final DocumentationGuideSection? selectedSection;
-  final ValueChanged<DocumentationGuideSection> onOpenSection;
-
-  @override
-  Widget build(BuildContext context) {
-    final visiblePaths = selectedSection == null
-        ? paths
-        : paths.where((path) => path.section == selectedSection).toList();
-
-    return FrostedPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.documentationQuickRoutesTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            l10n.documentationQuickRoutesBody,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-            ),
-          ),
-          const SizedBox(height: 18),
-          SizedBox(
-            height: 260,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: visiblePaths.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 12),
-              itemBuilder: (context, index) {
-                final path = visiblePaths[index];
-                return SizedBox(
-                  width: 280,
-                  child: _QuickRouteCard(
-                    icon: path.icon,
-                    title: path.title,
-                    description: path.description,
-                    accent: path.accent,
-                    actionLabel: l10n.documentationOpenTopicAction,
-                    onTap: () => onOpenSection(path.section),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -2114,38 +2130,6 @@ class _FilterChipButton extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PromptChip extends StatelessWidget {
-  const _PromptChip({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    return Material(
-      color: isDark
-          ? Colors.white.withValues(alpha: 0.12)
-          : Colors.white.withValues(alpha: 0.82),
-      borderRadius: BorderRadius.circular(999),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: isDark ? Colors.white : AppColors.textPrimaryFor(context),
-              fontWeight: FontWeight.w600,
-            ),
           ),
         ),
       ),
@@ -2742,123 +2726,6 @@ class _PathCard extends StatelessWidget {
   }
 }
 
-class _QuickRouteCard extends StatelessWidget {
-  const _QuickRouteCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.accent,
-    required this.actionLabel,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String description;
-  final Color accent;
-  final String actionLabel;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    final textPrimary = isDark ? Colors.white : const Color(0xFF10233F);
-    final textSoft = isDark
-        ? Colors.white.withValues(alpha: 0.76)
-        : const Color(0xCC28476D);
-    final resolvedBackground = isDark
-        ? Color.alphaBlend(
-            accent.withValues(alpha: 0.12),
-            const Color(0xFF101823),
-          )
-        : AppColors.tintedSurfaceFor(
-            context,
-            tint: accent,
-            lightColor: Color.alphaBlend(
-              accent.withValues(alpha: 0.10),
-              Colors.white,
-            ),
-          );
-    final resolvedBorder = isDark
-        ? accent.withValues(alpha: 0.24)
-        : accent.withValues(alpha: 0.34);
-    final iconSurface = isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : Colors.white.withValues(alpha: 0.94);
-
-    return FrostedPanel(
-      padding: const EdgeInsets.all(18),
-      backgroundColor: resolvedBackground,
-      borderColor: resolvedBorder,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: iconSurface,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: textPrimary),
-          ),
-          const SizedBox(height: 14),
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleSmall?.copyWith(color: textPrimary),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    description,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: textSoft),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: onTap,
-              style: TextButton.styleFrom(
-                foregroundColor: isDark ? Colors.white : accent,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-                backgroundColor: isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.white.withValues(alpha: 0.72),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  side: BorderSide(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.10)
-                        : accent.withValues(alpha: 0.16),
-                  ),
-                ),
-              ),
-              icon: const Icon(Icons.arrow_forward_rounded),
-              label: Text(actionLabel),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _CompareCard extends StatelessWidget {
   const _CompareCard({
     required this.icon,
@@ -3168,119 +3035,6 @@ class _QuickAnswerCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _JourneyFocusStrip extends StatelessWidget {
-  const _JourneyFocusStrip({
-    required this.title,
-    required this.body,
-    required this.cards,
-  });
-
-  final String title;
-  final String body;
-  final List<_FocusCardMeta> cards;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 6),
-        Text(
-          body,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.textSoftFor(context),
-            height: 1.4,
-          ),
-        ),
-        const SizedBox(height: 12),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final threeColumns = constraints.maxWidth >= 900;
-            final twoColumns = constraints.maxWidth >= 620;
-            final cardWidth = threeColumns
-                ? (constraints.maxWidth - 24) / 3
-                : twoColumns
-                ? (constraints.maxWidth - 12) / 2
-                : constraints.maxWidth;
-
-            return Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                for (final card in cards)
-                  SizedBox(
-                    width: cardWidth,
-                    child: _FocusCard(card: card),
-                  ),
-              ],
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _FocusCard extends StatelessWidget {
-  const _FocusCard({required this.card});
-
-  final _FocusCardMeta card;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: () => Navigator.pushNamed(
-          context,
-          AppRoutes.documentationTopic,
-          arguments: card.section,
-        ),
-        child: Ink(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceFor(context),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.borderFor(context)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(card.icon, color: AppColors.primary),
-              const SizedBox(height: 12),
-              Text(card.title, style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 6),
-              Text(
-                card.body,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FocusCardMeta {
-  const _FocusCardMeta({
-    required this.title,
-    required this.body,
-    required this.icon,
-    required this.section,
-  });
-
-  final String title;
-  final String body;
-  final IconData icon;
-  final DocumentationGuideSection section;
 }
 
 class _DocumentationTopic {

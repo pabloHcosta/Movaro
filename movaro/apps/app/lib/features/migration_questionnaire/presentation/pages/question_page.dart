@@ -4,11 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/catalog/domain/entities/catalog_country.dart';
+import 'package:movaro_app/core/journey/country_coverage.dart';
+import 'package:movaro_app/core/journey/detected_location.dart';
+import 'package:movaro_app/core/journey/journey_country_metadata.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/contextual_help.dart';
+import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
+import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/option.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/question.dart';
@@ -25,11 +32,14 @@ class QuestionPage extends StatefulWidget {
 }
 
 class _QuestionPageState extends State<QuestionPage> {
+  static const _helpPreferenceKey = 'questionnaire_flow';
   String? _inlineHint;
   bool _showProcessingScreen = false;
+  bool _didPromptOriginLocation = false;
   final ScrollController _optionsScrollController = ScrollController();
   String? _scrollScopeKey;
   bool _showScrollHint = false;
+  bool _didTryAutoHelp = false;
 
   MigrationQuestionnaireController get controller => widget.controller;
 
@@ -39,7 +49,56 @@ class _QuestionPageState extends State<QuestionPage> {
     _optionsScrollController.addListener(_updateScrollHint);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(controller.initialize());
+      unawaited(_maybeShowHelp());
     });
+  }
+
+  Future<void> _maybeShowHelp() async {
+    if (_didTryAutoHelp) {
+      return;
+    }
+    _didTryAutoHelp = true;
+    await maybeShowContextualHelpGuide(
+      context,
+      preferenceKey: _helpPreferenceKey,
+      content: _helpContent(context),
+    );
+  }
+
+  Future<void> _showHelp() {
+    return showContextualHelpGuide(
+      context,
+      preferenceKey: _helpPreferenceKey,
+      content: _helpContent(context),
+    );
+  }
+
+  ContextualHelpContent _helpContent(BuildContext context) {
+    return ContextualHelpContent(
+      eyebrow: context.l10n.questionnairePageTitle,
+      title: 'Answer one step at a time',
+      body:
+          'The questionnaire keeps the route in context, saves your progress, and builds the recommendation only after origin and destination are complete.',
+      steps: const [
+        FeatureGuideStep(
+          number: '1',
+          title: 'Confirm the setup',
+          body:
+              'Choose the questionnaire style, then answer the origin step first.',
+        ),
+        FeatureGuideStep(
+          number: '2',
+          title: 'Move forward when ready',
+          body: 'You can go back anytime without losing answers or progress.',
+        ),
+        FeatureGuideStep(
+          number: '3',
+          title: 'Generate the result',
+          body:
+              'The final step creates the recommendation and passes the full journey context to the result screen.',
+        ),
+      ],
+    );
   }
 
   @override
@@ -57,6 +116,13 @@ class _QuestionPageState extends State<QuestionPage> {
       builder: (context, _) {
         final question = controller.currentQuestion;
         final l10n = context.l10n;
+
+        if (question?.id == 'origin_country' && !_didPromptOriginLocation) {
+          _didPromptOriginLocation = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            unawaited(_handleOriginAutoDetection(question!));
+          });
+        }
 
         return Scaffold(
           body: Stack(
@@ -79,13 +145,13 @@ class _QuestionPageState extends State<QuestionPage> {
                           AppGlassHeader(
                             title: l10n.questionnairePageTitle,
                             onBack: () => _handleExitFlow(context),
+                            onHelp: _showHelp,
                           ),
                           const SizedBox(height: 20),
                           if (_showProcessingScreen)
                             Expanded(
                               child: _ProcessingState(
                                 title: l10n.questionnaireProcessingTitle,
-                                body: l10n.questionnaireProcessingBody,
                               ),
                             )
                           else if (controller.isInitializing)
@@ -139,14 +205,6 @@ class _QuestionPageState extends State<QuestionPage> {
           Text(
             l10n.bmpRefineTitle,
             style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            l10n.bmpRefineSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.45,
-            ),
           ),
           const SizedBox(height: 20),
           Expanded(
@@ -232,6 +290,131 @@ class _QuestionPageState extends State<QuestionPage> {
     }
   }
 
+  Future<void> _handleOriginAutoDetection(Question question) async {
+    if (!mounted || controller.answerFor(question.id) != null) {
+      return;
+    }
+
+    final journey = controller.journeyContextController;
+    final state = await journey.requestDetectedLocation();
+    if (!mounted) {
+      return;
+    }
+
+    switch (state) {
+      case DetectedLocationRequestState.available:
+        final detected = journey.detectedLocation;
+        final isArgentina =
+            detected?.countryId != null &&
+            journey.journeyValueFor(
+                  journey.countries
+                      .where((country) => country.id == detected!.countryId)
+                      .firstOrNull,
+                ) ==
+                'argentina';
+
+        if (detected == null) {
+          await _showLocationFailedDialog(question);
+          return;
+        }
+
+        if (isArgentina) {
+          await _showDetectedOriginDialog(question, detected);
+          return;
+        }
+
+        await _showUnsupportedLocationDialog(question, detected);
+      case DetectedLocationRequestState.denied:
+      case DetectedLocationRequestState.deniedForever:
+      case DetectedLocationRequestState.unavailable:
+      case DetectedLocationRequestState.failed:
+      case DetectedLocationRequestState.idle:
+      case DetectedLocationRequestState.requesting:
+        await _showLocationFailedDialog(question);
+    }
+  }
+
+  Future<void> _showDetectedOriginDialog(
+    Question question,
+    DetectedLocation detected,
+  ) async {
+    final locationLabel = [
+      if ((detected.city ?? '').isNotEmpty) detected.city!,
+      if ((detected.region ?? '').isNotEmpty) detected.region!,
+      detected.countryName,
+    ].join(' · ');
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => _QuestionLocationDialog(
+        title: context.l10n.questionnaireOriginAutoDetectTitle,
+        body:
+            '${context.l10n.journeyDetectedLocationLabel(locationLabel)}\n\n${context.l10n.journeyDetectedConfirmBody(detected.countryName)}',
+        secondaryLabel: context.l10n.journeyDetectedManualAction,
+        primaryLabel: context.l10n.journeyDetectedConfirmAction(
+          detected.countryName,
+        ),
+      ),
+    );
+
+    if (confirmed == true) {
+      final argentinaOption = question.options
+          .where((option) => option.value == 'argentina')
+          .firstOrNull;
+      if (argentinaOption != null) {
+        _handleSingleSelect(question, argentinaOption);
+      }
+    }
+  }
+
+  Future<void> _showUnsupportedLocationDialog(
+    Question question,
+    DetectedLocation detected,
+  ) async {
+    final useArgentina = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => _QuestionLocationDialog(
+        title: context.l10n.questionnaireOriginUnsupportedTitle,
+        body: context.l10n.questionnaireOriginUnsupportedBody(
+          detected.countryName,
+        ),
+        secondaryLabel: context.l10n.journeyDetectedManualAction,
+        primaryLabel: context.l10n.questionnaireOriginUseArgentinaAction,
+      ),
+    );
+
+    if (useArgentina == true) {
+      final argentinaOption = question.options
+          .where((option) => option.value == 'argentina')
+          .firstOrNull;
+      if (argentinaOption != null) {
+        _handleSingleSelect(question, argentinaOption);
+      }
+    }
+  }
+
+  Future<void> _showLocationFailedDialog(Question question) async {
+    final retry = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => _QuestionLocationDialog(
+        title: context.l10n.questionnaireOriginLocationFailedTitle,
+        body: context.l10n.journeyLocationFailedBody,
+        secondaryLabel: context.l10n.journeyDetectedManualAction,
+        primaryLabel: context.l10n.journeyLocationRetryAction,
+      ),
+    );
+
+    if (retry == true && mounted) {
+      _didPromptOriginLocation = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(_handleOriginAutoDetection(question));
+      });
+    }
+  }
+
   Widget _buildVariantSelector(BuildContext context) {
     final l10n = context.l10n;
     _prepareScrollableScope('variant_selector');
@@ -244,14 +427,6 @@ class _QuestionPageState extends State<QuestionPage> {
           Text(
             l10n.bmpVariantTitle,
             style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            l10n.bmpVariantSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.45,
-            ),
           ),
           const SizedBox(height: 22),
           Expanded(
@@ -301,8 +476,6 @@ class _QuestionPageState extends State<QuestionPage> {
                 ),
               ),
               const SizedBox(height: 14),
-              _QuestionSupportPill(label: _sectionLabel(context, question)),
-              const SizedBox(height: 14),
               Text(
                 l10n.questionTitle(question.id),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -313,27 +486,23 @@ class _QuestionPageState extends State<QuestionPage> {
               if (question.id == 'priorities') ...[
                 const SizedBox(height: 10),
                 _SelectionStatusCard(
-                  label: l10n.qPrioritiesHelper,
-                  counter: l10n.qPrioritiesSelectedCount(
+                  label: _selectionHelperLabel(context, question),
+                  counter: _selectionCounterLabel(
                     controller.answerValuesFor(question.id).length,
                     question.maxSelections,
                   ),
-                  isComplete:
-                      controller
-                          .answerValuesFor(question.id)
-                          .contains('balanced_unsure') ||
-                      controller.answerValuesFor(question.id).length ==
-                          question.maxSelections,
+                  isComplete: controller
+                      .answerValuesFor(question.id)
+                      .isNotEmpty,
                 ),
               ] else if (question.id == 'constraints') ...[
                 const SizedBox(height: 10),
-                _QuestionSubnote(label: l10n.qConstraintsSubtitle),
+                _QuestionSubnote(
+                  label: _selectionHelperLabel(context, question),
+                ),
               ] else if (question.id == 'funding') ...[
                 const SizedBox(height: 10),
-                _QuestionSubnote(label: l10n.qFundingSubtitle),
-              ] else if (question.id == 'origin_country') ...[
-                const SizedBox(height: 10),
-                _QuestionSubnote(label: l10n.journeyEntryOriginPending),
+                _QuestionSubnote(label: _compactHintLabel(context, question)),
               ] else if (_sectionTransitionHint(context, question)
                   case final hint?) ...[
                 const SizedBox(height: 10),
@@ -386,12 +555,24 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   Widget _buildQuestionOptions(BuildContext context, Question question) {
+    if (question.id == 'origin_country') {
+      return SingleChildScrollView(
+        controller: _optionsScrollController,
+        child: _OriginDestinationStep(
+          controller: controller,
+          question: question,
+          onOriginTap: (option) => _handleSingleSelect(question, option),
+          onDestinationTap: controller.setJourneyDestination,
+        ),
+      );
+    }
+
     if (question.id == 'priorities') {
       final values = controller.answerValuesFor(question.id);
       return LayoutBuilder(
         builder: (context, constraints) {
-          final columns = constraints.maxWidth < 360 ? 1 : 2;
-          final spacing = 12.0;
+          final columns = constraints.maxWidth < 300 ? 1 : 2;
+          final spacing = 10.0;
           final tileWidth =
               (constraints.maxWidth - (spacing * (columns - 1))) / columns;
 
@@ -405,7 +586,8 @@ class _QuestionPageState extends State<QuestionPage> {
                   SizedBox(
                     width: tileWidth,
                     child: _PriorityOptionCard(
-                      label: context.l10n.questionOptionLabel(
+                      label: _displayOptionLabel(
+                        context,
                         question.id,
                         option.value,
                       ),
@@ -421,50 +603,153 @@ class _QuestionPageState extends State<QuestionPage> {
       );
     }
 
+    final labels = question.options
+        .map(
+          (option) => _displayOptionLabel(context, question.id, option.value),
+        )
+        .toList(growable: false);
+    final layout = _resolveQuestionOptionLayout(question, labels);
+
     switch (question.type) {
       case 'single_card':
-        return ListView.separated(
-          controller: _optionsScrollController,
-          itemCount: question.options.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final option = question.options[index];
-            return _LargeOptionCard(
-              icon: _optionIcon(question.id, option.value),
-              label: context.l10n.questionOptionLabel(
-                question.id,
-                option.value,
-              ),
-              isSelected: controller.answerFor(question.id) == option.value,
-              onTap: () => _handleSingleSelect(question, option),
-            );
-          },
+        if (layout == _QuestionOptionLayout.list) {
+          return ListView.separated(
+            controller: _optionsScrollController,
+            itemCount: question.options.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final option = question.options[index];
+              return _LargeOptionCard(
+                icon: _optionIcon(question.id, option.value),
+                label: labels[index],
+                isSelected: controller.answerFor(question.id) == option.value,
+                onTap: () => _handleSingleSelect(question, option),
+              );
+            },
+          );
+        }
+        return _buildCompactOptionGrid(
+          context: context,
+          question: question,
+          labels: labels,
+          selectedValues: {controller.answerFor(question.id) ?? ''},
+          isMultiSelect: false,
+          compact: layout == _QuestionOptionLayout.compactGrid,
         );
       case 'single_chip':
       case 'multi_chip':
         final values = controller.answerValuesFor(question.id);
-        return ListView.separated(
-          controller: _optionsScrollController,
-          itemCount: question.options.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 10),
-          itemBuilder: (context, index) {
-            final option = question.options[index];
-            return _ChoiceChipCard(
-              icon: _optionIcon(question.id, option.value),
-              label: context.l10n.questionOptionLabel(
-                question.id,
-                option.value,
-              ),
-              isSelected: values.contains(option.value),
-              onTap: () => question.type == 'single_chip'
-                  ? _handleSingleSelect(question, option)
-                  : _handleMultiSelect(question, option),
-            );
-          },
+        if (layout == _QuestionOptionLayout.list) {
+          return ListView.separated(
+            controller: _optionsScrollController,
+            itemCount: question.options.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 10),
+            itemBuilder: (context, index) {
+              final option = question.options[index];
+              return _ChoiceChipCard(
+                icon: _optionIcon(question.id, option.value),
+                label: labels[index],
+                isSelected: values.contains(option.value),
+                onTap: () => question.type == 'single_chip'
+                    ? _handleSingleSelect(question, option)
+                    : _handleMultiSelect(question, option),
+              );
+            },
+          );
+        }
+        return _buildCompactOptionGrid(
+          context: context,
+          question: question,
+          labels: labels,
+          selectedValues: values.toSet(),
+          isMultiSelect: question.type == 'multi_chip',
+          compact: layout == _QuestionOptionLayout.compactGrid,
         );
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  Widget _buildCompactOptionGrid({
+    required BuildContext context,
+    required Question question,
+    required List<String> labels,
+    required Set<String> selectedValues,
+    required bool isMultiSelect,
+    required bool compact,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth < 300 ? 1 : 2;
+        final spacing = 10.0;
+        final tileWidth =
+            (constraints.maxWidth - (spacing * (columns - 1))) / columns;
+
+        return SingleChildScrollView(
+          controller: _optionsScrollController,
+          child: Wrap(
+            spacing: spacing,
+            runSpacing: spacing,
+            children: [
+              for (var index = 0; index < question.options.length; index++)
+                SizedBox(
+                  width: tileWidth,
+                  child: _GridOptionCard(
+                    icon: _optionIcon(
+                      question.id,
+                      question.options[index].value,
+                    ),
+                    label: labels[index],
+                    isSelected: selectedValues.contains(
+                      question.options[index].value,
+                    ),
+                    compact: compact,
+                    onTap: () => isMultiSelect
+                        ? _handleMultiSelect(question, question.options[index])
+                        : _handleSingleSelect(
+                            question,
+                            question.options[index],
+                          ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  _QuestionOptionLayout _resolveQuestionOptionLayout(
+    Question question,
+    List<String> labels,
+  ) {
+    final shortLabel = labels.every((label) => label.length <= 22);
+    final mediumLabel = labels.every((label) => label.length <= 32);
+    final gridFirstIds = {
+      'intent',
+      'timeline',
+      'priorities',
+      'funding',
+      'constraints',
+    };
+
+    if (gridFirstIds.contains(question.id) && shortLabel) {
+      return _QuestionOptionLayout.compactGrid;
+    }
+
+    if (gridFirstIds.contains(question.id) && mediumLabel) {
+      return _QuestionOptionLayout.grid;
+    }
+
+    if (question.options.length <= 4 && mediumLabel) {
+      return _QuestionOptionLayout.grid;
+    }
+
+    if (question.options.length <= 6 && shortLabel) {
+      return _QuestionOptionLayout.compactGrid;
+    }
+
+    return _QuestionOptionLayout.list;
   }
 
   IconData _priorityIcon(String value) {
@@ -580,6 +865,10 @@ class _QuestionPageState extends State<QuestionPage> {
 
   Widget _buildFooter(BuildContext context, Question question) {
     final l10n = context.l10n;
+
+    if (question.id == 'origin_country') {
+      return const SizedBox.shrink();
+    }
 
     return Row(
       children: [
@@ -762,9 +1051,7 @@ class _QuestionPageState extends State<QuestionPage> {
     }
 
     setState(() {
-      _inlineHint = question.id == 'priorities'
-          ? context.l10n.qPrioritiesValidation
-          : context.l10n.qConstraintsValidation;
+      _inlineHint = _selectionValidationLabel(context, question);
     });
   }
 
@@ -809,6 +1096,121 @@ class _QuestionPageState extends State<QuestionPage> {
     }
 
     return context.l10n.questionnaireNextSection(nextSection);
+  }
+
+  String _selectionHelperLabel(BuildContext context, Question question) {
+    final language = Localizations.localeOf(context).languageCode;
+    if (language == 'pt') {
+      return 'Selecione ate ${question.maxSelections}';
+    }
+    if (language == 'es') {
+      return 'Elegi hasta ${question.maxSelections}';
+    }
+    return 'Pick up to ${question.maxSelections}';
+  }
+
+  String _selectionValidationLabel(BuildContext context, Question question) {
+    final language = Localizations.localeOf(context).languageCode;
+    if (language == 'pt') {
+      return 'Voce pode marcar ate ${question.maxSelections}';
+    }
+    if (language == 'es') {
+      return 'Podes marcar hasta ${question.maxSelections}';
+    }
+    return 'You can pick up to ${question.maxSelections}';
+  }
+
+  String _selectionCounterLabel(int selected, int total) => '$selected/$total';
+
+  String _compactHintLabel(BuildContext context, Question question) {
+    final language = Localizations.localeOf(context).languageCode;
+    switch (question.id) {
+      case 'origin_country':
+        if (language == 'pt') {
+          return 'Escolha origem e destino.';
+        }
+        if (language == 'es') {
+          return 'Elegi origen y destino.';
+        }
+        return 'Choose origin and destination.';
+      case 'funding':
+        if (language == 'pt') {
+          return 'Escolha sua base financeira.';
+        }
+        if (language == 'es') {
+          return 'Elegi tu base financiera.';
+        }
+        return 'Choose your financial base.';
+      default:
+        return context.l10n.bmpScrollHint;
+    }
+  }
+
+  String _displayOptionLabel(
+    BuildContext context,
+    String questionId,
+    String value,
+  ) {
+    switch (questionId) {
+      case 'timeline':
+        return switch (value) {
+          'just_exploring' => 'Explore',
+          'in_0_3m' => '0-3 mo',
+          'in_3_6m' => '3-6 mo',
+          'in_6_12m' => '6-12 mo',
+          'in_12m_plus' => '12+ mo',
+          'depends' => 'Flexible',
+          _ => context.l10n.questionOptionLabel(questionId, value),
+        };
+      case 'intent':
+        return switch (value) {
+          'find_job_br' => 'Work',
+          'remote_income' => 'Remote',
+          'study' => 'Study',
+          'family_partner' => 'Family',
+          'fresh_start' => 'Restart',
+          'explore_unsure' => 'Explore',
+          _ => context.l10n.questionOptionLabel(questionId, value),
+        };
+      case 'funding':
+        return switch (value) {
+          'savings' => 'Savings',
+          'remote_income' => 'Remote',
+          'job_search' => 'Need job',
+          'job_offer' => 'Offer',
+          'family_support' => 'Family',
+          'dont_know' => 'Unsure',
+          _ => context.l10n.questionOptionLabel(questionId, value),
+        };
+      case 'constraints':
+        return switch (value) {
+          'prefer_south' => 'South',
+          'need_big_city' => 'Big city',
+          'prefer_mid_city' => 'Mid city',
+          'want_coast' => 'Coast',
+          'prefer_cooler' => 'Cooler',
+          'need_transit' => 'Transit',
+          'avoid_expensive' => 'Lower cost',
+          'no_constraints' => 'Open',
+          _ => context.l10n.questionOptionLabel(questionId, value),
+        };
+      case 'priorities':
+        return switch (value) {
+          'low_cost' => 'Low cost',
+          'job_opportunities' => 'Jobs',
+          'safety' => 'Safety',
+          'warm_climate_beach' => 'Warm coast',
+          'transit_infra' => 'Transit',
+          'nature' => 'Nature',
+          'university' => 'Study',
+          'community' => 'Community',
+          'close_to_argentina' => 'Near AR',
+          'balanced_unsure' => 'Balanced',
+          _ => context.l10n.questionOptionLabel(questionId, value),
+        };
+      default:
+        return context.l10n.questionOptionLabel(questionId, value);
+    }
   }
 
   ButtonStyle _primaryButtonStyle(BuildContext context) {
@@ -896,6 +1298,8 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 }
 
+enum _QuestionOptionLayout { list, grid, compactGrid }
+
 class _VariantOptionCard extends StatelessWidget {
   const _VariantOptionCard({
     required this.title,
@@ -929,33 +1333,17 @@ class _VariantOptionCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  tag,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
+              ScoreBadge(label: tag, icon: Icons.tune_rounded),
               const SizedBox(height: 12),
               Text(title, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
               Text(
                 body,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.textSoftFor(context),
-                  height: 1.4,
+                  height: 1.3,
                 ),
               ),
             ],
@@ -1032,13 +1420,23 @@ class _LargeOptionCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textPrimaryFor(context),
-                    fontWeight: FontWeight.w600,
-                    height: 1.25,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppColors.textPrimaryFor(context),
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    ScoreBadge(
+                      label: isSelected ? '✓' : '•',
+                      tone: isSelected ? ScoreTone.positive : ScoreTone.neutral,
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(width: 12),
@@ -1149,13 +1547,25 @@ class _ChoiceChipCard extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textPrimaryFor(context),
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  height: 1.2,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textPrimaryFor(context),
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  ScoreBadge(
+                    label: isSelected ? '✓' : '•',
+                    tone: isSelected ? ScoreTone.positive : ScoreTone.neutral,
+                  ),
+                ],
               ),
             ),
             const SizedBox(width: 12),
@@ -1210,8 +1620,8 @@ class _PriorityOptionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          constraints: const BoxConstraints(minHeight: 98),
-          padding: const EdgeInsets.all(14),
+          constraints: const BoxConstraints(minHeight: 82),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: background,
             borderRadius: BorderRadius.circular(22),
@@ -1240,8 +1650,8 @@ class _PriorityOptionCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: 34,
-                    height: 34,
+                    width: 30,
+                    height: 30,
                     decoration: BoxDecoration(
                       color: isSelected
                           ? (isDark
@@ -1254,7 +1664,7 @@ class _PriorityOptionCard extends StatelessWidget {
                     ),
                     child: Icon(
                       icon,
-                      size: 18,
+                      size: 16,
                       color: isSelected
                           ? Colors.white
                           : AppColors.textSoftFor(context),
@@ -1265,22 +1675,142 @@ class _PriorityOptionCard extends StatelessWidget {
                     isSelected
                         ? Icons.check_circle_rounded
                         : Icons.add_circle_outline_rounded,
-                    size: 20,
+                    size: 18,
                     color: isSelected
                         ? (isDark ? const Color(0xFF57B1FF) : AppColors.primary)
                         : AppColors.textSoftFor(context),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Text(
                 label,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.textPrimaryFor(context),
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   height: 1.18,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GridOptionCard extends StatelessWidget {
+  const _GridOptionCard({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+    required this.compact,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final background = isSelected
+        ? AppColors.tintedSurfaceFor(
+            context,
+            tint: AppColors.primary,
+            lightColor: const Color(0xFFEAF4FF),
+            darkAlpha: 0.24,
+            darkBase: const Color(0xFF182536),
+          )
+        : (isDark
+              ? const Color(0xFF131C29).withValues(alpha: 0.95)
+              : Colors.white.withValues(alpha: 0.96));
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          constraints: BoxConstraints(minHeight: compact ? 74 : 88),
+          padding: EdgeInsets.all(compact ? 10 : 12),
+          decoration: BoxDecoration(
+            color: background,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? (isDark ? const Color(0xFF57B1FF) : AppColors.primary)
+                  : (isDark
+                        ? Colors.white.withValues(alpha: 0.10)
+                        : const Color(0x16071B3A)),
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(
+                        alpha: isDark ? 0.20 : 0.10,
+                      ),
+                      blurRadius: 18,
+                      offset: const Offset(0, 10),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: compact ? 28 : 32,
+                    height: compact ? 28 : 32,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? (isDark
+                                ? const Color(0xFF4AA7FF)
+                                : AppColors.primary)
+                          : (isDark
+                                ? Colors.white.withValues(alpha: 0.06)
+                                : const Color(0xFFF0F5FA)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      icon,
+                      size: compact ? 14 : 16,
+                      color: isSelected
+                          ? Colors.white
+                          : AppColors.textSoftFor(context),
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    isSelected
+                        ? Icons.check_circle_rounded
+                        : Icons.add_circle_outline_rounded,
+                    size: compact ? 16 : 18,
+                    color: isSelected
+                        ? (isDark ? const Color(0xFF57B1FF) : AppColors.primary)
+                        : AppColors.textSoftFor(context),
+                  ),
+                ],
+              ),
+              SizedBox(height: compact ? 6 : 8),
+              Text(
+                label,
+                maxLines: compact ? 2 : 3,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textPrimaryFor(context),
+                  fontWeight: FontWeight.w700,
+                  height: 1.16,
+                  fontSize: compact ? 12 : 13,
                 ),
               ),
             ],
@@ -1358,45 +1888,617 @@ class _SelectionStatusCard extends StatelessWidget {
   }
 }
 
-class _QuestionSupportPill extends StatelessWidget {
-  const _QuestionSupportPill({required this.label});
+class _OriginDestinationStep extends StatefulWidget {
+  const _OriginDestinationStep({
+    required this.controller,
+    required this.question,
+    required this.onOriginTap,
+    required this.onDestinationTap,
+  });
 
-  final String label;
+  final MigrationQuestionnaireController controller;
+  final Question question;
+  final ValueChanged<Option> onOriginTap;
+  final Future<void> Function(String countryId) onDestinationTap;
+
+  @override
+  State<_OriginDestinationStep> createState() => _OriginDestinationStepState();
+}
+
+class _OriginDestinationStepState extends State<_OriginDestinationStep> {
+  MigrationQuestionnaireController get controller => widget.controller;
+  bool _didAutoSelectDestination = false;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.tintedSurfaceFor(
-          context,
-          tint: AppColors.primary,
-          lightColor: const Color(0xFFF2F7FF),
-          darkBase: const Color(0xFF162131),
-          darkAlpha: 0.28,
-        ),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.info_outline_rounded,
-            size: 14,
-            color: AppColors.textSoftFor(context),
+    final journey = controller.journeyContextController;
+    final selectedOrigin = controller.answerFor(widget.question.id);
+    final selectedDestination = journey.destinationCountryId;
+    final originCountries = _availableOriginCountries();
+    final destinationCountries = _availableDestinationCountries();
+
+    if (!_didAutoSelectDestination &&
+        selectedDestination == null &&
+        destinationCountries.length == 1) {
+      _didAutoSelectDestination = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(widget.onDestinationTap(destinationCountries.first.id));
+      });
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _QuestionRoutePanel(
+          title: context.l10n.journeyDestinationSectionTitle,
+          body: context.l10n.journeyDestinationSectionBody,
+          pickerTitle: context.l10n.journeyPickerChooseDestinationTitle,
+          countries: destinationCountries,
+          selectedCountryId: selectedDestination,
+          availabilityLabelFor: (country) =>
+              _coverageLabel(context, country.coverage.destinationStatus),
+          isSelectable: journey.canChooseAsDestination,
+          useQuickChoices: destinationCountries.length <= 4,
+          onOpenPicker: () => _openCountryPicker(
+            title: context.l10n.journeyPickerChooseDestinationTitle,
+            countries: destinationCountries,
+            selectedCountryId: selectedDestination,
+            availabilityLabelFor: (country) =>
+                _coverageLabel(context, country.coverage.destinationStatus),
+            isSelectable: journey.canChooseAsDestination,
+            onSelect: (country) => widget.onDestinationTap(country.id),
           ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: AppColors.textSoftFor(context),
-                fontWeight: FontWeight.w600,
+          onTap: (country) => widget.onDestinationTap(country.id),
+        ),
+        const SizedBox(height: 16),
+        _QuestionRoutePanel(
+          title: context.l10n.journeyOriginSectionTitle,
+          body: context.l10n.journeyOriginSectionBody,
+          pickerTitle: context.l10n.journeyPickerChooseOriginTitle,
+          countries: originCountries,
+          selectedCountryId: _countryIdForJourneyValue(selectedOrigin),
+          availabilityLabelFor: (country) =>
+              _coverageLabel(context, country.coverage.originStatus),
+          isSelectable: journey.canChooseAsOrigin,
+          onOpenPicker: () => _openCountryPicker(
+            title: context.l10n.journeyPickerChooseOriginTitle,
+            countries: originCountries,
+            selectedCountryId: _countryIdForJourneyValue(selectedOrigin),
+            availabilityLabelFor: (country) =>
+                _coverageLabel(context, country.coverage.originStatus),
+            isSelectable: journey.canChooseAsOrigin,
+            onSelect: _selectOriginCountry,
+          ),
+          onTap: _selectOriginCountry,
+        ),
+      ],
+    );
+  }
+
+  List<CatalogCountry> _availableOriginCountries() {
+    final allowedValues = widget.question.options
+        .map((option) => option.value)
+        .toSet();
+    return controller.journeyContextController.availableOrigins
+        .where(
+          (country) =>
+              controller.journeyContextController.journeyValueFor(country) ==
+                  'argentina' &&
+              allowedValues.contains(
+                controller.journeyContextController.journeyValueFor(country),
               ),
+        )
+        .toList(growable: false);
+  }
+
+  List<CatalogCountry> _availableDestinationCountries() {
+    return controller.journeyContextController.availableDestinations
+        .where(
+          (country) =>
+              controller.journeyContextController.journeyValueFor(country) ==
+              'brazil',
+        )
+        .toList(growable: false);
+  }
+
+  String? _countryIdForJourneyValue(String? value) {
+    if (value == null) {
+      return null;
+    }
+
+    for (final country
+        in controller.journeyContextController.availableOrigins) {
+      if (controller.journeyContextController.journeyValueFor(country) ==
+          value) {
+        return country.id;
+      }
+    }
+
+    return null;
+  }
+
+  Future<void> _selectOriginCountry(CatalogCountry country) async {
+    final option = widget.question.options
+        .where(
+          (item) =>
+              item.value ==
+              controller.journeyContextController.journeyValueFor(country),
+        )
+        .firstOrNull;
+    if (option == null) {
+      return;
+    }
+
+    widget.onOriginTap(option);
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _openCountryPicker({
+    required String title,
+    required List<CatalogCountry> countries,
+    required String? selectedCountryId,
+    required String Function(CatalogCountry country) availabilityLabelFor,
+    required bool Function(CatalogCountry country) isSelectable,
+    required Future<void> Function(CatalogCountry country) onSelect,
+  }) async {
+    final selected = await showModalBottomSheet<CatalogCountry>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => _QuestionCountryPickerSheet(
+        title: title,
+        countries: countries,
+        selectedCountryId: selectedCountryId,
+        availabilityLabelFor: availabilityLabelFor,
+        isSelectable: isSelectable,
+      ),
+    );
+
+    if (selected == null) {
+      return;
+    }
+
+    await onSelect(selected);
+  }
+
+  String _coverageLabel(BuildContext context, CoverageStatus status) {
+    return switch (status) {
+      CoverageStatus.full => context.l10n.journeyCoverageFull,
+      CoverageStatus.partial => context.l10n.journeyCoveragePartial,
+      CoverageStatus.unsupported => context.l10n.journeyCoverageUnsupported,
+    };
+  }
+}
+
+class _QuestionRoutePanel extends StatelessWidget {
+  const _QuestionRoutePanel({
+    required this.title,
+    required this.body,
+    required this.pickerTitle,
+    required this.countries,
+    required this.selectedCountryId,
+    required this.availabilityLabelFor,
+    required this.isSelectable,
+    required this.onOpenPicker,
+    required this.onTap,
+    this.useQuickChoices = false,
+  });
+
+  final String title;
+  final String body;
+  final String pickerTitle;
+  final List<CatalogCountry> countries;
+  final String? selectedCountryId;
+  final String Function(CatalogCountry country) availabilityLabelFor;
+  final bool Function(CatalogCountry country) isSelectable;
+  final VoidCallback onOpenPicker;
+  final ValueChanged<CatalogCountry> onTap;
+  final bool useQuickChoices;
+
+  @override
+  Widget build(BuildContext context) {
+    CatalogCountry? selectedCountry;
+    for (final country in countries) {
+      if (country.id == selectedCountryId) {
+        selectedCountry = country;
+        break;
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          body,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppColors.textSoftFor(context),
+            fontWeight: FontWeight.w600,
+            height: 1.3,
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (useQuickChoices)
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = constraints.maxWidth < 300 ? 1 : 2;
+              const spacing = 10.0;
+              final tileWidth =
+                  (constraints.maxWidth - (spacing * (columns - 1))) / columns;
+
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: [
+                  for (final country in countries)
+                    SizedBox(
+                      width: tileWidth,
+                      child: _QuestionInlineCountryCard(
+                        country: country,
+                        isSelected: selectedCountryId == country.id,
+                        isEnabled: isSelectable(country),
+                        availabilityLabel: availabilityLabelFor(country),
+                        onTap: isSelectable(country)
+                            ? () => onTap(country)
+                            : null,
+                      ),
+                    ),
+                ],
+              );
+            },
+          )
+        else
+          _QuestionCountryPickerSummaryCard(
+            title: pickerTitle,
+            placeholder: title,
+            selectedCountry: selectedCountry,
+            availabilityLabel: selectedCountry == null
+                ? null
+                : availabilityLabelFor(selectedCountry),
+            onTap: onOpenPicker,
+          ),
+      ],
+    );
+  }
+}
+
+class _QuestionInlineCountryCard extends StatelessWidget {
+  const _QuestionInlineCountryCard({
+    required this.country,
+    required this.isSelected,
+    required this.isEnabled,
+    required this.availabilityLabel,
+    required this.onTap,
+  });
+
+  final CatalogCountry country;
+  final bool isSelected;
+  final bool isEnabled;
+  final String availabilityLabel;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final background = isSelected
+        ? AppColors.tintedSurfaceFor(
+            context,
+            tint: AppColors.primary,
+            lightColor: const Color(0xFFEAF4FF),
+            darkAlpha: 0.24,
+            darkBase: const Color(0xFF182536),
+          )
+        : (isDark
+              ? const Color(
+                  0xFF131C29,
+                ).withValues(alpha: isEnabled ? 0.95 : 0.74)
+              : Colors.white.withValues(alpha: isEnabled ? 0.96 : 0.84));
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          constraints: const BoxConstraints(minHeight: 86),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: background,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? (isDark ? const Color(0xFF57B1FF) : AppColors.primary)
+                  : (isDark
+                        ? Colors.white.withValues(alpha: 0.10)
+                        : const Color(0x16071B3A)),
             ),
           ),
-        ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(country.flagEmoji, style: const TextStyle(fontSize: 22)),
+                  const Spacer(),
+                  Icon(
+                    isSelected
+                        ? Icons.check_circle_rounded
+                        : isEnabled
+                        ? Icons.radio_button_unchecked_rounded
+                        : Icons.schedule_rounded,
+                    size: 18,
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.textSoftFor(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                country.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: isEnabled
+                      ? AppColors.textPrimaryFor(context)
+                      : AppColors.textSoftFor(context),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                availabilityLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: isEnabled
+                      ? AppColors.primary
+                      : AppColors.textSoftFor(context),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
+    );
+  }
+}
+
+class _QuestionCountryPickerSummaryCard extends StatelessWidget {
+  const _QuestionCountryPickerSummaryCard({
+    required this.title,
+    required this.placeholder,
+    required this.selectedCountry,
+    required this.availabilityLabel,
+    required this.onTap,
+  });
+
+  final String title;
+  final String placeholder;
+  final CatalogCountry? selectedCountry;
+  final String? availabilityLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final country = selectedCountry;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Ink(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceMutedFor(context),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: AppColors.borderFor(context)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Text(
+                  country?.flagEmoji ?? '🌎',
+                  style: const TextStyle(fontSize: 22),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      country?.name ?? placeholder,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    if (availabilityLabel != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        availabilityLabel!,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSoftFor(context),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Icon(Icons.keyboard_arrow_down_rounded),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuestionCountryPickerSheet extends StatefulWidget {
+  const _QuestionCountryPickerSheet({
+    required this.title,
+    required this.countries,
+    required this.selectedCountryId,
+    required this.availabilityLabelFor,
+    required this.isSelectable,
+  });
+
+  final String title;
+  final List<CatalogCountry> countries;
+  final String? selectedCountryId;
+  final String Function(CatalogCountry country) availabilityLabelFor;
+  final bool Function(CatalogCountry country) isSelectable;
+
+  @override
+  State<_QuestionCountryPickerSheet> createState() =>
+      _QuestionCountryPickerSheetState();
+}
+
+class _QuestionCountryPickerSheetState
+    extends State<_QuestionCountryPickerSheet> {
+  late final TextEditingController _searchController;
+  String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered =
+        widget.countries
+            .where((country) {
+              final normalizedQuery = _query.trim().toLowerCase();
+              if (normalizedQuery.isEmpty) {
+                return true;
+              }
+              return country.name.toLowerCase().contains(normalizedQuery);
+            })
+            .toList(growable: false)
+          ..sort((left, right) {
+            final leftSelected = left.id == widget.selectedCountryId ? 1 : 0;
+            final rightSelected = right.id == widget.selectedCountryId ? 1 : 0;
+            if (leftSelected != rightSelected) {
+              return rightSelected.compareTo(leftSelected);
+            }
+
+            final leftSelectable = widget.isSelectable(left) ? 1 : 0;
+            final rightSelectable = widget.isSelectable(right) ? 1 : 0;
+            if (leftSelectable != rightSelectable) {
+              return rightSelectable.compareTo(leftSelectable);
+            }
+
+            return left.name.compareTo(right.name);
+          });
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.82,
+      minChildSize: 0.55,
+      maxChildSize: 0.94,
+      expand: false,
+      builder: (context, scrollController) {
+        return FrostedPanel(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.textSoftFor(
+                      context,
+                    ).withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                widget.title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _searchController,
+                onChanged: (value) => setState(() => _query = value),
+                decoration: InputDecoration(
+                  hintText: context.l10n.journeyPickerSearchHint,
+                  prefixIcon: const Icon(Icons.search_rounded),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Expanded(
+                child: filtered.isEmpty
+                    ? Center(
+                        child: Text(
+                          context.l10n.journeyPickerNoResults,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.textSoftFor(context)),
+                        ),
+                      )
+                    : ListView.separated(
+                        controller: scrollController,
+                        itemCount: filtered.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          final country = filtered[index];
+                          return _QuestionInlineCountryCard(
+                            country: country,
+                            isSelected: widget.selectedCountryId == country.id,
+                            isEnabled: widget.isSelectable(country),
+                            availabilityLabel: widget.availabilityLabelFor(
+                              country,
+                            ),
+                            onTap: widget.isSelectable(country)
+                                ? () => Navigator.of(context).pop(country)
+                                : null,
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -1419,10 +2521,9 @@ class _QuestionSubnote extends StatelessWidget {
 }
 
 class _ProcessingState extends StatelessWidget {
-  const _ProcessingState({required this.title, required this.body});
+  const _ProcessingState({required this.title});
 
   final String title;
-  final String body;
 
   @override
   Widget build(BuildContext context) {
@@ -1442,15 +2543,6 @@ class _ProcessingState extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              body,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSoftFor(context),
-                height: 1.45,
-              ),
             ),
           ],
         ),
@@ -1752,6 +2844,71 @@ class _ExitFlowDialog extends StatelessWidget {
                   child: FilledButton(
                     onPressed: () => Navigator.pop(context, true),
                     child: Text(leaveLabel),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuestionLocationDialog extends StatelessWidget {
+  const _QuestionLocationDialog({
+    required this.title,
+    required this.body,
+    required this.secondaryLabel,
+    required this.primaryLabel,
+  });
+
+  final String title;
+  final String body;
+  final String secondaryLabel;
+  final String primaryLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+      child: FrostedPanel(
+        padding: const EdgeInsets.all(22),
+        borderRadius: BorderRadius.circular(28),
+        backgroundColor: AppColors.isDark(context)
+            ? const Color(0xEE0F1722)
+            : const Color(0xF7FFFFFF),
+        borderColor: AppColors.isDark(context)
+            ? Colors.white.withValues(alpha: 0.08)
+            : AppColors.primary.withValues(alpha: 0.10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 10),
+            Text(
+              body,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.45,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text(secondaryLabel),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text(primaryLabel),
                   ),
                 ),
               ],

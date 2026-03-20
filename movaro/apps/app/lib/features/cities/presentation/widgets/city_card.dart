@@ -37,30 +37,18 @@ class CityCard extends StatelessWidget {
     );
     final isCoastal = CityCoastalProfile.isCoastal(city);
     final isDark = AppColors.isDark(context);
-    final textSoft = Colors.white.withValues(alpha: 0.80);
-    final textPrimary = Colors.white;
     final cardBorder = isDark
         ? Colors.white.withValues(alpha: 0.08)
         : AppColors.primary.withValues(alpha: 0.10);
     final cardShadow = isDark
         ? Colors.black.withValues(alpha: 0.16)
         : const Color(0x1A315A8A);
-    final glassFill = isDark
-        ? Colors.white.withValues(alpha: 0.12)
-        : const Color(0xF2FFFFFF);
-    final glassBorder = isDark
-        ? Colors.white.withValues(alpha: 0.18)
-        : AppColors.primary.withValues(alpha: 0.12);
-    final iconChrome = isDark
-        ? Colors.white
-        : const Color(0xFF183A70);
+    final iconChrome = isDark ? Colors.white : const Color(0xFF183A70);
     final favoriteFill = isDark
         ? Colors.white.withValues(alpha: 0.16)
         : const Color(0xD9FFFFFF);
-    final panelText = isDark ? Colors.white : const Color(0xFF10233F);
-    final panelSoftText = isDark
-        ? Colors.white.withValues(alpha: 0.76)
-        : const Color(0xCC28476D);
+    final panelText = AppColors.textPrimaryFor(context);
+    final panelSoftText = AppColors.textSoftFor(context);
     final metricItems = [
       _MetricSummary(
         label: context.l10n.cityDetailCostLabel,
@@ -98,6 +86,7 @@ class CityCard extends StatelessWidget {
       onTap: onTap,
       child: DecoratedBox(
         decoration: BoxDecoration(
+          color: AppColors.surfaceFor(context),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(color: cardBorder),
           boxShadow: [
@@ -111,11 +100,90 @@ class CityCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CityImageBackdrop(
+            CityImageHeader(
               city: city,
-              borderRadius: BorderRadius.circular(30),
-              overlayOpacity: isDark ? 0.8 : 0.72,
-              padding: const EdgeInsets.all(20),
+              height: 176,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(30),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        _GlassPill(
+                          child: Text(
+                            highlightLabel,
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  color: iconChrome,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          onPressed: onFavoriteToggle,
+                          style: IconButton.styleFrom(
+                            backgroundColor: favoriteFill,
+                            foregroundColor: isFavorite
+                                ? const Color(0xFFFF8FA7)
+                                : iconChrome,
+                          ),
+                          icon: Icon(
+                            isFavorite
+                                ? Icons.favorite_rounded
+                                : Icons.favorite_border_rounded,
+                            size: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        if (isCoastal)
+                          _GlassPill(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.waves_rounded,
+                                  size: 14,
+                                  color: iconChrome,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  context.l10n.citiesQuickFilterCoastal,
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        color: iconChrome,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (isCoastal) const SizedBox(width: 8),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: CityWeatherBadge(
+                              cityId: city.id,
+                              citiesController: citiesController,
+                              compact: true,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -128,102 +196,25 @@ class CityCard extends StatelessWidget {
                           children: [
                             Text(
                               city.name,
-                              style: Theme.of(context).textTheme.titleMedium
+                              style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(
-                                    color: textPrimary,
+                                    color: panelText,
                                     fontWeight: FontWeight.w800,
                                   ),
                             ),
                             const SizedBox(height: 4),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                Text(
-                                  '${city.stateName} (${city.stateCode})',
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(color: textSoft),
-                                ),
-                                if (isCoastal)
-                                  _GlassPill(
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.waves_rounded,
-                                          size: 14,
-                                          color: iconChrome,
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          context.l10n.citiesQuickFilterCoastal,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelSmall
-                                              ?.copyWith(
-                                                color: iconChrome,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
+                            Text(
+                              '${city.stateName} (${city.stateCode})',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: panelSoftText),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            onPressed: onFavoriteToggle,
-                            style: IconButton.styleFrom(
-                              backgroundColor: favoriteFill,
-                              foregroundColor: isFavorite
-                                  ? const Color(0xFFFF8FA7)
-                                  : iconChrome,
-                            ),
-                            icon: Icon(
-                              isFavorite
-                                  ? Icons.favorite_rounded
-                                  : Icons.favorite_border_rounded,
-                              size: 18,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.arrow_outward_rounded,
-                            color: iconChrome,
-                          ),
-                        ],
-                      ),
+                      _CityScoreStars(score: city.movaroScores.overall),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _GlassPill(
-                        child: Text(
-                          highlightLabel,
-                          style: Theme.of(context).textTheme.labelMedium
-                              ?.copyWith(
-                                color: panelText,
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
-                      ),
-                      CityWeatherBadge(
-                        cityId: city.id,
-                        citiesController: citiesController,
-                        compact: true,
-                      ),
-                  ],
-                ),
                   const SizedBox(height: 14),
                   _CardSnapshotPanel(
                     city: city,
@@ -231,8 +222,8 @@ class CityCard extends StatelessWidget {
                     housing: housing,
                     panelText: panelText,
                     panelSoftText: panelSoftText,
-                    glassFill: glassFill,
-                    glassBorder: glassBorder,
+                    glassFill: AppColors.surfaceMutedFor(context),
+                    glassBorder: AppColors.borderFor(context),
                   ),
                   const SizedBox(height: 10),
                   if (positiveMetrics.isNotEmpty) ...[
@@ -262,6 +253,49 @@ class CityCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CityScoreStars extends StatelessWidget {
+  const _CityScoreStars({required this.score});
+
+  final int score;
+
+  @override
+  Widget build(BuildContext context) {
+    final stars = (score / 20).clamp(1, 5).round();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMutedFor(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderFor(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var index = 0; index < 5; index++)
+                Icon(
+                  index < stars ? Icons.star_rounded : Icons.star_border_rounded,
+                  size: 14,
+                  color: const Color(0xFFF2B94B),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$score/100',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: AppColors.textPrimaryFor(context),
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
       ),
     );
   }

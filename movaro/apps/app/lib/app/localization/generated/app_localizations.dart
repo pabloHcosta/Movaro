@@ -1063,6 +1063,90 @@ abstract class AppLocalizations {
   /// **'Got it'**
   String get documentationGuidePrimaryAction;
 
+  /// No description provided for @documentationGuideModalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the practical guide faster'**
+  String get documentationGuideModalTitle;
+
+  /// No description provided for @documentationGuideModalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the country you want to review, search a topic or question, and open the section that removes the next blocker.'**
+  String get documentationGuideModalBody;
+
+  /// No description provided for @documentationGuideModalStepCountryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the country'**
+  String get documentationGuideModalStepCountryTitle;
+
+  /// No description provided for @documentationGuideModalStepCountryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The guide opens with your destination country when available, but you can switch countries at any time.'**
+  String get documentationGuideModalStepCountryBody;
+
+  /// No description provided for @documentationGuideModalStepSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by need'**
+  String get documentationGuideModalStepSearchTitle;
+
+  /// No description provided for @documentationGuideModalStepSearchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a topic, document, or everyday question to jump to the most relevant section.'**
+  String get documentationGuideModalStepSearchBody;
+
+  /// No description provided for @documentationGuideModalStepOpenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the section'**
+  String get documentationGuideModalStepOpenTitle;
+
+  /// No description provided for @documentationGuideModalStepOpenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use filters or results to go straight into documents, housing, health, work, driving, or costs.'**
+  String get documentationGuideModalStepOpenBody;
+
+  /// No description provided for @documentationGuideNoPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No plan selected yet'**
+  String get documentationGuideNoPlanTitle;
+
+  /// No description provided for @documentationGuideNoPlanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still use the practical guide. We loaded {country} for now, and you can switch countries whenever you need.'**
+  String documentationGuideNoPlanBody(Object country);
+
+  /// No description provided for @documentationGuideCountryPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{country} guide is not available yet'**
+  String documentationGuideCountryPendingTitle(Object country);
+
+  /// No description provided for @documentationGuideCountryPendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Movaro currently has practical guide coverage for Brazil. Choose Brazil to continue browsing the available guidance.'**
+  String get documentationGuideCountryPendingBody;
+
+  /// No description provided for @documentationGuideUsingPlanLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'From your plan'**
+  String get documentationGuideUsingPlanLabel;
+
+  /// No description provided for @documentationGuideManualCountryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual country'**
+  String get documentationGuideManualCountryLabel;
+
   /// No description provided for @documentationSearchResultsCount.
   ///
   /// In en, this message translates to:
@@ -5233,6 +5317,12 @@ abstract class AppLocalizations {
   /// **'Back'**
   String get commonBackAction;
 
+  /// No description provided for @commonGotItAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get commonGotItAction;
+
   /// No description provided for @protectedCommunityCreateTitle.
   ///
   /// In en, this message translates to:
@@ -5413,6 +5503,36 @@ abstract class AppLocalizations {
   /// **'Use {country} as origin'**
   String journeyDetectedConfirmAction(Object country);
 
+  /// No description provided for @questionnaireOriginAutoDetectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We found your location'**
+  String get questionnaireOriginAutoDetectTitle;
+
+  /// No description provided for @questionnaireOriginUnsupportedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This country is not supported yet'**
+  String get questionnaireOriginUnsupportedTitle;
+
+  /// No description provided for @questionnaireOriginLocationFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not detect your location'**
+  String get questionnaireOriginLocationFailedTitle;
+
+  /// No description provided for @questionnaireOriginUnsupportedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Movaro detected {country}, but the guided plan is only available for people coming from Argentina right now. You can choose Argentina manually or use it to continue.'**
+  String questionnaireOriginUnsupportedBody(Object country);
+
+  /// No description provided for @questionnaireOriginUseArgentinaAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Argentina'**
+  String get questionnaireOriginUseArgentinaAction;
+
   /// No description provided for @journeyDetectedManualAction.
   ///
   /// In en, this message translates to:
@@ -5448,6 +5568,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose where you want the migration plan to point. Destination is still required before the questionnaire starts.'**
   String get journeyDestinationSectionBody;
+
+  /// No description provided for @journeyPickerChooseDestinationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose destination'**
+  String get journeyPickerChooseDestinationTitle;
+
+  /// No description provided for @journeyPickerChooseOriginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose origin'**
+  String get journeyPickerChooseOriginTitle;
+
+  /// No description provided for @journeyPickerSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search country'**
+  String get journeyPickerSearchHint;
+
+  /// No description provided for @journeyPickerNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No countries found'**
+  String get journeyPickerNoResults;
 
   /// No description provided for @journeyCoverageFull.
   ///
@@ -7939,11 +8083,215 @@ abstract class AppLocalizations {
   /// **'Initial compatibility'**
   String get migrationPlanResultCompatibilityInitial;
 
+  /// No description provided for @migrationPlanResultCompatibilityHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How compatibility works'**
+  String get migrationPlanResultCompatibilityHelpTitle;
+
+  /// No description provided for @migrationPlanResultCompatibilityHelpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Compatibility combines your priorities, timeline, and migration goal with the signals available for each city. It is a directional match to help you start with the strongest city first.'**
+  String get migrationPlanResultCompatibilityHelpBody;
+
+  /// No description provided for @migrationPlanResultUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not load your city result.'**
+  String get migrationPlanResultUnavailableTitle;
+
+  /// No description provided for @migrationPlanResultUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again to reopen your recommendation and continue from the questionnaire.'**
+  String get migrationPlanResultUnavailableBody;
+
+  /// No description provided for @migrationPlanResultBasedOnAnswersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on your answers'**
+  String get migrationPlanResultBasedOnAnswersTitle;
+
+  /// No description provided for @migrationPlanResultCityDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'City data'**
+  String get migrationPlanResultCityDataTitle;
+
+  /// No description provided for @migrationPlanResultOtherCitiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Other compatible cities'**
+  String get migrationPlanResultOtherCitiesTitle;
+
+  /// No description provided for @migrationPlanResultReviewsMetricTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Public reviews'**
+  String get migrationPlanResultReviewsMetricTitle;
+
+  /// No description provided for @migrationPlanResultSafetyMetricTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety'**
+  String get migrationPlanResultSafetyMetricTitle;
+
+  /// No description provided for @migrationPlanResultPrimaryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start my plan in {city} ->'**
+  String migrationPlanResultPrimaryAction(Object city);
+
+  /// No description provided for @migrationPlanResultExploreDetailsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore the city in detail'**
+  String get migrationPlanResultExploreDetailsAction;
+
+  /// No description provided for @migrationPlanResultReasonFromPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'You chose: {label}'**
+  String migrationPlanResultReasonFromPriority(Object label);
+
+  /// No description provided for @migrationPlanResultReasonBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} keeps the entry cost more manageable, which helps you arrive with less pressure.'**
+  String migrationPlanResultReasonBudget(Object city);
+
+  /// No description provided for @migrationPlanResultReasonWork.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} shows a {signal} work signal, which gives you more room to move after arrival.'**
+  String migrationPlanResultReasonWork(Object city, Object signal);
+
+  /// No description provided for @migrationPlanResultReasonQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} stands out with a {signal} quality-of-life signal, which supports a steadier day-to-day routine.'**
+  String migrationPlanResultReasonQuality(Object city, Object signal);
+
+  /// No description provided for @migrationPlanResultReasonClimate.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} aligns well with the lifestyle you signaled, with {signal}.'**
+  String migrationPlanResultReasonClimate(Object city, Object signal);
+
+  /// No description provided for @migrationPlanResultReasonTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} gives you a more practical base if you need to move around the city often.'**
+  String migrationPlanResultReasonTransit(Object city);
+
+  /// No description provided for @migrationPlanResultReasonUniversity.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} keeps study and qualification paths closer if education is part of your plan.'**
+  String migrationPlanResultReasonUniversity(Object city);
+
+  /// No description provided for @migrationPlanResultReasonCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} has stronger adaptation signals for building routine and support once you arrive.'**
+  String migrationPlanResultReasonCommunity(Object city);
+
+  /// No description provided for @migrationPlanResultReasonProximity.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} keeps you on a route that feels easier to coordinate from Argentina.'**
+  String migrationPlanResultReasonProximity(Object city);
+
+  /// No description provided for @migrationPlanResultReasonBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} is the most balanced recommendation for your current profile across the available city signals.'**
+  String migrationPlanResultReasonBalanced(Object city);
+
+  /// No description provided for @migrationPlanResultWeatherPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather is updating'**
+  String get migrationPlanResultWeatherPending;
+
+  /// No description provided for @migrationPlanResultWeatherDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get migrationPlanResultWeatherDay;
+
+  /// No description provided for @migrationPlanResultWeatherNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Night'**
+  String get migrationPlanResultWeatherNight;
+
+  /// No description provided for @migrationPlanResultWeatherSunny.
+  ///
+  /// In en, this message translates to:
+  /// **'sunny right now'**
+  String get migrationPlanResultWeatherSunny;
+
+  /// No description provided for @migrationPlanResultWeatherCloudy.
+  ///
+  /// In en, this message translates to:
+  /// **'more cloudy conditions'**
+  String get migrationPlanResultWeatherCloudy;
+
+  /// No description provided for @migrationPlanResultWeatherRain.
+  ///
+  /// In en, this message translates to:
+  /// **'rain in the area'**
+  String get migrationPlanResultWeatherRain;
+
+  /// No description provided for @migrationPlanResultWeatherCold.
+  ///
+  /// In en, this message translates to:
+  /// **'cooler conditions'**
+  String get migrationPlanResultWeatherCold;
+
+  /// No description provided for @migrationPlanResultWeatherStorm.
+  ///
+  /// In en, this message translates to:
+  /// **'more unstable weather'**
+  String get migrationPlanResultWeatherStorm;
+
+  /// No description provided for @migrationPlanResultWeatherMild.
+  ///
+  /// In en, this message translates to:
+  /// **'mild weather'**
+  String get migrationPlanResultWeatherMild;
+
+  /// No description provided for @migrationPlanResultWeatherClearNight.
+  ///
+  /// In en, this message translates to:
+  /// **'clear night'**
+  String get migrationPlanResultWeatherClearNight;
+
   /// No description provided for @migrationPlanResultCostLabel.
   ///
   /// In en, this message translates to:
   /// **'Estimated cost'**
   String get migrationPlanResultCostLabel;
+
+  /// No description provided for @migrationPlanResultWeatherLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather now'**
+  String get migrationPlanResultWeatherLabel;
+
+  /// No description provided for @migrationPlanResultWhyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Why this city'**
+  String get migrationPlanResultWhyLabel;
+
+  /// No description provided for @migrationPlanResultReviewsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} reviews'**
+  String migrationPlanResultReviewsLabel(Object count);
 
   /// No description provided for @migrationPlanResultCostSupporting.
   ///

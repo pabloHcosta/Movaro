@@ -234,6 +234,30 @@
   "documentationGuideStepsLabel": "3 steps",
   "documentationGuideDismissAction": "Not now",
   "documentationGuidePrimaryAction": "Got it",
+  "documentationGuideModalTitle": "Use the practical guide faster",
+  "documentationGuideModalBody": "Choose the country you want to review, search a topic or question, and open the section that removes the next blocker.",
+  "documentationGuideModalStepCountryTitle": "Choose the country",
+  "documentationGuideModalStepCountryBody": "The guide opens with your destination country when available, but you can switch countries at any time.",
+  "documentationGuideModalStepSearchTitle": "Search by need",
+  "documentationGuideModalStepSearchBody": "Type a topic, document, or everyday question to jump to the most relevant section.",
+  "documentationGuideModalStepOpenTitle": "Open the section",
+  "documentationGuideModalStepOpenBody": "Use filters or results to go straight into documents, housing, health, work, driving, or costs.",
+  "documentationGuideNoPlanTitle": "No plan selected yet",
+  "documentationGuideNoPlanBody": "You can still use the practical guide. We loaded {country} for now, and you can switch countries whenever you need.",
+  "@documentationGuideNoPlanBody": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "documentationGuideCountryPendingTitle": "{country} guide is not available yet",
+  "@documentationGuideCountryPendingTitle": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "documentationGuideCountryPendingBody": "Movaro currently has practical guide coverage for Brazil. Choose Brazil to continue browsing the available guidance.",
+  "documentationGuideUsingPlanLabel": "From your plan",
+  "documentationGuideManualCountryLabel": "Manual country",
   "documentationSearchResultsCount": "{count} items found",
   "@documentationSearchResultsCount": {
     "placeholders": {
@@ -1173,6 +1197,7 @@
   "languageOptionPortuguese": "Português",
   "commonRetryAction": "Try again",
   "commonBackAction": "Back",
+  "commonGotItAction": "Got it",
   "protectedCommunityCreateTitle": "Create post",
   "protectedCommunityCreateDescription": "This area will allow community posting once that flow is enabled.",
   "questionOriginCountryTitle": "Where are you coming from?",
@@ -1228,12 +1253,26 @@
       "country": {}
     }
   },
+  "questionnaireOriginAutoDetectTitle": "We found your location",
+  "questionnaireOriginUnsupportedTitle": "This country is not supported yet",
+  "questionnaireOriginLocationFailedTitle": "We could not detect your location",
+  "questionnaireOriginUnsupportedBody": "Movaro detected {country}, but the guided plan is only available for people coming from Argentina right now. You can choose Argentina manually or use it to continue.",
+  "@questionnaireOriginUnsupportedBody": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "questionnaireOriginUseArgentinaAction": "Use Argentina",
   "journeyDetectedManualAction": "Choose origin manually",
   "journeyOriginSectionTitle": "Origin",
   "journeyOriginSectionBody": "Optional for now. Confirm it here if you already know it, or skip and answer it in the first questionnaire step.",
   "journeyOriginSkipAction": "Skip for now",
   "journeyDestinationSectionTitle": "Destination",
   "journeyDestinationSectionBody": "Choose where you want the migration plan to point. Destination is still required before the questionnaire starts.",
+  "journeyPickerChooseDestinationTitle": "Choose destination",
+  "journeyPickerChooseOriginTitle": "Choose origin",
+  "journeyPickerSearchHint": "Search country",
+  "journeyPickerNoResults": "No countries found",
   "journeyCoverageFull": "Full coverage",
   "journeyCoveragePartial": "Partial coverage",
   "journeyCoverageUnsupported": "Unsupported",
@@ -1851,7 +1890,104 @@
   "migrationPlanResultCompatibilityHigh": "High compatibility",
   "migrationPlanResultCompatibilityMedium": "Good compatibility",
   "migrationPlanResultCompatibilityInitial": "Initial compatibility",
+  "migrationPlanResultCompatibilityHelpTitle": "How compatibility works",
+  "migrationPlanResultCompatibilityHelpBody": "Compatibility combines your priorities, timeline, and migration goal with the signals available for each city. It is a directional match to help you start with the strongest city first.",
+  "migrationPlanResultUnavailableTitle": "We could not load your city result.",
+  "migrationPlanResultUnavailableBody": "Try again to reopen your recommendation and continue from the questionnaire.",
+  "migrationPlanResultBasedOnAnswersTitle": "Based on your answers",
+  "migrationPlanResultCityDataTitle": "City data",
+  "migrationPlanResultOtherCitiesTitle": "Other compatible cities",
+  "migrationPlanResultReviewsMetricTitle": "Public reviews",
+  "migrationPlanResultSafetyMetricTitle": "Safety",
+  "migrationPlanResultPrimaryAction": "Start my plan in {city} ->",
+  "@migrationPlanResultPrimaryAction": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultExploreDetailsAction": "Explore the city in detail",
+  "migrationPlanResultReasonFromPriority": "You chose: {label}",
+  "@migrationPlanResultReasonFromPriority": {
+    "placeholders": {
+      "label": {}
+    }
+  },
+  "migrationPlanResultReasonBudget": "{city} keeps the entry cost more manageable, which helps you arrive with less pressure.",
+  "@migrationPlanResultReasonBudget": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultReasonWork": "{city} shows a {signal} work signal, which gives you more room to move after arrival.",
+  "@migrationPlanResultReasonWork": {
+    "placeholders": {
+      "city": {},
+      "signal": {}
+    }
+  },
+  "migrationPlanResultReasonQuality": "{city} stands out with a {signal} quality-of-life signal, which supports a steadier day-to-day routine.",
+  "@migrationPlanResultReasonQuality": {
+    "placeholders": {
+      "city": {},
+      "signal": {}
+    }
+  },
+  "migrationPlanResultReasonClimate": "{city} aligns well with the lifestyle you signaled, with {signal}.",
+  "@migrationPlanResultReasonClimate": {
+    "placeholders": {
+      "city": {},
+      "signal": {}
+    }
+  },
+  "migrationPlanResultReasonTransit": "{city} gives you a more practical base if you need to move around the city often.",
+  "@migrationPlanResultReasonTransit": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultReasonUniversity": "{city} keeps study and qualification paths closer if education is part of your plan.",
+  "@migrationPlanResultReasonUniversity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultReasonCommunity": "{city} has stronger adaptation signals for building routine and support once you arrive.",
+  "@migrationPlanResultReasonCommunity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultReasonProximity": "{city} keeps you on a route that feels easier to coordinate from Argentina.",
+  "@migrationPlanResultReasonProximity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultReasonBalanced": "{city} is the most balanced recommendation for your current profile across the available city signals.",
+  "@migrationPlanResultReasonBalanced": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "migrationPlanResultWeatherPending": "Weather is updating",
+  "migrationPlanResultWeatherDay": "Day",
+  "migrationPlanResultWeatherNight": "Night",
+  "migrationPlanResultWeatherSunny": "sunny right now",
+  "migrationPlanResultWeatherCloudy": "more cloudy conditions",
+  "migrationPlanResultWeatherRain": "rain in the area",
+  "migrationPlanResultWeatherCold": "cooler conditions",
+  "migrationPlanResultWeatherStorm": "more unstable weather",
+  "migrationPlanResultWeatherMild": "mild weather",
+  "migrationPlanResultWeatherClearNight": "clear night",
   "migrationPlanResultCostLabel": "Estimated cost",
+  "migrationPlanResultWeatherLabel": "Weather now",
+  "migrationPlanResultWhyLabel": "Why this city",
+  "migrationPlanResultReviewsLabel": "{count} reviews",
+  "@migrationPlanResultReviewsLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "migrationPlanResultCostSupporting": "A directional read based on city cost and rent signals.",
   "migrationPlanResultCostLower": "Lower",
   "migrationPlanResultCostMedium": "Moderate",

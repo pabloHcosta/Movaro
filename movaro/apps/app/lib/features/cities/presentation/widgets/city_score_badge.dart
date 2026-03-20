@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
 
@@ -50,6 +51,7 @@ class CityScoreBadge extends StatelessWidget {
     final minWidth = compact ? 0.0 : 172.0;
     final iconSize = compact ? 16.0 : 18.0;
     final iconBoxSize = compact ? 34.0 : 30.0;
+    final trendIcon = _trendIcon(metric.badge, context);
 
     if (compact) {
       return Container(
@@ -107,15 +109,28 @@ class CityScoreBadge extends StatelessWidget {
                     maxLines: 2,
                   ),
                   const SizedBox(height: 3),
-                  Text(
-                    metric.supporting,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: textSoft,
-                      height: 1.15,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 10.5,
-                    ),
-                    maxLines: 2,
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      _ScoreValuePill(
+                        value: value,
+                        tint: metric.tint,
+                        trendIcon: trendIcon,
+                        compact: true,
+                      ),
+                      Text(
+                        metric.supporting,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: textSoft,
+                          height: 1.15,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 10.5,
+                        ),
+                        maxLines: 2,
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -208,20 +223,84 @@ class CityScoreBadge extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-            decoration: BoxDecoration(
-              color: badgeBackground,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              metric.badge,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: metric.tint,
-                fontWeight: FontWeight.w700,
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _ScoreValuePill(
+                value: value,
+                tint: metric.tint,
+                trendIcon: trendIcon,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                decoration: BoxDecoration(
+                  color: badgeBackground,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  metric.badge,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: metric.tint,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _trendIcon(String badge, BuildContext context) {
+    if (badge == context.l10n.cityMetricBadgePositive) {
+      return Icons.trending_up_rounded;
+    }
+    if (badge == context.l10n.cityMetricBadgeNeutral) {
+      return Icons.remove_rounded;
+    }
+    return Icons.trending_down_rounded;
+  }
+}
+
+class _ScoreValuePill extends StatelessWidget {
+  const _ScoreValuePill({
+    required this.value,
+    required this.tint,
+    required this.trendIcon,
+    this.compact = false,
+  });
+
+  final int value;
+  final Color tint;
+  final IconData trendIcon;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 8 : 10,
+        vertical: compact ? 5 : 6,
+      ),
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: tint.withValues(alpha: 0.14)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(trendIcon, size: compact ? 13 : 14, color: tint),
+          const SizedBox(width: 6),
+          Text(
+            '$value',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: tint,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],

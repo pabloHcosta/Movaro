@@ -10,28 +10,40 @@ import 'package:movaro_app/core/errors/error_handler.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/empty_state_widget.dart';
 import 'package:movaro_app/core/widgets/error_state_widget.dart';
+import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/loading_state_widget.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
+import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_arrival_profile_ranker.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_card.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/methodology_info_banner.dart';
+import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 
 class CitiesExplorePage extends StatefulWidget {
-  const CitiesExplorePage({required this.citiesController, super.key});
+  const CitiesExplorePage({
+    required this.citiesController,
+    this.journeyContextController,
+    this.migrationQuestionnaireController,
+    super.key,
+  });
 
   final CitiesController citiesController;
+  final JourneyContextController? journeyContextController;
+  final MigrationQuestionnaireController? migrationQuestionnaireController;
 
   @override
   State<CitiesExplorePage> createState() => _CitiesExplorePageState();
 }
 
 class _CitiesExplorePageState extends State<CitiesExplorePage> {
+  static const _helpPreferenceKey = 'cities_explore_page';
   static const _pageSize = 8;
 
   late final TextEditingController _searchController;
@@ -39,6 +51,7 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
   Timer? _searchDebounce;
   _CityQuickFilter? _quickFilter;
   int _visibleCount = _pageSize;
+  bool _didTryAutoHelp = false;
 
   @override
   void initState() {
@@ -48,6 +61,9 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
     widget.citiesController.loadExplore();
     widget.citiesController.loadCatalog();
     widget.citiesController.loadMethodology();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeShowHelp();
+    });
   }
 
   @override
@@ -68,7 +84,6 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
         final controller = widget.citiesController;
         final l10n = context.l10n;
         final isDark = AppColors.isDark(context);
-        final textPrimary = AppColors.textPrimaryFor(context);
         final textSoft = AppColors.textSoftFor(context);
         final hasQuery = _searchController.text.trim().isNotEmpty;
         final visibleCities = _visibleCities(controller);
@@ -104,17 +119,20 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                   children: [
                     AppGlassHeader(
                       title: l10n.citiesExploreTitle,
-                      onBack: () => Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        AppRoutes.publicHome,
-                        (route) => false,
-                      ),
+                      onBack: () => Navigator.canPop(context)
+                          ? Navigator.maybePop(context)
+                          : Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              AppRoutes.publicHome,
+                              (route) => false,
+                            ),
+                      onHelp: _showHelp,
                     ),
                     const SizedBox(height: 16),
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 1120),
                       child: FrostedPanel(
-                        padding: const EdgeInsets.all(32),
+                        padding: const EdgeInsets.all(24),
                         gradient: LinearGradient(
                           colors: [
                             isDark
@@ -136,26 +154,9 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              l10n.citiesExploreHeadline,
-                              style: Theme.of(context).textTheme.displaySmall
-                                  ?.copyWith(color: textPrimary),
-                            ),
-                            const SizedBox(height: 12),
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 760),
-                              child: Text(
-                                l10n.citiesExploreSearchFirstDescription,
-                                style: Theme.of(context).textTheme.bodyLarge
-                                    ?.copyWith(color: textSoft),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
                             _CitiesSearchField(
                               controller: _searchController,
                               hintText: l10n.citiesSearchHint,
-                              labelText: l10n.citiesSearchFieldLabel,
-                              helperText: l10n.citiesSearchHelper,
                               onChanged: _handleSearchChanged,
                               onSubmitted: (_) =>
                                   _handlePrimarySearchAction(suggestions),
@@ -193,13 +194,6 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1120),
-                      child: MethodologyInfoBanner(
-                        message: l10n.citiesMethodologyNote,
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -257,9 +251,7 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                           children: [
                             _ResultsHeader(
                               title: l10n.citiesResultsTitle,
-                              body: l10n.citiesResultsBody(
-                                pagedCities.length,
-                              ),
+                              body: l10n.citiesResultsBody(pagedCities.length),
                             ),
                             const SizedBox(height: 16),
                             for (final city in pagedCities) ...[
@@ -308,8 +300,64 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
               ),
             ],
           ),
+          bottomNavigationBar:
+              widget.journeyContextController != null &&
+                  widget.migrationQuestionnaireController != null
+              ? MainNavigationBar(
+                  currentIndex: 1,
+                  journeyContextController: widget.journeyContextController!,
+                  citiesController: widget.citiesController,
+                  migrationQuestionnaireController:
+                      widget.migrationQuestionnaireController!,
+                )
+              : null,
         );
       },
+    );
+  }
+
+  Future<void> _maybeShowHelp() async {
+    if (_didTryAutoHelp) {
+      return;
+    }
+    _didTryAutoHelp = true;
+    await maybeShowContextualHelpGuide(
+      context,
+      preferenceKey: _helpPreferenceKey,
+      content: _helpContent(context),
+    );
+  }
+
+  Future<void> _showHelp() {
+    return showContextualHelpGuide(
+      context,
+      preferenceKey: _helpPreferenceKey,
+      content: _helpContent(context),
+    );
+  }
+
+  ContextualHelpContent _helpContent(BuildContext context) {
+    return ContextualHelpContent(
+      eyebrow: context.l10n.citiesGuideEyebrow,
+      title: context.l10n.citiesGuideTitle,
+      body: context.l10n.citiesGuideBody,
+      steps: [
+        FeatureGuideStep(
+          number: '1',
+          title: context.l10n.citiesGuideStepOneTitle,
+          body: context.l10n.citiesGuideStepOneBody,
+        ),
+        FeatureGuideStep(
+          number: '2',
+          title: context.l10n.citiesGuideStepTwoTitle,
+          body: context.l10n.citiesGuideStepTwoBody,
+        ),
+        FeatureGuideStep(
+          number: '3',
+          title: context.l10n.citiesGuideStepThreeTitle,
+          body: context.l10n.citiesGuideStepThreeBody,
+        ),
+      ],
     );
   }
 
@@ -647,8 +695,6 @@ class _CitiesSearchField extends StatelessWidget {
   const _CitiesSearchField({
     required this.controller,
     required this.hintText,
-    required this.labelText,
-    required this.helperText,
     required this.onChanged,
     required this.onSubmitted,
     required this.onClear,
@@ -656,42 +702,27 @@ class _CitiesSearchField extends StatelessWidget {
 
   final TextEditingController controller;
   final String hintText;
-  final String labelText;
-  final String helperText;
   final ValueChanged<String> onChanged;
   final ValueChanged<String> onSubmitted;
   final VoidCallback? onClear;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          controller: controller,
-          onChanged: onChanged,
-          onSubmitted: onSubmitted,
-          textInputAction: TextInputAction.search,
-          decoration: InputDecoration(
-            hintText: hintText,
-            labelText: labelText,
-            prefixIcon: const Icon(Icons.search_rounded),
-            suffixIcon: onClear == null
-                ? null
-                : IconButton(
-                    onPressed: onClear,
-                    icon: const Icon(Icons.close_rounded),
-                  ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          helperText,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.textSoftFor(context),
-          ),
-        ),
-      ],
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        hintText: hintText,
+        prefixIcon: const Icon(Icons.search_rounded),
+        suffixIcon: onClear == null
+            ? null
+            : IconButton(
+                onPressed: onClear,
+                icon: const Icon(Icons.close_rounded),
+              ),
+      ),
     );
   }
 }

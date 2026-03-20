@@ -11,11 +11,11 @@ import 'package:movaro_app/core/journey/journey_country_metadata.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/contextual_help.dart';
+import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/movaro_logo.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
-
-enum _JourneyEntryMode { none, useLocation, manual }
 
 class JourneySetupPage extends StatefulWidget {
   const JourneySetupPage({
@@ -32,20 +32,16 @@ class JourneySetupPage extends StatefulWidget {
 }
 
 class _JourneySetupPageState extends State<JourneySetupPage> {
+  static const _helpPreferenceKey = 'journey_setup';
   String? _originId;
   String? _destinationId;
-  _JourneyEntryMode _entryMode = _JourneyEntryMode.none;
+  bool _didTryAutoHelp = false;
 
   @override
   void initState() {
     super.initState();
     _originId = widget.journeyContextController.originCountryId;
     _destinationId = widget.journeyContextController.destinationCountryId;
-    _entryMode = widget.journeyContextController.hasDetectedLocation
-        ? _JourneyEntryMode.useLocation
-        : (widget.journeyContextController.hasJourneyDraft
-              ? _JourneyEntryMode.manual
-              : _JourneyEntryMode.none);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await widget.catalogRepository.getCountries();
@@ -57,7 +53,86 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
         _originId = widget.journeyContextController.originCountryId;
         _destinationId = widget.journeyContextController.destinationCountryId;
       });
+      await _maybeShowHelp();
     });
+  }
+
+  Future<void> _maybeShowHelp() async {
+    if (_didTryAutoHelp) {
+      return;
+    }
+    _didTryAutoHelp = true;
+    await maybeShowContextualHelpGuide(
+      context,
+      preferenceKey: _helpPreferenceKey,
+      content: _helpContent(context),
+    );
+  }
+
+  Future<void> _showHelp() {
+    return showContextualHelpGuide(
+      context,
+      preferenceKey: _helpPreferenceKey,
+      content: _helpContent(context),
+    );
+  }
+
+  Future<void> _openCountryPicker({
+    required String title,
+    required List<CatalogCountry> countries,
+    required String? selectedCountryId,
+    required String Function(CatalogCountry country) availabilityLabelFor,
+    required bool Function(CatalogCountry country) isSelectable,
+    required ValueChanged<CatalogCountry> onSelect,
+  }) async {
+    final selected = await showModalBottomSheet<CatalogCountry>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => _CountryPickerSheet(
+        title: title,
+        countries: countries,
+        selectedCountryId: selectedCountryId,
+        availabilityLabelFor: availabilityLabelFor,
+        isSelectable: isSelectable,
+      ),
+    );
+
+    if (selected == null) {
+      return;
+    }
+
+    onSelect(selected);
+  }
+
+  ContextualHelpContent _helpContent(BuildContext context) {
+    final l10n = context.l10n;
+    return ContextualHelpContent(
+      eyebrow: l10n.journeySetupPageTitle,
+      title: 'Pick a route in one place',
+      body:
+          'Choose destination, optionally use location as a hint, and keep origin editable before starting the questionnaire.',
+      steps: [
+        FeatureGuideStep(
+          number: '1',
+          title: 'Choose the destination',
+          body:
+              'Select where you want to move first so the next steps stay relevant.',
+        ),
+        FeatureGuideStep(
+          number: '2',
+          title: 'Use location only if helpful',
+          body:
+              'Device location is optional and only suggests an origin. You can change it manually anytime.',
+        ),
+        FeatureGuideStep(
+          number: '3',
+          title: 'Start when ready',
+          body:
+              'You can continue to the questionnaire or browse cities and content without finishing setup first.',
+        ),
+      ],
+    );
   }
 
   @override
@@ -70,7 +145,9 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
       builder: (context, _) {
         final origins = controller.availableOrigins;
         final destinations = controller.availableDestinations;
-        final selectedOrigin = origins.where((c) => c.id == _originId).firstOrNull;
+        final selectedOrigin = origins
+            .where((c) => c.id == _originId)
+            .firstOrNull;
         final selectedDestination = destinations
             .where((c) => c.id == _destinationId)
             .firstOrNull;
@@ -92,6 +169,7 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
                       onBack: Navigator.canPop(context)
                           ? () => Navigator.maybePop(context)
                           : null,
+                      onHelp: _showHelp,
                     ),
                     Expanded(
                       child: SingleChildScrollView(
@@ -108,26 +186,130 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _IntroHero(
-                                  onUseLocation: () {
+                                  selectedDestination: selectedDestination,
+                                  selectedOrigin: selectedOrigin,
+                                ),
+                                const SizedBox(height: 16),
+                                _SelectorPanel(
+                                  title: l10n.journeyDestinationSectionTitle,
+                                  body: l10n.journeyDestinationSectionBody,
+                                  pickerTitle:
+                                      l10n.journeyPickerChooseDestinationTitle,
+                                  countries: destinations,
+                                  selectedCountryId: _destinationId,
+                                  availabilityLabelFor: (country) =>
+                                      _coverageLabel(
+                                        context,
+                                        country.coverage.destinationStatus,
+                                      ),
+                                  isSelectable:
+                                      controller.canChooseAsDestination,
+                                  useQuickChoices: destinations.length <= 4,
+                                  onOpenPicker: () => _openCountryPicker(
+                                    title: l10n
+                                        .journeyPickerChooseDestinationTitle,
+                                    countries: destinations,
+                                    selectedCountryId: _destinationId,
+                                    availabilityLabelFor: (country) =>
+                                        _coverageLabel(
+                                          context,
+                                          country.coverage.destinationStatus,
+                                        ),
+                                    isSelectable:
+                                        controller.canChooseAsDestination,
+                                    onSelect: (country) async {
+                                      setState(() {
+                                        _destinationId = country.id;
+                                      });
+                                      await controller.setDestinationCountry(
+                                        country.id,
+                                      );
+                                    },
+                                  ),
+                                  onTap: (country) async {
                                     setState(() {
-                                      _entryMode = _JourneyEntryMode.useLocation;
+                                      _destinationId = country.id;
                                     });
-                                  },
-                                  onChooseManual: () {
-                                    setState(() {
-                                      _entryMode = _JourneyEntryMode.manual;
-                                    });
+                                    await controller.setDestinationCountry(
+                                      country.id,
+                                    );
                                   },
                                 ),
                                 const SizedBox(height: 16),
-                                if (_entryMode == _JourneyEntryMode.useLocation)
-                                  _LocationHintPanel(
-                                    controller: controller,
-                                    onFallbackManual: () {
+                                _SelectorPanel(
+                                  title: l10n.journeyOriginSectionTitle,
+                                  body: l10n.journeyOriginSectionBody,
+                                  pickerTitle:
+                                      l10n.journeyPickerChooseOriginTitle,
+                                  countries: origins,
+                                  selectedCountryId: _originId,
+                                  onClear: _originId == null
+                                      ? null
+                                      : () async {
+                                          await controller.clearOriginCountry();
+                                          if (!mounted) {
+                                            return;
+                                          }
+                                          setState(() {
+                                            _originId = null;
+                                          });
+                                        },
+                                  availabilityLabelFor: (country) =>
+                                      _coverageLabel(
+                                        context,
+                                        country.coverage.originStatus,
+                                      ),
+                                  isSelectable: controller.canChooseAsOrigin,
+                                  onOpenPicker: () => _openCountryPicker(
+                                    title: l10n.journeyPickerChooseOriginTitle,
+                                    countries: origins,
+                                    selectedCountryId: _originId,
+                                    availabilityLabelFor: (country) =>
+                                        _coverageLabel(
+                                          context,
+                                          country.coverage.originStatus,
+                                        ),
+                                    isSelectable: controller.canChooseAsOrigin,
+                                    onSelect: (country) async {
                                       setState(() {
-                                        _entryMode = _JourneyEntryMode.manual;
+                                        _originId = country.id;
                                       });
+                                      await controller.setOriginCountry(
+                                        country.id,
+                                      );
                                     },
+                                  ),
+                                  onTap: (country) async {
+                                    setState(() {
+                                      _originId = country.id;
+                                    });
+                                    await controller.setOriginCountry(
+                                      country.id,
+                                    );
+                                  },
+                                  footer: _OriginAssistSection(
+                                    controller: controller,
+                                    onOpenPicker: () => _openCountryPicker(
+                                      title:
+                                          l10n.journeyPickerChooseOriginTitle,
+                                      countries: origins,
+                                      selectedCountryId: _originId,
+                                      availabilityLabelFor: (country) =>
+                                          _coverageLabel(
+                                            context,
+                                            country.coverage.originStatus,
+                                          ),
+                                      isSelectable:
+                                          controller.canChooseAsOrigin,
+                                      onSelect: (country) async {
+                                        setState(() {
+                                          _originId = country.id;
+                                        });
+                                        await controller.setOriginCountry(
+                                          country.id,
+                                        );
+                                      },
+                                    ),
                                     onConfirmDetectedOrigin: () async {
                                       await controller
                                           .confirmDetectedCountryAsOrigin();
@@ -139,126 +321,72 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
                                       });
                                     },
                                   ),
-                                if (_entryMode != _JourneyEntryMode.none) ...[
-                                  if (_entryMode == _JourneyEntryMode.useLocation)
-                                    const SizedBox(height: 16),
-                                  _SelectorPanel(
-                                    title: l10n.journeyOriginSectionTitle,
-                                    subtitle: l10n.journeyOriginSectionBody,
-                                    countries: origins,
-                                    selectedCountryId: _originId,
-                                    onClear: _originId == null
-                                        ? null
-                                        : () async {
-                                            await controller.clearOriginCountry();
-                                            if (!mounted) {
-                                              return;
-                                            }
-                                            setState(() {
-                                              _originId = null;
-                                            });
-                                          },
-                                    availabilityLabelFor: (country) =>
-                                        _coverageLabel(
-                                          context,
-                                          country.coverage.originStatus,
-                                        ),
-                                    isSelectable: controller.canChooseAsOrigin,
-                                    onTap: (country) async {
-                                      setState(() {
-                                        _originId = country.id;
-                                      });
-                                      await controller.setOriginCountry(
-                                        country.id,
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _SelectorPanel(
-                                    title: l10n.journeyDestinationSectionTitle,
-                                    subtitle: l10n.journeyDestinationSectionBody,
-                                    countries: destinations,
-                                    selectedCountryId: _destinationId,
-                                    availabilityLabelFor: (country) =>
-                                        _coverageLabel(
-                                          context,
-                                          country.coverage.destinationStatus,
-                                        ),
-                                    isSelectable: controller.canChooseAsDestination,
-                                    onTap: (country) async {
-                                      setState(() {
-                                        _destinationId = country.id;
-                                      });
-                                      await controller.setDestinationCountry(
-                                        country.id,
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _CoveragePanel(
-                                    selectedOrigin: selectedOrigin,
-                                    selectedDestination: selectedDestination,
-                                    detectedLocation: controller.detectedLocation,
-                                    routeSupported: routeSupported,
-                                    onChooseSupportedRoute: () {
-                                      setState(() {
-                                        _entryMode = _JourneyEntryMode.manual;
-                                        _originId = null;
-                                      });
-                                      controller.clearOriginCountry();
-                                    },
-                                  ),
-                                  const SizedBox(height: 18),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: FilledButton.icon(
-                                      onPressed: canContinue
-                                          ? () {
-                                              Navigator.pushReplacementNamed(
-                                                context,
-                                                AppRoutes.migrationQuestionnaire,
-                                              );
-                                            }
-                                          : null,
-                                      icon: const Icon(
-                                        Icons.arrow_forward_rounded,
-                                      ),
-                                      label: Text(
-                                        l10n.journeyEntryContinueAction,
-                                      ),
+                                ),
+                                const SizedBox(height: 16),
+                                _CoveragePanel(
+                                  selectedOrigin: selectedOrigin,
+                                  selectedDestination: selectedDestination,
+                                  detectedLocation: controller.detectedLocation,
+                                  routeSupported: routeSupported,
+                                  onChooseSupportedRoute: () {
+                                    setState(() {
+                                      _originId = null;
+                                    });
+                                    controller.clearOriginCountry();
+                                  },
+                                ),
+                                const SizedBox(height: 18),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: FilledButton.icon(
+                                    onPressed: canContinue
+                                        ? () {
+                                            Navigator.pushReplacementNamed(
+                                              context,
+                                              AppRoutes.migrationQuestionnaire,
+                                            );
+                                          }
+                                        : null,
+                                    icon: const Icon(
+                                      Icons.arrow_forward_rounded,
+                                    ),
+                                    label: Text(
+                                      canContinue
+                                          ? l10n.journeyEntryContinueAction
+                                          : l10n.journeyEntryStartAction,
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: OutlinedButton(
-                                          onPressed: () => Navigator.pushNamed(
-                                            context,
-                                            AppRoutes.explore,
-                                          ),
-                                          child: Text(
-                                            l10n.journeyCoverageBrowseAction,
-                                          ),
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        onPressed: () => Navigator.pushNamed(
+                                          context,
+                                          AppRoutes.explore,
+                                        ),
+                                        child: Text(
+                                          l10n.journeyCoverageBrowseAction,
                                         ),
                                       ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: OutlinedButton(
-                                          onPressed: () => Navigator.pushNamed(
-                                            context,
-                                            AppRoutes.documentationGuide,
-                                            arguments:
-                                                DocumentationGuideSection.documents,
-                                          ),
-                                          child: Text(
-                                            l10n.journeyCoverageContentAction,
-                                          ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        onPressed: () => Navigator.pushNamed(
+                                          context,
+                                          AppRoutes.documentationGuide,
+                                          arguments: DocumentationGuideSection
+                                              .documents,
+                                        ),
+                                        child: Text(
+                                          l10n.journeyCoverageContentAction,
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ],
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
@@ -286,71 +414,48 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
 
 class _IntroHero extends StatelessWidget {
   const _IntroHero({
-    required this.onUseLocation,
-    required this.onChooseManual,
+    required this.selectedDestination,
+    required this.selectedOrigin,
   });
 
-  final VoidCallback onUseLocation;
-  final VoidCallback onChooseManual;
+  final CatalogCountry? selectedDestination;
+  final CatalogCountry? selectedOrigin;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
     return FrostedPanel(
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const MovaroLogo(markSize: 24),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
           Text(
             l10n.journeyEntryDynamicTitle,
-            style: Theme.of(context).textTheme.headlineMedium,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
-          const SizedBox(height: 10),
-          Text(
-            l10n.journeyEntryDynamicBody,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.45,
-            ),
-          ),
-          const SizedBox(height: 22),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final compact = constraints.maxWidth < 760;
-              final cardWidth = compact
-                  ? constraints.maxWidth
-                  : (constraints.maxWidth - 12) / 2;
-
-              return Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  SizedBox(
-                    width: cardWidth,
-                    child: _EntryChoiceCard(
-                      icon: Icons.my_location_rounded,
-                      title: l10n.journeyEntryUseLocationTitle,
-                      body: l10n.journeyEntryUseLocationBody,
-                      actionLabel: l10n.journeyEntryUseLocationAction,
-                      onTap: onUseLocation,
-                    ),
-                  ),
-                  SizedBox(
-                    width: cardWidth,
-                    child: _EntryChoiceCard(
-                      icon: Icons.tune_rounded,
-                      title: l10n.journeyEntryManualTitle,
-                      body: l10n.journeyEntryManualBody,
-                      actionLabel: l10n.journeyEntryManualAction,
-                      onTap: onChooseManual,
-                    ),
-                  ),
-                ],
-              );
-            },
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _HeroStatusChip(
+                icon: Icons.flag_rounded,
+                label: selectedDestination == null
+                    ? l10n.journeyEntryDestinationLabel
+                    : l10n.journeyEntrySelectedDestination(
+                        selectedDestination!.name,
+                      ),
+              ),
+              _HeroStatusChip(
+                icon: Icons.my_location_rounded,
+                label: selectedOrigin == null
+                    ? l10n.journeyEntryOriginPending
+                    : '${l10n.journeyOriginSectionTitle}: ${selectedOrigin!.name}',
+              ),
+            ],
           ),
         ],
       ),
@@ -358,64 +463,118 @@ class _IntroHero extends StatelessWidget {
   }
 }
 
-class _LocationHintPanel extends StatelessWidget {
-  const _LocationHintPanel({
+class _HeroStatusChip extends StatelessWidget {
+  const _HeroStatusChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 420),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceMutedFor(context),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: AppColors.borderFor(context)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OriginAssistSection extends StatelessWidget {
+  const _OriginAssistSection({
     required this.controller,
-    required this.onFallbackManual,
+    required this.onOpenPicker,
     required this.onConfirmDetectedOrigin,
   });
 
   final JourneyContextController controller;
-  final VoidCallback onFallbackManual;
+  final VoidCallback onOpenPicker;
   final Future<void> Function() onConfirmDetectedOrigin;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final detected = controller.detectedLocation;
-
-    return FrostedPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.journeyLocationPanelTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.journeyLocationPanelBody,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 16),
-          if (!controller.hasDetectedLocation &&
-              !controller.isDetectingLocation) ...[
-            FilledButton.icon(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            OutlinedButton.icon(
               onPressed: controller.requestDetectedLocation,
               icon: const Icon(Icons.my_location_rounded),
-              label: Text(l10n.journeyEntryUseLocationAction),
+              label: Text(context.l10n.journeyEntryUseLocationAction),
             ),
-          ] else if (controller.isDetectingLocation) ...[
-            const LinearProgressIndicator(),
-          ] else if (detected != null) ...[
-            _DetectedLocationCard(
-              location: detected,
-              canConfirmOrigin: detected.hasMatchedCountry,
-              onConfirmOrigin: onConfirmDetectedOrigin,
-              onChooseManual: onFallbackManual,
-            ),
-          ] else ...[
-            _LocationErrorState(
-              state: controller.detectedLocationState,
-              onRetry: controller.requestDetectedLocation,
-              onChooseManual: onFallbackManual,
+            TextButton(
+              onPressed: onOpenPicker,
+              child: Text(context.l10n.journeyEntryManualAction),
             ),
           ],
-        ],
-      ),
+        ),
+        const SizedBox(height: 12),
+        _LocationAssistState(
+          controller: controller,
+          onConfirmDetectedOrigin: onConfirmDetectedOrigin,
+        ),
+      ],
+    );
+  }
+}
+
+class _LocationAssistState extends StatelessWidget {
+  const _LocationAssistState({
+    required this.controller,
+    required this.onConfirmDetectedOrigin,
+  });
+
+  final JourneyContextController controller;
+  final Future<void> Function() onConfirmDetectedOrigin;
+
+  @override
+  Widget build(BuildContext context) {
+    final detected = controller.detectedLocation;
+
+    if (!controller.hasDetectedLocation && !controller.isDetectingLocation) {
+      return const SizedBox.shrink();
+    }
+
+    if (controller.isDetectingLocation) {
+      return const LinearProgressIndicator();
+    }
+
+    if (detected != null) {
+      return _DetectedLocationCard(
+        location: detected,
+        canConfirmOrigin: detected.hasMatchedCountry,
+        onConfirmOrigin: onConfirmDetectedOrigin,
+      );
+    }
+
+    return _LocationErrorState(
+      state: controller.detectedLocationState,
+      onRetry: controller.requestDetectedLocation,
     );
   }
 }
@@ -425,13 +584,11 @@ class _DetectedLocationCard extends StatelessWidget {
     required this.location,
     required this.canConfirmOrigin,
     required this.onConfirmOrigin,
-    required this.onChooseManual,
   });
 
   final DetectedLocation location;
   final bool canConfirmOrigin;
   final Future<void> Function() onConfirmOrigin;
-  final VoidCallback onChooseManual;
 
   @override
   Widget build(BuildContext context) {
@@ -455,18 +612,10 @@ class _DetectedLocationCard extends StatelessWidget {
           Text(
             l10n.journeyDetectedLocationLabel(parts.join(' · ')),
             style: Theme.of(context).textTheme.titleSmall,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 8),
-          Text(
-            canConfirmOrigin
-                ? l10n.journeyDetectedConfirmBody(location.countryName)
-                : l10n.journeyDetectedUnknownBody(location.countryName),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 10,
             runSpacing: 10,
@@ -478,10 +627,6 @@ class _DetectedLocationCard extends StatelessWidget {
                     l10n.journeyDetectedConfirmAction(location.countryName),
                   ),
                 ),
-              OutlinedButton(
-                onPressed: onChooseManual,
-                child: Text(l10n.journeyDetectedManualAction),
-              ),
             ],
           ),
         ],
@@ -491,28 +636,14 @@ class _DetectedLocationCard extends StatelessWidget {
 }
 
 class _LocationErrorState extends StatelessWidget {
-  const _LocationErrorState({
-    required this.state,
-    required this.onRetry,
-    required this.onChooseManual,
-  });
+  const _LocationErrorState({required this.state, required this.onRetry});
 
   final DetectedLocationRequestState state;
   final Future<void> Function() onRetry;
-  final VoidCallback onChooseManual;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final body = switch (state) {
-      DetectedLocationRequestState.denied =>
-        l10n.journeyLocationDeniedBody,
-      DetectedLocationRequestState.deniedForever =>
-        l10n.journeyLocationDeniedForeverBody,
-      DetectedLocationRequestState.unavailable =>
-        l10n.journeyLocationUnavailableBody,
-      _ => l10n.journeyLocationFailedBody,
-    };
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -527,16 +658,10 @@ class _LocationErrorState extends StatelessWidget {
           Text(
             l10n.journeyLocationFallbackTitle,
             style: Theme.of(context).textTheme.titleSmall,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 8),
-          Text(
-            body,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 10,
             runSpacing: 10,
@@ -544,10 +669,6 @@ class _LocationErrorState extends StatelessWidget {
               OutlinedButton(
                 onPressed: onRetry,
                 child: Text(l10n.journeyLocationRetryAction),
-              ),
-              TextButton(
-                onPressed: onChooseManual,
-                child: Text(l10n.journeyDetectedManualAction),
               ),
             ],
           ),
@@ -560,26 +681,42 @@ class _LocationErrorState extends StatelessWidget {
 class _SelectorPanel extends StatelessWidget {
   const _SelectorPanel({
     required this.title,
-    required this.subtitle,
+    required this.body,
+    required this.pickerTitle,
     required this.countries,
     required this.selectedCountryId,
     required this.availabilityLabelFor,
     required this.isSelectable,
+    required this.onOpenPicker,
     required this.onTap,
     this.onClear,
+    this.useQuickChoices = false,
+    this.footer,
   });
 
   final String title;
-  final String subtitle;
+  final String body;
+  final String pickerTitle;
   final List<CatalogCountry> countries;
   final String? selectedCountryId;
   final String Function(CatalogCountry country) availabilityLabelFor;
   final bool Function(CatalogCountry country) isSelectable;
+  final VoidCallback onOpenPicker;
   final ValueChanged<CatalogCountry> onTap;
   final VoidCallback? onClear;
+  final bool useQuickChoices;
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
+    CatalogCountry? selectedCountry;
+    for (final country in countries) {
+      if (country.id == selectedCountryId) {
+        selectedCountry = country;
+        break;
+      }
+    }
+
     return FrostedPanel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -587,19 +724,9 @@ class _SelectorPanel extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 6),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSoftFor(context),
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
               if (onClear != null)
@@ -609,31 +736,361 @@ class _SelectorPanel extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 14),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate:
-                const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 420,
-                  mainAxisExtent: 96,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-            itemCount: countries.length,
-            itemBuilder: (context, index) {
-              final country = countries[index];
-              return _CountryChoiceCard(
-                country: country,
-                isSelected: selectedCountryId == country.id,
-                isEnabled: isSelectable(country),
-                availabilityLabel: availabilityLabelFor(country),
-                onTap: isSelectable(country) ? () => onTap(country) : null,
-              );
-            },
+          const SizedBox(height: 8),
+          Text(
+            body,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
           ),
+          const SizedBox(height: 16),
+          if (useQuickChoices)
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: countries
+                  .map(
+                    (country) => _InlineCountryChoiceCard(
+                      country: country,
+                      isSelected: selectedCountryId == country.id,
+                      isEnabled: isSelectable(country),
+                      availabilityLabel: availabilityLabelFor(country),
+                      onTap: isSelectable(country)
+                          ? () => onTap(country)
+                          : null,
+                    ),
+                  )
+                  .toList(growable: false),
+            )
+          else
+            _PickerSummaryCard(
+              title: pickerTitle,
+              selectedCountry: selectedCountry,
+              placeholder: title,
+              availabilityLabel: selectedCountry == null
+                  ? null
+                  : availabilityLabelFor(selectedCountry),
+              onTap: onOpenPicker,
+            ),
+          if (footer != null) ...[const SizedBox(height: 16), footer!],
         ],
       ),
+    );
+  }
+}
+
+class _InlineCountryChoiceCard extends StatelessWidget {
+  const _InlineCountryChoiceCard({
+    required this.country,
+    required this.isSelected,
+    required this.isEnabled,
+    required this.availabilityLabel,
+    required this.onTap,
+  });
+
+  final CatalogCountry country;
+  final bool isSelected;
+  final bool isEnabled;
+  final String availabilityLabel;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final background = isSelected
+        ? AppColors.tintedSurfaceFor(
+            context,
+            tint: AppColors.primary,
+            lightColor: const Color(0xFFF4F8FF),
+          )
+        : AppColors.surfaceMutedFor(context);
+    final border = isSelected
+        ? AppColors.primary.withValues(alpha: 0.28)
+        : AppColors.borderFor(context);
+
+    return SizedBox(
+      width: 220,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(22),
+          child: Ink(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: background,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: border),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      country.flagEmoji,
+                      style: const TextStyle(fontSize: 26),
+                    ),
+                    const Spacer(),
+                    if (isSelected)
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        color: AppColors.primary,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  country.name,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  availabilityLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: isEnabled
+                        ? AppColors.textSoftFor(context)
+                        : AppColors.textSoftFor(
+                            context,
+                          ).withValues(alpha: 0.72),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PickerSummaryCard extends StatelessWidget {
+  const _PickerSummaryCard({
+    required this.title,
+    required this.placeholder,
+    required this.selectedCountry,
+    required this.availabilityLabel,
+    required this.onTap,
+  });
+
+  final String title;
+  final String placeholder;
+  final CatalogCountry? selectedCountry;
+  final String? availabilityLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final country = selectedCountry;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Ink(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceMutedFor(context),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: AppColors.borderFor(context)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  country?.flagEmoji ?? '🌎',
+                  style: const TextStyle(fontSize: 24),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      country?.name ?? placeholder,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    if (availabilityLabel != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        availabilityLabel!,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSoftFor(context),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Icon(Icons.keyboard_arrow_down_rounded),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CountryPickerSheet extends StatefulWidget {
+  const _CountryPickerSheet({
+    required this.title,
+    required this.countries,
+    required this.selectedCountryId,
+    required this.availabilityLabelFor,
+    required this.isSelectable,
+  });
+
+  final String title;
+  final List<CatalogCountry> countries;
+  final String? selectedCountryId;
+  final String Function(CatalogCountry country) availabilityLabelFor;
+  final bool Function(CatalogCountry country) isSelectable;
+
+  @override
+  State<_CountryPickerSheet> createState() => _CountryPickerSheetState();
+}
+
+class _CountryPickerSheetState extends State<_CountryPickerSheet> {
+  late final TextEditingController _searchController;
+  String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final filtered =
+        widget.countries
+            .where((country) {
+              final normalizedQuery = _query.trim().toLowerCase();
+              if (normalizedQuery.isEmpty) {
+                return true;
+              }
+              return country.name.toLowerCase().contains(normalizedQuery);
+            })
+            .toList(growable: false)
+          ..sort((left, right) {
+            final leftSelected = left.id == widget.selectedCountryId ? 1 : 0;
+            final rightSelected = right.id == widget.selectedCountryId ? 1 : 0;
+            if (leftSelected != rightSelected) {
+              return rightSelected.compareTo(leftSelected);
+            }
+
+            final leftSelectable = widget.isSelectable(left) ? 1 : 0;
+            final rightSelectable = widget.isSelectable(right) ? 1 : 0;
+            if (leftSelectable != rightSelectable) {
+              return rightSelectable.compareTo(leftSelectable);
+            }
+
+            return left.name.compareTo(right.name);
+          });
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.82,
+      minChildSize: 0.55,
+      maxChildSize: 0.94,
+      expand: false,
+      builder: (context, scrollController) {
+        return FrostedPanel(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.textSoftFor(
+                      context,
+                    ).withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                widget.title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _searchController,
+                onChanged: (value) => setState(() => _query = value),
+                decoration: InputDecoration(
+                  hintText: l10n.journeyPickerSearchHint,
+                  prefixIcon: const Icon(Icons.search_rounded),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Expanded(
+                child: filtered.isEmpty
+                    ? Center(
+                        child: Text(
+                          l10n.journeyPickerNoResults,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.textSoftFor(context)),
+                        ),
+                      )
+                    : ListView.separated(
+                        controller: scrollController,
+                        itemCount: filtered.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          final country = filtered[index];
+                          return _CountryChoiceCard(
+                            country: country,
+                            isSelected: widget.selectedCountryId == country.id,
+                            isEnabled: widget.isSelectable(country),
+                            availabilityLabel: widget.availabilityLabelFor(
+                              country,
+                            ),
+                            onTap: widget.isSelectable(country)
+                                ? () => Navigator.of(context).pop(country)
+                                : null,
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -669,10 +1126,9 @@ class _CoveragePanel extends StatelessWidget {
             body,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSoftFor(context),
-              height: 1.4,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 10,
             runSpacing: 10,
@@ -749,64 +1205,6 @@ class _CoveragePanel extends StatelessWidget {
   }
 }
 
-class _EntryChoiceCard extends StatelessWidget {
-  const _EntryChoiceCard({
-    required this.icon,
-    required this.title,
-    required this.body,
-    required this.actionLabel,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String body;
-  final String actionLabel;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        child: Ink(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceMutedFor(context),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.borderFor(context)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: AppColors.primary),
-              const SizedBox(height: 12),
-              Text(title, style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 6),
-              Text(
-                body,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                actionLabel,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.primary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _CountryChoiceCard extends StatelessWidget {
   const _CountryChoiceCard({
     required this.country,
@@ -849,10 +1247,7 @@ class _CountryChoiceCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Text(
-                country.flagEmoji,
-                style: const TextStyle(fontSize: 24),
-              ),
+              Text(country.flagEmoji, style: const TextStyle(fontSize: 24)),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -868,16 +1263,19 @@ class _CountryChoiceCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isEnabled
                             ? AppColors.textSoftFor(context)
-                            : AppColors.textSoftFor(context).withValues(
-                                alpha: 0.72,
-                              ),
+                            : AppColors.textSoftFor(
+                                context,
+                              ).withValues(alpha: 0.72),
                       ),
                     ),
                   ],
                 ),
               ),
               if (isSelected)
-                const Icon(Icons.check_circle_rounded, color: AppColors.primary),
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: AppColors.primary,
+                ),
             ],
           ),
         ),
