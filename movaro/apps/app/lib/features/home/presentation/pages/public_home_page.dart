@@ -1,38 +1,26 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
+import 'package:flutter/services.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/journey/journey_country_metadata.dart';
 import 'package:movaro_app/core/location/location_controller.dart';
 import 'package:movaro_app/core/location/presentation/pages/location_permission_screen.dart';
 import 'package:movaro_app/core/location/presentation/widgets/location_banner_widget.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/explore_entry_card.dart';
-import 'package:movaro_app/features/cities/presentation/pages/city_explore_screen.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
-import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/arrival_execution_builder.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_readiness_builder.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
-
-enum HomeHeroState { noPlan, withPlan }
 
 class PublicHomePage extends StatefulWidget {
   const PublicHomePage({
@@ -64,90 +52,166 @@ class _PublicHomePageState extends State<PublicHomePage> {
   @override
   void initState() {
     super.initState();
+    widget.journeyContextController.addListener(_handleControllerUpdate);
+    widget.migrationQuestionnaireController.addListener(
+      _handleControllerUpdate,
+    );
+    widget.citiesController.addListener(_handleControllerUpdate);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_syncPlanState());
       unawaited(_maybePromptLocationPermission());
     });
   }
 
   @override
-  Widget build(BuildContext context) {
-    final maxWidth = context.isDesktopLayout ? 1160.0 : 920.0;
+  void dispose() {
+    widget.journeyContextController.removeListener(_handleControllerUpdate);
+    widget.migrationQuestionnaireController.removeListener(
+      _handleControllerUpdate,
+    );
+    widget.citiesController.removeListener(_handleControllerUpdate);
+    super.dispose();
+  }
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          const AmbientBackground(),
-          SafeArea(
-            child: AnimatedBuilder(
-              animation: Listenable.merge([
-                widget.journeyContextController,
-                widget.migrationQuestionnaireController,
-                widget.citiesController,
-              ]),
-              builder: (context, _) {
-                unawaited(_syncPlanHeroState());
-                return Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: maxWidth),
-                    child: ListView(
-                      padding: EdgeInsets.fromLTRB(
-                        context.pageHorizontalPadding,
-                        context.pageVerticalPadding,
-                        context.pageHorizontalPadding,
-                        context.pageVerticalPadding + 24,
+  @override
+  Widget build(BuildContext context) {
+    final maxWidth = context.isDesktopLayout ? 520.0 : double.infinity;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: AppColors.isDark(context)
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: _screenBackground(context),
+        body: SafeArea(
+          top: false,
+          child: AnimatedBuilder(
+            animation: Listenable.merge([
+              widget.journeyContextController,
+              widget.migrationQuestionnaireController,
+              widget.citiesController,
+            ]),
+            builder: (context, _) {
+              final plan =
+                  widget.migrationQuestionnaireController.generatedPlan;
+              final city = plan?.isCityConfirmed == true
+                  ? plan?.recommendedCity
+                  : null;
+              final hasActivePlan = city != null;
+              final guideState = city == null || plan == null
+                  ? null
+                  : _buildGuideState(plan, _progressSnapshot);
+
+              return Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth),
+                  child: Column(
+                    children: [
+                      FutureBuilder<bool>(
+                        future: widget.locationController
+                            .shouldShowInlineBanner(),
+                        builder: (context, snapshot) {
+                          if (snapshot.data != true) {
+                            return const SizedBox.shrink();
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                            child: LocationBannerWidget(
+                              onActivate: () => Navigator.pushNamed(
+                                context,
+                                AppRoutes.locationPermission,
+                                arguments: const LocationPermissionScreenArgs(
+                                  returnToPrevious: true,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                      children: [
-                        _LandingHero(
-                          journeyContextController:
-                              widget.journeyContextController,
-                          citiesController: widget.citiesController,
-                          migrationQuestionnaireController:
-                              widget.migrationQuestionnaireController,
-                          locationController: widget.locationController,
-                          progressSnapshot: _progressSnapshot,
+                      Expanded(
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 500),
+                          switchInCurve: Curves.easeInOut,
+                          switchOutCurve: Curves.easeInOut,
+                          transitionBuilder: (child, animation) =>
+                              FadeTransition(opacity: animation, child: child),
+                          child: hasActivePlan
+                              ? _ActiveHomeState(
+                                  key: const ValueKey('active-home'),
+                                  city: city,
+                                  weather: widget.citiesController.weatherFor(
+                                    city.id,
+                                  ),
+                                  guideState: guideState!,
+                                  onOpenSettings: _openSettings,
+                                  onOpenGuide: _openGuide,
+                                  onViewCurrentAction: () => _showActionDetails(
+                                    context,
+                                    guideState.currentItem,
+                                  ),
+                                  onCompare: () => _openComparison(city),
+                                  onViewCity: () => Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.cityDetail(city.id),
+                                  ),
+                                  onNewPlan: () => _handleManagePlan(context),
+                                )
+                              : _EmptyHomeState(
+                                  key: const ValueKey('empty-home'),
+                                  onOpenSettings: _openSettings,
+                                  onStart: () => _startPlanFlow(context),
+                                ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
-        ],
-      ),
-      bottomNavigationBar: MainNavigationBar(
-        currentIndex: 0,
-        journeyContextController: widget.journeyContextController,
-        citiesController: widget.citiesController,
-        migrationQuestionnaireController:
-            widget.migrationQuestionnaireController,
+        ),
+        bottomNavigationBar: MainNavigationBar(
+          currentIndex: 0,
+          journeyContextController: widget.journeyContextController,
+          citiesController: widget.citiesController,
+          migrationQuestionnaireController:
+              widget.migrationQuestionnaireController,
+        ),
       ),
     );
   }
 
-  Future<void> _syncPlanHeroState() async {
-    final plan = widget.migrationQuestionnaireController.generatedPlan;
-    final confirmedCity = plan?.isCityConfirmed == true
-        ? plan?.recommendedCity
-        : null;
+  Color _screenBackground(BuildContext context) => AppColors.isDark(context)
+      ? const Color(0xFF07090E)
+      : const Color(0xFFF4F6FA);
 
-    if (plan == null || confirmedCity == null) {
-      if (_loadedPlanKey != null ||
-          _progressSnapshot.readinessCompletedIds.isNotEmpty ||
-          _progressSnapshot.documentCompletedIds.isNotEmpty ||
-          _progressSnapshot.arrivalCompletedIds.isNotEmpty) {
-        setState(() {
-          _loadedPlanKey = null;
-          _loadedWeatherCityId = null;
-          _progressSnapshot = const MigrationCopilotProgressSnapshot();
-        });
+  void _handleControllerUpdate() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        unawaited(_syncPlanState());
       }
+    });
+  }
+
+  Future<void> _syncPlanState() async {
+    final plan = widget.migrationQuestionnaireController.generatedPlan;
+    final city = plan?.isCityConfirmed == true ? plan?.recommendedCity : null;
+
+    if (plan == null || city == null) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _loadedPlanKey = null;
+        _loadedWeatherCityId = null;
+        _progressSnapshot = const MigrationCopilotProgressSnapshot();
+      });
       return;
     }
 
-    if (_loadedWeatherCityId != confirmedCity.id) {
-      _loadedWeatherCityId = confirmedCity.id;
-      unawaited(widget.citiesController.loadWeatherForCity(confirmedCity.id));
+    if (_loadedWeatherCityId != city.id) {
+      _loadedWeatherCityId = city.id;
+      unawaited(widget.citiesController.loadWeatherForCity(city.id));
     }
 
     final planKey = _planKey(plan);
@@ -185,6 +249,185 @@ class _PublicHomePageState extends State<PublicHomePage> {
     );
   }
 
+  Future<void> _startPlanFlow(BuildContext context) async {
+    await widget.migrationQuestionnaireController.initialize();
+    if (!context.mounted) {
+      return;
+    }
+    Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire);
+  }
+
+  void _openSettings() {
+    Navigator.pushNamed(context, AppRoutes.settings);
+  }
+
+  void _openGuide() {
+    Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
+  }
+
+  void _openComparison(City city) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (_) => CityComparisonScreen(
+          initialCities: [city],
+          citiesController: widget.citiesController,
+          migrationQuestionnaireController:
+              widget.migrationQuestionnaireController,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleManagePlan(BuildContext context) async {
+    final choice = await showPlanResetDialog(
+      context,
+      currentCityName: widget
+          .migrationQuestionnaireController
+          .generatedPlan
+          ?.recommendedCity
+          ?.name,
+    );
+    if (!context.mounted || choice == null) {
+      return;
+    }
+
+    await widget.migrationQuestionnaireController.clearCurrentPlan();
+    if (!context.mounted) {
+      return;
+    }
+
+    if (choice == PlanResetChoice.rebuild) {
+      Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire);
+    }
+  }
+
+  Future<void> _showActionDetails(
+    BuildContext context,
+    GuideActionItem? item,
+  ) async {
+    if (item == null) {
+      return;
+    }
+
+    final body = item.fullContent?.trim().isNotEmpty == true
+        ? item.fullContent!
+        : item.shortDescription;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Container(
+              decoration: BoxDecoration(
+                color: _cardBackground(sheetContext),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: _cardBorder(sheetContext)),
+              ),
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.title,
+                          style: Theme.of(sheetContext).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(sheetContext).size.height * 0.45,
+                    ),
+                    child: SingleChildScrollView(
+                      child: Text(
+                        body,
+                        style: Theme.of(sheetContext).textTheme.bodyMedium
+                            ?.copyWith(
+                              color: _secondaryText(sheetContext),
+                              height: 1.5,
+                            ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  _HomeGuideState _buildGuideState(
+    MigrationPlan plan,
+    MigrationCopilotProgressSnapshot snapshot,
+  ) {
+    final completedIds = snapshot.getAllCompletedIds();
+    final items =
+        ArgentinaBrazilGuideDataSource.build(plan)
+            .map(
+              (item) =>
+                  item.copyWith(isCompleted: completedIds.contains(item.id)),
+            )
+            .toList(growable: false)
+          ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+
+    GuideActionItem? currentItem;
+    for (final item in items) {
+      final unlocked = item.dependencies.every(completedIds.contains);
+      if (!item.isCompleted && unlocked) {
+        currentItem = item;
+        break;
+      }
+    }
+
+    currentItem ??= items.firstWhere(
+      (item) => !item.isCompleted,
+      orElse: () => const GuideActionItem(
+        id: 'completed',
+        title: '',
+        shortDescription: '',
+        type: GuideActionType.informative,
+        phase: GuidePhase.arrival,
+        orderIndex: 0,
+        isCompleted: true,
+      ),
+    );
+
+    final currentPhaseIndex = currentItem.id == 'completed'
+        ? GuidePhase.values.length
+        : GuidePhase.values.indexOf(currentItem.phase) + 1;
+
+    return _HomeGuideState(
+      items: items,
+      completedIds: completedIds,
+      currentItem: currentItem.id == 'completed' ? null : currentItem,
+      completedCount: completedIds.length,
+      totalItems: items.length,
+      progressPercent: items.isEmpty
+          ? 0
+          : ((completedIds.length / items.length) * 100).round(),
+      currentPhaseIndex: currentPhaseIndex,
+      totalPhases: GuidePhase.values.length,
+    );
+  }
+
   String _planKey(MigrationPlan plan) {
     return [
       plan.originCountry,
@@ -196,1375 +439,1087 @@ class _PublicHomePageState extends State<PublicHomePage> {
   }
 }
 
-class _LandingHero extends StatelessWidget {
-  const _LandingHero({
-    required this.journeyContextController,
-    required this.citiesController,
-    required this.migrationQuestionnaireController,
-    required this.locationController,
-    required this.progressSnapshot,
-  });
-
-  final JourneyContextController journeyContextController;
-  final CitiesController citiesController;
-  final MigrationQuestionnaireController migrationQuestionnaireController;
-  final LocationController locationController;
-  final MigrationCopilotProgressSnapshot progressSnapshot;
-
-  @override
-  Widget build(BuildContext context) {
-    return _HomeContent(
-      journeyContextController: journeyContextController,
-      citiesController: citiesController,
-      migrationQuestionnaireController: migrationQuestionnaireController,
-      locationController: locationController,
-      progressSnapshot: progressSnapshot,
-    );
-  }
-}
-
-class _HomeContent extends StatelessWidget {
-  const _HomeContent({
-    required this.journeyContextController,
-    required this.citiesController,
-    required this.migrationQuestionnaireController,
-    required this.locationController,
-    required this.progressSnapshot,
-  });
-
-  final JourneyContextController journeyContextController;
-  final CitiesController citiesController;
-  final MigrationQuestionnaireController migrationQuestionnaireController;
-  final LocationController locationController;
-  final MigrationCopilotProgressSnapshot progressSnapshot;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final plan = migrationQuestionnaireController.generatedPlan;
-    final confirmedCity = plan?.isCityConfirmed == true
-        ? plan?.recommendedCity
-        : null;
-    final heroState = confirmedCity != null
-        ? HomeHeroState.withPlan
-        : HomeHeroState.noPlan;
-    final weather = confirmedCity == null
-        ? null
-        : citiesController.weatherFor(confirmedCity.id);
-    final planHeroData = confirmedCity == null
-        ? null
-        : _buildPlanHeroData(context, plan: plan!, snapshot: progressSnapshot);
-
-    final citiesCard = _VisualActionCard(
-      title: l10n.publicHomeCitiesTitle,
-      description: heroState == HomeHeroState.withPlan
-          ? l10n.homeHeroDiscoverCitiesBodyWithCity(confirmedCity!.name)
-          : l10n.homeHeroDiscoverCitiesBody,
-      actionLabel: heroState == HomeHeroState.withPlan
-          ? l10n.homeHeroExploreAction
-          : l10n.publicHomeCitiesAction,
-      onTap: () => Navigator.pushNamed(context, AppRoutes.cities),
-      scene: const _CitiesScene(),
-      icon: Icons.location_city_rounded,
-      accent: const Color(0xFF35A8FF),
-      highlights: [
-        _CardHighlight(
-          icon: Icons.payments_outlined,
-          label: l10n.cityDetailAffordabilityTitle,
-        ),
-        _CardHighlight(
-          icon: Icons.work_outline_rounded,
-          label: l10n.cityDetailWorkLabel,
-        ),
-      ],
-    );
-
-    final questionsCard = _VisualActionCard(
-      title: l10n.publicHomeQuestionsTitle,
-      description: l10n.homeHeroGuideBody,
-      actionLabel: heroState == HomeHeroState.withPlan
-          ? l10n.homeHeroOpenShortAction
-          : l10n.homeHeroOpenGuideAction,
-      onTap: () => Navigator.pushNamed(
-        context,
-        AppRoutes.documentationGuide,
-        arguments: DocumentationGuideSection.documents,
-      ),
-      scene: const _QuestionsScene(),
-      icon: Icons.folder_open_rounded,
-      accent: const Color(0xFF4DC2A8),
-      highlights: [
-        _CardHighlight(
-          icon: Icons.badge_outlined,
-          label: l10n.documentationPathDocumentsTitle,
-        ),
-        _CardHighlight(
-          icon: Icons.home_work_outlined,
-          label: l10n.documentationHousingArrivalSectionTitle,
-        ),
-      ],
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FutureBuilder<bool>(
-          future: locationController.shouldShowInlineBanner(),
-          builder: (context, snapshot) {
-            if (snapshot.data != true) {
-              return const SizedBox.shrink();
-            }
-
-            return LocationBannerWidget(
-              onActivate: () => Navigator.pushNamed(
-                context,
-                AppRoutes.locationPermission,
-                arguments: const LocationPermissionScreenArgs(
-                  returnToPrevious: true,
-                ),
-              ),
-            );
-          },
-        ),
-        _HomeGreeting(
-          state: heroState,
-          displayName: null,
-          onOpenSettings: () => Navigator.pushNamed(context, AppRoutes.settings),
-        ),
-        const SizedBox(height: 16),
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder: (child, animation) =>
-              FadeTransition(opacity: animation, child: child),
-          child: heroState == HomeHeroState.withPlan
-              ? _WithPlanHeroCard(
-                  key: const ValueKey('with-plan-hero'),
-                  city: confirmedCity!,
-                  weather: weather,
-                  planData: planHeroData!,
-                  citiesController: citiesController,
-                  onFavoriteToggle: () =>
-                      _toggleFavorite(context, confirmedCity),
-                  onOpenPlan: () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.migrationPlanCopilot,
-                  ),
-                  onOpenNextStep: () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.migrationPlanCopilot,
-                  ),
-                  onCompare: () => Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (_) => CityComparisonScreen(
-                        initialCities: [confirmedCity],
-                        citiesController: citiesController,
-                        migrationQuestionnaireController:
-                            migrationQuestionnaireController,
-                      ),
-                    ),
-                  ),
-                  onExploreCity: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => CityExploreScreen(
-                        city: confirmedCity,
-                        isPlanCity: true,
-                      ),
-                    ),
-                  ),
-                  onManagePlan: () => _handleManagePlan(context),
-                )
-              : _NoPlanHeroCard(
-                  key: const ValueKey('no-plan-hero'),
-                  originLabel:
-                      journeyContextController.selectedOrigin?.name ??
-                      'Argentina',
-                  originFlag:
-                      journeyContextController.selectedOrigin?.flagEmoji ??
-                      '🇦🇷',
-                  destinationLabel:
-                      journeyContextController.selectedDestination?.name ??
-                      'Brasil',
-                  destinationFlag:
-                      journeyContextController.selectedDestination?.flagEmoji ??
-                      '🇧🇷',
-                  onStart: () =>
-                      _startPlanFlow(context, journeyContextController),
-                ),
-        ),
-        const SizedBox(height: 16),
-        if (heroState == HomeHeroState.withPlan) ...[
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Text(
-              l10n.homeHeroExploreSectionTitle,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-            ),
-          ),
-        ],
-        _SecondaryCardsGrid(cards: [citiesCard, questionsCard]),
-      ],
-    );
-  }
-
-  _HomePlanHeroData _buildPlanHeroData(
-    BuildContext context, {
-    required MigrationPlan plan,
-    required MigrationCopilotProgressSnapshot snapshot,
-  }) {
-    final l10n = context.l10n;
-    final readinessChecklist = MigrationReadinessBuilder.build(
-      l10n: l10n,
-      plan: plan,
-    );
-    final documentChecklist = MigrationDocumentReadinessBuilder.build(
-      l10n: l10n,
-      plan: plan,
-    );
-    final arrivalChecklist = ArrivalExecutionBuilder.build(
-      l10n: l10n,
-      plan: plan,
-    );
-
-    final totalItems =
-        readinessChecklist.items.length +
-        documentChecklist.items.length +
-        arrivalChecklist.items.length;
-    final completedItems =
-        snapshot.readinessCompletedIds.length +
-        snapshot.documentCompletedIds.length +
-        snapshot.arrivalCompletedIds.length;
-    final percent = totalItems == 0
-        ? 0
-        : ((completedItems / totalItems) * 100).round();
-
-    final nextReadiness = readinessChecklist.items.where(
-      (item) => !snapshot.readinessCompletedIds.contains(item.id),
-    );
-    final nextDocument = documentChecklist.items.where(
-      (item) => !snapshot.documentCompletedIds.contains(item.id),
-    );
-    final nextArrival = arrivalChecklist.items.where(
-      (item) => !snapshot.arrivalCompletedIds.contains(item.id),
-    );
-
-    if (nextReadiness.isNotEmpty) {
-      return _HomePlanHeroData(
-        progressPercent: percent,
-        currentStage: 1,
-        nextPendingTask: nextReadiness.first.title,
-      );
-    }
-    if (nextDocument.isNotEmpty) {
-      return _HomePlanHeroData(
-        progressPercent: percent,
-        currentStage: 2,
-        nextPendingTask: nextDocument.first.title,
-      );
-    }
-    if (nextArrival.isNotEmpty) {
-      return _HomePlanHeroData(
-        progressPercent: percent,
-        currentStage: 5,
-        nextPendingTask: nextArrival.first.title,
-      );
-    }
-
-    return _HomePlanHeroData(
-      progressPercent: percent,
-      currentStage: 5,
-      nextPendingTask: l10n.homeHeroPlanCompleteTask,
-    );
-  }
-
-  Future<void> _toggleFavorite(BuildContext context, City city) async {
-    final result = await citiesController.toggleFavorite(city.id);
-    if (!context.mounted) {
-      return;
-    }
-
-    final message = switch (result) {
-      CityFavoriteToggleResult.added =>
-        context.l10n.cityDetailFavoriteAddedFeedback(city.name),
-      CityFavoriteToggleResult.removed =>
-        context.l10n.cityDetailFavoriteRemovedFeedback(city.name),
-      CityFavoriteToggleResult.limitReached =>
-        context.l10n.cityDetailFavoriteLimitFeedback(
-          CitiesController.maxFavoriteCities,
-        ),
-    };
-
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  Future<void> _startPlanFlow(
-    BuildContext context,
-    JourneyContextController journeyContextController,
-  ) async {
-    await migrationQuestionnaireController.initialize();
-    if (!context.mounted) {
-      return;
-    }
-
-    Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire);
-  }
-
-  Future<void> _handleManagePlan(BuildContext context) async {
-    final choice = await showPlanResetDialog(context);
-    if (!context.mounted || choice == null) {
-      return;
-    }
-
-    await migrationQuestionnaireController.clearCurrentPlan();
-    if (!context.mounted) {
-      return;
-    }
-
-    if (choice == PlanResetChoice.rebuild) {
-      Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire);
-    }
-  }
-}
-
-class _HomeGreeting extends StatelessWidget {
-  const _HomeGreeting({
-    required this.state,
-    required this.displayName,
+class _EmptyHomeState extends StatelessWidget {
+  const _EmptyHomeState({
     required this.onOpenSettings,
-  });
-
-  final HomeHeroState state;
-  final String? displayName;
-  final VoidCallback onOpenSettings;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final hour = DateTime.now().hour;
-    final salutation = displayName == null || displayName!.trim().isEmpty
-        ? (state == HomeHeroState.withPlan
-              ? l10n.homeHeroWelcomeBack
-              : l10n.homeHeroWelcomeDefault)
-        : hour < 12
-        ? l10n.homeHeroGreetingMorning(displayName!)
-        : hour < 18
-        ? l10n.homeHeroGreetingAfternoon(displayName!)
-        : l10n.homeHeroGreetingEvening(displayName!);
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                salutation,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                state == HomeHeroState.withPlan
-                    ? l10n.homeHeroSubtitleWithPlan
-                    : l10n.homeHeroSubtitleNoPlan,
-                style: Theme.of(
-                  context,
-                ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 12),
-        IconButton(
-          onPressed: onOpenSettings,
-          tooltip: l10n.settingsTitle(),
-          icon: const Icon(Icons.settings_outlined),
-        ),
-      ],
-    );
-  }
-}
-
-class _NoPlanHeroCard extends StatelessWidget {
-  const _NoPlanHeroCard({
-    required this.originLabel,
-    required this.originFlag,
-    required this.destinationLabel,
-    required this.destinationFlag,
     required this.onStart,
     super.key,
   });
 
-  final String originLabel;
-  final String originFlag;
-  final String destinationLabel;
-  final String destinationFlag;
+  final VoidCallback onOpenSettings;
   final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _EmptyHero(onOpenSettings: onOpenSettings),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                const _StepTimeline(),
+                const SizedBox(height: 12),
+                _StartPlanCta(onTap: onStart),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyHero extends StatelessWidget {
+  const _EmptyHero({required this.onOpenSettings});
+
+  final VoidCallback onOpenSettings;
 
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
 
-    return FrostedPanel(
-      padding: const EdgeInsets.all(20),
-      backgroundColor: AppColors.heroStart.withValues(
-        alpha: isDark ? 0.34 : 0.20,
-      ),
-      borderColor: AppColors.primary.withValues(alpha: 0.18),
-      borderRadius: BorderRadius.circular(28),
+    return SizedBox(
+      height: 240,
       child: Stack(
         children: [
-          Positioned(top: -30, right: -18, child: _HeroOrb(size: 124)),
-          Positioned(bottom: -38, left: -16, child: _HeroOrb(size: 136)),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _JourneyRouteStrip(
-                originLabel: originLabel,
-                originFlag: originFlag,
-                destinationLabel: destinationLabel,
-                destinationFlag: destinationFlag,
-              ),
-              const SizedBox(height: 18),
-              Text(
-                context.l10n.homeHeroNoPlanTitle,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.l10n.homeHeroNoPlanBody,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                  height: 1.35,
+          Positioned.fill(
+            child: ColoredBox(
+              color: isDark ? const Color(0xFF07090E) : const Color(0xFFEEF2F9),
+            ),
+          ),
+          const Positioned(top: -70, right: -50, child: _BlueOrb()),
+          const Positioned(bottom: -40, left: -50, child: _IndigoOrb()),
+          const Positioned(top: 80, left: 60, child: _BlueLightOrb()),
+          Positioned.fill(
+            child: CustomPaint(painter: _HeroGridPainter(isDark)),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: IgnorePointer(
+              child: Container(
+                height: 80,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      isDark
+                          ? const Color(0xFF07090E)
+                          : const Color(0xFFF4F6FA),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _PlanStepTile(
-                      number: '01',
-                      label: context.l10n.homeHeroStepQuestionnaire,
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            right: 14,
+            child: _SettingsButton(onTap: onOpenSettings),
+          ),
+          Positioned.fill(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 170),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: _badgeBackground(context),
+                        border: Border.all(color: _badgeBorder(context)),
+                      ),
+                      child: Icon(
+                        Icons.route_rounded,
+                        size: 22,
+                        color: _accentText(context),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _PlanStepTile(
-                      number: '02',
-                      label: context.l10n.homeHeroStepCity,
+                    const SizedBox(height: 10),
+                    Text(
+                      _greeting(context),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: _tertiaryText(context),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _PlanStepTile(
-                      number: '03',
-                      label: context.l10n.homeHeroStepGuide,
+                    const SizedBox(height: 4),
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text:
+                                '${_text(context, pt: 'Planeje sua', es: 'Planeá tu', en: 'Plan your')}\n',
+                            style: TextStyle(color: _primaryText(context)),
+                          ),
+                          TextSpan(
+                            text: _text(
+                              context,
+                              pt: 'mudança',
+                              es: 'mudanza',
+                              en: 'move',
+                            ),
+                            style: TextStyle(color: _accentText(context)),
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                            height: 1.15,
+                          ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: onStart,
-                  child: Text(context.l10n.homeHeroStartAction),
+                    const SizedBox(height: 5),
+                    Text(
+                      _text(
+                        context,
+                        pt: 'Do questionário ao guia passo a passo',
+                        es: 'Del cuestionario a la guía paso a paso',
+                        en: 'From questionnaire to step-by-step guide',
+                      ),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 13,
+                        color: _tertiaryText(context),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
+
+  String _greeting(BuildContext context) {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return _text(context, pt: 'Bom dia', es: 'Buen día', en: 'Good morning');
+    }
+    if (hour < 18) {
+      return _text(
+        context,
+        pt: 'Boa tarde',
+        es: 'Buenas tardes',
+        en: 'Good afternoon',
+      );
+    }
+    return _text(
+      context,
+      pt: 'Boa noite',
+      es: 'Buenas noches',
+      en: 'Good evening',
+    );
+  }
 }
 
-class _WithPlanHeroCard extends StatelessWidget {
-  const _WithPlanHeroCard({
+class _ActiveHomeState extends StatelessWidget {
+  const _ActiveHomeState({
     required this.city,
     required this.weather,
-    required this.planData,
-    required this.citiesController,
-    required this.onFavoriteToggle,
-    required this.onOpenPlan,
-    required this.onOpenNextStep,
+    required this.guideState,
+    required this.onOpenSettings,
+    required this.onOpenGuide,
+    required this.onViewCurrentAction,
     required this.onCompare,
-    required this.onExploreCity,
-    required this.onManagePlan,
+    required this.onViewCity,
+    required this.onNewPlan,
     super.key,
   });
 
   final City city;
   final CityWeather? weather;
-  final _HomePlanHeroData planData;
-  final CitiesController citiesController;
-  final VoidCallback onFavoriteToggle;
-  final VoidCallback onOpenPlan;
-  final VoidCallback onOpenNextStep;
+  final _HomeGuideState guideState;
+  final VoidCallback onOpenSettings;
+  final VoidCallback onOpenGuide;
+  final VoidCallback onViewCurrentAction;
   final VoidCallback onCompare;
-  final VoidCallback onExploreCity;
-  final VoidCallback onManagePlan;
+  final VoidCallback onViewCity;
+  final VoidCallback onNewPlan;
 
   @override
   Widget build(BuildContext context) {
-    final planResetCopy = PlanResetDialogCopy.fromContext(context);
-    final cost = CityHousingViabilityPresenter.resolve(
-      context,
-      rentScore: city.rentScore,
+    return Column(
+      children: [
+        _ActiveHero(
+          city: city,
+          weather: weather,
+          onOpenSettings: onOpenSettings,
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 16),
+            child: Column(
+              children: [
+                _ProgressCard(state: guideState),
+                const SizedBox(height: 8),
+                _NextActionCard(
+                  state: guideState,
+                  onOpenGuide: onOpenGuide,
+                  onViewAction: onViewCurrentAction,
+                ),
+                const SizedBox(height: 8),
+                _SecondaryActionRow(
+                  onCompare: onCompare,
+                  onViewCity: onViewCity,
+                  onNewPlan: onNewPlan,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
+  }
+}
 
-    return FrostedPanel(
-      padding: EdgeInsets.zero,
-      borderRadius: BorderRadius.circular(28),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 100,
-              width: double.infinity,
-              child: Stack(
-                fit: StackFit.expand,
+class _ActiveHero extends StatelessWidget {
+  const _ActiveHero({
+    required this.city,
+    required this.weather,
+    required this.onOpenSettings,
+  });
+
+  final City city;
+  final CityWeather? weather;
+  final VoidCallback onOpenSettings;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final stateLabel = city.stateName.isNotEmpty
+        ? city.stateName
+        : city.stateCode;
+
+    return SizedBox(
+      height: 200,
+      child: Stack(
+        children: [
+          Positioned.fill(child: _HeroCityImage(city: city)),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    isDark ? const Color(0x33090C12) : const Color(0x26F0F6FC),
+                    isDark ? const Color(0x8C090C12) : const Color(0x99F0F6FC),
+                    isDark ? const Color(0xFF07090E) : const Color(0xFFF4F6FA),
+                  ],
+                  stops: const [0, 0.55, 1],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            left: 14,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: _badgeBackground(context),
+                border: Border.all(color: _badgeBorder(context)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  _HomeHeroImage(city: city),
-                  Positioned(
-                    top: 12,
-                    left: 12,
-                    child: _StatusBadge(
-                      label: context.l10n.homeHeroPlanActiveBadge,
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isDark
+                          ? const Color(0xFF38BDF8)
+                          : const Color(0xFF0284C7),
                     ),
                   ),
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    child: _HeroCircleButton(
-                      icon: citiesController.isFavorite(city.id)
-                          ? Icons.favorite_rounded
-                          : Icons.favorite_border_rounded,
-                      active: citiesController.isFavorite(city.id),
-                      onTap: onFavoriteToggle,
+                  const SizedBox(width: 5),
+                  Text(
+                    _text(
+                      context,
+                      pt: 'PLANO ATIVO',
+                      es: 'PLAN ACTIVO',
+                      en: 'ACTIVE PLAN',
+                    ),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                      color: _accentText(context),
                     ),
                   ),
-                  Positioned(
-                    left: 14,
-                    right: 14,
-                    bottom: 12,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                context.l10n.homeHeroSelectedCityEyebrow,
-                                style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.72,
-                                      ),
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.6,
-                                    ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                city.name,
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                              ),
-                              Text(
-                                '${city.stateName} (${city.stateCode})',
-                                style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.78,
-                                      ),
-                                    ),
-                              ),
-                            ],
-                          ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 6,
+            right: 14,
+            child: _SettingsButton(onTap: onOpenSettings),
+          ),
+          Positioned(
+            left: 14,
+            right: 14,
+            bottom: 14,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        city.name,
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.6,
+                              color: Colors.white,
+                              shadows: const [
+                                Shadow(
+                                  blurRadius: 12,
+                                  color: Color(0x80000000),
+                                ),
+                              ],
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '$stateLabel, ${_text(context, pt: 'Brasil', es: 'Brasil', en: 'Brazil')}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.55)
+                              : Colors.white.withValues(alpha: 0.70),
                         ),
-                        const SizedBox(width: 12),
-                        Text(
-                          weather == null
-                              ? '--'
-                              : '${weather!.temperatureCelsius.round()}°C',
-                          style: Theme.of(context).textTheme.titleLarge
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  weather == null
+                      ? '--'
+                      : '${weather!.temperatureCelsius.round()}°C',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.65)
+                        : Colors.white.withValues(alpha: 0.75),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProgressCard extends StatelessWidget {
+  const _ProgressCard({required this.state});
+
+  final _HomeGuideState state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      decoration: BoxDecoration(
+        color: _cardBackground(context),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _progressBorder(context)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _text(
+                        context,
+                        pt: 'PROGRESSO GERAL',
+                        es: 'PROGRESO GENERAL',
+                        en: 'GENERAL PROGRESS',
+                      ),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                        color: _tertiaryText(context),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    RichText(
+                      text: TextSpan(
+                        style: Theme.of(context).textTheme.headlineLarge
+                            ?.copyWith(
+                              fontSize: 36,
+                              fontWeight: FontWeight.w900,
+                              color: _primaryText(context),
+                            ),
+                        children: [
+                          TextSpan(text: '${state.progressPercent}'),
+                          TextSpan(
+                            text: '%',
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: _tertiaryText(context),
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: _badgeBackground(context),
+                      border: Border.all(color: _badgeBorder(context)),
+                    ),
+                    child: Text(
+                      '${_text(context, pt: 'Etapa', es: 'Etapa', en: 'Stage')} ${state.currentPhaseIndex} / ${state.totalPhases}',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: _accentText(context),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${state.completedCount} ${_text(context, pt: 'de', es: 'de', en: 'of')} ${state.totalItems} ${_text(context, pt: 'feitas', es: 'hechas', en: 'done')}',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: 11,
+                      color: _tertiaryText(context),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                children: [
+                  Container(
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: _progressTrack(context),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeOut,
+                    height: 4,
+                    width: constraints.maxWidth * (state.progressPercent / 100),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(2),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF0369A1), Color(0xFF0EA5E9)],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              for (var index = 0; index < state.totalItems; index++) ...[
+                Expanded(
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0, end: 1),
+                    duration: Duration(milliseconds: 300 + (50 * index)),
+                    builder: (context, value, _) {
+                      return Container(
+                        height: 3,
+                        decoration: BoxDecoration(
+                          color: state
+                              .segmentColor(context, index)
+                              .withValues(alpha: value),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                if (index != state.totalItems - 1) const SizedBox(width: 3),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NextActionCard extends StatelessWidget {
+  const _NextActionCard({
+    required this.state,
+    required this.onOpenGuide,
+    required this.onViewAction,
+  });
+
+  final _HomeGuideState state;
+  final VoidCallback onOpenGuide;
+  final VoidCallback onViewAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final isComplete =
+        state.currentItem == null || state.progressPercent == 100;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _cardBackground(context),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _cardBorder(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isComplete
+                ? _text(
+                    context,
+                    pt: 'PLANO CONCLUÍDO',
+                    es: 'PLAN COMPLETADO',
+                    en: 'PLAN COMPLETED',
+                  )
+                : '${_text(context, pt: 'Próxima ação', es: 'Próxima acción', en: 'Next action')} · ${state.phaseName(context)}',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.7,
+              color: _accentText(context),
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            isComplete
+                ? _text(
+                    context,
+                    pt: 'Seu plano já está completo',
+                    es: 'Tu plan ya está completo',
+                    en: 'Your plan is already complete',
+                  )
+                : state.currentItem!.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.1,
+              height: 1.3,
+              color: _primaryText(context),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton(
+                  onPressed: onOpenGuide,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF0284C7),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                  ),
+                  child: Text(
+                    isComplete
+                        ? _text(
+                            context,
+                            pt: 'Ver resumo do plano',
+                            es: 'Ver resumen del plan',
+                            en: 'See plan summary',
+                          )
+                        : _text(
+                            context,
+                            pt: 'Continuar o guia →',
+                            es: 'Continuar la guía →',
+                            en: 'Continue guide →',
+                          ),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 7),
+              TextButton(
+                onPressed: onViewAction,
+                style: TextButton.styleFrom(
+                  backgroundColor: _mutedButtonBackground(context),
+                  foregroundColor: _mutedButtonForeground(context),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 13,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                ),
+                child: Text(
+                  _text(context, pt: 'Ver', es: 'Ver', en: 'View'),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SecondaryActionRow extends StatelessWidget {
+  const _SecondaryActionRow({
+    required this.onCompare,
+    required this.onViewCity,
+    required this.onNewPlan,
+  });
+
+  final VoidCallback onCompare;
+  final VoidCallback onViewCity;
+  final VoidCallback onNewPlan;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _ActionChip(
+            icon: Icons.compare_arrows_rounded,
+            label: _text(
+              context,
+              pt: 'Comparar',
+              es: 'Comparar',
+              en: 'Compare',
+            ),
+            onTap: onCompare,
+          ),
+        ),
+        const SizedBox(width: 7),
+        Expanded(
+          child: _ActionChip(
+            icon: Icons.location_city_outlined,
+            label: _text(
+              context,
+              pt: 'Ver cidade',
+              es: 'Ver ciudad',
+              en: 'View city',
+            ),
+            onTap: onViewCity,
+          ),
+        ),
+        const SizedBox(width: 7),
+        Expanded(
+          child: _ActionChip(
+            icon: Icons.restart_alt_rounded,
+            label: _text(
+              context,
+              pt: 'Novo plano',
+              es: 'Nuevo plan',
+              en: 'New plan',
+            ),
+            onTap: onNewPlan,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionChip extends StatelessWidget {
+  const _ActionChip({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(13),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          decoration: BoxDecoration(
+            color: AppColors.isDark(context)
+                ? const Color(0xFF0E1825)
+                : const Color(0xFFF0F4FA),
+            borderRadius: BorderRadius.circular(13),
+            border: Border.all(color: _cardBorder(context)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: _badgeBackground(context),
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                child: Icon(icon, size: 16, color: _accentText(context)),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: _tertiaryText(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StepTimeline extends StatelessWidget {
+  const _StepTimeline();
+
+  @override
+  Widget build(BuildContext context) {
+    final steps = [
+      (
+        title: _text(
+          context,
+          pt: 'Responder o questionário',
+          es: 'Responder el cuestionario',
+          en: 'Answer the questionnaire',
+        ),
+        subtitle: _text(
+          context,
+          pt: '5 minutos · seu perfil de vida e objetivos',
+          es: '5 minutos · tu perfil de vida y objetivos',
+          en: '5 minutes · your life profile and goals',
+        ),
+      ),
+      (
+        title: _text(
+          context,
+          pt: 'Receber a cidade ideal',
+          es: 'Recibir la ciudad ideal',
+          en: 'Get your ideal city',
+        ),
+        subtitle: _text(
+          context,
+          pt: 'Indicação personalizada para o seu perfil',
+          es: 'Recomendación personalizada para tu perfil',
+          en: 'Personalized recommendation for your profile',
+        ),
+      ),
+      (
+        title: _text(
+          context,
+          pt: 'Executar com o guia GPS',
+          es: 'Ejecutar con la guía GPS',
+          en: 'Execute with the GPS guide',
+        ),
+        subtitle: _text(
+          context,
+          pt: 'Passo a passo da mudança, do zero',
+          es: 'Paso a paso de la mudanza, desde cero',
+          en: 'Step by step from zero',
+        ),
+      ),
+    ];
+
+    return Column(
+      children: [
+        for (var index = 0; index < steps.length; index++)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 34,
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 34,
+                        height: 34,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _badgeBackground(context),
+                          border: Border.all(color: _badgeBorder(context)),
+                        ),
+                        child: Text(
+                          '${index + 1}',
+                          style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(
-                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                                color: _accentText(context),
+                              ),
+                        ),
+                      ),
+                      if (index != steps.length - 1)
+                        Container(
+                          width: 1,
+                          height: 32,
+                          color: AppColors.isDark(context)
+                              ? const Color(0x330EA5E9)
+                              : const Color(0x400EA5E9),
+                        ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10, top: 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          steps[index].title,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                fontSize: 16,
                                 fontWeight: FontWeight.w800,
+                                color: _primaryText(context),
+                              ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          steps[index].subtitle,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                fontSize: 12,
+                                color: _tertiaryText(context),
                               ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          context.l10n.homeHeroProgressLabel,
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(color: AppColors.textSoftFor(context)),
-                        ),
-                      ),
-                      Text(
-                        '${planData.progressPercent}%',
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w800,
-                            ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(999),
-                    child: LinearProgressIndicator(
-                      value: (planData.progressPercent / 100).clamp(0, 1),
-                      minHeight: 5,
-                      backgroundColor: AppColors.surfaceMutedFor(context),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _MetricMiniCard(
-                          label: context.l10n.homeHeroStageMetricLabel,
-                          value:
-                              '${planData.currentStage} / ${context.l10n.homeHeroStageTotalValue}',
-                          valueColor: AppColors.textPrimaryFor(context),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _MetricMiniCard(
-                          label: context.l10n.homeHeroCostMetricLabel,
-                          value: cost.headline,
-                          valueColor: cost.tint,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _MetricMiniCard(
-                          label: context.l10n.homeHeroClimateMetricLabel,
-                          value: weather == null
-                              ? '--'
-                              : '${weather!.temperatureCelsius.round()}°C',
-                          valueColor: AppColors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(18),
-                      onTap: onOpenNextStep,
-                      child: Ink(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceMutedFor(context),
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: AppColors.borderFor(context),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 34,
-                              height: 34,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(
-                                  alpha: 0.10,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.checklist_rounded,
-                                color: AppColors.primary,
-                                size: 18,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    context.l10n.homeHeroNextStepLabel,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall
-                                        ?.copyWith(
-                                          color: AppColors.textSoftFor(context),
-                                          letterSpacing: 0.6,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    planData.nextPendingTask,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(fontWeight: FontWeight.w700),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              Icons.chevron_right_rounded,
-                              color: AppColors.textSoftFor(context),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FilledButton(
-                          onPressed: onOpenPlan,
-                          child: Text(context.l10n.homeHeroContinueAction),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      OutlinedButton.icon(
-                        onPressed: onCompare,
-                        icon: const Icon(Icons.compare_rounded),
-                        label: Text(context.l10n.cityComparisonCompareAction),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  ExploreEntryCard(
-                    cityName: city.name,
-                    onTap: onExploreCity,
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton.icon(
-                      onPressed: onManagePlan,
-                      icon: const Icon(Icons.delete_outline_rounded),
-                      label: Text(planResetCopy.manageActionLabel),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SecondaryCardsGrid extends StatelessWidget {
-  const _SecondaryCardsGrid({required this.cards});
-
-  final List<Widget> cards;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth >= 720
-            ? (constraints.maxWidth - 12) / 2
-            : constraints.maxWidth;
-
-        return Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            for (final card in cards) SizedBox(width: width, child: card),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _HomePlanHeroData {
-  const _HomePlanHeroData({
-    required this.progressPercent,
-    required this.currentStage,
-    required this.nextPendingTask,
-  });
-
-  final int progressPercent;
-  final int currentStage;
-  final String nextPendingTask;
-}
-
-class _HeroOrb extends StatelessWidget {
-  const _HeroOrb({required this.size});
-
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.primary.withValues(alpha: 0.15),
-      ),
-    );
-  }
-}
-
-class _JourneyRouteStrip extends StatelessWidget {
-  const _JourneyRouteStrip({
-    required this.originLabel,
-    required this.originFlag,
-    required this.destinationLabel,
-    required this.destinationFlag,
-  });
-
-  final String originLabel;
-  final String originFlag;
-  final String destinationLabel;
-  final String destinationFlag;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _RouteEndpoint(
-            flag: originFlag,
-            caption: context.l10n.homeHeroOriginLabel,
-            country: originLabel,
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Icon(
-            Icons.flight_takeoff_rounded,
-            color: AppColors.primary,
-            size: 18,
-          ),
-        ),
-        Expanded(
-          child: _RouteEndpoint(
-            flag: destinationFlag,
-            caption: context.l10n.homeHeroDestinationLabel,
-            country: destinationLabel,
-          ),
-        ),
       ],
     );
   }
 }
 
-class _RouteEndpoint extends StatelessWidget {
-  const _RouteEndpoint({
-    required this.flag,
-    required this.caption,
-    required this.country,
-  });
+class _StartPlanCta extends StatefulWidget {
+  const _StartPlanCta({required this.onTap});
 
-  final String flag;
-  final String caption;
-  final String country;
+  final VoidCallback onTap;
+
+  @override
+  State<_StartPlanCta> createState() => _StartPlanCtaState();
+}
+
+class _StartPlanCtaState extends State<_StartPlanCta> {
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 42,
-          height: 42,
-          alignment: Alignment.center,
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 140),
+        scale: _pressed ? 0.97 : 1,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
-            color: AppColors.surfaceFor(context),
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.borderFor(context)),
+            color: const Color(0xFF0284C7),
+            borderRadius: BorderRadius.circular(14),
           ),
-          child: Text(flag, style: const TextStyle(fontSize: 20)),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                caption,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _text(
+                      context,
+                      pt: 'Montar meu plano',
+                      es: 'Armar mi plan',
+                      en: 'Build my plan',
+                    ),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    _text(
+                      context,
+                      pt: 'Leva cerca de 5 minutos',
+                      es: 'Toma unos 5 minutos',
+                      en: 'Takes about 5 minutes',
+                    ),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withValues(alpha: 0.60),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 2),
-              Text(
-                country,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: const Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 18,
+                  color: Colors.white,
+                ),
               ),
             ],
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _PlanStepTile extends StatelessWidget {
-  const _PlanStepTile({required this.number, required this.label});
-
-  final String number;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceFor(context),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.borderFor(context)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            number,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.2,
-            ),
-          ),
-        ],
       ),
     );
   }
 }
 
-class _HomeHeroImage extends StatelessWidget {
-  const _HomeHeroImage({required this.city});
+class _HeroCityImage extends StatelessWidget {
+  const _HeroCityImage({required this.city});
 
   final City city;
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = cityImageUrlFor(city.id);
-
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        if (imageUrl != null)
-          CachedNetworkImage(
-            imageUrl: imageUrl,
-            fit: BoxFit.cover,
-            placeholder: (_, _) => const SkeletonBox(height: 100),
-            errorWidget: (_, _, _) => const _HomeHeroImageFallback(),
-          )
-        else
-          const _HomeHeroImageFallback(),
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  const Color(0xFF08111E).withValues(alpha: 0.74),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
+    return CityResolvedImage(
+      city: city,
+      fit: BoxFit.cover,
+      placeholder: _HeroImageFallback(isDark: AppColors.isDark(context)),
+      errorWidget: _HeroImageFallback(isDark: AppColors.isDark(context)),
     );
   }
 }
 
-class _HomeHeroImageFallback extends StatelessWidget {
-  const _HomeHeroImageFallback();
+class _HeroImageFallback extends StatelessWidget {
+  const _HeroImageFallback({required this.isDark});
+
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF0D1828),
-      alignment: Alignment.center,
-      child: const Icon(
-        Icons.location_city_outlined,
-        color: Colors.white70,
-        size: 28,
-      ),
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w800,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? const [Color(0xFF1A3A5C), Color(0xFF0D1E30)]
+              : const [Color(0xFFC8DDEF), Color(0xFFE8F4FF)],
         ),
       ),
     );
   }
 }
 
-class _HeroCircleButton extends StatelessWidget {
-  const _HeroCircleButton({
-    required this.icon,
-    required this.active,
-    required this.onTap,
-  });
+class _SettingsButton extends StatelessWidget {
+  const _SettingsButton({required this.onTap});
 
-  final IconData icon;
-  final bool active;
   final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: Ink(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: active
-                ? const Color(0xFFE5485E)
-                : Colors.white.withValues(alpha: 0.14),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
-          ),
-          child: Icon(icon, color: Colors.white, size: 18),
-        ),
-      ),
-    );
-  }
-}
-
-class _MetricMiniCard extends StatelessWidget {
-  const _MetricMiniCard({
-    required this.label,
-    required this.value,
-    required this.valueColor,
-  });
-
-  final String label;
-  final String value;
-  final Color valueColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMutedFor(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderFor(context)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.textSoftFor(context),
-              letterSpacing: 0.5,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: valueColor,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CardHighlight {
-  const _CardHighlight({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-}
-
-class _VisualActionCard extends StatelessWidget {
-  const _VisualActionCard({
-    required this.title,
-    required this.description,
-    required this.actionLabel,
-    required this.onTap,
-    required this.scene,
-    required this.icon,
-    required this.accent,
-    this.highlights = const [],
-  });
-
-  final String title;
-  final String description;
-  final String actionLabel;
-  final VoidCallback onTap;
-  final Widget scene;
-  final IconData icon;
-  final Color accent;
-  final List<_CardHighlight> highlights;
 
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
-    final textPrimary = AppColors.textPrimaryFor(context);
-    final borderColor = AppColors.borderFor(context);
-    final cardGradient = LinearGradient(
-      colors: isDark
-          ? [AppColors.surfaceFor(context), AppColors.surfaceMutedFor(context)]
-          : const [Color(0xFFFFFFFF), Color(0xFFF4F7FC)],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    );
-
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(999),
         onTap: onTap,
         child: Ink(
+          width: 28,
+          height: 28,
           decoration: BoxDecoration(
-            gradient: cardGradient,
-            borderRadius: BorderRadius.circular(32),
+            shape: BoxShape.circle,
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.25)
+                : Colors.black.withValues(alpha: 0.08),
             border: Border.all(
               color: isDark
-                  ? borderColor
-                  : Colors.white.withValues(alpha: 0.28),
+                  ? Colors.white.withValues(alpha: 0.10)
+                  : Colors.black.withValues(alpha: 0.10),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: (isDark ? Colors.black : accent).withValues(
-                  alpha: isDark ? 0.14 : 0.08,
-                ),
-                blurRadius: 18,
-                offset: const Offset(0, 12),
-              ),
-            ],
           ),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 208),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(32),
-                    child: Opacity(
-                      opacity: isDark ? 0.12 : 0.14,
-                      child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: SizedBox(width: 190, child: scene),
-                      ),
-                    ),
-                  ),
-                ),
-
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 4,
-                      margin: const EdgeInsets.symmetric(vertical: 18),
-                      decoration: BoxDecoration(
-                        color: accent.withValues(alpha: isDark ? 0.72 : 0.50),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        accent.withValues(
-                                          alpha: isDark ? 0.24 : 0.16,
-                                        ),
-                                        accent.withValues(
-                                          alpha: isDark ? 0.14 : 0.08,
-                                        ),
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: accent.withValues(
-                                        alpha: isDark ? 0.22 : 0.12,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Icon(icon, color: accent, size: 24),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        title,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleLarge
-                                            ?.copyWith(
-                                              color: textPrimary,
-                                              height: 1.05,
-                                              fontWeight: FontWeight.w800,
-                                              letterSpacing: -0.2,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 10),
-
-                            Text(
-                              description,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: AppColors.textSoftFor(context),
-                                    height: 1.25,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-
-                            if (highlights.isNotEmpty) ...[
-                              const SizedBox(height: 12),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  for (final highlight in highlights.take(2))
-                                    _CardHighlightChip(
-                                      icon: highlight.icon,
-                                      label: highlight.label,
-                                      tint: accent,
-                                    ),
-                                ],
-                              ),
-                            ],
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    actionLabel,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelLarge
-                                        ?.copyWith(
-                                          color: accent,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Icon(
-                                  Icons.arrow_outward_rounded,
-                                  size: 20,
-                                  color: accent,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          child: Icon(
+            Icons.settings_outlined,
+            size: 16,
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.60)
+                : Colors.black.withValues(alpha: 0.50),
           ),
         ),
       ),
@@ -1572,365 +1527,235 @@ class _VisualActionCard extends StatelessWidget {
   }
 }
 
-class _CardHighlightChip extends StatelessWidget {
-  const _CardHighlightChip({
-    required this.icon,
-    required this.label,
-    required this.tint,
+class _BlueOrb extends StatelessWidget {
+  const _BlueOrb();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    return Container(
+      width: 220,
+      height: 220,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: isDark
+              ? const [Color(0x8C0284C7), Color(0x260284C7), Colors.transparent]
+              : const [
+                  Color(0x400284C7),
+                  Color(0x140284C7),
+                  Colors.transparent,
+                ],
+          stops: const [0, 0.45, 0.70],
+        ),
+      ),
+    );
+  }
+}
+
+class _IndigoOrb extends StatelessWidget {
+  const _IndigoOrb();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    return Container(
+      width: 200,
+      height: 200,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: isDark
+              ? const [Color(0x596366F1), Color(0x146366F1), Colors.transparent]
+              : const [
+                  Color(0x266366F1),
+                  Color(0x0A6366F1),
+                  Colors.transparent,
+                ],
+          stops: const [0, 0.50, 0.70],
+        ),
+      ),
+    );
+  }
+}
+
+class _BlueLightOrb extends StatelessWidget {
+  const _BlueLightOrb();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: isDark
+              ? const [Color(0x330EA5E9), Colors.transparent]
+              : const [Color(0x1A0EA5E9), Colors.transparent],
+          stops: const [0, 0.65],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroGridPainter extends CustomPainter {
+  const _HeroGridPainter(this.isDark);
+
+  final bool isDark;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = isDark ? const Color(0x0A0EA5E9) : const Color(0x0F0EA5E9)
+      ..strokeWidth = 1;
+
+    const spacing = 28.0;
+    for (double x = 0; x <= size.width; x += spacing) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y <= size.height; y += spacing) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _HeroGridPainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
+}
+
+class _HomeGuideState {
+  const _HomeGuideState({
+    required this.items,
+    required this.completedIds,
+    required this.currentItem,
+    required this.completedCount,
+    required this.totalItems,
+    required this.progressPercent,
+    required this.currentPhaseIndex,
+    required this.totalPhases,
   });
 
-  final IconData icon;
-  final String label;
-  final Color tint;
+  final List<GuideActionItem> items;
+  final Set<String> completedIds;
+  final GuideActionItem? currentItem;
+  final int completedCount;
+  final int totalItems;
+  final int progressPercent;
+  final int currentPhaseIndex;
+  final int totalPhases;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: tint.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: tint.withValues(alpha: 0.12)),
+  String phaseName(BuildContext context) {
+    final phase = currentItem?.phase ?? GuidePhase.arrival;
+    return switch (phase) {
+      GuidePhase.preparation => _text(
+        context,
+        pt: 'Antes de viajar',
+        es: 'Antes de viajar',
+        en: 'Before travel',
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: tint),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimaryFor(context),
-              ),
-            ),
-          ),
-        ],
+      GuidePhase.housing => _text(
+        context,
+        pt: 'Primeiros dias',
+        es: 'Primeros días',
+        en: 'First days',
       ),
-    );
+      GuidePhase.documents => _text(
+        context,
+        pt: 'Documentação',
+        es: 'Documentación',
+        en: 'Documentation',
+      ),
+      GuidePhase.work => _text(
+        context,
+        pt: 'Vida funcionando',
+        es: 'Vida funcionando',
+        en: 'Life working',
+      ),
+      GuidePhase.arrival => _text(
+        context,
+        pt: 'Integração',
+        es: 'Integración',
+        en: 'Integration',
+      ),
+    };
+  }
+
+  Color segmentColor(BuildContext context, int index) {
+    final item = items[index];
+    if (completedIds.contains(item.id)) {
+      return AppColors.isDark(context)
+          ? const Color(0xFF0EA5E9)
+          : const Color(0xFF0284C7);
+    }
+    if (currentItem?.id == item.id) {
+      return AppColors.isDark(context)
+          ? const Color(0x660EA5E9)
+          : const Color(0x590EA5E9);
+    }
+    return AppColors.isDark(context)
+        ? Colors.white.withValues(alpha: 0.07)
+        : Colors.black.withValues(alpha: 0.06);
   }
 }
 
-class _QuestionsScene extends StatelessWidget {
-  const _QuestionsScene();
+Color _cardBackground(BuildContext context) =>
+    AppColors.isDark(context) ? const Color(0xFF0E1825) : Colors.white;
 
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          left: 18,
-          top: 18,
-          child: Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(
-              color: Color(0xFF1F76E6),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        Positioned(
-          right: -10,
-          top: -8,
-          child: Container(
-            width: 78,
-            height: 78,
-            decoration: const BoxDecoration(
-              color: Color(0xF2FFFFFF),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        Positioned(
-          left: -12,
-          bottom: -16,
-          child: Container(
-            width: 88,
-            height: 88,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Container(
-            height: 42,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.elliptical(220, 64),
-                topRight: Radius.elliptical(240, 68),
-              ),
-            ),
-          ),
-        ),
-        Center(
-          child: SizedBox(
-            width: 178,
-            height: 92,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Positioned(
-                  left: 16,
-                  top: 16,
-                  child: Transform.rotate(
-                    angle: -0.08,
-                    child: _QuestionSheet(accent: const Color(0xFF2B7BE8)),
-                  ),
-                ),
-                Positioned(
-                  right: 16,
-                  top: 10,
-                  child: Transform.rotate(
-                    angle: 0.08,
-                    child: _QuestionSheet(accent: const Color(0xFF7E4DFF)),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
+Color _cardBorder(BuildContext context) => AppColors.isDark(context)
+    ? Colors.white.withValues(alpha: 0.08)
+    : Colors.black.withValues(alpha: 0.08);
 
-class _QuestionSheet extends StatelessWidget {
-  const _QuestionSheet({required this.accent});
+Color _progressBorder(BuildContext context) => AppColors.isDark(context)
+    ? const Color(0x2E0EA5E9)
+    : const Color(0x330EA5E9);
 
-  final Color accent;
+Color _primaryText(BuildContext context) =>
+    AppColors.isDark(context) ? Colors.white : const Color(0xFF0A0F1E);
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 72,
-      height: 84,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 14,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 26,
-            height: 26,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.question_answer_rounded, size: 15, color: accent),
-          ),
-          const Spacer(),
-          Container(
-            width: 44,
-            height: 8,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(999),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Container(
-            width: 30,
-            height: 8,
-            decoration: BoxDecoration(
-              color: const Color(0x332B7BE8),
-              borderRadius: BorderRadius.circular(999),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+Color _secondaryText(BuildContext context) => AppColors.isDark(context)
+    ? Colors.white.withValues(alpha: 0.40)
+    : const Color(0x800A0F1E);
 
-class _CitiesScene extends StatelessWidget {
-  const _CitiesScene();
+Color _tertiaryText(BuildContext context) => AppColors.isDark(context)
+    ? Colors.white.withValues(alpha: 0.25)
+    : const Color(0x590A0F1E);
 
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          left: 20,
-          top: 20,
-          child: Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(
-              color: Color(0xFF1F76E6),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        Positioned(
-          right: -12,
-          top: -6,
-          child: Container(
-            width: 86,
-            height: 86,
-            decoration: const BoxDecoration(
-              color: Color(0xF2FFFFFF),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        Positioned(
-          left: -18,
-          bottom: -24,
-          child: Container(
-            width: 102,
-            height: 102,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Container(
-            height: 48,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.elliptical(220, 64),
-                topRight: Radius.elliptical(260, 74),
-              ),
-            ),
-          ),
-        ),
-        Center(
-          child: SizedBox(
-            width: 190,
-            height: 110,
-            child: Stack(
-              alignment: Alignment.center,
-              children: const [
-                Positioned(
-                  left: 10,
-                  top: 24,
-                  child: _MiniCityCard(
-                    titleWidth: 44,
-                    accent: Color(0xFF35C6F4),
-                  ),
-                ),
-                Positioned(
-                  right: 12,
-                  top: 12,
-                  child: _MiniCityCard(
-                    titleWidth: 52,
-                    accent: Color(0xFF2B7BE8),
-                  ),
-                ),
-                Positioned(bottom: 8, child: _LocationPinCard()),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
+Color _badgeBackground(BuildContext context) => AppColors.isDark(context)
+    ? const Color(0x2E0284C7)
+    : const Color(0x1F0284C7);
 
-class _MiniCityCard extends StatelessWidget {
-  const _MiniCityCard({required this.titleWidth, required this.accent});
+Color _badgeBorder(BuildContext context) => AppColors.isDark(context)
+    ? const Color(0x4D0EA5E9)
+    : const Color(0x660EA5E9);
 
-  final double titleWidth;
-  final Color accent;
+Color _accentText(BuildContext context) => AppColors.isDark(context)
+    ? const Color(0xFF38BDF8)
+    : const Color(0xFF0369A1);
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 72,
-      height: 80,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 14,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-            child: Container(
-              width: titleWidth,
-              height: 8,
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
-          ),
-          const Spacer(),
-          Container(
-            height: 24,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.14),
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(16),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+Color _progressTrack(BuildContext context) => AppColors.isDark(context)
+    ? Colors.white.withValues(alpha: 0.07)
+    : Colors.black.withValues(alpha: 0.07);
 
-class _LocationPinCard extends StatelessWidget {
-  const _LocationPinCard();
+Color _mutedButtonBackground(BuildContext context) => AppColors.isDark(context)
+    ? Colors.white.withValues(alpha: 0.07)
+    : Colors.black.withValues(alpha: 0.06);
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 88,
-      height: 88,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 14,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: const Center(
-        child: Icon(
-          Icons.location_on_rounded,
-          size: 34,
-          color: Color(0xFF7E4DFF),
-        ),
-      ),
-    );
-  }
+Color _mutedButtonForeground(BuildContext context) => AppColors.isDark(context)
+    ? Colors.white.withValues(alpha: 0.35)
+    : Colors.black.withValues(alpha: 0.35);
+
+String _text(
+  BuildContext context, {
+  required String pt,
+  required String es,
+  required String en,
+}) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 }

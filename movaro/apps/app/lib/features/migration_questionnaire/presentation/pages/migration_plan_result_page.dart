@@ -13,11 +13,11 @@ import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
+import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_public_opinion.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/explore_entry_card.dart';
 import 'package:movaro_app/features/cities/presentation/pages/city_explore_screen.dart';
@@ -108,6 +108,10 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
       if (!mounted) {
         return;
       }
+      await _showCelebrationOverlay(city.name);
+      if (!mounted) {
+        return;
+      }
       await Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
     } finally {
       if (mounted) {
@@ -116,6 +120,20 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
         });
       }
     }
+  }
+
+  Future<void> _showCelebrationOverlay(String cityName) async {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.8),
+      builder: (_) => _CelebrationOverlay(cityName: cityName),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 2500));
+    if (!mounted) {
+      return;
+    }
+    Navigator.of(context, rootNavigator: true).pop();
   }
 
   Future<void> _showCompatibilityHelp() {
@@ -365,6 +383,73 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
   }
 }
 
+class _CelebrationOverlay extends StatelessWidget {
+  const _CelebrationOverlay({required this.cityName});
+
+  final String cityName;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0D2818),
+          border: Border.all(color: const Color(0xFF1A4428)),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('🎉', style: TextStyle(fontSize: 48)),
+            const SizedBox(height: 16),
+            Text(
+              _localizedCelebration(
+                context,
+                pt: 'Plano iniciado!',
+                es: 'Plan iniciado!',
+                en: 'Plan started!',
+              ),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: const Color(0xFFF0F6FC),
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _localizedCelebration(
+                context,
+                pt: 'Voce escolheu $cityName.\nVamos transformar isso em realidade.',
+                es: 'Elegiste $cityName.\nVamos a convertirlo en realidad.',
+                en: 'You chose $cityName.\nLet’s turn that into reality.',
+              ),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: const Color(0xFF6B7280),
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+String _localizedCelebration(
+  BuildContext context, {
+  required String pt,
+  required String es,
+  required String en,
+}) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
+}
+
 class _PlanResultSkeleton extends StatelessWidget {
   const _PlanResultSkeleton();
 
@@ -567,7 +652,7 @@ class _ResultCityRating extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rating = ((score / 20) * 2).round() / 2;
+    final rating = _normalizeCityRating(score);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -602,6 +687,12 @@ class _ResultCityRating extends StatelessWidget {
     }
     return Icons.star_border_rounded;
   }
+}
+
+double _normalizeCityRating(int rawScore) {
+  final normalized = rawScore <= 5 ? rawScore.toDouble() : (rawScore / 20);
+  final clamped = normalized.clamp(0.0, 5.0);
+  return (clamped * 2).round() / 2;
 }
 
 class _HeroImage extends StatefulWidget {

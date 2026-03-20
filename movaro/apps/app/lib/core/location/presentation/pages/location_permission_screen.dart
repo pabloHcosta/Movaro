@@ -6,6 +6,7 @@ import 'package:movaro_app/core/location/location_controller.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
 
 class LocationPermissionScreenArgs {
   const LocationPermissionScreenArgs({
@@ -77,22 +78,19 @@ class LocationPermissionScreen extends StatelessWidget {
                             const SizedBox(height: 24),
                             _BenefitRow(
                               icon: Icons.flag_outlined,
-                              label: context
-                                  .l10n
+                              label: context.l10n
                                   .locationPermissionBenefitAutoOrigin(),
                             ),
                             const SizedBox(height: 12),
                             _BenefitRow(
                               icon: Icons.route_outlined,
-                              label: context
-                                  .l10n
+                              label: context.l10n
                                   .locationPermissionBenefitDistance(),
                             ),
                             const SizedBox(height: 12),
                             _BenefitRow(
                               icon: Icons.explore_outlined,
-                              label: context
-                                  .l10n
+                              label: context.l10n
                                   .locationPermissionBenefitContent(),
                             ),
                             const SizedBox(height: 28),
@@ -101,8 +99,7 @@ class LocationPermissionScreen extends StatelessWidget {
                               child: FilledButton(
                                 onPressed: locationController.isBusy
                                     ? null
-                                    : () =>
-                                          _handleAllowLocation(context),
+                                    : () => _handleAllowLocation(context),
                                 child: Text(
                                   context.l10n.locationPermissionAllowAction(),
                                 ),
@@ -135,6 +132,7 @@ class LocationPermissionScreen extends StatelessWidget {
 
   Future<void> _handleAllowLocation(BuildContext context) async {
     final result = await locationController.requestPermissionAndCapture();
+    await PlanNotificationService.instance.requestPermissions();
     if (!context.mounted) {
       return;
     }
@@ -174,9 +172,7 @@ class LocationPermissionScreen extends StatelessWidget {
                           Navigator.pop(sheetContext);
                         }
                       },
-                      child: Text(
-                        context.l10n.locationOpenSettingsAction(),
-                      ),
+                      child: Text(context.l10n.locationOpenSettingsAction()),
                     ),
                   ),
                 ],
@@ -224,10 +220,7 @@ class _BenefitRow extends StatelessWidget {
         Icon(icon, size: 20, color: AppColors.primary),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
         ),
       ],
     );

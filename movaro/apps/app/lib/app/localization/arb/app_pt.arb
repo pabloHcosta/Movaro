@@ -2438,5 +2438,41 @@
   "journeyCoverageBrowseAction": "Browse explore",
   "journeyCoverageContentAction": "Open content",
   "journeyCoverageWaitlistAction": "Join waitlist",
-  "journeyCoverageWaitlistStub": "Waitlist registration is not live yet, but this route can be tracked safely for future coverage."
+  "journeyCoverageWaitlistStub": "Waitlist registration is not live yet, but this route can be tracked safely for future coverage.",
+  "phase_before_travel": "Antes de viajar",
+  "phase_first_days": "Primeiros dias",
+  "phase_documentation": "Documentação",
+  "phase_life_working": "Vida funcionando",
+  "phase_integration": "Integração",
+  "phase_desc_before_travel": "O que preparar ainda na Argentina para chegar sem surpresas",
+  "phase_desc_first_days": "Chegou no Brasil. Foco em se estabelecer e conseguir se comunicar.",
+  "phase_desc_documentation": "Os documentos que desbloqueiam tudo. Faça nessa ordem exata.",
+  "phase_desc_life_working": "Com CPF e residência em processo, agora você monta a estrutura do dia a dia.",
+  "phase_desc_integration": "Adaptar a vida completa ao Brasil e garantir a permanência de longo prazo.",
+  "item_next_action_tag": "PRÓXIMA AÇÃO",
+  "item_external_tag": "AÇÃO EXTERNA",
+  "item_tool_tag": "USE UMA FERRAMENTA",
+  "item_checklist_tag": "PARA CONCLUIR",
+  "deadline_badge": "Solicitar até {date}",
+  "@deadline_badge": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "deadline_alert_title": "Prazo se aproximando",
+  "deadline_alert_body": "Sua residência temporária vence em {days} dias. Solicite a permanente antes.",
+  "@deadline_alert_body": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "guide_completed_title": "Plano concluído!",
+  "guide_completed_subtitle": "Você completou todas as etapas do seu guia para {city}.",
+  "@guide_completed_subtitle": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "guide_no_plan_title": "Escolha sua cidade primeiro",
+  "guide_no_plan_subtitle": "Confirme a cidade do seu plano para começar o guia"
 }

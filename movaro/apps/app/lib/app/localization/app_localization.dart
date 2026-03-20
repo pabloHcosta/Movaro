@@ -341,11 +341,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'Allow location',
   );
 
-  String locationPermissionLaterAction() => _localizedText(
-    pt: 'Agora não',
-    es: 'Ahora no',
-    en: 'Not now',
-  );
+  String locationPermissionLaterAction() =>
+      _localizedText(pt: 'Agora não', es: 'Ahora no', en: 'Not now');
 
   String locationBannerBody() => _localizedText(
     pt: 'Ative a localização para uma experiência mais precisa',
@@ -353,11 +350,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'Turn on location for a more accurate experience',
   );
 
-  String locationBannerAction() => _localizedText(
-    pt: 'Ativar',
-    es: 'Activar',
-    en: 'Enable',
-  );
+  String locationBannerAction() =>
+      _localizedText(pt: 'Ativar', es: 'Activar', en: 'Enable');
 
   String locationSettingsTitle() => _localizedText(
     pt: 'Permissão bloqueada',
@@ -431,17 +425,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'We detect where you are leaving from and personalize everything before the questionnaire.',
   );
 
-  String commonNextAction() => _localizedText(
-    pt: 'Próximo',
-    es: 'Siguiente',
-    en: 'Next',
-  );
+  String commonNextAction() =>
+      _localizedText(pt: 'Próximo', es: 'Siguiente', en: 'Next');
 
-  String cityDetailHeaderTitle() => _localizedText(
-    pt: 'Detalhes',
-    es: 'Detalles',
-    en: 'Details',
-  );
+  String cityDetailHeaderTitle() =>
+      _localizedText(pt: 'Detalhes', es: 'Detalles', en: 'Details');
 
   String cityDetailGuideEyebrow() => _localizedText(
     pt: 'Detalhes da cidade',
@@ -545,11 +533,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: "The 'TOP' badge shows the city with the most wins overall. Tap 'Edit' to switch the compared cities.",
   );
 
-  String settingsTitle() => _localizedText(
-    pt: 'Configuracoes',
-    es: 'Configuracion',
-    en: 'Settings',
-  );
+  String settingsTitle() =>
+      _localizedText(pt: 'Configuracoes', es: 'Configuracion', en: 'Settings');
 
   String settingsLanguageTitle() => _localizedText(
     pt: 'Idioma do app',
@@ -592,6 +577,78 @@ extension AppLocalizationsFormatting on AppLocalizations {
     es: 'No mostrar de nuevo',
     en: "Don't show again",
   );
+
+  String questionnaireVariantPageTitle() => _localizedText(
+    pt: 'Seu plano inicial',
+    es: 'Tu plan inicial',
+    en: 'Your starter plan',
+  );
+
+  String questionnaireVariantEyebrow() =>
+      _localizedText(pt: 'PRIMEIRO PASSO', es: 'PRIMER PASO', en: 'FIRST STEP');
+
+  String questionnaireVariantHeroTitle() => _localizedText(
+    pt: 'Como voce quer montar\nseu plano?',
+    es: 'Como queres armar\ntu plan?',
+    en: 'How do you want to build\nyour plan?',
+  );
+
+  String questionnaireVariantHeroBody() => _localizedText(
+    pt: 'Escolha o ritmo. Voce pode mudar depois.',
+    es: 'Elegi el ritmo. Lo podes cambiar despues.',
+    en: 'Choose the pace. You can change it later.',
+  );
+
+  String questionnaireVariantLeanBadge() =>
+      _localizedText(pt: 'Mais rapido', es: 'Mas rapido', en: 'Fastest');
+
+  String questionnaireVariantLeanDescription() => _localizedText(
+    pt: '4 perguntas diretas para chegar a uma cidade recomendada sem perder tempo.',
+    es: '4 preguntas directas para llegar a una ciudad recomendada sin perder tiempo.',
+    en: '4 direct questions to reach a recommended city without wasting time.',
+  );
+
+  String questionnaireVariantLeanTime() =>
+      _localizedText(pt: '~2 min', es: '~2 min', en: '~2 min');
+
+  String questionnaireVariantLeanQuestionCount() =>
+      _localizedText(pt: '4 perguntas', es: '4 preguntas', en: '4 questions');
+
+  String questionnaireVariantLeanAction() =>
+      _localizedText(pt: 'Comecar agora', es: 'Empezar ahora', en: 'Start now');
+
+  String questionnaireVariantSeparator() => _localizedText(
+    pt: 'ou se preferir mais precisao',
+    es: 'o si preferis mas precision',
+    en: 'or if you prefer more precision',
+  );
+
+  String questionnaireVariantStrategicBadge() =>
+      _localizedText(pt: 'Mais preciso', es: 'Mas preciso', en: 'More precise');
+
+  String questionnaireVariantStrategicDescription() => _localizedText(
+    pt: '1 pergunta a mais sobre suas restricoes para uma recomendacao mais afinada ao seu perfil.',
+    es: '1 pregunta mas sobre tus restricciones para una recomendacion mas ajustada a tu perfil.',
+    en: '1 extra question about your constraints for a recommendation that fits your profile better.',
+  );
+
+  String questionnaireVariantStrategicTime() =>
+      _localizedText(pt: '~4 min', es: '~4 min', en: '~4 min');
+
+  String questionnaireVariantStrategicQuestionCount() =>
+      _localizedText(pt: '7 perguntas', es: '7 preguntas', en: '7 questions');
+
+  String questionnaireVariantStrategicAction() => _localizedText(
+    pt: 'Escolher plano estrategico',
+    es: 'Elegir plan estrategico',
+    en: 'Choose strategic plan',
+  );
+
+  String questionnaireVariantTimeLabel() =>
+      _localizedText(pt: 'tempo', es: 'tiempo', en: 'time');
+
+  String questionnaireVariantCountLabel() =>
+      _localizedText(pt: 'no total', es: 'en total', en: 'in total');
 
   String exploreGuideTitle() => _localizedText(
     pt: 'Explore com contexto do plano',
@@ -641,23 +698,14 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'The content section points to the practical guides most relevant to documents, housing, and work.',
   );
 
-  String exploreSignalStrong() => _localizedText(
-    pt: 'Forte',
-    es: 'Fuerte',
-    en: 'Strong',
-  );
+  String exploreSignalStrong() =>
+      _localizedText(pt: 'Forte', es: 'Fuerte', en: 'Strong');
 
-  String exploreSignalBalanced() => _localizedText(
-    pt: 'Equilibrado',
-    es: 'Equilibrado',
-    en: 'Balanced',
-  );
+  String exploreSignalBalanced() =>
+      _localizedText(pt: 'Equilibrado', es: 'Equilibrado', en: 'Balanced');
 
-  String exploreSignalWatch() => _localizedText(
-    pt: 'Atencao',
-    es: 'Atencion',
-    en: 'Watch',
-  );
+  String exploreSignalWatch() =>
+      _localizedText(pt: 'Atencao', es: 'Atencion', en: 'Watch');
 
   String journeySetupGuideTitle() => _localizedText(
     pt: 'Defina a rota em um lugar so',
@@ -802,58 +850,194 @@ extension AppLocalizationsFormatting on AppLocalizations {
     switch (questionId) {
       case 'timeline':
         return switch (value) {
-          'just_exploring' => _localizedText(pt: 'Explorar', es: 'Explorar', en: 'Explore'),
-          'in_0_3m' => _localizedText(pt: '0-3 meses', es: '0-3 meses', en: '0-3 mo'),
-          'in_3_6m' => _localizedText(pt: '3-6 meses', es: '3-6 meses', en: '3-6 mo'),
-          'in_6_12m' => _localizedText(pt: '6-12 meses', es: '6-12 meses', en: '6-12 mo'),
-          'in_12m_plus' => _localizedText(pt: '12+ meses', es: '12+ meses', en: '12+ mo'),
-          'depends' => _localizedText(pt: 'Flexivel', es: 'Flexible', en: 'Flexible'),
+          'just_exploring' => _localizedText(
+            pt: 'Explorar',
+            es: 'Explorar',
+            en: 'Explore',
+          ),
+          'in_0_3m' => _localizedText(
+            pt: '0-3 meses',
+            es: '0-3 meses',
+            en: '0-3 mo',
+          ),
+          'in_3_6m' => _localizedText(
+            pt: '3-6 meses',
+            es: '3-6 meses',
+            en: '3-6 mo',
+          ),
+          'in_6_12m' => _localizedText(
+            pt: '6-12 meses',
+            es: '6-12 meses',
+            en: '6-12 mo',
+          ),
+          'in_12m_plus' => _localizedText(
+            pt: '12+ meses',
+            es: '12+ meses',
+            en: '12+ mo',
+          ),
+          'depends' => _localizedText(
+            pt: 'Flexivel',
+            es: 'Flexible',
+            en: 'Flexible',
+          ),
           _ => questionOptionLabel(questionId, value),
         };
       case 'intent':
         return switch (value) {
-          'find_job_br' => _localizedText(pt: 'Trabalho', es: 'Trabajo', en: 'Work'),
-          'remote_income' => _localizedText(pt: 'Remoto', es: 'Remoto', en: 'Remote'),
+          'find_job_br' => _localizedText(
+            pt: 'Trabalho',
+            es: 'Trabajo',
+            en: 'Work',
+          ),
+          'remote_income' => _localizedText(
+            pt: 'Remoto',
+            es: 'Remoto',
+            en: 'Remote',
+          ),
           'study' => _localizedText(pt: 'Estudo', es: 'Estudio', en: 'Study'),
-          'family_partner' => _localizedText(pt: 'Familia', es: 'Familia', en: 'Family'),
-          'fresh_start' => _localizedText(pt: 'Recomeco', es: 'Reinicio', en: 'Restart'),
-          'explore_unsure' => _localizedText(pt: 'Explorar', es: 'Explorar', en: 'Explore'),
+          'family_partner' => _localizedText(
+            pt: 'Familia',
+            es: 'Familia',
+            en: 'Family',
+          ),
+          'fresh_start' => _localizedText(
+            pt: 'Recomeco',
+            es: 'Reinicio',
+            en: 'Restart',
+          ),
+          'explore_unsure' => _localizedText(
+            pt: 'Explorar',
+            es: 'Explorar',
+            en: 'Explore',
+          ),
           _ => questionOptionLabel(questionId, value),
         };
       case 'funding':
         return switch (value) {
-          'savings' => _localizedText(pt: 'Reserva', es: 'Ahorros', en: 'Savings'),
-          'remote_income' => _localizedText(pt: 'Remoto', es: 'Remoto', en: 'Remote'),
-          'job_search' => _localizedText(pt: 'Buscar vaga', es: 'Buscar trabajo', en: 'Need job'),
-          'job_offer' => _localizedText(pt: 'Oferta', es: 'Oferta', en: 'Offer'),
-          'family_support' => _localizedText(pt: 'Familia', es: 'Familia', en: 'Family'),
-          'dont_know' => _localizedText(pt: 'Nao sei', es: 'No se', en: 'Unsure'),
+          'savings' => _localizedText(
+            pt: 'Reserva',
+            es: 'Ahorros',
+            en: 'Savings',
+          ),
+          'remote_income' => _localizedText(
+            pt: 'Remoto',
+            es: 'Remoto',
+            en: 'Remote',
+          ),
+          'job_search' => _localizedText(
+            pt: 'Buscar vaga',
+            es: 'Buscar trabajo',
+            en: 'Need job',
+          ),
+          'job_offer' => _localizedText(
+            pt: 'Oferta',
+            es: 'Oferta',
+            en: 'Offer',
+          ),
+          'family_support' => _localizedText(
+            pt: 'Familia',
+            es: 'Familia',
+            en: 'Family',
+          ),
+          'dont_know' => _localizedText(
+            pt: 'Nao sei',
+            es: 'No se',
+            en: 'Unsure',
+          ),
           _ => questionOptionLabel(questionId, value),
         };
       case 'constraints':
         return switch (value) {
           'prefer_south' => _localizedText(pt: 'Sul', es: 'Sur', en: 'South'),
-          'need_big_city' => _localizedText(pt: 'Cidade grande', es: 'Ciudad grande', en: 'Big city'),
-          'prefer_mid_city' => _localizedText(pt: 'Cidade media', es: 'Ciudad media', en: 'Mid city'),
-          'want_coast' => _localizedText(pt: 'Litoral', es: 'Costa', en: 'Coast'),
-          'prefer_cooler' => _localizedText(pt: 'Mais fresco', es: 'Mas fresco', en: 'Cooler'),
-          'need_transit' => _localizedText(pt: 'Transporte', es: 'Transporte', en: 'Transit'),
-          'avoid_expensive' => _localizedText(pt: 'Menor custo', es: 'Menor costo', en: 'Lower cost'),
-          'no_constraints' => _localizedText(pt: 'Aberto', es: 'Abierto', en: 'Open'),
+          'need_big_city' => _localizedText(
+            pt: 'Cidade grande',
+            es: 'Ciudad grande',
+            en: 'Big city',
+          ),
+          'prefer_mid_city' => _localizedText(
+            pt: 'Cidade media',
+            es: 'Ciudad media',
+            en: 'Mid city',
+          ),
+          'want_coast' => _localizedText(
+            pt: 'Litoral',
+            es: 'Costa',
+            en: 'Coast',
+          ),
+          'prefer_cooler' => _localizedText(
+            pt: 'Mais fresco',
+            es: 'Mas fresco',
+            en: 'Cooler',
+          ),
+          'need_transit' => _localizedText(
+            pt: 'Transporte',
+            es: 'Transporte',
+            en: 'Transit',
+          ),
+          'avoid_expensive' => _localizedText(
+            pt: 'Menor custo',
+            es: 'Menor costo',
+            en: 'Lower cost',
+          ),
+          'no_constraints' => _localizedText(
+            pt: 'Aberto',
+            es: 'Abierto',
+            en: 'Open',
+          ),
           _ => questionOptionLabel(questionId, value),
         };
       case 'priorities':
         return switch (value) {
-          'low_cost' => _localizedText(pt: 'Baixo custo', es: 'Bajo costo', en: 'Low cost'),
-          'job_opportunities' => _localizedText(pt: 'Emprego', es: 'Empleo', en: 'Jobs'),
-          'safety' => _localizedText(pt: 'Seguranca', es: 'Seguridad', en: 'Safety'),
-          'warm_climate_beach' => _localizedText(pt: 'Costa quente', es: 'Costa calida', en: 'Warm coast'),
-          'transit_infra' => _localizedText(pt: 'Transporte', es: 'Transporte', en: 'Transit'),
-          'nature' => _localizedText(pt: 'Natureza', es: 'Naturaleza', en: 'Nature'),
-          'university' => _localizedText(pt: 'Estudo', es: 'Estudio', en: 'Study'),
-          'community' => _localizedText(pt: 'Comunidade', es: 'Comunidad', en: 'Community'),
-          'close_to_argentina' => _localizedText(pt: 'Perto da AR', es: 'Cerca de AR', en: 'Near AR'),
-          'balanced_unsure' => _localizedText(pt: 'Equilibrado', es: 'Equilibrado', en: 'Balanced'),
+          'low_cost' => _localizedText(
+            pt: 'Baixo custo',
+            es: 'Bajo costo',
+            en: 'Low cost',
+          ),
+          'job_opportunities' => _localizedText(
+            pt: 'Emprego',
+            es: 'Empleo',
+            en: 'Jobs',
+          ),
+          'safety' => _localizedText(
+            pt: 'Seguranca',
+            es: 'Seguridad',
+            en: 'Safety',
+          ),
+          'warm_climate_beach' => _localizedText(
+            pt: 'Costa quente',
+            es: 'Costa calida',
+            en: 'Warm coast',
+          ),
+          'transit_infra' => _localizedText(
+            pt: 'Transporte',
+            es: 'Transporte',
+            en: 'Transit',
+          ),
+          'nature' => _localizedText(
+            pt: 'Natureza',
+            es: 'Naturaleza',
+            en: 'Nature',
+          ),
+          'university' => _localizedText(
+            pt: 'Estudo',
+            es: 'Estudio',
+            en: 'Study',
+          ),
+          'community' => _localizedText(
+            pt: 'Comunidade',
+            es: 'Comunidad',
+            en: 'Community',
+          ),
+          'close_to_argentina' => _localizedText(
+            pt: 'Perto da AR',
+            es: 'Cerca de AR',
+            en: 'Near AR',
+          ),
+          'balanced_unsure' => _localizedText(
+            pt: 'Equilibrado',
+            es: 'Equilibrado',
+            en: 'Balanced',
+          ),
           _ => questionOptionLabel(questionId, value),
         };
       default:
@@ -862,51 +1046,51 @@ extension AppLocalizationsFormatting on AppLocalizations {
   }
 
   String copilotGuideTitle() => _localizedText(
-    pt: 'Use o plano uma etapa por vez',
-    es: 'Usá el plan una etapa por vez',
-    en: 'Use the plan one stage at a time',
+    pt: 'Como usar o guia',
+    es: 'Como usar la guia',
+    en: 'How to use the guide',
   );
 
   String copilotGuideBody() => _localizedText(
-    pt: 'O copilot transforma a recomendacao em um checklist de execucao para que voce foque na proxima etapa, e nao na mudanca inteira de uma vez.',
-    es: 'El copilot convierte la recomendacion en una checklist de ejecucion para que te enfoques en la siguiente etapa y no en toda la mudanza de una sola vez.',
-    en: 'Copilot turns the recommendation into a working checklist so you can focus on the next stage instead of the full move at once.',
+    pt: 'Esse guia transforma seu plano em passos concretos. Foque em uma etapa por vez e siga no seu ritmo.',
+    es: 'Esta guia convierte tu plan en pasos concretos. Enfocate en una etapa por vez y seguí a tu ritmo.',
+    en: 'This guide turns your plan into concrete steps. Focus on one stage at a time and move at your pace.',
   );
 
   String copilotGuideStepOneTitle() => _localizedText(
-    pt: 'Veja a etapa atual',
-    es: 'Mirá la etapa actual',
-    en: 'Watch the current stage',
+    pt: 'Veja o que fazer agora',
+    es: 'Mira que hacer ahora',
+    en: 'See what to do now',
   );
 
   String copilotGuideStepOneBody() => _localizedText(
-    pt: 'A visao geral destaca a etapa mais importante e o seu progresso total.',
-    es: 'La vista general destaca la etapa mas importante y tu progreso total.',
-    en: 'The overview highlights the most important step and your overall progress.',
+    pt: 'O card no topo sempre mostra a proxima acao mais importante do seu plano.',
+    es: 'La tarjeta de arriba siempre muestra la proxima accion mas importante de tu plan.',
+    en: 'The card at the top always shows the most important next action in your plan.',
   );
 
   String copilotGuideStepTwoTitle() => _localizedText(
-    pt: 'Abra a secao certa',
-    es: 'Abrí la seccion correcta',
-    en: 'Open the right section',
+    pt: 'Marque quando concluir',
+    es: 'Marca cuando termines',
+    en: 'Mark steps when you finish them',
   );
 
   String copilotGuideStepTwoBody() => _localizedText(
-    pt: 'Salte entre documentos, moradia, trabalho e chegada sem perder o estado da checklist.',
-    es: 'Saltá entre documentos, vivienda, trabajo y llegada sin perder el estado de la checklist.',
-    en: 'Jump between documents, housing, work, and arrival without losing checklist state.',
+    pt: 'Cada check salva seu progresso automaticamente. Voce pode continuar de onde parou.',
+    es: 'Cada check guarda tu progreso automaticamente. Podes seguir desde donde paraste.',
+    en: 'Each check saves your progress automatically. You can continue where you left off.',
   );
 
   String copilotGuideStepThreeTitle() => _localizedText(
-    pt: 'Conclua item por item',
-    es: 'Completá item por item',
-    en: 'Complete items as you go',
+    pt: 'Use as ferramentas quando precisar',
+    es: 'Usa las herramientas cuando las necesites',
+    en: 'Use the tools when you need them',
   );
 
   String copilotGuideStepThreeBody() => _localizedText(
-    pt: 'O progresso da checklist fica salvo localmente para voce retomar depois.',
-    es: 'El progreso de la checklist queda guardado localmente para que retomes despues.',
-    en: 'Checklist progress is saved locally so you can resume later.',
+    pt: 'Orcamento, voo e aluguel ficam disponiveis pelo botao Ferramentas.',
+    es: 'Presupuesto, vuelo y alquiler quedan disponibles en el boton Herramientas.',
+    en: 'Budget, flight, and housing tools are available through the Tools button.',
   );
 
   String copilotStageStateLabel(bool selected) => _localizedText(
@@ -915,11 +1099,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: selected ? 'Current stage' : 'Open stage',
   );
 
-  String cityExploreTitle() => _localizedText(
-    pt: 'Explorar',
-    es: 'Explorar',
-    en: 'Explore',
-  );
+  String cityExploreTitle() =>
+      _localizedText(pt: 'Explorar', es: 'Explorar', en: 'Explore');
 
   String cityExploreEntryTitle(String city) => _localizedText(
     pt: 'Explorar $city',
@@ -940,17 +1121,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
         en: '~$distanceKm km from $originCity',
       );
 
-  String cityDetailMapDistanceMiniLabel() => _localizedText(
-    pt: 'DISTANCIA',
-    es: 'DISTANCIA',
-    en: 'DISTANCE',
-  );
+  String cityDetailMapDistanceMiniLabel() =>
+      _localizedText(pt: 'DISTANCIA', es: 'DISTANCIA', en: 'DISTANCE');
 
-  String cityDetailMapCountryLabel() => _localizedText(
-    pt: 'Brasil',
-    es: 'Brasil',
-    en: 'Brazil',
-  );
+  String cityDetailMapCountryLabel() =>
+      _localizedText(pt: 'Brasil', es: 'Brasil', en: 'Brazil');
 
   String cityDetailExploreMediaTitle() => _localizedText(
     pt: 'Videos e fotos',
@@ -964,29 +1139,17 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'Get to know the city before deciding',
   );
 
-  String cityExploreTabVideos() => _localizedText(
-    pt: 'Videos',
-    es: 'Videos',
-    en: 'Videos',
-  );
+  String cityExploreTabVideos() =>
+      _localizedText(pt: 'Videos', es: 'Videos', en: 'Videos');
 
-  String cityExploreTabPhotos() => _localizedText(
-    pt: 'Fotos',
-    es: 'Fotos',
-    en: 'Photos',
-  );
+  String cityExploreTabPhotos() =>
+      _localizedText(pt: 'Fotos', es: 'Fotos', en: 'Photos');
 
-  String cityExploreTabMap() => _localizedText(
-    pt: 'No mapa',
-    es: 'En el mapa',
-    en: 'On the map',
-  );
+  String cityExploreTabMap() =>
+      _localizedText(pt: 'No mapa', es: 'En el mapa', en: 'On the map');
 
-  String cityExplorePlanBadge() => _localizedText(
-    pt: 'Seu plano',
-    es: 'Tu plan',
-    en: 'Your plan',
-  );
+  String cityExplorePlanBadge() =>
+      _localizedText(pt: 'Seu plano', es: 'Tu plan', en: 'Your plan');
 
   String cityExploreShareTooltip() => _localizedText(
     pt: 'Compartilhar busca',
@@ -1095,22 +1258,34 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'Opens the YouTube app with the best search terms',
   );
 
-  String cityExploreFeaturedLabel() => _localizedText(
-    pt: 'Em destaque',
-    es: 'Destacado',
-    en: 'Featured',
-  );
+  String cityExploreFeaturedLabel() =>
+      _localizedText(pt: 'Em destaque', es: 'Destacado', en: 'Featured');
 
-  String cityExploreMoreVideosLabel() => _localizedText(
-    pt: 'Mais videos',
-    es: 'Más videos',
-    en: 'More videos',
-  );
+  String cityExploreMoreVideosLabel() =>
+      _localizedText(pt: 'Mais videos', es: 'Más videos', en: 'More videos');
 
   String cityExplorePhotosAttributionFull() => _localizedText(
     pt: 'Fotos via Google Places · Unsplash',
     es: 'Fotos vía Google Places · Unsplash',
     en: 'Photos via Google Places · Unsplash',
+  );
+
+  String cityExplorePhotosAttributionGooglePlaces() => _localizedText(
+    pt: 'Fotos via Google Places',
+    es: 'Fotos vía Google Places',
+    en: 'Photos via Google Places',
+  );
+
+  String cityExplorePhotosAttributionPexels() => _localizedText(
+    pt: 'Fotos via Pexels',
+    es: 'Fotos vía Pexels',
+    en: 'Photos via Pexels',
+  );
+
+  String cityExplorePhotosAttributionGeneric() => _localizedText(
+    pt: 'Fotos da cidade',
+    es: 'Fotos de la ciudad',
+    en: 'City photos',
   );
 
   String questionnaireVariantLabel(String value) {

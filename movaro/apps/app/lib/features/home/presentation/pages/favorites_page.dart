@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
@@ -97,9 +96,11 @@ class FavoritesPage extends StatelessWidget {
                                   migrationQuestionnaireController,
                               isActivePlanCity: city.id == activePlanCityId,
                             ),
-                            if (city != favorites.last) const SizedBox(height: 16),
+                            if (city != favorites.last)
+                              const SizedBox(height: 16),
                           ],
-                          if (favorites.length < CitiesController.maxFavoriteCities) ...[
+                          if (favorites.length <
+                              CitiesController.maxFavoriteCities) ...[
                             const SizedBox(height: 16),
                             _AddCitySlot(currentCount: favorites.length),
                           ],
@@ -114,7 +115,7 @@ class FavoritesPage extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: MainNavigationBar(
-        currentIndex: 3,
+        currentIndex: 4,
         journeyContextController: journeyContextController,
         citiesController: citiesController,
         migrationQuestionnaireController: migrationQuestionnaireController,
@@ -145,11 +146,7 @@ class FavoritesPage extends StatelessWidget {
         return leftPriority.compareTo(rightPriority);
       });
     }
-    Navigator.pushNamed(
-      context,
-      AppRoutes.cityComparison,
-      arguments: ordered,
-    );
+    Navigator.pushNamed(context, AppRoutes.cityComparison, arguments: ordered);
   }
 }
 
@@ -184,10 +181,7 @@ class _FavoritesCountBadge extends StatelessWidget {
 }
 
 class _CompareBanner extends StatelessWidget {
-  const _CompareBanner({
-    required this.cities,
-    required this.onCompare,
-  });
+  const _CompareBanner({required this.cities, required this.onCompare});
 
   final List<City> cities;
   final VoidCallback onCompare;
@@ -283,10 +277,8 @@ class _FavoritesEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           FilledButton.icon(
-            onPressed: () => Navigator.pushReplacementNamed(
-              context,
-              AppRoutes.cities,
-            ),
+            onPressed: () =>
+                Navigator.pushReplacementNamed(context, AppRoutes.cities),
             icon: const Icon(Icons.travel_explore_rounded),
             label: Text(context.l10n.favoritesExploreAction),
           ),
@@ -327,9 +319,9 @@ class _AddCitySlot extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 context.l10n.favoritesAddCityTitle,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 4),
               Text(
@@ -368,7 +360,10 @@ class _FavoriteCityCard extends StatelessWidget {
       kind: CityMetricKind.cost,
       value: city.costOfLivingScore,
     );
-    final quality = CityIdhmPresentation.resolve(context, value: city.idhmScore);
+    final quality = CityIdhmPresentation.resolve(
+      context,
+      value: city.idhmScore,
+    );
     final alert = _FavoriteCityAlert.resolve(context, city);
     final cardBorder = isActivePlanCity
         ? AppColors.primary.withValues(alpha: 0.24)
@@ -535,24 +530,18 @@ class _FavoriteCityHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = cityImageUrlFor(city.id);
-
     return SizedBox(
       height: 80,
       width: double.infinity,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (imageUrl != null)
-            CachedNetworkImage(
-              imageUrl: imageUrl,
-              fit: BoxFit.cover,
-              httpHeaders: const {'User-Agent': 'Movaro/1.0'},
-              placeholder: (_, _) => const SkeletonBox(height: 80),
-              errorWidget: (_, _, _) => _HeroFallback(city: city),
-            )
-          else
-            _HeroFallback(city: city),
+          CityResolvedImage(
+            city: city,
+            fit: BoxFit.cover,
+            placeholder: const SkeletonBox(height: 80),
+            errorWidget: _HeroFallback(city: city),
+          ),
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -804,8 +793,11 @@ class _FavoriteCityAlert {
   final IconData icon;
 
   static _FavoriteCityAlert? resolve(BuildContext context, City city) {
-    final criticalPoints = city.publicOpinion?.criticalPoints ?? const <String>[];
-    final criticalPoint = criticalPoints.isNotEmpty ? criticalPoints.first : null;
+    final criticalPoints =
+        city.publicOpinion?.criticalPoints ?? const <String>[];
+    final criticalPoint = criticalPoints.isNotEmpty
+        ? criticalPoints.first
+        : null;
     if (criticalPoint != null && criticalPoint.isNotEmpty) {
       return _FavoriteCityAlert(
         text: criticalPoint,

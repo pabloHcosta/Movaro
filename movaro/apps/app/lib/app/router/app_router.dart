@@ -20,6 +20,7 @@ import 'package:movaro_app/features/explore/presentation/pages/documentation_gui
 import 'package:movaro_app/features/home/presentation/pages/home_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/pages/favorites_page.dart';
+import 'package:movaro_app/features/home/presentation/pages/info_brazil_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/public_home_page.dart';
 import 'package:movaro_app/features/intro/presentation/pages/intro_page.dart';
 import 'package:movaro_app/features/journey/presentation/pages/journey_setup_page.dart';
@@ -205,6 +206,15 @@ class AppRouter {
             migrationQuestionnaireController: migrationQuestionnaireController,
           ),
         );
+      case AppRoutes.infoBrazil:
+        return _buildRoute(
+          settings,
+          InfoBrazilPage(
+            journeyContextController: journeyContextController,
+            citiesController: citiesController,
+            migrationQuestionnaireController: migrationQuestionnaireController,
+          ),
+        );
       case AppRoutes.documentationGuide:
         final initialSection = settings.arguments is DocumentationGuideSection
             ? settings.arguments! as DocumentationGuideSection
@@ -367,6 +377,7 @@ class AppRouter {
       AppRoutes.explore,
       AppRoutes.favorites,
       AppRoutes.migrationPlanCopilot,
+      AppRoutes.infoBrazil,
     };
 
     if (primaryNavRoutes.contains(settings.name)) {

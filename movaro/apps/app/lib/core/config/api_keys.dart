@@ -13,6 +13,12 @@ class ApiKeys {
     defaultValue: '',
   );
 
+  static const pexelsApiKey = String.fromEnvironment(
+    DartDefineKeys.pexelsApiKey,
+    defaultValue: '',
+  );
+
   static bool get hasYoutubeApiKey => youtubeApiKey.trim().isNotEmpty;
   static bool get hasGooglePlacesKey => googlePlacesKey.trim().isNotEmpty;
+  static bool get hasPexelsApiKey => pexelsApiKey.trim().isNotEmpty;
 }

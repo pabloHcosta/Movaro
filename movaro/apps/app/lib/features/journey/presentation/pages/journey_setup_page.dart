@@ -57,8 +57,43 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
         _originId = widget.journeyContextController.originCountryId;
         _destinationId = widget.journeyContextController.destinationCountryId;
       });
+      await _maybeAutoSelectSingleRoute();
       await _maybeShowHelp();
     });
+  }
+
+  Future<void> _maybeAutoSelectSingleRoute() async {
+    final controller = widget.journeyContextController;
+    final availableOrigins = controller.availableOrigins
+        .where((country) => country.coverage.canPlanAsOrigin)
+        .toList(growable: false);
+    final availableDestinations = controller.availableDestinations
+        .where((country) => country.coverage.canPlanAsDestination)
+        .toList(growable: false);
+
+    if (availableOrigins.length != 1 || availableDestinations.length != 1) {
+      return;
+    }
+
+    final origin = availableOrigins.first;
+    final destination = availableDestinations.first;
+    final supportsRoute = origin.coverage.supportsDestination(destination.id);
+    if (!supportsRoute) {
+      return;
+    }
+
+    await controller.completeJourney(
+      originCountryId: origin.id,
+      destinationCountryId: destination.id,
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _originId = origin.id;
+      _destinationId = destination.id;
+    });
+    Navigator.pushReplacementNamed(context, AppRoutes.publicHome);
   }
 
   Future<void> _maybeShowHelp() async {
@@ -144,8 +179,12 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) {
-        final origins = controller.availableOrigins;
-        final destinations = controller.availableDestinations;
+        final origins = controller.availableOrigins
+            .where((country) => country.coverage.canPlanAsOrigin)
+            .toList(growable: false);
+        final destinations = controller.availableDestinations
+            .where((country) => country.coverage.canPlanAsDestination)
+            .toList(growable: false);
         final selectedOrigin = origins
             .where((c) => c.id == _originId)
             .firstOrNull;

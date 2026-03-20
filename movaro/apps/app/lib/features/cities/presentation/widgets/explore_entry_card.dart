@@ -5,11 +5,17 @@ class ExploreEntryCard extends StatelessWidget {
   const ExploreEntryCard({
     required this.cityName,
     required this.onTap,
+    this.title,
+    this.body,
+    this.leadingIcon,
     super.key,
   });
 
   final String cityName;
   final VoidCallback onTap;
+  final String? title;
+  final String? body;
+  final IconData? leadingIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -35,21 +41,10 @@ class ExploreEntryCard extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.play_circle_outline_rounded,
-                      size: 16,
-                      color: Colors.white,
-                    ),
-                    SizedBox(width: 2),
-                    Icon(
-                      Icons.photo_camera_outlined,
-                      size: 15,
-                      color: Colors.white70,
-                    ),
-                  ],
+                child: Icon(
+                  leadingIcon ?? Icons.play_circle_outline_rounded,
+                  size: 18,
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(width: 12),
@@ -59,7 +54,7 @@ class ExploreEntryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      context.l10n.cityExploreEntryTitle(cityName),
+                      title ?? context.l10n.cityExploreEntryTitle(cityName),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -69,7 +64,7 @@ class ExploreEntryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      context.l10n.cityExploreEntryBody(),
+                      body ?? context.l10n.cityExploreEntryBody(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -80,10 +75,7 @@ class ExploreEntryCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: Colors.white70,
-              ),
+              const Icon(Icons.chevron_right_rounded, color: Colors.white70),
             ],
           ),
         ),

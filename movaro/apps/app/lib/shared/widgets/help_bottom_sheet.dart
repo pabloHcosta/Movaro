@@ -19,7 +19,6 @@ class HelpBottomSheet extends StatefulWidget {
     required this.steps,
     required this.preferenceKey,
     required this.hideAgainLabel,
-    required this.dismissLabel,
     required this.confirmLabel,
     super.key,
   });
@@ -31,7 +30,6 @@ class HelpBottomSheet extends StatefulWidget {
   final List<HelpStep> steps;
   final String preferenceKey;
   final String hideAgainLabel;
-  final String dismissLabel;
   final String confirmLabel;
 
   @override
@@ -41,6 +39,7 @@ class HelpBottomSheet extends StatefulWidget {
 class _HelpBottomSheetState extends State<HelpBottomSheet> {
   bool _doNotShowAgain = true;
   bool _isSaving = false;
+  bool _hasPersistedPreference = false;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +50,7 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
     return PopScope(
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) {
-          unawaited(_persistPreferenceIfNeeded());
+          unawaited(_persistPreference());
         }
       },
       child: SafeArea(
@@ -107,7 +106,7 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
                                 Text(
                                   widget.contextLabel.toUpperCase(),
                                   style: const TextStyle(
-                                    fontSize: 9,
+                                    fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                     color: Color(0xFF58A6FF),
                                     letterSpacing: 0.6,
@@ -121,7 +120,7 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
                               child: Text(
                                 widget.title,
                                 style: const TextStyle(
-                                  fontSize: 17,
+                                  fontSize: 21,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFFF0F6FC),
                                   height: 1.2,
@@ -169,7 +168,7 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
                           Text(
                             widget.description,
                             style: const TextStyle(
-                              fontSize: 12,
+                              fontSize: 14,
                               color: Color(0xFF8B949E),
                               height: 1.5,
                             ),
@@ -228,7 +227,7 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
                                   child: Text(
                                     widget.hideAgainLabel,
                                     style: const TextStyle(
-                                      fontSize: 11,
+                                      fontSize: 13,
                                       color: Color(0xFF6B7280),
                                       height: 1.4,
                                     ),
@@ -239,55 +238,34 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: _isSaving ? null : _dismiss,
-                                style: OutlinedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1C2128),
-                                  foregroundColor: const Color(0xFF9CA3AF),
-                                  side: const BorderSide(color: Color(0xFF2D333B)),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
-                                  textStyle: const TextStyle(fontSize: 11),
-                                ),
-                                child: Text(widget.dismissLabel),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: _isSaving ? null : _confirm,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF1F6FEB),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              textStyle: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              flex: 2,
-                              child: FilledButton.icon(
-                                onPressed: _isSaving ? null : _confirm,
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1F6FEB),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
-                                  textStyle: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                icon: _isSaving
-                                    ? const SizedBox(
-                                        width: 14,
-                                        height: 14,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : const Icon(Icons.check, size: 16),
-                                label: Text(widget.confirmLabel),
-                              ),
-                            ),
-                          ],
+                            icon: _isSaving
+                                ? const SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Icon(Icons.check, size: 16),
+                            label: Text(widget.confirmLabel),
+                          ),
                         ),
                       ],
                     ),
@@ -302,32 +280,35 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
   }
 
   Future<void> _confirm() async {
-    await _persistPreferenceIfNeeded();
+    await _persistPreference();
     if (mounted) {
       Navigator.of(context).pop();
     }
   }
 
   Future<void> _dismiss() async {
-    await _persistPreferenceIfNeeded();
+    await _persistPreference();
     if (mounted) {
       Navigator.of(context).pop();
     }
   }
 
-  Future<void> _persistPreferenceIfNeeded() async {
-    if (!_doNotShowAgain || _isSaving) {
+  Future<void> _persistPreference() async {
+    if (_isSaving || _hasPersistedPreference) {
       return;
     }
     setState(() {
       _isSaving = true;
     });
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('help_${widget.preferenceKey}', true);
+    await prefs.setBool('help_${widget.preferenceKey}', _doNotShowAgain);
     if (mounted) {
       setState(() {
         _isSaving = false;
+        _hasPersistedPreference = true;
       });
+    } else {
+      _hasPersistedPreference = true;
     }
   }
 }
@@ -389,7 +370,7 @@ class _HelpStepRow extends StatelessWidget {
                 Text(
                   step.title,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFFF0F6FC),
                   ),
@@ -398,7 +379,7 @@ class _HelpStepRow extends StatelessWidget {
                 Text(
                   step.body,
                   style: const TextStyle(
-                    fontSize: 10.5,
+                    fontSize: 12.5,
                     color: Color(0xFF6B7280),
                     height: 1.4,
                   ),

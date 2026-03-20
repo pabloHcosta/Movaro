@@ -66,7 +66,7 @@ class MigrationReadinessSection extends StatelessWidget {
                   SizedBox(
                     width: columnWidth,
                     child: _StagePanel(
-                      title: l10n.readinessStageNow,
+                      title: _stageTitle(context, MigrationReadinessStage.now),
                       badge: '01',
                       items: checklist.itemsFor(MigrationReadinessStage.now),
                       completedItemIds: completedItemIds,
@@ -76,7 +76,7 @@ class MigrationReadinessSection extends StatelessWidget {
                   SizedBox(
                     width: columnWidth,
                     child: _StagePanel(
-                      title: l10n.readinessStageSoon,
+                      title: _stageTitle(context, MigrationReadinessStage.soon),
                       badge: '02',
                       items: checklist.itemsFor(MigrationReadinessStage.soon),
                       completedItemIds: completedItemIds,
@@ -86,7 +86,10 @@ class MigrationReadinessSection extends StatelessWidget {
                   SizedBox(
                     width: columnWidth,
                     child: _StagePanel(
-                      title: l10n.readinessStageLanding,
+                      title: _stageTitle(
+                        context,
+                        MigrationReadinessStage.landing,
+                      ),
                       badge: '03',
                       items: checklist.itemsFor(
                         MigrationReadinessStage.landing,
@@ -102,6 +105,26 @@ class MigrationReadinessSection extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _stageTitle(BuildContext context, MigrationReadinessStage stage) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => switch (stage) {
+        MigrationReadinessStage.now => 'AGORA',
+        MigrationReadinessStage.soon => 'EM BREVE',
+        MigrationReadinessStage.landing => 'AO CHEGAR',
+      },
+      'es' => switch (stage) {
+        MigrationReadinessStage.now => 'AHORA',
+        MigrationReadinessStage.soon => 'EN BREVE',
+        MigrationReadinessStage.landing => 'AL LLEGAR',
+      },
+      _ => switch (stage) {
+        MigrationReadinessStage.now => 'NOW',
+        MigrationReadinessStage.soon => 'SOON',
+        MigrationReadinessStage.landing => 'ON ARRIVAL',
+      },
+    };
   }
 }
 
@@ -211,6 +234,16 @@ class _ReadinessItemTile extends StatelessWidget {
                       decoration: completed ? TextDecoration.lineThrough : null,
                     ),
                   ),
+                  if (completed) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _doneLabel(context),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: AppColors.success,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 6),
                   Text(
                     item.description,
@@ -233,6 +266,14 @@ class _ReadinessItemTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _doneLabel(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => 'Feito ✓',
+      'es' => 'Hecho ✓',
+      _ => 'Done ✓',
+    };
   }
 }
 

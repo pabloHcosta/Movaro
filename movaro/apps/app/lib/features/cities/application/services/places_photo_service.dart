@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:movaro_app/core/config/api_keys.dart';
+import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
 
 class CityPhotoItem {
   const CityPhotoItem({
@@ -66,8 +67,12 @@ class PlacesPhotoService {
     }
 
     result = CityPhotosResult(
-      photos: _buildUnsplashPhotos(cityName: cityName, stateName: stateName),
-      attributionSource: 'unsplash',
+      photos: await _loadPexelsPhotos(
+        cityId: cityId,
+        cityName: cityName,
+        stateName: stateName,
+      ),
+      attributionSource: 'pexels',
       usedFallback: true,
     );
     _cache[cityId] = _PhotoCacheEntry(result: result, savedAt: DateTime.now());
@@ -112,29 +117,191 @@ class PlacesPhotoService {
     }).toList(growable: false);
   }
 
-  List<CityPhotoItem> _buildUnsplashPhotos({
+  Future<List<CityPhotoItem>> _loadPexelsPhotos({
+    required String cityId,
+    required String cityName,
+    required String stateName,
+  }) async {
+    if (!ApiKeys.hasPexelsApiKey) {
+      return const <CityPhotoItem>[];
+    }
+
+    final queries = <String>[
+      '$cityName $stateName Brazil city',
+      '$cityName Brazil skyline',
+      '$cityName Brazil downtown',
+    ];
+
+    final seenUrls = <String>{};
+    final photos = <CityPhotoItem>[];
+    final curatedImageUrl = cityImageUrlFor(cityId);
+
+    if (curatedImageUrl != null) {
+      seenUrls.add(curatedImageUrl);
+      photos.add(
+        CityPhotoItem(
+          url: curatedImageUrl,
+          label: cityName,
+          sourceLabel: 'Wikimedia Commons',
+        ),
+      );
+    }
+
+    for (final query in queries) {
+      final uri = Uri.parse(
+        'https://api.pexels.com/v1/search',
+      ).replace(
+        queryParameters: <String, String>{
+          'query': query,
+          'per_page': '6',
+          'orientation': 'landscape',
+        },
+      );
+
+      final response = await _client.get(
+        uri,
+        headers: <String, String>{'Authorization': ApiKeys.pexelsApiKey},
+      );
+      if (response.statusCode != 200) {
+        continue;
+      }
+
+      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+      final items = decoded['photos'] as List<dynamic>? ?? const <dynamic>[];
+
+      for (final item in items) {
+        final map = item as Map<String, dynamic>;
+        if (!_isRelevantPexelsPhoto(
+          map,
+          cityName: cityName,
+          stateName: stateName,
+        )) {
+          continue;
+        }
+        final src = map['src'] as Map<String, dynamic>? ?? const {};
+        final mediumUrl =
+            (src['large'] as String?) ??
+            (src['large2x'] as String?) ??
+            (src['medium'] as String?) ??
+            '';
+        if (mediumUrl.isEmpty || !seenUrls.add(mediumUrl)) {
+          continue;
+        }
+
+        final photographer = map['photographer'] as String? ?? '';
+        photos.add(
+          CityPhotoItem(
+            url: mediumUrl,
+            label: photographer.isEmpty ? '' : photographer,
+            sourceLabel: 'Pexels',
+          ),
+        );
+        if (photos.length >= 8) {
+          return photos;
+        }
+      }
+    }
+
+    return photos;
+  }
+
+  bool _isRelevantPexelsPhoto(
+    Map<String, dynamic> item, {
     required String cityName,
     required String stateName,
   }) {
-    final queries = <String>[
-      '$cityName+$stateName+brazil+city',
-      '$cityName+$stateName+brazil+urban',
-      '$cityName+$stateName+brazil+architecture',
-      '$cityName+$stateName+brazil+neighborhood',
-      '$cityName+$stateName+brazil+coast',
-      '$cityName+$stateName+brazil+downtown',
-      '$cityName+$stateName+brazil+streets',
-      '$cityName+$stateName+brazil+landscape',
-    ];
+    final alt = _normalizeText(item['alt'] as String? ?? '');
+    if (alt.isEmpty) {
+      return false;
+    }
 
-    return List<CityPhotoItem>.generate(8, (index) {
-      final query = queries[index % queries.length];
-      return CityPhotoItem(
-        url: 'https://source.unsplash.com/800x600/?$query&sig=$index',
-        label: '',
-        sourceLabel: 'Unsplash',
-      );
-    }, growable: false);
+    const blockedTerms = <String>{
+      'cat',
+      'cats',
+      'kitten',
+      'dog',
+      'dogs',
+      'puppy',
+      'horse',
+      'bird',
+      'cow',
+      'sheep',
+      'portrait',
+      'person',
+      'close up',
+      'close-up',
+    };
+    if (blockedTerms.any(alt.contains)) {
+      return false;
+    }
+
+    final cityPhrase = _normalizeText(cityName);
+    final statePhrase = _normalizeText(stateName);
+    if (alt.contains(cityPhrase)) {
+      return true;
+    }
+
+    final cityTokens = cityPhrase
+        .split(' ')
+        .where((token) => token.length >= 3)
+        .toList(growable: false);
+    final hasAllCityTokens = cityTokens.isNotEmpty &&
+        cityTokens.every((token) => alt.contains(token));
+    if (hasAllCityTokens) {
+      return true;
+    }
+
+    if (statePhrase.isNotEmpty &&
+        alt.contains(statePhrase) &&
+        (alt.contains('brazil') ||
+            alt.contains('brasil') ||
+            alt.contains('skyline') ||
+            alt.contains('cityscape') ||
+            alt.contains('downtown') ||
+            alt.contains('urban'))) {
+      return true;
+    }
+
+    return false;
+  }
+
+  String _normalizeText(String value) {
+    final source = value.toLowerCase();
+    const replacements = <String, String>{
+      'á': 'a',
+      'à': 'a',
+      'â': 'a',
+      'ã': 'a',
+      'ä': 'a',
+      'é': 'e',
+      'è': 'e',
+      'ê': 'e',
+      'ë': 'e',
+      'í': 'i',
+      'ì': 'i',
+      'î': 'i',
+      'ï': 'i',
+      'ó': 'o',
+      'ò': 'o',
+      'ô': 'o',
+      'õ': 'o',
+      'ö': 'o',
+      'ú': 'u',
+      'ù': 'u',
+      'û': 'u',
+      'ü': 'u',
+      'ç': 'c',
+      'ñ': 'n',
+    };
+
+    var normalized = source;
+    replacements.forEach((from, to) {
+      normalized = normalized.replaceAll(from, to);
+    });
+    return normalized.replaceAll(RegExp(r'[^a-z0-9 ]'), ' ').replaceAll(
+      RegExp(r'\s+'),
+      ' ',
+    ).trim();
   }
 }
 

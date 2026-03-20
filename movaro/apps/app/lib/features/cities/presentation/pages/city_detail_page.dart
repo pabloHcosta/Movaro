@@ -273,9 +273,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                                 .textTheme
                                                 .titleMedium
                                                 ?.copyWith(
-                                                  color: Colors.white.withValues(
-                                                    alpha: 0.84,
-                                                  ),
+                                                  color: Colors.white
+                                                      .withValues(alpha: 0.84),
                                                   fontWeight: FontWeight.w600,
                                                 ),
                                           ),
@@ -340,7 +339,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                   ?.journeyContextController
                                   .detectedLocation,
                               isActivePlanCity:
-                                  widget.migrationQuestionnaireController
+                                  widget
+                                      .migrationQuestionnaireController
                                       ?.generatedPlan
                                       ?.recommendedCity
                                       ?.id ==
@@ -990,7 +990,10 @@ class _CityLocationPanel extends StatelessWidget {
                     runSpacing: 5,
                     children: [
                       if (region != null && region.isNotEmpty)
-                        _MapBadge(label: '📍 ${context.l10n.cityDetailMapRegionLabel} ${_titleCase(region)}'),
+                        _MapBadge(
+                          label:
+                              '📍 ${context.l10n.cityDetailMapRegionLabel} ${_titleCase(region)}',
+                        ),
                       if (distanceKm != null)
                         _MapBadge(
                           label: context.l10n.cityDetailMapDistanceBadge(
@@ -1012,12 +1015,13 @@ class _CityLocationPanel extends StatelessWidget {
                     children: [
                       Text(
                         city.name,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: -0.3,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: -0.3,
+                            ),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -1052,19 +1056,21 @@ class _CityLocationPanel extends StatelessWidget {
                         children: [
                           Text(
                             context.l10n.cityDetailMapDistanceMiniLabel(),
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              fontSize: 7,
-                              color: Colors.white38,
-                              letterSpacing: 0.5,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  fontSize: 7,
+                                  color: Colors.white38,
+                                  letterSpacing: 0.5,
+                                ),
                           ),
                           Text(
                             '${NumberFormat.decimalPattern(Localizations.localeOf(context).toString()).format(distanceKm)} km',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              fontSize: 9,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  fontSize: 9,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
                         ],
                       ),
@@ -1078,10 +1084,8 @@ class _CityLocationPanel extends StatelessWidget {
         _ExploreMediaCard(
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(
-              builder: (_) => CityExploreScreen(
-                city: city,
-                isPlanCity: isActivePlanCity,
-              ),
+              builder: (_) =>
+                  CityExploreScreen(city: city, isPlanCity: isActivePlanCity),
             ),
           ),
         ),
@@ -1151,6 +1155,17 @@ class _ExploreMediaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final title = switch (Localizations.localeOf(context).languageCode) {
+      'es' => 'Ver videos y fotos',
+      'en' => 'See videos and photos',
+      _ => 'Ver videos e fotos',
+    };
+    final body = switch (Localizations.localeOf(context).languageCode) {
+      'es' => 'Abrí el contenido visual de la ciudad',
+      'en' => 'Open the city visual content',
+      _ => 'Abra o conteudo visual da cidade',
+    };
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1220,19 +1235,18 @@ class _ExploreMediaCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      context.l10n.cityDetailExploreMediaTitle(),
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontSize: 12,
+                      title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFFF0F6FC),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      context.l10n.cityDetailExploreMediaBody(),
+                      body,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: 9,
                         color: const Color(0xFF4B5563),
+                        height: 1.35,
                       ),
                     ),
                   ],
@@ -1478,9 +1492,9 @@ class _DecisionSnapshotPanel extends StatelessWidget {
         children: [
           Text(
             context.l10n.cityDetailDecisionSnapshotTitle,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
           Text(
@@ -1517,14 +1531,14 @@ class _DecisionSnapshotPanel extends StatelessWidget {
                       Expanded(
                         child: Text(
                           reason,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(height: 1.4),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(height: 1.4),
                         ),
                       ),
                     ],
                   ),
-                  if (reason != reasons.last)
-                    const SizedBox(height: 10),
+                  if (reason != reasons.last) const SizedBox(height: 10),
                 ],
               ],
             ),
@@ -1594,10 +1608,7 @@ class _DecisionSnapshotPanel extends StatelessWidget {
 }
 
 class _EssentialsGrid extends StatelessWidget {
-  const _EssentialsGrid({
-    required this.city,
-    this.primaryPriority,
-  });
+  const _EssentialsGrid({required this.city, this.primaryPriority});
 
   final City city;
   final String? primaryPriority;
@@ -1615,8 +1626,7 @@ class _EssentialsGrid extends StatelessWidget {
           spacing: 12,
           runSpacing: 12,
           children: [
-            for (final item in items)
-              SizedBox(width: cardWidth, child: item),
+            for (final item in items) SizedBox(width: cardWidth, child: item),
           ],
         );
       },

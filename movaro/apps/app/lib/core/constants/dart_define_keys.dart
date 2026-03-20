@@ -9,4 +9,5 @@ class DartDefineKeys {
   static const supabaseAnonKey = 'SUPABASE_ANON_KEY';
   static const youtubeApiKey = 'YOUTUBE_API_KEY';
   static const googlePlacesApiKey = 'GOOGLE_PLACES_API_KEY';
+  static const pexelsApiKey = 'PEXELS_API_KEY';
 }

@@ -2438,5 +2438,41 @@
   "journeyCoverageBrowseAction": "Browse explore",
   "journeyCoverageContentAction": "Open content",
   "journeyCoverageWaitlistAction": "Join waitlist",
-  "journeyCoverageWaitlistStub": "Waitlist registration is not live yet, but this route can be tracked safely for future coverage."
+  "journeyCoverageWaitlistStub": "Waitlist registration is not live yet, but this route can be tracked safely for future coverage.",
+  "phase_before_travel": "Antes de viajar",
+  "phase_first_days": "Primeros días",
+  "phase_documentation": "Documentación",
+  "phase_life_working": "Vida funcionando",
+  "phase_integration": "Integración",
+  "phase_desc_before_travel": "Qué preparar en Argentina para llegar sin sorpresas",
+  "phase_desc_first_days": "Llegaste a Brasil. Foco en establecerte y poder comunicarte.",
+  "phase_desc_documentation": "Los documentos que desbloquean todo. Hacelos en este orden exacto.",
+  "phase_desc_life_working": "Con CPF y residencia en proceso, ahora armás la estructura del día a día.",
+  "phase_desc_integration": "Adaptar tu vida completa a Brasil y garantizar la permanencia a largo plazo.",
+  "item_next_action_tag": "PRÓXIMA ACCIÓN",
+  "item_external_tag": "ACCIÓN EXTERNA",
+  "item_tool_tag": "USA UNA HERRAMIENTA",
+  "item_checklist_tag": "PARA COMPLETAR",
+  "deadline_badge": "Solicitar antes del {date}",
+  "@deadline_badge": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "deadline_alert_title": "El plazo se acerca",
+  "deadline_alert_body": "Tu residencia temporaria vence en {days} días. Solicitá la permanente antes.",
+  "@deadline_alert_body": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "guide_completed_title": "¡Plan completado!",
+  "guide_completed_subtitle": "Completaste todos los pasos de tu guía para {city}.",
+  "@guide_completed_subtitle": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "guide_no_plan_title": "Elegí tu ciudad primero",
+  "guide_no_plan_subtitle": "Confirmá la ciudad de tu plan para comenzar la guía"
 }

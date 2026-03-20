@@ -67,12 +67,7 @@ Future<void> showContextualHelpGuide(
           .toList(growable: false),
       preferenceKey: preferenceKey,
       hideAgainLabel: l10n.helpHideAgainLabel(),
-      dismissLabel: l10n.documentationGuideDismissAction,
       confirmLabel: l10n.documentationGuidePrimaryAction,
     ),
   );
-
-  final guideStore = store ?? FeatureGuidePreferencesStore();
-  final shouldShowAgain = await guideStore.shouldShowGuide(preferenceKey);
-  await guideStore.setHideGuide(preferenceKey, !shouldShowAgain);
 }

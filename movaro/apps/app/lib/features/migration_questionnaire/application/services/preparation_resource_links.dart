@@ -2,6 +2,8 @@ import 'package:movaro_app/features/cities/domain/entities/city.dart';
 
 enum RentalProvider { zapImoveis, vivaReal, chavesNaMao }
 
+enum TemporaryHousingDuration { oneWeek, oneMonth, twoThreeMonths }
+
 class PreparationResourceLinks {
   const PreparationResourceLinks._();
 
@@ -102,6 +104,60 @@ class PreparationResourceLinks {
       RentalProvider.chavesNaMao => Uri.parse(
         'https://www.chavesnamao.com.br/imoveis-para-alugar/$state-$hyphenCity/',
       ),
+    };
+  }
+
+  static Uri buildAirbnbSearch(City city, TemporaryHousingDuration duration) {
+    final citySlug = _slugify(city.name);
+    final stateSlug = _slugify(city.stateName);
+    return Uri.parse(
+      'https://www.airbnb.com.br/s/$citySlug--$stateSlug/homes'
+      '?tab_id=home_tab&refinement_paths[]=/homes'
+      '&flexible_trip_lengths[]=${_durationParam(duration)}',
+    );
+  }
+
+  static Uri buildBookingSearch(City city, TemporaryHousingDuration duration) {
+    final cityEncoded = Uri.encodeComponent(city.name);
+    final nights = switch (duration) {
+      TemporaryHousingDuration.oneWeek => '7',
+      TemporaryHousingDuration.oneMonth => '30',
+      TemporaryHousingDuration.twoThreeMonths => '60',
+    };
+
+    return Uri.parse(
+      'https://www.booking.com/searchresults.pt-br.html'
+      '?ss=$cityEncoded&nflt=ht_id%3D220&group_adults=1&no_rooms=1&stay_nights=$nights',
+    );
+  }
+
+  static Uri buildVivaRealTemporarySearch(
+    City city,
+    TemporaryHousingDuration duration,
+  ) {
+    final uf = city.stateCode.toLowerCase();
+    final slug = _slugify(city.name).replaceAll('-', '+');
+    return Uri.parse(
+      'https://www.vivareal.com.br/aluguel/imoveis/$uf+$slug/?__vt=temporada',
+    );
+  }
+
+  static Uri buildZapTemporarySearch(
+    City city,
+    TemporaryHousingDuration duration,
+  ) {
+    final uf = city.stateCode.toLowerCase();
+    final slug = _slugify(city.name).replaceAll('-', '+');
+    return Uri.parse(
+      'https://www.zapimoveis.com.br/temporada/imoveis/$uf+$slug/',
+    );
+  }
+
+  static String _durationParam(TemporaryHousingDuration duration) {
+    return switch (duration) {
+      TemporaryHousingDuration.oneWeek => 'weekend',
+      TemporaryHousingDuration.oneMonth => 'one_month',
+      TemporaryHousingDuration.twoThreeMonths => 'three_months',
     };
   }
 

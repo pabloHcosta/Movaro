@@ -148,49 +148,52 @@ class _QuestionPageState extends State<QuestionPage> {
                         context.pageHorizontalPadding,
                         context.pageVerticalPadding,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          AppGlassHeader(
-                            title: l10n.questionnairePageTitle,
-                            onBack: () => _handleExitFlow(context),
-                            onHelp: _showHelp,
-                          ),
-                          const SizedBox(height: 20),
-                          if (_showProcessingScreen)
-                            Expanded(
-                              child: _ProcessingState(
-                                title: l10n.questionnaireProcessingTitle,
-                              ),
-                            )
-                          else if (controller.isInitializing)
-                            const Expanded(
-                              child: SingleChildScrollView(
-                                child: FormSkeleton(
-                                  fieldCount: 4,
-                                  compact: true,
+                      child: !controller.hasSelectedVariant
+                          ? _buildVariantSelectionScreen(context)
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                AppGlassHeader(
+                                  title: l10n.questionnairePageTitle,
+                                  onBack: () => _handleExitFlow(context),
+                                  onHelp: _showHelp,
                                 ),
-                              ),
-                            )
-                          else if (!controller.hasSelectedVariant)
-                            Expanded(child: _buildVariantSelector(context))
-                          else if (controller.isRefinePromptVisible)
-                            Expanded(child: _buildRefinePrompt(context))
-                          else if (question != null)
-                            Expanded(
-                              child: _buildQuestionFlow(context, question),
-                            )
-                          else
-                            const Expanded(
-                              child: SingleChildScrollView(
-                                child: FormSkeleton(
-                                  fieldCount: 4,
-                                  compact: true,
-                                ),
-                              ),
+                                const SizedBox(height: 20),
+                                if (_showProcessingScreen)
+                                  Expanded(
+                                    child: _ProcessingState(
+                                      title: l10n.questionnaireProcessingTitle,
+                                    ),
+                                  )
+                                else if (controller.isInitializing)
+                                  const Expanded(
+                                    child: SingleChildScrollView(
+                                      child: FormSkeleton(
+                                        fieldCount: 4,
+                                        compact: true,
+                                      ),
+                                    ),
+                                  )
+                                else if (controller.isRefinePromptVisible)
+                                  Expanded(child: _buildRefinePrompt(context))
+                                else if (question != null)
+                                  Expanded(
+                                    child: _buildQuestionFlow(
+                                      context,
+                                      question,
+                                    ),
+                                  )
+                                else
+                                  const Expanded(
+                                    child: SingleChildScrollView(
+                                      child: FormSkeleton(
+                                        fieldCount: 4,
+                                        compact: true,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
-                        ],
-                      ),
                     ),
                   ),
                 ),
@@ -415,39 +418,59 @@ class _QuestionPageState extends State<QuestionPage> {
     final l10n = context.l10n;
     _prepareScrollableScope('variant_selector');
 
-    return FrostedPanel(
-      padding: const EdgeInsets.all(28),
+    return SingleChildScrollView(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.bmpVariantTitle,
-            style: Theme.of(context).textTheme.headlineSmall,
+          _QuestionnaireVariantHeader(
+            eyebrow: l10n.questionnaireVariantEyebrow(),
+            title: l10n.questionnaireVariantHeroTitle(),
+            body: l10n.questionnaireVariantHeroBody(),
           ),
-          const SizedBox(height: 22),
-          Expanded(
-            child: ListView(
-              children: [
-                _VariantOptionCard(
-                  title: l10n.bmpVariantLeanTitle,
-                  body: l10n.bmpVariantLeanBody,
-                  tag: l10n.bmpVariantLeanTag,
-                  onTap: () =>
-                      controller.selectVariant(QuestionnaireVariant.lean),
-                ),
-                const SizedBox(height: 12),
-                _VariantOptionCard(
-                  title: l10n.bmpVariantStrategicTitle,
-                  body: l10n.bmpVariantStrategicBody,
-                  tag: l10n.bmpVariantStrategicTag,
-                  onTap: () =>
-                      controller.selectVariant(QuestionnaireVariant.strategic),
-                ),
-              ],
-            ),
+          const SizedBox(height: 10),
+          _QuestionnaireVariantPrimaryCard(
+            badge: l10n.questionnaireVariantLeanBadge(),
+            title: l10n.bmpVariantLeanTitle,
+            body: l10n.questionnaireVariantLeanDescription(),
+            timeValue: l10n.questionnaireVariantLeanTime(),
+            timeLabel: l10n.questionnaireVariantTimeLabel(),
+            questionValue: l10n.questionnaireVariantLeanQuestionCount(),
+            questionLabel: l10n.questionnaireVariantCountLabel(),
+            actionLabel: l10n.questionnaireVariantLeanAction(),
+            onTap: () => controller.selectVariant(QuestionnaireVariant.lean),
           ),
+          const SizedBox(height: 14),
+          _QuestionnaireVariantSeparator(
+            label: l10n.questionnaireVariantSeparator(),
+          ),
+          const SizedBox(height: 14),
+          _QuestionnaireVariantSecondaryCard(
+            badge: l10n.questionnaireVariantStrategicBadge(),
+            title: l10n.bmpVariantStrategicTitle,
+            body: l10n.questionnaireVariantStrategicDescription(),
+            timeValue: l10n.questionnaireVariantStrategicTime(),
+            timeLabel: l10n.questionnaireVariantTimeLabel(),
+            questionValue: l10n.questionnaireVariantStrategicQuestionCount(),
+            questionLabel: l10n.questionnaireVariantCountLabel(),
+            actionLabel: l10n.questionnaireVariantStrategicAction(),
+            onTap: () =>
+                controller.selectVariant(QuestionnaireVariant.strategic),
+          ),
+          const SizedBox(height: 24),
         ],
       ),
+    );
+  }
+
+  Widget _buildVariantSelectionScreen(BuildContext context) {
+    return Column(
+      children: [
+        _QuestionnaireVariantAppBar(
+          title: context.l10n.questionnaireVariantPageTitle(),
+          onBack: () => _handleExitFlow(context),
+          onHelp: _showHelp,
+        ),
+        Expanded(child: _buildVariantSelector(context)),
+      ],
     );
   }
 
@@ -466,10 +489,8 @@ class _QuestionPageState extends State<QuestionPage> {
               QuestionProgressIndicator(
                 currentStep: controller.currentStepForProgress,
                 totalSteps: controller.totalStepsForProgress,
-                label: l10n.bmpProgressStep(
-                  controller.currentStepForProgress,
-                  controller.totalStepsForProgress,
-                ),
+                label:
+                    '${l10n.bmpProgressStep(controller.currentStepForProgress, controller.totalStepsForProgress)} · ${_remainingTimeLabel(context)}',
               ),
               const SizedBox(height: 14),
               Text(
@@ -550,6 +571,21 @@ class _QuestionPageState extends State<QuestionPage> {
     );
   }
 
+  String _remainingTimeLabel(BuildContext context) {
+    final total = controller.totalStepsForProgress;
+    final current = controller.currentStepForProgress;
+    final remaining = (total - current).clamp(0, total);
+    final secondsPerQuestion =
+        controller.selectedVariant == QuestionnaireVariant.lean ? 30 : 40;
+    final minutes = ((remaining * secondsPerQuestion) / 60).ceil();
+    return _localizedText(
+      context,
+      pt: minutes <= 1 ? 'menos de 1 min' : '~$minutes min restantes',
+      es: minutes <= 1 ? 'menos de 1 min' : '~$minutes min restantes',
+      en: minutes <= 1 ? 'under 1 min left' : '~$minutes min left',
+    );
+  }
+
   Widget _buildQuestionOptions(BuildContext context, Question question) {
     if (question.id == 'origin_country') {
       return SingleChildScrollView(
@@ -585,28 +621,35 @@ class _QuestionPageState extends State<QuestionPage> {
       final selectedChildrenCount = controller.answerFor(
         'travel_group_children_count',
       );
+      final labels = question.options
+          .map(
+            (option) => _displayOptionLabel(context, question.id, option.value),
+          )
+          .toList(growable: false);
+      final layout = _resolveQuestionOptionLayout(question, labels);
 
-      return ListView(
+      return SingleChildScrollView(
         controller: _optionsScrollController,
-        children: [
-          for (final option in question.options) ...[
-            _LargeOptionCard(
-              icon: _optionIcon(question.id, option.value),
-              label: _displayOptionLabel(context, question.id, option.value),
-              isSelected: selectedValue == option.value,
-              onTap: () => _handleTravelGroupSelect(option),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildCompactOptionGrid(
+              context: context,
+              question: question,
+              labels: labels,
+              selectedValues: {selectedValue ?? ''},
+              isMultiSelect: false,
+              compact: layout == _QuestionOptionLayout.compactGrid,
             ),
-            if (option.value == 'family_kids' &&
-                selectedValue == 'family_kids') ...[
-              const SizedBox(height: 10),
+            if (selectedValue == 'family_kids') ...[
+              const SizedBox(height: 12),
               _TravelGroupChildrenSelector(
                 selectedValue: selectedChildrenCount,
                 onSelected: _handleTravelGroupChildrenSelect,
               ),
             ],
-            if (option != question.options.last) const SizedBox(height: 12),
           ],
-        ],
+        ),
       );
     }
 
@@ -749,6 +792,8 @@ class _QuestionPageState extends State<QuestionPage> {
                     compact: compact,
                     onTap: () => isMultiSelect
                         ? _handleMultiSelect(question, question.options[index])
+                        : question.id == 'travel_group'
+                        ? _handleTravelGroupSelect(question.options[index])
                         : _handleSingleSelect(
                             question,
                             question.options[index],
@@ -1190,7 +1235,9 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   String _selectionValidationLabel(BuildContext context, Question question) {
-    return context.l10n.questionnaireSelectionValidation(question.maxSelections);
+    return context.l10n.questionnaireSelectionValidation(
+      question.maxSelections,
+    );
   }
 
   String _selectionCounterLabel(int selected, int total) => '$selected/$total';
@@ -1369,58 +1416,554 @@ class _QuestionPageState extends State<QuestionPage> {
 
 enum _QuestionOptionLayout { list, grid, compactGrid }
 
-class _VariantOptionCard extends StatelessWidget {
-  const _VariantOptionCard({
+class _QuestionnaireVariantAppBar extends StatelessWidget {
+  const _QuestionnaireVariantAppBar({
     required this.title,
-    required this.body,
-    required this.tag,
-    required this.onTap,
+    required this.onBack,
+    required this.onHelp,
   });
 
   final String title;
-  final String body;
-  final String tag;
+  final VoidCallback onBack;
+  final VoidCallback onHelp;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+      child: Row(
+        children: [
+          _QuestionnaireVariantIconButton(
+            icon: Icons.chevron_left_rounded,
+            iconColor: const Color(0xFF8B949E),
+            onTap: onBack,
+          ),
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFF0F6FC),
+              ),
+            ),
+          ),
+          _QuestionnaireVariantIconButton(
+            icon: Icons.help_outline_rounded,
+            iconColor: const Color(0xFF6B7280),
+            onTap: onHelp,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuestionnaireVariantIconButton extends StatelessWidget {
+  const _QuestionnaireVariantIconButton({
+    required this.icon,
+    required this.iconColor,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color iconColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(26),
-        child: FrostedPanel(
-          padding: const EdgeInsets.all(20),
-          borderRadius: BorderRadius.circular(26),
-          backgroundColor: isDark
-              ? const Color(0xCC152131)
-              : Colors.white.withValues(alpha: 0.94),
-          borderColor: isDark
-              ? AppColors.accent.withValues(alpha: 0.18)
-              : AppColors.primary.withValues(alpha: 0.10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ScoreBadge(label: tag, icon: Icons.tune_rounded),
-              const SizedBox(height: 12),
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 8),
-              Text(
-                body,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                  height: 1.3,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: const Color(0xFF111827),
+          border: Border.all(color: const Color(0xFF1E2636)),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: iconColor, size: 20),
+      ),
+    );
+  }
+}
+
+class _QuestionnaireVariantHeader extends StatelessWidget {
+  const _QuestionnaireVariantHeader({
+    required this.eyebrow,
+    required this.title,
+    required this.body,
+  });
+
+  final String eyebrow;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          eyebrow,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF58A6FF),
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFFF0F6FC),
+            letterSpacing: -0.5,
+            height: 1.2,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          body,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 13,
+            color: Color(0xFF6B7280),
+            height: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuestionnaireVariantPrimaryCard extends StatelessWidget {
+  const _QuestionnaireVariantPrimaryCard({
+    required this.badge,
+    required this.title,
+    required this.body,
+    required this.timeValue,
+    required this.timeLabel,
+    required this.questionValue,
+    required this.questionLabel,
+    required this.actionLabel,
+    required this.onTap,
+  });
+
+  final String badge;
+  final String title;
+  final String body;
+  final String timeValue;
+  final String timeLabel;
+  final String questionValue;
+  final String questionLabel;
+  final String actionLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0D1F38),
+          border: Border.all(color: const Color(0xFF1D4A70), width: 1.5),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(
+              top: -20,
+              right: -20,
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1D4A70).withValues(alpha: 0.30),
+                  shape: BoxShape.circle,
                 ),
               ),
-            ],
-          ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _QuestionnaireVariantBadge(
+                  backgroundColor: const Color(0xFF0A1A2E),
+                  borderColor: const Color(0xFF1D4A70),
+                  icon: Icons.bolt_rounded,
+                  color: const Color(0xFF58A6FF),
+                  label: badge,
+                ),
+                const SizedBox(height: 14),
+                const SizedBox(
+                  height: 54,
+                  child: CustomPaint(painter: _FastPlanPainter()),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFFF0F6FC),
+                    letterSpacing: -0.4,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  body,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF8B949E),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    _QuestionnaireVariantStat(
+                      icon: Icons.access_time_rounded,
+                      value: timeValue,
+                      label: timeLabel,
+                      color: const Color(0xFF58A6FF),
+                    ),
+                    const SizedBox(width: 8),
+                    _QuestionnaireVariantStat(
+                      icon: Icons.help_outline_rounded,
+                      value: questionValue,
+                      label: questionLabel,
+                      color: const Color(0xFF58A6FF),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1F6FEB),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        actionLabel,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(
+                        Icons.arrow_forward_rounded,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
+}
+
+class _QuestionnaireVariantSeparator extends StatelessWidget {
+  const _QuestionnaireVariantSeparator({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Expanded(
+          child: Divider(height: 1, thickness: 1, color: Color(0xFF1E2636)),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              color: Color(0xFF2D333B),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const Expanded(
+          child: Divider(height: 1, thickness: 1, color: Color(0xFF1E2636)),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuestionnaireVariantSecondaryCard extends StatelessWidget {
+  const _QuestionnaireVariantSecondaryCard({
+    required this.badge,
+    required this.title,
+    required this.body,
+    required this.timeValue,
+    required this.timeLabel,
+    required this.questionValue,
+    required this.questionLabel,
+    required this.actionLabel,
+    required this.onTap,
+  });
+
+  final String badge;
+  final String title;
+  final String body;
+  final String timeValue;
+  final String timeLabel;
+  final String questionValue;
+  final String questionLabel;
+  final String actionLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: const Color(0xFF111827),
+          border: Border.all(color: const Color(0xFF1E2636), width: 1.5),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _QuestionnaireVariantBadge(
+              backgroundColor: const Color(0xFF1A1200),
+              borderColor: const Color(0xFF3D2800),
+              icon: Icons.star_outline_rounded,
+              color: const Color(0xFFF59E0B),
+              label: badge,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFFF0F6FC),
+                letterSpacing: -0.3,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              body,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF8B949E),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                _QuestionnaireVariantStat(
+                  icon: Icons.access_time_rounded,
+                  value: timeValue,
+                  label: timeLabel,
+                  color: const Color(0xFFF59E0B),
+                ),
+                const SizedBox(width: 8),
+                _QuestionnaireVariantStat(
+                  icon: Icons.help_outline_rounded,
+                  value: questionValue,
+                  label: questionLabel,
+                  color: const Color(0xFFF59E0B),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1C2128),
+                border: Border.all(color: const Color(0xFF2D333B)),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Text(
+                actionLabel,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF8B949E),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuestionnaireVariantBadge extends StatelessWidget {
+  const _QuestionnaireVariantBadge({
+    required this.backgroundColor,
+    required this.borderColor,
+    required this.icon,
+    required this.color,
+    required this.label,
+  });
+
+  final Color backgroundColor;
+  final Color borderColor;
+  final IconData icon;
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        border: Border.all(color: borderColor),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 12),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuestionnaireVariantStat extends StatelessWidget {
+  const _QuestionnaireVariantStat({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.25),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 5),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFF0F6FC),
+                ),
+              ),
+              Text(
+                label,
+                style: const TextStyle(fontSize: 9, color: Color(0xFF4B5563)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FastPlanPainter extends CustomPainter {
+  const _FastPlanPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final background = Paint()
+      ..color = Colors.white.withValues(alpha: 0.06)
+      ..style = PaintingStyle.fill;
+    final foreground = Paint()
+      ..color = const Color(0xFF1F6FEB)
+      ..style = PaintingStyle.fill;
+    final circlePaint = Paint()
+      ..color = const Color(0xFF1D4A70).withValues(alpha: 0.4)
+      ..style = PaintingStyle.fill;
+    final circleBorder = Paint()
+      ..color = const Color(0xFF1D4A70)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    final iconPaint = Paint()
+      ..color = const Color(0xFF58A6FF)
+      ..style = PaintingStyle.fill;
+
+    RRect bar(double top, double width) => RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, top, width, 8),
+      const Radius.circular(4),
+    );
+
+    canvas.drawRRect(bar(0, size.width * 0.72), background);
+    canvas.drawRRect(bar(0, size.width * 0.72), foreground);
+    canvas.drawRRect(bar(16, size.width * 0.72), background);
+    canvas.drawRRect(bar(16, size.width * 0.50), foreground);
+    canvas.drawRRect(bar(32, size.width * 0.72), background);
+    canvas.drawRRect(bar(32, size.width * 0.28), foreground);
+
+    final cx = size.width - 20;
+    final cy = size.height / 2;
+    canvas.drawCircle(Offset(cx, cy), 18, circlePaint);
+    canvas.drawCircle(Offset(cx, cy), 18, circleBorder);
+
+    final path = Path()
+      ..moveTo(cx + 3, cy - 7)
+      ..lineTo(cx - 2, cy + 1)
+      ..lineTo(cx + 1, cy + 1)
+      ..lineTo(cx - 3, cy + 7)
+      ..lineTo(cx + 2, cy - 1)
+      ..lineTo(cx - 1, cy - 1)
+      ..close();
+    canvas.drawPath(path, iconPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _LargeOptionCard extends StatelessWidget {
@@ -3053,4 +3596,17 @@ class _QuestionLocationDialog extends StatelessWidget {
       ),
     );
   }
+}
+
+String _localizedText(
+  BuildContext context, {
+  required String pt,
+  required String es,
+  required String en,
+}) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 }

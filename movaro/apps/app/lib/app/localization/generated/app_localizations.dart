@@ -10309,6 +10309,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open a public alert about common fraud in listings and rentals so you do not decide only on price or urgency.'**
   String get migrationPlanPrepScamsBody;
+
+  /// No description provided for @phase_before_travel.
+  ///
+  /// In en, this message translates to:
+  /// **'Before travel'**
+  String get phase_before_travel;
+
+  /// No description provided for @phase_first_days.
+  ///
+  /// In en, this message translates to:
+  /// **'First days'**
+  String get phase_first_days;
+
+  /// No description provided for @phase_documentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Documentation'**
+  String get phase_documentation;
+
+  /// No description provided for @phase_life_working.
+  ///
+  /// In en, this message translates to:
+  /// **'Life working'**
+  String get phase_life_working;
+
+  /// No description provided for @phase_integration.
+  ///
+  /// In en, this message translates to:
+  /// **'Integration'**
+  String get phase_integration;
+
+  /// No description provided for @phase_desc_before_travel.
+  ///
+  /// In en, this message translates to:
+  /// **'What to prepare in Argentina so you arrive without surprises'**
+  String get phase_desc_before_travel;
+
+  /// No description provided for @phase_desc_first_days.
+  ///
+  /// In en, this message translates to:
+  /// **'You arrived in Brazil. Focus on getting established and being able to communicate.'**
+  String get phase_desc_first_days;
+
+  /// No description provided for @phase_desc_documentation.
+  ///
+  /// In en, this message translates to:
+  /// **'The documents that unlock everything. Do them in this exact order.'**
+  String get phase_desc_documentation;
+
+  /// No description provided for @phase_desc_life_working.
+  ///
+  /// In en, this message translates to:
+  /// **'With CPF and residence in progress, now you build the structure of daily life.'**
+  String get phase_desc_life_working;
+
+  /// No description provided for @phase_desc_integration.
+  ///
+  /// In en, this message translates to:
+  /// **'Adapt your full life to Brazil and secure long-term stay.'**
+  String get phase_desc_integration;
+
+  /// No description provided for @item_next_action_tag.
+  ///
+  /// In en, this message translates to:
+  /// **'NEXT ACTION'**
+  String get item_next_action_tag;
+
+  /// No description provided for @item_external_tag.
+  ///
+  /// In en, this message translates to:
+  /// **'EXTERNAL ACTION'**
+  String get item_external_tag;
+
+  /// No description provided for @item_tool_tag.
+  ///
+  /// In en, this message translates to:
+  /// **'USE A TOOL'**
+  String get item_tool_tag;
+
+  /// No description provided for @item_checklist_tag.
+  ///
+  /// In en, this message translates to:
+  /// **'TO COMPLETE'**
+  String get item_checklist_tag;
+
+  /// No description provided for @deadline_badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply by {date}'**
+  String deadline_badge(Object date);
+
+  /// No description provided for @deadline_alert_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline is getting close'**
+  String get deadline_alert_title;
+
+  /// No description provided for @deadline_alert_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Your temporary residence expires in {days} days. Apply for permanent residence before that.'**
+  String deadline_alert_body(Object days);
+
+  /// No description provided for @guide_completed_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan completed!'**
+  String get guide_completed_title;
+
+  /// No description provided for @guide_completed_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You completed every step in your guide for {city}.'**
+  String guide_completed_subtitle(Object city);
+
+  /// No description provided for @guide_no_plan_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your city first'**
+  String get guide_no_plan_title;
+
+  /// No description provided for @guide_no_plan_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your plan city to start the guide'**
+  String get guide_no_plan_subtitle;
 }
 
 class _AppLocalizationsDelegate

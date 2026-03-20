@@ -1,0 +1,118 @@
+String? cityImageUrlFor(String cityId) {
+  const images = <String, String>{
+    'florianopolis':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Morro_da_Cruz%2C_Florian%C3%B3polis_-_SC%2C_Brazil_-_panoramio_%28cropped%29.jpg/640px-Morro_da_Cruz%2C_Florian%C3%B3polis_-_SC%2C_Brazil_-_panoramio_%28cropped%29.jpg',
+    'sao-paulo':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Marginal_Pinheiros_e_Jockey_Club.jpg/640px-Marginal_Pinheiros_e_Jockey_Club.jpg',
+    'rio-de-janeiro':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Cidade_Maravilhosa.jpg/640px-Cidade_Maravilhosa.jpg',
+    'armacao-dos-buzios':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Vista_da_Igreja_de_Sant%27Anna_%28Arma%C3%A7%C3%A3o_dos_B%C3%BAzios%29.jpg/640px-Vista_da_Igreja_de_Sant%27Anna_%28Arma%C3%A7%C3%A3o_dos_B%C3%BAzios%29.jpg',
+    'arraial-do-cabo':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Oven_S_Beach_Arraial_Do_Cabo_%28247765557%29.jpeg/640px-Oven_S_Beach_Arraial_Do_Cabo_%28247765557%29.jpeg',
+    'cabo-frio':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Cabo_Frio_-_vista_a%C3%A9rea.jpg/640px-Cabo_Frio_-_vista_a%C3%A9rea.jpg',
+    'niteroi':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Museu_de_Arte_Contempor%C3%A2nea_by_Diego_Baravelli.jpg/640px-Museu_de_Arte_Contempor%C3%A2nea_by_Diego_Baravelli.jpg',
+    'curitiba':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Vista_a%C3%A9rea_de_Curitiba.jpg/640px-Vista_a%C3%A9rea_de_Curitiba.jpg',
+    'foz-do-iguacu':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/SkylineFoz.JPG/640px-SkylineFoz.JPG',
+    'balneario-camboriu':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Orla_da_Praia_Central%2C_Balne%C3%A1rio_Cambori%C3%BA_SC.JPG/640px-Orla_da_Praia_Central%2C_Balne%C3%A1rio_Cambori%C3%BA_SC.JPG',
+    'bombinhas':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/ColagemBombinhas2.png/640px-ColagemBombinhas2.png',
+    'maceio':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Ponta_Verde_Lighthouse_landscape_-_Macei%C3%B3%2C_Brazil_%28edited%29.jpg/640px-Ponta_Verde_Lighthouse_landscape_-_Macei%C3%B3%2C_Brazil_%28edited%29.jpg',
+    'maragogi':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Maragogi_Alagoas_Brasil.jpg/640px-Maragogi_Alagoas_Brasil.jpg',
+    'recife':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Antonio_Vaz_island_-_Recife%2C_Pernambuco%2C_Brazil_%28cropped%29.jpg/640px-Antonio_Vaz_island_-_Recife%2C_Pernambuco%2C_Brazil_%28cropped%29.jpg',
+    'natal':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Natal%2C_capital_do_Rio_Grande_do_Norte%2C_Brasil.jpg/640px-Natal%2C_capital_do_Rio_Grande_do_Norte%2C_Brasil.jpg',
+    'salvador':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Salvador_BA_%28cropped%29_2.jpg/640px-Salvador_BA_%28cropped%29_2.jpg',
+    'porto-seguro':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Porto_Seguro.1.jpg/640px-Porto_Seguro.1.jpg',
+    'joinville':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Joinville%2C_Santa_Catarina%2C_Brazil.jpg/640px-Joinville%2C_Santa_Catarina%2C_Brazil.jpg',
+    'itajai':
+        'https://commons.wikimedia.org/wiki/Special:FilePath/Itaja%C3%AD%20-%20Santa%20Catarina.jpg?width=640',
+    'porto-alegre':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Porto_Alegre_Skyline.jpg/640px-Porto_Alegre_Skyline.jpg',
+    'joao-pessoa':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Jo%C3%A3o_Pessoa%2C_Para%C3%ADba.jpg/640px-Jo%C3%A3o_Pessoa%2C_Para%C3%ADba.jpg',
+    'aracaju':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Aracaju%2C_Sergipe%2C_Brasil.jpg/640px-Aracaju%2C_Sergipe%2C_Brasil.jpg',
+    'goiania':
+        'https://commons.wikimedia.org/wiki/Special:FilePath/Goi%C3%A2nia%20Skyline.JPG?width=640',
+    'campo-grande':
+        'https://commons.wikimedia.org/wiki/Special:FilePath/Vista%20de%20Campo%20Grande%20%28Mato%20Grosso%20do%20Sul%29.JPG?width=640',
+    'santos':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Vista_de_Santos.jpg/640px-Vista_de_Santos.jpg',
+    'ubatuba':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/20230725_084402.jpg/640px-20230725_084402.jpg',
+    'paraty':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Paraty_05.JPG/640px-Paraty_05.JPG',
+    'tibau-do-sul':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/PipaBeachView.JPG/1920px-PipaBeachView.JPG',
+    'jijoca-de-jericoacoara':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Jericoacoara_-_Duna_do_Por_do_Sol_-_PARQUE_NACIONAL_DE_JERICOACOARA_-_1.jpg/960px-Jericoacoara_-_Duna_do_Por_do_Sol_-_PARQUE_NACIONAL_DE_JERICOACOARA_-_1.jpg',
+    'ilhabela':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Sunset_View_-_Ilhabela.jpg/640px-Sunset_View_-_Ilhabela.jpg',
+    'guaruja':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/ROGERIO_CASSIMIRO_morro_da_caixa_dagua_GUARUJA_SP_%2827787693658%29.jpg/640px-ROGERIO_CASSIMIRO_morro_da_caixa_dagua_GUARUJA_SP_%2827787693658%29.jpg',
+    'garopaba':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/0_04192022IMG_024626487.jpg/640px-0_04192022IMG_024626487.jpg',
+    'imbituba':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Porto_de_imbituba.jpg/640px-Porto_de_imbituba.jpg',
+    'itacare':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/MARCIO_FILHO_ITACARE_CIDADE_ITACARE_BAHIA_%2840933336562%29.jpg/640px-MARCIO_FILHO_ITACARE_CIDADE_ITACARE_BAHIA_%2840933336562%29.jpg',
+    'sao-miguel-do-gostoso':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/S%C3%A3o_Miguel_do_Gostoso%2C_Rio_Grande_do_Norte.jpg/1920px-S%C3%A3o_Miguel_do_Gostoso%2C_Rio_Grande_do_Norte.jpg',
+    'cairu':
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Morro1.jpg/640px-Morro1.jpg',
+  };
+
+  for (final key in _cityImageLookupKeys(cityId)) {
+    final image = images[key];
+    if (image != null) {
+      return _wikimediaImageUrl(image);
+    }
+  }
+
+  return null;
+}
+
+String _wikimediaImageUrl(String sourceUrl, {int width = 640}) {
+  final uri = Uri.parse(sourceUrl);
+  if (uri.host == 'commons.wikimedia.org' &&
+      uri.pathSegments.length >= 3 &&
+      uri.pathSegments[0] == 'wiki' &&
+      uri.pathSegments[1] == 'Special:FilePath') {
+    return sourceUrl;
+  }
+
+  var fileName = uri.pathSegments.isEmpty ? '' : uri.pathSegments.last;
+  final sizedMatch = RegExp(r'^\d+px-(.+)$').firstMatch(fileName);
+  if (sizedMatch != null) {
+    fileName = sizedMatch.group(1)!;
+  }
+
+  return Uri(
+    scheme: 'https',
+    host: 'commons.wikimedia.org',
+    pathSegments: ['wiki', 'Special:FilePath', fileName],
+    queryParameters: {'width': '$width'},
+  ).toString();
+}
+
+Iterable<String> _cityImageLookupKeys(String cityId) sync* {
+  final normalized = cityId.trim().toLowerCase().replaceAll('_', '-');
+  yield normalized;
+
+  final parts = normalized.split('-');
+  if (parts.length > 1 && parts.last.length == 2) {
+    yield parts.sublist(0, parts.length - 1).join('-');
+  }
+}

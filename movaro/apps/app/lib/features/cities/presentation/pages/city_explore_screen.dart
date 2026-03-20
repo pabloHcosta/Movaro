@@ -34,7 +34,8 @@ class CityExploreScreen extends StatefulWidget {
   State<CityExploreScreen> createState() => _CityExploreScreenState();
 }
 
-class _CityExploreScreenState extends State<CityExploreScreen> {
+class _CityExploreScreenState extends State<CityExploreScreen>
+    with SingleTickerProviderStateMixin {
   final YouTubeService _youTubeService = YouTubeService();
   final PlacesPhotoService _photoService = PlacesPhotoService();
 
@@ -42,6 +43,8 @@ class _CityExploreScreenState extends State<CityExploreScreen> {
   ExploreState _photoState = ExploreState.loading;
   YouTubeSearchResult? _videos;
   CityPhotosResult? _photos;
+  String? _activeLanguageCode;
+  late final TabController _tabController;
 
   bool get hasApiKey =>
       ApiKeys.youtubeApiKey.isNotEmpty &&
@@ -50,10 +53,30 @@ class _CityExploreScreenState extends State<CityExploreScreen> {
   @override
   void initState() {
     super.initState();
-    unawaited(_loadContent());
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(_handleTabChanged);
   }
 
-  Future<void> _loadContent() async {
+  @override
+  void dispose() {
+    _tabController
+      ..removeListener(_handleTabChanged)
+      ..dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final languageCode = Localizations.localeOf(context).languageCode;
+    if (_activeLanguageCode == languageCode) {
+      return;
+    }
+    _activeLanguageCode = languageCode;
+    unawaited(_loadContent(languageCode));
+  }
+
+  Future<void> _loadContent(String languageCode) async {
     setState(() {
       _videoState = ExploreState.loading;
       _photoState = ExploreState.loading;
@@ -64,7 +87,7 @@ class _CityExploreScreenState extends State<CityExploreScreen> {
         cityId: widget.city.id,
         cityName: widget.city.name,
         stateName: widget.city.stateName,
-        languageCode: Localizations.localeOf(context).languageCode,
+        languageCode: languageCode,
       ),
       _photoService.getPhotos(
         cityId: widget.city.id,
@@ -96,90 +119,80 @@ class _CityExploreScreenState extends State<CityExploreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        body: Stack(
-          children: [
-            const AmbientBackground(),
-            SafeArea(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                    child: AppGlassHeader(
-                      title: context.l10n.cityExploreTitle(),
-                      onBack: () => Navigator.maybePop(context),
-                      trailing: IconButton(
-                        onPressed: _shareExplore,
-                        icon: const Icon(Icons.share_outlined),
-                        tooltip: context.l10n.cityExploreShareTooltip(),
+    return Scaffold(
+      body: Stack(
+        children: [
+          const AmbientBackground(),
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: AppGlassHeader(
+                    title: context.l10n.cityExploreTitle(),
+                    onBack: () => Navigator.maybePop(context),
+                    trailing: IconButton(
+                      onPressed: _shareExplore,
+                      icon: const Icon(Icons.share_outlined),
+                      tooltip: context.l10n.cityExploreShareTooltip(),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                    children: [
+                      _MiniHero(
+                        city: widget.city,
+                        isPlanCity: widget.isPlanCity,
                       ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
-                      children: [
-                        _MiniHero(
-                          city: widget.city,
-                          isPlanCity: widget.isPlanCity,
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF111827),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.08),
+                      const SizedBox(height: 16),
+                      _ExploreTabSelector(
+                        selectedIndex: _tabController.index,
+                        videosLabel: context.l10n.cityExploreTabVideos(),
+                        photosLabel: context.l10n.cityExploreTabPhotos(),
+                        onTabChanged: (index) {
+                          _tabController.animateTo(index);
+                          setState(() {});
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 720,
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _VideosTab(
+                              state: _videoState,
+                              result: _videos,
+                              city: widget.city,
+                              hasApiKey: hasApiKey,
+                              onOpenVideo: _openVideo,
+                              onOpenMore: () => _openMoreOnYouTube(widget.city),
                             ),
-                          ),
-                          child: TabBar(
-                            dividerColor: Colors.transparent,
-                            indicator: BoxDecoration(
-                              color: const Color(0xFF1F6FEB),
-                              borderRadius: BorderRadius.circular(12),
+                            _PhotosTab(
+                              state: _photoState,
+                              result: _photos,
+                              city: widget.city,
                             ),
-                            labelColor: Colors.white,
-                            unselectedLabelColor: Colors.white70,
-                            tabs: [
-                              Tab(text: context.l10n.cityExploreTabVideos()),
-                              Tab(text: context.l10n.cityExploreTabPhotos()),
-                            ],
-                          ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          height: 720,
-                          child: TabBarView(
-                            children: [
-                              _VideosTab(
-                                state: _videoState,
-                                result: _videos,
-                                city: widget.city,
-                                hasApiKey: hasApiKey,
-                                onOpenVideo: _openVideo,
-                                onOpenMore: () => _openMoreOnYouTube(widget.city),
-                              ),
-                              _PhotosTab(
-                                state: _photoState,
-                                result: _photos,
-                                city: widget.city,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
+  }
+
+  void _handleTabChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _shareExplore() async {
@@ -220,6 +233,157 @@ class _CityExploreScreenState extends State<CityExploreScreen> {
     );
     return 'https://www.youtube.com/results?search_query=$query';
   }
+}
+
+class _ExploreTabSelector extends StatelessWidget {
+  const _ExploreTabSelector({
+    required this.selectedIndex,
+    required this.videosLabel,
+    required this.photosLabel,
+    required this.onTabChanged,
+  });
+
+  final int selectedIndex;
+  final String videosLabel;
+  final String photosLabel;
+  final ValueChanged<int> onTabChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Color(0xFF1E2636), width: 1),
+        ),
+      ),
+      child: Row(
+        children: [
+          _ExploreTabSelectorItem(
+            icon: const _YouTubeTabIcon(selected: true),
+            label: videosLabel,
+            isSelected: selectedIndex == 0,
+            onTap: () => onTabChanged(0),
+          ),
+          _ExploreTabSelectorItem(
+            icon: Icon(
+              Icons.photo_camera_outlined,
+              size: 14,
+              color: selectedIndex == 1
+                  ? const Color(0xFFF0F6FC)
+                  : const Color(0xFF4B5563),
+            ),
+            label: photosLabel,
+            isSelected: selectedIndex == 1,
+            onTap: () => onTabChanged(1),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExploreTabSelectorItem extends StatelessWidget {
+  const _ExploreTabSelectorItem({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final Widget icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  icon,
+                  const SizedBox(width: 6),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: isSelected
+                          ? const Color(0xFFF0F6FC)
+                          : const Color(0xFF4B5563),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              height: 2.5,
+              width: isSelected ? 36 : 0,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1F6FEB),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 1),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _YouTubeTabIcon extends StatelessWidget {
+  const _YouTubeTabIcon({required this.selected});
+
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 18,
+      height: 13,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFF0000),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: const Center(
+        child: CustomPaint(
+          size: Size(7, 8),
+          painter: _PlayIconPainter(),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlayIconPainter extends CustomPainter {
+  const _PlayIconPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+    final path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, size.height / 2)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _MiniHero extends StatelessWidget {
@@ -462,6 +626,7 @@ class _PhotosTab extends StatelessWidget {
         );
       case ExploreState.loaded:
         final photos = result?.photos ?? const <CityPhotoItem>[];
+        final attribution = _attributionLabel(context, result);
         final previewPhotos = photos.take(5).toList(growable: false);
         return ListView(
           children: [
@@ -518,7 +683,7 @@ class _PhotosTab extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      context.l10n.cityExplorePhotosAttributionFull(),
+                      attribution,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: const Color(0xFF4B5563),
                         fontSize: 8,
@@ -530,6 +695,17 @@ class _PhotosTab extends StatelessWidget {
             ),
           ],
         );
+    }
+  }
+
+  String _attributionLabel(BuildContext context, CityPhotosResult? result) {
+    switch (result?.attributionSource) {
+      case 'google_places':
+        return context.l10n.cityExplorePhotosAttributionGooglePlaces();
+      case 'pexels':
+        return context.l10n.cityExplorePhotosAttributionPexels();
+      default:
+        return context.l10n.cityExplorePhotosAttributionGeneric();
     }
   }
 

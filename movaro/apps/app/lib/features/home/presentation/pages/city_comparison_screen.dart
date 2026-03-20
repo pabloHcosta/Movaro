@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
@@ -17,7 +16,6 @@ import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
@@ -54,9 +52,17 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
     super.initState();
     _mode = widget.initialCities.length >= 3 ? 3 : 2;
     _selectedCities = List<City?>.filled(_mode, null, growable: true);
-    for (var index = 0; index < widget.initialCities.length && index < _mode; index++) {
+    for (
+      var index = 0;
+      index < widget.initialCities.length && index < _mode;
+      index++
+    ) {
       _selectedCities[index] = widget.initialCities[index];
-      unawaited(widget.citiesController.loadWeatherForCity(widget.initialCities[index].id));
+      unawaited(
+        widget.citiesController.loadWeatherForCity(
+          widget.initialCities[index].id,
+        ),
+      );
     }
     _isComparing = widget.initialCities.length >= 2;
     unawaited(widget.citiesController.prefetchCatalog());
@@ -133,10 +139,7 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
           ),
         ),
         const SizedBox(height: 18),
-        _ModeToggle(
-          mode: _mode,
-          onModeChanged: _changeMode,
-        ),
+        _ModeToggle(mode: _mode, onModeChanged: _changeMode),
         const SizedBox(height: 16),
         Row(
           children: [
@@ -185,15 +188,9 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
             child: Column(
               children: [
                 for (final city in results.take(8)) ...[
-                  _SearchResultTile(
-                    city: city,
-                    onTap: () => _addCity(city),
-                  ),
+                  _SearchResultTile(city: city, onTap: () => _addCity(city)),
                   if (city != results.take(8).last)
-                    Divider(
-                      height: 1,
-                      color: AppColors.borderFor(context),
-                    ),
+                    Divider(height: 1, color: AppColors.borderFor(context)),
                 ],
               ],
             ),
@@ -204,6 +201,14 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
 
   Widget _buildComparisonState(BuildContext context) {
     final cities = _comparisonCities(context);
+    if (cities.length < 2) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _isComparing) {
+          setState(() => _isComparing = false);
+        }
+      });
+      return _buildSelectionState(context);
+    }
     final winner = _winner(cities);
     final compact = cities.length >= 3;
     final scoredMetricCount = _scoredMetricDefinitions.length;
@@ -261,7 +266,9 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
             minExtentValue: compact ? 188 : 204,
             maxExtentValue: compact ? 188 : 204,
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: context.pageHorizontalPadding),
+              padding: EdgeInsets.symmetric(
+                horizontal: context.pageHorizontalPadding,
+              ),
               child: _ComparisonHeader(
                 cities: cities,
                 winner: winner,
@@ -289,15 +296,14 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
                   ),
                   const SizedBox(height: 16),
                 ],
-                _WinnerBanner(
-                  winner: winner,
-                  totalMetrics: scoredMetricCount,
-                ),
+                _WinnerBanner(winner: winner, totalMetrics: scoredMetricCount),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () => _startPlanWithWinner(winner.city),
                   child: Text(
-                    context.l10n.cityComparisonStartPlanAction(winner.city.name),
+                    context.l10n.cityComparisonStartPlanAction(
+                      winner.city.name,
+                    ),
                   ),
                 ),
                 if (cities.length == 2) ...[
@@ -306,12 +312,22 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
                     onPressed: () => Navigator.pushNamed(
                       context,
                       AppRoutes.cityDetail(
-                        cities.firstWhere((item) => item.city.id != winner.city.id).city.id,
+                        cities
+                            .firstWhere(
+                              (item) => item.city.id != winner.city.id,
+                            )
+                            .city
+                            .id,
                       ),
                     ),
                     child: Text(
                       context.l10n.cityComparisonOtherDetailsAction(
-                        cities.firstWhere((item) => item.city.id != winner.city.id).city.name,
+                        cities
+                            .firstWhere(
+                              (item) => item.city.id != winner.city.id,
+                            )
+                            .city
+                            .name,
                       ),
                     ),
                   ),
@@ -373,7 +389,10 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
   }
 
   List<City> _filteredResults(String query) {
-    final selectedIds = _selectedCities.whereType<City>().map((city) => city.id).toSet();
+    final selectedIds = _selectedCities
+        .whereType<City>()
+        .map((city) => city.id)
+        .toSet();
     final catalog = widget.citiesController.catalog;
     if (query.isEmpty) {
       return const [];
@@ -391,7 +410,10 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
   }
 
   List<City> _quickSuggestions() {
-    final selectedIds = _selectedCities.whereType<City>().map((city) => city.id).toSet();
+    final selectedIds = _selectedCities
+        .whereType<City>()
+        .map((city) => city.id)
+        .toSet();
     final plan = widget.migrationQuestionnaireController.generatedPlan;
     final candidates = <City>[
       if (plan?.recommendedCity != null) plan!.recommendedCity!,
@@ -423,8 +445,10 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
   }
 
   String? get _preferredCurrencyCountryId {
-    final journeyOrigin =
-        widget.migrationQuestionnaireController.journeyContextController.originCountryId;
+    final journeyOrigin = widget
+        .migrationQuestionnaireController
+        .journeyContextController
+        .originCountryId;
     if (journeyOrigin != null && journeyOrigin.isNotEmpty) {
       return journeyOrigin;
     }
@@ -444,7 +468,9 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
       for (final city in cities) city.city.id: _calculateScore(city, cities),
     };
     final sorted = cities.toList()
-      ..sort((a, b) => (scored[b.city.id] ?? 0).compareTo(scored[a.city.id] ?? 0));
+      ..sort(
+        (a, b) => (scored[b.city.id] ?? 0).compareTo(scored[a.city.id] ?? 0),
+      );
     final winner = sorted.first;
     return _CityWinner(city: winner.city, score: scored[winner.city.id] ?? 0);
   }
@@ -529,10 +555,7 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
 }
 
 class _ModeToggle extends StatelessWidget {
-  const _ModeToggle({
-    required this.mode,
-    required this.onModeChanged,
-  });
+  const _ModeToggle({required this.mode, required this.onModeChanged});
 
   final int mode;
   final ValueChanged<int> onModeChanged;
@@ -595,7 +618,9 @@ class _ModeButton extends StatelessWidget {
           label,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: selected ? AppColors.primary : AppColors.textPrimaryFor(context),
+            color: selected
+                ? AppColors.primary
+                : AppColors.textPrimaryFor(context),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -628,10 +653,7 @@ class _SelectedCitySlot extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.add_rounded,
-                  color: AppColors.textSoftFor(context),
-                ),
+                Icon(Icons.add_rounded, color: AppColors.textSoftFor(context)),
                 const SizedBox(height: 4),
                 Text(
                   context.l10n.cityComparisonAddAction,
@@ -645,8 +667,6 @@ class _SelectedCitySlot extends StatelessWidget {
         ),
       );
     }
-
-    final imageUrl = cityImageUrlFor(city!.id);
 
     return Container(
       height: 94,
@@ -669,20 +689,14 @@ class _SelectedCitySlot extends StatelessWidget {
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        if (imageUrl != null)
-                          CachedNetworkImage(
-                            imageUrl: imageUrl,
-                            fit: BoxFit.cover,
-                            httpHeaders: const {'User-Agent': 'Movaro/1.0'},
-                            placeholder: (_, _) => const SkeletonBox(height: 32),
-                            errorWidget: (_, _, _) => const DecoratedBox(
-                              decoration: BoxDecoration(color: Color(0xFF17345D)),
-                            ),
-                          )
-                        else
-                          const DecoratedBox(
+                        CityResolvedImage(
+                          city: city!,
+                          fit: BoxFit.cover,
+                          placeholder: const SkeletonBox(height: 32),
+                          errorWidget: const DecoratedBox(
                             decoration: BoxDecoration(color: Color(0xFF17345D)),
                           ),
+                        ),
                         DecoratedBox(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
@@ -750,10 +764,7 @@ class _SelectedCitySlot extends StatelessWidget {
 }
 
 class _SearchResultTile extends StatelessWidget {
-  const _SearchResultTile({
-    required this.city,
-    required this.onTap,
-  });
+  const _SearchResultTile({required this.city, required this.onTap});
 
   final City city;
   final VoidCallback onTap;
@@ -769,7 +780,10 @@ class _SearchResultTile extends StatelessWidget {
           color: AppColors.primary.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Icon(Icons.location_city_outlined, color: AppColors.primary),
+        child: const Icon(
+          Icons.location_city_outlined,
+          color: AppColors.primary,
+        ),
       ),
       title: Text(city.name),
       subtitle: Text('${city.stateName} (${city.stateCode})'),
@@ -801,10 +815,11 @@ class _ComparisonHeaderDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return Container(
+    return ColoredBox(
       color: Theme.of(context).scaffoldBackgroundColor,
-      padding: const EdgeInsets.only(bottom: 8),
-      child: child,
+      child: SizedBox.expand(
+        child: Padding(padding: const EdgeInsets.only(bottom: 8), child: child),
+      ),
     );
   }
 
@@ -838,7 +853,10 @@ class _ComparisonHeader extends StatelessWidget {
             SizedBox(
               width: compact ? 74 : 80,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 14,
+                ),
                 alignment: Alignment.centerLeft,
                 child: Text(
                   context.l10n.cityComparisonHeaderLabel.toUpperCase(),
@@ -898,7 +916,10 @@ class _CityHeaderColumn extends StatelessWidget {
             alignment: Alignment.topCenter,
             child: isWinner
                 ? Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       borderRadius: BorderRadius.circular(999),
@@ -1019,10 +1040,7 @@ List<_MetricSectionGroup> _metricGroups(BuildContext context) => [
   ),
   _MetricSectionGroup(
     title: context.l10n.cityComparisonGroupWork,
-    metrics: const [
-      _MetricDefinition.job,
-      _MetricDefinition.community,
-    ],
+    metrics: const [_MetricDefinition.job, _MetricDefinition.community],
   ),
 ];
 
@@ -1048,17 +1066,13 @@ class _MetricSection extends StatelessWidget {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 14),
           for (final metric in metrics) ...[
-            _MetricRow(
-              metric: metric,
-              cities: cities,
-              compact: compact,
-            ),
+            _MetricRow(metric: metric, cities: cities, compact: compact),
             if (metric != metrics.last) const SizedBox(height: 10),
           ],
         ],
@@ -1110,7 +1124,9 @@ class _MetricRow extends StatelessWidget {
                   winners: winners,
                   losers: losers,
                 );
-                final colors = _MetricCellColors.resolve(context, state);
+                final colors =
+                    metric.semanticColors(context, city) ??
+                    _MetricCellColors.resolve(context, state);
                 final value = metric.displayValue(context, city);
 
                 return Container(
@@ -1131,12 +1147,13 @@ class _MetricRow extends StatelessWidget {
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         softWrap: false,
-                        overflow: TextOverflow.visible,
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          fontSize: compact ? 10 : 11,
-                          fontWeight: FontWeight.w800,
-                          color: colors.text,
-                        ),
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              fontSize: compact ? 10 : 11,
+                              fontWeight: FontWeight.w800,
+                              color: colors.text,
+                            ),
                       ),
                     ),
                   ),
@@ -1152,10 +1169,7 @@ class _MetricRow extends StatelessWidget {
 }
 
 class _WinnerBanner extends StatelessWidget {
-  const _WinnerBanner({
-    required this.winner,
-    required this.totalMetrics,
-  });
+  const _WinnerBanner({required this.winner, required this.totalMetrics});
 
   final _CityWinner winner;
   final int totalMetrics;
@@ -1197,9 +1211,9 @@ class _WinnerBanner extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   winner.city.name,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
               ],
             ),
@@ -1263,10 +1277,10 @@ class _ComparisonCityData {
   static _ComparisonCityData fromCity(
     BuildContext context,
     City city,
-    CityWeather? weather,
-    {required CopilotExchangeRates? exchangeRates,
-    required String? preferredCountryId,}
-  ) {
+    CityWeather? weather, {
+    required CopilotExchangeRates? exchangeRates,
+    required String? preferredCountryId,
+  }) {
     final monthlyBase = _monthlyBaseEstimate(city);
     return _ComparisonCityData(
       city: city,
@@ -1314,29 +1328,62 @@ class _ComparisonCityData {
     if (initials.length >= 3) {
       return initials.substring(0, 3);
     }
-    final normalized = city.name.replaceAll(RegExp(r'[^A-Za-z]'), '').toUpperCase();
+    final normalized = city.name
+        .replaceAll(RegExp(r'[^A-Za-z]'), '')
+        .toUpperCase();
     if (normalized.length >= 3) {
       return normalized.substring(0, 3);
     }
-    return (normalized.isNotEmpty ? normalized : city.stateCode).padRight(3, city.stateCode);
+    return (normalized.isNotEmpty ? normalized : city.stateCode).padRight(
+      3,
+      city.stateCode,
+    );
   }
 
   static String _safetyLabel(BuildContext context, int score) {
-    final presentation = CityMetricPresentation.resolve(
-      context,
-      kind: CityMetricKind.safety,
-      value: score,
-    );
-    return presentation.headline;
+    final languageCode = Localizations.localeOf(context).languageCode;
+    if (score >= 70) {
+      return switch (languageCode) {
+        'es' => 'Alta',
+        'en' => 'High',
+        _ => 'Alta',
+      };
+    }
+    if (score >= 55) {
+      return switch (languageCode) {
+        'es' => 'Moderada',
+        'en' => 'Moderate',
+        _ => 'Moderada',
+      };
+    }
+    return switch (languageCode) {
+      'es' => 'Baja',
+      'en' => 'Low',
+      _ => 'Baixa',
+    };
   }
 
   static String _jobLabel(BuildContext context, int score) {
-    final presentation = CityMetricPresentation.resolve(
-      context,
-      kind: CityMetricKind.work,
-      value: score,
-    );
-    return presentation.headline;
+    final languageCode = Localizations.localeOf(context).languageCode;
+    if (score >= 78) {
+      return switch (languageCode) {
+        'es' => 'Fuerte',
+        'en' => 'Strong',
+        _ => 'Forte',
+      };
+    }
+    if (score >= 62) {
+      return switch (languageCode) {
+        'es' => 'Moderado',
+        'en' => 'Moderate',
+        _ => 'Moderado',
+      };
+    }
+    return switch (languageCode) {
+      'es' => 'Limitado',
+      'en' => 'Limited',
+      _ => 'Limitado',
+    };
   }
 
   static String _communityLabel(BuildContext context, int score) {
@@ -1364,7 +1411,8 @@ class _MetricDefinition {
   final bool isCompetitive;
   final bool lowerIsBetter;
   final double? Function(_ComparisonCityData city) numericValue;
-  final String Function(BuildContext context, _ComparisonCityData city) displayValue;
+  final String Function(BuildContext context, _ComparisonCityData city)
+  displayValue;
   final String Function(BuildContext context) label;
 
   static const rent = _MetricDefinition._(
@@ -1472,7 +1520,8 @@ class _MetricDefinition {
         .toList(growable: false);
   }
 
-  static double? _rentNumeric(_ComparisonCityData city) => city.rentEstimateBrl.toDouble();
+  static double? _rentNumeric(_ComparisonCityData city) =>
+      city.rentEstimateBrl.toDouble();
   static String _rentDisplay(BuildContext context, _ComparisonCityData city) =>
       _formatMoney(context, city.rentEstimateBrl, city);
   static String _rentLabel(BuildContext context) =>
@@ -1501,10 +1550,12 @@ class _MetricDefinition {
       context.l10n.cityComparisonHdiLabel;
 
   static double? _climateNumeric(_ComparisonCityData city) => city.currentTempC;
-  static String _climateDisplay(BuildContext context, _ComparisonCityData city) =>
-      city.currentTempC == null
-          ? context.l10n.cityComparisonUnavailable
-          : '${city.currentTempC!.round()}°C';
+  static String _climateDisplay(
+    BuildContext context,
+    _ComparisonCityData city,
+  ) => city.currentTempC == null
+      ? context.l10n.cityComparisonUnavailable
+      : '${city.currentTempC!.round()}°C';
   static String _climateLabel(BuildContext context) =>
       context.l10n.cityComparisonClimateLabel;
 
@@ -1549,6 +1600,32 @@ class _MetricDefinition {
     return _MetricCellState.neutral;
   }
 
+  _MetricCellColors? semanticColors(
+    BuildContext context,
+    _ComparisonCityData city,
+  ) {
+    switch (key) {
+      case 'safety':
+        if (city.safetyLevelScore >= 70) {
+          return _MetricCellColors.semanticSuccess(context);
+        }
+        if (city.safetyLevelScore >= 55) {
+          return _MetricCellColors.semanticWarning(context);
+        }
+        return _MetricCellColors.semanticDanger(context);
+      case 'job':
+        if (city.jobMarketScore >= 78) {
+          return _MetricCellColors.semanticSuccess(context);
+        }
+        if (city.jobMarketScore >= 62) {
+          return _MetricCellColors.semanticWarning(context);
+        }
+        return _MetricCellColors.semanticDanger(context);
+      default:
+        return null;
+    }
+  }
+
   static String _formatMoney(
     BuildContext context,
     num amountInBrl,
@@ -1578,7 +1655,55 @@ class _MetricCellColors {
   final Color border;
   final Color text;
 
-  static _MetricCellColors resolve(BuildContext context, _MetricCellState state) {
+  static _MetricCellColors semanticSuccess(BuildContext context) =>
+      _MetricCellColors(
+        background: AppColors.tintedSurfaceFor(
+          context,
+          tint: AppColors.success,
+          lightColor: const Color(0xFFF1F8F3),
+        ),
+        border: AppColors.tintedBorderFor(
+          context,
+          tint: AppColors.success,
+          lightColor: const Color(0xFFBBDCC6),
+        ),
+        text: AppColors.success,
+      );
+
+  static _MetricCellColors semanticWarning(BuildContext context) =>
+      _MetricCellColors(
+        background: AppColors.tintedSurfaceFor(
+          context,
+          tint: AppColors.warning,
+          lightColor: const Color(0xFFFFF8E7),
+        ),
+        border: AppColors.tintedBorderFor(
+          context,
+          tint: AppColors.warning,
+          lightColor: const Color(0xFFEFCF84),
+        ),
+        text: AppColors.warning,
+      );
+
+  static _MetricCellColors semanticDanger(BuildContext context) =>
+      _MetricCellColors(
+        background: AppColors.tintedSurfaceFor(
+          context,
+          tint: AppColors.danger,
+          lightColor: const Color(0xFFFDEEE8),
+        ),
+        border: AppColors.tintedBorderFor(
+          context,
+          tint: AppColors.danger,
+          lightColor: const Color(0xFFF1C3B2),
+        ),
+        text: AppColors.danger,
+      );
+
+  static _MetricCellColors resolve(
+    BuildContext context,
+    _MetricCellState state,
+  ) {
     switch (state) {
       case _MetricCellState.best:
         return const _MetricCellColors(

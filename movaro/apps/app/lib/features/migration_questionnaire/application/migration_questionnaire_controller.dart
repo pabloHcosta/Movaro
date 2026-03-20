@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/answer.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
@@ -426,6 +427,11 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     );
     notifyListeners();
     await _migrationPlanRepository.setCurrentPlan(_generatedPlan);
+    if (_generatedPlan != null) {
+      await PlanNotificationService.instance.scheduleOnboardingSequence(
+        _generatedPlan!,
+      );
+    }
   }
 
   void _setInitializing(bool value) {

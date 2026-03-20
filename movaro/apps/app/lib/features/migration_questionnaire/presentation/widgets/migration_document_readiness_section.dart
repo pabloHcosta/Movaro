@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/document_checklist_adapter.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class MigrationDocumentReadinessSection extends StatelessWidget {
+class MigrationDocumentReadinessSection extends StatefulWidget {
   const MigrationDocumentReadinessSection({
     required this.plan,
     required this.completedItemIds,
@@ -18,12 +20,529 @@ class MigrationDocumentReadinessSection extends StatelessWidget {
   final ValueChanged<String> onToggleItem;
 
   @override
+  State<MigrationDocumentReadinessSection> createState() =>
+      _MigrationDocumentReadinessSectionState();
+}
+
+class _MigrationDocumentReadinessSectionState
+    extends State<MigrationDocumentReadinessSection> {
+  String? _activeItemId;
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final checklist = MigrationDocumentReadinessBuilder.build(
+    final fallbackChecklist = MigrationDocumentReadinessBuilder.build(
       l10n: l10n,
-      plan: plan,
+      plan: widget.plan,
     );
+    final items = DocumentChecklistAdapter.getItems(
+      l10n: l10n,
+      originCountry: widget.plan.originCountry,
+      destinationCountry: widget.plan.destinationCountry,
+      goal: widget.plan.goal,
+      travelGroup: widget.plan.travelGroup,
+      fallbackChecklist: fallbackChecklist,
+    );
+    final visibleCompletedCount = items
+        .where((item) => widget.completedItemIds.contains(item.id))
+        .length;
+
+    if (_isArgentinaToBrazil) {
+      return FrostedPanel(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _sectionTitle(l10n),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              _sectionSummary(l10n),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.45,
+              ),
+            ),
+            const SizedBox(height: 14),
+            _ProgressRow(
+              label: l10n.readinessProgressLabel(
+                visibleCompletedCount,
+                items.length,
+              ),
+              progress: items.isEmpty
+                  ? 0
+                  : visibleCompletedCount / items.length,
+            ),
+            const SizedBox(height: 18),
+            _TopBanner(localeName: l10n.localeName),
+            const SizedBox(height: 14),
+            _PhaseGroup(
+              title: _beforeTravelTitle(l10n),
+              phaseContext: _beforeTravelContext(l10n),
+              accent: const Color(0xFFE24B4A).withValues(alpha: 0.70),
+              items: items
+                  .where((item) => item.phase == DocumentPhase.beforeTravel)
+                  .toList(growable: false),
+              completedItemIds: widget.completedItemIds,
+              activeItemId: _activeItemId,
+              onActivate: _setActiveItem,
+              onToggleItem: widget.onToggleItem,
+            ),
+            const SizedBox(height: 16),
+            _PhaseGroup(
+              title: _uponArrivalTitle(l10n),
+              phaseContext: _uponArrivalContext(l10n),
+              accent: const Color(0xFFF59E0B).withValues(alpha: 0.70),
+              items: items
+                  .where((item) => item.phase == DocumentPhase.uponArrival)
+                  .toList(growable: false),
+              completedItemIds: widget.completedItemIds,
+              activeItemId: _activeItemId,
+              onActivate: _setActiveItem,
+              onToggleItem: widget.onToggleItem,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return _GenericDocumentReadinessSection(
+      checklist: fallbackChecklist,
+      completedItemIds: widget.completedItemIds,
+      onToggleItem: widget.onToggleItem,
+    );
+  }
+
+  bool get _isArgentinaToBrazil =>
+      widget.plan.originCountry.toUpperCase() == 'AR' &&
+      widget.plan.destinationCountry.toUpperCase() == 'BR';
+
+  void _setActiveItem(String id) {
+    setState(() {
+      _activeItemId = _activeItemId == id ? null : id;
+    });
+  }
+
+  String _sectionTitle(dynamic l10n) {
+    return switch (l10n.localeName.split('_').first) {
+      'pt' => 'Seus documentos para o Brasil',
+      'es' => 'Tus documentos para Brasil',
+      _ => 'Your documents for Brazil',
+    };
+  }
+
+  String _sectionSummary(dynamic l10n) {
+    return switch (l10n.localeName.split('_').first) {
+      'pt' =>
+        'Argentinos nao precisam de passaporte nem visto para entrar no Brasil. Veja o que voce realmente precisa.',
+      'es' =>
+        'Los argentinos no necesitan pasaporte ni visa para entrar a Brasil. Mira lo que realmente hace falta.',
+      _ =>
+        'Argentine citizens do not need a passport or visa to enter Brazil. See what you actually need.',
+    };
+  }
+
+  String _beforeTravelTitle(dynamic l10n) {
+    return switch (l10n.localeName.split('_').first) {
+      'pt' => 'ANTES DE VIAJAR',
+      'es' => 'ANTES DE VIAJAR',
+      _ => 'BEFORE YOU TRAVEL',
+    };
+  }
+
+  String _beforeTravelContext(dynamic l10n) {
+    return switch (l10n.localeName.split('_').first) {
+      'pt' =>
+        '✓ Argentinos entram no Brasil so com o DNI. Sem passaporte e sem visto.',
+      'es' =>
+        '✓ Los argentinos entran a Brasil solo con el DNI. Sin pasaporte y sin visa.',
+      _ =>
+        '✓ Argentine citizens can enter Brazil with DNI only. No passport and no visa.',
+    };
+  }
+
+  String _uponArrivalTitle(dynamic l10n) {
+    return switch (l10n.localeName.split('_').first) {
+      'pt' => 'AO CHEGAR NO BRASIL',
+      'es' => 'AL LLEGAR A BRASIL',
+      _ => 'AFTER YOU ARRIVE IN BRAZIL',
+    };
+  }
+
+  String _uponArrivalContext(dynamic l10n) {
+    return switch (l10n.localeName.split('_').first) {
+      'pt' =>
+        'Esses passos sao feitos depois da chegada. Nao precisa resolver tudo antes.',
+      'es' =>
+        'Estos pasos se hacen despues de llegar. No hace falta resolver todo antes.',
+      _ =>
+        'These steps happen after you arrive. You do not need to solve them all before traveling.',
+    };
+  }
+}
+
+class _TopBanner extends StatelessWidget {
+  const _TopBanner({required this.localeName});
+
+  final String localeName;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0D2818),
+        border: Border.all(color: const Color(0xFF1A4428)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('✅', style: TextStyle(fontSize: 18)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _title,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: const Color(0xFF3FB950),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  _body,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: const Color(0xFF4B5563),
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String get _title => switch (localeName.split('_').first) {
+    'pt' => 'Argentinos entram no Brasil com o DNI',
+    'es' => 'Los argentinos entran a Brasil con el DNI',
+    _ => 'Argentine citizens can enter Brazil with DNI',
+  };
+
+  String get _body => switch (localeName.split('_').first) {
+    'pt' =>
+      'Nada de passaporte, visto ou apostila para entrar. A regularizacao e feita depois da chegada.',
+    'es' =>
+      'Nada de pasaporte, visa o apostilla para entrar. La regularizacion se hace despues de llegar.',
+    _ =>
+      'No passport, visa, or apostille is required to enter. Regularization happens after arrival.',
+  };
+}
+
+class _PhaseGroup extends StatelessWidget {
+  const _PhaseGroup({
+    required this.title,
+    required this.phaseContext,
+    required this.accent,
+    required this.items,
+    required this.completedItemIds,
+    required this.activeItemId,
+    required this.onActivate,
+    required this.onToggleItem,
+  });
+
+  final String title;
+  final String phaseContext;
+  final Color accent;
+  final List<DocumentItem> items;
+  final Set<String> completedItemIds;
+  final String? activeItemId;
+  final ValueChanged<String> onActivate;
+  final ValueChanged<String> onToggleItem;
+
+  @override
+  Widget build(BuildContext context) {
+    return FrostedPanel(
+      padding: const EdgeInsets.all(0),
+      borderRadius: BorderRadius.circular(22),
+      backgroundColor: AppColors.surfaceFor(context),
+      borderColor: AppColors.borderFor(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: accent,
+                    letterSpacing: 1.0,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  phaseContext,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          for (final item in items)
+            _ChecklistItem(
+              item: item,
+              isActive: activeItemId == item.id,
+              isCompleted: completedItemIds.contains(item.id),
+              onActivate: () => onActivate(item.id),
+              onToggle: () => onToggleItem(item.id),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChecklistItem extends StatelessWidget {
+  const _ChecklistItem({
+    required this.item,
+    required this.isActive,
+    required this.isCompleted,
+    required this.onActivate,
+    required this.onToggle,
+  });
+
+  final DocumentItem item;
+  final bool isActive;
+  final bool isCompleted;
+  final VoidCallback onActivate;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onActivate,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 1),
+        padding: const EdgeInsets.all(12),
+        color: isActive ? const Color(0xFF0A1828) : Colors.transparent,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: onToggle,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                width: 20,
+                height: 20,
+                margin: const EdgeInsets.only(top: 2),
+                decoration: BoxDecoration(
+                  color: isCompleted
+                      ? const Color(0xFF0D2818)
+                      : const Color(0xFF1C2128),
+                  border: Border.all(
+                    color: isCompleted
+                        ? const Color(0xFF1A4428)
+                        : isActive
+                        ? const Color(0xFF1D4A70)
+                        : const Color(0xFF2D333B),
+                    width: isActive && !isCompleted ? 1.5 : 1,
+                  ),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: isCompleted
+                    ? const Icon(
+                        Icons.check_rounded,
+                        size: 12,
+                        color: Color(0xFF3FB950),
+                      )
+                    : null,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(item.icon, style: const TextStyle(fontSize: 13)),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Text(
+                          item.title,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: isCompleted
+                                    ? const Color(0xFF4B5563)
+                                    : const Color(0xFFF0F6FC),
+                                decoration: isCompleted
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                              ),
+                        ),
+                      ),
+                      if (isCompleted)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(
+                            _doneLabel(context),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: const Color(0xFF3FB950),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    item.description,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: 10,
+                      color: isCompleted
+                          ? const Color(0xFF2D333B)
+                          : const Color(0xFF8B949E),
+                      height: 1.5,
+                    ),
+                  ),
+                  if (!isCompleted) ...[
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.access_time_rounded,
+                          size: 10,
+                          color: Color(0xFF4B5563),
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          item.timeEstimate,
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                fontSize: 9,
+                                color: const Color(0xFF4B5563),
+                              ),
+                        ),
+                      ],
+                    ),
+                    if (item.tip != null) ...[
+                      const SizedBox(height: 5),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1A1200),
+                          border: Border.all(color: const Color(0xFF3D2800)),
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('💡', style: TextStyle(fontSize: 10)),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                item.tip!,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      fontSize: 9,
+                                      color: const Color(0xFFF59E0B),
+                                      height: 1.4,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    if (isActive && item.link != null) ...[
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () => _openLink(item.link!),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1F6FEB),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            _openOfficialSiteLabel(context),
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openLink(String value) async {
+    final uri = Uri.parse(value);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  String _openOfficialSiteLabel(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => 'Abrir site oficial ->',
+      'es' => 'Abrir sitio oficial ->',
+      _ => 'Open official site ->',
+    };
+  }
+
+  String _doneLabel(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => 'Feito ✓',
+      'es' => 'Hecho ✓',
+      _ => 'Done ✓',
+    };
+  }
+}
+
+class _GenericDocumentReadinessSection extends StatelessWidget {
+  const _GenericDocumentReadinessSection({
+    required this.checklist,
+    required this.completedItemIds,
+    required this.onToggleItem,
+  });
+
+  final MigrationDocumentReadinessChecklist checklist;
+  final Set<String> completedItemIds;
+  final ValueChanged<String> onToggleItem;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
 
     return FrostedPanel(
       child: Column(
@@ -347,24 +866,22 @@ class _MetaChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: AppColors.isDark(context) ? 0.16 : 0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: color),
+          Icon(icon, size: 14, color: color),
           const SizedBox(width: 6),
           Flexible(
             child: Text(
               label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w700,
-              ),
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              softWrap: true,
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(color: color),
             ),
           ),
         ],
@@ -397,7 +914,6 @@ class _ProgressRow extends StatelessWidget {
             value: progress.clamp(0, 1),
             minHeight: 8,
             backgroundColor: AppColors.surfaceMutedFor(context),
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
           ),
         ),
       ],

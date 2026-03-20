@@ -2438,5 +2438,41 @@
   "migrationPlanPrepRentalSearchDisclaimer": "Coverage and listings may vary by city and current availability. Check more than one source before deciding.",
   "migrationPlanPrepRentalSearchOpen": "Open rental search",
   "migrationPlanPrepScamsTitle": "How to avoid rental scams",
-  "migrationPlanPrepScamsBody": "Open a public alert about common fraud in listings and rentals so you do not decide only on price or urgency."
+  "migrationPlanPrepScamsBody": "Open a public alert about common fraud in listings and rentals so you do not decide only on price or urgency.",
+  "phase_before_travel": "Before travel",
+  "phase_first_days": "First days",
+  "phase_documentation": "Documentation",
+  "phase_life_working": "Life working",
+  "phase_integration": "Integration",
+  "phase_desc_before_travel": "What to prepare in Argentina so you arrive without surprises",
+  "phase_desc_first_days": "You arrived in Brazil. Focus on getting established and being able to communicate.",
+  "phase_desc_documentation": "The documents that unlock everything. Do them in this exact order.",
+  "phase_desc_life_working": "With CPF and residence in progress, now you build the structure of daily life.",
+  "phase_desc_integration": "Adapt your full life to Brazil and secure long-term stay.",
+  "item_next_action_tag": "NEXT ACTION",
+  "item_external_tag": "EXTERNAL ACTION",
+  "item_tool_tag": "USE A TOOL",
+  "item_checklist_tag": "TO COMPLETE",
+  "deadline_badge": "Apply by {date}",
+  "@deadline_badge": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "deadline_alert_title": "Deadline is getting close",
+  "deadline_alert_body": "Your temporary residence expires in {days} days. Apply for permanent residence before that.",
+  "@deadline_alert_body": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "guide_completed_title": "Plan completed!",
+  "guide_completed_subtitle": "You completed every step in your guide for {city}.",
+  "@guide_completed_subtitle": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "guide_no_plan_title": "Choose your city first",
+  "guide_no_plan_subtitle": "Confirm your plan city to start the guide"
 }

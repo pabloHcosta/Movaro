@@ -16,18 +16,23 @@ import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
-import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/guide_gps_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/arrival_execution_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/document_checklist_adapter.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_readiness_builder.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/pages/housing_selection_screen.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/arrival_execution_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/landing_budget_estimator_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_document_readiness_section.dart';
@@ -64,13 +69,20 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   Set<String> _readinessCompletedIds = <String>{};
   Set<String> _documentCompletedIds = <String>{};
   Set<String> _arrivalCompletedIds = <String>{};
+  Map<String, String> _completedAtById = <String, String>{};
   String? _loadedProgressKey;
+  String? _loadedActiveItemId;
+  GuideGpsController? _gpsController;
+  String? _gpsControllerKey;
   bool _didTryAutoHelp = false;
+  bool _showCelebration = false;
+  bool _showExpandedContent = false;
 
   @override
   void initState() {
     super.initState();
     _exchangeRatesFuture = widget.exchangeRatesService.fetchLatest();
+    unawaited(PlanNotificationService.instance.cancelPlanReminders());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeShowHelp();
     });
@@ -96,6 +108,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     );
   }
 
+  // ignore: unused_element
   void _openSection(
     _PreparationSection section,
     MigrationPlan plan,
@@ -156,6 +169,8 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       _readinessCompletedIds = Set<String>.from(snapshot.readinessCompletedIds);
       _documentCompletedIds = Set<String>.from(snapshot.documentCompletedIds);
       _arrivalCompletedIds = Set<String>.from(snapshot.arrivalCompletedIds);
+      _loadedActiveItemId = snapshot.activeItemId;
+      _completedAtById = Map<String, String>.from(snapshot.completedAtById);
     });
   }
 
@@ -171,6 +186,38 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       documentCompletedIds: documentCompletedIds,
       arrivalCompletedIds: arrivalCompletedIds,
     );
+  }
+
+  void _ensureGpsController(
+    BuildContext context,
+    MigrationPlan plan,
+    List<GuideActionItem> items,
+  ) {
+    final signature = [
+      _planKey(plan),
+      _readinessCompletedIds.length,
+      _documentCompletedIds.length,
+      _arrivalCompletedIds.length,
+      _loadedActiveItemId ?? 'none',
+      items.length,
+      _completedAtById.length,
+    ].join('::');
+
+    if (_gpsControllerKey == signature && _gpsController != null) {
+      return;
+    }
+
+    _gpsController = GuideGpsController(
+      plan: plan,
+      progressStore: _progressStore,
+      items: items,
+      readinessCompletedIds: _readinessCompletedIds,
+      documentCompletedIds: _documentCompletedIds,
+      arrivalCompletedIds: _arrivalCompletedIds,
+      completedAtById: _completedAtById,
+      activeItemId: _loadedActiveItemId,
+    );
+    _gpsControllerKey = signature;
   }
 
   void _syncProgressFromStage(
@@ -213,7 +260,6 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       plan: plan,
       city: city,
       exchangeRatesFuture: _exchangeRatesFuture,
-      onOpenRentalSearch: _openRentalSearch,
       onManagePlan: _handleManagePlan,
     );
   }
@@ -253,6 +299,304 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     );
   }
 
+  List<GuideActionItem> _buildGuideActionItems(
+    BuildContext context,
+    MigrationPlan plan,
+  ) {
+    if (plan.originCountry.toUpperCase() == 'AR' &&
+        plan.destinationCountry.toUpperCase() == 'BR') {
+      final completedIds = <String>{
+        ..._readinessCompletedIds,
+        ..._documentCompletedIds,
+        ..._arrivalCompletedIds,
+      };
+      return ArgentinaBrazilGuideDataSource.build(plan)
+          .map(
+            (item) =>
+                item.copyWith(isCompleted: completedIds.contains(item.id)),
+          )
+          .toList(growable: false);
+    }
+
+    final l10n = context.l10n;
+    final readinessChecklist = MigrationReadinessBuilder.build(
+      l10n: l10n,
+      plan: plan,
+    );
+    final documentChecklist = MigrationDocumentReadinessBuilder.build(
+      l10n: l10n,
+      plan: plan,
+    );
+    final adaptedDocumentItems = DocumentChecklistAdapter.getItems(
+      l10n: l10n,
+      originCountry: plan.originCountry,
+      destinationCountry: plan.destinationCountry,
+      goal: plan.goal,
+      travelGroup: plan.travelGroup,
+      fallbackChecklist: documentChecklist,
+    );
+    final arrivalChecklist = ArrivalExecutionBuilder.build(
+      l10n: l10n,
+      plan: plan,
+    );
+
+    var orderIndex = 0;
+    final items = <GuideActionItem>[];
+
+    for (final item in readinessChecklist.items) {
+      items.add(
+        GuideActionItem(
+          id: item.id,
+          title: item.title,
+          shortDescription: item.description,
+          fullContent: item.description,
+          type: switch (item.id) {
+            'landing_budget' => GuideActionType.tool,
+            'housing' => GuideActionType.tool,
+            _ => GuideActionType.informative,
+          },
+          toolType: switch (item.id) {
+            'landing_budget' => GuideToolType.budget,
+            'housing' => GuideToolType.housing,
+            _ => null,
+          },
+          phase: switch (item.id) {
+            'housing' => GuidePhase.housing,
+            'goal_layer' || 'cpf_bank' => GuidePhase.work,
+            'arrival_plan' => GuidePhase.arrival,
+            _ => GuidePhase.preparation,
+          },
+          orderIndex: orderIndex++,
+          isCompleted: _readinessCompletedIds.contains(item.id),
+          icon: item.icon,
+        ),
+      );
+    }
+
+    for (final item in adaptedDocumentItems) {
+      items.add(
+        GuideActionItem(
+          id: item.id,
+          title: item.title,
+          shortDescription: item.description,
+          fullContent: [
+            item.description,
+            if (item.tip != null) item.tip!,
+            item.timeEstimate,
+          ].join('\n\n'),
+          type: item.link != null
+              ? GuideActionType.external
+              : GuideActionType.informative,
+          externalUrl: item.link,
+          externalLabel: _localizedText(
+            context,
+            pt: 'site oficial',
+            es: 'sitio oficial',
+            en: 'official site',
+          ),
+          phase: GuidePhase.documents,
+          orderIndex: orderIndex++,
+          isCompleted: _documentCompletedIds.contains(item.id),
+        ),
+      );
+    }
+
+    items.addAll([
+      GuideActionItem(
+        id: 'housing_temporary_base',
+        title: _localizedText(
+          context,
+          pt: 'Reservar moradia temporaria',
+          es: 'Reservar vivienda temporal',
+          en: 'Book temporary housing',
+        ),
+        shortDescription: _localizedText(
+          context,
+          pt: 'Comece pela chegada segura: 1 a 3 meses em moradia temporaria.',
+          es: 'Empeza por una llegada segura: 1 a 3 meses en vivienda temporal.',
+          en: 'Start with a safer arrival: 1 to 3 months in temporary housing.',
+        ),
+        type: GuideActionType.tool,
+        toolType: GuideToolType.housing,
+        phase: GuidePhase.housing,
+        orderIndex: orderIndex++,
+        isCompleted: _readinessCompletedIds.contains('housing_temporary_base'),
+        icon: Icons.bed_outlined,
+      ),
+      GuideActionItem(
+        id: 'housing_long_term_search',
+        title: _localizedText(
+          context,
+          pt: 'Pesquisar aluguel fixo',
+          es: 'Buscar alquiler fijo',
+          en: 'Search long-term rent',
+        ),
+        shortDescription: _localizedText(
+          context,
+          pt: 'Depois de conhecer os bairros, avance para o aluguel definitivo.',
+          es: 'Despues de conocer los barrios, avanza al alquiler definitivo.',
+          en: 'After knowing the neighborhoods, move to a long-term rental.',
+        ),
+        type: GuideActionType.tool,
+        toolType: GuideToolType.housing,
+        phase: GuidePhase.housing,
+        orderIndex: orderIndex++,
+        isCompleted: _readinessCompletedIds.contains(
+          'housing_long_term_search',
+        ),
+        icon: Icons.home_work_outlined,
+      ),
+    ]);
+
+    for (final item in arrivalChecklist.items) {
+      items.add(
+        GuideActionItem(
+          id: item.id,
+          title: item.title,
+          shortDescription: item.description,
+          fullContent: item.description,
+          type: GuideActionType.informative,
+          phase: GuidePhase.arrival,
+          orderIndex: orderIndex++,
+          isCompleted: _arrivalCompletedIds.contains(item.id),
+          icon: item.icon,
+        ),
+      );
+    }
+
+    return items;
+  }
+
+  Future<void> _handleCurrentActionTap(
+    GuideGpsController controller,
+    GuideActionItem item,
+    MigrationPlan plan,
+    City? city,
+  ) async {
+    switch (item.type) {
+      case GuideActionType.informative:
+        if (!_showExpandedContent) {
+          controller.startCurrentItem();
+          setState(() {
+            _showExpandedContent = true;
+          });
+          return;
+        }
+        await _completeGuideItem(controller, item.id);
+      case GuideActionType.external:
+        if (!controller.awaitingConfirmation) {
+          controller.startCurrentItem();
+          if (item.externalUrl != null) {
+            await _openExternalPreparationLink(
+              title: item.title,
+              uri: Uri.parse(item.externalUrl!),
+            );
+          }
+          controller.markNeedsConfirmation();
+          setState(() {});
+          return;
+        }
+        await _completeGuideItem(controller, item.id);
+      case GuideActionType.tool:
+        if (!controller.awaitingConfirmation) {
+          controller.startCurrentItem();
+          await _openToolForItem(item, plan, city);
+          controller.markNeedsConfirmation();
+          setState(() {});
+          return;
+        }
+        await _completeGuideItem(controller, item.id);
+      case GuideActionType.checklist:
+        return;
+    }
+  }
+
+  Future<void> _openToolForItem(
+    GuideActionItem item,
+    MigrationPlan plan,
+    City? city,
+  ) async {
+    switch (item.toolType) {
+      case GuideToolType.budget:
+        await _showPreparationSheet(
+          context,
+          title: item.title,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FutureBuilder<CopilotExchangeRates?>(
+                future: _exchangeRatesFuture,
+                builder: (context, snapshot) {
+                  return LandingBudgetEstimatorSection(
+                    plan: plan,
+                    exchangeRates: snapshot.data,
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      case GuideToolType.flight:
+        await _showPreparationSheet(
+          context,
+          title: item.title,
+          child: _FlightSearchPlannerCard(
+            destinationCityName: city?.name ?? '',
+          ),
+        );
+      case GuideToolType.housing:
+        if (city == null) {
+          return;
+        }
+        final preselectedType =
+            item.id == 'item_3_2_aluguel_fixo' ||
+                item.id == 'housing_long_term_search'
+            ? HousingType.permanent
+            : HousingType.temporary;
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => HousingSelectionScreen(
+              city: city,
+              onOpenRentalSearch: _openRentalSearch,
+              onHelp: _showHelp,
+              skipTypeSelection: true,
+              preselectedType: preselectedType,
+            ),
+          ),
+        );
+      case null:
+        break;
+    }
+  }
+
+  Future<void> _completeGuideItem(
+    GuideGpsController controller,
+    String itemId,
+  ) async {
+    await controller.completeActionItem(itemId);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _showCelebration = true;
+      _showExpandedContent = false;
+      _readinessCompletedIds = Set<String>.from(
+        controller.readinessCompletedIds,
+      );
+      _documentCompletedIds = Set<String>.from(controller.documentCompletedIds);
+      _arrivalCompletedIds = Set<String>.from(controller.arrivalCompletedIds);
+      _loadedActiveItemId = controller.activeItemId;
+      _completedAtById = Map<String, String>.from(controller.completedAtById);
+    });
+    await Future<void>.delayed(const Duration(milliseconds: 1800));
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _showCelebration = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -281,13 +625,9 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     }
 
     final hasConfirmedCity = plan.isCityConfirmed && city != null;
-    final progressSnapshot = _buildPlanProgressSnapshot(
-      context,
-      plan: plan,
-      readinessCompletedIds: _readinessCompletedIds,
-      documentCompletedIds: _documentCompletedIds,
-      arrivalCompletedIds: _arrivalCompletedIds,
-    );
+    final actionItems = _buildGuideActionItems(context, plan);
+    _ensureGpsController(context, plan, actionItems);
+    final gpsController = _gpsController!;
     unawaited(_loadProgress(plan));
 
     return Scaffold(
@@ -304,69 +644,125 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                     context.pageHorizontalPadding,
                     0,
                   ),
-                  child: AppGlassHeader(
-                    title: l10n.migrationPlanCopilotTitle,
+                  child: _GuideGpsHeader(
+                    cityLabel: city == null
+                        ? null
+                        : '${city.name}, ${city.stateName}',
                     onBack: () => _handleBack(context),
-                    onHelp: _showHelp,
+                    onMore: () => _showGuideMoreSheet(
+                      context,
+                      plan: plan,
+                      city: city,
+                      controller: gpsController,
+                    ),
                   ),
                 ),
                 Expanded(
                   child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 1040),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: SingleChildScrollView(
-                              padding: EdgeInsets.fromLTRB(
-                                context.pageHorizontalPadding,
-                                18,
-                                context.pageHorizontalPadding,
-                                20,
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.fromLTRB(
+                          context.pageHorizontalPadding,
+                          18,
+                          context.pageHorizontalPadding,
+                          20,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (!hasConfirmedCity)
+                              _PreparationNeedsCityState(
+                                onOpenPlanResult: () {
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    AppRoutes.migrationPlanResult,
+                                  );
+                                },
+                              )
+                            else ...[
+                              _GuideContextBand(controller: gpsController),
+                              const SizedBox(height: 12),
+                              _GuideUnifiedProgressBar(
+                                controller: gpsController,
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _PreparationHero(
-                                    cityName: city?.name,
-                                    stateCode: city?.stateCode,
-                                    isOverview: true,
-                                    section: _PreparationSection.overview,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  if (!hasConfirmedCity)
-                                    _PreparationNeedsCityState(
-                                      onOpenPlanResult: () {
-                                        Navigator.pushReplacementNamed(
-                                          context,
-                                          AppRoutes.migrationPlanResult,
-                                        );
-                                      },
-                                    )
-                                  else ...[
-                                    _PlanProgressBar(
-                                      snapshot: progressSnapshot,
-                                      currentStep: 1,
+                              const SizedBox(height: 16),
+                              _GuideDominantActionCard(
+                                item: gpsController.currentItem,
+                                showCelebration: _showCelebration,
+                                showExpandedContent: _showExpandedContent,
+                                onPrimaryTap: (item) => _handleCurrentActionTap(
+                                  gpsController,
+                                  item,
+                                  plan,
+                                  city,
+                                ),
+                                onChecklistToggle: (itemId, subItemId) async {
+                                  await gpsController.toggleChecklistSubItem(
+                                    itemId,
+                                    subItemId,
+                                  );
+                                  setState(() {
+                                    _readinessCompletedIds = Set<String>.from(
+                                      gpsController.readinessCompletedIds,
+                                    );
+                                    _documentCompletedIds = Set<String>.from(
+                                      gpsController.documentCompletedIds,
+                                    );
+                                    _arrivalCompletedIds = Set<String>.from(
+                                      gpsController.arrivalCompletedIds,
+                                    );
+                                  });
+                                  final current = gpsController.currentItem;
+                                  _completedAtById = Map<String, String>.from(
+                                    gpsController.completedAtById,
+                                  );
+                                  final previous = actionItems.firstWhere(
+                                    (item) => item.id == itemId,
+                                    orElse: () => const GuideActionItem(
+                                      id: '',
+                                      title: '',
+                                      shortDescription: '',
+                                      type: GuideActionType.informative,
+                                      phase: GuidePhase.preparation,
+                                      orderIndex: -1,
+                                      isCompleted: false,
                                     ),
-                                    const SizedBox(height: 16),
-                                    _PreparationSectionRail(
-                                      selectedSection:
-                                          _PreparationSection.overview,
-                                      onSelected: (section) =>
-                                          _openSection(section, plan, city),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    _PreparationOverview(
-                                      snapshot: progressSnapshot,
-                                      onOpenSection: (section) =>
-                                          _openSection(section, plan, city),
-                                    ),
-                                  ],
-                                ],
+                                  );
+                                  if (previous.id.isNotEmpty &&
+                                      previous.id != current?.id &&
+                                      previous.hasChecklist) {
+                                    await _completeGuideItem(
+                                      gpsController,
+                                      previous.id,
+                                    );
+                                  }
+                                },
                               ),
-                            ),
-                          ),
-                        ],
+                              const SizedBox(height: 16),
+                              _GuideUpcomingSection(
+                                controller: gpsController,
+                                onSelectItem: (itemId) async {
+                                  await gpsController.jumpToItem(itemId);
+                                  if (!mounted) {
+                                    return;
+                                  }
+                                  setState(() {
+                                    _showExpandedContent = false;
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 18),
+                              _GuidePlanCompleteBar(
+                                totalItems: gpsController.totalItems,
+                                onTap: () => _showFullPlanSheet(
+                                  context,
+                                  controller: gpsController,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -382,14 +778,149 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
         citiesController: widget.citiesController,
         migrationQuestionnaireController: widget.controller,
       ),
-      floatingActionButton: hasConfirmedCity
-          ? FloatingActionButton.extended(
-              onPressed: () => _showToolsSheet(plan, city),
-              icon: const Icon(Icons.build_circle_outlined),
-              label: Text(l10n.migrationPlanCopilotToolsButton),
-            )
-          : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Future<void> _showGuideMoreSheet(
+    BuildContext context, {
+    required MigrationPlan plan,
+    required City? city,
+    required GuideGpsController controller,
+  }) {
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: FrostedPanel(
+              padding: const EdgeInsets.all(18),
+              borderRadius: BorderRadius.circular(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _GuideMenuAction(
+                    icon: Icons.list_alt_rounded,
+                    title: _localizedText(
+                      context,
+                      pt: 'Ver plano completo',
+                      es: 'Ver plan completo',
+                      en: 'View full plan',
+                    ),
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      _showFullPlanSheet(context, controller: controller);
+                    },
+                  ),
+                  _GuideMenuAction(
+                    icon: Icons.build_circle_outlined,
+                    title: _localizedText(
+                      context,
+                      pt: 'Ferramentas',
+                      es: 'Herramientas',
+                      en: 'Tools',
+                    ),
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      _showToolsSheet(plan, city);
+                    },
+                  ),
+                  _GuideMenuAction(
+                    icon: Icons.restart_alt_rounded,
+                    title: _localizedText(
+                      context,
+                      pt: 'Reiniciar plano',
+                      es: 'Reiniciar plan',
+                      en: 'Reset plan',
+                    ),
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      _handleManagePlan();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showFullPlanSheet(
+    BuildContext context, {
+    required GuideGpsController controller,
+  }) {
+    final groupedItems = <GuidePhase, List<GuideActionItem>>{};
+    for (final item in controller.items) {
+      groupedItems.putIfAbsent(item.phase, () => <GuideActionItem>[]).add(item);
+    }
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: FrostedPanel(
+              padding: const EdgeInsets.all(18),
+              borderRadius: BorderRadius.circular(28),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _localizedText(
+                              context,
+                              pt: 'Plano completo',
+                              es: 'Plan completo',
+                              en: 'Full plan',
+                            ),
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.of(sheetContext).pop(),
+                          icon: const Icon(Icons.close_rounded),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    for (final phase in GuidePhase.values) ...[
+                      _GuidePlanGroup(
+                        phaseLabel: _guidePhaseName(context, phase),
+                        items: groupedItems[phase] ?? const [],
+                        completedIds: controller.allCompletedIds,
+                        currentItemId: controller.currentItem?.id,
+                        isUnlocked: controller.isItemUnlocked,
+                        onTapItem: (item) async {
+                          Navigator.of(sheetContext).pop();
+                          await controller.jumpToItem(item.id);
+                          if (!mounted) {
+                            return;
+                          }
+                          setState(() {
+                            _showExpandedContent = false;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -401,7 +932,10 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   }
 
   Future<void> _handleManagePlan() async {
-    final choice = await showPlanResetDialog(context);
+    final choice = await showPlanResetDialog(
+      context,
+      currentCityName: widget.controller.generatedPlan?.recommendedCity?.name,
+    );
     if (!mounted || choice == null) {
       return;
     }
@@ -523,30 +1057,42 @@ class _PlanStageScreenState extends State<_PlanStageScreen> {
   }
 
   Future<void> _toggleReadinessItem(String id) async {
+    final wasCompleted = !_readinessCompletedIds.contains(id);
     setState(() {
       if (!_readinessCompletedIds.add(id)) {
         _readinessCompletedIds.remove(id);
       }
     });
     await _persist();
+    if (wasCompleted && mounted) {
+      _showCompletionFeedback(context, _readinessCompletedIds.length);
+    }
   }
 
   Future<void> _toggleDocumentItem(String id) async {
+    final wasCompleted = !_documentCompletedIds.contains(id);
     setState(() {
       if (!_documentCompletedIds.add(id)) {
         _documentCompletedIds.remove(id);
       }
     });
     await _persist();
+    if (wasCompleted && mounted) {
+      _showCompletionFeedback(context, _documentCompletedIds.length);
+    }
   }
 
   Future<void> _toggleArrivalItem(String id) async {
+    final wasCompleted = !_arrivalCompletedIds.contains(id);
     setState(() {
       if (!_arrivalCompletedIds.add(id)) {
         _arrivalCompletedIds.remove(id);
       }
     });
     await _persist();
+    if (wasCompleted && mounted) {
+      _showCompletionFeedback(context, _arrivalCompletedIds.length);
+    }
   }
 
   void _navigateToSection(_PreparationSection section) {
@@ -598,7 +1144,6 @@ class _PlanStageScreenState extends State<_PlanStageScreen> {
       plan: widget.plan,
       city: widget.city,
       exchangeRatesFuture: widget.exchangeRatesFuture,
-      onOpenRentalSearch: widget.onOpenRentalSearch,
       onManagePlan: widget.onManagePlan,
     );
   }
@@ -652,6 +1197,7 @@ class _PlanStageScreenState extends State<_PlanStageScreen> {
                               stateCode: widget.city?.stateCode,
                               isOverview: false,
                               section: widget.section,
+                              plan: widget.plan,
                             ),
                             const SizedBox(height: 16),
                             _PlanProgressBar(
@@ -710,11 +1256,8 @@ Future<void> _showPlanToolsSheet(
   required MigrationPlan plan,
   required City? city,
   required Future<CopilotExchangeRates?> exchangeRatesFuture,
-  required Future<void> Function(City city, RentalProvider provider)
-  onOpenRentalSearch,
   required Future<void> Function() onManagePlan,
 }) {
-  final l10n = context.l10n;
   final planResetCopy = PlanResetDialogCopy.fromContext(context);
 
   return showModalBottomSheet<void>(
@@ -737,7 +1280,12 @@ Future<void> _showPlanToolsSheet(
                     children: [
                       Expanded(
                         child: Text(
-                          l10n.migrationPlanCopilotToolsButton,
+                          _localizedText(
+                            context,
+                            pt: 'Ferramentas',
+                            es: 'Herramientas',
+                            en: 'Tools',
+                          ),
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                       ),
@@ -751,21 +1299,46 @@ Future<void> _showPlanToolsSheet(
                   _ToolMenuCard(
                     icon: Icons.account_balance_wallet_outlined,
                     tint: AppColors.success,
-                    title: l10n.migrationPlanPrepQuestionMoneyTitle,
-                    body: l10n.migrationPlanPrepQuestionMoneyBody,
+                    title: _localizedText(
+                      context,
+                      pt: 'Quanto voce vai gastar nos primeiros meses',
+                      es: 'Cuanto vas a gastar en los primeros meses',
+                      en: 'How much you will spend in the first months',
+                    ),
+                    body: _localizedText(
+                      context,
+                      pt: 'Veja quanto voce precisa para os primeiros 30, 60 e 90 dias.',
+                      es: 'Mira cuanto necesitas para los primeros 30, 60 y 90 dias.',
+                      en: 'See how much you need for the first 30, 60, and 90 days.',
+                    ),
                     onTap: () {
                       Navigator.of(sheetContext).pop();
                       _showPreparationSheet(
                         context,
-                        title: l10n.migrationPlanPrepQuestionMoneyTitle,
+                        title: _localizedText(
+                          context,
+                          pt: 'Quanto voce vai gastar nos primeiros meses',
+                          es: 'Cuanto vas a gastar en los primeros meses',
+                          en: 'How much you will spend in the first months',
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _ToolIntroCard(
                               icon: Icons.account_balance_wallet_outlined,
                               tint: AppColors.success,
-                              title: l10n.migrationPlanPrepQuestionMoneyTitle,
-                              body: l10n.migrationPlanPrepQuestionMoneyBody,
+                              title: _localizedText(
+                                context,
+                                pt: 'Quanto voce vai gastar nos primeiros meses',
+                                es: 'Cuanto vas a gastar en los primeros meses',
+                                en: 'How much you will spend in the first months',
+                              ),
+                              body: _localizedText(
+                                context,
+                                pt: 'Veja quanto voce precisa para os primeiros 30, 60 e 90 dias.',
+                                es: 'Mira cuanto necesitas para los primeros 30, 60 y 90 dias.',
+                                en: 'See how much you need for the first 30, 60, and 90 days.',
+                              ),
                             ),
                             const SizedBox(height: 12),
                             FutureBuilder<CopilotExchangeRates?>(
@@ -787,61 +1360,33 @@ Future<void> _showPlanToolsSheet(
                   _ToolMenuCard(
                     icon: Icons.flight_takeoff_rounded,
                     tint: AppColors.caution,
-                    title: l10n.migrationPlanPrepQuestionFlightsTitle,
-                    body: l10n.migrationPlanPrepQuestionFlightsBody,
+                    title: _localizedText(
+                      context,
+                      pt: 'Planejar meu voo para o Brasil',
+                      es: 'Planear mi vuelo a Brasil',
+                      en: 'Plan my flight to Brazil',
+                    ),
+                    body: _localizedText(
+                      context,
+                      pt: 'Escolha a data e veja opcoes de voo para ${city?.name ?? "sua cidade"}.',
+                      es: 'Elegi la fecha y mira opciones de vuelo para ${city?.name ?? "tu ciudad"}.',
+                      en: 'Choose a date and see flight options to ${city?.name ?? "your city"}.',
+                    ),
                     onTap: () {
                       Navigator.of(sheetContext).pop();
                       _showPreparationSheet(
                         context,
-                        title: l10n.migrationPlanPrepQuestionFlightsTitle,
+                        title: _localizedText(
+                          context,
+                          pt: 'Planejar meu voo para o Brasil',
+                          es: 'Planear mi vuelo a Brasil',
+                          en: 'Plan my flight to Brazil',
+                        ),
                         child: _FlightSearchPlannerCard(
                           destinationCityName: city?.name,
                         ),
                       );
                     },
-                  ),
-                  const SizedBox(height: 12),
-                  _ToolMenuCard(
-                    icon: Icons.home_work_outlined,
-                    tint: AppColors.secondary,
-                    title: l10n.migrationPlanPrepRentalSearchTitle,
-                    body: city == null
-                        ? l10n.migrationPlanCopilotCityRequiredHint
-                        : l10n.migrationPlanPrepRentalSearchBody(
-                            city.name,
-                            city.stateCode,
-                          ),
-                    enabled: city != null,
-                    onTap: city == null
-                        ? null
-                        : () {
-                            Navigator.of(sheetContext).pop();
-                            _showPreparationSheet(
-                              context,
-                              title: l10n.migrationPlanPrepRentalSearchTitle,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _ToolIntroCard(
-                                    icon: Icons.home_work_outlined,
-                                    tint: AppColors.secondary,
-                                    title:
-                                        l10n.migrationPlanPrepRentalSearchTitle,
-                                    body: l10n
-                                        .migrationPlanPrepRentalSearchBody(
-                                          city.name,
-                                          city.stateCode,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _RentalSearchCard(
-                                    city: city,
-                                    onOpenRentalSearch: onOpenRentalSearch,
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
                   ),
                   const SizedBox(height: 12),
                   _ToolMenuCard(
@@ -917,16 +1462,17 @@ class _PreparationHero extends StatelessWidget {
     required this.stateCode,
     required this.isOverview,
     required this.section,
+    required this.plan,
   });
 
   final String? cityName;
   final String? stateCode;
   final bool isOverview;
   final _PreparationSection section;
+  final MigrationPlan plan;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final sectionLabel = _sectionLabel(context, section);
 
     return FrostedPanel(
@@ -945,44 +1491,43 @@ class _PreparationHero extends StatelessWidget {
             spacing: 10,
             runSpacing: 10,
             children: [
-              _HeroPill(label: l10n.migrationPlanCopilotTitle),
+              _HeroPill(
+                label: _localizedText(
+                  context,
+                  pt: 'Guia de mudanca',
+                  es: 'Guia de mudanza',
+                  en: 'Moving guide',
+                ),
+              ),
               if (cityName != null && stateCode != null)
                 _HeroPill(label: '$cityName ($stateCode)'),
-              _HeroPill(
-                label: isOverview
-                    ? l10n.migrationPlanPrepTabOverview
-                    : sectionLabel,
-              ),
+              _HeroPill(label: sectionLabel),
             ],
           ),
           const SizedBox(height: 14),
           Text(
-            isOverview
-                ? l10n.migrationPlanPrepHeroTitle
-                : _sectionTitle(context, section),
+            _localizedText(
+              context,
+              pt: 'Etapa ${section.index + 1} de 5 — $sectionLabel',
+              es: 'Etapa ${section.index + 1} de 5 — $sectionLabel',
+              en: 'Step ${section.index + 1} of 5 — $sectionLabel',
+            ),
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(color: Colors.white),
           ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              _PrepHeroStat(
-                label: l10n.migrationPlanCopilotTitle,
-                value: isOverview
-                    ? l10n.migrationPlanPrepTabOverview
-                    : sectionLabel,
-                icon: Icons.flag_rounded,
-              ),
-              if (cityName != null)
-                _PrepHeroStat(
-                  label: l10n.migrationPlanDecisionLabel,
-                  value: cityName!,
-                  icon: Icons.location_city_rounded,
-                ),
-            ],
+          const SizedBox(height: 10),
+          Text(
+            _localizedText(
+              context,
+              pt: 'Voce esta em ${cityName ?? "sua cidade"} · ${_goalLabel(context, plan.goal)}',
+              es: 'Estas en ${cityName ?? "tu ciudad"} · ${_goalLabel(context, plan.goal)}',
+              en: 'You are in ${cityName ?? "your city"} · ${_goalLabel(context, plan.goal)}',
+            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withValues(alpha: 0.82),
+              height: 1.4,
+            ),
           ),
         ],
       ),
@@ -990,75 +1535,7 @@ class _PreparationHero extends StatelessWidget {
   }
 
   String _sectionLabel(BuildContext context, _PreparationSection section) {
-    final l10n = context.l10n;
-    return switch (section) {
-      _PreparationSection.overview => l10n.migrationPlanPrepTabOverview,
-      _PreparationSection.documents => l10n.migrationPlanPrepTabDocuments,
-      _PreparationSection.housing => l10n.migrationPlanPrepTabHousing,
-      _PreparationSection.work => l10n.migrationPlanPrepTabWork,
-      _PreparationSection.arrival => l10n.migrationPlanPrepTabArrival,
-    };
-  }
-
-  String _sectionTitle(BuildContext context, _PreparationSection section) {
-    final l10n = context.l10n;
-    return switch (section) {
-      _PreparationSection.overview => l10n.migrationPlanPrepHeroTitle,
-      _PreparationSection.documents => l10n.migrationPlanPrepDocumentsTitle,
-      _PreparationSection.housing => l10n.migrationPlanPrepHousingTitle,
-      _PreparationSection.work => l10n.migrationPlanPrepWorkTitle,
-      _PreparationSection.arrival => l10n.migrationPlanPrepArrivalTitle,
-    };
-  }
-}
-
-class _PrepHeroStat extends StatelessWidget {
-  const _PrepHeroStat({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-
-  final String label;
-  final String value;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: Colors.white),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.74),
-                ),
-              ),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+    return _prepSectionLabel(context, section);
   }
 }
 
@@ -1133,14 +1610,7 @@ class _PreparationSectionRail extends StatelessWidget {
   }
 
   String _label(BuildContext context, _PreparationSection section) {
-    final l10n = context.l10n;
-    return switch (section) {
-      _PreparationSection.overview => l10n.migrationPlanPrepTabOverview,
-      _PreparationSection.documents => l10n.migrationPlanPrepTabDocuments,
-      _PreparationSection.housing => l10n.migrationPlanPrepTabHousing,
-      _PreparationSection.work => l10n.migrationPlanPrepTabWork,
-      _PreparationSection.arrival => l10n.migrationPlanPrepTabArrival,
-    };
+    return _prepSectionLabel(context, section);
   }
 
   IconData _icon(_PreparationSection section) {
@@ -1274,6 +1744,17 @@ _PlanProgressSnapshot _buildPlanProgressSnapshot(
     l10n: l10n,
     plan: plan,
   );
+  final adaptedDocumentItems = DocumentChecklistAdapter.getItems(
+    l10n: l10n,
+    originCountry: plan.originCountry,
+    destinationCountry: plan.destinationCountry,
+    goal: plan.goal,
+    travelGroup: plan.travelGroup,
+    fallbackChecklist: documentChecklist,
+  );
+  final documentVisibleIds = adaptedDocumentItems
+      .map((item) => item.id)
+      .toSet();
   final arrivalChecklist = ArrivalExecutionBuilder.build(
     l10n: l10n,
     plan: plan,
@@ -1291,8 +1772,10 @@ _PlanProgressSnapshot _buildPlanProgressSnapshot(
       title: l10n.migrationPlanCopilotStepDocumentsTitle,
       body: l10n.migrationPlanCopilotStepDocumentsBody,
       section: _PreparationSection.documents,
-      totalItems: documentChecklist.items.length,
-      completedItems: documentCompletedIds.length,
+      totalItems: adaptedDocumentItems.length,
+      completedItems: documentCompletedIds
+          .where(documentVisibleIds.contains)
+          .length,
     ),
     _PlanStageState(
       title: l10n.migrationPlanCopilotStepArrivalTitle,
@@ -1369,27 +1852,35 @@ class _PlanProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
     return FrostedPanel(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.migrationPlanCopilotProgressHeader(
-              currentStep,
-              5,
-              snapshot.percent,
+            _localizedText(
+              context,
+              pt: 'Etapa $currentStep de 5 — ${_prepSectionLabel(context, _sectionForStep(currentStep))}',
+              es: 'Etapa $currentStep de 5 — ${_prepSectionLabel(context, _sectionForStep(currentStep))}',
+              en: 'Step $currentStep of 5 — ${_prepSectionLabel(context, _sectionForStep(currentStep))}',
             ),
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 6),
           Text(
-            l10n.migrationPlanCopilotProgressValue(
-              snapshot.completedItems,
-              snapshot.totalItems,
-            ),
+            snapshot.completedItems == 0
+                ? _localizedText(
+                    context,
+                    pt: 'Voce ainda nao marcou nenhuma etapa — comece pela mais importante',
+                    es: 'Todavia no marcaste ninguna etapa — empeza por la mas importante',
+                    en: 'You have not completed any step yet — start with the most important one',
+                  )
+                : _localizedText(
+                    context,
+                    pt: '${snapshot.completedItems} de ${snapshot.totalItems} etapas concluidas · ${snapshot.percent}% do plano',
+                    es: '${snapshot.completedItems} de ${snapshot.totalItems} etapas completadas · ${snapshot.percent}% del plan',
+                    en: '${snapshot.completedItems} of ${snapshot.totalItems} steps completed · ${snapshot.percent}% of the plan',
+                  ),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSoftFor(context),
             ),
@@ -1482,6 +1973,7 @@ class _TimelineStage extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _PreparationOverview extends StatelessWidget {
   const _PreparationOverview({
     required this.snapshot,
@@ -1493,18 +1985,31 @@ class _PreparationOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         PlanNextActionCard(
-          eyebrow: l10n.migrationPlanCopilotHomeTitle,
-          title: l10n.migrationPlanCopilotNextActionsTitle,
-          body: l10n.migrationPlanCopilotNextActionsBody,
-          actionLabel: l10n.migrationPlanCopilotRecommendedOpen,
+          eyebrow: _localizedText(
+            context,
+            pt: 'Proximo passo',
+            es: 'Proximo paso',
+            en: 'Next step',
+          ),
+          title: _localizedText(
+            context,
+            pt: 'Faca isso agora',
+            es: 'Hace esto ahora',
+            en: 'Do this now',
+          ),
+          body: _localizedText(
+            context,
+            pt: '${_prepSectionLabel(context, snapshot.nextStage.section)} · Passo ${snapshot.nextStage.completedItems + 1} de ${snapshot.nextStage.totalItems}',
+            es: '${_prepSectionLabel(context, snapshot.nextStage.section)} · Paso ${snapshot.nextStage.completedItems + 1} de ${snapshot.nextStage.totalItems}',
+            en: '${_prepSectionLabel(context, snapshot.nextStage.section)} · Step ${snapshot.nextStage.completedItems + 1} of ${snapshot.nextStage.totalItems}',
+          ),
+          actionLabel: _openSectionCta(context, snapshot.nextStage.section),
           onTap: () => onOpenSection(snapshot.nextStage.section),
-          progressLabel: l10n.migrationPlanCopilotStageCountLabel(4),
+          progressLabel: snapshot.nextStage.title,
           icon: Icons.auto_awesome_rounded,
         ),
         const SizedBox(height: 16),
@@ -1549,9 +2054,11 @@ class _MacroStageCard extends StatelessWidget {
       subtitle: _statusLabel(context, stage),
       metrics: [
         CompareCardMetric(
-          label: context.l10n.migrationPlanCopilotProgressValue(
-            stage.completedItems,
-            stage.totalItems,
+          label: _localizedText(
+            context,
+            pt: '${stage.completedItems} de ${stage.totalItems} etapas',
+            es: '${stage.completedItems} de ${stage.totalItems} etapas',
+            en: '${stage.completedItems} of ${stage.totalItems} steps',
           ),
           value: '${stage.percent}%',
           icon: Icons.timeline_rounded,
@@ -1563,7 +2070,7 @@ class _MacroStageCard extends StatelessWidget {
         ),
       ],
       onTap: onTap,
-      actionLabel: context.l10n.migrationPlanCopilotRecommendedOpen,
+      actionLabel: _openSectionCta(context, stage.section),
     );
   }
 
@@ -1592,18 +2099,738 @@ class _PreparationNeedsCityState extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InsightCard(
-            title: context.l10n.migrationPlanPrepChooseCityTitle,
-            body: context.l10n.migrationPlanPrepChooseCityBody,
+            title: _localizedText(
+              context,
+              pt: 'Escolha sua cidade para continuar',
+              es: 'Elegi tu ciudad para continuar',
+              en: 'Choose your city to continue',
+            ),
+            body: _localizedText(
+              context,
+              pt: 'Voce precisa escolher a cidade do seu plano antes de acessar o guia completo. Volte ao resultado e confirme a cidade recomendada.',
+              es: 'Necesitas elegir la ciudad de tu plan antes de entrar a la guia completa. Volve al resultado y confirma la ciudad recomendada.',
+              en: 'You need to choose your plan city before accessing the full guide. Go back to the result and confirm the recommended city.',
+            ),
             icon: Icons.location_city_outlined,
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: onOpenPlanResult,
             icon: const Icon(Icons.location_city_outlined),
-            label: Text(context.l10n.migrationPlanPrepChooseCityAction),
+            label: Text(
+              _localizedText(
+                context,
+                pt: 'Ver cidades recomendadas ->',
+                es: 'Ver ciudades recomendadas ->',
+                en: 'See recommended cities ->',
+              ),
+            ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _GuideGpsHeader extends StatelessWidget {
+  const _GuideGpsHeader({
+    required this.cityLabel,
+    required this.onBack,
+    required this.onMore,
+  });
+
+  final String? cityLabel;
+  final VoidCallback onBack;
+  final VoidCallback onMore;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            IconButton(
+              onPressed: onBack,
+              icon: const Icon(Icons.arrow_back_rounded),
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  Text(
+                    _localizedText(
+                      context,
+                      pt: 'Guia de mudanca',
+                      es: 'Guia de mudanza',
+                      en: 'Moving guide',
+                    ),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    cityLabel ?? '',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              onPressed: onMore,
+              icon: const Icon(Icons.more_horiz_rounded),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _GuideContextBand extends StatelessWidget {
+  const _GuideContextBand({required this.controller});
+
+  final GuideGpsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final phase = controller.currentPhase;
+    final phaseIndex = GuidePhase.values.indexOf(phase) + 1;
+    return FrostedPanel(
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _localizedText(context, pt: 'Fase', es: 'Fase', en: 'Phase'),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${_guidePhaseName(context, phase)} · ${_localizedText(context, pt: 'etapa', es: 'etapa', en: 'step')} $phaseIndex ${_localizedText(context, pt: 'de', es: 'de', en: 'of')} ${GuidePhase.values.length}',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: AppColors.success.withValues(alpha: 0.22),
+              ),
+            ),
+            child: Text(
+              '${controller.completedCount} ${_localizedText(context, pt: 'de', es: 'de', en: 'of')} ${controller.totalItems} ${_localizedText(context, pt: 'feitas', es: 'hechas', en: 'done')}',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: AppColors.success,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GuideUnifiedProgressBar extends StatelessWidget {
+  const _GuideUnifiedProgressBar({required this.controller});
+
+  final GuideGpsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return FrostedPanel(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0, end: controller.progress),
+            duration: const Duration(milliseconds: 400),
+            builder: (context, value, _) {
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  value: value.clamp(0, 1),
+                  minHeight: 6,
+                  backgroundColor: AppColors.surfaceMutedFor(context),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Text(
+                '${controller.progressPercent}% ${_localizedText(context, pt: 'concluido', es: 'completado', en: 'completed')}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${controller.remainingCount} ${_localizedText(context, pt: 'restantes', es: 'restantes', en: 'remaining')}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GuideDominantActionCard extends StatelessWidget {
+  const _GuideDominantActionCard({
+    required this.item,
+    required this.showCelebration,
+    required this.showExpandedContent,
+    required this.onPrimaryTap,
+    required this.onChecklistToggle,
+  });
+
+  final GuideActionItem? item;
+  final bool showCelebration;
+  final bool showExpandedContent;
+  final Future<void> Function(GuideActionItem item) onPrimaryTap;
+  final Future<void> Function(String itemId, String subItemId)
+  onChecklistToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    if (item == null) {
+      return FrostedPanel(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _localizedText(
+                context,
+                pt: 'Plano concluído!',
+                es: '¡Plan completado!',
+                en: 'Plan completed!',
+              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _localizedText(
+                context,
+                pt: 'Você completou todas as etapas do seu guia.',
+                es: 'Completaste todos los pasos de tu guía.',
+                en: 'You completed every step in your guide.',
+              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSoftFor(context),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (child, animation) {
+        final offsetAnimation = Tween<Offset>(
+          begin: const Offset(0, 0.08),
+          end: Offset.zero,
+        ).animate(animation);
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(position: offsetAnimation, child: child),
+        );
+      },
+      child: FrostedPanel(
+        key: ValueKey<String>('guide-item-${item!.id}-$showCelebration'),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _GuideActionTag(item: item!),
+            const SizedBox(height: 12),
+            Text(
+              item!.title,
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              item!.shortDescription,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.45,
+              ),
+            ),
+            if (item!.badgeLabel != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: AppColors.warning.withValues(alpha: 0.22),
+                  ),
+                ),
+                child: Text(
+                  item!.badgeLabel!,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: AppColors.warning,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+            if (showExpandedContent &&
+                item!.type == GuideActionType.informative &&
+                item!.fullContent != null) ...[
+              const SizedBox(height: 14),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMutedFor(context),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.borderFor(context)),
+                ),
+                padding: const EdgeInsets.all(14),
+                child: SizedBox(
+                  height: 112,
+                  child: SingleChildScrollView(
+                    child: Text(
+                      item!.fullContent!,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(height: 1.5),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if (item!.hasChecklist) ...[
+              const SizedBox(height: 14),
+              for (final subItem in item!.checklistItems!) ...[
+                CheckboxListTile(
+                  value: subItem.isCompleted,
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(subItem.title),
+                  onChanged: (_) => onChecklistToggle(item!.id, subItem.id),
+                ),
+              ],
+            ],
+            if (showCelebration) ...[
+              const SizedBox(height: 14),
+              TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 200),
+                builder: (context, value, child) => Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, (1 - value) * 8),
+                    child: child,
+                  ),
+                ),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AppColors.success.withValues(alpha: 0.22),
+                    ),
+                  ),
+                  child: Text(
+                    _localizedText(
+                      context,
+                      pt: 'Otimo! Proxima acao desbloqueada.',
+                      es: 'Genial. Se desbloqueo la siguiente accion.',
+                      en: 'Great. The next action is unlocked.',
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.success,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if (!item!.hasChecklist) ...[
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => onPrimaryTap(item!),
+                  child: Text(
+                    _guideButtonLabel(context, item!, showExpandedContent),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GuideActionTag extends StatelessWidget {
+  const _GuideActionTag({required this.item});
+
+  final GuideActionItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = switch (item.type) {
+      GuideActionType.external => AppColors.primary,
+      GuideActionType.tool => AppColors.warning,
+      GuideActionType.checklist => AppColors.success,
+      GuideActionType.informative => AppColors.primary,
+    };
+
+    final label = switch (item.type) {
+      GuideActionType.informative => _localizedText(
+        context,
+        pt: 'PROXIMA ACAO',
+        es: 'PROXIMA ACCION',
+        en: 'NEXT ACTION',
+      ),
+      GuideActionType.external => _localizedText(
+        context,
+        pt: 'ACAO EXTERNA',
+        es: 'ACCION EXTERNA',
+        en: 'EXTERNAL ACTION',
+      ),
+      GuideActionType.tool => _localizedText(
+        context,
+        pt: 'USE UMA FERRAMENTA',
+        es: 'USA UNA HERRAMIENTA',
+        en: 'USE A TOOL',
+      ),
+      GuideActionType.checklist => _localizedText(
+        context,
+        pt: 'PARA CONCLUIR',
+        es: 'PARA COMPLETAR',
+        en: 'TO COMPLETE',
+      ),
+    };
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GuideUpcomingSection extends StatelessWidget {
+  const _GuideUpcomingSection({
+    required this.controller,
+    required this.onSelectItem,
+  });
+
+  final GuideGpsController controller;
+  final Future<void> Function(String itemId) onSelectItem;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = controller.upcomingItems;
+    if (items.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _localizedText(
+            context,
+            pt: 'A SEGUIR',
+            es: 'A CONTINUACION',
+            en: 'UP NEXT',
+          ),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: AppColors.textSoftFor(context),
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.6,
+          ),
+        ),
+        const SizedBox(height: 10),
+        for (var index = 0; index < items.length; index++) ...[
+          _UpcomingGuideItemTile(
+            indexLabel: '${index + 2}',
+            item: items[index],
+            unlocked: controller.isItemUnlocked(items[index]),
+            onTap: controller.isItemUnlocked(items[index])
+                ? () => onSelectItem(items[index].id)
+                : null,
+          ),
+          if (index != items.length - 1) const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+}
+
+class _UpcomingGuideItemTile extends StatelessWidget {
+  const _UpcomingGuideItemTile({
+    required this.indexLabel,
+    required this.item,
+    required this.unlocked,
+    required this.onTap,
+  });
+
+  final String indexLabel;
+  final GuideActionItem item;
+  final bool unlocked;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: unlocked ? 1 : 0.58,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceMutedFor(context),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: unlocked
+                    ? AppColors.primary.withValues(alpha: 0.28)
+                    : AppColors.borderFor(context),
+              ),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  indexLabel,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    item.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  unlocked
+                      ? Icons.arrow_forward_rounded
+                      : Icons.lock_outline_rounded,
+                  size: 18,
+                  color: unlocked
+                      ? AppColors.primary
+                      : AppColors.textSoftFor(context),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GuidePlanCompleteBar extends StatelessWidget {
+  const _GuidePlanCompleteBar({required this.totalItems, required this.onTap});
+
+  final int totalItems;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceMutedFor(context),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderFor(context)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _localizedText(
+                    context,
+                    pt: 'Ver plano completo',
+                    es: 'Ver plan completo',
+                    en: 'View full plan',
+                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '$totalItems ${_localizedText(context, pt: 'etapas', es: 'etapas', en: 'steps')}',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GuideMenuAction extends StatelessWidget {
+  const _GuideMenuAction({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: onTap,
+    );
+  }
+}
+
+class _GuidePlanGroup extends StatelessWidget {
+  const _GuidePlanGroup({
+    required this.phaseLabel,
+    required this.items,
+    required this.completedIds,
+    required this.currentItemId,
+    required this.isUnlocked,
+    required this.onTapItem,
+  });
+
+  final String phaseLabel;
+  final List<GuideActionItem> items;
+  final Set<String> completedIds;
+  final String? currentItemId;
+  final bool Function(GuideActionItem item) isUnlocked;
+  final ValueChanged<GuideActionItem> onTapItem;
+
+  @override
+  Widget build(BuildContext context) {
+    final completedCount = items
+        .where((item) => completedIds.contains(item.id))
+        .length;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$phaseLabel · $completedCount ${_localizedText(context, pt: 'de', es: 'de', en: 'of')} ${items.length}',
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 8),
+        for (final item in items) ...[
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(
+              completedIds.contains(item.id)
+                  ? Icons.check_circle_rounded
+                  : currentItemId == item.id
+                  ? Icons.arrow_forward_rounded
+                  : isUnlocked(item)
+                  ? Icons.arrow_forward_rounded
+                  : Icons.lock_outline_rounded,
+              color: completedIds.contains(item.id)
+                  ? AppColors.success
+                  : currentItemId == item.id
+                  ? AppColors.primary
+                  : isUnlocked(item)
+                  ? AppColors.primary
+                  : AppColors.textSoftFor(context),
+            ),
+            title: Text(
+              item.title,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                decoration: completedIds.contains(item.id)
+                    ? TextDecoration.lineThrough
+                    : null,
+              ),
+            ),
+            subtitle: Text(
+              item.badgeLabel ?? item.type.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            onTap: completedIds.contains(item.id)
+                ? null
+                : !isUnlocked(item)
+                ? null
+                : () => onTapItem(item),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -1672,11 +2899,13 @@ class _PreparationSectionContent extends StatelessWidget {
       case _PreparationSection.housing:
         return _HousingGuideSection(
           plan: plan,
-          cityName: city?.name,
           city: city,
-          citiesController: citiesController,
-          migrationQuestionnaireController: migrationQuestionnaireController,
-          onOpenTopic: onOpenTopic,
+          onOpenRentalSearch: onOpenRentalSearch,
+          onHelp: () => showContextualHelpGuide(
+            context,
+            preferenceKey: _MigrationPlanCopilotPageState._helpPreferenceKey,
+            content: _buildCopilotHelpContent(context),
+          ),
           onOpenExternalPreparationLink: onOpenExternalPreparationLink,
         );
       case _PreparationSection.work:
@@ -1744,12 +2973,22 @@ class _DocumentsGuideSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                l10n.migrationPlanPrepDocumentsGuideTitle,
+                _localizedText(
+                  context,
+                  pt: 'Seus documentos para o Brasil',
+                  es: 'Tus documentos para Brasil',
+                  en: 'Your documents for Brazil',
+                ),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 10),
               Text(
-                l10n.migrationPlanPrepDocumentsGuideBody,
+                _localizedText(
+                  context,
+                  pt: 'Argentinos nao precisam de passaporte nem visto para entrar no Brasil. Veja o que voce realmente precisa.',
+                  es: 'Los argentinos no necesitan pasaporte ni visa para entrar a Brasil. Mira lo que realmente hace falta.',
+                  en: 'Argentine citizens do not need a passport or visa to enter Brazil. See what you actually need.',
+                ),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.textSoftFor(context),
                   height: 1.45,
@@ -1780,16 +3019,36 @@ class _DocumentsGuideSection extends StatelessWidget {
         _InfoGuideCard(
           icon: Icons.badge_outlined,
           tint: AppColors.primary,
-          title: l10n.migrationPlanPrepDocumentsCpfTitle,
-          body: l10n.migrationPlanPrepDocumentsCpfBody,
+          title: _localizedText(
+            context,
+            pt: 'CPF — seu numero no Brasil',
+            es: 'CPF — tu numero en Brasil',
+            en: 'CPF — your number in Brazil',
+          ),
+          body: _localizedText(
+            context,
+            pt: 'O CPF e como o CUIL argentino — voce vai precisar dele para abrir conta, alugar e trabalhar. Gratuito. Pode fazer antes de viajar no consulado.',
+            es: 'El CPF es como el CUIL argentino: lo vas a necesitar para abrir cuenta, alquilar y trabajar. Es gratis y podes hacerlo antes de viajar en el consulado.',
+            en: 'The CPF is like the Argentine CUIL. You will need it to open a bank account, rent, and work. It is free and can be done before travel at the consulate.',
+          ),
           onTap: () => onOpenTopic(DocumentationGuideSection.documents),
         ),
         const SizedBox(height: 12),
         _InfoGuideCard(
           icon: Icons.perm_identity_rounded,
           tint: AppColors.secondary,
-          title: l10n.migrationPlanPrepDocumentsResidenceTitle,
-          body: l10n.migrationPlanPrepDocumentsResidenceBody,
+          title: _localizedText(
+            context,
+            pt: 'Residencia pelo Mercosul — mais simples do que parece',
+            es: 'Residencia Mercosur — mas simple de lo que parece',
+            en: 'Mercosur residence — simpler than it looks',
+          ),
+          body: _localizedText(
+            context,
+            pt: 'Argentinos tem direito a residencia permanente no Brasil pelo Mercosul — sem apostila, sem traducao, sem provar renda. Feito na Policia Federal depois de chegar.',
+            es: 'Los argentinos tienen derecho a residencia permanente en Brasil por Mercosur, sin apostilla, sin traduccion ni prueba de ingresos. Se hace en la Policia Federal despues de llegar.',
+            en: 'Argentine citizens can get permanent residence in Brazil through Mercosur without apostilles, translations, or proof of income. It is done after arrival at the Federal Police.',
+          ),
           onTap: () => onOpenTopic(DocumentationGuideSection.documents),
         ),
         const SizedBox(height: 12),
@@ -1826,20 +3085,17 @@ class _DocumentsGuideSection extends StatelessWidget {
 class _HousingGuideSection extends StatelessWidget {
   const _HousingGuideSection({
     required this.plan,
-    required this.cityName,
     required this.city,
-    required this.citiesController,
-    required this.migrationQuestionnaireController,
-    required this.onOpenTopic,
+    required this.onOpenRentalSearch,
+    required this.onHelp,
     required this.onOpenExternalPreparationLink,
   });
 
   final MigrationPlan plan;
-  final String? cityName;
   final City? city;
-  final CitiesController citiesController;
-  final MigrationQuestionnaireController migrationQuestionnaireController;
-  final ValueChanged<DocumentationGuideSection> onOpenTopic;
+  final Future<void> Function(City city, RentalProvider provider)
+  onOpenRentalSearch;
+  final Future<void> Function() onHelp;
   final Future<void> Function({required String title, required Uri uri})
   onOpenExternalPreparationLink;
 
@@ -1856,12 +3112,22 @@ class _HousingGuideSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                l10n.migrationPlanPrepHousingGuideTitle,
+                _localizedText(
+                  context,
+                  pt: 'Como encontrar onde morar em ${city?.name ?? "sua cidade"}',
+                  es: 'Como encontrar donde vivir en ${city?.name ?? "tu ciudad"}',
+                  en: 'How to find a place to live in ${city?.name ?? "your city"}',
+                ),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 10),
               Text(
-                l10n.migrationPlanPrepHousingGuideBody,
+                _localizedText(
+                  context,
+                  pt: 'Para comecar com seguranca, escolha primeiro entre moradia temporaria e aluguel fixo.',
+                  es: 'Para empezar con seguridad, elegi primero entre vivienda temporal y alquiler fijo.',
+                  en: 'To start safely, first choose between temporary housing and a long-term rental.',
+                ),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.textSoftFor(context),
                   height: 1.45,
@@ -1876,93 +3142,134 @@ class _HousingGuideSection extends StatelessWidget {
             icon: Icons.home_work_outlined,
             text: l10n.migrationPlanCopilotCityRequiredHint,
           ),
-          const SizedBox(height: 12),
+        ] else ...[
+          const SizedBox(height: 14),
+          _HousingFlowEntryCard(
+            city: city!,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => HousingSelectionScreen(
+                    city: city!,
+                    onOpenRentalSearch: onOpenRentalSearch,
+                    onHelp: onHelp,
+                  ),
+                ),
+              );
+            },
+          ),
         ],
-        _InfoGuideCard(
-          icon: Icons.key_outlined,
-          tint: AppColors.primary,
-          title: l10n.documentationHousingArrivalSectionTitle,
-          body: l10n.migrationPlanPrepQuestionRentBody,
-          onTap: () => onOpenTopic(DocumentationGuideSection.housing),
-        ),
-        const SizedBox(height: 12),
-        _InfoGuideCard(
-          icon: Icons.price_check_outlined,
-          tint: AppColors.secondary,
-          title: l10n.documentationPathCostsTitle,
-          body: l10n.housingEntryDisclaimer,
-          onTap: () => onOpenTopic(DocumentationGuideSection.costs),
-        ),
         const SizedBox(height: 14),
         _ExternalToolCard(
           icon: Icons.warning_amber_rounded,
           tint: AppColors.caution,
-          title: l10n.migrationPlanPrepScamsTitle,
-          body: l10n.migrationPlanPrepScamsBody,
+          title: _localizedText(
+            context,
+            pt: '⚠️ Cuidado com golpes de aluguel — como se proteger',
+            es: '⚠️ Cuidado con estafas de alquiler — como protegerte',
+            en: '⚠️ Rental scams — how to protect yourself',
+          ),
+          body: _localizedText(
+            context,
+            pt: 'Sempre visite o imovel pessoalmente antes de pagar qualquer valor. Nunca transfira dinheiro por Pix antes de assinar contrato e receber as chaves.',
+            es: 'Visita siempre la propiedad en persona antes de pagar cualquier monto. Nunca transfieras dinero antes de firmar el contrato y recibir las llaves.',
+            en: 'Always visit the property in person before paying anything. Never transfer money before signing the contract and receiving the keys.',
+          ),
           uri: PreparationResourceLinks.rentalScamAlert,
           onOpenExternalPreparationLink: onOpenExternalPreparationLink,
         ),
-        if (city != null) ...[
-          const SizedBox(height: 14),
-          FrostedPanel(
-            padding: const EdgeInsets.all(18),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 42,
-                  width: 42,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Icon(
-                    Icons.location_city_outlined,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.migrationPlanHousingCompareTitle,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        l10n.migrationPlanHousingCompareBody(city!.name),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSoftFor(context),
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => CityComparisonScreen(
-                                initialCities: [city!],
-                                citiesController: citiesController,
-                                migrationQuestionnaireController:
-                                    migrationQuestionnaireController,
-                              ),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.compare_arrows_rounded),
-                        label: Text(l10n.migrationPlanHousingCompareAction),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ],
+    );
+  }
+}
+
+class _HousingFlowEntryCard extends StatelessWidget {
+  const _HousingFlowEntryCard({required this.city, required this.onTap});
+
+  final City city;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(24),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              AppColors.heroStart,
+              AppColors.heroMiddle,
+              AppColors.heroEnd,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0x1AFFFFFF)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(Icons.home_work_outlined, color: Colors.white),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _localizedText(
+                      context,
+                      pt: 'Como funciona alugar em ${city.name} sendo estrangeiro',
+                      es: 'Como funciona alquilar en ${city.name} siendo extranjero',
+                      en: 'How renting works in ${city.name} as a foreigner',
+                    ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _localizedText(
+                      context,
+                      pt: 'Para chegar com mais seguranca, escolha entre uma base temporaria e um aluguel definitivo depois de conhecer melhor a cidade.',
+                      es: 'Para llegar con mas seguridad, elegi entre una base temporal y un alquiler definitivo despues de conocer mejor la ciudad.',
+                      en: 'To arrive more safely, choose between a temporary base and a long-term rental after getting to know the city.',
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.82),
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: onTap,
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                    label: Text(
+                      _localizedText(
+                        context,
+                        pt: 'Ver opcoes de moradia',
+                        es: 'Ver opciones de vivienda',
+                        en: 'See housing options',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -2120,12 +3427,22 @@ class _WorkGuideSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                l10n.migrationPlanPrepWorkGuideTitle,
+                _localizedText(
+                  context,
+                  pt: 'Trabalho e vida pratica em ${cityData?.name ?? "sua cidade"}',
+                  es: 'Trabajo y vida practica en ${cityData?.name ?? "tu ciudad"}',
+                  en: 'Work and daily life in ${cityData?.name ?? "your city"}',
+                ),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 10),
               Text(
-                l10n.migrationPlanPrepWorkGuideBody,
+                _localizedText(
+                  context,
+                  pt: 'Para construir renda e rotina no Brasil, veja onde buscar vagas, saude, dinheiro e os primeiros ajustes da vida pratica.',
+                  es: 'Para construir ingresos y rutina en Brasil, mira donde buscar trabajo, salud, dinero y los primeros ajustes de la vida diaria.',
+                  en: 'To build income and daily structure in Brazil, see where to search for jobs, health, money, and early practical steps.',
+                ),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.textSoftFor(context),
                   height: 1.45,
@@ -2147,7 +3464,12 @@ class _WorkGuideSection extends StatelessWidget {
           _ExternalToolCard(
             icon: Icons.business_center_outlined,
             tint: AppColors.caution,
-            title: l10n.migrationPlanPrepOfficialJobsTitle,
+            title: _localizedText(
+              context,
+              pt: 'Buscar vagas em ${cityData?.name ?? "sua cidade"}',
+              es: 'Buscar vagas en ${cityData?.name ?? "tu ciudad"}',
+              en: 'Search jobs in ${cityData?.name ?? "your city"}',
+            ),
             body: cityData == null
                 ? l10n.migrationPlanPrepOfficialJobsBodyNoCity
                 : l10n.migrationPlanPrepOfficialJobsBodyWithCity(
@@ -2197,7 +3519,12 @@ class _WorkGuideSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n.migrationPlanPrepWorkSignalsTitle,
+                  _localizedText(
+                    context,
+                    pt: 'Mercado de trabalho em ${cityData.name}: ${_jobMarketLabel(context, cityData.jobMarketScore / 100)}',
+                    es: 'Mercado laboral en ${cityData.name}: ${_jobMarketLabel(context, cityData.jobMarketScore / 100)}',
+                    en: 'Job market in ${cityData.name}: ${_jobMarketLabel(context, cityData.jobMarketScore / 100)}',
+                  ),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
@@ -2249,7 +3576,12 @@ class _WorkGuideSection extends StatelessWidget {
         _InfoGuideCard(
           icon: Icons.health_and_safety_outlined,
           tint: AppColors.primary,
-          title: l10n.documentationPathHealthTitle,
+          title: _localizedText(
+            context,
+            pt: 'Saude no Brasil: SUS, plano e o que voce precisa saber',
+            es: 'Salud en Brasil: SUS, prepaga y lo que necesitas saber',
+            en: 'Healthcare in Brazil: SUS, insurance, and what you need to know',
+          ),
           body: l10n.documentationPathHealthBody,
           onTap: () => onOpenTopic(DocumentationGuideSection.health),
         ),
@@ -2266,7 +3598,12 @@ class _WorkGuideSection extends StatelessWidget {
         _ExternalToolCard(
           icon: Icons.gavel_outlined,
           tint: AppColors.secondary,
-          title: l10n.migrationPlanPrepDiplomaTitle,
+          title: _localizedText(
+            context,
+            pt: 'Revalidar seu diploma no Brasil — quando e como',
+            es: 'Revalidar tu titulo en Brasil — cuando y como',
+            en: 'Validate your degree in Brazil — when and how',
+          ),
           body: l10n.migrationPlanPrepDiplomaBody,
           uri: PreparationResourceLinks.diplomaValidationGuide,
           onOpenExternalPreparationLink: onOpenExternalPreparationLink,
@@ -2309,12 +3646,22 @@ class _ArrivalGuideSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                l10n.migrationPlanPrepArrivalGuideTitle,
+                _localizedText(
+                  context,
+                  pt: 'Sua primeira semana em ${destinationCityName ?? "sua cidade"}',
+                  es: 'Tu primera semana en ${destinationCityName ?? "tu ciudad"}',
+                  en: 'Your first week in ${destinationCityName ?? "your city"}',
+                ),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 10),
               Text(
-                l10n.migrationPlanPrepArrivalGuideBody,
+                _localizedText(
+                  context,
+                  pt: 'Para se instalar com menos estresse, foque primeiro no que resolve sua base nos primeiros dias.',
+                  es: 'Para instalarte con menos estres, enfocate primero en lo que te da base en los primeros dias.',
+                  en: 'To settle with less stress, focus first on what gives you a stable base in the first days.',
+                ),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.textSoftFor(context),
                   height: 1.45,
@@ -2327,7 +3674,12 @@ class _ArrivalGuideSection extends StatelessWidget {
         _InfoGuideCard(
           icon: Icons.calendar_view_week_outlined,
           tint: AppColors.primary,
-          title: l10n.migrationPlanPrepArrivalWeekTitle,
+          title: _localizedText(
+            context,
+            pt: 'PRIMEIRA SEMANA — prioridade maxima',
+            es: 'PRIMERA SEMANA — prioridad maxima',
+            en: 'FIRST WEEK — top priority',
+          ),
           body: l10n.migrationPlanPrepArrivalWeekBody,
           onTap: () => onOpenTopic(DocumentationGuideSection.housing),
         ),
@@ -2335,7 +3687,12 @@ class _ArrivalGuideSection extends StatelessWidget {
         _InfoGuideCard(
           icon: Icons.calendar_month_outlined,
           tint: AppColors.secondary,
-          title: l10n.migrationPlanPrepArrivalMonthTitle,
+          title: _localizedText(
+            context,
+            pt: 'PRIMEIRO MES — consolidar a base',
+            es: 'PRIMER MES — consolidar la base',
+            en: 'FIRST MONTH — build your base',
+          ),
           body: l10n.migrationPlanPrepArrivalMonthBody,
           onTap: () => onOpenTopic(DocumentationGuideSection.documents),
         ),
@@ -2343,7 +3700,12 @@ class _ArrivalGuideSection extends StatelessWidget {
         _InfoGuideCard(
           icon: Icons.timeline_rounded,
           tint: AppColors.success,
-          title: l10n.migrationPlanPrepArrivalQuarterTitle,
+          title: _localizedText(
+            context,
+            pt: 'PRIMEIROS 3 MESES — estabilizar a vida',
+            es: 'PRIMEROS 3 MESES — estabilizar la vida',
+            en: 'FIRST 3 MONTHS — stabilize life',
+          ),
           body: l10n.migrationPlanPrepArrivalQuarterBody,
           onTap: () => onOpenTopic(DocumentationGuideSection.work),
         ),
@@ -2776,7 +4138,6 @@ class _ToolMenuCard extends StatelessWidget {
     required this.title,
     required this.body,
     this.onTap,
-    this.enabled = true,
   });
 
   final IconData icon;
@@ -2784,22 +4145,15 @@ class _ToolMenuCard extends StatelessWidget {
   final String title;
   final String body;
   final VoidCallback? onTap;
-  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     final content = Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: enabled
-            ? tint.withValues(alpha: 0.08)
-            : AppColors.surfaceMutedFor(context),
+        color: tint.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: enabled
-              ? tint.withValues(alpha: 0.14)
-              : AppColors.borderFor(context),
-        ),
+        border: Border.all(color: tint.withValues(alpha: 0.14)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2808,16 +4162,10 @@ class _ToolMenuCard extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: enabled
-                  ? tint.withValues(alpha: 0.12)
-                  : AppColors.surfaceFor(context),
+              color: tint.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(
-              icon,
-              color: enabled ? tint : AppColors.textSoftFor(context),
-              size: 20,
-            ),
+            child: Icon(icon, color: tint, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -2837,15 +4185,12 @@ class _ToolMenuCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Icon(
-            enabled ? Icons.arrow_forward_rounded : Icons.lock_outline_rounded,
-            color: enabled ? tint : AppColors.textSoftFor(context),
-          ),
+          Icon(Icons.arrow_forward_rounded, color: tint),
         ],
       ),
     );
 
-    if (!enabled || onTap == null) {
+    if (onTap == null) {
       return content;
     }
 
@@ -2885,6 +4230,262 @@ class _AvailabilityNoteCard extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showCompletionFeedback(BuildContext context, int completedCount) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Row(
+        children: [
+          const Text('✓', style: TextStyle(fontSize: 16)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              _completionMessage(context, completedCount),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: const Color(0xFF0D2818),
+      duration: const Duration(seconds: 2),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    ),
+  );
+}
+
+String _completionMessage(BuildContext context, int count) {
+  if (count == 1) {
+    return _localizedText(
+      context,
+      pt: 'Primeiro passo dado. Continue assim!',
+      es: 'Primer paso hecho. Segui asi.',
+      en: 'First step done. Keep going.',
+    );
+  }
+  if (count <= 3) {
+    return _localizedText(
+      context,
+      pt: 'Otimo ritmo! $count etapas feitas.',
+      es: 'Buen ritmo. $count etapas hechas.',
+      en: 'Great pace. $count steps done.',
+    );
+  }
+  if (count <= 7) {
+    return _localizedText(
+      context,
+      pt: '$count etapas concluidas. Voce esta avancando.',
+      es: '$count etapas completadas. Estas avanzando.',
+      en: '$count steps completed. You are moving forward.',
+    );
+  }
+  return _localizedText(
+    context,
+    pt: 'Incrivel — $count etapas prontas!',
+    es: 'Increible: $count etapas listas.',
+    en: 'Amazing — $count steps ready.',
+  );
+}
+
+String _prepSectionLabel(BuildContext context, _PreparationSection section) {
+  return _localizedText(
+    context,
+    pt: switch (section) {
+      _PreparationSection.overview => 'Visao geral',
+      _PreparationSection.documents => 'Ver meus documentos',
+      _PreparationSection.housing => 'Ver moradia',
+      _PreparationSection.work => 'Ver trabalho e preparo',
+      _PreparationSection.arrival => 'Ver chegada',
+    },
+    es: switch (section) {
+      _PreparationSection.overview => 'Vista general',
+      _PreparationSection.documents => 'Ver mis documentos',
+      _PreparationSection.housing => 'Ver vivienda',
+      _PreparationSection.work => 'Ver trabajo y preparacion',
+      _PreparationSection.arrival => 'Ver llegada',
+    },
+    en: switch (section) {
+      _PreparationSection.overview => 'Plan overview',
+      _PreparationSection.documents => 'View my documents',
+      _PreparationSection.housing => 'View housing',
+      _PreparationSection.work => 'View work and prep',
+      _PreparationSection.arrival => 'View arrival',
+    },
+  );
+}
+
+_PreparationSection _sectionForStep(int step) {
+  return switch (step) {
+    1 => _PreparationSection.overview,
+    2 => _PreparationSection.documents,
+    3 => _PreparationSection.housing,
+    4 => _PreparationSection.work,
+    _ => _PreparationSection.arrival,
+  };
+}
+
+String _goalLabel(BuildContext context, String goal) {
+  return switch (goal) {
+    'find_job_br' => _localizedText(
+      context,
+      pt: 'buscando emprego no Brasil',
+      es: 'buscando trabajo en Brasil',
+      en: 'looking for work in Brazil',
+    ),
+    'remote_income' => _localizedText(
+      context,
+      pt: 'trabalhando remotamente',
+      es: 'trabajando de forma remota',
+      en: 'working remotely',
+    ),
+    'study' => _localizedText(
+      context,
+      pt: 'indo estudar',
+      es: 'yendo a estudiar',
+      en: 'moving to study',
+    ),
+    'family_partner' => _localizedText(
+      context,
+      pt: 'reunindo a familia',
+      es: 'reuniendo a la familia',
+      en: 'bringing family together',
+    ),
+    'fresh_start' => _localizedText(
+      context,
+      pt: 'recomecando do zero',
+      es: 'empezando de cero',
+      en: 'starting over',
+    ),
+    _ => _localizedText(
+      context,
+      pt: 'planejando a mudanca',
+      es: 'planeando la mudanza',
+      en: 'planning the move',
+    ),
+  };
+}
+
+String _openSectionCta(BuildContext context, _PreparationSection section) {
+  return _localizedText(
+    context,
+    pt: 'Abrir: ${_prepSectionLabel(context, section)}',
+    es: 'Abrir: ${_prepSectionLabel(context, section)}',
+    en: 'Open: ${_prepSectionLabel(context, section)}',
+  );
+}
+
+String _jobMarketLabel(BuildContext context, double score) {
+  if (score >= 0.7) {
+    return _localizedText(
+      context,
+      pt: 'aquecido — boa demanda por profissionais',
+      es: 'activo — buena demanda de profesionales',
+      en: 'active — good demand for professionals',
+    );
+  }
+  if (score >= 0.4) {
+    return _localizedText(
+      context,
+      pt: 'moderado — oportunidades em areas especificas',
+      es: 'moderado — oportunidades en areas especificas',
+      en: 'moderate — opportunities in specific areas',
+    );
+  }
+  return _localizedText(
+    context,
+    pt: 'em desenvolvimento — vale pesquisar antes de chegar',
+    es: 'en desarrollo — conviene investigar antes de llegar',
+    en: 'developing — research before you arrive',
+  );
+}
+
+String _guidePhaseName(BuildContext context, GuidePhase phase) {
+  return switch (phase) {
+    GuidePhase.preparation => _localizedText(
+      context,
+      pt: 'Antes de viajar',
+      es: 'Antes de viajar',
+      en: 'Before travel',
+    ),
+    GuidePhase.housing => _localizedText(
+      context,
+      pt: 'Primeiros dias',
+      es: 'Primeros días',
+      en: 'First days',
+    ),
+    GuidePhase.documents => _localizedText(
+      context,
+      pt: 'Documentação',
+      es: 'Documentación',
+      en: 'Documentation',
+    ),
+    GuidePhase.work => _localizedText(
+      context,
+      pt: 'Vida funcionando',
+      es: 'Vida funcionando',
+      en: 'Life working',
+    ),
+    GuidePhase.arrival => _localizedText(
+      context,
+      pt: 'Integração',
+      es: 'Integración',
+      en: 'Integration',
+    ),
+  };
+}
+
+String _guideButtonLabel(
+  BuildContext context,
+  GuideActionItem item,
+  bool showExpandedContent,
+) {
+  if (item.type == GuideActionType.informative) {
+    if (showExpandedContent) {
+      return _localizedText(
+        context,
+        pt: 'Marcar como concluido',
+        es: 'Marcar como completado',
+        en: 'Mark as completed',
+      );
+    }
+    return _localizedText(context, pt: 'Comecar', es: 'Empezar', en: 'Start');
+  }
+  if (item.type == GuideActionType.external) {
+    return _localizedText(
+      context,
+      pt: 'Abrir ${item.externalLabel ?? 'link'}',
+      es: 'Abrir ${item.externalLabel ?? 'link'}',
+      en: 'Open ${item.externalLabel ?? 'link'}',
+    );
+  }
+  if (item.type == GuideActionType.tool) {
+    return _localizedText(
+      context,
+      pt: 'Abrir ferramenta',
+      es: 'Abrir herramienta',
+      en: 'Open tool',
+    );
+  }
+  return _localizedText(
+    context,
+    pt: 'Concluir',
+    es: 'Completar',
+    en: 'Complete',
+  );
+}
+
+String _localizedText(
+  BuildContext context, {
+  required String pt,
+  required String es,
+  required String en,
+}) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 }
 
 class _InfoGuideCard extends StatelessWidget {

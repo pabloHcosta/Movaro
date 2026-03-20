@@ -66,7 +66,10 @@ class ArrivalExecutionSection extends StatelessWidget {
                   SizedBox(
                     width: columnWidth,
                     child: _StagePanel(
-                      title: l10n.arrivalExecutionStageWeek,
+                      title: _stageTitle(
+                        context,
+                        ArrivalExecutionStage.firstWeek,
+                      ),
                       badge: '07',
                       accent: AppColors.primary,
                       items: checklist.itemsFor(
@@ -79,7 +82,10 @@ class ArrivalExecutionSection extends StatelessWidget {
                   SizedBox(
                     width: columnWidth,
                     child: _StagePanel(
-                      title: l10n.arrivalExecutionStageMonth,
+                      title: _stageTitle(
+                        context,
+                        ArrivalExecutionStage.firstMonth,
+                      ),
                       badge: '30',
                       accent: AppColors.warning,
                       items: checklist.itemsFor(
@@ -92,7 +98,10 @@ class ArrivalExecutionSection extends StatelessWidget {
                   SizedBox(
                     width: columnWidth,
                     child: _StagePanel(
-                      title: l10n.arrivalExecutionStageQuarter,
+                      title: _stageTitle(
+                        context,
+                        ArrivalExecutionStage.firstQuarter,
+                      ),
                       badge: '90',
                       accent: AppColors.success,
                       items: checklist.itemsFor(
@@ -109,6 +118,29 @@ class ArrivalExecutionSection extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _stageTitle(BuildContext context, ArrivalExecutionStage stage) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => switch (stage) {
+        ArrivalExecutionStage.firstWeek =>
+          'PRIMEIRA SEMANA — prioridade maxima',
+        ArrivalExecutionStage.firstMonth => 'PRIMEIRO MES — consolidar a base',
+        ArrivalExecutionStage.firstQuarter =>
+          'PRIMEIROS 3 MESES — estabilizar a vida',
+      },
+      'es' => switch (stage) {
+        ArrivalExecutionStage.firstWeek => 'PRIMERA SEMANA — prioridad maxima',
+        ArrivalExecutionStage.firstMonth => 'PRIMER MES — consolidar la base',
+        ArrivalExecutionStage.firstQuarter =>
+          'PRIMEROS 3 MESES — estabilizar la vida',
+      },
+      _ => switch (stage) {
+        ArrivalExecutionStage.firstWeek => 'FIRST WEEK — top priority',
+        ArrivalExecutionStage.firstMonth => 'FIRST MONTH — build your base',
+        ArrivalExecutionStage.firstQuarter => 'FIRST 3 MONTHS — stabilize life',
+      },
+    };
   }
 }
 
@@ -241,6 +273,16 @@ class _ExecutionItemTile extends StatelessWidget {
                       decoration: completed ? TextDecoration.lineThrough : null,
                     ),
                   ),
+                  if (completed) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _doneLabel(context),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: AppColors.success,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 6),
                   Text(
                     item.description,
@@ -263,6 +305,14 @@ class _ExecutionItemTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _doneLabel(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => 'Feito ✓',
+      'es' => 'Hecho ✓',
+      _ => 'Done ✓',
+    };
   }
 }
 

@@ -6139,4 +6139,79 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get migrationPlanPrepScamsBody =>
       'Open a public alert about common fraud in listings and rentals so you do not decide only on price or urgency.';
+
+  @override
+  String get phase_before_travel => 'Before travel';
+
+  @override
+  String get phase_first_days => 'First days';
+
+  @override
+  String get phase_documentation => 'Documentation';
+
+  @override
+  String get phase_life_working => 'Life working';
+
+  @override
+  String get phase_integration => 'Integration';
+
+  @override
+  String get phase_desc_before_travel =>
+      'What to prepare in Argentina so you arrive without surprises';
+
+  @override
+  String get phase_desc_first_days =>
+      'You arrived in Brazil. Focus on getting established and being able to communicate.';
+
+  @override
+  String get phase_desc_documentation =>
+      'The documents that unlock everything. Do them in this exact order.';
+
+  @override
+  String get phase_desc_life_working =>
+      'With CPF and residence in progress, now you build the structure of daily life.';
+
+  @override
+  String get phase_desc_integration =>
+      'Adapt your full life to Brazil and secure long-term stay.';
+
+  @override
+  String get item_next_action_tag => 'NEXT ACTION';
+
+  @override
+  String get item_external_tag => 'EXTERNAL ACTION';
+
+  @override
+  String get item_tool_tag => 'USE A TOOL';
+
+  @override
+  String get item_checklist_tag => 'TO COMPLETE';
+
+  @override
+  String deadline_badge(Object date) {
+    return 'Apply by $date';
+  }
+
+  @override
+  String get deadline_alert_title => 'Deadline is getting close';
+
+  @override
+  String deadline_alert_body(Object days) {
+    return 'Your temporary residence expires in $days days. Apply for permanent residence before that.';
+  }
+
+  @override
+  String get guide_completed_title => 'Plan completed!';
+
+  @override
+  String guide_completed_subtitle(Object city) {
+    return 'You completed every step in your guide for $city.';
+  }
+
+  @override
+  String get guide_no_plan_title => 'Choose your city first';
+
+  @override
+  String get guide_no_plan_subtitle =>
+      'Confirm your plan city to start the guide';
 }

@@ -112,17 +112,21 @@ class CityCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        _GlassPill(
-                          child: Text(
-                            highlightLabel,
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
-                                  color: iconChrome,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                        Expanded(
+                          child: _GlassPill(
+                            child: Text(
+                              highlightLabel,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    color: iconChrome,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
                           ),
                         ),
-                        const Spacer(),
+                        const SizedBox(width: 10),
                         IconButton(
                           onPressed: onFavoriteToggle,
                           style: IconButton.styleFrom(
@@ -265,7 +269,7 @@ class _CityScoreStars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rating = ((score / 20) * 2).round() / 2;
+    final rating = _normalizeCityRating(score);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
@@ -313,6 +317,12 @@ class _CityScoreStars extends StatelessWidget {
     }
     return Icons.star_border_rounded;
   }
+}
+
+double _normalizeCityRating(int rawScore) {
+  final normalized = rawScore <= 5 ? rawScore.toDouble() : (rawScore / 20);
+  final clamped = normalized.clamp(0.0, 5.0);
+  return (clamped * 2).round() / 2;
 }
 
 class _CardSnapshotPanel extends StatelessWidget {
@@ -524,10 +534,9 @@ class _SnapshotFactTile extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             supporting,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: textSoft,
-              height: 1.3,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: textSoft, height: 1.3),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -635,10 +644,9 @@ class _SnapshotReasonRow extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: softTextColor,
-              height: 1.3,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: softTextColor, height: 1.3),
           ),
         ),
       ],
@@ -741,9 +749,7 @@ class _MetricGroupSection extends StatelessWidget {
             ? Colors.black.withValues(alpha: 0.16)
             : Colors.white.withValues(alpha: 0.52),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: tint.withValues(alpha: isDark ? 0.20 : 0.14),
-        ),
+        border: Border.all(color: tint.withValues(alpha: isDark ? 0.20 : 0.14)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

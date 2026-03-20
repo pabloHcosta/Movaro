@@ -6163,4 +6163,79 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get migrationPlanPrepScamsBody =>
       'Abra um alerta público sobre fraudes comuns em anúncios e aluguéis para não decidir só pelo preço ou pela pressa.';
+
+  @override
+  String get phase_before_travel => 'Antes de viajar';
+
+  @override
+  String get phase_first_days => 'Primeiros dias';
+
+  @override
+  String get phase_documentation => 'Documentação';
+
+  @override
+  String get phase_life_working => 'Vida funcionando';
+
+  @override
+  String get phase_integration => 'Integração';
+
+  @override
+  String get phase_desc_before_travel =>
+      'O que preparar ainda na Argentina para chegar sem surpresas';
+
+  @override
+  String get phase_desc_first_days =>
+      'Chegou no Brasil. Foco em se estabelecer e conseguir se comunicar.';
+
+  @override
+  String get phase_desc_documentation =>
+      'Os documentos que desbloqueiam tudo. Faça nessa ordem exata.';
+
+  @override
+  String get phase_desc_life_working =>
+      'Com CPF e residência em processo, agora você monta a estrutura do dia a dia.';
+
+  @override
+  String get phase_desc_integration =>
+      'Adaptar a vida completa ao Brasil e garantir a permanência de longo prazo.';
+
+  @override
+  String get item_next_action_tag => 'PRÓXIMA AÇÃO';
+
+  @override
+  String get item_external_tag => 'AÇÃO EXTERNA';
+
+  @override
+  String get item_tool_tag => 'USE UMA FERRAMENTA';
+
+  @override
+  String get item_checklist_tag => 'PARA CONCLUIR';
+
+  @override
+  String deadline_badge(Object date) {
+    return 'Solicitar até $date';
+  }
+
+  @override
+  String get deadline_alert_title => 'Prazo se aproximando';
+
+  @override
+  String deadline_alert_body(Object days) {
+    return 'Sua residência temporária vence em $days dias. Solicite a permanente antes.';
+  }
+
+  @override
+  String get guide_completed_title => 'Plano concluído!';
+
+  @override
+  String guide_completed_subtitle(Object city) {
+    return 'Você completou todas as etapas do seu guia para $city.';
+  }
+
+  @override
+  String get guide_no_plan_title => 'Escolha sua cidade primeiro';
+
+  @override
+  String get guide_no_plan_subtitle =>
+      'Confirme a cidade do seu plano para começar o guia';
 }

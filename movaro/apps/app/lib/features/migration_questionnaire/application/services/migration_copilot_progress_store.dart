@@ -11,11 +11,30 @@ class MigrationCopilotProgressSnapshot {
     this.readinessCompletedIds = const <String>{},
     this.documentCompletedIds = const <String>{},
     this.arrivalCompletedIds = const <String>{},
+    this.activeItemId,
+    this.completedAtById = const <String, String>{},
   });
 
   final Set<String> readinessCompletedIds;
   final Set<String> documentCompletedIds;
   final Set<String> arrivalCompletedIds;
+  final String? activeItemId;
+  final Map<String, String> completedAtById;
+
+  Set<String> getAllCompletedIds() => <String>{
+    ...readinessCompletedIds,
+    ...documentCompletedIds,
+    ...arrivalCompletedIds,
+  };
+
+  int get completedItemsCount => getAllCompletedIds().length;
+
+  double getProgressPercent(int totalItems) {
+    if (totalItems <= 0) {
+      return 0;
+    }
+    return completedItemsCount / totalItems;
+  }
 }
 
 class MigrationCopilotProgressStore {
@@ -51,6 +70,8 @@ class MigrationCopilotProgressStore {
         readinessCompletedIds: _readStringSet(value['readinessCompletedIds']),
         documentCompletedIds: _readStringSet(value['documentCompletedIds']),
         arrivalCompletedIds: _readStringSet(value['arrivalCompletedIds']),
+        activeItemId: value['activeItemId'] as String?,
+        completedAtById: _readStringMap(value['completedAtById']),
       );
     } catch (_) {
       return const MigrationCopilotProgressSnapshot();
@@ -62,6 +83,8 @@ class MigrationCopilotProgressStore {
     required Set<String> readinessCompletedIds,
     required Set<String> documentCompletedIds,
     required Set<String> arrivalCompletedIds,
+    String? activeItemId,
+    Map<String, String>? completedAtById,
   }) async {
     final file = await _file();
     await file.parent.create(recursive: true);
@@ -83,10 +106,25 @@ class MigrationCopilotProgressStore {
       'readinessCompletedIds': readinessCompletedIds.toList()..sort(),
       'documentCompletedIds': documentCompletedIds.toList()..sort(),
       'arrivalCompletedIds': arrivalCompletedIds.toList()..sort(),
+      'activeItemId': activeItemId,
+      'completedAtById': completedAtById ?? const <String, String>{},
       'updatedAt': DateTime.now().toIso8601String(),
     };
 
     await file.writeAsString(jsonEncode(current));
+  }
+
+  Map<String, String> _readStringMap(Object? rawValue) {
+    if (rawValue is! Map) {
+      return <String, String>{};
+    }
+    final result = <String, String>{};
+    rawValue.forEach((key, value) {
+      if (key is String && value is String) {
+        result[key] = value;
+      }
+    });
+    return result;
   }
 
   Set<String> _readStringSet(Object? rawValue) {
@@ -95,6 +133,25 @@ class MigrationCopilotProgressStore {
     }
 
     return rawValue.whereType<String>().toSet();
+  }
+
+  Set<String> getAllCompletedIds(MigrationCopilotProgressSnapshot snapshot) {
+    return snapshot.getAllCompletedIds();
+  }
+
+  int getTotalItems({
+    required int readinessItems,
+    required int documentItems,
+    required int arrivalItems,
+  }) {
+    return readinessItems + documentItems + arrivalItems;
+  }
+
+  double getProgressPercent({
+    required MigrationCopilotProgressSnapshot snapshot,
+    required int totalItems,
+  }) {
+    return snapshot.getProgressPercent(totalItems);
   }
 
   String _planKey(MigrationPlan plan) {
