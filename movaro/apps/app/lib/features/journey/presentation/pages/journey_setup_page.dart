@@ -114,27 +114,23 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
     return ContextualHelpContent(
       eyebrow: l10n.journeySetupPageTitle,
       contextIcon: Icons.route_outlined,
-      title: 'Pick a route in one place',
-      body:
-          'Choose destination, optionally use location as a hint, and keep origin editable before starting the questionnaire.',
+      title: l10n.journeySetupGuideTitle(),
+      body: l10n.journeySetupGuideBody(),
       steps: [
         FeatureGuideStep(
           number: '1',
-          title: 'Choose the destination',
-          body:
-              'Select where you want to move first so the next steps stay relevant.',
+          title: l10n.journeySetupGuideStepOneTitle(),
+          body: l10n.journeySetupGuideStepOneBody(),
         ),
         FeatureGuideStep(
           number: '2',
-          title: 'Use location only if helpful',
-          body:
-              'Device location is optional and only suggests an origin. You can change it manually anytime.',
+          title: l10n.journeySetupGuideStepTwoTitle(),
+          body: l10n.journeySetupGuideStepTwoBody(),
         ),
         FeatureGuideStep(
           number: '3',
-          title: 'Start when ready',
-          body:
-              'You can continue to the questionnaire or browse cities and content without finishing setup first.',
+          title: l10n.journeySetupGuideStepThreeTitle(),
+          body: l10n.journeySetupGuideStepThreeBody(),
         ),
       ],
     );

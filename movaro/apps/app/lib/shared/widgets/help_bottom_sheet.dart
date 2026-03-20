@@ -18,8 +18,9 @@ class HelpBottomSheet extends StatefulWidget {
     required this.description,
     required this.steps,
     required this.preferenceKey,
-    this.dismissLabel = 'Agora nao',
-    this.confirmLabel = 'Entendi',
+    required this.hideAgainLabel,
+    required this.dismissLabel,
+    required this.confirmLabel,
     super.key,
   });
 
@@ -29,6 +30,7 @@ class HelpBottomSheet extends StatefulWidget {
   final String description;
   final List<HelpStep> steps;
   final String preferenceKey;
+  final String hideAgainLabel;
   final String dismissLabel;
   final String confirmLabel;
 
@@ -37,7 +39,7 @@ class HelpBottomSheet extends StatefulWidget {
 }
 
 class _HelpBottomSheetState extends State<HelpBottomSheet> {
-  bool _doNotShowAgain = false;
+  bool _doNotShowAgain = true;
   bool _isSaving = false;
 
   @override
@@ -105,7 +107,7 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
                                 Text(
                                   widget.contextLabel.toUpperCase(),
                                   style: const TextStyle(
-                                    fontSize: 8,
+                                    fontSize: 9,
                                     fontWeight: FontWeight.w600,
                                     color: Color(0xFF58A6FF),
                                     letterSpacing: 0.6,
@@ -119,7 +121,7 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
                               child: Text(
                                 widget.title,
                                 style: const TextStyle(
-                                  fontSize: 15,
+                                  fontSize: 17,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFFF0F6FC),
                                   height: 1.2,
@@ -167,7 +169,7 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
                           Text(
                             widget.description,
                             style: const TextStyle(
-                              fontSize: 10,
+                              fontSize: 12,
                               color: Color(0xFF8B949E),
                               height: 1.5,
                             ),
@@ -222,11 +224,11 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
                                       : null,
                                 ),
                                 const SizedBox(width: 8),
-                                const Expanded(
+                                Expanded(
                                   child: Text(
-                                    'Nao mostrar novamente',
-                                    style: TextStyle(
-                                      fontSize: 9,
+                                    widget.hideAgainLabel,
+                                    style: const TextStyle(
+                                      fontSize: 11,
                                       color: Color(0xFF6B7280),
                                       height: 1.4,
                                     ),
@@ -249,8 +251,8 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 9),
-                                  textStyle: const TextStyle(fontSize: 9),
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  textStyle: const TextStyle(fontSize: 11),
                                 ),
                                 child: Text(widget.dismissLabel),
                               ),
@@ -266,9 +268,9 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 9),
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
                                   textStyle: const TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 11,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -384,22 +386,22 @@ class _HelpStepRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    step.title,
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFFF0F6FC),
-                    ),
+                Text(
+                  step.title,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFF0F6FC),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    step.body,
-                    style: const TextStyle(
-                      fontSize: 8.5,
-                      color: Color(0xFF6B7280),
-                      height: 1.4,
-                    ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  step.body,
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    color: Color(0xFF6B7280),
+                    height: 1.4,
+                  ),
                   ),
                 ],
               ),

@@ -545,6 +545,574 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: "The 'TOP' badge shows the city with the most wins overall. Tap 'Edit' to switch the compared cities.",
   );
 
+  String settingsTitle() => _localizedText(
+    pt: 'Configuracoes',
+    es: 'Configuracion',
+    en: 'Settings',
+  );
+
+  String settingsLanguageTitle() => _localizedText(
+    pt: 'Idioma do app',
+    es: 'Idioma de la app',
+    en: 'App language',
+  );
+
+  String settingsLanguageBody() => _localizedText(
+    pt: 'Escolha o idioma usado dentro do aplicativo. Se preferir, voce pode manter o idioma do sistema.',
+    es: 'Elegí el idioma usado dentro de la app. Si preferís, podés mantener el idioma del sistema.',
+    en: 'Choose the language used inside the app. If you prefer, you can keep the system language.',
+  );
+
+  String settingsLanguageSystem(String language) => _localizedText(
+    pt: 'Sistema ($language)',
+    es: 'Sistema ($language)',
+    en: 'System ($language)',
+  );
+
+  String settingsSystemLanguageTitle() => _localizedText(
+    pt: 'Configuracoes do dispositivo',
+    es: 'Configuracion del dispositivo',
+    en: 'Device settings',
+  );
+
+  String settingsSystemLanguageBody() => _localizedText(
+    pt: 'No iPhone e em alguns aparelhos Android, voce tambem pode definir um idioma especifico para o app nas configuracoes do sistema.',
+    es: 'En iPhone y en algunos dispositivos Android, tambien podés definir un idioma especifico para la app desde la configuracion del sistema.',
+    en: 'On iPhone and on some Android devices, you can also define a specific app language in the system settings.',
+  );
+
+  String settingsOpenAction() => _localizedText(
+    pt: 'Abrir configuracoes',
+    es: 'Abrir configuracion',
+    en: 'Open settings',
+  );
+
+  String helpHideAgainLabel() => _localizedText(
+    pt: 'Nao mostrar novamente',
+    es: 'No mostrar de nuevo',
+    en: "Don't show again",
+  );
+
+  String exploreGuideTitle() => _localizedText(
+    pt: 'Explore com contexto do plano',
+    es: 'Explorá con el contexto del plan',
+    en: 'Explore with plan context',
+  );
+
+  String exploreGuideBody() => _localizedText(
+    pt: 'O explorar organiza cidades e conteudo pratico ao redor da sua rota atual para que a descoberta continue ajudando na decisao.',
+    es: 'Explorar organiza ciudades y contenido practico alrededor de tu ruta actual para que el descubrimiento siga ayudando en la decision.',
+    en: 'Explore groups cities and practical content around your current route so discovery still supports a decision.',
+  );
+
+  String exploreGuideStepOneTitle() => _localizedText(
+    pt: 'Veja o que combina com seu plano',
+    es: 'Mirá lo que coincide con tu plan',
+    en: 'Check what matches your plan',
+  );
+
+  String exploreGuideStepOneBody() => _localizedText(
+    pt: 'A primeira secao reflete a recomendacao ativa e a rota atual quando elas estiverem disponiveis.',
+    es: 'La primera seccion refleja la recomendacion activa y la ruta actual cuando estan disponibles.',
+    en: 'The first section reflects the active recommendation and route when available.',
+  );
+
+  String exploreGuideStepTwoTitle() => _localizedText(
+    pt: 'Navegue por outras cidades',
+    es: 'Recorré otras ciudades',
+    en: 'Browse other cities',
+  );
+
+  String exploreGuideStepTwoBody() => _localizedText(
+    pt: 'Use os cards de cidade para comparar alternativas sem perder o seu plano atual.',
+    es: 'Usá las tarjetas de ciudades para comparar alternativas sin perder tu plan actual.',
+    en: 'Use city cards to compare alternatives without losing your current plan.',
+  );
+
+  String exploreGuideStepThreeTitle() => _localizedText(
+    pt: 'Abra o conteudo util',
+    es: 'Abrí el contenido util',
+    en: 'Open useful content',
+  );
+
+  String exploreGuideStepThreeBody() => _localizedText(
+    pt: 'A secao de conteudo aponta para os guias praticos mais relevantes sobre documentos, moradia e trabalho.',
+    es: 'La seccion de contenido apunta a las guias practicas mas relevantes sobre documentos, vivienda y trabajo.',
+    en: 'The content section points to the practical guides most relevant to documents, housing, and work.',
+  );
+
+  String exploreSignalStrong() => _localizedText(
+    pt: 'Forte',
+    es: 'Fuerte',
+    en: 'Strong',
+  );
+
+  String exploreSignalBalanced() => _localizedText(
+    pt: 'Equilibrado',
+    es: 'Equilibrado',
+    en: 'Balanced',
+  );
+
+  String exploreSignalWatch() => _localizedText(
+    pt: 'Atencao',
+    es: 'Atencion',
+    en: 'Watch',
+  );
+
+  String journeySetupGuideTitle() => _localizedText(
+    pt: 'Defina a rota em um lugar so',
+    es: 'Definí la ruta en un solo lugar',
+    en: 'Pick a route in one place',
+  );
+
+  String journeySetupGuideBody() => _localizedText(
+    pt: 'Escolha o destino, use a localizacao apenas como pista se quiser, e mantenha a origem editavel antes de iniciar o questionario.',
+    es: 'Elegí el destino, usá la ubicacion solo como pista si querés y mantené el origen editable antes de empezar el cuestionario.',
+    en: 'Choose the destination, optionally use location as a hint, and keep origin editable before starting the questionnaire.',
+  );
+
+  String journeySetupGuideStepOneTitle() => _localizedText(
+    pt: 'Escolha o destino',
+    es: 'Elegí el destino',
+    en: 'Choose the destination',
+  );
+
+  String journeySetupGuideStepOneBody() => _localizedText(
+    pt: 'Selecione primeiro para onde voce quer se mudar para manter os proximos passos relevantes.',
+    es: 'Seleccioná primero hacia dónde querés mudarte para mantener relevantes los proximos pasos.',
+    en: 'Select where you want to move first so the next steps stay relevant.',
+  );
+
+  String journeySetupGuideStepTwoTitle() => _localizedText(
+    pt: 'Use a localizacao so se ajudar',
+    es: 'Usá la ubicacion solo si ayuda',
+    en: 'Use location only if helpful',
+  );
+
+  String journeySetupGuideStepTwoBody() => _localizedText(
+    pt: 'A localizacao do aparelho e opcional e serve apenas para sugerir a origem. Voce pode mudar isso manualmente a qualquer momento.',
+    es: 'La ubicacion del dispositivo es opcional y solo sugiere el origen. Podés cambiarlo manualmente en cualquier momento.',
+    en: 'Device location is optional and only suggests an origin. You can change it manually anytime.',
+  );
+
+  String journeySetupGuideStepThreeTitle() => _localizedText(
+    pt: 'Comece quando estiver pronto',
+    es: 'Empezá cuando estés listo',
+    en: 'Start when ready',
+  );
+
+  String journeySetupGuideStepThreeBody() => _localizedText(
+    pt: 'Voce pode seguir para o questionario ou navegar por cidades e conteudo sem concluir essa etapa primeiro.',
+    es: 'Podés seguir al cuestionario o explorar ciudades y contenido sin terminar esta etapa primero.',
+    en: 'You can continue to the questionnaire or browse cities and content without finishing setup first.',
+  );
+
+  String questionnaireGuideTitle() => _localizedText(
+    pt: 'Responda uma etapa por vez',
+    es: 'Respondé una etapa por vez',
+    en: 'Answer one step at a time',
+  );
+
+  String questionnaireGuideBody() => _localizedText(
+    pt: 'O questionario mantem a rota em contexto, salva seu progresso e so monta a recomendacao depois que origem e destino estiverem completos.',
+    es: 'El cuestionario mantiene la ruta en contexto, guarda tu progreso y solo arma la recomendacion despues de completar origen y destino.',
+    en: 'The questionnaire keeps the route in context, saves your progress, and builds the recommendation only after origin and destination are complete.',
+  );
+
+  String questionnaireGuideStepOneTitle() => _localizedText(
+    pt: 'Confirme a base',
+    es: 'Confirmá la base',
+    en: 'Confirm the setup',
+  );
+
+  String questionnaireGuideStepOneBody() => _localizedText(
+    pt: 'Escolha o estilo do questionario e depois responda primeiro a etapa de origem.',
+    es: 'Elegí el estilo del cuestionario y despues respondé primero la etapa de origen.',
+    en: 'Choose the questionnaire style, then answer the origin step first.',
+  );
+
+  String questionnaireGuideStepTwoTitle() => _localizedText(
+    pt: 'Avance quando quiser',
+    es: 'Avanzá cuando quieras',
+    en: 'Move forward when ready',
+  );
+
+  String questionnaireGuideStepTwoBody() => _localizedText(
+    pt: 'Voce pode voltar a qualquer momento sem perder respostas nem progresso.',
+    es: 'Podés volver en cualquier momento sin perder respuestas ni progreso.',
+    en: 'You can go back anytime without losing answers or progress.',
+  );
+
+  String questionnaireGuideStepThreeTitle() => _localizedText(
+    pt: 'Gere o resultado',
+    es: 'Generá el resultado',
+    en: 'Generate the result',
+  );
+
+  String questionnaireGuideStepThreeBody() => _localizedText(
+    pt: 'A etapa final cria a recomendacao e envia todo o contexto da jornada para a tela de resultado.',
+    es: 'La etapa final crea la recomendacion y pasa todo el contexto del recorrido a la pantalla de resultado.',
+    en: 'The final step creates the recommendation and passes the full journey context to the result screen.',
+  );
+
+  String questionnaireSelectionHelper(int maxSelections) => _localizedText(
+    pt: 'Selecione ate $maxSelections',
+    es: 'Elegi hasta $maxSelections',
+    en: 'Pick up to $maxSelections',
+  );
+
+  String questionnaireSelectionValidation(int maxSelections) => _localizedText(
+    pt: 'Voce pode marcar ate $maxSelections',
+    es: 'Podes marcar hasta $maxSelections',
+    en: 'You can pick up to $maxSelections',
+  );
+
+  String questionnaireCompactHint(String questionId) {
+    switch (questionId) {
+      case 'origin_country':
+        return _localizedText(
+          pt: 'Escolha origem e destino.',
+          es: 'Elegi origen y destino.',
+          en: 'Choose origin and destination.',
+        );
+      case 'funding':
+        return _localizedText(
+          pt: 'Escolha sua base financeira.',
+          es: 'Elegi tu base financiera.',
+          en: 'Choose your financial base.',
+        );
+      case 'travel_group':
+        return _localizedText(
+          pt: 'Defina quem vai com voce.',
+          es: 'Definí quién se muda con vos.',
+          en: 'Choose who is moving with you.',
+        );
+      case 'available_capital':
+        return _localizedText(
+          pt: 'Defina sua reserva inicial.',
+          es: 'Definí tu capital inicial.',
+          en: 'Choose your initial capital.',
+        );
+      default:
+        return bmpScrollHint;
+    }
+  }
+
+  String questionnaireCompactOptionLabel(String questionId, String value) {
+    switch (questionId) {
+      case 'timeline':
+        return switch (value) {
+          'just_exploring' => _localizedText(pt: 'Explorar', es: 'Explorar', en: 'Explore'),
+          'in_0_3m' => _localizedText(pt: '0-3 meses', es: '0-3 meses', en: '0-3 mo'),
+          'in_3_6m' => _localizedText(pt: '3-6 meses', es: '3-6 meses', en: '3-6 mo'),
+          'in_6_12m' => _localizedText(pt: '6-12 meses', es: '6-12 meses', en: '6-12 mo'),
+          'in_12m_plus' => _localizedText(pt: '12+ meses', es: '12+ meses', en: '12+ mo'),
+          'depends' => _localizedText(pt: 'Flexivel', es: 'Flexible', en: 'Flexible'),
+          _ => questionOptionLabel(questionId, value),
+        };
+      case 'intent':
+        return switch (value) {
+          'find_job_br' => _localizedText(pt: 'Trabalho', es: 'Trabajo', en: 'Work'),
+          'remote_income' => _localizedText(pt: 'Remoto', es: 'Remoto', en: 'Remote'),
+          'study' => _localizedText(pt: 'Estudo', es: 'Estudio', en: 'Study'),
+          'family_partner' => _localizedText(pt: 'Familia', es: 'Familia', en: 'Family'),
+          'fresh_start' => _localizedText(pt: 'Recomeco', es: 'Reinicio', en: 'Restart'),
+          'explore_unsure' => _localizedText(pt: 'Explorar', es: 'Explorar', en: 'Explore'),
+          _ => questionOptionLabel(questionId, value),
+        };
+      case 'funding':
+        return switch (value) {
+          'savings' => _localizedText(pt: 'Reserva', es: 'Ahorros', en: 'Savings'),
+          'remote_income' => _localizedText(pt: 'Remoto', es: 'Remoto', en: 'Remote'),
+          'job_search' => _localizedText(pt: 'Buscar vaga', es: 'Buscar trabajo', en: 'Need job'),
+          'job_offer' => _localizedText(pt: 'Oferta', es: 'Oferta', en: 'Offer'),
+          'family_support' => _localizedText(pt: 'Familia', es: 'Familia', en: 'Family'),
+          'dont_know' => _localizedText(pt: 'Nao sei', es: 'No se', en: 'Unsure'),
+          _ => questionOptionLabel(questionId, value),
+        };
+      case 'constraints':
+        return switch (value) {
+          'prefer_south' => _localizedText(pt: 'Sul', es: 'Sur', en: 'South'),
+          'need_big_city' => _localizedText(pt: 'Cidade grande', es: 'Ciudad grande', en: 'Big city'),
+          'prefer_mid_city' => _localizedText(pt: 'Cidade media', es: 'Ciudad media', en: 'Mid city'),
+          'want_coast' => _localizedText(pt: 'Litoral', es: 'Costa', en: 'Coast'),
+          'prefer_cooler' => _localizedText(pt: 'Mais fresco', es: 'Mas fresco', en: 'Cooler'),
+          'need_transit' => _localizedText(pt: 'Transporte', es: 'Transporte', en: 'Transit'),
+          'avoid_expensive' => _localizedText(pt: 'Menor custo', es: 'Menor costo', en: 'Lower cost'),
+          'no_constraints' => _localizedText(pt: 'Aberto', es: 'Abierto', en: 'Open'),
+          _ => questionOptionLabel(questionId, value),
+        };
+      case 'priorities':
+        return switch (value) {
+          'low_cost' => _localizedText(pt: 'Baixo custo', es: 'Bajo costo', en: 'Low cost'),
+          'job_opportunities' => _localizedText(pt: 'Emprego', es: 'Empleo', en: 'Jobs'),
+          'safety' => _localizedText(pt: 'Seguranca', es: 'Seguridad', en: 'Safety'),
+          'warm_climate_beach' => _localizedText(pt: 'Costa quente', es: 'Costa calida', en: 'Warm coast'),
+          'transit_infra' => _localizedText(pt: 'Transporte', es: 'Transporte', en: 'Transit'),
+          'nature' => _localizedText(pt: 'Natureza', es: 'Naturaleza', en: 'Nature'),
+          'university' => _localizedText(pt: 'Estudo', es: 'Estudio', en: 'Study'),
+          'community' => _localizedText(pt: 'Comunidade', es: 'Comunidad', en: 'Community'),
+          'close_to_argentina' => _localizedText(pt: 'Perto da AR', es: 'Cerca de AR', en: 'Near AR'),
+          'balanced_unsure' => _localizedText(pt: 'Equilibrado', es: 'Equilibrado', en: 'Balanced'),
+          _ => questionOptionLabel(questionId, value),
+        };
+      default:
+        return questionOptionLabel(questionId, value);
+    }
+  }
+
+  String copilotGuideTitle() => _localizedText(
+    pt: 'Use o plano uma etapa por vez',
+    es: 'Usá el plan una etapa por vez',
+    en: 'Use the plan one stage at a time',
+  );
+
+  String copilotGuideBody() => _localizedText(
+    pt: 'O copilot transforma a recomendacao em um checklist de execucao para que voce foque na proxima etapa, e nao na mudanca inteira de uma vez.',
+    es: 'El copilot convierte la recomendacion en una checklist de ejecucion para que te enfoques en la siguiente etapa y no en toda la mudanza de una sola vez.',
+    en: 'Copilot turns the recommendation into a working checklist so you can focus on the next stage instead of the full move at once.',
+  );
+
+  String copilotGuideStepOneTitle() => _localizedText(
+    pt: 'Veja a etapa atual',
+    es: 'Mirá la etapa actual',
+    en: 'Watch the current stage',
+  );
+
+  String copilotGuideStepOneBody() => _localizedText(
+    pt: 'A visao geral destaca a etapa mais importante e o seu progresso total.',
+    es: 'La vista general destaca la etapa mas importante y tu progreso total.',
+    en: 'The overview highlights the most important step and your overall progress.',
+  );
+
+  String copilotGuideStepTwoTitle() => _localizedText(
+    pt: 'Abra a secao certa',
+    es: 'Abrí la seccion correcta',
+    en: 'Open the right section',
+  );
+
+  String copilotGuideStepTwoBody() => _localizedText(
+    pt: 'Salte entre documentos, moradia, trabalho e chegada sem perder o estado da checklist.',
+    es: 'Saltá entre documentos, vivienda, trabajo y llegada sin perder el estado de la checklist.',
+    en: 'Jump between documents, housing, work, and arrival without losing checklist state.',
+  );
+
+  String copilotGuideStepThreeTitle() => _localizedText(
+    pt: 'Conclua item por item',
+    es: 'Completá item por item',
+    en: 'Complete items as you go',
+  );
+
+  String copilotGuideStepThreeBody() => _localizedText(
+    pt: 'O progresso da checklist fica salvo localmente para voce retomar depois.',
+    es: 'El progreso de la checklist queda guardado localmente para que retomes despues.',
+    en: 'Checklist progress is saved locally so you can resume later.',
+  );
+
+  String copilotStageStateLabel(bool selected) => _localizedText(
+    pt: selected ? 'Etapa atual' : 'Abrir etapa',
+    es: selected ? 'Etapa actual' : 'Abrir etapa',
+    en: selected ? 'Current stage' : 'Open stage',
+  );
+
+  String cityExploreTitle() => _localizedText(
+    pt: 'Explorar',
+    es: 'Explorar',
+    en: 'Explore',
+  );
+
+  String cityExploreEntryTitle(String city) => _localizedText(
+    pt: 'Explorar $city',
+    es: 'Explorar $city',
+    en: 'Explore $city',
+  );
+
+  String cityExploreEntryBody() => _localizedText(
+    pt: 'Videos, fotos e mapa',
+    es: 'Videos, fotos y mapa',
+    en: 'Videos, photos, and map',
+  );
+
+  String cityDetailMapDistanceBadge(String distanceKm, String originCity) =>
+      _localizedText(
+        pt: '~$distanceKm km de $originCity',
+        es: '~$distanceKm km de $originCity',
+        en: '~$distanceKm km from $originCity',
+      );
+
+  String cityDetailMapDistanceMiniLabel() => _localizedText(
+    pt: 'DISTANCIA',
+    es: 'DISTANCIA',
+    en: 'DISTANCE',
+  );
+
+  String cityDetailMapCountryLabel() => _localizedText(
+    pt: 'Brasil',
+    es: 'Brasil',
+    en: 'Brazil',
+  );
+
+  String cityDetailExploreMediaTitle() => _localizedText(
+    pt: 'Videos e fotos',
+    es: 'Videos y fotos',
+    en: 'Videos and photos',
+  );
+
+  String cityDetailExploreMediaBody() => _localizedText(
+    pt: 'Conheca a cidade antes de decidir',
+    es: 'Conocé la ciudad antes de decidir',
+    en: 'Get to know the city before deciding',
+  );
+
+  String cityExploreTabVideos() => _localizedText(
+    pt: 'Videos',
+    es: 'Videos',
+    en: 'Videos',
+  );
+
+  String cityExploreTabPhotos() => _localizedText(
+    pt: 'Fotos',
+    es: 'Fotos',
+    en: 'Photos',
+  );
+
+  String cityExploreTabMap() => _localizedText(
+    pt: 'No mapa',
+    es: 'En el mapa',
+    en: 'On the map',
+  );
+
+  String cityExplorePlanBadge() => _localizedText(
+    pt: 'Seu plano',
+    es: 'Tu plan',
+    en: 'Your plan',
+  );
+
+  String cityExploreShareTooltip() => _localizedText(
+    pt: 'Compartilhar busca',
+    es: 'Compartir búsqueda',
+    en: 'Share search',
+  );
+
+  String cityExploreVideoQueriesLabel() => _localizedText(
+    pt: 'Buscas usadas',
+    es: 'Búsquedas usadas',
+    en: 'Search queries used',
+  );
+
+  String cityExploreYouTubeAction() => _localizedText(
+    pt: 'Ver mais no YouTube',
+    es: 'Ver más en YouTube',
+    en: 'See more on YouTube',
+  );
+
+  String cityExploreVideoUnavailableTitle() => _localizedText(
+    pt: 'Videos indisponíveis no app agora',
+    es: 'Videos no disponibles en la app ahora',
+    en: 'Videos are unavailable in the app right now',
+  );
+
+  String cityExploreVideoUnavailableBody() => _localizedText(
+    pt: 'Se a API estiver sem cota ou sem configuração, você ainda pode abrir a busca direta no YouTube.',
+    es: 'Si la API no tiene cuota o no está configurada, igual podés abrir la búsqueda directa en YouTube.',
+    en: 'If the API is out of quota or not configured, you can still open the direct search on YouTube.',
+  );
+
+  String cityExplorePhotosAttribution(String value) => _localizedText(
+    pt: 'Fotos via $value',
+    es: 'Fotos vía $value',
+    en: 'Photos via $value',
+  );
+
+  String cityExploreSearchQuery(String city) => _localizedText(
+    pt: '$city morar brasileiros vida',
+    es: '$city vivir brasileños vida',
+    en: '$city move to brazil city life',
+  );
+
+  String cityExploreGalleryTitle(String city, int index, int total) =>
+      _localizedText(
+        pt: '$city · ${index + 1}/$total',
+        es: '$city · ${index + 1}/$total',
+        en: '$city · ${index + 1}/$total',
+      );
+
+  String cityExploreSourceGooglePlaces() => 'Google Places';
+
+  String cityExploreSourceUnsplash() => 'Unsplash';
+
+  String cityExplorePhotosSeeAll(int count) => _localizedText(
+    pt: 'Ver todas as fotos ($count)',
+    es: 'Ver todas las fotos ($count)',
+    en: 'See all photos ($count)',
+  );
+
+  String cityExploreEmptyTitle() => _localizedText(
+    pt: 'Conteúdo indisponível por enquanto',
+    es: 'Contenido no disponible por ahora',
+    en: 'Content unavailable for now',
+  );
+
+  String cityExploreEmptyBody() => _localizedText(
+    pt: 'Ainda não temos mídia suficiente para esta cidade nesta experiência.',
+    es: 'Todavía no tenemos suficiente contenido para esta ciudad en esta experiencia.',
+    en: 'We do not have enough media for this city in this experience yet.',
+  );
+
+  String cityExploreOpenGalleryAction() => _localizedText(
+    pt: 'Abrir galeria',
+    es: 'Abrir galería',
+    en: 'Open gallery',
+  );
+
+  String cityExploreCopiedShareFeedback() => _localizedText(
+    pt: 'Link de exploração compartilhado.',
+    es: 'Link de exploración compartido.',
+    en: 'Explore link shared.',
+  );
+
+  String cityExploreFallbackTitle() => _localizedText(
+    pt: 'Videos disponíveis no YouTube',
+    es: 'Videos disponibles en YouTube',
+    en: 'Videos available on YouTube',
+  );
+
+  String cityExploreFallbackBody(String city) => _localizedText(
+    pt: 'Encontramos conteúdo sobre $city. Abrimos direto no YouTube para você.',
+    es: 'Encontramos contenido sobre $city. Lo abrimos directo en YouTube para vos.',
+    en: 'We found content about $city. We open it directly on YouTube for you.',
+  );
+
+  String cityExploreFallbackAction() => _localizedText(
+    pt: 'Abrir busca no YouTube',
+    es: 'Abrir búsqueda en YouTube',
+    en: 'Open YouTube search',
+  );
+
+  String cityExploreFallbackFootnote() => _localizedText(
+    pt: 'Abre o app do YouTube com os melhores termos',
+    es: 'Abre la app de YouTube con los mejores términos',
+    en: 'Opens the YouTube app with the best search terms',
+  );
+
+  String cityExploreFeaturedLabel() => _localizedText(
+    pt: 'Em destaque',
+    es: 'Destacado',
+    en: 'Featured',
+  );
+
+  String cityExploreMoreVideosLabel() => _localizedText(
+    pt: 'Mais videos',
+    es: 'Más videos',
+    en: 'More videos',
+  );
+
+  String cityExplorePhotosAttributionFull() => _localizedText(
+    pt: 'Fotos via Google Places · Unsplash',
+    es: 'Fotos vía Google Places · Unsplash',
+    en: 'Photos via Google Places · Unsplash',
+  );
+
   String questionnaireVariantLabel(String value) {
     switch (value) {
       case 'lean':

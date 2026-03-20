@@ -265,7 +265,7 @@ class _CityScoreStars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stars = (score / 20).clamp(1, 5).round();
+    final rating = ((score / 20) * 2).round() / 2;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
@@ -280,16 +280,19 @@ class _CityScoreStars extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               for (var index = 0; index < 5; index++)
-                Icon(
-                  index < stars ? Icons.star_rounded : Icons.star_border_rounded,
-                  size: 14,
-                  color: const Color(0xFFF2B94B),
+                Padding(
+                  padding: EdgeInsets.only(right: index == 4 ? 0 : 1),
+                  child: Icon(
+                    _starIconFor(index, rating),
+                    size: 14,
+                    color: const Color(0xFFF2B94B),
+                  ),
                 ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
-            '$score/100',
+            '${rating.toStringAsFixed(rating.truncateToDouble() == rating ? 0 : 1)}/5',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: AppColors.textPrimaryFor(context),
               fontWeight: FontWeight.w800,
@@ -298,6 +301,17 @@ class _CityScoreStars extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  IconData _starIconFor(int index, double rating) {
+    final position = index + 1;
+    if (rating >= position) {
+      return Icons.star_rounded;
+    }
+    if (rating >= position - 0.5) {
+      return Icons.star_half_rounded;
+    }
+    return Icons.star_border_rounded;
   }
 }
 

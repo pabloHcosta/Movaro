@@ -75,27 +75,23 @@ class _ExplorePageState extends State<ExplorePage> {
     return ContextualHelpContent(
       eyebrow: context.l10n.mainNavExplore,
       contextIcon: Icons.explore_outlined,
-      title: 'Explore with plan context',
-      body:
-          'Explore groups cities and practical content around your current migration route so discovery still supports a decision.',
-      steps: const [
+      title: context.l10n.exploreGuideTitle(),
+      body: context.l10n.exploreGuideBody(),
+      steps: [
         FeatureGuideStep(
           number: '1',
-          title: 'Check what matches your plan',
-          body:
-              'The first section reflects the active recommendation and route when available.',
+          title: context.l10n.exploreGuideStepOneTitle(),
+          body: context.l10n.exploreGuideStepOneBody(),
         ),
         FeatureGuideStep(
           number: '2',
-          title: 'Browse other cities',
-          body:
-              'Use city cards to compare alternatives without losing your current plan.',
+          title: context.l10n.exploreGuideStepTwoTitle(),
+          body: context.l10n.exploreGuideStepTwoBody(),
         ),
         FeatureGuideStep(
           number: '3',
-          title: 'Open useful content',
-          body:
-              'The content section points to the practical guides most relevant to documents, housing, and work.',
+          title: context.l10n.exploreGuideStepThreeTitle(),
+          body: context.l10n.exploreGuideStepThreeBody(),
         ),
       ],
     );
@@ -911,7 +907,7 @@ class _CitySignalMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tone = _signalTone(score);
+    final tone = _signalTone(context, score);
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -969,23 +965,23 @@ class _CitySignalMetric extends StatelessWidget {
     );
   }
 
-  _ExploreSignalTone _signalTone(int value) {
+  _ExploreSignalTone _signalTone(BuildContext context, int value) {
     if (value >= 72) {
       return _ExploreSignalTone(
-        label: 'Strong',
+        label: context.l10n.exploreSignalStrong(),
         color: AppColors.success,
         icon: Icons.trending_up_rounded,
       );
     }
     if (value >= 52) {
       return _ExploreSignalTone(
-        label: 'Balanced',
+        label: context.l10n.exploreSignalBalanced(),
         color: AppColors.warning,
         icon: Icons.remove_rounded,
       );
     }
     return _ExploreSignalTone(
-      label: 'Watch',
+      label: context.l10n.exploreSignalWatch(),
       color: AppColors.caution,
       icon: Icons.trending_down_rounded,
     );

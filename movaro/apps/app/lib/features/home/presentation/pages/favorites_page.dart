@@ -17,6 +17,8 @@ import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/explore_entry_card.dart';
+import 'package:movaro_app/features/cities/presentation/pages/city_explore_screen.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
@@ -425,6 +427,18 @@ class _FavoriteCityCard extends StatelessWidget {
                     const SizedBox(height: 12),
                     _AlertRow(alert: alert),
                   ],
+                  const SizedBox(height: 12),
+                  ExploreEntryCard(
+                    cityName: city.name,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => CityExploreScreen(
+                          city: city,
+                          isPlanCity: isActivePlanCity,
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 14),
                   Row(
                     children: [

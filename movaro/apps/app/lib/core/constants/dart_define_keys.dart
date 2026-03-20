@@ -7,4 +7,6 @@ class DartDefineKeys {
   static const appName = 'APP_NAME';
   static const supabaseUrl = 'SUPABASE_URL';
   static const supabaseAnonKey = 'SUPABASE_ANON_KEY';
+  static const youtubeApiKey = 'YOUTUBE_API_KEY';
+  static const googlePlacesApiKey = 'GOOGLE_PLACES_API_KEY';
 }

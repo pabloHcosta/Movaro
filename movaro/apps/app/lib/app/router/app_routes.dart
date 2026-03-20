@@ -10,6 +10,7 @@ class AppRoutes {
   static const explore = '/explore';
   static const documentationGuide = '/documentation';
   static const documentationTopic = '/documentation/topic';
+  static const settings = '/settings';
   static const cities = '/cities';
   static const citiesSearch = '/cities/search';
   static const countries = '/countries';

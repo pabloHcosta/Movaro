@@ -42,9 +42,11 @@ class _CityWeatherBadgeState extends State<CityWeatherBadge> {
         }
 
         final tint = _resolveTint(context, weather);
-        final background = tint.withValues(
-          alpha: AppColors.isDark(context) ? 0.16 : 0.12,
-        );
+        final background = widget.compact
+            ? _compactBackground(context, tint)
+            : tint.withValues(
+                alpha: AppColors.isDark(context) ? 0.16 : 0.12,
+              );
         final icon = _resolveIcon(weather);
         final textTheme = Theme.of(context).textTheme;
 
@@ -102,7 +104,7 @@ class _CityWeatherBadgeState extends State<CityWeatherBadge> {
                   weather.temperatureCelsius.round(),
                 ),
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: tint,
+                  color: widget.compact ? Colors.white : tint,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -111,6 +113,13 @@ class _CityWeatherBadgeState extends State<CityWeatherBadge> {
         );
       },
     );
+  }
+
+  Color _compactBackground(BuildContext context, Color tint) {
+    if (AppColors.isDark(context)) {
+      return tint.withValues(alpha: 0.32);
+    }
+    return tint.withValues(alpha: 0.92);
   }
 
   Color _resolveTint(BuildContext context, CityWeather weather) {

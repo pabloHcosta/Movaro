@@ -19,6 +19,8 @@ import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/explore_entry_card.dart';
+import 'package:movaro_app/features/cities/presentation/pages/city_explore_screen.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
@@ -324,7 +326,11 @@ class _HomeContent extends StatelessWidget {
             );
           },
         ),
-        _HomeGreeting(state: heroState, displayName: null),
+        _HomeGreeting(
+          state: heroState,
+          displayName: null,
+          onOpenSettings: () => Navigator.pushNamed(context, AppRoutes.settings),
+        ),
         const SizedBox(height: 16),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
@@ -355,6 +361,14 @@ class _HomeContent extends StatelessWidget {
                         citiesController: citiesController,
                         migrationQuestionnaireController:
                             migrationQuestionnaireController,
+                      ),
+                    ),
+                  ),
+                  onExploreCity: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => CityExploreScreen(
+                        city: confirmedCity,
+                        isPlanCity: true,
                       ),
                     ),
                   ),
@@ -517,10 +531,15 @@ class _HomeContent extends StatelessWidget {
 }
 
 class _HomeGreeting extends StatelessWidget {
-  const _HomeGreeting({required this.state, required this.displayName});
+  const _HomeGreeting({
+    required this.state,
+    required this.displayName,
+    required this.onOpenSettings,
+  });
 
   final HomeHeroState state;
   final String? displayName;
+  final VoidCallback onOpenSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -536,24 +555,37 @@ class _HomeGreeting extends StatelessWidget {
         ? l10n.homeHeroGreetingAfternoon(displayName!)
         : l10n.homeHeroGreetingEvening(displayName!);
 
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          salutation,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSoftFor(context),
-            fontWeight: FontWeight.w600,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                salutation,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                state == HomeHeroState.withPlan
+                    ? l10n.homeHeroSubtitleWithPlan
+                    : l10n.homeHeroSubtitleNoPlan,
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          state == HomeHeroState.withPlan
-              ? l10n.homeHeroSubtitleWithPlan
-              : l10n.homeHeroSubtitleNoPlan,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+        const SizedBox(width: 12),
+        IconButton(
+          onPressed: onOpenSettings,
+          tooltip: l10n.settingsTitle(),
+          icon: const Icon(Icons.settings_outlined),
         ),
       ],
     );
@@ -666,6 +698,7 @@ class _WithPlanHeroCard extends StatelessWidget {
     required this.onOpenPlan,
     required this.onOpenNextStep,
     required this.onCompare,
+    required this.onExploreCity,
     required this.onManagePlan,
     super.key,
   });
@@ -678,6 +711,7 @@ class _WithPlanHeroCard extends StatelessWidget {
   final VoidCallback onOpenPlan;
   final VoidCallback onOpenNextStep;
   final VoidCallback onCompare;
+  final VoidCallback onExploreCity;
   final VoidCallback onManagePlan;
 
   @override
@@ -934,6 +968,11 @@ class _WithPlanHeroCard extends StatelessWidget {
                         label: Text(context.l10n.cityComparisonCompareAction),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 12),
+                  ExploreEntryCard(
+                    cityName: city.name,
+                    onTap: onExploreCity,
                   ),
                   const SizedBox(height: 8),
                   Align(

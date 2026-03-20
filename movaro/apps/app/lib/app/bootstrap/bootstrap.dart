@@ -62,6 +62,7 @@ Future<void> bootstrap({required AppFlavor defaultFlavor}) async {
     ),
   );
   final localeController = LocaleController();
+  await localeController.initialize();
 
   runApp(
     MovaroApp(

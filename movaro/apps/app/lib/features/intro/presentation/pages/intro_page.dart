@@ -215,29 +215,130 @@ class _IntroPageState extends State<IntroPage> {
         title: l10n.introRedesignCityTitle(),
         description: l10n.introRedesignCityDescription(),
         primaryLabel: l10n.commonNextAction(),
-        illustration: _introDiscoverCitySvg,
+        illustration: _discoverCitySvg(context),
       ),
       _IntroSlideData(
         title: l10n.introRedesignPlanTitle(),
         description: l10n.introRedesignPlanDescription(),
         primaryLabel: l10n.commonNextAction(),
-        illustration: _introPlanSvg,
+        illustration: _planSvg(context),
       ),
       _IntroSlideData(
         title: l10n.introRedesignGuideTitle(),
         description: l10n.introRedesignGuideDescription(),
         primaryLabel: l10n.commonNextAction(),
-        illustration: _introGuideSvg,
+        illustration: _guideSvg(context),
       ),
       _IntroSlideData(
         title: l10n.introRedesignLocationTitle(),
         description: l10n.introRedesignLocationDescription(),
         primaryLabel: l10n.locationPermissionAllowAction(),
         secondaryLabel: l10n.locationPermissionLaterAction(),
-        illustration: _introLocationSvg,
+        illustration: _locationSvg(context),
         isLocationStep: true,
       ),
     ];
+  }
+
+  String _discoverCitySvg(BuildContext context) {
+    final language = Localizations.localeOf(context).languageCode;
+    return switch (language) {
+      'pt' => _introDiscoverCitySvg,
+      'es' => _introDiscoverCitySvg
+          .replaceAll('✦ Melhor fit', '✦ Mejor fit')
+          .replaceAll('Paraná (PR) · Brasil', 'Paraná (PR) · Brasil')
+          .replaceAll('Custo', 'Costo')
+          .replaceAll('Bom', 'Bueno')
+          .replaceAll('Clima', 'Clima')
+          .replaceAll('IDH', 'IDH')
+          .replaceAll('Alto', 'Alto')
+          .replaceAll('Custo alto', 'Costo alto')
+          .replaceAll('Mercado', 'Mercado')
+          .replaceAll('Litoral', 'Costa'),
+      _ => _introDiscoverCitySvg
+          .replaceAll('✦ Melhor fit', '✦ Best fit')
+          .replaceAll('Paraná (PR) · Brasil', 'Parana (PR) · Brazil')
+          .replaceAll('Custo', 'Cost')
+          .replaceAll('Bom', 'Good')
+          .replaceAll('Clima', 'Climate')
+          .replaceAll('IDH', 'HDI')
+          .replaceAll('Alto', 'High')
+          .replaceAll('Custo alto', 'High cost')
+          .replaceAll('Mercado', 'Jobs')
+          .replaceAll('Litoral', 'Coast')
+          .replaceAll('São Paulo', 'Sao Paulo'),
+    };
+  }
+
+  String _planSvg(BuildContext context) {
+    final language = Localizations.localeOf(context).languageCode;
+    return switch (language) {
+      'pt' => _introPlanSvg,
+      'es' => _introPlanSvg
+          .replaceAll('Pergunta 2 de 6', 'Pregunta 2 de 6')
+          .replaceAll('Quando você planeja', '¿Cuándo pensás')
+          .replaceAll('fazer essa mudança?', 'hacer esta mudanza?')
+          .replaceAll('Ainda estou explorando', 'Todavía estoy explorando')
+          .replaceAll('Em 3 a 6 meses', 'En 3 a 6 meses')
+          .replaceAll('Em 6 a 12 meses', 'En 6 a 12 meses')
+          .replaceAll('+ 3 opções', '+ 3 opciones'),
+      _ => _introPlanSvg
+          .replaceAll('Pergunta 2 de 6', 'Question 2 of 6')
+          .replaceAll('Quando você planeja', 'When are you planning')
+          .replaceAll('fazer essa mudança?', 'to make this move?')
+          .replaceAll('Ainda estou explorando', 'I am still exploring')
+          .replaceAll('Em 3 a 6 meses', 'In 3 to 6 months')
+          .replaceAll('Em 6 a 12 meses', 'In 6 to 12 months')
+          .replaceAll('+ 3 opções', '+ 3 more options'),
+    };
+  }
+
+  String _guideSvg(BuildContext context) {
+    final language = Localizations.localeOf(context).languageCode;
+    return switch (language) {
+      'pt' => _introGuideSvg,
+      'es' => _introGuideSvg
+          .replaceAll('Guia de chegada', 'Guía de llegada')
+          .replaceAll('Curitiba · Argentina → Brasil', 'Curitiba · Argentina → Brasil')
+          .replaceAll('Passaporte válido', 'Pasaporte válido')
+          .replaceAll('Voo reservado', 'Vuelo reservado')
+          .replaceAll('CPF e RNE → em andamento', 'CPF y RNE → en curso')
+          .replaceAll('Conta bancária brasileira', 'Cuenta bancaria brasileña')
+          .replaceAll('+ 3 itens aguardando...', '+ 3 items pendientes...'),
+      _ => _introGuideSvg
+          .replaceAll('Guia de chegada', 'Arrival guide')
+          .replaceAll('Curitiba · Argentina → Brasil', 'Curitiba · Argentina -> Brazil')
+          .replaceAll('Passaporte válido', 'Valid passport')
+          .replaceAll('Voo reservado', 'Flight booked')
+          .replaceAll('CPF e RNE → em andamento', 'CPF and RNE -> in progress')
+          .replaceAll('Conta bancária brasileira', 'Brazilian bank account')
+          .replaceAll('+ 3 itens aguardando...', '+ 3 items waiting...'),
+    };
+  }
+
+  String _locationSvg(BuildContext context) {
+    final language = Localizations.localeOf(context).languageCode;
+    return switch (language) {
+      'pt' => _introLocationSvg,
+      'es' => _introLocationSvg
+          .replaceAll(
+            'País de origem detectado automaticamente',
+            'País de origen detectado automáticamente',
+          )
+          .replaceAll(
+            'Moeda e conteúdo na sua língua',
+            'Moneda y contenido en tu idioma',
+          ),
+      _ => _introLocationSvg
+          .replaceAll(
+            'País de origem detectado automaticamente',
+            'Origin country detected automatically',
+          )
+          .replaceAll(
+            'Moeda e conteúdo na sua língua',
+            'Currency and content in your language',
+          ),
+    };
   }
 }
 

@@ -88,26 +88,23 @@ class _QuestionPageState extends State<QuestionPage> {
     return ContextualHelpContent(
       eyebrow: context.l10n.questionnairePageTitle,
       contextIcon: Icons.quiz_outlined,
-      title: 'Answer one step at a time',
-      body:
-          'The questionnaire keeps the route in context, saves your progress, and builds the recommendation only after origin and destination are complete.',
-      steps: const [
+      title: context.l10n.questionnaireGuideTitle(),
+      body: context.l10n.questionnaireGuideBody(),
+      steps: [
         FeatureGuideStep(
           number: '1',
-          title: 'Confirm the setup',
-          body:
-              'Choose the questionnaire style, then answer the origin step first.',
+          title: context.l10n.questionnaireGuideStepOneTitle(),
+          body: context.l10n.questionnaireGuideStepOneBody(),
         ),
         FeatureGuideStep(
           number: '2',
-          title: 'Move forward when ready',
-          body: 'You can go back anytime without losing answers or progress.',
+          title: context.l10n.questionnaireGuideStepTwoTitle(),
+          body: context.l10n.questionnaireGuideStepTwoBody(),
         ),
         FeatureGuideStep(
           number: '3',
-          title: 'Generate the result',
-          body:
-              'The final step creates the recommendation and passes the full journey context to the result screen.',
+          title: context.l10n.questionnaireGuideStepThreeTitle(),
+          body: context.l10n.questionnaireGuideStepThreeBody(),
         ),
       ],
     );
@@ -1189,67 +1186,17 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   String _selectionHelperLabel(BuildContext context, Question question) {
-    final language = Localizations.localeOf(context).languageCode;
-    if (language == 'pt') {
-      return 'Selecione ate ${question.maxSelections}';
-    }
-    if (language == 'es') {
-      return 'Elegi hasta ${question.maxSelections}';
-    }
-    return 'Pick up to ${question.maxSelections}';
+    return context.l10n.questionnaireSelectionHelper(question.maxSelections);
   }
 
   String _selectionValidationLabel(BuildContext context, Question question) {
-    final language = Localizations.localeOf(context).languageCode;
-    if (language == 'pt') {
-      return 'Voce pode marcar ate ${question.maxSelections}';
-    }
-    if (language == 'es') {
-      return 'Podes marcar hasta ${question.maxSelections}';
-    }
-    return 'You can pick up to ${question.maxSelections}';
+    return context.l10n.questionnaireSelectionValidation(question.maxSelections);
   }
 
   String _selectionCounterLabel(int selected, int total) => '$selected/$total';
 
   String _compactHintLabel(BuildContext context, Question question) {
-    final language = Localizations.localeOf(context).languageCode;
-    switch (question.id) {
-      case 'origin_country':
-        if (language == 'pt') {
-          return 'Escolha origem e destino.';
-        }
-        if (language == 'es') {
-          return 'Elegi origen y destino.';
-        }
-        return 'Choose origin and destination.';
-      case 'funding':
-        if (language == 'pt') {
-          return 'Escolha sua base financeira.';
-        }
-        if (language == 'es') {
-          return 'Elegi tu base financiera.';
-        }
-        return 'Choose your financial base.';
-      case 'travel_group':
-        if (language == 'pt') {
-          return 'Defina quem vai com voce.';
-        }
-        if (language == 'es') {
-          return 'Definí quién se muda con vos.';
-        }
-        return 'Choose who is moving with you.';
-      case 'available_capital':
-        if (language == 'pt') {
-          return 'Defina sua reserva inicial.';
-        }
-        if (language == 'es') {
-          return 'Definí tu capital inicial.';
-        }
-        return 'Choose your initial capital.';
-      default:
-        return context.l10n.bmpScrollHint;
-    }
+    return context.l10n.questionnaireCompactHint(question.id);
   }
 
   String _displayOptionLabel(
@@ -1257,73 +1204,10 @@ class _QuestionPageState extends State<QuestionPage> {
     String questionId,
     String value,
   ) {
-    switch (questionId) {
-      case 'timeline':
-        return switch (value) {
-          'just_exploring' => 'Explore',
-          'in_0_3m' => '0-3 mo',
-          'in_3_6m' => '3-6 mo',
-          'in_6_12m' => '6-12 mo',
-          'in_12m_plus' => '12+ mo',
-          'depends' => 'Flexible',
-          _ => context.l10n.questionOptionLabel(questionId, value),
-        };
-      case 'intent':
-        return switch (value) {
-          'find_job_br' => 'Work',
-          'remote_income' => 'Remote',
-          'study' => 'Study',
-          'family_partner' => 'Family',
-          'fresh_start' => 'Restart',
-          'explore_unsure' => 'Explore',
-          _ => context.l10n.questionOptionLabel(questionId, value),
-        };
-      case 'funding':
-        return switch (value) {
-          'savings' => 'Savings',
-          'remote_income' => 'Remote',
-          'job_search' => 'Need job',
-          'job_offer' => 'Offer',
-          'family_support' => 'Family',
-          'dont_know' => 'Unsure',
-          _ => context.l10n.questionOptionLabel(questionId, value),
-        };
-      case 'constraints':
-        return switch (value) {
-          'prefer_south' => 'South',
-          'need_big_city' => 'Big city',
-          'prefer_mid_city' => 'Mid city',
-          'want_coast' => 'Coast',
-          'prefer_cooler' => 'Cooler',
-          'need_transit' => 'Transit',
-          'avoid_expensive' => 'Lower cost',
-          'no_constraints' => 'Open',
-          _ => context.l10n.questionOptionLabel(questionId, value),
-        };
-      case 'priorities':
-        return switch (value) {
-          'low_cost' => 'Low cost',
-          'job_opportunities' => 'Jobs',
-          'safety' => 'Safety',
-          'warm_climate_beach' => 'Warm coast',
-          'transit_infra' => 'Transit',
-          'nature' => 'Nature',
-          'university' => 'Study',
-          'community' => 'Community',
-          'close_to_argentina' => 'Near AR',
-          'balanced_unsure' => 'Balanced',
-          _ => context.l10n.questionOptionLabel(questionId, value),
-        };
-      case 'travel_group':
-        return context.l10n.questionOptionLabel(questionId, value);
-      case 'available_capital':
-        if (value == 'prefer_not_say') {
-          return context.l10n.questionOptionLabel(questionId, value);
-        }
-        return _availableCapitalOptionLabel(context, value);
-      default:
-        return context.l10n.questionOptionLabel(questionId, value);
+    if (questionId == 'available_capital' && value != 'prefer_not_say') {
+      return _availableCapitalOptionLabel(context, value);
     }
+    return context.l10n.questionnaireCompactOptionLabel(questionId, value);
   }
 
   String _availableCapitalOptionLabel(BuildContext context, String value) {

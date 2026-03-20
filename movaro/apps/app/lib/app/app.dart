@@ -71,6 +71,7 @@ class MovaroApp extends StatelessWidget {
               apiHealthService: apiHealthService,
               journeyContextController: journeyContextController,
               locationController: locationController,
+              localeController: localeController,
             ).onGenerateRoute,
             initialRoute: AppRoutes.splash,
           ),

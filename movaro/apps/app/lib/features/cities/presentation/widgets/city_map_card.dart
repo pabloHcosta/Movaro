@@ -13,8 +13,6 @@ class CityMapCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final center = LatLng(city.latitude, city.longitude);
-
     return FrostedPanel(
       padding: EdgeInsets.zero,
       child: Column(
@@ -44,42 +42,7 @@ class CityMapCard extends StatelessWidget {
             borderRadius: const BorderRadius.all(Radius.circular(28)),
             child: SizedBox(
               height: 280,
-              child: FlutterMap(
-                options: MapOptions(
-                  initialCenter: center,
-                  initialZoom: 11.5,
-                  minZoom: 3,
-                  maxZoom: 18,
-                  interactionOptions: const InteractionOptions(
-                    flags: InteractiveFlag.all,
-                  ),
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.movaro.app',
-                  ),
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        point: center,
-                        width: 44,
-                        height: 44,
-                        child: const _CityMapMarker(),
-                      ),
-                    ],
-                  ),
-                  RichAttributionWidget(
-                    attributions: [
-                      TextSourceAttribution(
-                        'OpenStreetMap contributors',
-                        onTap: () {},
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              child: CityInteractiveMap(city: city),
             ),
           ),
           Padding(
@@ -105,6 +68,53 @@ class CityMapCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class CityInteractiveMap extends StatelessWidget {
+  const CityInteractiveMap({required this.city, super.key});
+
+  final City city;
+
+  @override
+  Widget build(BuildContext context) {
+    final center = LatLng(city.latitude, city.longitude);
+
+    return FlutterMap(
+      options: MapOptions(
+        initialCenter: center,
+        initialZoom: 11.5,
+        minZoom: 3,
+        maxZoom: 18,
+        interactionOptions: const InteractionOptions(
+          flags: InteractiveFlag.all,
+        ),
+      ),
+      children: [
+        TileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.movaro.app',
+        ),
+        MarkerLayer(
+          markers: [
+            Marker(
+              point: center,
+              width: 44,
+              height: 44,
+              child: const _CityMapMarker(),
+            ),
+          ],
+        ),
+        RichAttributionWidget(
+          attributions: [
+            TextSourceAttribution(
+              'OpenStreetMap contributors',
+              onTap: () {},
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

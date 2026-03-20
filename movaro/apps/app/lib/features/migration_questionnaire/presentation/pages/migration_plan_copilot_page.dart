@@ -424,26 +424,23 @@ ContextualHelpContent _buildCopilotHelpContent(BuildContext context) {
   return ContextualHelpContent(
     eyebrow: context.l10n.migrationPlanCopilotTitle,
     contextIcon: Icons.task_alt_outlined,
-    title: 'Use the plan one stage at a time',
-    body:
-        'Copilot turns the recommendation into a working checklist so you can focus on the next stage instead of the full move at once.',
-    steps: const [
+    title: context.l10n.copilotGuideTitle(),
+    body: context.l10n.copilotGuideBody(),
+    steps: [
       FeatureGuideStep(
         number: '1',
-        title: 'Watch the current stage',
-        body:
-            'The overview highlights the most important step and your overall progress.',
+        title: context.l10n.copilotGuideStepOneTitle(),
+        body: context.l10n.copilotGuideStepOneBody(),
       ),
       FeatureGuideStep(
         number: '2',
-        title: 'Open the right section',
-        body:
-            'Jump between documents, housing, work, and arrival without losing checklist state.',
+        title: context.l10n.copilotGuideStepTwoTitle(),
+        body: context.l10n.copilotGuideStepTwoBody(),
       ),
       FeatureGuideStep(
         number: '3',
-        title: 'Complete items as you go',
-        body: 'Checklist progress is saved locally so you can resume later.',
+        title: context.l10n.copilotGuideStepThreeTitle(),
+        body: context.l10n.copilotGuideStepThreeBody(),
       ),
     ],
   );
@@ -1235,7 +1232,7 @@ class _SectionChip extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    selected ? 'Current stage' : 'Open stage',
+                    context.l10n.copilotStageStateLabel(selected),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSoftFor(context),
                       fontWeight: FontWeight.w600,

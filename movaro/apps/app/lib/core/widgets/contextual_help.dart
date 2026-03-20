@@ -66,6 +66,7 @@ Future<void> showContextualHelpGuide(
           .map((step) => HelpStep(title: step.title, body: step.body))
           .toList(growable: false),
       preferenceKey: preferenceKey,
+      hideAgainLabel: l10n.helpHideAgainLabel(),
       dismissLabel: l10n.documentationGuideDismissAction,
       confirmLabel: l10n.documentationGuidePrimaryAction,
     ),

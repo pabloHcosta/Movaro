@@ -32,6 +32,7 @@ import 'package:movaro_app/features/cities/presentation/widgets/city_image_backd
 import 'package:movaro_app/features/cities/presentation/widgets/city_public_opinion_section.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_snapshot_tile.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_sources_section.dart';
+import 'package:movaro_app/features/cities/presentation/pages/city_explore_screen.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
@@ -338,6 +339,12 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                   .migrationQuestionnaireController
                                   ?.journeyContextController
                                   .detectedLocation,
+                              isActivePlanCity:
+                                  widget.migrationQuestionnaireController
+                                      ?.generatedPlan
+                                      ?.recommendedCity
+                                      ?.id ==
+                                  city.id,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -928,44 +935,164 @@ class _SummaryTableRow extends StatelessWidget {
 }
 
 class _CityLocationPanel extends StatelessWidget {
-  const _CityLocationPanel({required this.city, this.detectedLocation});
+  const _CityLocationPanel({
+    required this.city,
+    this.detectedLocation,
+    this.isActivePlanCity = false,
+  });
 
   final City city;
   final DetectedLocation? detectedLocation;
+  final bool isActivePlanCity;
 
   @override
   Widget build(BuildContext context) {
     final region = city.regionName;
-    final distanceLabel = _distanceLabel(context);
+    final distanceKm = _distanceKm();
+    final originCityName = detectedLocation?.city?.trim().isNotEmpty == true
+        ? detectedLocation!.city!
+        : 'Buenos Aires';
 
     return Column(
       children: [
-        CityMapCard(city: city),
-        const SizedBox(height: 12),
-        FrostedPanel(
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              if (region != null && region.isNotEmpty)
-                _ContextChip(
-                  label:
-                      '${context.l10n.cityDetailMapRegionLabel}: ${_titleCase(region)}',
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: SizedBox(
+            height: 200,
+            child: Stack(
+              children: [
+                Positioned.fill(child: CityInteractiveMap(city: city)),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    height: 90,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.82),
+                        ],
+                        stops: const [0.2, 1.0],
+                      ),
+                    ),
+                  ),
                 ),
-              if (distanceLabel != null)
-                _ContextChip(label: distanceLabel),
-            ],
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  right: 10,
+                  child: Wrap(
+                    spacing: 5,
+                    runSpacing: 5,
+                    children: [
+                      if (region != null && region.isNotEmpty)
+                        _MapBadge(label: '📍 ${context.l10n.cityDetailMapRegionLabel} ${_titleCase(region)}'),
+                      if (distanceKm != null)
+                        _MapBadge(
+                          label: context.l10n.cityDetailMapDistanceBadge(
+                            NumberFormat.decimalPattern(
+                              Localizations.localeOf(context).toString(),
+                            ).format(distanceKm),
+                            originCityName,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  left: 12,
+                  bottom: 10,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        city.name,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${city.stateName} · ${context.l10n.cityDetailMapCountryLabel()}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontSize: 9,
+                          color: Colors.white.withValues(alpha: 0.65),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (distanceKm != null)
+                  Positioned(
+                    right: 12,
+                    bottom: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.55),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.15),
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            context.l10n.cityDetailMapDistanceMiniLabel(),
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              fontSize: 7,
+                              color: Colors.white38,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          Text(
+                            '${NumberFormat.decimalPattern(Localizations.localeOf(context).toString()).format(distanceKm)} km',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              fontSize: 9,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        _ExploreMediaCard(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => CityExploreScreen(
+                city: city,
+                isPlanCity: isActivePlanCity,
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  String? _distanceLabel(BuildContext context) {
+  int? _distanceKm() {
     final latitude = detectedLocation?.latitude;
     final longitude = detectedLocation?.longitude;
-    final cityName = detectedLocation?.city;
-    if (latitude == null || longitude == null || cityName == null) {
+    if (latitude == null || longitude == null) {
       return null;
     }
 
@@ -975,12 +1102,7 @@ class _CityLocationPanel extends StatelessWidget {
       LatLng(city.latitude, city.longitude),
     );
 
-    return context.l10n.cityDetailMapDistanceLabel(
-      cityName,
-      NumberFormat.decimalPattern(
-        Localizations.localeOf(context).toString(),
-      ).format(distanceKm.round()),
-    );
+    return distanceKm.round();
   }
 
   String _titleCase(String value) {
@@ -993,6 +1115,139 @@ class _CityLocationPanel extends StatelessWidget {
           return '${part[0].toUpperCase()}${part.substring(1).toLowerCase()}';
         })
         .join(' ');
+  }
+}
+
+class _MapBadge extends StatelessWidget {
+  const _MapBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.55),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          fontSize: 8,
+          color: Colors.white.withValues(alpha: 0.9),
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _ExploreMediaCard extends StatelessWidget {
+  const _ExploreMediaCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF111827),
+            border: Border.all(color: const Color(0xFF1E2636)),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 44,
+                height: 28,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: 0,
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1565C0),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFF0B0F14),
+                            width: 2,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.photo_camera_outlined,
+                          color: Colors.white,
+                          size: 13,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 0,
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFCC0000),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFF0B0F14),
+                            width: 2,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.play_arrow_rounded,
+                          color: Colors.white,
+                          size: 15,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      context.l10n.cityDetailExploreMediaTitle(),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFFF0F6FC),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      context.l10n.cityDetailExploreMediaBody(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontSize: 9,
+                        color: const Color(0xFF4B5563),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFF1F6FEB),
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

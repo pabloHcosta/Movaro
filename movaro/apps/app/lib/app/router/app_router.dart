@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:movaro_app/app/localization/locale_controller.dart';
 import 'package:movaro_app/core/catalog/domain/repositories/catalog_repository.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
@@ -29,6 +30,7 @@ import 'package:movaro_app/features/migration_questionnaire/presentation/pages/m
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_save_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/question_page.dart';
 import 'package:movaro_app/features/shared/presentation/pages/protected_placeholder_page.dart';
+import 'package:movaro_app/features/shared/presentation/pages/app_settings_page.dart';
 import 'package:movaro_app/features/splash/presentation/pages/splash_page.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 
@@ -43,6 +45,7 @@ class AppRouter {
     required this.apiHealthService,
     required this.journeyContextController,
     required this.locationController,
+    required this.localeController,
   });
 
   final AppEnvironment environment;
@@ -54,6 +57,7 @@ class AppRouter {
   final ApiHealthService apiHealthService;
   final JourneyContextController journeyContextController;
   final LocationController locationController;
+  final LocaleController localeController;
 
   Route<dynamic> onGenerateRoute(RouteSettings settings) {
     final routeName = settings.name ?? AppRoutes.splash;
@@ -290,6 +294,11 @@ class AppRouter {
             locationController: locationController,
             args: args,
           ),
+        );
+      case AppRoutes.settings:
+        return _buildRoute(
+          settings,
+          AppSettingsPage(localeController: localeController),
         );
       case AppRoutes.migrationPlanResult:
         return _buildRoute(

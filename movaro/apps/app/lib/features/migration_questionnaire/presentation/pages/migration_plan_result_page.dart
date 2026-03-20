@@ -19,6 +19,8 @@ import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/explore_entry_card.dart';
+import 'package:movaro_app/features/cities/presentation/pages/city_explore_screen.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
@@ -253,6 +255,20 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
                             city.id,
                           ),
                           onFavoriteTap: () => _toggleFavoriteCity(city),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+                          child: ExploreEntryCard(
+                            cityName: city.name,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => CityExploreScreen(
+                                  city: city,
+                                  isPlanCity: true,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -517,6 +533,8 @@ class _PlanHero extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                          const SizedBox(height: 8),
+                          _ResultCityRating(score: city.movaroScores.overall),
                           const SizedBox(height: 10),
                           Wrap(
                             spacing: 8,
@@ -539,6 +557,50 @@ class _PlanHero extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class _ResultCityRating extends StatelessWidget {
+  const _ResultCityRating({required this.score});
+
+  final int score;
+
+  @override
+  Widget build(BuildContext context) {
+    final rating = ((score / 20) * 2).round() / 2;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var index = 0; index < 5; index++) ...[
+          Icon(
+            _starIconFor(index, rating),
+            size: 15,
+            color: const Color(0xFFF2B94B),
+          ),
+          if (index != 4) const SizedBox(width: 1),
+        ],
+        const SizedBox(width: 8),
+        Text(
+          '${rating.toStringAsFixed(rating.truncateToDouble() == rating ? 0 : 1)}/5',
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
+
+  IconData _starIconFor(int index, double rating) {
+    final position = index + 1;
+    if (rating >= position) {
+      return Icons.star_rounded;
+    }
+    if (rating >= position - 0.5) {
+      return Icons.star_half_rounded;
+    }
+    return Icons.star_border_rounded;
   }
 }
 

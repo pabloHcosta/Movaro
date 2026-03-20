@@ -37,6 +37,7 @@ import 'package:movaro_app/features/migration_questionnaire/data/repositories/lo
 import 'package:movaro_app/features/migration_questionnaire/data/repositories/question_repository_impl.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +45,7 @@ void main() {
   late _AppTestHarness harness;
 
   setUp(() async {
+    SharedPreferences.setMockInitialValues(const <String, Object>{});
     harness = await _AppTestHarness.create();
   });
 
@@ -341,6 +343,7 @@ class _AppTestHarness {
               apiHealthService: apiHealthService,
               journeyContextController: journeyContextController,
               locationController: locationController,
+              localeController: localeController,
             ).onGenerateRoute,
             initialRoute: initialRoute,
           ),
