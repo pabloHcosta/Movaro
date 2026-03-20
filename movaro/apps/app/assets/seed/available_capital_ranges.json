@@ -1,0 +1,27 @@
+{
+  "argentina": {
+    "currencyCode": "ARS",
+    "locale": "es_AR",
+    "bands": [500000, 2000000, 5000000]
+  },
+  "chile": {
+    "currencyCode": "CLP",
+    "locale": "es_CL",
+    "bands": [500000, 2000000, 5000000]
+  },
+  "uruguai": {
+    "currencyCode": "UYU",
+    "locale": "es_UY",
+    "bands": [15000, 60000, 150000]
+  },
+  "brasil": {
+    "currencyCode": "BRL",
+    "locale": "pt_BR",
+    "bands": [3000, 10000, 25000]
+  },
+  "default": {
+    "currencyCode": "USD",
+    "locale": "en_US",
+    "bands": [500, 2000, 5000]
+  }
+}

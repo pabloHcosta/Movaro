@@ -8,6 +8,7 @@ import 'package:movaro_app/app/theme/app_theme.dart';
 import 'package:movaro_app/core/catalog/domain/repositories/catalog_repository.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
+import 'package:movaro_app/core/location/location_controller.dart';
 import 'package:movaro_app/core/network/api_health_service.dart';
 import 'package:movaro_app/features/auth/application/auth_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
@@ -24,6 +25,7 @@ class MovaroApp extends StatelessWidget {
     required this.copilotExchangeRatesService,
     required this.apiHealthService,
     required this.journeyContextController,
+    required this.locationController,
     required this.localeController,
     super.key,
   });
@@ -36,6 +38,7 @@ class MovaroApp extends StatelessWidget {
   final CopilotExchangeRatesService copilotExchangeRatesService;
   final ApiHealthService apiHealthService;
   final JourneyContextController journeyContextController;
+  final LocationController locationController;
   final LocaleController localeController;
 
   @override
@@ -67,6 +70,7 @@ class MovaroApp extends StatelessWidget {
               copilotExchangeRatesService: copilotExchangeRatesService,
               apiHealthService: apiHealthService,
               journeyContextController: journeyContextController,
+              locationController: locationController,
             ).onGenerateRoute,
             initialRoute: AppRoutes.splash,
           ),

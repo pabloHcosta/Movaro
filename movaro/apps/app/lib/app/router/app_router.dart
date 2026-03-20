@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/core/catalog/domain/repositories/catalog_repository.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
+import 'package:movaro_app/core/location/location_controller.dart';
+import 'package:movaro_app/core/location/presentation/pages/location_permission_screen.dart';
 import 'package:movaro_app/core/network/api_health_service.dart';
 import 'package:movaro_app/features/auth/application/auth_controller.dart';
-import 'package:movaro_app/features/auth/presentation/pages/login_page.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/pages/cities_explore_page.dart';
@@ -41,6 +42,7 @@ class AppRouter {
     required this.copilotExchangeRatesService,
     required this.apiHealthService,
     required this.journeyContextController,
+    required this.locationController,
   });
 
   final AppEnvironment environment;
@@ -51,26 +53,20 @@ class AppRouter {
   final CopilotExchangeRatesService copilotExchangeRatesService;
   final ApiHealthService apiHealthService;
   final JourneyContextController journeyContextController;
+  final LocationController locationController;
 
   Route<dynamic> onGenerateRoute(RouteSettings settings) {
     final routeName = settings.name ?? AppRoutes.splash;
 
     if (AppRoutes.privatePaths.contains(routeName) &&
         !authController.isAuthenticated) {
-      authController.rememberPendingRoute(routeName);
       return _buildRoute(
-        const RouteSettings(name: AppRoutes.login),
-        LoginPage(authController: authController),
-      );
-    }
-
-    if (routeName == AppRoutes.migrationQuestionnaire &&
-        !journeyContextController.canEnterQuestionnaire) {
-      return _buildRoute(
-        const RouteSettings(name: AppRoutes.journeySetup),
-        JourneySetupPage(
-          catalogRepository: catalogRepository,
+        const RouteSettings(name: AppRoutes.publicHome),
+        PublicHomePage(
           journeyContextController: journeyContextController,
+          citiesController: citiesController,
+          migrationQuestionnaireController: migrationQuestionnaireController,
+          locationController: locationController,
         ),
       );
     }
@@ -88,6 +84,7 @@ class AppRouter {
           journeyContextController: journeyContextController,
           citiesController: citiesController,
           migrationQuestionnaireController: migrationQuestionnaireController,
+          locationController: locationController,
         ),
       );
     }
@@ -101,6 +98,7 @@ class AppRouter {
         OnboardingPage(
           authController: authController,
           catalogRepository: catalogRepository,
+          locationController: locationController,
         ),
       );
     }
@@ -118,6 +116,7 @@ class AppRouter {
           cityId: cityId,
           citiesController: citiesController,
           migrationQuestionnaireController: migrationQuestionnaireController,
+          locationController: locationController,
           selectForPlan: selectForPlan,
         ),
       );
@@ -134,6 +133,7 @@ class AppRouter {
             migrationQuestionnaireController: migrationQuestionnaireController,
             apiHealthService: apiHealthService,
             journeyContextController: journeyContextController,
+            locationController: locationController,
           ),
         );
       case AppRoutes.publicHome:
@@ -144,6 +144,7 @@ class AppRouter {
             journeyContextController: journeyContextController,
             citiesController: citiesController,
             migrationQuestionnaireController: migrationQuestionnaireController,
+            locationController: locationController,
           ),
         );
       case AppRoutes.favorites:
@@ -175,6 +176,7 @@ class AppRouter {
           settings,
           IntroPage(
             journeyContextController: journeyContextController,
+            locationController: locationController,
             isFirstLaunch: isFirstLaunch,
           ),
         );
@@ -185,6 +187,7 @@ class AppRouter {
           JourneySetupPage(
             catalogRepository: catalogRepository,
             journeyContextController: journeyContextController,
+            locationController: locationController,
           ),
         );
       case AppRoutes.explore:
@@ -221,7 +224,9 @@ class AppRouter {
             section: section,
             exchangeRatesService: copilotExchangeRatesService,
             preferredCurrencyCountryId:
-                journeyContextController.originCountryId ??
+                locationController.fallbackPreferredCountryId(
+                  journeyContextController.originCountryId,
+                ) ??
                 migrationQuestionnaireController.generatedPlan?.originCountry,
           ),
         );
@@ -248,12 +253,15 @@ class AppRouter {
           CountriesPage(catalogRepository: catalogRepository),
         );
       case AppRoutes.login:
-        if (authController.isAuthenticated) {
-          final nextRoute = authController.resolveRouteAfterLogin();
-          return onGenerateRoute(RouteSettings(name: nextRoute));
-        }
-
-        return _buildRoute(settings, LoginPage(authController: authController));
+        return _buildRoute(
+          const RouteSettings(name: AppRoutes.publicHome),
+          PublicHomePage(
+            journeyContextController: journeyContextController,
+            citiesController: citiesController,
+            migrationQuestionnaireController: migrationQuestionnaireController,
+            locationController: locationController,
+          ),
+        );
       case AppRoutes.onboarding:
         unawaited(catalogRepository.getCountries());
         return _buildRoute(
@@ -261,12 +269,27 @@ class AppRouter {
           OnboardingPage(
             authController: authController,
             catalogRepository: catalogRepository,
+            locationController: locationController,
           ),
         );
       case AppRoutes.migrationQuestionnaire:
         return _buildRoute(
           settings,
-          QuestionPage(controller: migrationQuestionnaireController),
+          QuestionPage(
+            controller: migrationQuestionnaireController,
+            locationController: locationController,
+          ),
+        );
+      case AppRoutes.locationPermission:
+        final args = settings.arguments is LocationPermissionScreenArgs
+            ? settings.arguments! as LocationPermissionScreenArgs
+            : const LocationPermissionScreenArgs();
+        return _buildRoute(
+          settings,
+          LocationPermissionScreen(
+            locationController: locationController,
+            args: args,
+          ),
         );
       case AppRoutes.migrationPlanResult:
         return _buildRoute(
@@ -323,6 +346,7 @@ class AppRouter {
           JourneySetupPage(
             catalogRepository: catalogRepository,
             journeyContextController: journeyContextController,
+            locationController: locationController,
           ),
         );
     }

@@ -6,6 +6,7 @@ import 'package:movaro_app/core/catalog/data/repositories/catalog_repository_imp
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/environment/app_flavor.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
+import 'package:movaro_app/core/location/location_controller.dart';
 import 'package:movaro_app/core/network/api_health_service.dart';
 import 'package:movaro_app/core/supabase/supabase_bootstrap.dart';
 import 'package:movaro_app/features/auth/application/auth_controller.dart';
@@ -42,6 +43,9 @@ Future<void> bootstrap({required AppFlavor defaultFlavor}) async {
   final journeyContextController = JourneyContextController(
     catalogRepository: catalogRepository,
   );
+  final locationController = LocationController(
+    journeyContextController: journeyContextController,
+  );
   final citiesController = CitiesController(repository: citiesRepository);
   final migrationQuestionnaireController = MigrationQuestionnaireController(
     questionRepository: QuestionRepositoryImpl(
@@ -69,6 +73,7 @@ Future<void> bootstrap({required AppFlavor defaultFlavor}) async {
       copilotExchangeRatesService: copilotExchangeRatesService,
       apiHealthService: apiHealthService,
       journeyContextController: journeyContextController,
+      locationController: locationController,
       localeController: localeController,
     ),
   );

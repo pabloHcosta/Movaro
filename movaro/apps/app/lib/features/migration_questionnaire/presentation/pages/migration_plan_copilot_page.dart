@@ -423,6 +423,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
 ContextualHelpContent _buildCopilotHelpContent(BuildContext context) {
   return ContextualHelpContent(
     eyebrow: context.l10n.migrationPlanCopilotTitle,
+    contextIcon: Icons.task_alt_outlined,
     title: 'Use the plan one stage at a time',
     body:
         'Copilot turns the recommendation into a working checklist so you can focus on the next stage instead of the full move at once.',

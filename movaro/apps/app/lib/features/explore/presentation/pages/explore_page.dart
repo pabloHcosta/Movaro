@@ -74,6 +74,7 @@ class _ExplorePageState extends State<ExplorePage> {
   ContextualHelpContent _helpContent(BuildContext context) {
     return ContextualHelpContent(
       eyebrow: context.l10n.mainNavExplore,
+      contextIcon: Icons.explore_outlined,
       title: 'Explore with plan context',
       body:
           'Explore groups cities and practical content around your current migration route so discovery still supports a decision.',
@@ -257,10 +258,7 @@ class _ExplorePageState extends State<ExplorePage> {
     if (plan != null) {
       return AppRoutes.migrationPlanResult;
     }
-    if (journeyContextController.hasDestinationSelected) {
-      return AppRoutes.migrationQuestionnaire;
-    }
-    return AppRoutes.journeySetup;
+    return AppRoutes.migrationQuestionnaire;
   }
 }
 

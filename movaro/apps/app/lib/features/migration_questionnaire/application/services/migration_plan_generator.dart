@@ -135,6 +135,11 @@ class MigrationPlanGenerator {
     final intent = _firstValue(answerMap['intent']);
     final funding = _firstValue(answerMap['funding']);
     final timeline = _firstValue(answerMap['timeline']);
+    final travelGroup = _firstValue(answerMap['travel_group']);
+    final childrenCount = _parseChildrenCount(
+      _firstValue(answerMap['travel_group_children_count']),
+    );
+    final availableCapital = _firstValue(answerMap['available_capital']);
     final priorities = answerMap['priorities'] ?? const <String>[];
     final constraints = answerMap['constraints'] ?? const <String>[];
     final archetypeKey = _resolveArchetype(intent: intent, funding: funding);
@@ -154,6 +159,9 @@ class MigrationPlanGenerator {
       timeline: timeline,
       variant: variant,
       funding: funding,
+      travelGroup: travelGroup,
+      childrenCount: childrenCount,
+      availableCapital: availableCapital,
       archetypeKey: archetypeKey,
       confidence: recommendation.confidence,
       selectedPriorities: priorities,
@@ -253,6 +261,15 @@ class MigrationPlanGenerator {
     }
 
     return _archetypeByIntent[intent] ?? 'explorer';
+  }
+
+  int? _parseChildrenCount(String value) {
+    return switch (value) {
+      '1' => 1,
+      '2' => 2,
+      '3+' => 3,
+      _ => null,
+    };
   }
 
   Map<String, double> _buildWeights({

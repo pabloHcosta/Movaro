@@ -1,6 +1,7 @@
 import 'package:movaro_app/core/catalog/domain/repositories/catalog_repository.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/journey/journey_country_metadata.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/available_capital_ranges_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/models/option_model.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/models/question_model.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/question.dart';
@@ -19,6 +20,7 @@ class QuestionRepositoryImpl implements QuestionRepository {
 
   @override
   Future<List<Question>> getQuestions() async {
+    await AvailableCapitalRangesStore.load();
     final countries = await _catalogRepository.getCountries();
 
     final destinationCountryId = _journeyContextController.destinationCountryId;
@@ -81,6 +83,27 @@ class QuestionRepositoryImpl implements QuestionRepository {
             value: 'in_12m_plus',
           ),
           OptionModel(id: 'depends', label: 'depends', value: 'depends'),
+        ],
+      ).toEntity(),
+      QuestionModel(
+        id: 'travel_group',
+        title: 'travel_group',
+        type: 'single_card',
+        variants: const [QuestionnaireVariant.strategic],
+        options: const [
+          OptionModel(id: 'solo', label: 'solo', value: 'solo'),
+          OptionModel(id: 'partner', label: 'partner', value: 'partner'),
+          OptionModel(
+            id: 'family_no_kids',
+            label: 'family_no_kids',
+            value: 'family_no_kids',
+          ),
+          OptionModel(
+            id: 'family_kids',
+            label: 'family_kids',
+            value: 'family_kids',
+          ),
+          OptionModel(id: 'undecided', label: 'undecided', value: 'undecided'),
         ],
       ).toEntity(),
       QuestionModel(
@@ -200,6 +223,24 @@ class QuestionRepositoryImpl implements QuestionRepository {
             value: 'family_support',
           ),
           OptionModel(id: 'dont_know', label: 'dont_know', value: 'dont_know'),
+        ],
+      ).toEntity(),
+      QuestionModel(
+        id: 'available_capital',
+        title: 'available_capital',
+        type: 'single_card',
+        isOptional: true,
+        variants: const [QuestionnaireVariant.strategic],
+        options: const [
+          OptionModel(id: 'low', label: 'low', value: 'low'),
+          OptionModel(id: 'medium', label: 'medium', value: 'medium'),
+          OptionModel(id: 'high', label: 'high', value: 'high'),
+          OptionModel(id: 'very_high', label: 'very_high', value: 'very_high'),
+          OptionModel(
+            id: 'prefer_not_say',
+            label: 'prefer_not_say',
+            value: 'prefer_not_say',
+          ),
         ],
       ).toEntity(),
       QuestionModel(

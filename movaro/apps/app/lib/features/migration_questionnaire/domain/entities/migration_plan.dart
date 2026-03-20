@@ -11,6 +11,9 @@ class MigrationPlan {
     required this.steps,
     this.variant = QuestionnaireVariant.lean,
     this.funding = '',
+    this.travelGroup = '',
+    this.childrenCount,
+    this.availableCapital = '',
     this.archetypeKey,
     this.confidence = 0,
     this.selectedPriorities = const [],
@@ -28,6 +31,9 @@ class MigrationPlan {
   final List<MigrationStep> steps;
   final QuestionnaireVariant variant;
   final String funding;
+  final String travelGroup;
+  final int? childrenCount;
+  final String availableCapital;
   final String? archetypeKey;
   final double confidence;
   final List<String> selectedPriorities;
@@ -45,6 +51,9 @@ class MigrationPlan {
     List<MigrationStep>? steps,
     QuestionnaireVariant? variant,
     String? funding,
+    String? travelGroup,
+    Object? childrenCount = _migrationPlanNoChange,
+    String? availableCapital,
     String? archetypeKey,
     double? confidence,
     List<String>? selectedPriorities,
@@ -62,6 +71,11 @@ class MigrationPlan {
       steps: steps ?? this.steps,
       variant: variant ?? this.variant,
       funding: funding ?? this.funding,
+      travelGroup: travelGroup ?? this.travelGroup,
+      childrenCount: identical(childrenCount, _migrationPlanNoChange)
+          ? this.childrenCount
+          : childrenCount as int?,
+      availableCapital: availableCapital ?? this.availableCapital,
       archetypeKey: archetypeKey ?? this.archetypeKey,
       confidence: confidence ?? this.confidence,
       selectedPriorities: selectedPriorities ?? this.selectedPriorities,
@@ -74,3 +88,5 @@ class MigrationPlan {
     );
   }
 }
+
+const Object _migrationPlanNoChange = Object();

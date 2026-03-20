@@ -15,6 +15,7 @@ class AppRoutes {
   static const countries = '/countries';
   static const login = '/login';
   static const onboarding = '/onboarding';
+  static const locationPermission = '/location/permission';
   static const migrationQuestionnaire = '/migration/questionnaire';
   static const migrationPlanResult = '/migration/result';
   static const migrationPlanCopilot = '/migration/copilot';
@@ -43,6 +44,7 @@ class AppRoutes {
 
   static const privatePaths = <String>{
     onboarding,
+    locationPermission,
     authenticatedHome,
     communityCreate,
     migrationSave,

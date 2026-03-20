@@ -149,10 +149,7 @@ class MainNavigationBar extends StatelessWidget {
     if (plan != null) {
       return AppRoutes.migrationPlanResult;
     }
-    if (journeyContextController.canEnterQuestionnaire) {
-      return AppRoutes.migrationQuestionnaire;
-    }
-    return AppRoutes.journeySetup;
+    return AppRoutes.migrationQuestionnaire;
   }
 
   void _showFeedback(BuildContext context, String message) {

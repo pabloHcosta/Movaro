@@ -13,6 +13,9 @@ class MigrationPlanModel {
     required this.steps,
     this.variant = QuestionnaireVariant.lean,
     this.funding = '',
+    this.travelGroup = '',
+    this.childrenCount,
+    this.availableCapital = '',
     this.archetypeKey,
     this.confidence = 0,
     this.selectedPriorities = const [],
@@ -33,6 +36,9 @@ class MigrationPlanModel {
           QuestionnaireVariantX.fromId(json['variant'] as String?) ??
           QuestionnaireVariant.lean,
       funding: json['funding'] as String? ?? '',
+      travelGroup: json['travelGroup'] as String? ?? '',
+      childrenCount: (json['childrenCount'] as num?)?.toInt(),
+      availableCapital: json['availableCapital'] as String? ?? '',
       archetypeKey: json['archetypeKey'] as String?,
       confidence: (json['confidence'] as num?)?.toDouble() ?? 0,
       selectedPriorities:
@@ -75,6 +81,9 @@ class MigrationPlanModel {
       timeline: plan.timeline,
       variant: plan.variant,
       funding: plan.funding,
+      travelGroup: plan.travelGroup,
+      childrenCount: plan.childrenCount,
+      availableCapital: plan.availableCapital,
       archetypeKey: plan.archetypeKey,
       confidence: plan.confidence,
       selectedPriorities: plan.selectedPriorities,
@@ -93,6 +102,9 @@ class MigrationPlanModel {
   final String timeline;
   final QuestionnaireVariant variant;
   final String funding;
+  final String travelGroup;
+  final int? childrenCount;
+  final String availableCapital;
   final String? archetypeKey;
   final double confidence;
   final List<String> selectedPriorities;
@@ -110,6 +122,9 @@ class MigrationPlanModel {
     'timeline': timeline,
     'variant': variant.id,
     'funding': funding,
+    'travelGroup': travelGroup,
+    'childrenCount': childrenCount,
+    'availableCapital': availableCapital,
     'archetypeKey': archetypeKey,
     'confidence': confidence,
     'selectedPriorities': selectedPriorities,
@@ -132,6 +147,9 @@ class MigrationPlanModel {
     timeline: timeline,
     variant: variant,
     funding: funding,
+    travelGroup: travelGroup,
+    childrenCount: childrenCount,
+    availableCapital: availableCapital,
     archetypeKey: archetypeKey,
     confidence: confidence,
     selectedPriorities: selectedPriorities,

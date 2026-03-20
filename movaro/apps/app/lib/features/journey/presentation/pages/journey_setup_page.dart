@@ -8,6 +8,8 @@ import 'package:movaro_app/core/journey/country_coverage.dart';
 import 'package:movaro_app/core/journey/detected_location.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/journey/journey_country_metadata.dart';
+import 'package:movaro_app/core/location/location_controller.dart';
+import 'package:movaro_app/core/location/presentation/pages/location_permission_screen.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -21,11 +23,13 @@ class JourneySetupPage extends StatefulWidget {
   const JourneySetupPage({
     required this.catalogRepository,
     required this.journeyContextController,
+    required this.locationController,
     super.key,
   });
 
   final CatalogRepository catalogRepository;
   final JourneyContextController journeyContextController;
+  final LocationController locationController;
 
   @override
   State<JourneySetupPage> createState() => _JourneySetupPageState();
@@ -109,6 +113,7 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
     final l10n = context.l10n;
     return ContextualHelpContent(
       eyebrow: l10n.journeySetupPageTitle,
+      contextIcon: Icons.route_outlined,
       title: 'Pick a route in one place',
       body:
           'Choose destination, optionally use location as a hint, and keep origin editable before starting the questionnaire.',
@@ -523,7 +528,13 @@ class _OriginAssistSection extends StatelessWidget {
           runSpacing: 10,
           children: [
             OutlinedButton.icon(
-              onPressed: controller.requestDetectedLocation,
+              onPressed: () => Navigator.pushNamed(
+                context,
+                AppRoutes.locationPermission,
+                arguments: const LocationPermissionScreenArgs(
+                  returnToPrevious: true,
+                ),
+              ),
               icon: const Icon(Icons.my_location_rounded),
               label: Text(context.l10n.journeyEntryUseLocationAction),
             ),

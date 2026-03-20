@@ -339,6 +339,7 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
   ContextualHelpContent _helpContent(BuildContext context) {
     return ContextualHelpContent(
       eyebrow: context.l10n.citiesGuideEyebrow,
+      contextIcon: Icons.travel_explore_rounded,
       title: context.l10n.citiesGuideTitle,
       body: context.l10n.citiesGuideBody,
       steps: [

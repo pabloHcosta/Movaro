@@ -49,7 +49,9 @@
 		</dict>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Movaro uses your location only when you ask for it, to suggest your current country as a starting point for your migration journey.</string>
+	<string>Usamos sua localização para detectar seu país de origem e personalizar sua experiência de migração.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Usamos sua localização para detectar seu país de origem e personalizar sua experiência de migração.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

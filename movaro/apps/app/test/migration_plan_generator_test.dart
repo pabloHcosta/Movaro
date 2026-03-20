@@ -123,6 +123,28 @@ void main() {
         );
       },
     );
+
+    test('strategic variant stores travel group and capital context', () async {
+      final plan = await generator.generate(
+        variant: QuestionnaireVariant.strategic,
+        answers: const [
+          Answer(questionId: 'origin_country', values: ['argentina']),
+          Answer(questionId: 'destination_country', values: ['brasil']),
+          Answer(questionId: 'timeline', values: ['in_3_6m']),
+          Answer(questionId: 'travel_group', values: ['family_kids']),
+          Answer(questionId: 'travel_group_children_count', values: ['2']),
+          Answer(questionId: 'priorities', values: ['safety', 'community']),
+          Answer(questionId: 'constraints', values: ['need_big_city']),
+          Answer(questionId: 'funding', values: ['savings']),
+          Answer(questionId: 'available_capital', values: ['medium']),
+          Answer(questionId: 'intent', values: ['family_partner']),
+        ],
+      );
+
+      expect(plan.travelGroup, 'family_kids');
+      expect(plan.childrenCount, 2);
+      expect(plan.availableCapital, 'medium');
+    });
   });
 }
 

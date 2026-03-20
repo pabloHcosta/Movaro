@@ -8,6 +8,7 @@ import 'package:movaro_app/core/journey/journey_country_metadata.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/features/explore/application/services/documentation_guide_preferences_store.dart';
@@ -375,14 +376,14 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
   Future<void> _showGuideModal() async {
     final l10n = context.l10n;
 
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) => FeatureGuideDialog(
+    await showContextualHelpGuide(
+      context,
+      preferenceKey: 'documentation_guide',
+      content: ContextualHelpContent(
         eyebrow: l10n.documentationHeroEyebrow,
+        contextIcon: Icons.description_outlined,
         title: l10n.documentationGuideModalTitle,
         body: l10n.documentationGuideModalBody,
-        stepsLabel: l10n.documentationGuideStepsLabel,
         steps: [
           FeatureGuideStep(
             number: '1',
@@ -400,12 +401,6 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
             body: l10n.documentationGuideModalStepOpenBody,
           ),
         ],
-        hideNextTimeLabel: l10n.documentationGuideHideNextTime,
-        dismissLabel: l10n.documentationGuideDismissAction,
-        primaryLabel: l10n.documentationGuidePrimaryAction,
-        onClose: (hideNextTime) async {
-          await _preferencesStore.setHideGuide(hideNextTime);
-        },
       ),
     );
   }

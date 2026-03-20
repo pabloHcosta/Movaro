@@ -3,6 +3,7 @@ import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
+import 'package:movaro_app/core/location/location_controller.dart';
 import 'package:movaro_app/core/network/api_health_service.dart';
 import 'package:movaro_app/features/auth/application/auth_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
@@ -18,6 +19,7 @@ class SplashPage extends StatefulWidget {
     required this.migrationQuestionnaireController,
     required this.apiHealthService,
     required this.journeyContextController,
+    required this.locationController,
     super.key,
   });
 
@@ -27,6 +29,7 @@ class SplashPage extends StatefulWidget {
   final MigrationQuestionnaireController migrationQuestionnaireController;
   final ApiHealthService apiHealthService;
   final JourneyContextController journeyContextController;
+  final LocationController locationController;
 
   @override
   State<SplashPage> createState() => _SplashPageState();
@@ -70,6 +73,7 @@ class _SplashPageState extends State<SplashPage> {
     }
 
     await widget.journeyContextController.initialize();
+    await widget.locationController.initialize();
     await widget.authController.initialize();
     await widget.citiesController.initialize(
       preloadData: widget.journeyContextController.hasSelectedJourney,
@@ -90,7 +94,7 @@ class _SplashPageState extends State<SplashPage> {
 
     const shouldReplayIntroFlow = false;
 
-    final nextRoute =
+    final resolvedRoute =
         shouldReplayIntroFlow || !widget.journeyContextController.hasSeenIntro
         ? AppRoutes.intro
         : !widget.journeyContextController.hasDestinationSelected
@@ -105,10 +109,9 @@ class _SplashPageState extends State<SplashPage> {
 
     Navigator.pushReplacementNamed(
       context,
-      nextRoute,
+      resolvedRoute,
       arguments:
-          shouldReplayIntroFlow ||
-          !widget.journeyContextController.hasSeenIntro,
+          shouldReplayIntroFlow || !widget.journeyContextController.hasSeenIntro,
     );
   }
 

@@ -61,6 +61,7 @@ class MultiCurrencyAmount extends StatefulWidget {
     required String fallbackLocale,
     String? preferredCountryId,
   }) {
+    final effectiveRates = _EffectiveExchangeRates.resolve(exchangeRates);
     final optionsByCode = <String, _CurrencyOption>{
       'BRL': _CurrencyOption(
         currencyCode: 'BRL',
@@ -70,30 +71,44 @@ class MultiCurrencyAmount extends StatefulWidget {
           amount: amountInBrl,
         ),
       ),
-    };
-
-    if (exchangeRates != null) {
-      optionsByCode['USD'] = _CurrencyOption(
+      'USD': _CurrencyOption(
         currencyCode: 'USD',
         label: _formatCurrency(
           locale: 'en_US',
           currencyCode: 'USD',
-          amount: amountInBrl * exchangeRates.brlToUsd,
+          amount: amountInBrl * effectiveRates.brlToUsd,
         ),
-      );
-      optionsByCode['ARS'] = _CurrencyOption(
+      ),
+      'ARS': _CurrencyOption(
         currencyCode: 'ARS',
         label: _formatCurrency(
           locale: 'es_AR',
           currencyCode: 'ARS',
-          amount: amountInBrl * exchangeRates.brlToArs,
+          amount: amountInBrl * effectiveRates.brlToArs,
         ),
-      );
-    }
+      ),
+      'CLP': _CurrencyOption(
+        currencyCode: 'CLP',
+        label: _formatCurrency(
+          locale: 'es_CL',
+          currencyCode: 'CLP',
+          amount: amountInBrl * effectiveRates.brlToClp,
+        ),
+      ),
+      'UYU': _CurrencyOption(
+        currencyCode: 'UYU',
+        label: _formatCurrency(
+          locale: 'es_UY',
+          currencyCode: 'UYU',
+          amount: amountInBrl * effectiveRates.brlToUyu,
+        ),
+      ),
+    };
 
     final localCurrencyCode = _currencyCodeForCountry(preferredCountryId);
     final primaryCode =
-        localCurrencyCode != null && optionsByCode.containsKey(localCurrencyCode)
+        localCurrencyCode != null &&
+            optionsByCode.containsKey(localCurrencyCode)
         ? localCurrencyCode
         : optionsByCode.containsKey('USD')
         ? 'USD'
@@ -120,13 +135,23 @@ class MultiCurrencyAmount extends StatefulWidget {
   static String? _currencyCodeForCountry(String? countryId) {
     switch (countryId?.toLowerCase()) {
       case 'argentina':
+      case 'ar':
         return 'ARS';
+      case 'chile':
+      case 'cl':
+        return 'CLP';
+      case 'uruguai':
+      case 'uruguay':
+      case 'uy':
+        return 'UYU';
       case 'brasil':
       case 'brazil':
+      case 'br':
         return 'BRL';
       case 'estados_unidos':
       case 'united_states':
       case 'usa':
+      case 'us':
         return 'USD';
       default:
         return null;
@@ -145,7 +170,9 @@ class MultiCurrencyAmount extends StatefulWidget {
         'USD' => 'US\$',
         'ARS' => 'AR\$',
         'CLP' => 'CLP\$',
-        _ => 'R\$',
+        'UYU' => 'UYU\$',
+        'BRL' => 'R\$',
+        _ => currencyCode,
       },
       decimalDigits: switch (currencyCode) {
         'USD' => 2,
@@ -237,13 +264,43 @@ class _MultiCurrencyAmountState extends State<MultiCurrencyAmount> {
 }
 
 class _CurrencyOption {
-  const _CurrencyOption({
-    required this.currencyCode,
-    required this.label,
-  });
+  const _CurrencyOption({required this.currencyCode, required this.label});
 
   final String currencyCode;
   final String label;
+}
+
+class _EffectiveExchangeRates {
+  const _EffectiveExchangeRates({
+    required this.brlToUsd,
+    required this.brlToArs,
+    required this.brlToClp,
+    required this.brlToUyu,
+  });
+
+  final double brlToUsd;
+  final double brlToArs;
+  final double brlToClp;
+  final double brlToUyu;
+
+  static const _fallback = _EffectiveExchangeRates(
+    brlToUsd: 0.20,
+    brlToArs: 190.0,
+    brlToClp: 185.0,
+    brlToUyu: 8.2,
+  );
+
+  static _EffectiveExchangeRates resolve(CopilotExchangeRates? liveRates) {
+    if (liveRates == null) {
+      return _fallback;
+    }
+    return _EffectiveExchangeRates(
+      brlToUsd: liveRates.brlToUsd,
+      brlToArs: liveRates.brlToArs,
+      brlToClp: liveRates.brlToUsd * 930.0,
+      brlToUyu: liveRates.brlToUsd * 41.0,
+    );
+  }
 }
 
 class _AmountChip extends StatelessWidget {

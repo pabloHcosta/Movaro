@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/core/persistence/feature_guide_preferences_store.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
+import 'package:movaro_app/shared/widgets/help_bottom_sheet.dart';
 
 class ContextualHelpContent {
   const ContextualHelpContent({
     required this.eyebrow,
+    required this.contextIcon,
     required this.title,
     required this.body,
     required this.steps,
   });
 
   final String eyebrow;
+  final IconData contextIcon;
   final String title;
   final String body;
   final List<FeatureGuideStep> steps;
@@ -49,23 +52,26 @@ Future<void> showContextualHelpGuide(
   FeatureGuidePreferencesStore? store,
 }) async {
   final l10n = context.l10n;
-  final guideStore = store ?? FeatureGuidePreferencesStore();
 
-  await showDialog<void>(
+  await showModalBottomSheet<void>(
     context: context,
-    barrierDismissible: true,
-    builder: (dialogContext) => FeatureGuideDialog(
-      eyebrow: content.eyebrow,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (dialogContext) => HelpBottomSheet(
+      contextLabel: content.eyebrow,
+      contextIcon: content.contextIcon,
       title: content.title,
-      body: content.body,
-      stepsLabel: l10n.documentationGuideStepsLabel,
-      steps: content.steps,
-      hideNextTimeLabel: l10n.documentationGuideHideNextTime,
+      description: content.body,
+      steps: content.steps
+          .map((step) => HelpStep(title: step.title, body: step.body))
+          .toList(growable: false),
+      preferenceKey: preferenceKey,
       dismissLabel: l10n.documentationGuideDismissAction,
-      primaryLabel: l10n.documentationGuidePrimaryAction,
-      onClose: (hideNextTime) async {
-        await guideStore.setHideGuide(preferenceKey, hideNextTime);
-      },
+      confirmLabel: l10n.documentationGuidePrimaryAction,
     ),
   );
+
+  final guideStore = store ?? FeatureGuidePreferencesStore();
+  final shouldShowAgain = await guideStore.shouldShowGuide(preferenceKey);
+  await guideStore.setHideGuide(preferenceKey, !shouldShowAgain);
 }

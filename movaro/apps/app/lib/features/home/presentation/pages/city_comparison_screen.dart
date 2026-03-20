@@ -8,6 +8,8 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/contextual_help.dart';
+import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
@@ -37,6 +39,7 @@ class CityComparisonScreen extends StatefulWidget {
 }
 
 class _CityComparisonScreenState extends State<CityComparisonScreen> {
+  static const _helpPreferenceKey = 'city_comparison';
   late int _mode;
   late List<City?> _selectedCities;
   late bool _isComparing;
@@ -219,10 +222,23 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
               title: context.l10n.cityComparisonTitle,
               onBack: () => Navigator.of(context).pop(),
               trailing: SizedBox(
-                width: 96,
-                child: TextButton(
-                  onPressed: () => setState(() => _isComparing = false),
-                  child: Text(context.l10n.cityComparisonEditAction),
+                width: 92,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      onPressed: () => setState(() => _isComparing = false),
+                      icon: const Icon(Icons.edit_outlined),
+                      tooltip: context.l10n.cityComparisonEditAction,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    IconButton(
+                      onPressed: _showHelp,
+                      icon: const Icon(Icons.help_outline_rounded),
+                      tooltip: context.l10n.cityComparisonGuideTitle(),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -242,8 +258,8 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
         SliverPersistentHeader(
           pinned: true,
           delegate: _ComparisonHeaderDelegate(
-            minExtentValue: compact ? 112 : 124,
-            maxExtentValue: compact ? 112 : 124,
+            minExtentValue: compact ? 188 : 204,
+            maxExtentValue: compact ? 188 : 204,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: context.pageHorizontalPadding),
               child: _ComparisonHeader(
@@ -412,6 +428,14 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
     if (journeyOrigin != null && journeyOrigin.isNotEmpty) {
       return journeyOrigin;
     }
+    final detectedCountry = widget
+        .migrationQuestionnaireController
+        .journeyContextController
+        .detectedLocation
+        ?.countryId;
+    if (detectedCountry != null && detectedCountry.isNotEmpty) {
+      return detectedCountry;
+    }
     return widget.migrationQuestionnaireController.generatedPlan?.originCountry;
   }
 
@@ -470,6 +494,36 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
       context,
       AppRoutes.cityDetail(city.id),
       arguments: {'selectForPlan': true},
+    );
+  }
+
+  Future<void> _showHelp() {
+    return showContextualHelpGuide(
+      context,
+      preferenceKey: _helpPreferenceKey,
+      content: ContextualHelpContent(
+        eyebrow: context.l10n.cityComparisonTitle,
+        contextIcon: Icons.compare_arrows_rounded,
+        title: context.l10n.cityComparisonGuideTitle(),
+        body: context.l10n.cityComparisonGuideBody(),
+        steps: [
+          FeatureGuideStep(
+            number: '1',
+            title: context.l10n.cityComparisonGuideStepOneTitle(),
+            body: context.l10n.cityComparisonGuideStepOneBody(),
+          ),
+          FeatureGuideStep(
+            number: '2',
+            title: context.l10n.cityComparisonGuideStepTwoTitle(),
+            body: context.l10n.cityComparisonGuideStepTwoBody(),
+          ),
+          FeatureGuideStep(
+            number: '3',
+            title: context.l10n.cityComparisonGuideStepThreeTitle(),
+            body: context.l10n.cityComparisonGuideStepThreeBody(),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -777,31 +831,39 @@ class _ComparisonHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return FrostedPanel(
       padding: const EdgeInsets.all(14),
-      child: Row(
-        children: [
-          SizedBox(
-            width: compact ? 118 : 140,
-            child: Text(
-              context.l10n.cityComparisonHeaderLabel,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppColors.textSoftFor(context),
-                fontWeight: FontWeight.w700,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: compact ? 74 : 80,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  context.l10n.cityComparisonHeaderLabel.toUpperCase(),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 8,
+                    letterSpacing: 0.9,
+                    color: AppColors.textSoftFor(context),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          for (final city in cities) ...[
-            Expanded(
-              child: _CityHeaderColumn(
-                city: city,
-                isWinner: city.city.id == winner.city.id,
-                compact: compact,
-                showTopLabel: cities.length == 2,
+            SizedBox(width: compact ? 8 : 10),
+            for (final city in cities) ...[
+              Expanded(
+                child: _CityHeaderColumn(
+                  city: city,
+                  isWinner: city.city.id == winner.city.id,
+                  compact: compact,
+                ),
               ),
-            ),
-            if (city != cities.last) const SizedBox(width: 10),
+              if (city != cities.last) SizedBox(width: compact ? 8 : 10),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -812,78 +874,122 @@ class _CityHeaderColumn extends StatelessWidget {
     required this.city,
     required this.isWinner,
     required this.compact,
-    required this.showTopLabel,
   });
 
   final _ComparisonCityData city;
   final bool isWinner;
   final bool compact;
-  final bool showTopLabel;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
+    final nameStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
+      fontSize: _nameFontSize(city.city.name),
+      fontWeight: FontWeight.w800,
+      color: Colors.white,
+      height: 1.15,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: EdgeInsets.fromLTRB(10, compact ? 14 : 18, 10, 12),
-          decoration: BoxDecoration(
-            color: isWinner
-                ? AppColors.primary.withValues(alpha: 0.08)
-                : AppColors.surfaceMutedFor(context),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: isWinner
-                  ? AppColors.primary.withValues(alpha: 0.28)
-                  : AppColors.borderFor(context),
-            ),
-          ),
-          child: Column(
-            children: [
-              Text(
-                compact ? city.cityCode : city.city.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: isWinner
-                      ? AppColors.primary
-                      : AppColors.textPrimaryFor(context),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                city.city.stateCode,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                ),
-              ),
-            ],
+        SizedBox(
+          height: 24,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: isWinner
+                ? Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      context.l10n.cityComparisonTopBadge,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
         ),
-        if (isWinner)
-          Positioned(
-            top: -10,
-            left: 12,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(999),
+        const SizedBox(height: 6),
+        Expanded(
+          child: Container(
+            constraints: BoxConstraints(minHeight: compact ? 124 : 132),
+            padding: EdgeInsets.fromLTRB(
+              compact ? 8 : 10,
+              compact ? 12 : 14,
+              compact ? 8 : 10,
+              compact ? 10 : 12,
+            ),
+            decoration: BoxDecoration(
+              color: isWinner
+                  ? AppColors.primary.withValues(alpha: 0.08)
+                  : AppColors.surfaceMutedFor(context),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: isWinner
+                    ? AppColors.primary.withValues(alpha: 0.32)
+                    : AppColors.borderFor(context),
               ),
-              child: Text(
-                showTopLabel
-                    ? context.l10n.cityComparisonBestFitBadge
-                    : context.l10n.cityComparisonTopBadge,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
+              boxShadow: isWinner
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.12),
+                        blurRadius: 22,
+                        offset: const Offset(0, 10),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  city.city.name,
+                  maxLines: compact ? 3 : 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.visible,
+                  style: nameStyle,
                 ),
-              ),
+                const SizedBox(height: 8),
+                Text(
+                  '${city.city.stateCode} · ${city.cityCode}',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontSize: compact ? 7.5 : 8,
+                    color: AppColors.textSoftFor(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
+        ),
       ],
     );
+  }
+
+  double _nameFontSize(String name) {
+    if (!compact) {
+      if (name.length >= 20) {
+        return 10;
+      }
+      if (name.length >= 15) {
+        return 10.5;
+      }
+      return 11.5;
+    }
+
+    if (name.length >= 20) {
+      return 8.6;
+    }
+    if (name.length >= 15) {
+      return 9.0;
+    }
+    return 9.6;
   }
 }
 
@@ -976,12 +1082,13 @@ class _MetricRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final winners = metric.bestCityIds(cities);
     final losers = metric.worstCityIds(cities);
+    final minWidth = cities.length >= 3 ? 72.0 : 90.0;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: compact ? 118 : 140,
+          width: 80,
           child: Padding(
             padding: const EdgeInsets.only(top: 10),
             child: Text(
@@ -996,47 +1103,45 @@ class _MetricRow extends StatelessWidget {
         const SizedBox(width: 10),
         for (final city in cities) ...[
           Expanded(
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: compact ? 8 : 10,
-                vertical: compact ? 10 : 12,
-              ),
-              decoration: BoxDecoration(
-                color: winners.contains(city.city.id)
-                    ? AppColors.success.withValues(alpha: 0.08)
-                    : AppColors.surfaceMutedFor(context),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: winners.contains(city.city.id)
-                      ? AppColors.success.withValues(alpha: 0.16)
-                      : AppColors.borderFor(context),
-                ),
-              ),
-              child: metric.amountInBrl == null
-                  ? Text(
-                      metric.displayValue(context, city),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        fontSize: compact ? 12 : null,
-                        fontWeight: FontWeight.w800,
-                        color: winners.contains(city.city.id)
-                            ? AppColors.success
-                            : losers.contains(city.city.id) &&
-                                  metric.isCompetitive
-                            ? AppColors.danger
-                            : AppColors.textPrimaryFor(context),
-                      ),
-                    )
-                  : Center(
-                      child: MultiCurrencyAmount(
-                        amountInBrl: metric.amountInBrl!(city),
-                        exchangeRates: city.exchangeRates,
-                        preferredCountryId: city.preferredCountryId,
-                        compact: true,
-                        wrapSpacing: 6,
-                        runSpacing: 6,
+            child: Builder(
+              builder: (context) {
+                final state = metric.cellStateFor(
+                  cityId: city.city.id,
+                  winners: winners,
+                  losers: losers,
+                );
+                final colors = _MetricCellColors.resolve(context, state);
+                final value = metric.displayValue(context, city);
+
+                return Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: compact ? 6 : 8,
+                    vertical: compact ? 10 : 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.background,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: colors.border),
+                  ),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: minWidth),
+                      child: Text(
+                        value,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontSize: compact ? 10 : 11,
+                          fontWeight: FontWeight.w800,
+                          color: colors.text,
+                        ),
                       ),
                     ),
+                  ),
+                );
+              },
             ),
           ),
           if (city != cities.last) const SizedBox(width: 10),
@@ -1253,7 +1358,6 @@ class _MetricDefinition {
     required this.numericValue,
     required this.displayValue,
     required this.label,
-    this.amountInBrl,
   });
 
   final String key;
@@ -1262,7 +1366,6 @@ class _MetricDefinition {
   final double? Function(_ComparisonCityData city) numericValue;
   final String Function(BuildContext context, _ComparisonCityData city) displayValue;
   final String Function(BuildContext context) label;
-  final num Function(_ComparisonCityData city)? amountInBrl;
 
   static const rent = _MetricDefinition._(
     key: 'rent',
@@ -1271,7 +1374,6 @@ class _MetricDefinition {
     numericValue: _rentNumeric,
     displayValue: _rentDisplay,
     label: _rentLabel,
-    amountInBrl: _rentAmount,
   );
   static const food = _MetricDefinition._(
     key: 'food',
@@ -1280,7 +1382,6 @@ class _MetricDefinition {
     numericValue: _foodNumeric,
     displayValue: _foodDisplay,
     label: _foodLabel,
-    amountInBrl: _foodAmount,
   );
   static const transport = _MetricDefinition._(
     key: 'transport',
@@ -1289,7 +1390,6 @@ class _MetricDefinition {
     numericValue: _transportNumeric,
     displayValue: _transportDisplay,
     label: _transportLabel,
-    amountInBrl: _transportAmount,
   );
   static const hdi = _MetricDefinition._(
     key: 'hdi',
@@ -1333,7 +1433,7 @@ class _MetricDefinition {
   );
 
   List<String> bestCityIds(List<_ComparisonCityData> cities) {
-    if (!isCompetitive) {
+    if (direction == MetricDirection.neutral) {
       return const [];
     }
     final values = <String, double>{
@@ -1343,7 +1443,7 @@ class _MetricDefinition {
     if (values.isEmpty) {
       return const [];
     }
-    final best = lowerIsBetter
+    final best = direction == MetricDirection.lowerIsBetter
         ? values.values.reduce((a, b) => a < b ? a : b)
         : values.values.reduce((a, b) => a > b ? a : b);
     return values.entries
@@ -1353,7 +1453,7 @@ class _MetricDefinition {
   }
 
   List<String> worstCityIds(List<_ComparisonCityData> cities) {
-    if (!isCompetitive) {
+    if (direction == MetricDirection.neutral) {
       return const [];
     }
     final values = <String, double>{
@@ -1363,7 +1463,7 @@ class _MetricDefinition {
     if (values.isEmpty) {
       return const [];
     }
-    final worst = lowerIsBetter
+    final worst = direction == MetricDirection.lowerIsBetter
         ? values.values.reduce((a, b) => a > b ? a : b)
         : values.values.reduce((a, b) => a < b ? a : b);
     return values.entries
@@ -1374,26 +1474,14 @@ class _MetricDefinition {
 
   static double? _rentNumeric(_ComparisonCityData city) => city.rentEstimateBrl.toDouble();
   static String _rentDisplay(BuildContext context, _ComparisonCityData city) =>
-      MultiCurrencyAmount.formatPreferredCurrency(
-        context: context,
-        amountInBrl: city.rentEstimateBrl,
-        exchangeRates: city.exchangeRates,
-        preferredCountryId: city.preferredCountryId,
-      );
-  static num _rentAmount(_ComparisonCityData city) => city.rentEstimateBrl;
+      _formatMoney(context, city.rentEstimateBrl, city);
   static String _rentLabel(BuildContext context) =>
       context.l10n.cityComparisonRentLabel;
 
   static double? _foodNumeric(_ComparisonCityData city) =>
       city.monthlyFoodCostBrl.toDouble();
   static String _foodDisplay(BuildContext context, _ComparisonCityData city) =>
-      MultiCurrencyAmount.formatPreferredCurrency(
-        context: context,
-        amountInBrl: city.monthlyFoodCostBrl,
-        exchangeRates: city.exchangeRates,
-        preferredCountryId: city.preferredCountryId,
-      );
-  static num _foodAmount(_ComparisonCityData city) => city.monthlyFoodCostBrl;
+      _formatMoney(context, city.monthlyFoodCostBrl, city);
   static String _foodLabel(BuildContext context) =>
       context.l10n.cityComparisonFoodLabel;
 
@@ -1402,14 +1490,7 @@ class _MetricDefinition {
   static String _transportDisplay(
     BuildContext context,
     _ComparisonCityData city,
-  ) => MultiCurrencyAmount.formatPreferredCurrency(
-    context: context,
-    amountInBrl: city.monthlyTransportCostBrl,
-    exchangeRates: city.exchangeRates,
-    preferredCountryId: city.preferredCountryId,
-  );
-  static num _transportAmount(_ComparisonCityData city) =>
-      city.monthlyTransportCostBrl;
+  ) => _formatMoney(context, city.monthlyTransportCostBrl, city);
   static String _transportLabel(BuildContext context) =>
       context.l10n.cityComparisonTransportLabel;
 
@@ -1447,6 +1528,78 @@ class _MetricDefinition {
       city.communityLabel;
   static String _communityLabel(BuildContext context) =>
       context.l10n.cityComparisonCommunityLabel;
+
+  MetricDirection get direction => switch (key) {
+    'rent' || 'food' || 'transport' => MetricDirection.lowerIsBetter,
+    'hdi' || 'safety' || 'job' || 'community' => MetricDirection.higherIsBetter,
+    _ => MetricDirection.neutral,
+  };
+
+  _MetricCellState cellStateFor({
+    required String cityId,
+    required List<String> winners,
+    required List<String> losers,
+  }) {
+    if (winners.contains(cityId) && winners.length == 1) {
+      return _MetricCellState.best;
+    }
+    if (losers.contains(cityId) && losers.length == 1) {
+      return _MetricCellState.worst;
+    }
+    return _MetricCellState.neutral;
+  }
+
+  static String _formatMoney(
+    BuildContext context,
+    num amountInBrl,
+    _ComparisonCityData city,
+  ) {
+    return MultiCurrencyAmount.formatPreferredCurrency(
+      context: context,
+      amountInBrl: amountInBrl,
+      exchangeRates: city.exchangeRates,
+      preferredCountryId: city.preferredCountryId,
+    );
+  }
+}
+
+enum MetricDirection { lowerIsBetter, higherIsBetter, neutral }
+
+enum _MetricCellState { best, worst, neutral }
+
+class _MetricCellColors {
+  const _MetricCellColors({
+    required this.background,
+    required this.border,
+    required this.text,
+  });
+
+  final Color background;
+  final Color border;
+  final Color text;
+
+  static _MetricCellColors resolve(BuildContext context, _MetricCellState state) {
+    switch (state) {
+      case _MetricCellState.best:
+        return const _MetricCellColors(
+          background: Color.fromRGBO(63, 185, 80, 0.15),
+          border: Color.fromRGBO(63, 185, 80, 0.4),
+          text: Color(0xFF3FB950),
+        );
+      case _MetricCellState.worst:
+        return const _MetricCellColors(
+          background: Color.fromRGBO(226, 75, 74, 0.15),
+          border: Color.fromRGBO(226, 75, 74, 0.3),
+          text: Color(0xFFE24B4A),
+        );
+      case _MetricCellState.neutral:
+        return _MetricCellColors(
+          background: AppColors.surfaceMutedFor(context),
+          border: AppColors.borderFor(context),
+          text: AppColors.textPrimaryFor(context),
+        );
+    }
+  }
 }
 
 const _scoredMetricDefinitions = <_MetricDefinition>[

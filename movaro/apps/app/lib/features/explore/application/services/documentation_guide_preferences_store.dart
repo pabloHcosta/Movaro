@@ -1,69 +1,29 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:path_provider/path_provider.dart';
-
-typedef DocumentationGuideDirectoryProvider = Future<Directory> Function();
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DocumentationGuidePreferencesStore {
-  DocumentationGuidePreferencesStore({
-    DocumentationGuideDirectoryProvider? directoryProvider,
-  }) : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
+  DocumentationGuidePreferencesStore();
 
-  final DocumentationGuideDirectoryProvider _directoryProvider;
+  static const _hideKey = 'help_documentation_guide';
+  static const _seenKey = 'help_seen_documentation_guide';
 
   Future<bool> hasSeenIntro() async {
-    final value = await _read();
-    return value['hasSeenIntro'] == true;
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_seenKey) ?? false;
   }
 
   Future<void> markIntroSeen() async {
-    await _write(const <String, dynamic>{'hasSeenIntro': true});
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_seenKey, true);
   }
 
   Future<bool> shouldShowGuide() async {
-    final value = await _read();
-    return value['hideGuide'] != true;
+    final prefs = await SharedPreferences.getInstance();
+    return !(prefs.getBool(_hideKey) ?? false);
   }
 
   Future<void> setHideGuide(bool hideGuide) async {
-    final current = await _read();
-    await _write(<String, dynamic>{
-      ...current,
-      'hasSeenIntro': true,
-      'hideGuide': hideGuide,
-    });
-  }
-
-  Future<Map<String, dynamic>> _read() async {
-    try {
-      final file = await _file();
-      if (!file.existsSync()) {
-        return const <String, dynamic>{};
-      }
-
-      final raw = await file.readAsString();
-      if (raw.trim().isEmpty) {
-        return const <String, dynamic>{};
-      }
-
-      final decoded = jsonDecode(raw);
-      return decoded is Map<String, dynamic>
-          ? decoded
-          : const <String, dynamic>{};
-    } catch (_) {
-      return const <String, dynamic>{};
-    }
-  }
-
-  Future<void> _write(Map<String, dynamic> value) async {
-    final file = await _file();
-    await file.parent.create(recursive: true);
-    await file.writeAsString(jsonEncode(value));
-  }
-
-  Future<File> _file() async {
-    final directory = await _directoryProvider();
-    return File('${directory.path}/movaro_documentation_guide.json');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_seenKey, true);
+    await prefs.setBool(_hideKey, hideGuide);
   }
 }

@@ -14,6 +14,7 @@ import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/environment/app_flavor.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/journey/journey_preferences_store.dart';
+import 'package:movaro_app/core/location/location_controller.dart';
 import 'package:movaro_app/core/network/api_health_service.dart';
 import 'package:movaro_app/features/auth/application/auth_controller.dart';
 import 'package:movaro_app/features/auth/data/datasources/fake_auth_data_source.dart';
@@ -224,6 +225,7 @@ class _AppTestHarness {
     required this.copilotExchangeRatesService,
     required this.apiHealthService,
     required this.journeyContextController,
+    required this.locationController,
     required this.localeController,
     required this.tempDirectory,
   });
@@ -236,6 +238,7 @@ class _AppTestHarness {
   final CopilotExchangeRatesService copilotExchangeRatesService;
   final ApiHealthService apiHealthService;
   final JourneyContextController journeyContextController;
+  final LocationController locationController;
   final LocaleController localeController;
   final Directory tempDirectory;
 
@@ -262,6 +265,9 @@ class _AppTestHarness {
       store: JourneyPreferencesStore(
         directoryProvider: () async => tempDirectory,
       ),
+    );
+    final locationController = LocationController(
+      journeyContextController: journeyContextController,
     );
     const citiesRepository = _FakeCitiesRepository();
     final citiesController = CitiesController(repository: citiesRepository);
@@ -304,6 +310,7 @@ class _AppTestHarness {
       copilotExchangeRatesService: copilotExchangeRatesService,
       apiHealthService: apiHealthService,
       journeyContextController: journeyContextController,
+      locationController: locationController,
       localeController: localeController,
       tempDirectory: tempDirectory,
     );
@@ -333,6 +340,7 @@ class _AppTestHarness {
               copilotExchangeRatesService: copilotExchangeRatesService,
               apiHealthService: apiHealthService,
               journeyContextController: journeyContextController,
+              locationController: locationController,
             ).onGenerateRoute,
             initialRoute: initialRoute,
           ),

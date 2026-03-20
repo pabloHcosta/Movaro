@@ -7,6 +7,9 @@ import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/journey/journey_country_metadata.dart';
+import 'package:movaro_app/core/location/location_controller.dart';
+import 'package:movaro_app/core/location/presentation/pages/location_permission_screen.dart';
+import 'package:movaro_app/core/location/presentation/widgets/location_banner_widget.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
@@ -34,12 +37,14 @@ class PublicHomePage extends StatefulWidget {
     required this.journeyContextController,
     required this.citiesController,
     required this.migrationQuestionnaireController,
+    required this.locationController,
     super.key,
   });
 
   final JourneyContextController journeyContextController;
   final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
+  final LocationController locationController;
 
   @override
   State<PublicHomePage> createState() => _PublicHomePageState();
@@ -52,6 +57,15 @@ class _PublicHomePageState extends State<PublicHomePage> {
       const MigrationCopilotProgressSnapshot();
   String? _loadedPlanKey;
   String? _loadedWeatherCityId;
+  bool _didTryPromptLocation = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_maybePromptLocationPermission());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +101,7 @@ class _PublicHomePageState extends State<PublicHomePage> {
                           citiesController: widget.citiesController,
                           migrationQuestionnaireController:
                               widget.migrationQuestionnaireController,
+                          locationController: widget.locationController,
                           progressSnapshot: _progressSnapshot,
                         ),
                       ],
@@ -149,6 +164,25 @@ class _PublicHomePageState extends State<PublicHomePage> {
     });
   }
 
+  Future<void> _maybePromptLocationPermission() async {
+    if (_didTryPromptLocation || !mounted) {
+      return;
+    }
+    _didTryPromptLocation = true;
+
+    await widget.locationController.initialize();
+    final shouldAsk = await widget.locationController.shouldRequestAgain();
+    if (!mounted || !shouldAsk) {
+      return;
+    }
+
+    await Navigator.pushNamed(
+      context,
+      AppRoutes.locationPermission,
+      arguments: const LocationPermissionScreenArgs(returnToPrevious: true),
+    );
+  }
+
   String _planKey(MigrationPlan plan) {
     return [
       plan.originCountry,
@@ -165,12 +199,14 @@ class _LandingHero extends StatelessWidget {
     required this.journeyContextController,
     required this.citiesController,
     required this.migrationQuestionnaireController,
+    required this.locationController,
     required this.progressSnapshot,
   });
 
   final JourneyContextController journeyContextController;
   final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
+  final LocationController locationController;
   final MigrationCopilotProgressSnapshot progressSnapshot;
 
   @override
@@ -179,6 +215,7 @@ class _LandingHero extends StatelessWidget {
       journeyContextController: journeyContextController,
       citiesController: citiesController,
       migrationQuestionnaireController: migrationQuestionnaireController,
+      locationController: locationController,
       progressSnapshot: progressSnapshot,
     );
   }
@@ -189,12 +226,14 @@ class _HomeContent extends StatelessWidget {
     required this.journeyContextController,
     required this.citiesController,
     required this.migrationQuestionnaireController,
+    required this.locationController,
     required this.progressSnapshot,
   });
 
   final JourneyContextController journeyContextController;
   final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
+  final LocationController locationController;
   final MigrationCopilotProgressSnapshot progressSnapshot;
 
   @override
@@ -267,6 +306,24 @@ class _HomeContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        FutureBuilder<bool>(
+          future: locationController.shouldShowInlineBanner(),
+          builder: (context, snapshot) {
+            if (snapshot.data != true) {
+              return const SizedBox.shrink();
+            }
+
+            return LocationBannerWidget(
+              onActivate: () => Navigator.pushNamed(
+                context,
+                AppRoutes.locationPermission,
+                arguments: const LocationPermissionScreenArgs(
+                  returnToPrevious: true,
+                ),
+              ),
+            );
+          },
+        ),
         _HomeGreeting(state: heroState, displayName: null),
         const SizedBox(height: 16),
         AnimatedSwitcher(

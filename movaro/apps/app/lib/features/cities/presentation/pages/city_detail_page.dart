@@ -8,10 +8,16 @@ import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/errors/error_handler.dart';
 import 'package:movaro_app/core/journey/detected_location.dart';
+import 'package:movaro_app/core/location/location_controller.dart';
+import 'package:movaro_app/core/location/presentation/pages/location_permission_screen.dart';
+import 'package:movaro_app/core/location/presentation/widgets/location_banner_widget.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/utils/number_formatters.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
+import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/error_state_widget.dart';
+import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/core/widgets/visual_data_cards.dart';
@@ -36,6 +42,7 @@ class CityDetailPage extends StatefulWidget {
   const CityDetailPage({
     required this.cityId,
     required this.citiesController,
+    required this.locationController,
     this.migrationQuestionnaireController,
     this.selectForPlan = false,
     super.key,
@@ -43,6 +50,7 @@ class CityDetailPage extends StatefulWidget {
 
   final String cityId;
   final CitiesController citiesController;
+  final LocationController locationController;
   final MigrationQuestionnaireController? migrationQuestionnaireController;
   final bool selectForPlan;
 
@@ -51,6 +59,7 @@ class CityDetailPage extends StatefulWidget {
 }
 
 class _CityDetailPageState extends State<CityDetailPage> {
+  static const _helpPreferenceKey = 'city_detail';
   City? _city;
   final ScrollController _scrollController = ScrollController();
   bool _showScrollHint = false;
@@ -89,6 +98,40 @@ class _CityDetailPageState extends State<CityDetailPage> {
     }
 
     await methodologyFuture;
+  }
+
+  Future<void> _showHelp() {
+    return showContextualHelpGuide(
+      context,
+      preferenceKey: _helpPreferenceKey,
+      content: _helpContent(context),
+    );
+  }
+
+  ContextualHelpContent _helpContent(BuildContext context) {
+    return ContextualHelpContent(
+      eyebrow: context.l10n.cityDetailGuideEyebrow(),
+      contextIcon: Icons.location_city_outlined,
+      title: context.l10n.cityDetailGuideTitle(),
+      body: context.l10n.cityDetailGuideBody(),
+      steps: [
+        FeatureGuideStep(
+          number: '1',
+          title: context.l10n.cityDetailGuideStepOneTitle(),
+          body: context.l10n.cityDetailGuideStepOneBody(),
+        ),
+        FeatureGuideStep(
+          number: '2',
+          title: context.l10n.cityDetailGuideStepTwoTitle(),
+          body: context.l10n.cityDetailGuideStepTwoBody(),
+        ),
+        FeatureGuideStep(
+          number: '3',
+          title: context.l10n.cityDetailGuideStepThreeTitle(),
+          body: context.l10n.cityDetailGuideStepThreeBody(),
+        ),
+      ],
+    );
   }
 
   @override
@@ -149,22 +192,10 @@ class _CityDetailPageState extends State<CityDetailPage> {
                             child: DetailSkeleton(),
                           )
                         else ...[
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextButton.icon(
-                                  onPressed: _goBackToCities,
-                                  icon: const Icon(Icons.arrow_back_rounded),
-                                  label: Text(l10n.citiesExploreTitle),
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () =>
-                                    _handleCompareCity(context, city),
-                                icon: const Icon(Icons.compare_arrows_rounded),
-                                tooltip: l10n.cityDetailCompareAction,
-                              ),
-                            ],
+                          AppGlassHeader(
+                            title: l10n.cityDetailHeaderTitle(),
+                            onBack: _goBackToCities,
+                            onHelp: _showHelp,
                           ),
                           const SizedBox(height: 16),
                           ConstrainedBox(
@@ -271,6 +302,32 @@ class _CityDetailPageState extends State<CityDetailPage> {
                               onCompareAction: () =>
                                   _handleCompareCity(context, city),
                             ),
+                          ),
+                          const SizedBox(height: 16),
+                          FutureBuilder<bool>(
+                            future: widget.locationController
+                                .shouldShowInlineBanner(),
+                            builder: (context, snapshot) {
+                              if (snapshot.data != true) {
+                                return const SizedBox.shrink();
+                              }
+
+                              return ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 1160,
+                                ),
+                                child: LocationBannerWidget(
+                                  onActivate: () => Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.locationPermission,
+                                    arguments:
+                                        const LocationPermissionScreenArgs(
+                                          returnToPrevious: true,
+                                        ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 16),
                           ConstrainedBox(

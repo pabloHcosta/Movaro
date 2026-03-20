@@ -13,6 +13,12 @@ import 'package:movaro_app/features/migration_questionnaire/domain/repositories/
 import 'package:movaro_app/features/migration_questionnaire/domain/repositories/question_repository.dart';
 
 class MigrationQuestionnaireController extends ChangeNotifier {
+  static const Set<String> capitalAwareFundingOptions = {
+    'savings',
+    'family_support',
+    'dont_know',
+  };
+
   MigrationQuestionnaireController({
     required QuestionRepository questionRepository,
     required MigrationPlanRepository migrationPlanRepository,
@@ -90,7 +96,15 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   }
 
   List<Question> get _activeQuestions {
-    return coreQuestions;
+    return coreQuestions
+        .where((question) {
+          if (question.id != 'available_capital') {
+            return true;
+          }
+
+          return capitalAwareFundingOptions.contains(answerFor('funding'));
+        })
+        .toList(growable: false);
   }
 
   Question? get currentQuestion {
@@ -187,6 +201,9 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _includeConstraints = false;
     if (variant == QuestionnaireVariant.lean) {
       _removeAnswer('constraints');
+      _removeAnswer('travel_group');
+      _removeAnswer('travel_group_children_count');
+      _removeAnswer('available_capital');
     }
     notifyListeners();
     _persistDraft();
@@ -195,6 +212,11 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   void selectAnswer(String questionId, String value) {
     _setAnswer(questionId, <String>[value]);
     _syncJourneySelection(questionId, <String>[value]);
+  }
+
+  void setAnswerValues(String questionId, List<String> values) {
+    _setAnswer(questionId, values);
+    _syncJourneySelection(questionId, values);
   }
 
   Future<void> setJourneyDestination(String countryId) async {
@@ -282,6 +304,12 @@ class MigrationQuestionnaireController extends ChangeNotifier {
 
     if (question.id == 'priorities') {
       return values.isNotEmpty;
+    }
+
+    if (question.id == 'travel_group') {
+      return values.isNotEmpty &&
+          (values.first != 'family_kids' ||
+              answerFor('travel_group_children_count') != null);
     }
 
     return values.isNotEmpty;
@@ -464,6 +492,8 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     }
 
     _answers = nextAnswers;
+    _syncConditionalAnswers(questionId, values);
+    _clampCurrentIndex();
     notifyListeners();
     _persistDraft();
   }
@@ -472,6 +502,17 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _answers = _answers
         .where((answer) => answer.questionId != questionId)
         .toList(growable: false);
+  }
+
+  void _syncConditionalAnswers(String questionId, List<String> values) {
+    if (questionId == 'travel_group' && values.firstOrNull != 'family_kids') {
+      _removeAnswer('travel_group_children_count');
+    }
+
+    if (questionId == 'funding' &&
+        !capitalAwareFundingOptions.contains(values.firstOrNull)) {
+      _removeAnswer('available_capital');
+    }
   }
 
   void _syncJourneySelection(String questionId, List<String> values) {

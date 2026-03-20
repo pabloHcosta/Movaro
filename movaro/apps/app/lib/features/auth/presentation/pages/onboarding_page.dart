@@ -3,6 +3,7 @@ import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/catalog/domain/entities/catalog_country.dart';
 import 'package:movaro_app/core/catalog/domain/repositories/catalog_repository.dart';
+import 'package:movaro_app/core/location/location_controller.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -17,11 +18,13 @@ class OnboardingPage extends StatefulWidget {
   const OnboardingPage({
     required this.authController,
     required this.catalogRepository,
+    required this.locationController,
     super.key,
   });
 
   final AuthController authController;
   final CatalogRepository catalogRepository;
+  final LocationController locationController;
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();

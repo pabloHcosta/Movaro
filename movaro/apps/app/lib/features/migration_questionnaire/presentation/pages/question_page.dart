@@ -8,6 +8,10 @@ import 'package:movaro_app/core/catalog/domain/entities/catalog_country.dart';
 import 'package:movaro_app/core/journey/country_coverage.dart';
 import 'package:movaro_app/core/journey/detected_location.dart';
 import 'package:movaro_app/core/journey/journey_country_metadata.dart';
+import 'package:movaro_app/core/location/location_controller.dart';
+import 'package:movaro_app/core/location/location_data.dart';
+import 'package:movaro_app/core/location/presentation/pages/location_permission_screen.dart';
+import 'package:movaro_app/core/location/presentation/widgets/location_banner_widget.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -17,15 +21,21 @@ import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/available_capital_ranges_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/option.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/question.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/question_progress_indicator.dart';
 
 class QuestionPage extends StatefulWidget {
-  const QuestionPage({required this.controller, super.key});
+  const QuestionPage({
+    required this.controller,
+    required this.locationController,
+    super.key,
+  });
 
   final MigrationQuestionnaireController controller;
+  final LocationController locationController;
 
   @override
   State<QuestionPage> createState() => _QuestionPageState();
@@ -42,6 +52,7 @@ class _QuestionPageState extends State<QuestionPage> {
   bool _didTryAutoHelp = false;
 
   MigrationQuestionnaireController get controller => widget.controller;
+  LocationController get locationController => widget.locationController;
 
   @override
   void initState() {
@@ -76,6 +87,7 @@ class _QuestionPageState extends State<QuestionPage> {
   ContextualHelpContent _helpContent(BuildContext context) {
     return ContextualHelpContent(
       eyebrow: context.l10n.questionnairePageTitle,
+      contextIcon: Icons.quiz_outlined,
       title: 'Answer one step at a time',
       body:
           'The questionnaire keeps the route in context, saves your progress, and builds the recommendation only after origin and destination are complete.',
@@ -295,34 +307,38 @@ class _QuestionPageState extends State<QuestionPage> {
       return;
     }
 
-    final journey = controller.journeyContextController;
-    final cachedDetected = journey.detectedLocation;
-    if (cachedDetected != null) {
-      await _handleDetectedOriginResult(question, cachedDetected);
+    final savedLocation = locationController.savedLocation;
+    if (savedLocation == null || savedLocation.countryCode.isEmpty) {
       return;
     }
 
-    final state = await journey.requestDetectedLocation();
+    final detected = _toDetectedLocation(savedLocation);
+    await _handleDetectedOriginResult(question, detected);
+  }
+
+  DetectedLocation _toDetectedLocation(LocationData location) {
+    return DetectedLocation(
+      countryId: locationController.matchedCountryId,
+      countryName: location.countryName,
+      city: location.cityName.isEmpty ? null : location.cityName,
+      region: location.stateName.isEmpty ? null : location.stateName,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      detectedAt: DateTime.now(),
+    );
+  }
+
+  Future<void> _openLocationPermissionScreen() async {
+    await Navigator.pushNamed(
+      context,
+      AppRoutes.locationPermission,
+      arguments: const LocationPermissionScreenArgs(returnToPrevious: true),
+    );
     if (!mounted) {
       return;
     }
-
-    switch (state) {
-      case DetectedLocationRequestState.available:
-        final detected = journey.detectedLocation;
-        if (detected == null) {
-          await _showLocationFailedDialog(question);
-          return;
-        }
-        await _handleDetectedOriginResult(question, detected);
-      case DetectedLocationRequestState.denied:
-      case DetectedLocationRequestState.deniedForever:
-      case DetectedLocationRequestState.unavailable:
-      case DetectedLocationRequestState.failed:
-      case DetectedLocationRequestState.idle:
-      case DetectedLocationRequestState.requesting:
-        await _showLocationFailedDialog(question);
-    }
+    _didPromptOriginLocation = false;
+    setState(() {});
   }
 
   Future<void> _handleDetectedOriginResult(
@@ -333,21 +349,19 @@ class _QuestionPageState extends State<QuestionPage> {
     final matchedCountry = journey.countries
         .where((country) => country.id == detected.countryId)
         .firstOrNull;
-    final isArgentina =
-        matchedCountry != null &&
-        journey.journeyValueFor(matchedCountry) == 'argentina';
 
-    if (isArgentina) {
-      await _showDetectedOriginDialog(question, detected);
+    if (matchedCountry != null && journey.canUseAsOrigin(matchedCountry)) {
+      await _showDetectedOriginDialog(question, detected, matchedCountry);
       return;
     }
 
-    await _showUnsupportedLocationDialog(question, detected);
+    await _showUnsupportedLocationDialog(detected);
   }
 
   Future<void> _showDetectedOriginDialog(
     Question question,
     DetectedLocation detected,
+    CatalogCountry matchedCountry,
   ) async {
     final locationLabel = [
       if ((detected.city ?? '').isNotEmpty) detected.city!,
@@ -370,60 +384,34 @@ class _QuestionPageState extends State<QuestionPage> {
     );
 
     if (confirmed == true) {
-      final argentinaOption = question.options
-          .where((option) => option.value == 'argentina')
+      final matchedOption = question.options
+          .where(
+            (option) =>
+                option.value ==
+                controller.journeyContextController.journeyValueFor(
+                  matchedCountry,
+                ),
+          )
           .firstOrNull;
-      if (argentinaOption != null) {
-        _handleSingleSelect(question, argentinaOption);
+      if (matchedOption != null) {
+        _handleSingleSelect(question, matchedOption);
       }
     }
   }
 
-  Future<void> _showUnsupportedLocationDialog(
-    Question question,
-    DetectedLocation detected,
-  ) async {
-    final useArgentina = await showDialog<bool>(
+  Future<void> _showUnsupportedLocationDialog(DetectedLocation detected) async {
+    await showDialog<void>(
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => _QuestionLocationDialog(
         title: context.l10n.questionnaireOriginUnsupportedTitle,
-        body: context.l10n.questionnaireOriginUnsupportedBody(
+        body: context.l10n.locationQuestionnaireUnsupportedBody(
           detected.countryName,
         ),
-        secondaryLabel: context.l10n.journeyDetectedManualAction,
-        primaryLabel: context.l10n.questionnaireOriginUseArgentinaAction,
+        secondaryLabel: null,
+        primaryLabel: context.l10n.journeyDetectedManualAction,
       ),
     );
-
-    if (useArgentina == true) {
-      final argentinaOption = question.options
-          .where((option) => option.value == 'argentina')
-          .firstOrNull;
-      if (argentinaOption != null) {
-        _handleSingleSelect(question, argentinaOption);
-      }
-    }
-  }
-
-  Future<void> _showLocationFailedDialog(Question question) async {
-    final retry = await showDialog<bool>(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) => _QuestionLocationDialog(
-        title: context.l10n.questionnaireOriginLocationFailedTitle,
-        body: context.l10n.journeyLocationFailedBody,
-        secondaryLabel: context.l10n.journeyDetectedManualAction,
-        primaryLabel: context.l10n.journeyLocationRetryAction,
-      ),
-    );
-
-    if (retry == true && mounted) {
-      _didPromptOriginLocation = false;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        unawaited(_handleOriginAutoDetection(question));
-      });
-    }
   }
 
   Widget _buildVariantSelector(BuildContext context) {
@@ -569,12 +557,59 @@ class _QuestionPageState extends State<QuestionPage> {
     if (question.id == 'origin_country') {
       return SingleChildScrollView(
         controller: _optionsScrollController,
-        child: _OriginDestinationStep(
-          controller: controller,
-          question: question,
-          onOriginTap: (option) => _handleSingleSelect(question, option),
-          onDestinationTap: controller.setJourneyDestination,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FutureBuilder<bool>(
+              future: locationController.shouldShowInlineBanner(),
+              builder: (context, snapshot) {
+                if (snapshot.data != true) {
+                  return const SizedBox.shrink();
+                }
+
+                return LocationBannerWidget(
+                  onActivate: _openLocationPermissionScreen,
+                );
+              },
+            ),
+            _OriginDestinationStep(
+              controller: controller,
+              question: question,
+              onOriginTap: (option) => _handleSingleSelect(question, option),
+              onDestinationTap: controller.setJourneyDestination,
+            ),
+          ],
         ),
+      );
+    }
+
+    if (question.id == 'travel_group') {
+      final selectedValue = controller.answerFor(question.id);
+      final selectedChildrenCount = controller.answerFor(
+        'travel_group_children_count',
+      );
+
+      return ListView(
+        controller: _optionsScrollController,
+        children: [
+          for (final option in question.options) ...[
+            _LargeOptionCard(
+              icon: _optionIcon(question.id, option.value),
+              label: _displayOptionLabel(context, question.id, option.value),
+              isSelected: selectedValue == option.value,
+              onTap: () => _handleTravelGroupSelect(option),
+            ),
+            if (option.value == 'family_kids' &&
+                selectedValue == 'family_kids') ...[
+              const SizedBox(height: 10),
+              _TravelGroupChildrenSelector(
+                selectedValue: selectedChildrenCount,
+                onSelected: _handleTravelGroupChildrenSelect,
+              ),
+            ],
+            if (option != question.options.last) const SizedBox(height: 12),
+          ],
+        ],
       );
     }
 
@@ -739,9 +774,11 @@ class _QuestionPageState extends State<QuestionPage> {
     final gridFirstIds = {
       'intent',
       'timeline',
+      'travel_group',
       'priorities',
       'funding',
       'constraints',
+      'available_capital',
     };
 
     if (gridFirstIds.contains(question.id) && shortLabel) {
@@ -849,6 +886,32 @@ class _QuestionPageState extends State<QuestionPage> {
             return Icons.groups_2_outlined;
           case 'dont_know':
             return Icons.help_outline_rounded;
+        }
+      case 'travel_group':
+        switch (value) {
+          case 'solo':
+            return Icons.person_outline_rounded;
+          case 'partner':
+            return Icons.favorite_border_rounded;
+          case 'family_no_kids':
+            return Icons.people_outline_rounded;
+          case 'family_kids':
+            return Icons.family_restroom_rounded;
+          case 'undecided':
+            return Icons.help_outline_rounded;
+        }
+      case 'available_capital':
+        switch (value) {
+          case 'low':
+            return Icons.savings_outlined;
+          case 'medium':
+            return Icons.account_balance_wallet_outlined;
+          case 'high':
+            return Icons.payments_outlined;
+          case 'very_high':
+            return Icons.trending_up_rounded;
+          case 'prefer_not_say':
+            return Icons.lock_outline_rounded;
         }
       case 'constraints':
         switch (value) {
@@ -1052,6 +1115,20 @@ class _QuestionPageState extends State<QuestionPage> {
     controller.selectAnswer(question.id, option.value);
   }
 
+  void _handleTravelGroupSelect(Option option) {
+    setState(() {
+      _inlineHint = null;
+    });
+    controller.selectAnswer('travel_group', option.value);
+  }
+
+  void _handleTravelGroupChildrenSelect(String value) {
+    setState(() {
+      _inlineHint = null;
+    });
+    controller.selectAnswer('travel_group_children_count', value);
+  }
+
   void _handleMultiSelect(Question question, Option option) {
     final changed = controller.toggleAnswer(question.id, option.value);
     if (changed) {
@@ -1080,11 +1157,13 @@ class _QuestionPageState extends State<QuestionPage> {
       case 'origin_country':
         return context.l10n.questionnaireSectionOrigin;
       case 'timeline':
+      case 'travel_group':
         return context.l10n.questionnaireSectionBasicProfile;
       case 'priorities':
       case 'constraints':
         return context.l10n.questionnaireSectionPreferences;
       case 'funding':
+      case 'available_capital':
         return context.l10n.questionnaireSectionFinancial;
       case 'intent':
         return context.l10n.questionnaireSectionGoal;
@@ -1152,6 +1231,22 @@ class _QuestionPageState extends State<QuestionPage> {
           return 'Elegi tu base financiera.';
         }
         return 'Choose your financial base.';
+      case 'travel_group':
+        if (language == 'pt') {
+          return 'Defina quem vai com voce.';
+        }
+        if (language == 'es') {
+          return 'Definí quién se muda con vos.';
+        }
+        return 'Choose who is moving with you.';
+      case 'available_capital':
+        if (language == 'pt') {
+          return 'Defina sua reserva inicial.';
+        }
+        if (language == 'es') {
+          return 'Definí tu capital inicial.';
+        }
+        return 'Choose your initial capital.';
       default:
         return context.l10n.bmpScrollHint;
     }
@@ -1219,8 +1314,87 @@ class _QuestionPageState extends State<QuestionPage> {
           'balanced_unsure' => 'Balanced',
           _ => context.l10n.questionOptionLabel(questionId, value),
         };
+      case 'travel_group':
+        return context.l10n.questionOptionLabel(questionId, value);
+      case 'available_capital':
+        if (value == 'prefer_not_say') {
+          return context.l10n.questionOptionLabel(questionId, value);
+        }
+        return _availableCapitalOptionLabel(context, value);
       default:
         return context.l10n.questionOptionLabel(questionId, value);
+    }
+  }
+
+  String _availableCapitalOptionLabel(BuildContext context, String value) {
+    final rangeSet = AvailableCapitalRangesStore.rangesForOrigin(
+      controller.answerFor('origin_country'),
+    );
+    final language = Localizations.localeOf(context).languageCode;
+    final first = _formatCapitalAmount(
+      rangeSet.currencyCode,
+      rangeSet.bands[0],
+    );
+    final second = _formatCapitalAmount(
+      rangeSet.currencyCode,
+      rangeSet.bands[1],
+    );
+    final third = _formatCapitalAmount(
+      rangeSet.currencyCode,
+      rangeSet.bands[2],
+    );
+    final unit = _capitalUnitLabel(language, rangeSet.currencyCode);
+
+    return switch (value) {
+      'low' =>
+        language == 'en'
+            ? 'Up to $first $unit'
+            : '${language == 'pt' ? 'Até' : 'Hasta'} $first $unit',
+      'medium' => '$first a $second $unit',
+      'high' => '$second a $third $unit',
+      'very_high' =>
+        language == 'en'
+            ? 'More than $third $unit'
+            : '${language == 'pt' ? 'Mais de' : 'Más de'} $third $unit',
+      _ => value,
+    };
+  }
+
+  String _formatCapitalAmount(String currencyCode, num amount) {
+    final value = amount.round().toString().replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => '.',
+    );
+    if (currencyCode == 'BRL') {
+      return 'R\$ $value';
+    }
+    return '\$$value';
+  }
+
+  String _capitalUnitLabel(String language, String currencyCode) {
+    switch (currencyCode) {
+      case 'ARS':
+        return language == 'en' ? 'Argentine pesos' : 'pesos';
+      case 'CLP':
+        return language == 'pt'
+            ? 'pesos chilenos'
+            : language == 'en'
+            ? 'Chilean pesos'
+            : 'pesos chilenos';
+      case 'UYU':
+        return language == 'pt'
+            ? 'pesos uruguaios'
+            : language == 'en'
+            ? 'Uruguayan pesos'
+            : 'pesos uruguayos';
+      case 'BRL':
+        return language == 'en'
+            ? 'reais'
+            : language == 'es'
+            ? 'reales'
+            : 'reais';
+      default:
+        return language == 'en' ? 'USD' : 'dólares';
     }
   }
 
@@ -2542,6 +2716,59 @@ class _QuestionSubnote extends StatelessWidget {
   }
 }
 
+class _TravelGroupChildrenSelector extends StatelessWidget {
+  const _TravelGroupChildrenSelector({
+    required this.selectedValue,
+    required this.onSelected,
+  });
+
+  final String? selectedValue;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final language = Localizations.localeOf(context).languageCode;
+    final title = switch (language) {
+      'pt' => 'Quantos filhos?',
+      'es' => '¿Cuántos hijos?',
+      _ => 'How many kids?',
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMutedFor(context),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.borderFor(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              for (final value in const ['1', '2', '3+'])
+                ChoiceChip(
+                  label: Text(value),
+                  selected: selectedValue == value,
+                  onSelected: (_) => onSelected(value),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ProcessingState extends StatelessWidget {
   const _ProcessingState({required this.title});
 
@@ -2881,13 +3108,13 @@ class _QuestionLocationDialog extends StatelessWidget {
   const _QuestionLocationDialog({
     required this.title,
     required this.body,
-    required this.secondaryLabel,
+    this.secondaryLabel,
     required this.primaryLabel,
   });
 
   final String title;
   final String body;
-  final String secondaryLabel;
+  final String? secondaryLabel;
   final String primaryLabel;
 
   @override
@@ -2920,13 +3147,15 @@ class _QuestionLocationDialog extends StatelessWidget {
             const SizedBox(height: 18),
             Row(
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: Text(secondaryLabel),
+                if (secondaryLabel != null) ...[
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(secondaryLabel!),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
+                  const SizedBox(width: 12),
+                ],
                 Expanded(
                   child: FilledButton(
                     onPressed: () => Navigator.pop(context, true),

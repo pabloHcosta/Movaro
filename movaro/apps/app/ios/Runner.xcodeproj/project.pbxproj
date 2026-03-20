@@ -228,6 +228,7 @@
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				25878D043E20396925B2D35D /* [CP] Embed Pods Frameworks */,
+				4744854160690B7C5D048002 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -331,6 +332,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer\nexport TARGET_DEVICE_OS_VERSION=${TARGET_DEVICE_OS_VERSION:-$IPHONEOS_DEPLOYMENT_TARGET}\n/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
+		};
+		4744854160690B7C5D048002 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 		6A213A40C9C6FC6D5F2E813B /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -571,6 +589,7 @@
 			baseConfigurationReference = 7B4F1A1C4B4D4E0A8A000001 /* Debug-dev.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				BUNDLE_LOADER = "";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = WF5647V4H2;
@@ -582,7 +601,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.movaro.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				BUNDLE_LOADER = "";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -599,6 +617,7 @@
 			baseConfigurationReference = 7B4F1A1C4B4D4E0A8A000003 /* Release-dev.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				BUNDLE_LOADER = "";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = WF5647V4H2;
@@ -610,7 +629,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.movaro.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				BUNDLE_LOADER = "";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -626,6 +644,7 @@
 			baseConfigurationReference = 7B4F1A1C4B4D4E0A8A000002 /* Profile-dev.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				BUNDLE_LOADER = "";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = WF5647V4H2;
@@ -637,7 +656,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.movaro.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				BUNDLE_LOADER = "";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -653,6 +671,7 @@
 			baseConfigurationReference = 7B4F1A1C4B4D4E0A8A000004 /* Debug-prod.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				BUNDLE_LOADER = "";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = WF5647V4H2;
@@ -664,7 +683,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.movaro.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				BUNDLE_LOADER = "";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -681,6 +699,7 @@
 			baseConfigurationReference = 7B4F1A1C4B4D4E0A8A000006 /* Release-prod.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				BUNDLE_LOADER = "";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = WF5647V4H2;
@@ -692,7 +711,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.movaro.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				BUNDLE_LOADER = "";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -708,6 +726,7 @@
 			baseConfigurationReference = 7B4F1A1C4B4D4E0A8A000005 /* Profile-prod.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				BUNDLE_LOADER = "";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = WF5647V4H2;
@@ -719,7 +738,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.movaro.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				BUNDLE_LOADER = "";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
