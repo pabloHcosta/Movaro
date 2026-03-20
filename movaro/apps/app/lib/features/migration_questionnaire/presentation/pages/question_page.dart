@@ -296,6 +296,12 @@ class _QuestionPageState extends State<QuestionPage> {
     }
 
     final journey = controller.journeyContextController;
+    final cachedDetected = journey.detectedLocation;
+    if (cachedDetected != null) {
+      await _handleDetectedOriginResult(question, cachedDetected);
+      return;
+    }
+
     final state = await journey.requestDetectedLocation();
     if (!mounted) {
       return;
@@ -304,26 +310,11 @@ class _QuestionPageState extends State<QuestionPage> {
     switch (state) {
       case DetectedLocationRequestState.available:
         final detected = journey.detectedLocation;
-        final isArgentina =
-            detected?.countryId != null &&
-            journey.journeyValueFor(
-                  journey.countries
-                      .where((country) => country.id == detected!.countryId)
-                      .firstOrNull,
-                ) ==
-                'argentina';
-
         if (detected == null) {
           await _showLocationFailedDialog(question);
           return;
         }
-
-        if (isArgentina) {
-          await _showDetectedOriginDialog(question, detected);
-          return;
-        }
-
-        await _showUnsupportedLocationDialog(question, detected);
+        await _handleDetectedOriginResult(question, detected);
       case DetectedLocationRequestState.denied:
       case DetectedLocationRequestState.deniedForever:
       case DetectedLocationRequestState.unavailable:
@@ -332,6 +323,26 @@ class _QuestionPageState extends State<QuestionPage> {
       case DetectedLocationRequestState.requesting:
         await _showLocationFailedDialog(question);
     }
+  }
+
+  Future<void> _handleDetectedOriginResult(
+    Question question,
+    DetectedLocation detected,
+  ) async {
+    final journey = controller.journeyContextController;
+    final matchedCountry = journey.countries
+        .where((country) => country.id == detected.countryId)
+        .firstOrNull;
+    final isArgentina =
+        matchedCountry != null &&
+        journey.journeyValueFor(matchedCountry) == 'argentina';
+
+    if (isArgentina) {
+      await _showDetectedOriginDialog(question, detected);
+      return;
+    }
+
+    await _showUnsupportedLocationDialog(question, detected);
   }
 
   Future<void> _showDetectedOriginDialog(
@@ -2187,6 +2198,9 @@ class _QuestionInlineCountryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizedCountryName = context.l10n.countryLabel(
+      country.journeyValue,
+    );
     final isDark = AppColors.isDark(context);
     final background = isSelected
         ? AppColors.tintedSurfaceFor(
@@ -2244,7 +2258,7 @@ class _QuestionInlineCountryCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                country.name,
+                localizedCountryName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -2292,6 +2306,9 @@ class _QuestionCountryPickerSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final country = selectedCountry;
+    final localizedCountryName = country == null
+        ? placeholder
+        : context.l10n.countryLabel(country.journeyValue);
 
     return Material(
       color: Colors.transparent,
@@ -2333,7 +2350,7 @@ class _QuestionCountryPickerSummaryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      country?.name ?? placeholder,
+                      localizedCountryName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
@@ -2406,7 +2423,10 @@ class _QuestionCountryPickerSheetState
               if (normalizedQuery.isEmpty) {
                 return true;
               }
-              return country.name.toLowerCase().contains(normalizedQuery);
+              final localizedName = context.l10n.countryLabel(
+                country.journeyValue,
+              );
+              return localizedName.toLowerCase().contains(normalizedQuery);
             })
             .toList(growable: false)
           ..sort((left, right) {
@@ -2422,7 +2442,9 @@ class _QuestionCountryPickerSheetState
               return rightSelectable.compareTo(leftSelectable);
             }
 
-            return left.name.compareTo(right.name);
+            return context.l10n
+                .countryLabel(left.journeyValue)
+                .compareTo(context.l10n.countryLabel(right.journeyValue));
           });
 
     return DraggableScrollableSheet(

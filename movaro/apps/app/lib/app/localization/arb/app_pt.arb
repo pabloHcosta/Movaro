@@ -93,6 +93,58 @@
   "publicHomeQuestionsTitle": "Guia prático",
   "publicHomeQuestionsBody": "Entre no guia para entender documentos, saúde, moradia e custos iniciais sem pesquisa solta.",
   "publicHomeQuestionsAction": "Tirar dúvidas",
+  "homeHeroWelcomeDefault": "Bem-vindo ao Movaro",
+  "homeHeroWelcomeBack": "Continue de onde parou",
+  "homeHeroGreetingMorning": "Bom dia, {name}",
+  "@homeHeroGreetingMorning": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "homeHeroGreetingAfternoon": "Boa tarde, {name}",
+  "@homeHeroGreetingAfternoon": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "homeHeroGreetingEvening": "Boa noite, {name}",
+  "@homeHeroGreetingEvening": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "homeHeroSubtitleNoPlan": "Planeje sua mudança",
+  "homeHeroSubtitleWithPlan": "Continue de onde parou",
+  "homeHeroOriginLabel": "Origem",
+  "homeHeroDestinationLabel": "Destino",
+  "homeHeroNoPlanTitle": "Seu plano de migração em 3 passos",
+  "homeHeroNoPlanBody": "Responda o questionário e receba uma cidade indicada para o seu perfil.",
+  "homeHeroStepQuestionnaire": "Responder questionário",
+  "homeHeroStepCity": "Receber cidade ideal",
+  "homeHeroStepGuide": "Executar com guia",
+  "homeHeroStartAction": "Montar meu plano -> leva ~5 min",
+  "homeHeroPlanActiveBadge": "Plano ativo",
+  "homeHeroSelectedCityEyebrow": "Sua cidade escolhida",
+  "homeHeroProgressLabel": "Progresso geral do plano",
+  "homeHeroStageMetricLabel": "ETAPA",
+  "homeHeroStageTotalValue": "5",
+  "homeHeroCostMetricLabel": "CUSTO",
+  "homeHeroClimateMetricLabel": "CLIMA",
+  "homeHeroNextStepLabel": "PRÓXIMA ETAPA",
+  "homeHeroContinueAction": "Continuar plano ->",
+  "homeHeroDiscoverCitiesBody": "Custo, trabalho e qualidade de vida",
+  "homeHeroDiscoverCitiesBodyWithCity": "Ver alternativas a {city}",
+  "@homeHeroDiscoverCitiesBodyWithCity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "homeHeroExploreAction": "Explorar ->",
+  "homeHeroGuideBody": "Documentos e chegada ao Brasil",
+  "homeHeroOpenGuideAction": "Abrir guia ->",
+  "homeHeroOpenShortAction": "Abrir ->",
+  "homeHeroExploreSectionTitle": "Explorar",
+  "homeHeroPlanCompleteTask": "Revisar plano concluído",
   "publicHomePlanTitle": "Gerar meu plano",
   "publicHomePlanBody": "Responda poucas perguntas e receba um plano inicial com sugestões mais claras.",
   "publicHomeJourneyDraftTitle": "Comece seu plano com o destino já definido",
@@ -813,6 +865,14 @@
   "cityLifestyleInlandLabel": "Rotina de interior",
   "cityDetailMapTitle": "Onde a cidade fica",
   "cityDetailMapDescription": "Veja a localização da cidade no mapa antes de comparar contexto, distância e região.",
+  "cityDetailMapRegionLabel": "Região",
+  "cityDetailMapDistanceLabel": "Distância de {origin}: ~{distanceKm} km",
+  "@cityDetailMapDistanceLabel": {
+    "placeholders": {
+      "origin": {},
+      "distanceKm": {}
+    }
+  },
   "cityDetailSnapshotTitle": "Visão rápida",
   "cityDetailSnapshotPositiveTag": "Ponto forte",
   "cityDetailSnapshotWatchoutTag": "Atenção",
@@ -917,10 +977,16 @@
       "state": {}
     }
   },
-  "cityDetailDiscoverAction": "Conhecer a cidade",
+  "cityDetailDiscoverAction": "Explorar a cidade",
   "cityDetailDeepDiveTitle": "Análise detalhada",
   "cityDetailDeepDiveSummary": "Abra esta área se quiser ver todos os indicadores, contexto e leitura mais profunda da cidade.",
   "cityDetailCompareAction": "Comparar outras cidades",
+  "cityDetailCompareSelectedBody": "{city} pré-selecionada",
+  "@cityDetailCompareSelectedBody": {
+    "placeholders": {
+      "city": {}
+    }
+  },
   "cityDetailPlanAction": "Montar meu plano",
   "cityDetailFooterNote": "Os indicadores ajudam na exploração inicial e não substituem análise individual.",
   "publicHomeFavoritesTitle": "Suas cidades favoritas",
@@ -935,6 +1001,77 @@
   "favoritesEmptyTitle": "Nenhuma cidade favorita ainda",
   "favoritesEmptyBody": "Quando você favoritar cidades, elas ficam reunidas aqui para acompanhar detalhes, clima e comparação mais rápido.",
   "favoritesEmptyHint": "Explore cidades, salve as mais promissoras e volte aqui quando quiser retomar.",
+  "favoritesPageTitle": "Cidades salvas",
+  "favoritesPageCount": "{current} de {total}",
+  "@favoritesPageCount": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
+  "favoritesCompareTitle": "Comparar cidades",
+  "favoritesCompareSubtitle": "{left} vs {right}",
+  "@favoritesCompareSubtitle": {
+    "placeholders": {
+      "left": {},
+      "right": {}
+    }
+  },
+  "favoritesCompareAction": "Comparar",
+  "favoritesPageEmptyTitle": "Nenhuma cidade salva",
+  "favoritesPageEmptyBody": "Explore as cidades e salve as que mais te interessam para comparar depois.",
+  "favoritesAddCityTitle": "Adicionar cidade",
+  "favoritesAddCitySubtitle": "{count} vaga(s) disponível(is)",
+  "@favoritesAddCitySubtitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "favoritesActivePlanBadge": "Plano ativo",
+  "favoritesContinuePlanAction": "Continuar plano",
+  "favoritesOpenDetailsAction": "Ver detalhes",
+  "favoritesRemoveAction": "Remover",
+  "favoritesClimateLabel": "Clima agora",
+  "favoritesClimatePending": "Carregando",
+  "favoritesQualityLabel": "Qualidade",
+  "cityComparisonTitle": "Comparar cidades",
+  "cityComparisonCompareAction": "Comparar",
+  "cityComparisonEditAction": "Alterar",
+  "cityComparisonModeTwo": "2 cidades",
+  "cityComparisonModeThree": "3 cidades",
+  "cityComparisonAddAction": "Adicionar",
+  "cityComparisonSearchPlaceholder": "Buscar cidade para comparar...",
+  "cityComparisonHeaderLabel": "Métrica",
+  "cityComparisonBestFitBadge": "MELHOR FIT",
+  "cityComparisonTopBadge": "TOP",
+  "cityComparisonGroupCost": "Custo de vida",
+  "cityComparisonGroupQuality": "Qualidade de vida",
+  "cityComparisonGroupWork": "Trabalho e chegada",
+  "cityComparisonRentLabel": "Aluguel estimado",
+  "cityComparisonFoodLabel": "Custo de alimentação mensal",
+  "cityComparisonTransportLabel": "Custo de transporte mensal",
+  "cityComparisonHdiLabel": "IDH",
+  "cityComparisonClimateLabel": "Clima atual",
+  "cityComparisonSafetyLabel": "Índice de segurança",
+  "cityComparisonJobLabel": "Mercado de trabalho",
+  "cityComparisonCommunityLabel": "Comunidade de imigrantes",
+  "cityComparisonCommunityLarge": "Grande",
+  "cityComparisonCommunityMedium": "Média",
+  "cityComparisonCommunitySmall": "Pequena",
+  "cityComparisonWinnerLabel": "MELHOR ESCOLHA PARA VOCÊ",
+  "cityComparisonUnavailable": "—",
+  "cityComparisonStartPlanAction": "Iniciar plano em {city} →",
+  "@cityComparisonStartPlanAction": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "cityComparisonOtherDetailsAction": "Ver detalhes de {city}",
+  "@cityComparisonOtherDetailsAction": {
+    "placeholders": {
+      "city": {}
+    }
+  },
   "favoritesExploreAction": "Explorar cidades",
   "favoritesGuideEyebrow": "Guia rápido",
   "favoritesGuideTitle": "Como usar Favoritas",
@@ -1801,6 +1938,7 @@
   "migrationPlanResultCitySectionBody": "Abra o contexto da cidade quando quiser mais detalhes, não antes de a decisão principal ficar clara.",
   "migrationPlanResultPlanSectionTitle": "O que acontece depois deste resultado",
   "migrationPlanResultPlanSectionBody": "A preparação só ganha valor quando a escolha da cidade já parece firme o suficiente para avançar.",
+  "migrationPlanCompareThreeCitiesAction": "Comparar as 3 cidades",
   "migrationPlanResultProgressSupporting": "Itens do checklist concluídos dentro do plano guiado.",
   "migrationPlanCopilotProgressValue": "{done} de {total} itens do checklist concluídos",
   "@migrationPlanCopilotProgressValue": {
@@ -1809,6 +1947,29 @@
       "total": {}
     }
   },
+  "migrationPlanCopilotProgressHeader": "Etapa {current} de {total} · {percent}% concluído",
+  "@migrationPlanCopilotProgressHeader": {
+    "placeholders": {
+      "current": {},
+      "total": {},
+      "percent": {}
+    }
+  },
+  "migrationPlanCopilotStatusNotStarted": "Não iniciado",
+  "migrationPlanCopilotStatusInProgress": "Em andamento",
+  "migrationPlanCopilotStatusDone": "Concluído",
+  "migrationPlanCopilotToolsButton": "Ferramentas",
+  "migrationPlanCopilotCityRequiredHint": "Disponível após confirmar sua cidade.",
+  "migrationPlanCopilotGoalRequiredHint": "Disponível após definir seu objetivo de migração.",
+  "migrationPlanCopilotToolsFlightsHint": "Planejador de voos disponível em Ferramentas.",
+  "migrationPlanHousingCompareTitle": "Pensando em trocar de cidade?",
+  "migrationPlanHousingCompareBody": "Compare {cityName} com outras opções antes de decidir.",
+  "@migrationPlanHousingCompareBody": {
+    "placeholders": {
+      "cityName": {}
+    }
+  },
+  "migrationPlanHousingCompareAction": "Comparar cidades",
   "migrationPlanScrollHint": "Ver mais",
   "languageSelectorSystem": "Sistema",
   "bmpDisclaimer": "Isto monta um ponto de partida. Não é consultoria legal.",

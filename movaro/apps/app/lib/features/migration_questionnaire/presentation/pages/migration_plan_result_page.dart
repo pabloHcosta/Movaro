@@ -21,6 +21,7 @@ import 'package:movaro_app/features/cities/presentation/widgets/city_image_backd
 import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 
 class MigrationPlanResultPage extends StatefulWidget {
   const MigrationPlanResultPage({
@@ -290,6 +291,31 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
                                   title:
                                       l10n.migrationPlanResultOtherCitiesTitle,
                                 ),
+                                if (alternativeCities.length >= 2) ...[
+                                  const SizedBox(height: 12),
+                                  OutlinedButton.icon(
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute<void>(
+                                          builder: (_) => CityComparisonScreen(
+                                            initialCities: [
+                                              city,
+                                              ...alternativeCities,
+                                            ],
+                                            citiesController:
+                                                widget.citiesController,
+                                            migrationQuestionnaireController:
+                                                widget.controller,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.compare_rounded),
+                                    label: Text(
+                                      l10n.migrationPlanCompareThreeCitiesAction,
+                                    ),
+                                  ),
+                                ],
                                 const SizedBox(height: 12),
                                 _AlternativeCitiesList(
                                   cities: alternativeCities,

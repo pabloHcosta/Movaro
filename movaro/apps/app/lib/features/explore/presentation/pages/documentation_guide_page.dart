@@ -4,6 +4,7 @@ import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/catalog/domain/entities/catalog_country.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
+import 'package:movaro_app/core/journey/journey_country_metadata.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -109,7 +110,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     final availableCountries = _availableGuideCountries(context);
     final selectedCountry = _selectedGuideCountry(context, availableCountries);
     final hasActivePlan = _hasActivePlan;
-    final hasGuideData = selectedCountry.id == 'brazil';
+    final hasGuideData = _normalizeCountryId(selectedCountry.id) == 'brasil';
 
     return Scaffold(
       body: Stack(
@@ -147,6 +148,10 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                             children: [
                               _GuideCountryBar(
                                 selectedCountry: selectedCountry,
+                                selectedCountryLabel: _localizedCountryName(
+                                  context,
+                                  selectedCountry,
+                                ),
                                 hasActivePlan: hasActivePlan,
                                 onTapCountry: () => _showCountryPicker(
                                   context,
@@ -424,7 +429,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     }
     return [
       CatalogCountry(
-        id: 'brazil',
+        id: 'brasil',
         name: context.l10n.questionOptionBrazil,
         isoCode: 'BR',
       ),
@@ -436,15 +441,17 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     List<CatalogCountry> countries,
   ) {
     final preferredId =
-        _selectedCountryId ??
-        widget.journeyContextController?.destinationCountryId ??
+        _normalizeCountryId(_selectedCountryId) ??
+        _normalizeCountryId(
+          widget.journeyContextController?.destinationCountryId,
+        ) ??
         _normalizeCountryId(
           widget
               .migrationQuestionnaireController
               ?.generatedPlan
               ?.destinationCountry,
         ) ??
-        'brazil';
+        'brasil';
 
     for (final country in countries) {
       if (country.id == preferredId) {
@@ -460,9 +467,23 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     }
     final normalized = raw.toLowerCase().trim();
     return switch (normalized) {
-      'brazil' || 'brasil' => 'brazil',
+      'brazil' || 'brasil' => 'brasil',
       'argentina' => 'argentina',
       _ => normalized,
+    };
+  }
+
+  String _localizedCountryName(BuildContext context, CatalogCountry country) {
+    final l10n = context.l10n;
+    final normalizedId = _normalizeCountryId(country.id) ?? country.id;
+
+    return switch (normalizedId) {
+      'argentina' => l10n.questionOptionArgentina,
+      'brasil' => l10n.questionOptionBrazil,
+      'chile' => l10n.countryLabel('chile'),
+      'uruguai' => l10n.countryLabel('uruguai'),
+      'paraguai' => l10n.countryLabel('paraguai'),
+      _ => country.name,
     };
   }
 
@@ -488,6 +509,10 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                   for (var index = 0; index < countries.length; index++) ...[
                     _GuideCountryOptionTile(
                       country: countries[index],
+                      countryLabel: _localizedCountryName(
+                        context,
+                        countries[index],
+                      ),
                       selected: countries[index].id == selectedCountryId,
                       onTap: () =>
                           Navigator.of(sheetContext).pop(countries[index]),
@@ -1094,16 +1119,23 @@ class DocumentationTopicPage extends StatelessWidget {
   const DocumentationTopicPage({
     required this.section,
     required this.exchangeRatesService,
+    this.preferredCurrencyCountryId,
     super.key,
   });
 
   final DocumentationGuideSection section;
   final CopilotExchangeRatesService exchangeRatesService;
+  final String? preferredCurrencyCountryId;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final details = _sectionDetails(context, section, exchangeRatesService);
+    final details = _sectionDetails(
+      context,
+      section,
+      exchangeRatesService,
+      preferredCurrencyCountryId,
+    );
 
     return Scaffold(
       body: Stack(
@@ -1168,6 +1200,7 @@ class DocumentationTopicPage extends StatelessWidget {
     BuildContext context,
     DocumentationGuideSection section,
     CopilotExchangeRatesService exchangeRatesService,
+    String? preferredCurrencyCountryId,
   ) {
     final l10n = context.l10n;
     final topics = _documentationTopics(context);
@@ -1201,7 +1234,10 @@ class DocumentationTopicPage extends StatelessWidget {
           sections: [
             const HousingDecisionSupportSection(),
             const SizedBox(height: 12),
-            HousingEntryCostSection(exchangeRatesService: exchangeRatesService),
+            HousingEntryCostSection(
+              exchangeRatesService: exchangeRatesService,
+              preferredCountryId: preferredCurrencyCountryId,
+            ),
             const SizedBox(height: 12),
             const HousingSoftLandingSection(),
             const SizedBox(height: 12),
@@ -1265,7 +1301,10 @@ class DocumentationTopicPage extends StatelessWidget {
           title: l10n.documentationPathCostsTitle,
           description: l10n.documentationPathCostsBody,
           sections: [
-            PracticalCostEstimator(exchangeRatesService: exchangeRatesService),
+            PracticalCostEstimator(
+              exchangeRatesService: exchangeRatesService,
+              preferredCountryId: preferredCurrencyCountryId,
+            ),
           ],
         );
     }
@@ -1510,11 +1549,13 @@ class _GuideSearchField extends StatelessWidget {
 class _GuideCountryBar extends StatelessWidget {
   const _GuideCountryBar({
     required this.selectedCountry,
+    required this.selectedCountryLabel,
     required this.hasActivePlan,
     required this.onTapCountry,
   });
 
   final CatalogCountry selectedCountry;
+  final String selectedCountryLabel;
   final bool hasActivePlan;
   final VoidCallback onTapCountry;
 
@@ -1525,8 +1566,11 @@ class _GuideCountryBar extends StatelessWidget {
         Expanded(
           child: OutlinedButton.icon(
             onPressed: onTapCountry,
-            icon: const Icon(Icons.public_rounded),
-            label: Text(selectedCountry.name),
+            icon: Text(
+              selectedCountry.flagEmoji,
+              style: const TextStyle(fontSize: 18),
+            ),
+            label: Text(selectedCountryLabel),
           ),
         ),
         const SizedBox(width: 12),
@@ -1607,11 +1651,13 @@ class _GuideStatusNotice extends StatelessWidget {
 class _GuideCountryOptionTile extends StatelessWidget {
   const _GuideCountryOptionTile({
     required this.country,
+    required this.countryLabel,
     required this.selected,
     required this.onTap,
   });
 
   final CatalogCountry country;
+  final String countryLabel;
   final bool selected;
   final VoidCallback onTap;
 
@@ -1629,16 +1675,11 @@ class _GuideCountryOptionTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           child: Row(
             children: [
-              Icon(
-                Icons.public_rounded,
-                color: selected
-                    ? AppColors.primary
-                    : AppColors.textSoftFor(context),
-              ),
+              Text(country.flagEmoji, style: const TextStyle(fontSize: 22)),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  country.name,
+                  countryLabel,
                   style: Theme.of(
                     context,
                   ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),

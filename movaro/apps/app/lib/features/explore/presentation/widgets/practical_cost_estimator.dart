@@ -8,9 +8,14 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 
 class PracticalCostEstimator extends StatefulWidget {
-  const PracticalCostEstimator({required this.exchangeRatesService, super.key});
+  const PracticalCostEstimator({
+    required this.exchangeRatesService,
+    this.preferredCountryId,
+    super.key,
+  });
 
   final CopilotExchangeRatesService exchangeRatesService;
+  final String? preferredCountryId;
 
   @override
   State<PracticalCostEstimator> createState() => _PracticalCostEstimatorState();
@@ -92,7 +97,11 @@ class _PracticalCostEstimatorState extends State<PracticalCostEstimator> {
                       for (final item in items)
                         SizedBox(
                           width: cardWidth,
-                          child: _CostItemCard(item: item, exchange: exchange),
+                          child: _CostItemCard(
+                            item: item,
+                            exchange: exchange,
+                            preferredCountryId: widget.preferredCountryId,
+                          ),
                         ),
                     ],
                   );
@@ -165,14 +174,19 @@ class _PracticalCostEstimatorState extends State<PracticalCostEstimator> {
 }
 
 class _CostItemCard extends StatelessWidget {
-  const _CostItemCard({required this.item, required this.exchange});
+  const _CostItemCard({
+    required this.item,
+    required this.exchange,
+    required this.preferredCountryId,
+  });
 
   final _CostItem item;
   final CopilotExchangeRates? exchange;
+  final String? preferredCountryId;
 
   @override
   Widget build(BuildContext context) {
-    final hasRates = exchange != null && item.amountInBrl != null;
+    final hasAmount = item.amountInBrl != null;
     final surfaceMuted = AppColors.surfaceMutedFor(context);
     final textPrimary = AppColors.textPrimaryFor(context);
     final textSoft = AppColors.textSoftFor(context);
@@ -209,11 +223,12 @@ class _CostItemCard extends StatelessWidget {
               context,
             ).textTheme.bodyMedium?.copyWith(color: textSoft),
           ),
-          if (hasRates) ...[
+          if (hasAmount) ...[
             const SizedBox(height: 14),
             MultiCurrencyAmount(
               amountInBrl: item.amountInBrl!,
               exchangeRates: exchange,
+              preferredCountryId: preferredCountryId,
             ),
           ],
         ],

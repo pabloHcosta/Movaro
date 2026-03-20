@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/latest_migration_plan_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/answer.dart';
@@ -19,20 +18,17 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     required MigrationPlanRepository migrationPlanRepository,
     required MigrationPlanGenerator planGenerator,
     required JourneyContextController journeyContextController,
-    LatestMigrationPlanStore? latestPlanStore,
     QuestionnaireFlowDraftStore? flowDraftStore,
   }) : _questionRepository = questionRepository,
        _migrationPlanRepository = migrationPlanRepository,
        _planGenerator = planGenerator,
        _journeyContextController = journeyContextController,
-       _latestPlanStore = latestPlanStore ?? LatestMigrationPlanStore(),
        _flowDraftStore = flowDraftStore ?? QuestionnaireFlowDraftStore();
 
   final QuestionRepository _questionRepository;
   final MigrationPlanRepository _migrationPlanRepository;
   final MigrationPlanGenerator _planGenerator;
   final JourneyContextController _journeyContextController;
-  final LatestMigrationPlanStore _latestPlanStore;
   final QuestionnaireFlowDraftStore _flowDraftStore;
 
   List<Question> _questions = const [];
@@ -142,7 +138,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     try {
       _questions = await _questionRepository.getQuestions();
       _savedPlans = await _migrationPlanRepository.getSavedPlans();
-      _generatedPlan = await _latestPlanStore.read();
+      _generatedPlan = await _migrationPlanRepository.getCurrentPlan();
       final draft = _generatedPlan == null
           ? await _flowDraftStore.read()
           : null;
@@ -178,7 +174,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _showRefinePrompt = false;
     _isRefineResolved = false;
     _includeConstraints = false;
-    await _latestPlanStore.clear();
+    await _migrationPlanRepository.setCurrentPlan(null);
     await _flowDraftStore.clear();
     notifyListeners();
   }
@@ -401,7 +397,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       isCityConfirmed: true,
     );
     notifyListeners();
-    await _latestPlanStore.write(_generatedPlan!);
+    await _migrationPlanRepository.setCurrentPlan(_generatedPlan);
   }
 
   void _setInitializing(bool value) {
@@ -434,7 +430,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
         answers: _answers,
         variant: _selectedVariant ?? QuestionnaireVariant.lean,
       );
-      await _latestPlanStore.write(_generatedPlan!);
+      await _migrationPlanRepository.setCurrentPlan(_generatedPlan);
       await _flowDraftStore.clear();
       notifyListeners();
       return true;

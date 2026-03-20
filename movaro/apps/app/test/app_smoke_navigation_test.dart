@@ -29,11 +29,10 @@ import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/latest_migration_plan_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/repositories/in_memory_migration_plan_repository.dart';
+import 'package:movaro_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/repositories/question_repository_impl.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
@@ -66,6 +65,7 @@ void main() {
         find.text('Escolha seu destino e comece mais rápido'),
         findsOneWidget,
       );
+      expect(find.text('Plano'), findsNothing);
       expect(find.text('Começar meu plano'), findsOneWidget);
       expect(find.text('Descobrir cidades'), findsOneWidget);
       expect(find.text('PT'), findsOneWidget);
@@ -114,6 +114,93 @@ void main() {
     expect(find.text('Guia da mudança'), findsWidgets);
     expect(find.text('Documentos e residência'), findsOneWidget);
     expect(find.text('Guia'), findsOneWidget);
+    expect(find.text('Plano'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('copilot back falls back to public home when opened as root', (
+    tester,
+  ) async {
+    await harness.generateLeanPlan();
+
+    final city = harness
+        .migrationQuestionnaireController
+        .generatedPlan!
+        .recommendedCity!;
+    await harness.migrationQuestionnaireController.confirmPlanCity(city);
+
+    await tester.pumpWidget(
+      harness.buildApp(initialRoute: AppRoutes.migrationPlanCopilot),
+    );
+    await _pumpScreen(tester);
+
+    expect(find.text('Guia da mudança'), findsWidgets);
+
+    await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded).first);
+    await _pumpScreen(tester);
+
+    expect(find.text('Escolha o próximo passo da sua mudança'), findsOneWidget);
+    expect(find.text('Plano'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('home lets the user delete the current plan', (tester) async {
+    await harness.generateLeanPlan();
+
+    final city = harness
+        .migrationQuestionnaireController
+        .generatedPlan!
+        .recommendedCity!;
+    await harness.migrationQuestionnaireController.confirmPlanCity(city);
+
+    await tester.pumpWidget(
+      harness.buildApp(initialRoute: AppRoutes.publicHome),
+    );
+    await _pumpScreen(tester);
+
+    expect(find.text('Excluir ou refazer'), findsOneWidget);
+
+    await tester.tap(find.text('Excluir ou refazer'));
+    await _pumpScreen(tester);
+
+    expect(find.text('Excluir plano'), findsOneWidget);
+
+    await tester.tap(find.text('Excluir plano'));
+    await _pumpScreen(tester);
+
+    expect(find.text('Excluir ou refazer'), findsNothing);
+    expect(find.text('Plano'), findsNothing);
+    expect(find.text('Começar meu plano'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('home lets the user rebuild the current plan', (tester) async {
+    await harness.generateLeanPlan();
+
+    final city = harness
+        .migrationQuestionnaireController
+        .generatedPlan!
+        .recommendedCity!;
+    await harness.migrationQuestionnaireController.confirmPlanCity(city);
+
+    await tester.pumpWidget(
+      harness.buildApp(initialRoute: AppRoutes.publicHome),
+    );
+    await _pumpScreen(tester);
+
+    await tester.tap(find.text('Excluir ou refazer'));
+    await _pumpScreen(tester);
+
+    await tester.tap(find.text('Refazer plano'));
+    await _pumpScreen(tester);
+
+    expect(find.text('Seu plano inicial'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
@@ -183,12 +270,11 @@ class _AppTestHarness {
         catalogRepository: catalogRepository,
         journeyContextController: journeyContextController,
       ),
-      migrationPlanRepository: InMemoryMigrationPlanRepository(),
-      planGenerator: MigrationPlanGenerator(citiesRepository: citiesRepository),
-      journeyContextController: journeyContextController,
-      latestPlanStore: LatestMigrationPlanStore(
+      migrationPlanRepository: LocalMigrationPlanRepository(
         directoryProvider: () async => tempDirectory,
       ),
+      planGenerator: MigrationPlanGenerator(citiesRepository: citiesRepository),
+      journeyContextController: journeyContextController,
     );
     final copilotExchangeRatesService = _FakeCopilotExchangeRatesService(
       environment: environment,

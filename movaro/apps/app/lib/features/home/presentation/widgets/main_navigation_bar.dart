@@ -32,6 +32,7 @@ class MainNavigationBar extends StatelessWidget {
       ]),
       builder: (context, _) {
         final isDark = AppColors.isDark(context);
+        final items = _buildItems(context);
 
         return SafeArea(
           top: false,
@@ -68,57 +69,19 @@ class MainNavigationBar extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
                   child: Row(
                     children: [
-                      Expanded(
-                        child: _NavItem(
-                          label: context.l10n.mainNavHome,
-                          icon: Icons.home_rounded,
-                          isSelected: currentIndex == 0,
-                          isEnabled: true,
-                          onTap: () => _handleTap(
-                            context,
-                            index: 0,
+                      for (var index = 0; index < items.length; index++) ...[
+                        Expanded(
+                          child: _NavItem(
+                            label: items[index].label,
+                            icon: items[index].icon,
+                            isSelected: currentIndex == items[index].slot,
+                            isEnabled: true,
+                            onTap: () =>
+                                _handleTap(context, slot: items[index].slot),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _NavItem(
-                          label: context.l10n.mainNavExplore,
-                          icon: Icons.travel_explore_rounded,
-                          isSelected: currentIndex == 1,
-                          isEnabled: true,
-                          onTap: () => _handleTap(
-                            context,
-                            index: 1,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _NavItem(
-                          label: context.l10n.mainNavPlan,
-                          icon: Icons.checklist_rounded,
-                          isSelected: currentIndex == 2,
-                          isEnabled: true,
-                          onTap: () => _handleTap(
-                            context,
-                            index: 2,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _NavItem(
-                          label: context.l10n.mainNavFavorites,
-                          icon: Icons.favorite_rounded,
-                          isSelected: currentIndex == 3,
-                          isEnabled: true,
-                          onTap: () => _handleTap(
-                            context,
-                            index: 3,
-                          ),
-                        ),
-                      ),
+                        if (index != items.length - 1) const SizedBox(width: 8),
+                      ],
                     ],
                   ),
                 ),
@@ -130,22 +93,48 @@ class MainNavigationBar extends StatelessWidget {
     );
   }
 
-  void _handleTap(
-    BuildContext context, {
-    required int index,
-  }) {
-    final targetRoute = switch (index) {
+  List<_NavDestination> _buildItems(BuildContext context) {
+    return [
+      _NavDestination(
+        slot: 0,
+        label: context.l10n.mainNavHome,
+        icon: Icons.home_rounded,
+      ),
+      _NavDestination(
+        slot: 1,
+        label: context.l10n.mainNavExplore,
+        icon: Icons.travel_explore_rounded,
+      ),
+      if (_hasDetailedPlan)
+        _NavDestination(
+          slot: 2,
+          label: context.l10n.mainNavPlan,
+          icon: Icons.checklist_rounded,
+        ),
+      _NavDestination(
+        slot: 3,
+        label: context.l10n.mainNavFavorites,
+        icon: Icons.favorite_rounded,
+      ),
+    ];
+  }
+
+  bool get _hasDetailedPlan =>
+      migrationQuestionnaireController.generatedPlan?.isCityConfirmed == true;
+
+  void _handleTap(BuildContext context, {required int slot}) {
+    final targetRoute = switch (slot) {
       0 => AppRoutes.publicHome,
       1 => AppRoutes.explore,
       2 => _resolvePlanRoute(),
       _ => AppRoutes.favorites,
     };
 
-    if (index == currentIndex) {
+    if (slot == currentIndex) {
       return;
     }
 
-    if (index == 2 && targetRoute == AppRoutes.publicHome) {
+    if (slot == 2 && targetRoute == AppRoutes.publicHome) {
       _showFeedback(context, context.l10n.mainNavPlanNeedsJourney);
     }
 
@@ -173,6 +162,18 @@ class MainNavigationBar extends StatelessWidget {
         SnackBar(behavior: SnackBarBehavior.floating, content: Text(message)),
       );
   }
+}
+
+class _NavDestination {
+  const _NavDestination({
+    required this.slot,
+    required this.label,
+    required this.icon,
+  });
+
+  final int slot;
+  final String label;
+  final IconData icon;
 }
 
 class _NavItem extends StatelessWidget {

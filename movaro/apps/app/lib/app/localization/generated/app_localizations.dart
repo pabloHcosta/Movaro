@@ -439,6 +439,198 @@ abstract class AppLocalizations {
   /// **'Clear my doubts'**
   String get publicHomeQuestionsAction;
 
+  /// No description provided for @homeHeroWelcomeDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Movaro'**
+  String get homeHeroWelcomeDefault;
+
+  /// No description provided for @homeHeroWelcomeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue where you left off'**
+  String get homeHeroWelcomeBack;
+
+  /// No description provided for @homeHeroGreetingMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning, {name}'**
+  String homeHeroGreetingMorning(Object name);
+
+  /// No description provided for @homeHeroGreetingAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon, {name}'**
+  String homeHeroGreetingAfternoon(Object name);
+
+  /// No description provided for @homeHeroGreetingEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening, {name}'**
+  String homeHeroGreetingEvening(Object name);
+
+  /// No description provided for @homeHeroSubtitleNoPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan your move'**
+  String get homeHeroSubtitleNoPlan;
+
+  /// No description provided for @homeHeroSubtitleWithPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue where you left off'**
+  String get homeHeroSubtitleWithPlan;
+
+  /// No description provided for @homeHeroOriginLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Origin'**
+  String get homeHeroOriginLabel;
+
+  /// No description provided for @homeHeroDestinationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination'**
+  String get homeHeroDestinationLabel;
+
+  /// No description provided for @homeHeroNoPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your migration plan in 3 steps'**
+  String get homeHeroNoPlanTitle;
+
+  /// No description provided for @homeHeroNoPlanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer the questionnaire and get a recommended city that fits your profile.'**
+  String get homeHeroNoPlanBody;
+
+  /// No description provided for @homeHeroStepQuestionnaire.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer questionnaire'**
+  String get homeHeroStepQuestionnaire;
+
+  /// No description provided for @homeHeroStepCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Get ideal city'**
+  String get homeHeroStepCity;
+
+  /// No description provided for @homeHeroStepGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Execute with guide'**
+  String get homeHeroStepGuide;
+
+  /// No description provided for @homeHeroStartAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Build my plan -> takes ~5 min'**
+  String get homeHeroStartAction;
+
+  /// No description provided for @homeHeroPlanActiveBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Active plan'**
+  String get homeHeroPlanActiveBadge;
+
+  /// No description provided for @homeHeroSelectedCityEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Your chosen city'**
+  String get homeHeroSelectedCityEyebrow;
+
+  /// No description provided for @homeHeroProgressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall plan progress'**
+  String get homeHeroProgressLabel;
+
+  /// No description provided for @homeHeroStageMetricLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'STAGE'**
+  String get homeHeroStageMetricLabel;
+
+  /// No description provided for @homeHeroStageTotalValue.
+  ///
+  /// In en, this message translates to:
+  /// **'5'**
+  String get homeHeroStageTotalValue;
+
+  /// No description provided for @homeHeroCostMetricLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'COST'**
+  String get homeHeroCostMetricLabel;
+
+  /// No description provided for @homeHeroClimateMetricLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'CLIMATE'**
+  String get homeHeroClimateMetricLabel;
+
+  /// No description provided for @homeHeroNextStepLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'NEXT STEP'**
+  String get homeHeroNextStepLabel;
+
+  /// No description provided for @homeHeroContinueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue plan ->'**
+  String get homeHeroContinueAction;
+
+  /// No description provided for @homeHeroDiscoverCitiesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost, jobs, and quality of life'**
+  String get homeHeroDiscoverCitiesBody;
+
+  /// No description provided for @homeHeroDiscoverCitiesBodyWithCity.
+  ///
+  /// In en, this message translates to:
+  /// **'See alternatives to {city}'**
+  String homeHeroDiscoverCitiesBodyWithCity(Object city);
+
+  /// No description provided for @homeHeroExploreAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore ->'**
+  String get homeHeroExploreAction;
+
+  /// No description provided for @homeHeroGuideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents and arrival in Brazil'**
+  String get homeHeroGuideBody;
+
+  /// No description provided for @homeHeroOpenGuideAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open guide ->'**
+  String get homeHeroOpenGuideAction;
+
+  /// No description provided for @homeHeroOpenShortAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open ->'**
+  String get homeHeroOpenShortAction;
+
+  /// No description provided for @homeHeroExploreSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore'**
+  String get homeHeroExploreSectionTitle;
+
+  /// No description provided for @homeHeroPlanCompleteTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Review completed plan'**
+  String get homeHeroPlanCompleteTask;
+
   /// No description provided for @publicHomePlanTitle.
   ///
   /// In en, this message translates to:
@@ -3889,6 +4081,18 @@ abstract class AppLocalizations {
   /// **'See the city on the map before comparing context, distance, and region.'**
   String get cityDetailMapDescription;
 
+  /// No description provided for @cityDetailMapRegionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get cityDetailMapRegionLabel;
+
+  /// No description provided for @cityDetailMapDistanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance from {origin}: ~{distanceKm} km'**
+  String cityDetailMapDistanceLabel(Object origin, Object distanceKm);
+
   /// No description provided for @cityDetailSnapshotTitle.
   ///
   /// In en, this message translates to:
@@ -4237,6 +4441,12 @@ abstract class AppLocalizations {
   /// **'Compare other cities'**
   String get cityDetailCompareAction;
 
+  /// No description provided for @cityDetailCompareSelectedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} pre-selected'**
+  String cityDetailCompareSelectedBody(Object city);
+
   /// No description provided for @cityDetailPlanAction.
   ///
   /// In en, this message translates to:
@@ -4344,6 +4554,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Explore cities, save the strongest ones, and come back here whenever you want to resume.'**
   String get favoritesEmptyHint;
+
+  /// No description provided for @favoritesPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved cities'**
+  String get favoritesPageTitle;
+
+  /// No description provided for @favoritesPageCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {total}'**
+  String favoritesPageCount(Object current, Object total);
+
+  /// No description provided for @favoritesCompareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare cities'**
+  String get favoritesCompareTitle;
+
+  /// No description provided for @favoritesCompareSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{left} vs {right}'**
+  String favoritesCompareSubtitle(Object left, Object right);
+
+  /// No description provided for @favoritesCompareAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get favoritesCompareAction;
+
+  /// No description provided for @favoritesPageEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved cities'**
+  String get favoritesPageEmptyTitle;
+
+  /// No description provided for @favoritesPageEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore cities and save the ones that interest you most so you can compare them later.'**
+  String get favoritesPageEmptyBody;
+
+  /// No description provided for @favoritesAddCityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add city'**
+  String get favoritesAddCityTitle;
+
+  /// No description provided for @favoritesAddCitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} slot(s) available'**
+  String favoritesAddCitySubtitle(Object count);
+
+  /// No description provided for @favoritesActivePlanBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Active plan'**
+  String get favoritesActivePlanBadge;
+
+  /// No description provided for @favoritesContinuePlanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue plan'**
+  String get favoritesContinuePlanAction;
+
+  /// No description provided for @favoritesOpenDetailsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get favoritesOpenDetailsAction;
+
+  /// No description provided for @favoritesRemoveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get favoritesRemoveAction;
+
+  /// No description provided for @favoritesClimateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Climate now'**
+  String get favoritesClimateLabel;
+
+  /// No description provided for @favoritesClimatePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get favoritesClimatePending;
+
+  /// No description provided for @favoritesQualityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get favoritesQualityLabel;
+
+  /// No description provided for @cityComparisonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare cities'**
+  String get cityComparisonTitle;
+
+  /// No description provided for @cityComparisonCompareAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get cityComparisonCompareAction;
+
+  /// No description provided for @cityComparisonEditAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get cityComparisonEditAction;
+
+  /// No description provided for @cityComparisonModeTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'2 cities'**
+  String get cityComparisonModeTwo;
+
+  /// No description provided for @cityComparisonModeThree.
+  ///
+  /// In en, this message translates to:
+  /// **'3 cities'**
+  String get cityComparisonModeThree;
+
+  /// No description provided for @cityComparisonAddAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get cityComparisonAddAction;
+
+  /// No description provided for @cityComparisonSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search city to compare...'**
+  String get cityComparisonSearchPlaceholder;
+
+  /// No description provided for @cityComparisonHeaderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Metric'**
+  String get cityComparisonHeaderLabel;
+
+  /// No description provided for @cityComparisonBestFitBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'BEST FIT'**
+  String get cityComparisonBestFitBadge;
+
+  /// No description provided for @cityComparisonTopBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'TOP'**
+  String get cityComparisonTopBadge;
+
+  /// No description provided for @cityComparisonGroupCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost of living'**
+  String get cityComparisonGroupCost;
+
+  /// No description provided for @cityComparisonGroupQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality of life'**
+  String get cityComparisonGroupQuality;
+
+  /// No description provided for @cityComparisonGroupWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work and arrival'**
+  String get cityComparisonGroupWork;
+
+  /// No description provided for @cityComparisonRentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated rent'**
+  String get cityComparisonRentLabel;
+
+  /// No description provided for @cityComparisonFoodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly food cost'**
+  String get cityComparisonFoodLabel;
+
+  /// No description provided for @cityComparisonTransportLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly transport cost'**
+  String get cityComparisonTransportLabel;
+
+  /// No description provided for @cityComparisonHdiLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'HDI'**
+  String get cityComparisonHdiLabel;
+
+  /// No description provided for @cityComparisonClimateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current climate'**
+  String get cityComparisonClimateLabel;
+
+  /// No description provided for @cityComparisonSafetyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety index'**
+  String get cityComparisonSafetyLabel;
+
+  /// No description provided for @cityComparisonJobLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Job market'**
+  String get cityComparisonJobLabel;
+
+  /// No description provided for @cityComparisonCommunityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Immigrant community'**
+  String get cityComparisonCommunityLabel;
+
+  /// No description provided for @cityComparisonCommunityLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get cityComparisonCommunityLarge;
+
+  /// No description provided for @cityComparisonCommunityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get cityComparisonCommunityMedium;
+
+  /// No description provided for @cityComparisonCommunitySmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get cityComparisonCommunitySmall;
+
+  /// No description provided for @cityComparisonWinnerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'BEST CHOICE FOR YOU'**
+  String get cityComparisonWinnerLabel;
+
+  /// No description provided for @cityComparisonUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get cityComparisonUnavailable;
+
+  /// No description provided for @cityComparisonStartPlanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start plan in {city} →'**
+  String cityComparisonStartPlanAction(Object city);
+
+  /// No description provided for @cityComparisonOtherDetailsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View details of {city}'**
+  String cityComparisonOtherDetailsAction(Object city);
 
   /// No description provided for @favoritesExploreAction.
   ///
@@ -8383,6 +8857,12 @@ abstract class AppLocalizations {
   /// **'Preparation becomes useful only after the city choice feels strong enough to move forward.'**
   String get migrationPlanResultPlanSectionBody;
 
+  /// No description provided for @migrationPlanCompareThreeCitiesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare the 3 cities'**
+  String get migrationPlanCompareThreeCitiesAction;
+
   /// No description provided for @migrationPlanResultProgressSupporting.
   ///
   /// In en, this message translates to:
@@ -8394,6 +8874,76 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{done} of {total} checklist items completed'**
   String migrationPlanCopilotProgressValue(Object done, Object total);
+
+  /// No description provided for @migrationPlanCopilotProgressHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage {current} of {total} · {percent}% complete'**
+  String migrationPlanCopilotProgressHeader(
+    Object current,
+    Object total,
+    Object percent,
+  );
+
+  /// No description provided for @migrationPlanCopilotStatusNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started'**
+  String get migrationPlanCopilotStatusNotStarted;
+
+  /// No description provided for @migrationPlanCopilotStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get migrationPlanCopilotStatusInProgress;
+
+  /// No description provided for @migrationPlanCopilotStatusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get migrationPlanCopilotStatusDone;
+
+  /// No description provided for @migrationPlanCopilotToolsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get migrationPlanCopilotToolsButton;
+
+  /// No description provided for @migrationPlanCopilotCityRequiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Available after confirming your city.'**
+  String get migrationPlanCopilotCityRequiredHint;
+
+  /// No description provided for @migrationPlanCopilotGoalRequiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Available after defining your migration goal.'**
+  String get migrationPlanCopilotGoalRequiredHint;
+
+  /// No description provided for @migrationPlanCopilotToolsFlightsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight planner available in Tools.'**
+  String get migrationPlanCopilotToolsFlightsHint;
+
+  /// No description provided for @migrationPlanHousingCompareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking about changing cities?'**
+  String get migrationPlanHousingCompareTitle;
+
+  /// No description provided for @migrationPlanHousingCompareBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare {cityName} with other options before you decide.'**
+  String migrationPlanHousingCompareBody(Object cityName);
+
+  /// No description provided for @migrationPlanHousingCompareAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare cities'**
+  String get migrationPlanHousingCompareAction;
 
   /// No description provided for @migrationPlanScrollHint.
   ///

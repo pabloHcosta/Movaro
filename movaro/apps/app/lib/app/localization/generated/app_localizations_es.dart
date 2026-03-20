@@ -209,6 +209,111 @@ class AppLocalizationsEs extends AppLocalizations {
   String get publicHomeQuestionsAction => 'Resolver dudas';
 
   @override
+  String get homeHeroWelcomeDefault => 'Bienvenido a Movaro';
+
+  @override
+  String get homeHeroWelcomeBack => 'Continuá donde lo dejaste';
+
+  @override
+  String homeHeroGreetingMorning(Object name) {
+    return 'Buen día, $name';
+  }
+
+  @override
+  String homeHeroGreetingAfternoon(Object name) {
+    return 'Buenas tardes, $name';
+  }
+
+  @override
+  String homeHeroGreetingEvening(Object name) {
+    return 'Buenas noches, $name';
+  }
+
+  @override
+  String get homeHeroSubtitleNoPlan => 'Planificá tu mudanza';
+
+  @override
+  String get homeHeroSubtitleWithPlan => 'Continuá donde lo dejaste';
+
+  @override
+  String get homeHeroOriginLabel => 'Origen';
+
+  @override
+  String get homeHeroDestinationLabel => 'Destino';
+
+  @override
+  String get homeHeroNoPlanTitle => 'Tu plan migratorio en 3 pasos';
+
+  @override
+  String get homeHeroNoPlanBody =>
+      'Respondé el cuestionario y recibí una ciudad recomendada para tu perfil.';
+
+  @override
+  String get homeHeroStepQuestionnaire => 'Responder cuestionario';
+
+  @override
+  String get homeHeroStepCity => 'Recibir ciudad ideal';
+
+  @override
+  String get homeHeroStepGuide => 'Ejecutar con guía';
+
+  @override
+  String get homeHeroStartAction => 'Armar mi plan -> lleva ~5 min';
+
+  @override
+  String get homeHeroPlanActiveBadge => 'Plan activo';
+
+  @override
+  String get homeHeroSelectedCityEyebrow => 'Tu ciudad elegida';
+
+  @override
+  String get homeHeroProgressLabel => 'Progreso general del plan';
+
+  @override
+  String get homeHeroStageMetricLabel => 'ETAPA';
+
+  @override
+  String get homeHeroStageTotalValue => '5';
+
+  @override
+  String get homeHeroCostMetricLabel => 'COSTO';
+
+  @override
+  String get homeHeroClimateMetricLabel => 'CLIMA';
+
+  @override
+  String get homeHeroNextStepLabel => 'PRÓXIMA ETAPA';
+
+  @override
+  String get homeHeroContinueAction => 'Continuar plan ->';
+
+  @override
+  String get homeHeroDiscoverCitiesBody => 'Costo, trabajo y calidad de vida';
+
+  @override
+  String homeHeroDiscoverCitiesBodyWithCity(Object city) {
+    return 'Ver alternativas a $city';
+  }
+
+  @override
+  String get homeHeroExploreAction => 'Explorar ->';
+
+  @override
+  String get homeHeroGuideBody => 'Documentos y llegada a Brasil';
+
+  @override
+  String get homeHeroOpenGuideAction => 'Abrir guía ->';
+
+  @override
+  String get homeHeroOpenShortAction => 'Abrir ->';
+
+  @override
+  String get homeHeroExploreSectionTitle => 'Explorar';
+
+  @override
+  String get homeHeroPlanCompleteTask => 'Revisar plan completado';
+
+  @override
   String get publicHomePlanTitle => 'Crear mi plan';
 
   @override
@@ -2298,6 +2403,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mirá la ubicación de la ciudad en el mapa antes de comparar contexto, distancia y región.';
 
   @override
+  String get cityDetailMapRegionLabel => 'Región';
+
+  @override
+  String cityDetailMapDistanceLabel(Object origin, Object distanceKm) {
+    return 'Distancia desde $origin: ~$distanceKm km';
+  }
+
+  @override
   String get cityDetailSnapshotTitle => 'Vista rápida';
 
   @override
@@ -2498,7 +2611,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get cityDetailDiscoverAction => 'Conocer la ciudad';
+  String get cityDetailDiscoverAction => 'Explorar la ciudad';
 
   @override
   String get cityDetailDeepDiveTitle => 'Análisis detallado';
@@ -2509,6 +2622,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cityDetailCompareAction => 'Comparar otras ciudades';
+
+  @override
+  String cityDetailCompareSelectedBody(Object city) {
+    return '$city preseleccionada';
+  }
 
   @override
   String get cityDetailPlanAction => 'Armar mi plan';
@@ -2571,6 +2689,150 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get favoritesEmptyHint =>
       'Explorá ciudades, guardá las más fuertes y volvé acá cuando quieras retomar.';
+
+  @override
+  String get favoritesPageTitle => 'Ciudades guardadas';
+
+  @override
+  String favoritesPageCount(Object current, Object total) {
+    return '$current de $total';
+  }
+
+  @override
+  String get favoritesCompareTitle => 'Comparar ciudades';
+
+  @override
+  String favoritesCompareSubtitle(Object left, Object right) {
+    return '$left vs $right';
+  }
+
+  @override
+  String get favoritesCompareAction => 'Comparar';
+
+  @override
+  String get favoritesPageEmptyTitle => 'No hay ciudades guardadas';
+
+  @override
+  String get favoritesPageEmptyBody =>
+      'Explorá ciudades y guardá las que más te interesan para compararlas después.';
+
+  @override
+  String get favoritesAddCityTitle => 'Agregar ciudad';
+
+  @override
+  String favoritesAddCitySubtitle(Object count) {
+    return '$count lugar(es) disponible(s)';
+  }
+
+  @override
+  String get favoritesActivePlanBadge => 'Plan activo';
+
+  @override
+  String get favoritesContinuePlanAction => 'Continuar plan';
+
+  @override
+  String get favoritesOpenDetailsAction => 'Ver detalles';
+
+  @override
+  String get favoritesRemoveAction => 'Eliminar';
+
+  @override
+  String get favoritesClimateLabel => 'Clima actual';
+
+  @override
+  String get favoritesClimatePending => 'Cargando';
+
+  @override
+  String get favoritesQualityLabel => 'Calidad';
+
+  @override
+  String get cityComparisonTitle => 'Comparar ciudades';
+
+  @override
+  String get cityComparisonCompareAction => 'Comparar';
+
+  @override
+  String get cityComparisonEditAction => 'Cambiar';
+
+  @override
+  String get cityComparisonModeTwo => '2 ciudades';
+
+  @override
+  String get cityComparisonModeThree => '3 ciudades';
+
+  @override
+  String get cityComparisonAddAction => 'Agregar';
+
+  @override
+  String get cityComparisonSearchPlaceholder =>
+      'Buscar ciudad para comparar...';
+
+  @override
+  String get cityComparisonHeaderLabel => 'Métrica';
+
+  @override
+  String get cityComparisonBestFitBadge => 'MEJOR FIT';
+
+  @override
+  String get cityComparisonTopBadge => 'TOP';
+
+  @override
+  String get cityComparisonGroupCost => 'Costo de vida';
+
+  @override
+  String get cityComparisonGroupQuality => 'Calidad de vida';
+
+  @override
+  String get cityComparisonGroupWork => 'Trabajo y llegada';
+
+  @override
+  String get cityComparisonRentLabel => 'Alquiler estimado';
+
+  @override
+  String get cityComparisonFoodLabel => 'Costo mensual de alimentación';
+
+  @override
+  String get cityComparisonTransportLabel => 'Costo mensual de transporte';
+
+  @override
+  String get cityComparisonHdiLabel => 'IDH';
+
+  @override
+  String get cityComparisonClimateLabel => 'Clima actual';
+
+  @override
+  String get cityComparisonSafetyLabel => 'Índice de seguridad';
+
+  @override
+  String get cityComparisonJobLabel => 'Mercado laboral';
+
+  @override
+  String get cityComparisonCommunityLabel => 'Comunidad inmigrante';
+
+  @override
+  String get cityComparisonCommunityLarge => 'Grande';
+
+  @override
+  String get cityComparisonCommunityMedium => 'Media';
+
+  @override
+  String get cityComparisonCommunitySmall => 'Pequeña';
+
+  @override
+  String get cityComparisonWinnerLabel => 'MEJOR OPCIÓN PARA VOS';
+
+  @override
+  String get cityComparisonUnavailable => '—';
+
+  @override
+  String cityComparisonStartPlanAction(Object city) {
+    return 'Iniciar plan en $city →';
+  }
+
+  @override
+  String cityComparisonOtherDetailsAction(Object city) {
+    return 'Ver detalles de $city';
+  }
 
   @override
   String get favoritesExploreAction => 'Explorar ciudades';
@@ -5051,6 +5313,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'La preparación empieza a tener valor cuando la elección de ciudad ya se siente suficientemente firme.';
 
   @override
+  String get migrationPlanCompareThreeCitiesAction => 'Comparar las 3 ciudades';
+
+  @override
   String get migrationPlanResultProgressSupporting =>
       'Items del checklist completados dentro del plan guiado.';
 
@@ -5058,6 +5323,51 @@ class AppLocalizationsEs extends AppLocalizations {
   String migrationPlanCopilotProgressValue(Object done, Object total) {
     return '$done de $total items del checklist completados';
   }
+
+  @override
+  String migrationPlanCopilotProgressHeader(
+    Object current,
+    Object total,
+    Object percent,
+  ) {
+    return 'Etapa $current de $total · $percent% completado';
+  }
+
+  @override
+  String get migrationPlanCopilotStatusNotStarted => 'No iniciado';
+
+  @override
+  String get migrationPlanCopilotStatusInProgress => 'En progreso';
+
+  @override
+  String get migrationPlanCopilotStatusDone => 'Completado';
+
+  @override
+  String get migrationPlanCopilotToolsButton => 'Herramientas';
+
+  @override
+  String get migrationPlanCopilotCityRequiredHint =>
+      'Disponible después de confirmar tu ciudad.';
+
+  @override
+  String get migrationPlanCopilotGoalRequiredHint =>
+      'Disponible después de definir tu objetivo de migración.';
+
+  @override
+  String get migrationPlanCopilotToolsFlightsHint =>
+      'Planificador de vuelos disponible en Herramientas.';
+
+  @override
+  String get migrationPlanHousingCompareTitle =>
+      '¿Pensando en cambiar de ciudad?';
+
+  @override
+  String migrationPlanHousingCompareBody(Object cityName) {
+    return 'Compará $cityName con otras opciones antes de decidir.';
+  }
+
+  @override
+  String get migrationPlanHousingCompareAction => 'Comparar ciudades';
 
   @override
   String get migrationPlanScrollHint => 'Ver más';

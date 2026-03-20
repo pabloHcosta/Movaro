@@ -6,6 +6,7 @@ class AppRoutes {
   static const journeySetup = '/journey/setup';
   static const publicHome = '/home';
   static const favorites = '/favorites';
+  static const cityComparison = '/favorites/compare';
   static const explore = '/explore';
   static const documentationGuide = '/documentation';
   static const documentationTopic = '/documentation/topic';
@@ -27,6 +28,7 @@ class AppRoutes {
     journeySetup,
     publicHome,
     favorites,
+    cityComparison,
     explore,
     documentationGuide,
     documentationTopic,

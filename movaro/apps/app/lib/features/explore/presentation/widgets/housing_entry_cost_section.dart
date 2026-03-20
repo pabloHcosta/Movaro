@@ -12,11 +12,13 @@ class HousingEntryCostSection extends StatefulWidget {
   const HousingEntryCostSection({
     required this.exchangeRatesService,
     this.cityName,
+    this.preferredCountryId,
     super.key,
   });
 
   final CopilotExchangeRatesService exchangeRatesService;
   final String? cityName;
+  final String? preferredCountryId;
 
   @override
   State<HousingEntryCostSection> createState() =>
@@ -68,14 +70,16 @@ class _HousingEntryCostSectionState extends State<HousingEntryCostSection> {
               MultiCurrencyAmount(
                 amountInBrl: _monthlyRent,
                 exchangeRates: exchangeRates,
+                preferredCountryId: widget.preferredCountryId,
               ),
               const SizedBox(height: 8),
               Text(
                 l10n.housingEntryRentLabel(
-                  MultiCurrencyAmount.formatCurrency(
-                    locale: Localizations.localeOf(context).toString(),
-                    currencyCode: 'BRL',
-                    amount: _monthlyRent,
+                  MultiCurrencyAmount.formatPreferredCurrency(
+                    context: context,
+                    amountInBrl: _monthlyRent,
+                    exchangeRates: exchangeRates,
+                    preferredCountryId: widget.preferredCountryId,
                   ),
                 ),
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -87,10 +91,11 @@ class _HousingEntryCostSectionState extends State<HousingEntryCostSection> {
                 min: 1200,
                 max: 5000,
                 divisions: 19,
-                label: MultiCurrencyAmount.formatCurrency(
-                  locale: Localizations.localeOf(context).toString(),
-                  currencyCode: 'BRL',
-                  amount: _monthlyRent,
+                label: MultiCurrencyAmount.formatPreferredCurrency(
+                  context: context,
+                  amountInBrl: _monthlyRent,
+                  exchangeRates: exchangeRates,
+                  preferredCountryId: widget.preferredCountryId,
                 ),
                 onChanged: (value) => setState(() => _monthlyRent = value),
               ),
@@ -137,6 +142,7 @@ class _HousingEntryCostSectionState extends State<HousingEntryCostSection> {
                           title: l10n.housingEntryTotalTitle,
                           amountInBrl: breakdown.total,
                           exchangeRates: exchangeRates,
+                          preferredCountryId: widget.preferredCountryId,
                           description: _modeDescription(context, _mode),
                           lines: [
                             _BreakdownLine(
@@ -160,6 +166,7 @@ class _HousingEntryCostSectionState extends State<HousingEntryCostSection> {
                           title: l10n.housingEntryPlatformsTitle,
                           headlineText: l10n.housingEntryPlatformsHeadline,
                           description: l10n.housingEntryPlatformsBody,
+                          preferredCountryId: widget.preferredCountryId,
                           lines: [
                             _BreakdownLine.text(
                               'QuintoAndar',
@@ -299,6 +306,7 @@ class _BreakdownCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.lines,
+    required this.preferredCountryId,
     this.amountInBrl,
     this.exchangeRates,
     this.headlineText,
@@ -307,6 +315,7 @@ class _BreakdownCard extends StatelessWidget {
   final String title;
   final double? amountInBrl;
   final CopilotExchangeRates? exchangeRates;
+  final String? preferredCountryId;
   final String? headlineText;
   final String description;
   final List<_BreakdownLine> lines;
@@ -325,10 +334,11 @@ class _BreakdownCard extends StatelessWidget {
           const SizedBox(height: 10),
           if (amountInBrl != null) ...[
             Text(
-              MultiCurrencyAmount.formatCurrency(
-                locale: Localizations.localeOf(context).toString(),
-                currencyCode: 'BRL',
-                amount: amountInBrl!,
+              MultiCurrencyAmount.formatPreferredCurrency(
+                context: context,
+                amountInBrl: amountInBrl!,
+                exchangeRates: exchangeRates,
+                preferredCountryId: preferredCountryId,
               ),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: AppColors.textPrimaryFor(context),
@@ -338,6 +348,7 @@ class _BreakdownCard extends StatelessWidget {
             MultiCurrencyAmount(
               amountInBrl: amountInBrl!,
               exchangeRates: exchangeRates,
+              preferredCountryId: preferredCountryId,
             ),
           ] else if (headlineText != null) ...[
             Text(
@@ -385,6 +396,7 @@ class _BreakdownCard extends StatelessWidget {
                           child: MultiCurrencyAmount(
                             amountInBrl: line.amountInBrl!,
                             exchangeRates: exchangeRates,
+                            preferredCountryId: preferredCountryId,
                             compact: true,
                             wrapSpacing: 6,
                             runSpacing: 6,

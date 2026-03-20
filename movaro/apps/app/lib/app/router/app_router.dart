@@ -8,6 +8,7 @@ import 'package:movaro_app/core/network/api_health_service.dart';
 import 'package:movaro_app/features/auth/application/auth_controller.dart';
 import 'package:movaro_app/features/auth/presentation/pages/login_page.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
+import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/pages/cities_explore_page.dart';
 import 'package:movaro_app/features/cities/presentation/pages/city_detail_page.dart';
 import 'package:movaro_app/features/cities/presentation/pages/city_search_page.dart';
@@ -15,6 +16,7 @@ import 'package:movaro_app/features/auth/presentation/pages/onboarding_page.dart
 import 'package:movaro_app/features/explore/presentation/pages/countries_page.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/home_page.dart';
+import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/pages/favorites_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/public_home_page.dart';
 import 'package:movaro_app/features/intro/presentation/pages/intro_page.dart';
@@ -154,6 +156,19 @@ class AppRouter {
             migrationQuestionnaireController: migrationQuestionnaireController,
           ),
         );
+      case AppRoutes.cityComparison:
+        final initialCities = settings.arguments is List<City>
+            ? settings.arguments! as List<City>
+            : const <City>[];
+        unawaited(citiesController.prefetchCatalog());
+        return _buildRoute(
+          settings,
+          CityComparisonScreen(
+            initialCities: initialCities,
+            citiesController: citiesController,
+            migrationQuestionnaireController: migrationQuestionnaireController,
+          ),
+        );
       case AppRoutes.intro:
         final isFirstLaunch = settings.arguments == true;
         return _buildRoute(
@@ -205,6 +220,9 @@ class AppRouter {
           DocumentationTopicPage(
             section: section,
             exchangeRatesService: copilotExchangeRatesService,
+            preferredCurrencyCountryId:
+                journeyContextController.originCountryId ??
+                migrationQuestionnaireController.generatedPlan?.originCountry,
           ),
         );
       case AppRoutes.cities:

@@ -208,6 +208,111 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publicHomeQuestionsAction => 'Clear my doubts';
 
   @override
+  String get homeHeroWelcomeDefault => 'Welcome to Movaro';
+
+  @override
+  String get homeHeroWelcomeBack => 'Continue where you left off';
+
+  @override
+  String homeHeroGreetingMorning(Object name) {
+    return 'Good morning, $name';
+  }
+
+  @override
+  String homeHeroGreetingAfternoon(Object name) {
+    return 'Good afternoon, $name';
+  }
+
+  @override
+  String homeHeroGreetingEvening(Object name) {
+    return 'Good evening, $name';
+  }
+
+  @override
+  String get homeHeroSubtitleNoPlan => 'Plan your move';
+
+  @override
+  String get homeHeroSubtitleWithPlan => 'Continue where you left off';
+
+  @override
+  String get homeHeroOriginLabel => 'Origin';
+
+  @override
+  String get homeHeroDestinationLabel => 'Destination';
+
+  @override
+  String get homeHeroNoPlanTitle => 'Your migration plan in 3 steps';
+
+  @override
+  String get homeHeroNoPlanBody =>
+      'Answer the questionnaire and get a recommended city that fits your profile.';
+
+  @override
+  String get homeHeroStepQuestionnaire => 'Answer questionnaire';
+
+  @override
+  String get homeHeroStepCity => 'Get ideal city';
+
+  @override
+  String get homeHeroStepGuide => 'Execute with guide';
+
+  @override
+  String get homeHeroStartAction => 'Build my plan -> takes ~5 min';
+
+  @override
+  String get homeHeroPlanActiveBadge => 'Active plan';
+
+  @override
+  String get homeHeroSelectedCityEyebrow => 'Your chosen city';
+
+  @override
+  String get homeHeroProgressLabel => 'Overall plan progress';
+
+  @override
+  String get homeHeroStageMetricLabel => 'STAGE';
+
+  @override
+  String get homeHeroStageTotalValue => '5';
+
+  @override
+  String get homeHeroCostMetricLabel => 'COST';
+
+  @override
+  String get homeHeroClimateMetricLabel => 'CLIMATE';
+
+  @override
+  String get homeHeroNextStepLabel => 'NEXT STEP';
+
+  @override
+  String get homeHeroContinueAction => 'Continue plan ->';
+
+  @override
+  String get homeHeroDiscoverCitiesBody => 'Cost, jobs, and quality of life';
+
+  @override
+  String homeHeroDiscoverCitiesBodyWithCity(Object city) {
+    return 'See alternatives to $city';
+  }
+
+  @override
+  String get homeHeroExploreAction => 'Explore ->';
+
+  @override
+  String get homeHeroGuideBody => 'Documents and arrival in Brazil';
+
+  @override
+  String get homeHeroOpenGuideAction => 'Open guide ->';
+
+  @override
+  String get homeHeroOpenShortAction => 'Open ->';
+
+  @override
+  String get homeHeroExploreSectionTitle => 'Explore';
+
+  @override
+  String get homeHeroPlanCompleteTask => 'Review completed plan';
+
+  @override
   String get publicHomePlanTitle => 'Build my plan';
 
   @override
@@ -2291,6 +2396,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'See the city on the map before comparing context, distance, and region.';
 
   @override
+  String get cityDetailMapRegionLabel => 'Region';
+
+  @override
+  String cityDetailMapDistanceLabel(Object origin, Object distanceKm) {
+    return 'Distance from $origin: ~$distanceKm km';
+  }
+
+  @override
   String get cityDetailSnapshotTitle => 'Quick view';
 
   @override
@@ -2504,6 +2617,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cityDetailCompareAction => 'Compare other cities';
 
   @override
+  String cityDetailCompareSelectedBody(Object city) {
+    return '$city pre-selected';
+  }
+
+  @override
   String get cityDetailPlanAction => 'Build my plan';
 
   @override
@@ -2564,6 +2682,149 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get favoritesEmptyHint =>
       'Explore cities, save the strongest ones, and come back here whenever you want to resume.';
+
+  @override
+  String get favoritesPageTitle => 'Saved cities';
+
+  @override
+  String favoritesPageCount(Object current, Object total) {
+    return '$current of $total';
+  }
+
+  @override
+  String get favoritesCompareTitle => 'Compare cities';
+
+  @override
+  String favoritesCompareSubtitle(Object left, Object right) {
+    return '$left vs $right';
+  }
+
+  @override
+  String get favoritesCompareAction => 'Compare';
+
+  @override
+  String get favoritesPageEmptyTitle => 'No saved cities';
+
+  @override
+  String get favoritesPageEmptyBody =>
+      'Explore cities and save the ones that interest you most so you can compare them later.';
+
+  @override
+  String get favoritesAddCityTitle => 'Add city';
+
+  @override
+  String favoritesAddCitySubtitle(Object count) {
+    return '$count slot(s) available';
+  }
+
+  @override
+  String get favoritesActivePlanBadge => 'Active plan';
+
+  @override
+  String get favoritesContinuePlanAction => 'Continue plan';
+
+  @override
+  String get favoritesOpenDetailsAction => 'View details';
+
+  @override
+  String get favoritesRemoveAction => 'Remove';
+
+  @override
+  String get favoritesClimateLabel => 'Climate now';
+
+  @override
+  String get favoritesClimatePending => 'Loading';
+
+  @override
+  String get favoritesQualityLabel => 'Quality';
+
+  @override
+  String get cityComparisonTitle => 'Compare cities';
+
+  @override
+  String get cityComparisonCompareAction => 'Compare';
+
+  @override
+  String get cityComparisonEditAction => 'Edit';
+
+  @override
+  String get cityComparisonModeTwo => '2 cities';
+
+  @override
+  String get cityComparisonModeThree => '3 cities';
+
+  @override
+  String get cityComparisonAddAction => 'Add';
+
+  @override
+  String get cityComparisonSearchPlaceholder => 'Search city to compare...';
+
+  @override
+  String get cityComparisonHeaderLabel => 'Metric';
+
+  @override
+  String get cityComparisonBestFitBadge => 'BEST FIT';
+
+  @override
+  String get cityComparisonTopBadge => 'TOP';
+
+  @override
+  String get cityComparisonGroupCost => 'Cost of living';
+
+  @override
+  String get cityComparisonGroupQuality => 'Quality of life';
+
+  @override
+  String get cityComparisonGroupWork => 'Work and arrival';
+
+  @override
+  String get cityComparisonRentLabel => 'Estimated rent';
+
+  @override
+  String get cityComparisonFoodLabel => 'Monthly food cost';
+
+  @override
+  String get cityComparisonTransportLabel => 'Monthly transport cost';
+
+  @override
+  String get cityComparisonHdiLabel => 'HDI';
+
+  @override
+  String get cityComparisonClimateLabel => 'Current climate';
+
+  @override
+  String get cityComparisonSafetyLabel => 'Safety index';
+
+  @override
+  String get cityComparisonJobLabel => 'Job market';
+
+  @override
+  String get cityComparisonCommunityLabel => 'Immigrant community';
+
+  @override
+  String get cityComparisonCommunityLarge => 'Large';
+
+  @override
+  String get cityComparisonCommunityMedium => 'Medium';
+
+  @override
+  String get cityComparisonCommunitySmall => 'Small';
+
+  @override
+  String get cityComparisonWinnerLabel => 'BEST CHOICE FOR YOU';
+
+  @override
+  String get cityComparisonUnavailable => '—';
+
+  @override
+  String cityComparisonStartPlanAction(Object city) {
+    return 'Start plan in $city →';
+  }
+
+  @override
+  String cityComparisonOtherDetailsAction(Object city) {
+    return 'View details of $city';
+  }
 
   @override
   String get favoritesExploreAction => 'Explore cities';
@@ -5020,6 +5281,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Preparation becomes useful only after the city choice feels strong enough to move forward.';
 
   @override
+  String get migrationPlanCompareThreeCitiesAction => 'Compare the 3 cities';
+
+  @override
   String get migrationPlanResultProgressSupporting =>
       'Completed checklist items across the guided plan.';
 
@@ -5027,6 +5291,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String migrationPlanCopilotProgressValue(Object done, Object total) {
     return '$done of $total checklist items completed';
   }
+
+  @override
+  String migrationPlanCopilotProgressHeader(
+    Object current,
+    Object total,
+    Object percent,
+  ) {
+    return 'Stage $current of $total · $percent% complete';
+  }
+
+  @override
+  String get migrationPlanCopilotStatusNotStarted => 'Not started';
+
+  @override
+  String get migrationPlanCopilotStatusInProgress => 'In progress';
+
+  @override
+  String get migrationPlanCopilotStatusDone => 'Completed';
+
+  @override
+  String get migrationPlanCopilotToolsButton => 'Tools';
+
+  @override
+  String get migrationPlanCopilotCityRequiredHint =>
+      'Available after confirming your city.';
+
+  @override
+  String get migrationPlanCopilotGoalRequiredHint =>
+      'Available after defining your migration goal.';
+
+  @override
+  String get migrationPlanCopilotToolsFlightsHint =>
+      'Flight planner available in Tools.';
+
+  @override
+  String get migrationPlanHousingCompareTitle =>
+      'Thinking about changing cities?';
+
+  @override
+  String migrationPlanHousingCompareBody(Object cityName) {
+    return 'Compare $cityName with other options before you decide.';
+  }
+
+  @override
+  String get migrationPlanHousingCompareAction => 'Compare cities';
 
   @override
   String get migrationPlanScrollHint => 'See more';

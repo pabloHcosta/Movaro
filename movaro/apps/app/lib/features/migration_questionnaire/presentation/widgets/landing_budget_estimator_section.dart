@@ -12,11 +12,13 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
   const LandingBudgetEstimatorSection({
     required this.plan,
     this.exchangeRates,
+    this.preferredCountryId,
     super.key,
   });
 
   final MigrationPlan plan;
   final CopilotExchangeRates? exchangeRates;
+  final String? preferredCountryId;
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +103,7 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
                           scenario.descriptionKey,
                         ),
                         exchangeRates: exchangeRates,
+                        preferredCountryId: preferredCountryId,
                       ),
                     ),
                 ],
@@ -166,12 +169,14 @@ class _ScenarioCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.exchangeRates,
+    required this.preferredCountryId,
   });
 
   final LandingBudgetScenarioEstimate scenario;
   final String title;
   final String description;
   final CopilotExchangeRates? exchangeRates;
+  final String? preferredCountryId;
 
   @override
   Widget build(BuildContext context) {
@@ -182,15 +187,19 @@ class _ScenarioCard extends StatelessWidget {
     };
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).toString();
-    final total30 = MultiCurrencyAmount.formatCurrency(
-      locale: locale,
-      currencyCode: 'BRL',
-      amount: scenario.breakdown.total30DaysBrl,
+    final total30 = MultiCurrencyAmount.formatPreferredCurrency(
+      context: context,
+      amountInBrl: scenario.breakdown.total30DaysBrl,
+      exchangeRates: exchangeRates,
+      preferredCountryId: preferredCountryId,
+      primaryLocale: locale,
     );
-    final total90 = MultiCurrencyAmount.formatCurrency(
-      locale: locale,
-      currencyCode: 'BRL',
-      amount: scenario.breakdown.total90DaysBrl,
+    final total90 = MultiCurrencyAmount.formatPreferredCurrency(
+      context: context,
+      amountInBrl: scenario.breakdown.total90DaysBrl,
+      exchangeRates: exchangeRates,
+      preferredCountryId: preferredCountryId,
+      primaryLocale: locale,
     );
 
     return FrostedPanel(
@@ -232,6 +241,7 @@ class _ScenarioCard extends StatelessWidget {
           MultiCurrencyAmount(
             amountInBrl: scenario.breakdown.total30DaysBrl,
             exchangeRates: exchangeRates,
+            preferredCountryId: preferredCountryId,
           ),
           const SizedBox(height: 10),
           Text(
@@ -246,16 +256,19 @@ class _ScenarioCard extends StatelessWidget {
             label: l10n.landingBudgetMonthlyBaseLabel,
             amountInBrl: scenario.breakdown.monthlyBaseBrl,
             exchangeRates: exchangeRates,
+            preferredCountryId: preferredCountryId,
           ),
           _BudgetLine(
             label: l10n.landingBudgetSetupLabel,
             amountInBrl: scenario.breakdown.setupBrl,
             exchangeRates: exchangeRates,
+            preferredCountryId: preferredCountryId,
           ),
           _BudgetLine(
             label: l10n.landingBudgetBufferLabel,
             amountInBrl: scenario.breakdown.bufferBrl,
             exchangeRates: exchangeRates,
+            preferredCountryId: preferredCountryId,
           ),
           const SizedBox(height: 12),
           Container(
@@ -291,11 +304,13 @@ class _BudgetLine extends StatelessWidget {
     required this.label,
     required this.amountInBrl,
     required this.exchangeRates,
+    required this.preferredCountryId,
   });
 
   final String label;
   final num amountInBrl;
   final CopilotExchangeRates? exchangeRates;
+  final String? preferredCountryId;
 
   @override
   Widget build(BuildContext context) {
@@ -318,6 +333,7 @@ class _BudgetLine extends StatelessWidget {
               child: MultiCurrencyAmount(
                 amountInBrl: amountInBrl,
                 exchangeRates: exchangeRates,
+                preferredCountryId: preferredCountryId,
                 compact: true,
                 wrapSpacing: 6,
                 runSpacing: 6,
