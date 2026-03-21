@@ -183,11 +183,24 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
         buffer.writeln();
       }
       final locale = Localizations.localeOf(context).languageCode;
+      final plan = widget.migrationQuestionnaireController?.generatedPlan;
+      final journeyState = plan?.isCityConfirmed == true
+          ? 'copilot_active'
+          : plan != null
+              ? 'plan_generated'
+              : 'destination_selected';
+
       _chatService!.initialize(
         curatedContent: buffer.toString(),
         originCountry: origin,
         destinationCountry: destination,
         locale: locale,
+        userContext: UserMigrationContext(
+          journeyState: journeyState,
+          migrationGoal: plan?.goal.isNotEmpty == true ? plan!.goal : null,
+          recommendedCity: plan?.recommendedCity?.name,
+          planTimeline: plan?.timeline.isNotEmpty == true ? plan!.timeline : null,
+        ),
         errorMessages: ChatErrorMessages(
           notInitialized: l10n.aiChatNotInitialized,
           rateLimit: l10n.aiChatErrorRateLimit,

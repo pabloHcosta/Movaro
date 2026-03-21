@@ -11,6 +11,7 @@ import { HttpDebugLoggingInterceptor } from './common/interceptors/http-debug-lo
 import { HttpDebugLoggerService } from './common/logging/http-debug-logger.service';
 import { TraceIdMiddleware } from './common/middleware/trace-id.middleware';
 import { SupabaseAdminService } from './common/supabase/supabase-admin.service';
+import { ChatModule } from './modules/chat/chat.module';
 import { CitiesModule } from './modules/cities/cities.module';
 import { HealthModule } from './modules/health/health.module';
 import { MigrationModule } from './modules/migration/migration.module';
@@ -26,6 +27,7 @@ import { ReferenceModule } from './modules/reference/reference.module';
       validate: validateEnvironment,
     }),
     AppConfigModule,
+    ChatModule,
     CitiesModule,
     HealthModule,
     MigrationModule,

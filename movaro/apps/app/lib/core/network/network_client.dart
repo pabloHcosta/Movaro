@@ -61,6 +61,87 @@ class NetworkClient {
     );
   }
 
+  Future<Map<String, dynamic>> postJsonMap(
+    String path,
+    Map<String, dynamic> body,
+  ) async {
+    final data = await _post(path, body);
+
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+
+    throw const NetworkException(
+      'invalid_api_response_format',
+      isRetryable: false,
+    );
+  }
+
+  Future<Object?> _post(String path, Map<String, dynamic> body) {
+    return _executeWithRetry(() => _requestPost(path, body));
+  }
+
+  Future<Object?> _requestPost(
+    String path,
+    Map<String, dynamic> body,
+  ) async {
+    if (!path.startsWith('/')) {
+      throw const NetworkException('invalid_api_path', isRetryable: false);
+    }
+
+    final baseUri = Uri.parse(_environment.apiBaseUrl);
+    final uri = baseUri.resolve(path);
+    final requestHeaders = <String, String>{
+      'accept': 'application/json',
+      'content-type': 'application/json',
+      'x-movaro-client': 'app',
+      'x-movaro-environment': _environment.environmentName,
+    };
+
+    try {
+      final response = await _httpClient
+          .post(uri, headers: requestHeaders, body: jsonEncode(body))
+          .timeout(_timeout);
+      final decoded = jsonDecode(response.body);
+
+      if (decoded is! Map<String, dynamic>) {
+        throw const NetworkException(
+          'invalid_api_response_envelope',
+          isRetryable: false,
+        );
+      }
+
+      final envelope = ApiResponseModel<Object?>.fromJson(decoded);
+
+      if (response.statusCode >= 200 &&
+          response.statusCode < 300 &&
+          envelope.success) {
+        return envelope.data;
+      }
+
+      throw ApiException(
+        envelope.error ??
+            ApiErrorModel(
+              code: 'INTERNAL_ERROR',
+              message: 'Unexpected API failure.',
+              userMessage: '',
+              status: response.statusCode,
+            ),
+      );
+    } on ApiException {
+      rethrow;
+    } on http.ClientException {
+      throw const NetworkException('network_unreachable');
+    } on TimeoutException {
+      throw const NetworkException('network_timeout');
+    } on FormatException {
+      throw const NetworkException(
+        'invalid_api_response_body',
+        isRetryable: false,
+      );
+    }
+  }
+
   Future<Object?> _get(
     String path, {
     Map<String, String> headers = const {},

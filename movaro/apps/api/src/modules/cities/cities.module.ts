@@ -14,6 +14,7 @@ import { CitiesController } from './presentation/cities.controller';
 
 @Module({
   controllers: [CitiesController],
+  exports: [CitiesCatalogService],
   providers: [
     IbgeHttpClient,
     IbgeCityNormalizerService,
