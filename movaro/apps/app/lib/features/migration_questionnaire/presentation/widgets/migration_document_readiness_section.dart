@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/app/theme/app_text_styles.dart';
+import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/document_checklist_adapter.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
@@ -382,10 +384,7 @@ class _ChecklistItem extends StatelessWidget {
                       Expanded(
                         child: Text(
                           item.title,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
+                          style: context.textStyles.itemTitle.copyWith(
                                 color: isCompleted
                                     ? const Color(0xFF4B5563)
                                     : const Color(0xFFF0F6FC),
@@ -413,7 +412,6 @@ class _ChecklistItem extends StatelessWidget {
                   Text(
                     item.description,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: 10,
                       color: isCompleted
                           ? const Color(0xFF2D333B)
                           : const Color(0xFF8B949E),
@@ -432,9 +430,7 @@ class _ChecklistItem extends StatelessWidget {
                         const SizedBox(width: 3),
                         Text(
                           item.timeEstimate,
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                fontSize: 9,
+                          style: AppTypography.compactLabel.copyWith(
                                 color: const Color(0xFF4B5563),
                               ),
                         ),
@@ -460,9 +456,7 @@ class _ChecklistItem extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 item.tip!,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      fontSize: 9,
+                                style: AppTypography.compactLabel.copyWith(
                                       color: const Color(0xFFF59E0B),
                                       height: 1.4,
                                     ),
@@ -487,9 +481,7 @@ class _ChecklistItem extends StatelessWidget {
                           ),
                           child: Text(
                             _openOfficialSiteLabel(context),
-                            style: Theme.of(context).textTheme.labelLarge
-                                ?.copyWith(
-                                  fontSize: 10,
+                            style: AppTypography.compactBadge.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
                                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
+import 'package:movaro_app/app/theme/app_text_styles.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
@@ -234,9 +235,7 @@ class _NavTab extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
+                style: context.textStyles.navLabel.copyWith(
                   color: isActive
                       ? (isDark
                             ? const Color(0xFF38BDF8)
