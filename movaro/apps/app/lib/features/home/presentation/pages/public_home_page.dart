@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/app/theme/app_text_styles.dart';
+import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/location/location_controller.dart';
 import 'package:movaro_app/core/location/presentation/pages/location_permission_screen.dart';
@@ -552,8 +554,7 @@ class _EmptyHero extends StatelessWidget {
                     Text(
                       _greeting(context),
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        fontSize: 12,
+                      style: context.textStyles.sectionLabel.copyWith(
                         fontWeight: FontWeight.w600,
                         color: _tertiaryText(context),
                       ),
@@ -763,10 +764,8 @@ class _ActiveHero extends StatelessWidget {
                       es: 'PLAN ACTIVO',
                       en: 'ACTIVE PLAN',
                     ),
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontSize: 12,
+                    style: AppTypography.compactBadge.copyWith(
                       fontWeight: FontWeight.w800,
-                      letterSpacing: 0.5,
                       color: _accentText(context),
                     ),
                   ),
@@ -880,9 +879,7 @@ class _ProgressCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     RichText(
                       text: TextSpan(
-                        style: Theme.of(context).textTheme.headlineLarge
-                            ?.copyWith(
-                              fontSize: 36,
+                        style: context.textStyles.displayNumber.copyWith(
                               fontWeight: FontWeight.w900,
                               color: _primaryText(context),
                             ),
@@ -892,7 +889,6 @@ class _ProgressCard extends StatelessWidget {
                             text: '%',
                             style: Theme.of(context).textTheme.titleSmall
                                 ?.copyWith(
-                                  fontSize: 16,
                                   fontWeight: FontWeight.w800,
                                   color: _tertiaryText(context),
                                 ),
@@ -1220,9 +1216,7 @@ class _ActionChip extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 label,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
+                style: context.textStyles.navLabel.copyWith(
                   color: _tertiaryText(context),
                 ),
               ),
@@ -1307,9 +1301,7 @@ class _StepTimeline extends StatelessWidget {
                         ),
                         child: Text(
                           '${index + 1}',
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(
-                                fontSize: 14,
+                          style: context.textStyles.badgeLabel.copyWith(
                                 fontWeight: FontWeight.w900,
                                 color: _accentText(context),
                               ),
