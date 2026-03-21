@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
@@ -184,8 +185,10 @@ class PlanNotificationService {
   }
 
   String? _getNextPendingItemTitle(MigrationPlan plan) {
-    if (plan.destinationCountry.toUpperCase() == 'BR' &&
-        plan.originCountry.toUpperCase() == 'AR') {
+    if (ArgentinaBrazilGuideDataSource.isArgentinaToBrazil(
+      plan.originCountry,
+      plan.destinationCountry,
+    )) {
       if (plan.goal == 'find_job_br') {
         return _text(
           pt: 'tirar seu CPF',

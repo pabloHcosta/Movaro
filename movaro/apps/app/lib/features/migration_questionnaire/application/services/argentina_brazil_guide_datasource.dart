@@ -6,6 +6,15 @@ import 'package:movaro_app/features/migration_questionnaire/domain/entities/migr
 class ArgentinaBrazilGuideDataSource {
   const ArgentinaBrazilGuideDataSource._();
 
+  /// Returns `true` when the origin→destination pair matches Argentina→Brazil,
+  /// regardless of whether values are ISO codes or journey values.
+  static bool isArgentinaToBrazil(String origin, String destination) {
+    final o = origin.toUpperCase();
+    final d = destination.toUpperCase();
+    return (o == 'ARGENTINA' || o == 'AR') &&
+        (d == 'BRAZIL' || d == 'BR' || d == 'BRASIL');
+  }
+
   static List<GuideActionItem> build(MigrationPlan plan) {
     final items = <GuideActionItem>[
       const GuideActionItem(
@@ -33,6 +42,23 @@ class ArgentinaBrazilGuideDataSource {
         orderIndex: 1,
         isCompleted: false,
         icon: Icons.gpp_good_outlined,
+        checklistItems: [
+          ChecklistSubItem(
+            id: 'ante_1',
+            title: 'Solicitar certificado no site do RNR',
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'ante_2',
+            title: 'Aguardar emissão (5–15 dias úteis)',
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'ante_3',
+            title: 'Salvar PDF e imprimir cópia',
+            isCompleted: false,
+          ),
+        ],
       ),
       const GuideActionItem(
         id: 'item_0_3_budget',
@@ -49,6 +75,19 @@ class ArgentinaBrazilGuideDataSource {
         icon: Icons.account_balance_wallet_outlined,
       ),
       const GuideActionItem(
+        id: 'item_1_3_money',
+        title: 'Organizar o dinheiro para os primeiros dias',
+        shortDescription:
+            'Sem conta brasileira ainda, você vai depender de cartão internacional ou dinheiro em espécie. Entenda as opções.',
+        fullContent:
+            'Opções para os primeiros dias, antes de ter conta brasileira:\n\nWise (recomendado): cartão internacional que converte na taxa de câmbio real,\nsem as taxas absurdas dos bancos. Funciona em qualquer loja com maquininha.\nCrie sua conta antes de sair da Argentina em wise.com\n\nCartão de crédito internacional: funciona, mas as taxas de câmbio são altas.\nUse como backup, não como principal.\n\nDinheiro em espécie em reais: útil para os primeiros dias, especialmente para\ntransporte e alimentação em lugares sem maquininha.\n\nCâmbio na fronteira ou aeroporto: evite — são as piores taxas. Faça câmbio\nem casas de câmbio na cidade.\n\nQuanto ter disponível para a primeira semana: calcule pelo menos R\$ 1.500 a\nR\$ 2.500 em dinheiro ou cartão funcionando.',
+        type: GuideActionType.informative,
+        phase: GuidePhase.preparation,
+        orderIndex: 3,
+        isCompleted: false,
+        icon: Icons.payments_outlined,
+      ),
+      const GuideActionItem(
         id: 'item_0_4_flight',
         title: 'Planejar o voo e a logística da chegada',
         shortDescription:
@@ -58,7 +97,7 @@ class ArgentinaBrazilGuideDataSource {
         type: GuideActionType.tool,
         toolType: GuideToolType.flight,
         phase: GuidePhase.preparation,
-        orderIndex: 3,
+        orderIndex: 4,
         isCompleted: false,
         icon: Icons.flight_takeoff_rounded,
       ),
@@ -71,7 +110,7 @@ class ArgentinaBrazilGuideDataSource {
             'Por que é urgente: praticamente todos os cadastros no Brasil exigem verificação\npor SMS para um número brasileiro. Sem chip, você não consegue abrir conta no\nNubank, agendar na Polícia Federal, nem usar apps de transporte.\n\nOnde comprar:\n- Lojas das operadoras nos aeroportos (mais caro, mas conveniente)\n- Claro, Vivo, TIM ou Oi — qualquer shopping ou loja de celular\n- Você não precisa de CPF para comprar um chip pré-pago\n\nQual operadora escolher: verifique qual tem melhor cobertura na cidade de destino.\nClaro e Vivo costumam ter a melhor cobertura nacional.\n\nPlano recomendado para começo: pré-pago com recarga. Depois que tiver CPF e\nconta bancária, migre para pós-pago (mais barato no longo prazo).',
         type: GuideActionType.informative,
         phase: GuidePhase.housing,
-        orderIndex: 4,
+        orderIndex: 5,
         isCompleted: false,
         icon: Icons.sim_card_outlined,
       ),
@@ -85,22 +124,9 @@ class ArgentinaBrazilGuideDataSource {
         type: GuideActionType.tool,
         toolType: GuideToolType.housing,
         phase: GuidePhase.housing,
-        orderIndex: 5,
-        isCompleted: false,
-        icon: Icons.house_outlined,
-      ),
-      const GuideActionItem(
-        id: 'item_1_3_money',
-        title: 'Organizar o dinheiro para os primeiros dias',
-        shortDescription:
-            'Sem conta brasileira ainda, você vai depender de cartão internacional ou dinheiro em espécie. Entenda as opções.',
-        fullContent:
-            'Opções para os primeiros dias, antes de ter conta brasileira:\n\nWise (recomendado): cartão internacional que converte na taxa de câmbio real,\nsem as taxas absurdas dos bancos. Funciona em qualquer loja com maquininha.\nCrie sua conta antes de sair da Argentina em wise.com\n\nCartão de crédito internacional: funciona, mas as taxas de câmbio são altas.\nUse como backup, não como principal.\n\nDinheiro em espécie em reais: útil para os primeiros dias, especialmente para\ntransporte e alimentação em lugares sem maquininha.\n\nCâmbio na fronteira ou aeroporto: evite — são as piores taxas. Faça câmbio\nem casas de câmbio na cidade.\n\nQuanto ter disponível para a primeira semana: calcule pelo menos R\$ 1.500 a\nR\$ 2.500 em dinheiro ou cartão funcionando.',
-        type: GuideActionType.informative,
-        phase: GuidePhase.housing,
         orderIndex: 6,
         isCompleted: false,
-        icon: Icons.payments_outlined,
+        icon: Icons.house_outlined,
       ),
       const GuideActionItem(
         id: 'item_2_1_cpf',
@@ -115,6 +141,23 @@ class ArgentinaBrazilGuideDataSource {
         isCompleted: false,
         icon: Icons.badge_outlined,
         dependencies: <String>['item_1_1_chip'],
+        checklistItems: [
+          ChecklistSubItem(
+            id: 'cpf_1',
+            title: 'Reunir documentos (DNI + comprovante de endereço)',
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'cpf_2',
+            title: 'Ir à Receita Federal ou Correios',
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'cpf_3',
+            title: 'Receber número do CPF',
+            isCompleted: false,
+          ),
+        ],
       ),
       const GuideActionItem(
         id: 'item_2_2_residencia',
@@ -129,6 +172,28 @@ class ArgentinaBrazilGuideDataSource {
         isCompleted: false,
         icon: Icons.account_balance_outlined,
         dependencies: <String>['item_2_1_cpf'],
+        checklistItems: [
+          ChecklistSubItem(
+            id: 'res_1',
+            title: 'Agendar no site da Polícia Federal',
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'res_2',
+            title: 'Reunir documentos e fotos 3x4',
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'res_3',
+            title: 'Comparecer ao atendimento e biometria',
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'res_4',
+            title: 'Receber protocolo de residência',
+            isCompleted: false,
+          ),
+        ],
       ),
       const GuideActionItem(
         id: 'item_2_3_ctps',
@@ -157,6 +222,23 @@ class ArgentinaBrazilGuideDataSource {
         isCompleted: false,
         icon: Icons.account_balance_rounded,
         dependencies: <String>['item_2_1_cpf'],
+        checklistItems: [
+          ChecklistSubItem(
+            id: 'bank_1',
+            title: 'Escolher banco digital (Nubank, Inter ou C6)',
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'bank_2',
+            title: 'Abrir conta pelo app com CPF + DNI',
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'bank_3',
+            title: 'Configurar chave Pix',
+            isCompleted: false,
+          ),
+        ],
       ),
       const GuideActionItem(
         id: 'item_3_2_aluguel_fixo',
@@ -311,6 +393,9 @@ class ArgentinaBrazilGuideDataSource {
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
+          'item_0_3_budget',
+          'item_1_3_money',
+          'item_0_4_flight',
           'item_1_1_chip',
           'item_2_1_cpf',
           'item_2_2_residencia',
@@ -325,6 +410,9 @@ class ArgentinaBrazilGuideDataSource {
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
+          'item_0_3_budget',
+          'item_1_3_money',
+          'item_0_4_flight',
           'item_1_1_chip',
           'item_2_1_cpf',
           'item_3_1_conta_bancaria',
@@ -336,6 +424,9 @@ class ArgentinaBrazilGuideDataSource {
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
+          'item_0_3_budget',
+          'item_1_3_money',
+          'item_0_4_flight',
           'item_1_1_chip',
           'item_2_1_cpf',
           'item_2_2_residencia',
@@ -349,6 +440,9 @@ class ArgentinaBrazilGuideDataSource {
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
+          'item_0_3_budget',
+          'item_1_3_money',
+          'item_0_4_flight',
           'item_1_1_chip',
           'item_1_2_housing_temporary',
           'item_2_1_cpf',

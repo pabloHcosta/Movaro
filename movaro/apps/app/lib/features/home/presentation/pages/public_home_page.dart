@@ -43,7 +43,8 @@ class PublicHomePage extends StatefulWidget {
   State<PublicHomePage> createState() => _PublicHomePageState();
 }
 
-class _PublicHomePageState extends State<PublicHomePage> {
+class _PublicHomePageState extends State<PublicHomePage>
+    with WidgetsBindingObserver {
   final MigrationCopilotProgressStore _progressStore =
       MigrationCopilotProgressStore();
   MigrationCopilotProgressSnapshot _progressSnapshot =
@@ -55,6 +56,7 @@ class _PublicHomePageState extends State<PublicHomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     widget.journeyContextController.addListener(_handleControllerUpdate);
     widget.migrationQuestionnaireController.addListener(
       _handleControllerUpdate,
@@ -68,12 +70,20 @@ class _PublicHomePageState extends State<PublicHomePage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     widget.journeyContextController.removeListener(_handleControllerUpdate);
     widget.migrationQuestionnaireController.removeListener(
       _handleControllerUpdate,
     );
     widget.citiesController.removeListener(_handleControllerUpdate);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_refreshProgress());
+    }
   }
 
   @override
@@ -299,8 +309,10 @@ class _PublicHomePageState extends State<PublicHomePage> {
     Navigator.pushNamed(context, AppRoutes.settings);
   }
 
-  void _openGuide() {
-    Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
+  Future<void> _openGuide() async {
+    await Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
+    if (!mounted) return;
+    await _refreshProgress();
   }
 
   void _openComparison(City city) {
@@ -464,6 +476,20 @@ class _PublicHomePageState extends State<PublicHomePage> {
       currentPhaseIndex: currentPhaseIndex,
       totalPhases: GuidePhase.values.length,
     );
+  }
+
+  /// Force-refreshes the progress snapshot from disk (e.g. after returning
+  /// from the guide page where the user may have completed items).
+  Future<void> _refreshProgress() async {
+    final plan = widget.migrationQuestionnaireController.generatedPlan;
+    if (plan == null) return;
+
+    final snapshot = await _progressStore.read(plan);
+    if (!mounted) return;
+
+    setState(() {
+      _progressSnapshot = snapshot;
+    });
   }
 
   String _planKey(MigrationPlan plan) {

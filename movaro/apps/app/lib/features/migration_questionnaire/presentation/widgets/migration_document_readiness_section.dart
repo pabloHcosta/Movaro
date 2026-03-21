@@ -4,6 +4,7 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_text_styles.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/document_checklist_adapter.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
@@ -117,8 +118,10 @@ class _MigrationDocumentReadinessSectionState
   }
 
   bool get _isArgentinaToBrazil =>
-      widget.plan.originCountry.toUpperCase() == 'AR' &&
-      widget.plan.destinationCountry.toUpperCase() == 'BR';
+      ArgentinaBrazilGuideDataSource.isArgentinaToBrazil(
+        widget.plan.originCountry,
+        widget.plan.destinationCountry,
+      );
 
   void _setActiveItem(String id) {
     setState(() {
