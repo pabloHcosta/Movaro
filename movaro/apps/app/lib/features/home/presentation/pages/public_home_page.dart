@@ -120,26 +120,12 @@ class _PublicHomePageState extends State<PublicHomePage>
                   ? null
                   : _buildGuideState(plan, _progressSnapshot);
 
-              // How far above the *screen bottom* the sheet must sit so it
-              // aligns with the top of the floating nav-bar pill.
-              //
-              // Scaffold(extendBody:true) wraps the body in
-              // MediaQuery.removePadding(removeBottom:true), so
-              // SafeArea(bottom:true) adds 0 px — the Stack extends
-              // to the screen bottom. We must therefore include the
-              // device's physical safe-area inset (home indicator)
-              // via viewPadding.bottom (which is never consumed).
-              //
-              // Pill height breakdown (main_navigation_bar.dart):
-              //   pill Container vertical pad : 8 + 8  = 16
-              //   _NavTab AnimatedContainer pad: 8 + 8  = 16
-              //   icon(22) + gap(3) + labelSmall(~16)  = 41
-              //   total pill height                     ≈ 73
-              //   + outer bottom non-safe pad           = 14
-              //   + viewPadding.bottom (safe area)      = device
-              //
-              final safeBottom = MediaQuery.of(context).viewPadding.bottom;
-              final sheetBottom = safeBottom + 14.0 + 73.0; // safe + pad + pill
+              // Scaffold(extendBody:true) sets the body's
+              // MediaQuery.padding.bottom = max(safeArea, navBarHeight),
+              // and SafeArea(bottom:true) consumes it. The Stack's bottom
+              // edge therefore aligns with the nav-bar's top — no manual
+              // offset is needed.
+              const sheetBottom = 0.0;
               // Extra bottom padding so scroll content clears the sheet.
               const sheetCollapsedH = 200.0;
 

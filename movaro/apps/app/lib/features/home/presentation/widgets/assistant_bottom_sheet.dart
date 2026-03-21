@@ -177,16 +177,14 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
       animation: _expandAnim,
       builder: (context, child) {
         const collapsedH = 200.0;
-        // Available viewport above the nav bar pill, excluding the status bar.
-        // Scaffold(extendBody:true) removed padding.bottom from the body's
-        // MediaQuery, so the Stack extends to the screen bottom. Use
-        // viewPadding.bottom (never consumed) + pill offset to match the
-        // Positioned(bottom:) value in PublicHomePage.
-        final safeBottom = MediaQuery.of(context).viewPadding.bottom;
-        final sheetBottomOffset = safeBottom + 14.0 + 73.0;
-        final topPad = MediaQuery.of(context).padding.top;
-        final usableH = screenHeight - topPad - sheetBottomOffset;
-        final expandedH = usableH * 0.90;
+        // Scaffold(extendBody:true) sets padding.bottom to
+        // max(safeArea, navBarHeight). SafeArea consumes it, so the
+        // Stack height = screenHeight - padding.bottom. The sheet
+        // sits at Stack bottom (Positioned(bottom:0)). Available
+        // height for expansion = stackHeight - statusBar.
+        final mq = MediaQuery.of(context);
+        final stackH = screenHeight - mq.padding.bottom;
+        final expandedH = (stackH - mq.padding.top) * 0.90;
         final height = collapsedH + (expandedH - collapsedH) * _expandAnim.value;
 
         return GestureDetector(
