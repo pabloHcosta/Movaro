@@ -18,7 +18,13 @@ class ApiKeys {
     defaultValue: '',
   );
 
+  static const geminiApiKey = String.fromEnvironment(
+    DartDefineKeys.geminiApiKey,
+    defaultValue: '',
+  );
+
   static bool get hasYoutubeApiKey => youtubeApiKey.trim().isNotEmpty;
   static bool get hasGooglePlacesKey => googlePlacesKey.trim().isNotEmpty;
   static bool get hasPexelsApiKey => pexelsApiKey.trim().isNotEmpty;
+  static bool get hasGeminiApiKey => geminiApiKey.trim().isNotEmpty;
 }

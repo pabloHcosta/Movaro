@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/config/api_keys.dart';
+import 'package:movaro_app/core/config/api_keys.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
@@ -80,7 +80,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     _preferencesStore = DocumentationGuidePreferencesStore();
     _selectedSection = widget.initialSection;
     widget.journeyContextController?.initialize();
-    if (widget.showAsTab && geminiApiKey.isNotEmpty) {
+    if (widget.showAsTab && ApiKeys.hasGeminiApiKey) {
       _initChatService();
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -171,7 +171,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
         widget.journeyContextController?.selection.destination?.name ??
         'Brasil';
 
-    _chatService = GeminiChatService(apiKey: geminiApiKey);
+    _chatService = GeminiChatService(apiKey: ApiKeys.geminiApiKey);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final l10n = context.l10n;
