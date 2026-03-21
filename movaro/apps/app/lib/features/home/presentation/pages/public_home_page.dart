@@ -121,11 +121,19 @@ class _PublicHomePageState extends State<PublicHomePage>
                   : _buildGuideState(plan, _progressSnapshot);
 
               // How far above the SafeArea-adjusted stack bottom the sheet
-              // must sit so it aligns with the top of the floating pill:
-              //   navOuterBottomPad (14) + pillHeight (8+37+8 = 53) = 67
-              // This value is safe-area-independent because SafeArea already
-              // strips bottomPadding from the stack coordinate space.
-              const sheetBottom = 67.0;
+              // must sit so it aligns with the top of the floating pill.
+              //
+              // Pill height breakdown (main_navigation_bar.dart):
+              //   pill Container vertical pad : 8 + 8  = 16
+              //   _NavTab AnimatedContainer pad: 8 + 8  = 16
+              //   icon(22) + gap(3) + labelSmall(~16)  = 41
+              //   total pill height                     = 73
+              //   + outer bottom non-safe pad           = 14
+              //                                         = 87
+              //
+              // Safe-area-independent: SafeArea(top:false) already strips
+              // MediaQuery.padding.bottom from the stack coordinate space.
+              const sheetBottom = 87.0;
               // Extra bottom padding so scroll content clears the sheet.
               const sheetCollapsedH = 200.0;
 
