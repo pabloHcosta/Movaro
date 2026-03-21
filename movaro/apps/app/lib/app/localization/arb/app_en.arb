@@ -2474,5 +2474,32 @@
     }
   },
   "guide_no_plan_title": "Choose your city first",
-  "guide_no_plan_subtitle": "Confirm your plan city to start the guide"
+  "guide_no_plan_subtitle": "Confirm your plan city to start the guide",
+
+  "infoGuideEyebrow": "Quick guide",
+  "infoGuideTitle": "Your migration info hub",
+  "infoGuideBody": "Find answers about documents, housing, health, work, and costs for your destination country — all in one place.",
+  "infoGuideStepOneTitle": "Browse by category",
+  "infoGuideStepOneBody": "Tap a section card to see detailed guides with official sources for each topic.",
+  "infoGuideStepTwoTitle": "Search any topic",
+  "infoGuideStepTwoBody": "Use the search bar to find specific answers about CPF, visa, SUS, or any other subject.",
+  "infoGuideStepThreeTitle": "Ask the AI assistant",
+  "infoGuideStepThreeBody": "Tap the blue button at the bottom right to chat with our assistant and get personalized answers.",
+
+  "aiChatTitle": "Movaro Assistant",
+  "aiChatSubtitle": "Get answers about migration",
+  "aiChatClearTooltip": "Clear chat",
+  "aiChatInputHint": "Ask about migration...",
+  "aiChatWelcomeTitle": "How can I help?",
+  "aiChatWelcomeBody": "Ask about documents, housing, health, work and more",
+  "aiChatErrorRateLimit": "Request limit reached. Please wait a moment.",
+  "aiChatErrorApiLimit": "API limit reached. Please try again in a few minutes.",
+  "aiChatErrorGeneric": "Error processing your question. Please try again.",
+  "aiChatNotInitialized": "Service not initialized. Please try again.",
+  "aiChatSuggestPassport": "Do I need a passport to travel to Brazil?",
+  "aiChatSuggestCpf": "How to get a CPF?",
+  "aiChatSuggestSus": "How does SUS (public health) work?",
+  "aiChatSuggestWork": "Can I work with a tourist visa?",
+  "aiChatSuggestCosts": "How much does it cost to move?",
+  "aiChatSuggestLicense": "How to validate my driver's license?"
 }

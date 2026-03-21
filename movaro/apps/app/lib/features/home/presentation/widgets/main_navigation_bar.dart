@@ -116,7 +116,7 @@ class MainNavigationBar extends StatelessWidget {
     ),
     _NavItemData(
       slot: 3,
-      label: _text(context, pt: 'Info BR', es: 'Info BR', en: 'Info BR'),
+      label: _text(context, pt: 'Info', es: 'Info', en: 'Info'),
       icon: Icons.info_outline,
       activeIcon: Icons.info,
     ),
@@ -136,7 +136,7 @@ class MainNavigationBar extends StatelessWidget {
       0 => AppRoutes.publicHome,
       1 => AppRoutes.explore,
       2 => AppRoutes.migrationPlanCopilot,
-      3 => AppRoutes.infoBrazil,
+      3 => AppRoutes.info,
       _ => AppRoutes.favorites,
     };
 

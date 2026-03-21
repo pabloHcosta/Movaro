@@ -10435,6 +10435,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm your plan city to start the guide'**
   String get guide_no_plan_subtitle;
+
+  /// No description provided for @infoGuideEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick guide'**
+  String get infoGuideEyebrow;
+
+  /// No description provided for @infoGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your migration info hub'**
+  String get infoGuideTitle;
+
+  /// No description provided for @infoGuideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Find answers about documents, housing, health, work, and costs for your destination country — all in one place.'**
+  String get infoGuideBody;
+
+  /// No description provided for @infoGuideStepOneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse by category'**
+  String get infoGuideStepOneTitle;
+
+  /// No description provided for @infoGuideStepOneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a section card to see detailed guides with official sources for each topic.'**
+  String get infoGuideStepOneBody;
+
+  /// No description provided for @infoGuideStepTwoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search any topic'**
+  String get infoGuideStepTwoTitle;
+
+  /// No description provided for @infoGuideStepTwoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the search bar to find specific answers about CPF, visa, SUS, or any other subject.'**
+  String get infoGuideStepTwoBody;
+
+  /// No description provided for @infoGuideStepThreeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the AI assistant'**
+  String get infoGuideStepThreeTitle;
+
+  /// No description provided for @infoGuideStepThreeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the blue button at the bottom right to chat with our assistant and get personalized answers.'**
+  String get infoGuideStepThreeBody;
+
+  /// No description provided for @aiChatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Movaro Assistant'**
+  String get aiChatTitle;
+
+  /// No description provided for @aiChatSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get answers about migration'**
+  String get aiChatSubtitle;
+
+  /// No description provided for @aiChatClearTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear chat'**
+  String get aiChatClearTooltip;
+
+  /// No description provided for @aiChatInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about migration...'**
+  String get aiChatInputHint;
+
+  /// No description provided for @aiChatWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How can I help?'**
+  String get aiChatWelcomeTitle;
+
+  /// No description provided for @aiChatWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about documents, housing, health, work and more'**
+  String get aiChatWelcomeBody;
+
+  /// No description provided for @aiChatErrorRateLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Request limit reached. Please wait a moment.'**
+  String get aiChatErrorRateLimit;
+
+  /// No description provided for @aiChatErrorApiLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'API limit reached. Please try again in a few minutes.'**
+  String get aiChatErrorApiLimit;
+
+  /// No description provided for @aiChatErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Error processing your question. Please try again.'**
+  String get aiChatErrorGeneric;
+
+  /// No description provided for @aiChatNotInitialized.
+  ///
+  /// In en, this message translates to:
+  /// **'Service not initialized. Please try again.'**
+  String get aiChatNotInitialized;
+
+  /// No description provided for @aiChatSuggestPassport.
+  ///
+  /// In en, this message translates to:
+  /// **'Do I need a passport to travel to Brazil?'**
+  String get aiChatSuggestPassport;
+
+  /// No description provided for @aiChatSuggestCpf.
+  ///
+  /// In en, this message translates to:
+  /// **'How to get a CPF?'**
+  String get aiChatSuggestCpf;
+
+  /// No description provided for @aiChatSuggestSus.
+  ///
+  /// In en, this message translates to:
+  /// **'How does SUS (public health) work?'**
+  String get aiChatSuggestSus;
+
+  /// No description provided for @aiChatSuggestWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I work with a tourist visa?'**
+  String get aiChatSuggestWork;
+
+  /// No description provided for @aiChatSuggestCosts.
+  ///
+  /// In en, this message translates to:
+  /// **'How much does it cost to move?'**
+  String get aiChatSuggestCosts;
+
+  /// No description provided for @aiChatSuggestLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'How to validate my driver\'s license?'**
+  String get aiChatSuggestLicense;
 }
 
 class _AppLocalizationsDelegate

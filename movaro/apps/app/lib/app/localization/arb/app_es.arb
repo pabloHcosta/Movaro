@@ -2474,5 +2474,32 @@
     }
   },
   "guide_no_plan_title": "Elegí tu ciudad primero",
-  "guide_no_plan_subtitle": "Confirmá la ciudad de tu plan para comenzar la guía"
+  "guide_no_plan_subtitle": "Confirmá la ciudad de tu plan para comenzar la guía",
+
+  "infoGuideEyebrow": "Guía rápida",
+  "infoGuideTitle": "Tu centro de información migratoria",
+  "infoGuideBody": "Encontrá respuestas sobre documentos, vivienda, salud, trabajo y costos para tu país de destino — todo en un solo lugar.",
+  "infoGuideStepOneTitle": "Navegá por categoría",
+  "infoGuideStepOneBody": "Tocá una tarjeta de sección para ver guías detalladas con fuentes oficiales de cada tema.",
+  "infoGuideStepTwoTitle": "Buscá cualquier tema",
+  "infoGuideStepTwoBody": "Usá la barra de búsqueda para encontrar respuestas sobre CPF, visa, SUS o cualquier otro asunto.",
+  "infoGuideStepThreeTitle": "Preguntale al asistente IA",
+  "infoGuideStepThreeBody": "Tocá el botón azul en la esquina inferior derecha para chatear con nuestro asistente y obtener respuestas personalizadas.",
+
+  "aiChatTitle": "Asistente Movaro",
+  "aiChatSubtitle": "Resolvé tus dudas sobre migración",
+  "aiChatClearTooltip": "Limpiar conversación",
+  "aiChatInputHint": "Preguntá sobre migración...",
+  "aiChatWelcomeTitle": "¿Cómo puedo ayudarte?",
+  "aiChatWelcomeBody": "Preguntá sobre documentación, vivienda, salud, trabajo y más",
+  "aiChatErrorRateLimit": "Límite de solicitudes alcanzado. Esperá un momento.",
+  "aiChatErrorApiLimit": "Límite de API alcanzado. Intentá de nuevo en unos minutos.",
+  "aiChatErrorGeneric": "Error al procesar tu pregunta. Intentá de nuevo.",
+  "aiChatNotInitialized": "Servicio no inicializado. Intentá de nuevo.",
+  "aiChatSuggestPassport": "¿Necesito pasaporte para viajar a Brasil?",
+  "aiChatSuggestCpf": "¿Cómo obtener el CPF?",
+  "aiChatSuggestSus": "¿Cómo funciona el SUS?",
+  "aiChatSuggestWork": "¿Puedo trabajar con visa de turista?",
+  "aiChatSuggestCosts": "¿Cuánto cuesta mudarse?",
+  "aiChatSuggestLicense": "¿Cómo validar mi licencia de conducir?"
 }

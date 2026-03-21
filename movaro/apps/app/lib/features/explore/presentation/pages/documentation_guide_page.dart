@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movaro_app/app/config/api_keys.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
@@ -11,11 +12,15 @@ import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/explore/application/services/documentation_guide_preferences_store.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_decision_support_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_entry_cost_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_soft_landing_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/practical_cost_estimator.dart';
+import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
+import 'package:movaro_app/features/info/application/gemini_chat_service.dart';
+import 'package:movaro_app/features/info/presentation/widgets/ai_chat_sheet.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
 
@@ -34,6 +39,8 @@ class DocumentationGuidePage extends StatefulWidget {
     this.initialSection,
     this.journeyContextController,
     this.migrationQuestionnaireController,
+    this.citiesController,
+    this.showAsTab = false,
     super.key,
   });
 
@@ -41,6 +48,12 @@ class DocumentationGuidePage extends StatefulWidget {
   final DocumentationGuideSection? initialSection;
   final JourneyContextController? journeyContextController;
   final MigrationQuestionnaireController? migrationQuestionnaireController;
+
+  /// When non-null, a [MainNavigationBar] is shown at the bottom.
+  final CitiesController? citiesController;
+
+  /// When `true`, the page acts as a primary tab (shows nav bar + AI chat FAB).
+  final bool showAsTab;
 
   @override
   State<DocumentationGuidePage> createState() => _DocumentationGuidePageState();
@@ -56,6 +69,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
   bool _didTryAutoGuide = false;
   bool _showScrollHint = false;
   String? _selectedCountryId;
+  GeminiChatService? _chatService;
 
   @override
   void initState() {
@@ -66,9 +80,16 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     _preferencesStore = DocumentationGuidePreferencesStore();
     _selectedSection = widget.initialSection;
     widget.journeyContextController?.initialize();
+    if (widget.showAsTab && geminiApiKey.isNotEmpty) {
+      _initChatService();
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshScrollHint();
-      _maybeShowGuide();
+      if (widget.showAsTab) {
+        _maybeShowInfoGuide();
+      } else {
+        _maybeShowGuide();
+      }
     });
   }
 
@@ -96,6 +117,91 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     await _showGuideModal();
   }
 
+  static const _infoHelpKey = 'info_tab';
+
+  Future<void> _maybeShowInfoGuide() async {
+    if (_didTryAutoGuide) return;
+    _didTryAutoGuide = true;
+    await maybeShowContextualHelpGuide(
+      context,
+      preferenceKey: _infoHelpKey,
+      content: _infoHelpContent(context),
+    );
+  }
+
+  Future<void> _showInfoGuide() {
+    return showContextualHelpGuide(
+      context,
+      preferenceKey: _infoHelpKey,
+      content: _infoHelpContent(context),
+    );
+  }
+
+  ContextualHelpContent _infoHelpContent(BuildContext context) {
+    final l10n = context.l10n;
+    return ContextualHelpContent(
+      eyebrow: l10n.infoGuideEyebrow,
+      contextIcon: Icons.info_outline_rounded,
+      title: l10n.infoGuideTitle,
+      body: l10n.infoGuideBody,
+      steps: [
+        FeatureGuideStep(
+          number: '1',
+          title: l10n.infoGuideStepOneTitle,
+          body: l10n.infoGuideStepOneBody,
+        ),
+        FeatureGuideStep(
+          number: '2',
+          title: l10n.infoGuideStepTwoTitle,
+          body: l10n.infoGuideStepTwoBody,
+        ),
+        FeatureGuideStep(
+          number: '3',
+          title: l10n.infoGuideStepThreeTitle,
+          body: l10n.infoGuideStepThreeBody,
+        ),
+      ],
+    );
+  }
+
+  void _initChatService() {
+    final origin = widget.journeyContextController?.selection?.origin?.name
+        ?? 'Argentina';
+    final destination = widget.journeyContextController?.selection?.destination
+        ?.name ?? 'Brasil';
+
+    _chatService = GeminiChatService(apiKey: geminiApiKey);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final l10n = context.l10n;
+      final answers = _guideQuickAnswers(context);
+      final buffer = StringBuffer();
+      for (final a in answers) {
+        buffer.writeln('Q: ${a.question}');
+        buffer.writeln('A: ${a.answer}');
+        buffer.writeln();
+      }
+      final locale = Localizations.localeOf(context).languageCode;
+      _chatService!.initialize(
+        curatedContent: buffer.toString(),
+        originCountry: origin,
+        destinationCountry: destination,
+        locale: locale,
+        errorMessages: ChatErrorMessages(
+          notInitialized: l10n.aiChatNotInitialized,
+          rateLimit: l10n.aiChatErrorRateLimit,
+          apiLimit: l10n.aiChatErrorApiLimit,
+          generic: l10n.aiChatErrorGeneric,
+        ),
+      );
+    });
+  }
+
+  void _openAiChat() {
+    if (_chatService == null) return;
+    showAiChatSheet(context, chatService: _chatService!);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -114,6 +220,22 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     final hasGuideData = _normalizeCountryId(selectedCountry.id) == 'brasil';
 
     return Scaffold(
+      extendBody: widget.showAsTab,
+      floatingActionButton: widget.showAsTab && _chatService != null
+          ? _AiChatFab(onTap: _openAiChat)
+          : null,
+      bottomNavigationBar: widget.showAsTab &&
+              widget.citiesController != null &&
+              widget.journeyContextController != null &&
+              widget.migrationQuestionnaireController != null
+          ? MainNavigationBar(
+              currentIndex: 3,
+              journeyContextController: widget.journeyContextController!,
+              citiesController: widget.citiesController!,
+              migrationQuestionnaireController:
+                  widget.migrationQuestionnaireController!,
+            )
+          : null,
       body: Stack(
         children: [
           const AmbientBackground(),
@@ -134,9 +256,13 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                       children: [
                         AppGlassHeader(
                           title: l10n.documentationPageTitle,
-                          onBack: () => Navigator.maybePop(context),
+                          onBack: widget.showAsTab
+                              ? null
+                              : () => Navigator.maybePop(context),
                           trailing: IconButton(
-                            onPressed: _showGuideModal,
+                            onPressed: widget.showAsTab
+                                ? _showInfoGuide
+                                : _showGuideModal,
                             icon: const Icon(Icons.help_outline_rounded),
                             visualDensity: VisualDensity.compact,
                           ),
@@ -3089,4 +3215,46 @@ class _DocumentationTopic {
   final List<String> bullets;
   final String sourceNameKey;
   final String sourceUrl;
+}
+
+class _AiChatFab extends StatelessWidget {
+  const _AiChatFab({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 72),
+      child: FloatingActionButton(
+        onPressed: onTap,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0088FF), Color(0xFF00BBFF)],
+            ),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0088FF).withValues(alpha: 0.35),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.auto_awesome,
+            color: Colors.white,
+            size: 26,
+          ),
+        ),
+      ),
+    );
+  }
 }
