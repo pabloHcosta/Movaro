@@ -45,6 +45,7 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
   double _dragDelta = 0;
   GeminiChatService? _chatService;
   bool _isInitializing = false;
+  bool _chatInitStarted = false;
   late final AnimationController _animController;
   late final Animation<double> _expandAnim;
 
@@ -59,7 +60,14 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
       parent: _animController,
       curve: Curves.easeInOutCubic,
     );
-    if (ApiKeys.hasGeminiApiKey) {
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // context.l10n / Localizations requires an inherited widget — safe here.
+    if (!_chatInitStarted && ApiKeys.hasGeminiApiKey) {
+      _chatInitStarted = true;
       _isInitializing = true;
       _initChatService();
     }
