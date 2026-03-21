@@ -76,20 +76,19 @@ class MainNavigationBar extends StatelessWidget {
   List<_NavItemData> _emptyItems(BuildContext context) => [
     _NavItemData(
       slot: 0,
-      label: _text(context, pt: 'Home', es: 'Home', en: 'Home'),
+      label: _text(context, pt: 'Home', es: 'Inicio', en: 'Home'),
       icon: Icons.home_outlined,
       activeIcon: Icons.home,
     ),
     _NavItemData(
       slot: 1,
-      label: _text(context, pt: 'Explore', es: 'Explore', en: 'Explore'),
+      label: _text(context, pt: 'Explorar', es: 'Explorar', en: 'Explore'),
       icon: Icons.explore_outlined,
       activeIcon: Icons.explore,
     ),
     _NavItemData(
       slot: 4,
-      label:
-          _text(context, pt: 'Favoritas', es: 'Favoritas', en: 'Favorites'),
+      label: _text(context, pt: 'Favoritos', es: 'Favoritos', en: 'Favorites'),
       icon: Icons.favorite_outline,
       activeIcon: Icons.favorite,
     ),
@@ -98,13 +97,13 @@ class MainNavigationBar extends StatelessWidget {
   List<_NavItemData> _activeItems(BuildContext context) => [
     _NavItemData(
       slot: 0,
-      label: _text(context, pt: 'Home', es: 'Home', en: 'Home'),
+      label: _text(context, pt: 'Home', es: 'Inicio', en: 'Home'),
       icon: Icons.home_outlined,
       activeIcon: Icons.home,
     ),
     _NavItemData(
       slot: 1,
-      label: _text(context, pt: 'Explore', es: 'Explore', en: 'Explore'),
+      label: _text(context, pt: 'Explorar', es: 'Explorar', en: 'Explore'),
       icon: Icons.explore_outlined,
       activeIcon: Icons.explore,
     ),
@@ -122,8 +121,7 @@ class MainNavigationBar extends StatelessWidget {
     ),
     _NavItemData(
       slot: 4,
-      label:
-          _text(context, pt: 'Favoritas', es: 'Favoritas', en: 'Favorites'),
+      label: _text(context, pt: 'Favoritos', es: 'Favoritos', en: 'Favorites'),
       icon: Icons.favorite_outline,
       activeIcon: Icons.favorite,
     ),
@@ -186,7 +184,7 @@ class _NavTab extends StatelessWidget {
           duration: const Duration(milliseconds: 300),
           curve: const Cubic(0.4, 0, 0.2, 1),
           padding: EdgeInsets.symmetric(
-            horizontal: isActive ? 24 : 20,
+            horizontal: isActive ? 10 : 6,
             vertical: 8,
           ),
           decoration: BoxDecoration(
@@ -222,9 +220,7 @@ class _NavTab extends StatelessWidget {
               Text(
                 label,
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
                 style: context.textStyles.navLabel.copyWith(
-                  fontSize: 11,
                   fontWeight:
                       isActive ? FontWeight.w600 : FontWeight.w400,
                   color: isActive

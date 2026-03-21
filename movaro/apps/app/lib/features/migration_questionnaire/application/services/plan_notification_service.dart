@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
@@ -33,7 +34,7 @@ class PlanNotificationService {
     const ios = DarwinInitializationSettings();
 
     await _notifications.initialize(
-      const InitializationSettings(android: android, iOS: ios),
+      settings: const InitializationSettings(android: android, iOS: ios),
     );
 
     await _notifications
@@ -128,9 +129,9 @@ class PlanNotificationService {
 
   Future<void> cancelPlanReminders() async {
     await initialize();
-    await _notifications.cancel(1001);
-    await _notifications.cancel(1002);
-    await _notifications.cancel(1003);
+    await _notifications.cancel(id: 1001);
+    await _notifications.cancel(id: 1002);
+    await _notifications.cancel(id: 1003);
   }
 
   Future<void> scheduleResidenceDeadlineReminder({
@@ -138,7 +139,7 @@ class PlanNotificationService {
     required DateTime scheduledDate,
   }) async {
     await initialize();
-    await _notifications.cancel(1103);
+    await _notifications.cancel(id: 1103);
     if (!scheduledDate.isAfter(DateTime.now())) {
       return;
     }
@@ -166,11 +167,11 @@ class PlanNotificationService {
     required DateTime scheduledDate,
   }) async {
     await _notifications.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledDate, tz.local),
-      NotificationDetails(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: tz.TZDateTime.from(scheduledDate, tz.local),
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _channel.id,
           _channel.name,
@@ -179,15 +180,15 @@ class PlanNotificationService {
         ),
         iOS: const DarwinNotificationDetails(),
       ),
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
 
   String? _getNextPendingItemTitle(MigrationPlan plan) {
-    if (plan.destinationCountry.toUpperCase() == 'BR' &&
-        plan.originCountry.toUpperCase() == 'AR') {
+    if (ArgentinaBrazilGuideDataSource.isArgentinaToBrazil(
+      plan.originCountry,
+      plan.destinationCountry,
+    )) {
       if (plan.goal == 'find_job_br') {
         return _text(
           pt: 'tirar seu CPF',

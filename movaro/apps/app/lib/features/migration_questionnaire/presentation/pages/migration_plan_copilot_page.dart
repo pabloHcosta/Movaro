@@ -35,6 +35,7 @@ import 'package:movaro_app/features/migration_questionnaire/presentation/pages/p
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/housing_selection_screen.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/arrival_execution_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/landing_budget_estimator_section.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/guide_content_renderer.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_document_readiness_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_readiness_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
@@ -303,8 +304,10 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     BuildContext context,
     MigrationPlan plan,
   ) {
-    if (plan.originCountry.toUpperCase() == 'AR' &&
-        plan.destinationCountry.toUpperCase() == 'BR') {
+    if (ArgentinaBrazilGuideDataSource.isArgentinaToBrazil(
+      plan.originCountry,
+      plan.destinationCountry,
+    )) {
       final completedIds = <String>{
         ..._readinessCompletedIds,
         ..._documentCompletedIds,
@@ -692,11 +695,18 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                 item: gpsController.currentItem,
                                 showCelebration: _showCelebration,
                                 showExpandedContent: _showExpandedContent,
+                                awaitingConfirmation:
+                                    gpsController.awaitingConfirmation,
                                 onPrimaryTap: (item) => _handleCurrentActionTap(
                                   gpsController,
                                   item,
                                   plan,
                                   city,
+                                ),
+                                onLinkTap: (url, label) =>
+                                    _openExternalPreparationLink(
+                                  title: label,
+                                  uri: Uri.parse(url),
                                 ),
                                 onChecklistToggle: (itemId, subItemId) async {
                                   await gpsController.toggleChecklistSubItem(
@@ -2197,47 +2207,83 @@ class _GuideContextBand extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final phase = controller.currentPhase;
-    final phaseIndex = GuidePhase.values.indexOf(phase) + 1;
+    final phaseIndex = GuidePhase.values.indexOf(phase);
     return FrostedPanel(
       padding: const EdgeInsets.all(14),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _localizedText(context, pt: 'Fase', es: 'Fase', en: 'Phase'),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.textSoftFor(context),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _guidePhaseName(context, phase),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '${_guidePhaseName(context, phase)} · ${_localizedText(context, pt: 'etapa', es: 'etapa', en: 'step')} $phaseIndex ${_localizedText(context, pt: 'de', es: 'de', en: 'of')} ${GuidePhase.values.length}',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: AppColors.success.withValues(alpha: 0.22),
+                  ),
+                ),
+                child: Text(
+                  '${controller.completedCount}/${controller.totalItems}',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: AppColors.success,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              for (var i = 0; i < GuidePhase.values.length; i++) ...[
+                Expanded(
+                  child: Container(
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: i < phaseIndex
+                          ? AppColors.success
+                          : i == phaseIndex
+                              ? AppColors.primary
+                              : AppColors.surfaceMutedFor(context),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                if (i < GuidePhase.values.length - 1) const SizedBox(width: 4),
+              ],
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              for (var i = 0; i < GuidePhase.values.length; i++) ...[
+                Expanded(
+                  child: Text(
+                    _guidePhaseShortName(context, GuidePhase.values[i]),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontSize: 9,
+                      color: i <= phaseIndex
+                          ? null
+                          : AppColors.textSoftFor(context),
+                      fontWeight:
+                          i == phaseIndex ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
                 ),
               ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: AppColors.success.withValues(alpha: 0.22),
-              ),
-            ),
-            child: Text(
-              '${controller.completedCount} ${_localizedText(context, pt: 'de', es: 'de', en: 'of')} ${controller.totalItems} ${_localizedText(context, pt: 'feitas', es: 'hechas', en: 'done')}',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: AppColors.success,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            ],
           ),
         ],
       ),
@@ -2300,16 +2346,20 @@ class _GuideDominantActionCard extends StatelessWidget {
     required this.item,
     required this.showCelebration,
     required this.showExpandedContent,
+    required this.awaitingConfirmation,
     required this.onPrimaryTap,
     required this.onChecklistToggle,
+    required this.onLinkTap,
   });
 
   final GuideActionItem? item;
   final bool showCelebration;
   final bool showExpandedContent;
+  final bool awaitingConfirmation;
   final Future<void> Function(GuideActionItem item) onPrimaryTap;
   final Future<void> Function(String itemId, String subItemId)
   onChecklistToggle;
+  final void Function(String url, String label) onLinkTap;
 
   @override
   Widget build(BuildContext context) {
@@ -2415,20 +2465,28 @@ class _GuideDominantActionCard extends StatelessWidget {
                   border: Border.all(color: AppColors.borderFor(context)),
                 ),
                 padding: const EdgeInsets.all(14),
-                child: SizedBox(
-                  height: 112,
-                  child: SingleChildScrollView(
-                    child: Text(
-                      item!.fullContent!,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(height: 1.5),
-                    ),
-                  ),
+                child: GuideContentRenderer(
+                  content: item!.fullContent!,
+                  onLinkTap: onLinkTap,
                 ),
               ),
             ],
             if (item!.hasChecklist) ...[
+              if (item!.fullContent != null) ...[
+                const SizedBox(height: 14),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceMutedFor(context),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.borderFor(context)),
+                  ),
+                  padding: const EdgeInsets.all(14),
+                  child: GuideContentRenderer(
+                    content: item!.fullContent!,
+                    onLinkTap: onLinkTap,
+                  ),
+                ),
+              ],
               const SizedBox(height: 14),
               for (final subItem in item!.checklistItems!) ...[
                 CheckboxListTile(
@@ -2484,7 +2542,12 @@ class _GuideDominantActionCard extends StatelessWidget {
                 child: FilledButton(
                   onPressed: () => onPrimaryTap(item!),
                   child: Text(
-                    _guideButtonLabel(context, item!, showExpandedContent),
+                    _guideButtonLabel(
+                      context,
+                      item!,
+                      showExpandedContent,
+                      awaitingConfirmation: awaitingConfirmation,
+                    ),
                   ),
                 ),
               ),
@@ -2642,13 +2705,25 @@ class _UpcomingGuideItemTile extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Text(
-                  indexLabel,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
-                ),
-                const SizedBox(width: 12),
+                if (item.icon != null) ...[
+                  Icon(
+                    unlocked ? item.icon : Icons.lock_outline_rounded,
+                    size: 18,
+                    color: unlocked
+                        ? AppColors.primary
+                        : AppColors.textSoftFor(context),
+                  ),
+                  const SizedBox(width: 10),
+                ] else ...[
+                  Text(
+                    indexLabel,
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelLarge
+                        ?.copyWith(fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(width: 12),
+                ],
                 Expanded(
                   child: Text(
                     item.title,
@@ -4436,23 +4511,72 @@ String _guidePhaseName(BuildContext context, GuidePhase phase) {
   };
 }
 
+String _guidePhaseShortName(BuildContext context, GuidePhase phase) {
+  return switch (phase) {
+    GuidePhase.preparation => _localizedText(
+      context,
+      pt: 'Preparo',
+      es: 'Preparo',
+      en: 'Prep',
+    ),
+    GuidePhase.housing => _localizedText(
+      context,
+      pt: '1os dias',
+      es: '1os días',
+      en: '1st days',
+    ),
+    GuidePhase.documents => _localizedText(
+      context,
+      pt: 'Docs',
+      es: 'Docs',
+      en: 'Docs',
+    ),
+    GuidePhase.work => _localizedText(
+      context,
+      pt: 'Vida',
+      es: 'Vida',
+      en: 'Life',
+    ),
+    GuidePhase.arrival => _localizedText(
+      context,
+      pt: 'Integrar',
+      es: 'Integrar',
+      en: 'Settle',
+    ),
+  };
+}
+
 String _guideButtonLabel(
   BuildContext context,
   GuideActionItem item,
-  bool showExpandedContent,
-) {
+  bool showExpandedContent, {
+  bool awaitingConfirmation = false,
+}) {
   if (item.type == GuideActionType.informative) {
     if (showExpandedContent) {
       return _localizedText(
         context,
-        pt: 'Marcar como concluido',
-        es: 'Marcar como completado',
-        en: 'Mark as completed',
+        pt: 'Entendi, próximo passo',
+        es: 'Entendido, siguiente paso',
+        en: 'Got it, next step',
       );
     }
-    return _localizedText(context, pt: 'Comecar', es: 'Empezar', en: 'Start');
+    return _localizedText(
+      context,
+      pt: 'Ver detalhes',
+      es: 'Ver detalles',
+      en: 'View details',
+    );
   }
   if (item.type == GuideActionType.external) {
+    if (awaitingConfirmation) {
+      return _localizedText(
+        context,
+        pt: 'Já verifiquei',
+        es: 'Ya lo verifiqué',
+        en: 'I\'ve checked this',
+      );
+    }
     return _localizedText(
       context,
       pt: 'Abrir ${item.externalLabel ?? 'link'}',
@@ -4461,6 +4585,14 @@ String _guideButtonLabel(
     );
   }
   if (item.type == GuideActionType.tool) {
+    if (awaitingConfirmation) {
+      return _localizedText(
+        context,
+        pt: 'Concluir esta etapa',
+        es: 'Completar esta etapa',
+        en: 'Complete this step',
+      );
+    }
     return _localizedText(
       context,
       pt: 'Abrir ferramenta',

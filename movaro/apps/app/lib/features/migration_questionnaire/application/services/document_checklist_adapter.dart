@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/generated/app_localizations.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
 
 enum DocumentPhase { beforeTravel, uponArrival }
@@ -43,8 +44,10 @@ class DocumentChecklistAdapter {
     required String travelGroup,
     required MigrationDocumentReadinessChecklist fallbackChecklist,
   }) {
-    if (originCountry.toUpperCase() == 'AR' &&
-        destinationCountry.toUpperCase() == 'BR') {
+    if (ArgentinaBrazilGuideDataSource.isArgentinaToBrazil(
+      originCountry,
+      destinationCountry,
+    )) {
       return _argentinaToBrazilItems(
         l10n: l10n,
         goal: goal,

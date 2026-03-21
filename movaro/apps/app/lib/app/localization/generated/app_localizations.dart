@@ -10585,6 +10585,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How to validate my driver\'s license?'**
   String get aiChatSuggestLicense;
+
+  /// No description provided for @homeAssistantTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Movaro Assistant'**
+  String get homeAssistantTitle;
+
+  /// No description provided for @homeAssistantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask anything about your trip'**
+  String get homeAssistantSubtitle;
+
+  /// No description provided for @homeAssistantSwipeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe to expand ↑'**
+  String get homeAssistantSwipeHint;
+
+  /// No description provided for @homeAssistantInputPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask something...'**
+  String get homeAssistantInputPlaceholder;
+
+  /// No description provided for @homeAssistantInputPlaceholderExpanded.
+  ///
+  /// In en, this message translates to:
+  /// **'Or type your question...'**
+  String get homeAssistantInputPlaceholderExpanded;
+
+  /// No description provided for @homeAssistantWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi! I see you\'re planning {destination}. How can I help with your trip?'**
+  String homeAssistantWelcome(String destination);
+
+  /// No description provided for @homeAssistantSectionQuickQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick questions'**
+  String get homeAssistantSectionQuickQuestions;
+
+  /// No description provided for @homeAssistantSectionExploreTopics.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore by topic'**
+  String get homeAssistantSectionExploreTopics;
+
+  /// No description provided for @homeAssistantChipVisa.
+  ///
+  /// In en, this message translates to:
+  /// **'Do I need a visa?'**
+  String get homeAssistantChipVisa;
+
+  /// No description provided for @homeAssistantChipBestTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Best time to go?'**
+  String get homeAssistantChipBestTime;
+
+  /// No description provided for @homeAssistantChipPacking.
+  ///
+  /// In en, this message translates to:
+  /// **'What to pack?'**
+  String get homeAssistantChipPacking;
+
+  /// No description provided for @homeAssistantChipSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Is it safe?'**
+  String get homeAssistantChipSafety;
+
+  /// No description provided for @homeAssistantChipHowToGet.
+  ///
+  /// In en, this message translates to:
+  /// **'How to get there?'**
+  String get homeAssistantChipHowToGet;
+
+  /// No description provided for @homeAssistantCategoryDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Visa & documents'**
+  String get homeAssistantCategoryDocuments;
+
+  /// No description provided for @homeAssistantCategoryCosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Costs & budget'**
+  String get homeAssistantCategoryCosts;
+
+  /// No description provided for @homeAssistantCategoryActivities.
+  ///
+  /// In en, this message translates to:
+  /// **'Things to do'**
+  String get homeAssistantCategoryActivities;
+
+  /// No description provided for @homeAssistantCategoryStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to stay'**
+  String get homeAssistantCategoryStay;
+
+  /// No description provided for @homeAssistantMessageDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'What documents do I need to travel to {destination}?'**
+  String homeAssistantMessageDocuments(String destination);
+
+  /// No description provided for @homeAssistantMessageCosts.
+  ///
+  /// In en, this message translates to:
+  /// **'How much does a trip to {destination} cost on average?'**
+  String homeAssistantMessageCosts(String destination);
+
+  /// No description provided for @homeAssistantMessageActivities.
+  ///
+  /// In en, this message translates to:
+  /// **'What to do in {destination}? What are the best activities?'**
+  String homeAssistantMessageActivities(String destination);
+
+  /// No description provided for @homeAssistantMessageStay.
+  ///
+  /// In en, this message translates to:
+  /// **'What are the best areas to stay in {destination}?'**
+  String homeAssistantMessageStay(String destination);
 }
 
 class _AppLocalizationsDelegate

@@ -6299,4 +6299,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiChatSuggestLicense => 'How to validate my driver\'s license?';
+
+  @override
+  String get homeAssistantTitle => 'Movaro Assistant';
+
+  @override
+  String get homeAssistantSubtitle => 'Ask anything about your trip';
+
+  @override
+  String get homeAssistantSwipeHint => 'Swipe to expand ↑';
+
+  @override
+  String get homeAssistantInputPlaceholder => 'Ask something...';
+
+  @override
+  String get homeAssistantInputPlaceholderExpanded =>
+      'Or type your question...';
+
+  @override
+  String homeAssistantWelcome(String destination) {
+    return 'Hi! I see you\'re planning $destination. How can I help with your trip?';
+  }
+
+  @override
+  String get homeAssistantSectionQuickQuestions => 'Quick questions';
+
+  @override
+  String get homeAssistantSectionExploreTopics => 'Explore by topic';
+
+  @override
+  String get homeAssistantChipVisa => 'Do I need a visa?';
+
+  @override
+  String get homeAssistantChipBestTime => 'Best time to go?';
+
+  @override
+  String get homeAssistantChipPacking => 'What to pack?';
+
+  @override
+  String get homeAssistantChipSafety => 'Is it safe?';
+
+  @override
+  String get homeAssistantChipHowToGet => 'How to get there?';
+
+  @override
+  String get homeAssistantCategoryDocuments => 'Visa & documents';
+
+  @override
+  String get homeAssistantCategoryCosts => 'Costs & budget';
+
+  @override
+  String get homeAssistantCategoryActivities => 'Things to do';
+
+  @override
+  String get homeAssistantCategoryStay => 'Where to stay';
+
+  @override
+  String homeAssistantMessageDocuments(String destination) {
+    return 'What documents do I need to travel to $destination?';
+  }
+
+  @override
+  String homeAssistantMessageCosts(String destination) {
+    return 'How much does a trip to $destination cost on average?';
+  }
+
+  @override
+  String homeAssistantMessageActivities(String destination) {
+    return 'What to do in $destination? What are the best activities?';
+  }
+
+  @override
+  String homeAssistantMessageStay(String destination) {
+    return 'What are the best areas to stay in $destination?';
+  }
 }

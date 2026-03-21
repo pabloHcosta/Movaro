@@ -7,23 +7,30 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/features/info/application/gemini_chat_service.dart';
 
 /// Opens the AI chat bottom sheet.
+///
+/// If [initialMessage] is provided the sheet sends it automatically on open.
 Future<void> showAiChatSheet(
   BuildContext context, {
   required GeminiChatService chatService,
+  String? initialMessage,
 }) {
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     useSafeArea: true,
-    builder: (_) => _AiChatSheet(chatService: chatService),
+    builder: (_) => _AiChatSheet(
+      chatService: chatService,
+      initialMessage: initialMessage,
+    ),
   );
 }
 
 class _AiChatSheet extends StatefulWidget {
-  const _AiChatSheet({required this.chatService});
+  const _AiChatSheet({required this.chatService, this.initialMessage});
 
   final GeminiChatService chatService;
+  final String? initialMessage;
 
   @override
   State<_AiChatSheet> createState() => _AiChatSheetState();
@@ -36,6 +43,16 @@ class _AiChatSheetState extends State<_AiChatSheet> {
   bool _isStreaming = false;
   String _streamingText = '';
   StreamSubscription<String>? _streamSub;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _send(widget.initialMessage!),
+      );
+    }
+  }
 
   @override
   void dispose() {
