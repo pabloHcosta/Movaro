@@ -84,6 +84,7 @@ class _PublicHomePageState extends State<PublicHomePage> {
           ? SystemUiOverlayStyle.light
           : SystemUiOverlayStyle.dark,
       child: Scaffold(
+        extendBody: true,
         backgroundColor: _screenBackground(context),
         body: SafeArea(
           top: false,

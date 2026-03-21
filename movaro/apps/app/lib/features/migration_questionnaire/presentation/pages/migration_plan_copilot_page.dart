@@ -631,6 +631,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     unawaited(_loadProgress(plan));
 
     return Scaffold(
+      extendBody: true,
       body: Stack(
         children: [
           const AmbientBackground(),

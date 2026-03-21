@@ -104,6 +104,7 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
             (controller.isLoadingCatalog || hasQuery || _quickFilter != null);
 
         return Scaffold(
+          extendBody: true,
           body: Stack(
             children: [
               const AmbientBackground(),

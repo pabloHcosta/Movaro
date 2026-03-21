@@ -102,6 +102,7 @@ class _ExplorePageState extends State<ExplorePage> {
     final l10n = context.l10n;
 
     return Scaffold(
+      extendBody: true,
       body: Stack(
         children: [
           const AmbientBackground(),
