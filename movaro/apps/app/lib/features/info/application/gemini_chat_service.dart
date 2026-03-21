@@ -126,7 +126,7 @@ class GeminiChatService {
     _errorMessages = errorMessages;
 
     _model = GenerativeModel(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
       apiKey: _apiKey,
       systemInstruction: Content.system(
         _buildSystemPrompt(
@@ -217,6 +217,15 @@ class GeminiChatService {
               e.message.contains('RESOURCE_EXHAUSTED')
           ? _errorMessages.apiLimit
           : _errorMessages.generic;
+      _history.add(ChatMessage(
+        role: 'assistant',
+        text: errorMsg,
+        timestamp: DateTime.now(),
+      ));
+      yield errorMsg;
+    } catch (_) {
+      // Network errors, socket exceptions, etc.
+      final errorMsg = _errorMessages.generic;
       _history.add(ChatMessage(
         role: 'assistant',
         text: errorMsg,

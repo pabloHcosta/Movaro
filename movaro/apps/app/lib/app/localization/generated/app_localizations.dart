@@ -10711,6 +10711,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'What are the best areas to stay in {destination}?'**
   String homeAssistantMessageStay(String destination);
+
+  /// No description provided for @aiChatLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading assistant...'**
+  String get aiChatLoading;
+
+  /// No description provided for @aiChatUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant unavailable'**
+  String get aiChatUnavailable;
+
+  /// No description provided for @aiChatRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'The assistant is still loading. Please try again in a moment.'**
+  String get aiChatRetry;
+
+  /// No description provided for @aiChatNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection error. Check your internet and try again.'**
+  String get aiChatNetworkError;
 }
 
 class _AppLocalizationsDelegate

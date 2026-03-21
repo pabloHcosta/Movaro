@@ -6400,4 +6400,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String homeAssistantMessageStay(String destination) {
     return '¿Cuáles son las mejores zonas para hospedarse en $destination?';
   }
+
+  @override
+  String get aiChatLoading => 'Cargando asistente...';
+
+  @override
+  String get aiChatUnavailable => 'Asistente no disponible';
+
+  @override
+  String get aiChatRetry =>
+      'El asistente aún está cargando. Inténtalo de nuevo en un momento.';
+
+  @override
+  String get aiChatNetworkError =>
+      'Error de conexión. Verifica tu internet e intenta de nuevo.';
 }
