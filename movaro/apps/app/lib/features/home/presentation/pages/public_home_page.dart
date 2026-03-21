@@ -23,6 +23,8 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:movaro_app/core/environment/app_environment.dart';
+import 'package:movaro_app/features/info/application/gemini_chat_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
 
 class PublicHomePage extends StatefulWidget {
@@ -31,6 +33,7 @@ class PublicHomePage extends StatefulWidget {
     required this.citiesController,
     required this.migrationQuestionnaireController,
     required this.locationController,
+    required this.environment,
     super.key,
   });
 
@@ -38,6 +41,7 @@ class PublicHomePage extends StatefulWidget {
   final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
   final LocationController locationController;
+  final AppEnvironment environment;
 
   @override
   State<PublicHomePage> createState() => _PublicHomePageState();
@@ -213,6 +217,19 @@ class _PublicHomePageState extends State<PublicHomePage>
                         destination: city.name,
                         originCountry: plan!.originCountry,
                         destinationCountry: plan.destinationCountry,
+                        environment: widget.environment,
+                        userContext: UserMigrationContext(
+                          journeyState: 'copilot_active',
+                          migrationGoal: plan.goal.isNotEmpty ? plan.goal : null,
+                          recommendedCity: city.name,
+                          planTimeline: plan.timeline.isNotEmpty ? plan.timeline : null,
+                          currentPhase: guideState?.currentItem?.phase.name,
+                          currentItemTitle: guideState?.currentItem?.title,
+                          completedItemIds: guideState?.completedIds.toList() ?? const [],
+                          completedCount: guideState?.completedCount ?? 0,
+                          totalItems: guideState?.totalItems ?? 0,
+                          progressPercent: guideState?.progressPercent ?? 0,
+                        ),
                       ),
                     ),
                 ],

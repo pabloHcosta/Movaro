@@ -72,6 +72,7 @@ class AppRouter {
           citiesController: citiesController,
           migrationQuestionnaireController: migrationQuestionnaireController,
           locationController: locationController,
+          environment: environment,
         ),
       );
     }
@@ -90,6 +91,7 @@ class AppRouter {
           citiesController: citiesController,
           migrationQuestionnaireController: migrationQuestionnaireController,
           locationController: locationController,
+          environment: environment,
         ),
       );
     }
@@ -146,6 +148,7 @@ class AppRouter {
         return _buildRoute(
           settings,
           PublicHomePage(
+            environment: environment,
             journeyContextController: journeyContextController,
             citiesController: citiesController,
             migrationQuestionnaireController: migrationQuestionnaireController,
@@ -272,6 +275,7 @@ class AppRouter {
         return _buildRoute(
           const RouteSettings(name: AppRoutes.publicHome),
           PublicHomePage(
+            environment: environment,
             journeyContextController: journeyContextController,
             citiesController: citiesController,
             migrationQuestionnaireController: migrationQuestionnaireController,

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/core/config/api_keys.dart';
+import 'package:movaro_app/core/environment/app_environment.dart';
+import 'package:movaro_app/core/network/network_client.dart';
+import 'package:movaro_app/features/info/application/chat_context_remote_service.dart';
 import 'package:movaro_app/features/info/application/gemini_chat_service.dart';
 import 'package:movaro_app/features/info/presentation/widgets/ai_chat_sheet.dart';
 
@@ -14,6 +17,8 @@ class AssistantBottomSheet extends StatefulWidget {
     required this.destination,
     required this.originCountry,
     required this.destinationCountry,
+    required this.environment,
+    this.userContext = const UserMigrationContext(),
     super.key,
   });
 
@@ -23,6 +28,12 @@ class AssistantBottomSheet extends StatefulWidget {
   /// Raw country IDs used when initialising the chat service.
   final String originCountry;
   final String destinationCountry;
+
+  /// App environment used to build the NetworkClient for the context API call.
+  final AppEnvironment environment;
+
+  /// Migration context injected into the AI system prompt.
+  final UserMigrationContext userContext;
 
   @override
   State<AssistantBottomSheet> createState() => _AssistantBottomSheetState();
@@ -52,14 +63,31 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
     }
   }
 
-  void _initChatService() {
+  Future<void> _initChatService() async {
     final l10n = context.l10n;
-    _chatService = GeminiChatService(apiKey: ApiKeys.geminiApiKey);
-    _chatService!.initialize(
-      curatedContent: '',
+    final locale = Localizations.localeOf(context).languageCode;
+
+    // Fetch real app data from the backend (city metrics + guide phase items).
+    // Falls back to empty string on network error — chat still works.
+    final contextService = ChatContextRemoteService(
+      networkClient: NetworkClient(environment: widget.environment),
+    );
+    final contextResult = await contextService.fetchContext(
       originCountry: widget.originCountry,
       destinationCountry: widget.destinationCountry,
-      locale: Localizations.localeOf(context).languageCode,
+      userContext: widget.userContext,
+      locale: locale,
+    );
+
+    if (!mounted) return;
+
+    _chatService = GeminiChatService(apiKey: ApiKeys.geminiApiKey);
+    _chatService!.initialize(
+      curatedContent: contextResult?.appDataBlock ?? '',
+      originCountry: widget.originCountry,
+      destinationCountry: widget.destinationCountry,
+      locale: locale,
+      userContext: widget.userContext,
       errorMessages: ChatErrorMessages(
         notInitialized: l10n.aiChatNotInitialized,
         rateLimit: l10n.aiChatErrorRateLimit,
@@ -67,6 +95,7 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
         generic: l10n.aiChatErrorGeneric,
       ),
     );
+    if (mounted) setState(() {});
   }
 
   @override
