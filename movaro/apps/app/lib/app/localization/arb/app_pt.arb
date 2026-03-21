@@ -2474,5 +2474,32 @@
     }
   },
   "guide_no_plan_title": "Escolha sua cidade primeiro",
-  "guide_no_plan_subtitle": "Confirme a cidade do seu plano para começar o guia"
+  "guide_no_plan_subtitle": "Confirme a cidade do seu plano para começar o guia",
+
+  "infoGuideEyebrow": "Guia rápido",
+  "infoGuideTitle": "Seu hub de informações de migração",
+  "infoGuideBody": "Encontre respostas sobre documentos, moradia, saúde, trabalho e custos para o seu país de destino — tudo em um só lugar.",
+  "infoGuideStepOneTitle": "Navegue por categoria",
+  "infoGuideStepOneBody": "Toque em um card de seção para ver guias detalhados com fontes oficiais para cada tema.",
+  "infoGuideStepTwoTitle": "Pesquise qualquer tema",
+  "infoGuideStepTwoBody": "Use a barra de busca para encontrar respostas sobre CPF, visto, SUS ou qualquer outro assunto.",
+  "infoGuideStepThreeTitle": "Pergunte ao assistente IA",
+  "infoGuideStepThreeBody": "Toque no botão azul no canto inferior direito para conversar com nosso assistente e obter respostas personalizadas.",
+
+  "aiChatTitle": "Assistente Movaro",
+  "aiChatSubtitle": "Tire suas dúvidas sobre migração",
+  "aiChatClearTooltip": "Limpar conversa",
+  "aiChatInputHint": "Pergunte sobre migração...",
+  "aiChatWelcomeTitle": "Como posso ajudar?",
+  "aiChatWelcomeBody": "Pergunte sobre documentação, moradia, saúde, trabalho e mais",
+  "aiChatErrorRateLimit": "Limite de requisições atingido. Aguarde um momento.",
+  "aiChatErrorApiLimit": "Limite da API atingido. Tente novamente em alguns minutos.",
+  "aiChatErrorGeneric": "Erro ao processar sua pergunta. Tente novamente.",
+  "aiChatNotInitialized": "Serviço não inicializado. Tente novamente.",
+  "aiChatSuggestPassport": "Preciso de passaporte para viajar ao Brasil?",
+  "aiChatSuggestCpf": "Como tirar o CPF?",
+  "aiChatSuggestSus": "Como funciona o SUS?",
+  "aiChatSuggestWork": "Posso trabalhar com visto de turista?",
+  "aiChatSuggestCosts": "Quanto custa para se mudar?",
+  "aiChatSuggestLicense": "Como validar minha carteira de motorista?"
 }

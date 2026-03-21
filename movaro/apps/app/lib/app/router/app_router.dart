@@ -20,7 +20,7 @@ import 'package:movaro_app/features/explore/presentation/pages/documentation_gui
 import 'package:movaro_app/features/home/presentation/pages/home_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/pages/favorites_page.dart';
-import 'package:movaro_app/features/home/presentation/pages/info_brazil_page.dart';
+// info_brazil_page removed — Info tab now loads DocumentationGuidePage
 import 'package:movaro_app/features/home/presentation/pages/public_home_page.dart';
 import 'package:movaro_app/features/intro/presentation/pages/intro_page.dart';
 import 'package:movaro_app/features/journey/presentation/pages/journey_setup_page.dart';
@@ -206,13 +206,15 @@ class AppRouter {
             migrationQuestionnaireController: migrationQuestionnaireController,
           ),
         );
-      case AppRoutes.infoBrazil:
+      case AppRoutes.info:
         return _buildRoute(
           settings,
-          InfoBrazilPage(
+          DocumentationGuidePage(
+            exchangeRatesService: copilotExchangeRatesService,
             journeyContextController: journeyContextController,
-            citiesController: citiesController,
             migrationQuestionnaireController: migrationQuestionnaireController,
+            citiesController: citiesController,
+            showAsTab: true,
           ),
         );
       case AppRoutes.documentationGuide:
@@ -377,7 +379,7 @@ class AppRouter {
       AppRoutes.explore,
       AppRoutes.favorites,
       AppRoutes.migrationPlanCopilot,
-      AppRoutes.infoBrazil,
+      AppRoutes.info,
     };
 
     if (primaryNavRoutes.contains(settings.name)) {

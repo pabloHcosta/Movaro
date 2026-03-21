@@ -6214,4 +6214,89 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get guide_no_plan_subtitle =>
       'Confirm your plan city to start the guide';
+
+  @override
+  String get infoGuideEyebrow => 'Quick guide';
+
+  @override
+  String get infoGuideTitle => 'Your migration info hub';
+
+  @override
+  String get infoGuideBody =>
+      'Find answers about documents, housing, health, work, and costs for your destination country — all in one place.';
+
+  @override
+  String get infoGuideStepOneTitle => 'Browse by category';
+
+  @override
+  String get infoGuideStepOneBody =>
+      'Tap a section card to see detailed guides with official sources for each topic.';
+
+  @override
+  String get infoGuideStepTwoTitle => 'Search any topic';
+
+  @override
+  String get infoGuideStepTwoBody =>
+      'Use the search bar to find specific answers about CPF, visa, SUS, or any other subject.';
+
+  @override
+  String get infoGuideStepThreeTitle => 'Ask the AI assistant';
+
+  @override
+  String get infoGuideStepThreeBody =>
+      'Tap the blue button at the bottom right to chat with our assistant and get personalized answers.';
+
+  @override
+  String get aiChatTitle => 'Movaro Assistant';
+
+  @override
+  String get aiChatSubtitle => 'Get answers about migration';
+
+  @override
+  String get aiChatClearTooltip => 'Clear chat';
+
+  @override
+  String get aiChatInputHint => 'Ask about migration...';
+
+  @override
+  String get aiChatWelcomeTitle => 'How can I help?';
+
+  @override
+  String get aiChatWelcomeBody =>
+      'Ask about documents, housing, health, work and more';
+
+  @override
+  String get aiChatErrorRateLimit =>
+      'Request limit reached. Please wait a moment.';
+
+  @override
+  String get aiChatErrorApiLimit =>
+      'API limit reached. Please try again in a few minutes.';
+
+  @override
+  String get aiChatErrorGeneric =>
+      'Error processing your question. Please try again.';
+
+  @override
+  String get aiChatNotInitialized =>
+      'Service not initialized. Please try again.';
+
+  @override
+  String get aiChatSuggestPassport =>
+      'Do I need a passport to travel to Brazil?';
+
+  @override
+  String get aiChatSuggestCpf => 'How to get a CPF?';
+
+  @override
+  String get aiChatSuggestSus => 'How does SUS (public health) work?';
+
+  @override
+  String get aiChatSuggestWork => 'Can I work with a tourist visa?';
+
+  @override
+  String get aiChatSuggestCosts => 'How much does it cost to move?';
+
+  @override
+  String get aiChatSuggestLicense => 'How to validate my driver\'s license?';
 }

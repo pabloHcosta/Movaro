@@ -10,7 +10,7 @@ class AppRoutes {
   static const explore = '/explore';
   static const documentationGuide = '/documentation';
   static const documentationTopic = '/documentation/topic';
-  static const infoBrazil = '/info-br';
+  static const info = '/info';
   static const settings = '/settings';
   static const cities = '/cities';
   static const citiesSearch = '/cities/search';
@@ -35,7 +35,7 @@ class AppRoutes {
     explore,
     documentationGuide,
     documentationTopic,
-    infoBrazil,
+    info,
     cities,
     citiesSearch,
     countries,
