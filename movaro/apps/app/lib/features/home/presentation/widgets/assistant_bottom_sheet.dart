@@ -44,6 +44,7 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
   bool _expanded = false;
   double _dragDelta = 0;
   GeminiChatService? _chatService;
+  bool _isInitializing = false;
   late final AnimationController _animController;
   late final Animation<double> _expandAnim;
 
@@ -59,6 +60,7 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
       curve: Curves.easeInOutCubic,
     );
     if (ApiKeys.hasGeminiApiKey) {
+      _isInitializing = true;
       _initChatService();
     }
   }
@@ -95,7 +97,7 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
         generic: l10n.aiChatErrorGeneric,
       ),
     );
-    if (mounted) setState(() {});
+    if (mounted) setState(() => _isInitializing = false);
   }
 
   @override
@@ -131,7 +133,26 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
   }
 
   void _openChat(String message) {
-    if (_chatService == null) return;
+    if (_isInitializing) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.aiChatRetry),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (_chatService == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.aiChatUnavailable),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     showAiChatSheet(
       context,
       chatService: _chatService!,
@@ -148,7 +169,13 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
       animation: _expandAnim,
       builder: (context, child) {
         const collapsedH = 200.0;
-        final expandedH = screenHeight * 0.78;
+        // Available viewport above the nav bar pill, excluding the status bar.
+        // SafeArea(top:false) does NOT consume padding.top, so we read it here.
+        // SafeArea(bottom:true) has already consumed padding.bottom (= 0 here).
+        const sheetBottomOffset = 87.0; // must match Positioned(bottom:) in PublicHomePage
+        final topPad = MediaQuery.of(context).padding.top;
+        final usableH = screenHeight - topPad - sheetBottomOffset;
+        final expandedH = usableH * 0.90;
         final height = collapsedH + (expandedH - collapsedH) * _expandAnim.value;
 
         return GestureDetector(
@@ -173,10 +200,13 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
                             destination: widget.destination,
                             onChip: _openChat,
                             chatService: _chatService,
+                            isInitializing: _isInitializing,
                           )
                         : _CollapsedContent(
                             l10n: l10n,
                             chatService: _chatService,
+                            isInitializing: _isInitializing,
+                            onNotReady: _openChat,
                           ),
                   ),
                 ],
@@ -346,9 +376,16 @@ class _Avatar extends StatelessWidget {
 // ─── Collapsed content ───────────────────────────────────────────────────────
 
 class _CollapsedContent extends StatefulWidget {
-  const _CollapsedContent({required this.l10n, required this.chatService});
+  const _CollapsedContent({
+    required this.l10n,
+    required this.chatService,
+    required this.isInitializing,
+    required this.onNotReady,
+  });
   final dynamic l10n;
   final GeminiChatService? chatService;
+  final bool isInitializing;
+  final void Function(String) onNotReady;
 
   @override
   State<_CollapsedContent> createState() => _CollapsedContentState();
@@ -365,13 +402,10 @@ class _CollapsedContentState extends State<_CollapsedContent> {
 
   void _send() {
     final text = _controller.text.trim();
-    if (text.isEmpty || widget.chatService == null) return;
+    if (text.isEmpty) return;
+    // Delegate to parent which handles loading/unavailable feedback
+    widget.onNotReady(text);
     _controller.clear();
-    showAiChatSheet(
-      context,
-      chatService: widget.chatService!,
-      initialMessage: text,
-    );
   }
 
   @override
@@ -384,9 +418,14 @@ class _CollapsedContentState extends State<_CollapsedContent> {
           const SizedBox(height: 10),
           _InputRow(
             controller: _controller,
-            placeholder: widget.l10n.homeAssistantInputPlaceholder,
+            placeholder: widget.isInitializing
+                ? context.l10n.aiChatLoading
+                : widget.chatService != null
+                    ? widget.l10n.homeAssistantInputPlaceholder
+                    : context.l10n.aiChatUnavailable,
             onSend: _send,
-            enabled: widget.chatService != null,
+            enabled: true, // always tappable — feedback shown by parent
+            isLoading: widget.isInitializing,
           ),
         ],
       ),
@@ -446,12 +485,14 @@ class _ExpandedContent extends StatefulWidget {
     required this.destination,
     required this.onChip,
     required this.chatService,
+    required this.isInitializing,
   });
 
   final dynamic l10n;
   final String destination;
   final void Function(String) onChip;
   final GeminiChatService? chatService;
+  final bool isInitializing;
 
   @override
   State<_ExpandedContent> createState() => _ExpandedContentState();
@@ -551,9 +592,12 @@ class _ExpandedContentState extends State<_ExpandedContent> {
           // Input
           _InputRow(
             controller: _controller,
-            placeholder: l10n.homeAssistantInputPlaceholderExpanded,
+            placeholder: widget.isInitializing
+                ? context.l10n.aiChatLoading
+                : l10n.homeAssistantInputPlaceholderExpanded,
             onSend: _send,
-            enabled: widget.chatService != null,
+            enabled: true,
+            isLoading: widget.isInitializing,
           ),
         ],
       ),
@@ -708,12 +752,14 @@ class _InputRow extends StatelessWidget {
     required this.placeholder,
     required this.onSend,
     required this.enabled,
+    this.isLoading = false,
   });
 
   final TextEditingController controller;
   final String placeholder;
   final VoidCallback onSend;
   final bool enabled;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -750,19 +796,31 @@ class _InputRow extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Material(
-          color: enabled ? const Color(0xFF0288D1) : Colors.grey.shade800,
+          color: isLoading
+              ? Colors.grey.shade700
+              : enabled
+                  ? const Color(0xFF0288D1)
+                  : Colors.grey.shade800,
           borderRadius: BorderRadius.circular(20),
           child: InkWell(
-            onTap: enabled ? onSend : null,
+            onTap: isLoading ? null : (enabled ? onSend : null),
             borderRadius: BorderRadius.circular(20),
-            child: const SizedBox(
+            child: SizedBox(
               width: 40,
               height: 40,
-              child: Icon(
-                Icons.arrow_upward_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
+              child: isLoading
+                  ? const Padding(
+                      padding: EdgeInsets.all(11),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Icon(
+                      Icons.arrow_upward_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
             ),
           ),
         ),

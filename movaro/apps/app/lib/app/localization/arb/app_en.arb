@@ -2548,5 +2548,9 @@
     "placeholders": {
       "destination": { "type": "String" }
     }
-  }
+  },
+  "aiChatLoading": "Loading assistant...",
+  "aiChatUnavailable": "Assistant unavailable",
+  "aiChatRetry": "The assistant is still loading. Please try again in a moment.",
+  "aiChatNetworkError": "Connection error. Check your internet and try again."
 }

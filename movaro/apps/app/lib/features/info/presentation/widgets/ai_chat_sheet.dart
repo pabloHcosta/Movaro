@@ -89,7 +89,11 @@ class _AiChatSheetState extends State<_AiChatSheet> {
       },
       onError: (_) {
         if (!mounted) return;
-        setState(() => _isStreaming = false);
+        final errorMsg = context.l10n.aiChatNetworkError;
+        setState(() {
+          _isStreaming = false;
+          _streamingText = errorMsg;
+        });
       },
     );
   }
