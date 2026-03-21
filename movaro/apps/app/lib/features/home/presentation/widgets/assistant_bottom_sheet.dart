@@ -118,7 +118,7 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
     return AnimatedBuilder(
       animation: _expandAnim,
       builder: (context, child) {
-        final collapsedH = 170.0;
+        const collapsedH = 200.0;
         final expandedH = screenHeight * 0.78;
         final height = collapsedH + (expandedH - collapsedH) * _expandAnim.value;
 

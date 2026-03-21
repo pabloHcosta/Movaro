@@ -116,12 +116,14 @@ class _PublicHomePageState extends State<PublicHomePage>
                   ? null
                   : _buildGuideState(plan, _progressSnapshot);
 
-              // Height of the floating pill nav bar above which the assistant
-              // sheet is anchored (bottom safe area + pill container height).
-              final navBarH =
-                  MediaQuery.of(context).padding.bottom + 76.0;
-              // Extra bottom padding so the scroll content clears the sheet.
-              const sheetCollapsedH = 170.0;
+              // How far above the SafeArea-adjusted stack bottom the sheet
+              // must sit so it aligns with the top of the floating pill:
+              //   navOuterBottomPad (14) + pillHeight (8+37+8 = 53) = 67
+              // This value is safe-area-independent because SafeArea already
+              // strips bottomPadding from the stack coordinate space.
+              const sheetBottom = 67.0;
+              // Extra bottom padding so scroll content clears the sheet.
+              const sheetCollapsedH = 200.0;
 
               return Stack(
                 children: [
@@ -173,7 +175,7 @@ class _PublicHomePageState extends State<PublicHomePage>
                                       ),
                                       guideState: guideState!,
                                       extraBottomPadding:
-                                          navBarH + sheetCollapsedH,
+                                          sheetBottom + sheetCollapsedH,
                                       onOpenSettings: _openSettings,
                                       onOpenGuide: _openGuide,
                                       onViewCurrentAction: () =>
@@ -206,7 +208,7 @@ class _PublicHomePageState extends State<PublicHomePage>
                     Positioned(
                       left: 0,
                       right: 0,
-                      bottom: navBarH,
+                      bottom: sheetBottom,
                       child: AssistantBottomSheet(
                         destination: city.name,
                         originCountry: plan!.originCountry,
