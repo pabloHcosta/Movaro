@@ -33,7 +33,7 @@ class PlanNotificationService {
     const ios = DarwinInitializationSettings();
 
     await _notifications.initialize(
-      const InitializationSettings(android: android, iOS: ios),
+      settings: const InitializationSettings(android: android, iOS: ios),
     );
 
     await _notifications
@@ -128,9 +128,9 @@ class PlanNotificationService {
 
   Future<void> cancelPlanReminders() async {
     await initialize();
-    await _notifications.cancel(1001);
-    await _notifications.cancel(1002);
-    await _notifications.cancel(1003);
+    await _notifications.cancel(id: 1001);
+    await _notifications.cancel(id: 1002);
+    await _notifications.cancel(id: 1003);
   }
 
   Future<void> scheduleResidenceDeadlineReminder({
@@ -138,7 +138,7 @@ class PlanNotificationService {
     required DateTime scheduledDate,
   }) async {
     await initialize();
-    await _notifications.cancel(1103);
+    await _notifications.cancel(id: 1103);
     if (!scheduledDate.isAfter(DateTime.now())) {
       return;
     }
@@ -166,11 +166,11 @@ class PlanNotificationService {
     required DateTime scheduledDate,
   }) async {
     await _notifications.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledDate, tz.local),
-      NotificationDetails(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: tz.TZDateTime.from(scheduledDate, tz.local),
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _channel.id,
           _channel.name,
@@ -179,8 +179,6 @@ class PlanNotificationService {
         ),
         iOS: const DarwinNotificationDetails(),
       ),
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
