@@ -45,6 +45,7 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
   double _dragDelta = 0;
   GeminiChatService? _chatService;
   bool _isInitializing = false;
+  bool _chatInitStarted = false;
   late final AnimationController _animController;
   late final Animation<double> _expandAnim;
 
@@ -59,7 +60,14 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
       parent: _animController,
       curve: Curves.easeInOutCubic,
     );
-    if (ApiKeys.hasGeminiApiKey) {
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // context.l10n / Localizations requires an inherited widget — safe here.
+    if (!_chatInitStarted && ApiKeys.hasGeminiApiKey) {
+      _chatInitStarted = true;
       _isInitializing = true;
       _initChatService();
     }
@@ -170,9 +178,12 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
       builder: (context, child) {
         const collapsedH = 200.0;
         // Available viewport above the nav bar pill, excluding the status bar.
-        // SafeArea(top:false) does NOT consume padding.top, so we read it here.
-        // SafeArea(bottom:true) has already consumed padding.bottom (= 0 here).
-        const sheetBottomOffset = 87.0; // must match Positioned(bottom:) in PublicHomePage
+        // Scaffold(extendBody:true) removed padding.bottom from the body's
+        // MediaQuery, so the Stack extends to the screen bottom. Use
+        // viewPadding.bottom (never consumed) + pill offset to match the
+        // Positioned(bottom:) value in PublicHomePage.
+        final safeBottom = MediaQuery.of(context).viewPadding.bottom;
+        final sheetBottomOffset = safeBottom + 14.0 + 73.0;
         final topPad = MediaQuery.of(context).padding.top;
         final usableH = screenHeight - topPad - sheetBottomOffset;
         final expandedH = usableH * 0.90;
