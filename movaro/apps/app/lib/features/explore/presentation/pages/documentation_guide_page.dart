@@ -165,10 +165,11 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
   }
 
   void _initChatService() {
-    final origin = widget.journeyContextController?.selection?.origin?.name
-        ?? 'Argentina';
-    final destination = widget.journeyContextController?.selection?.destination
-        ?.name ?? 'Brasil';
+    final origin =
+        widget.journeyContextController?.selection.origin?.name ?? 'Argentina';
+    final destination =
+        widget.journeyContextController?.selection.destination?.name ??
+        'Brasil';
 
     _chatService = GeminiChatService(apiKey: geminiApiKey);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -224,7 +225,8 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
       floatingActionButton: widget.showAsTab && _chatService != null
           ? _AiChatFab(onTap: _openAiChat)
           : null,
-      bottomNavigationBar: widget.showAsTab &&
+      bottomNavigationBar:
+          widget.showAsTab &&
               widget.citiesController != null &&
               widget.journeyContextController != null &&
               widget.migrationQuestionnaireController != null
@@ -3248,11 +3250,7 @@ class _AiChatFab extends StatelessWidget {
               ),
             ],
           ),
-          child: const Icon(
-            Icons.auto_awesome,
-            color: Colors.white,
-            size: 26,
-          ),
+          child: const Icon(Icons.auto_awesome, color: Colors.white, size: 26),
         ),
       ),
     );
