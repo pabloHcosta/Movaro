@@ -2501,5 +2501,52 @@
   "aiChatSuggestSus": "¿Cómo funciona el SUS?",
   "aiChatSuggestWork": "¿Puedo trabajar con visa de turista?",
   "aiChatSuggestCosts": "¿Cuánto cuesta mudarse?",
-  "aiChatSuggestLicense": "¿Cómo validar mi licencia de conducir?"
+  "aiChatSuggestLicense": "¿Cómo validar mi licencia de conducir?",
+
+  "homeAssistantTitle": "Asistente Movaro",
+  "homeAssistantSubtitle": "Pregunta cualquier cosa sobre tu viaje",
+  "homeAssistantSwipeHint": "Desliza para expandir ↑",
+  "homeAssistantInputPlaceholder": "Pregunta algo...",
+  "homeAssistantInputPlaceholderExpanded": "O escribe tu pregunta...",
+  "homeAssistantWelcome": "¡Hola! Vi que estás planeando {destination}. ¿Cómo puedo ayudarte con tu viaje?",
+  "@homeAssistantWelcome": {
+    "placeholders": {
+      "destination": { "type": "String" }
+    }
+  },
+  "homeAssistantSectionQuickQuestions": "Preguntas rápidas",
+  "homeAssistantSectionExploreTopics": "Explorar por tema",
+  "homeAssistantChipVisa": "¿Necesito visa?",
+  "homeAssistantChipBestTime": "¿Mejor época para ir?",
+  "homeAssistantChipPacking": "¿Qué llevar en la maleta?",
+  "homeAssistantChipSafety": "¿Es seguro?",
+  "homeAssistantChipHowToGet": "¿Cómo llegar?",
+  "homeAssistantCategoryDocuments": "Visa y documentos",
+  "homeAssistantCategoryCosts": "Costos y presupuesto",
+  "homeAssistantCategoryActivities": "Qué hacer allí",
+  "homeAssistantCategoryStay": "Dónde alojarse",
+  "homeAssistantMessageDocuments": "¿Qué documentos necesito para viajar a {destination}?",
+  "@homeAssistantMessageDocuments": {
+    "placeholders": {
+      "destination": { "type": "String" }
+    }
+  },
+  "homeAssistantMessageCosts": "¿Cuánto cuesta en promedio un viaje a {destination}?",
+  "@homeAssistantMessageCosts": {
+    "placeholders": {
+      "destination": { "type": "String" }
+    }
+  },
+  "homeAssistantMessageActivities": "¿Qué hacer en {destination}? ¿Cuáles son las mejores actividades?",
+  "@homeAssistantMessageActivities": {
+    "placeholders": {
+      "destination": { "type": "String" }
+    }
+  },
+  "homeAssistantMessageStay": "¿Cuáles son las mejores zonas para hospedarse en {destination}?",
+  "@homeAssistantMessageStay": {
+    "placeholders": {
+      "destination": { "type": "String" }
+    }
+  }
 }

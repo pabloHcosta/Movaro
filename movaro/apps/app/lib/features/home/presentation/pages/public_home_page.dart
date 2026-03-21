@@ -16,6 +16,7 @@ import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
+import 'package:movaro_app/features/home/presentation/widgets/assistant_bottom_sheet.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
@@ -105,70 +106,104 @@ class _PublicHomePageState extends State<PublicHomePage> {
                   ? null
                   : _buildGuideState(plan, _progressSnapshot);
 
-              return Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxWidth),
-                  child: Column(
-                    children: [
-                      FutureBuilder<bool>(
-                        future: widget.locationController
-                            .shouldShowInlineBanner(),
-                        builder: (context, snapshot) {
-                          if (snapshot.data != true) {
-                            return const SizedBox.shrink();
-                          }
-                          return Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                            child: LocationBannerWidget(
-                              onActivate: () => Navigator.pushNamed(
-                                context,
-                                AppRoutes.locationPermission,
-                                arguments: const LocationPermissionScreenArgs(
-                                  returnToPrevious: true,
+              // Height of the floating pill nav bar above which the assistant
+              // sheet is anchored (bottom safe area + pill container height).
+              final navBarH =
+                  MediaQuery.of(context).padding.bottom + 76.0;
+              // Extra bottom padding so the scroll content clears the sheet.
+              const sheetCollapsedH = 170.0;
+
+              return Stack(
+                children: [
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxWidth),
+                      child: Column(
+                        children: [
+                          FutureBuilder<bool>(
+                            future: widget.locationController
+                                .shouldShowInlineBanner(),
+                            builder: (context, snapshot) {
+                              if (snapshot.data != true) {
+                                return const SizedBox.shrink();
+                              }
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                                child: LocationBannerWidget(
+                                  onActivate: () => Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.locationPermission,
+                                    arguments:
+                                        const LocationPermissionScreenArgs(
+                                      returnToPrevious: true,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              );
+                            },
+                          ),
+                          Expanded(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 500),
+                              switchInCurve: Curves.easeInOut,
+                              switchOutCurve: Curves.easeInOut,
+                              transitionBuilder: (child, animation) =>
+                                  FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  ),
+                              child: hasActivePlan
+                                  ? _ActiveHomeState(
+                                      key: const ValueKey('active-home'),
+                                      city: city,
+                                      weather:
+                                          widget.citiesController.weatherFor(
+                                        city.id,
+                                      ),
+                                      guideState: guideState!,
+                                      extraBottomPadding:
+                                          navBarH + sheetCollapsedH,
+                                      onOpenSettings: _openSettings,
+                                      onOpenGuide: _openGuide,
+                                      onViewCurrentAction: () =>
+                                          _showActionDetails(
+                                        context,
+                                        guideState.currentItem,
+                                      ),
+                                      onCompare: () => _openComparison(city),
+                                      onViewCity: () => Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.cityDetail(city.id),
+                                      ),
+                                      onNewPlan: () =>
+                                          _handleManagePlan(context),
+                                    )
+                                  : _EmptyHomeState(
+                                      key: const ValueKey('empty-home'),
+                                      onOpenSettings: _openSettings,
+                                      onStart: () => _startPlanFlow(context),
+                                    ),
                             ),
-                          );
-                        },
+                          ),
+                        ],
                       ),
-                      Expanded(
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 500),
-                          switchInCurve: Curves.easeInOut,
-                          switchOutCurve: Curves.easeInOut,
-                          transitionBuilder: (child, animation) =>
-                              FadeTransition(opacity: animation, child: child),
-                          child: hasActivePlan
-                              ? _ActiveHomeState(
-                                  key: const ValueKey('active-home'),
-                                  city: city,
-                                  weather: widget.citiesController.weatherFor(
-                                    city.id,
-                                  ),
-                                  guideState: guideState!,
-                                  onOpenSettings: _openSettings,
-                                  onOpenGuide: _openGuide,
-                                  onViewCurrentAction: () => _showActionDetails(
-                                    context,
-                                    guideState.currentItem,
-                                  ),
-                                  onCompare: () => _openComparison(city),
-                                  onViewCity: () => Navigator.pushNamed(
-                                    context,
-                                    AppRoutes.cityDetail(city.id),
-                                  ),
-                                  onNewPlan: () => _handleManagePlan(context),
-                                )
-                              : _EmptyHomeState(
-                                  key: const ValueKey('empty-home'),
-                                  onOpenSettings: _openSettings,
-                                  onStart: () => _startPlanFlow(context),
-                                ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+
+                  // Assistant sheet — anchored above the floating nav bar.
+                  if (hasActivePlan)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: navBarH,
+                      child: AssistantBottomSheet(
+                        destination: city.name,
+                        originCountry: plan!.originCountry,
+                        destinationCountry: plan.destinationCountry,
+                      ),
+                    ),
+                ],
               );
             },
           ),
@@ -646,6 +681,7 @@ class _ActiveHomeState extends StatelessWidget {
     required this.onCompare,
     required this.onViewCity,
     required this.onNewPlan,
+    this.extraBottomPadding = 0,
     super.key,
   });
 
@@ -658,6 +694,7 @@ class _ActiveHomeState extends StatelessWidget {
   final VoidCallback onCompare;
   final VoidCallback onViewCity;
   final VoidCallback onNewPlan;
+  final double extraBottomPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -670,7 +707,7 @@ class _ActiveHomeState extends StatelessWidget {
         ),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 16),
+            padding: EdgeInsets.fromLTRB(12, 10, 12, 16 + extraBottomPadding),
             child: Column(
               children: [
                 _ProgressCard(state: guideState),

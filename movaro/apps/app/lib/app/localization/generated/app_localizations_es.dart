@@ -6326,4 +6326,78 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get aiChatSuggestLicense => '¿Cómo validar mi licencia de conducir?';
+
+  @override
+  String get homeAssistantTitle => 'Asistente Movaro';
+
+  @override
+  String get homeAssistantSubtitle => 'Pregunta cualquier cosa sobre tu viaje';
+
+  @override
+  String get homeAssistantSwipeHint => 'Desliza para expandir ↑';
+
+  @override
+  String get homeAssistantInputPlaceholder => 'Pregunta algo...';
+
+  @override
+  String get homeAssistantInputPlaceholderExpanded =>
+      'O escribe tu pregunta...';
+
+  @override
+  String homeAssistantWelcome(String destination) {
+    return '¡Hola! Vi que estás planeando $destination. ¿Cómo puedo ayudarte con tu viaje?';
+  }
+
+  @override
+  String get homeAssistantSectionQuickQuestions => 'Preguntas rápidas';
+
+  @override
+  String get homeAssistantSectionExploreTopics => 'Explorar por tema';
+
+  @override
+  String get homeAssistantChipVisa => '¿Necesito visa?';
+
+  @override
+  String get homeAssistantChipBestTime => '¿Mejor época para ir?';
+
+  @override
+  String get homeAssistantChipPacking => '¿Qué llevar en la maleta?';
+
+  @override
+  String get homeAssistantChipSafety => '¿Es seguro?';
+
+  @override
+  String get homeAssistantChipHowToGet => '¿Cómo llegar?';
+
+  @override
+  String get homeAssistantCategoryDocuments => 'Visa y documentos';
+
+  @override
+  String get homeAssistantCategoryCosts => 'Costos y presupuesto';
+
+  @override
+  String get homeAssistantCategoryActivities => 'Qué hacer allí';
+
+  @override
+  String get homeAssistantCategoryStay => 'Dónde alojarse';
+
+  @override
+  String homeAssistantMessageDocuments(String destination) {
+    return '¿Qué documentos necesito para viajar a $destination?';
+  }
+
+  @override
+  String homeAssistantMessageCosts(String destination) {
+    return '¿Cuánto cuesta en promedio un viaje a $destination?';
+  }
+
+  @override
+  String homeAssistantMessageActivities(String destination) {
+    return '¿Qué hacer en $destination? ¿Cuáles son las mejores actividades?';
+  }
+
+  @override
+  String homeAssistantMessageStay(String destination) {
+    return '¿Cuáles son las mejores zonas para hospedarse en $destination?';
+  }
 }

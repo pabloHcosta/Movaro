@@ -2501,5 +2501,52 @@
   "aiChatSuggestSus": "How does SUS (public health) work?",
   "aiChatSuggestWork": "Can I work with a tourist visa?",
   "aiChatSuggestCosts": "How much does it cost to move?",
-  "aiChatSuggestLicense": "How to validate my driver's license?"
+  "aiChatSuggestLicense": "How to validate my driver's license?",
+
+  "homeAssistantTitle": "Movaro Assistant",
+  "homeAssistantSubtitle": "Ask anything about your trip",
+  "homeAssistantSwipeHint": "Swipe to expand ↑",
+  "homeAssistantInputPlaceholder": "Ask something...",
+  "homeAssistantInputPlaceholderExpanded": "Or type your question...",
+  "homeAssistantWelcome": "Hi! I see you're planning {destination}. How can I help with your trip?",
+  "@homeAssistantWelcome": {
+    "placeholders": {
+      "destination": { "type": "String" }
+    }
+  },
+  "homeAssistantSectionQuickQuestions": "Quick questions",
+  "homeAssistantSectionExploreTopics": "Explore by topic",
+  "homeAssistantChipVisa": "Do I need a visa?",
+  "homeAssistantChipBestTime": "Best time to go?",
+  "homeAssistantChipPacking": "What to pack?",
+  "homeAssistantChipSafety": "Is it safe?",
+  "homeAssistantChipHowToGet": "How to get there?",
+  "homeAssistantCategoryDocuments": "Visa & documents",
+  "homeAssistantCategoryCosts": "Costs & budget",
+  "homeAssistantCategoryActivities": "Things to do",
+  "homeAssistantCategoryStay": "Where to stay",
+  "homeAssistantMessageDocuments": "What documents do I need to travel to {destination}?",
+  "@homeAssistantMessageDocuments": {
+    "placeholders": {
+      "destination": { "type": "String" }
+    }
+  },
+  "homeAssistantMessageCosts": "How much does a trip to {destination} cost on average?",
+  "@homeAssistantMessageCosts": {
+    "placeholders": {
+      "destination": { "type": "String" }
+    }
+  },
+  "homeAssistantMessageActivities": "What to do in {destination}? What are the best activities?",
+  "@homeAssistantMessageActivities": {
+    "placeholders": {
+      "destination": { "type": "String" }
+    }
+  },
+  "homeAssistantMessageStay": "What are the best areas to stay in {destination}?",
+  "@homeAssistantMessageStay": {
+    "placeholders": {
+      "destination": { "type": "String" }
+    }
+  }
 }
