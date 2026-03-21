@@ -168,17 +168,40 @@ class _SheetSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xF00E1D33),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(
-          top: BorderSide(color: const Color(0xFF4FC3F7).withValues(alpha: 0.2)),
-          left: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
-          right: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
-        ),
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      child: Stack(
+        children: [
+          // Background fill
+          Positioned.fill(child: ColoredBox(color: const Color(0xF00E1D33))),
+          // Content
+          child,
+          // Top accent border (blue)
+          Positioned(
+            top: 0, left: 0, right: 0,
+            child: Container(
+              height: 1,
+              color: const Color(0xFF4FC3F7).withValues(alpha: 0.2),
+            ),
+          ),
+          // Left edge border
+          Positioned(
+            top: 0, left: 0, bottom: 0,
+            child: Container(
+              width: 1,
+              color: Colors.white.withValues(alpha: 0.05),
+            ),
+          ),
+          // Right edge border
+          Positioned(
+            top: 0, right: 0, bottom: 0,
+            child: Container(
+              width: 1,
+              color: Colors.white.withValues(alpha: 0.05),
+            ),
+          ),
+        ],
       ),
-      child: child,
     );
   }
 }
