@@ -50,6 +50,6 @@ import { ReferenceModule } from './modules/reference/reference.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(TraceIdMiddleware).forRoutes('*');
+    consumer.apply(TraceIdMiddleware).forRoutes('*path');
   }
 }

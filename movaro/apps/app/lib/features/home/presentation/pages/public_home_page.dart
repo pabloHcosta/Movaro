@@ -482,7 +482,7 @@ class _EmptyHero extends StatelessWidget {
     final isDark = AppColors.isDark(context);
 
     return SizedBox(
-      height: 240,
+      height: MediaQuery.of(context).padding.top + 240,
       child: Stack(
         children: [
           Positioned.fill(
@@ -524,9 +524,13 @@ class _EmptyHero extends StatelessWidget {
             child: _SettingsButton(onTap: onOpenSettings),
           ),
           Positioned.fill(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 170),
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top,
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 300),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -577,12 +581,12 @@ class _EmptyHero extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium
                           ?.copyWith(
-                            fontSize: 28,
+                            fontSize: 32,
                             fontWeight: FontWeight.w900,
                             height: 1.15,
                           ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 6),
                     Text(
                       _text(
                         context,
@@ -592,7 +596,7 @@ class _EmptyHero extends StatelessWidget {
                       ),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 13,
+                        fontSize: 15,
                         color: _tertiaryText(context),
                       ),
                     ),
@@ -601,6 +605,7 @@ class _EmptyHero extends StatelessWidget {
               ),
             ),
           ),
+        ),
         ],
       ),
     );
@@ -1312,7 +1317,7 @@ class _StepTimeline extends StatelessWidget {
                           '${index + 1}',
                           style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(
-                                fontSize: 12,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w900,
                                 color: _accentText(context),
                               ),
@@ -1339,7 +1344,6 @@ class _StepTimeline extends StatelessWidget {
                           steps[index].title,
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
-                                fontSize: 16,
                                 fontWeight: FontWeight.w800,
                                 color: _primaryText(context),
                               ),
@@ -1349,7 +1353,6 @@ class _StepTimeline extends StatelessWidget {
                           steps[index].subtitle,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
-                                fontSize: 12,
                                 color: _tertiaryText(context),
                               ),
                         ),
@@ -1408,12 +1411,12 @@ class _StartPlanCtaState extends State<_StartPlanCta> {
                       en: 'Build my plan',
                     ),
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 18,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 1),
+                  const SizedBox(height: 2),
                   Text(
                     _text(
                       context,
@@ -1422,7 +1425,7 @@ class _StartPlanCtaState extends State<_StartPlanCta> {
                       en: 'Takes about 5 minutes',
                     ),
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Colors.white.withValues(alpha: 0.60),
                     ),
@@ -1501,8 +1504,8 @@ class _SettingsButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         onTap: onTap,
         child: Ink(
-          width: 28,
-          height: 28,
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isDark
@@ -1516,7 +1519,7 @@ class _SettingsButton extends StatelessWidget {
           ),
           child: Icon(
             Icons.settings_outlined,
-            size: 16,
+            size: 20,
             color: isDark
                 ? Colors.white.withValues(alpha: 0.60)
                 : Colors.black.withValues(alpha: 0.50),
