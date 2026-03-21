@@ -194,8 +194,8 @@ class _NavTab extends StatelessWidget {
             children: [
               if (isActive)
                 Container(
-                  width: 40,
-                  height: 30,
+                  width: 46,
+                  height: 32,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color: isDark
@@ -209,25 +209,25 @@ class _NavTab extends StatelessWidget {
                   ),
                   child: Center(
                     child: Container(
-                      width: 18,
-                      height: 18,
+                      width: 22,
+                      height: 22,
                       decoration: BoxDecoration(
                         color: const Color(0xFF0284C7),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(5),
                       ),
-                      child: Icon(activeIcon, size: 10, color: Colors.white),
+                      child: Icon(activeIcon, size: 13, color: Colors.white),
                     ),
                   ),
                 )
               else
                 Container(
-                  width: 24,
-                  height: 24,
+                  width: 30,
+                  height: 30,
                   decoration: BoxDecoration(
                     color: inactiveBackground,
-                    borderRadius: BorderRadius.circular(7),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, size: 14, color: inactiveForeground),
+                  child: Icon(icon, size: 17, color: inactiveForeground),
                 ),
               const SizedBox(height: 4),
               Text(
@@ -235,7 +235,7 @@ class _NavTab extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: isActive
                       ? (isDark
