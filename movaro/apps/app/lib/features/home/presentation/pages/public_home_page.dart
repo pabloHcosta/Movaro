@@ -759,30 +759,64 @@ class _ActiveHomeState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = _screenSizeOf(context);
+    final isLargeScreen = screenSize == _ScreenSize.large;
+
+    final hero = _ActiveHero(
+      city: city,
+      weather: weather,
+      onOpenSettings: onOpenSettings,
+    );
+
+    final progressCard = _MigrationProgressCard(
+      state: guideState,
+      streakDays: streakDays,
+      onOpenGuide: onOpenGuide,
+      onViewAction: onViewCurrentAction,
+    );
+
+    final actionRow = _SecondaryActionRow(
+      onCompare: onCompare,
+      onViewCity: onViewCity,
+      onNewPlan: onNewPlan,
+    );
+
+    // ── Large screen: content fits without scroll. Cards sit at the top and
+    // a Spacer fills the gap above the overlaid AssistantBottomSheet.
+    if (isLargeScreen) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          hero,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                progressCard,
+                const SizedBox(height: 8),
+                actionRow,
+              ],
+            ),
+          ),
+          // Fills the remaining space so content floats above the sheet overlay.
+          const Spacer(),
+        ],
+      );
+    }
+
+    // ── Small / medium screen: keep scroll with bottom clearance for the sheet.
     return Column(
       children: [
-        _ActiveHero(
-          city: city,
-          weather: weather,
-          onOpenSettings: onOpenSettings,
-        ),
+        hero,
         Expanded(
           child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(12, 10, 12, 16 + extraBottomPadding),
             child: Column(
               children: [
-                _MigrationProgressCard(
-                  state: guideState,
-                  streakDays: streakDays,
-                  onOpenGuide: onOpenGuide,
-                  onViewAction: onViewCurrentAction,
-                ),
+                progressCard,
                 const SizedBox(height: 8),
-                _SecondaryActionRow(
-                  onCompare: onCompare,
-                  onViewCity: onViewCity,
-                  onNewPlan: onNewPlan,
-                ),
+                actionRow,
               ],
             ),
           ),
@@ -969,9 +1003,26 @@ class _MigrationProgressCard extends StatelessWidget {
     final isComplete =
         state.currentItem == null || state.progressPercent == 100;
 
+    final screenSize = _screenSizeOf(context);
+    final cardPadding = switch (screenSize) {
+      _ScreenSize.small => 10.0,
+      _ScreenSize.medium => 12.0,
+      _ScreenSize.large => 16.0,
+    };
+    final dividerV = switch (screenSize) {
+      _ScreenSize.small => 6.0,
+      _ScreenSize.medium => 8.0,
+      _ScreenSize.large => 10.0,
+    };
+    final actionGap = switch (screenSize) {
+      _ScreenSize.small => 4.0,
+      _ScreenSize.medium => 6.0,
+      _ScreenSize.large => 8.0,
+    };
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(cardPadding),
       decoration: BoxDecoration(
         color: _cardBackground(context),
         borderRadius: BorderRadius.circular(18),
@@ -991,7 +1042,7 @@ class _MigrationProgressCard extends StatelessWidget {
                     es: 'TU JORNADA',
                     en: 'YOUR JOURNEY',
                   ),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: Colors.white.withValues(alpha: 0.40),
                     letterSpacing: 0.5,
                   ),
@@ -1029,7 +1080,7 @@ class _MigrationProgressCard extends StatelessWidget {
 
           // ── Divider ─────────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: EdgeInsets.symmetric(vertical: dividerV),
             child: Container(
               height: 1,
               color: Colors.white.withValues(alpha: 0.06),
@@ -1046,13 +1097,13 @@ class _MigrationProgressCard extends StatelessWidget {
                     en: 'Journey complete! 🎉',
                   )
                 : state.currentItem!.title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w700,
               color: Colors.white,
               height: 1.3,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: actionGap),
           Row(
             children: [
               Expanded(
@@ -1112,7 +1163,7 @@ class _StreakBadge extends StatelessWidget {
       ),
       child: Text(
         '🔥 $days $label',
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
           color: _accentText(context),
           fontWeight: FontWeight.w600,
         ),
@@ -1166,7 +1217,7 @@ class _PhaseRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final label = _phaseLabel(context, phase);
 
-    final nameStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
+    final nameStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
       color: switch (status) {
         _PhaseStatus.completed => Colors.white.withValues(alpha: 0.45),
         _PhaseStatus.current => Colors.white,
@@ -1180,19 +1231,19 @@ class _PhaseRow extends StatelessWidget {
     final Widget indicator = switch (status) {
       _PhaseStatus.completed => Icon(
         Icons.check_rounded,
-        size: 12,
+        size: 13,
         color: _accentText(context),
       ),
       _PhaseStatus.current => Text(
         _text(context, pt: '→ agora', es: '→ ahora', en: '→ now'),
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.w700,
         ),
       ),
       _PhaseStatus.future => Text(
         _text(context, pt: 'bloq.', es: 'bloq.', en: 'lock.'),
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
           color: Colors.white.withValues(alpha: 0.20),
         ),
       ),
@@ -1279,14 +1330,14 @@ class _MetricsColumn extends StatelessWidget {
           ),
           Text(
             _text(context, pt: 'feito', es: 'hecho', en: 'done'),
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Colors.white.withValues(alpha: 0.35),
             ),
           ),
           const SizedBox(height: 6),
           Text(
             '${state.completedCount}/${state.totalItems}',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
               color: Colors.white,
               height: 1.1,
@@ -1294,7 +1345,7 @@ class _MetricsColumn extends StatelessWidget {
           ),
           Text(
             _text(context, pt: 'itens', es: 'ítems', en: 'items'),
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Colors.white.withValues(alpha: 0.35),
             ),
           ),
@@ -1314,6 +1365,12 @@ class _CardPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final verticalPadding = switch (_screenSizeOf(context)) {
+      _ScreenSize.small => 9.0,
+      _ScreenSize.medium => 11.0,
+      _ScreenSize.large => 14.0,
+    };
+
     return Material(
       color: AppColors.primary,
       borderRadius: BorderRadius.circular(8),
@@ -1322,10 +1379,10 @@ class _CardPrimaryButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         child: Container(
           alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(vertical: 7),
+          padding: EdgeInsets.symmetric(vertical: verticalPadding),
           child: Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w700,
             ),
@@ -1344,6 +1401,11 @@ class _CardSecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final verticalPadding = switch (_screenSizeOf(context)) {
+      _ScreenSize.small => 9.0,
+      _ScreenSize.medium => 11.0,
+      _ScreenSize.large => 14.0,
+    };
     return Material(
       color: Colors.white.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(8),
@@ -1352,10 +1414,10 @@ class _CardSecondaryButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         child: Container(
           alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: verticalPadding),
           child: Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Colors.white.withValues(alpha: 0.60),
             ),
           ),
@@ -1436,13 +1498,29 @@ class _ActionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sz = _screenSizeOf(context);
+    final containerSize = switch (sz) {
+      _ScreenSize.small => 26.0,
+      _ScreenSize.medium => 30.0,
+      _ScreenSize.large => 36.0,
+    };
+    final iconSize = switch (sz) {
+      _ScreenSize.small => 14.0,
+      _ScreenSize.medium => 16.0,
+      _ScreenSize.large => 18.0,
+    };
+    final verticalPadding = switch (sz) {
+      _ScreenSize.small => 10.0,
+      _ScreenSize.medium => 12.0,
+      _ScreenSize.large => 14.0,
+    };
     return Material(
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(13),
         onTap: onTap,
         child: Ink(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          padding: EdgeInsets.symmetric(vertical: verticalPadding, horizontal: 8),
           decoration: BoxDecoration(
             color: AppColors.isDark(context)
                 ? const Color(0xFF0E1825)
@@ -1454,18 +1532,18 @@ class _ActionChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 30,
-                height: 30,
+                width: containerSize,
+                height: containerSize,
                 decoration: BoxDecoration(
                   color: _badgeBackground(context),
                   borderRadius: BorderRadius.circular(7),
                 ),
-                child: Icon(icon, size: 16, color: _accentText(context)),
+                child: Icon(icon, size: iconSize, color: _accentText(context)),
               ),
               const SizedBox(height: 6),
               Text(
                 label,
-                style: context.textStyles.navLabel.copyWith(
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: _tertiaryText(context),
                 ),
               ),
@@ -1983,4 +2061,18 @@ String _text(
     'es' => es,
     _ => en,
   };
+}
+
+// ─── Screen-size breakpoints ─────────────────────────────────────────────────
+//
+// Used by the journey card widgets to adapt padding, icon sizes, and spacing
+// to the available vertical real estate without hardcoding pixel values.
+
+enum _ScreenSize { small, medium, large }
+
+_ScreenSize _screenSizeOf(BuildContext context) {
+  final h = MediaQuery.of(context).size.height;
+  if (h < 700) return _ScreenSize.small;
+  if (h < 850) return _ScreenSize.medium;
+  return _ScreenSize.large;
 }
