@@ -692,60 +692,111 @@ extension AppLocalizationsFormatting on AppLocalizations {
   String questionnaireVariantEyebrow() =>
       _localizedText(pt: 'PRIMEIRO PASSO', es: 'PRIMER PASO', en: 'FIRST STEP');
 
+  // Headline: "Em minutos, você terá:"
   String questionnaireVariantHeroTitle() => _localizedText(
-    pt: 'Como voce quer montar\nseu plano?',
-    es: 'Como queres armar\ntu plan?',
-    en: 'How do you want to build\nyour plan?',
+    pt: 'Em minutos, você terá:',
+    es: 'En minutos, tendrás:',
+    en: 'In minutes, you\'ll have:',
   );
 
   String questionnaireVariantHeroBody() => _localizedText(
-    pt: 'Escolha o ritmo. Voce pode mudar depois.',
-    es: 'Elegi el ritmo. Lo podes cambiar despues.',
+    pt: 'Escolha o ritmo. Você pode mudar depois.',
+    es: 'Elegí el ritmo. Lo podés cambiar después.',
     en: 'Choose the pace. You can change it later.',
   );
 
+  // Result outcome items (full string + bold substring for RichText)
+  String questionnaireVariantItem1Full() => _localizedText(
+    pt: 'Sua cidade ideal no Brasil',
+    es: 'Tu ciudad ideal en Brasil',
+    en: 'Your ideal city in Brazil',
+  );
+
+  String questionnaireVariantItem1Bold() => _localizedText(
+    pt: 'cidade ideal',
+    es: 'ciudad ideal',
+    en: 'ideal city',
+  );
+
+  String questionnaireVariantItem2Full() => _localizedText(
+    pt: 'Um guia personalizado de migração',
+    es: 'Una guía personalizada de migración',
+    en: 'A personalized migration guide',
+  );
+
+  String questionnaireVariantItem2Bold() => _localizedText(
+    pt: 'guia personalizado',
+    es: 'guía personalizada',
+    en: 'personalized migration guide',
+  );
+
+  String questionnaireVariantItem3Full() => _localizedText(
+    pt: 'Seu perfil de migrante completo',
+    es: 'Tu perfil de migrante completo',
+    en: 'Your complete migrant profile',
+  );
+
+  String questionnaireVariantItem3Bold() => _localizedText(
+    pt: 'perfil de migrante',
+    es: 'perfil de migrante',
+    en: 'complete migrant profile',
+  );
+
+  // Transition label and shared CTA
+  String questionnaireVariantHowLabel() => _localizedText(
+    pt: 'Como você quer chegar lá?',
+    es: '¿Cómo querés llegar?',
+    en: 'How do you want to get there?',
+  );
+
+  String questionnaireVariantCtaLabel() => _localizedText(
+    pt: 'Quero minha cidade →',
+    es: 'Quiero mi ciudad →',
+    en: 'I want my city →',
+  );
+
   String questionnaireVariantLeanBadge() =>
-      _localizedText(pt: 'Mais rapido', es: 'Mas rapido', en: 'Fastest');
+      _localizedText(pt: '⚡ Mais rápido', es: '⚡ Más rápido', en: '⚡ Fastest');
 
   String questionnaireVariantLeanDescription() => _localizedText(
-    pt: '4 perguntas diretas para chegar a uma cidade recomendada sem perder tempo.',
-    es: '4 preguntas directas para llegar a una ciudad recomendada sin perder tiempo.',
-    en: '4 direct questions to reach a recommended city without wasting time.',
+    pt: '4 perguntas essenciais para chegar a uma cidade recomendada sem perder tempo.',
+    es: '4 preguntas esenciales para llegar a una ciudad recomendada sin perder tiempo.',
+    en: '4 essential questions to reach a recommended city without wasting time.',
   );
 
   String questionnaireVariantLeanTime() =>
       _localizedText(pt: '~2 min', es: '~2 min', en: '~2 min');
 
   String questionnaireVariantLeanQuestionCount() =>
-      _localizedText(pt: '4 perguntas', es: '4 preguntas', en: '4 questions');
+      _localizedText(pt: '4 pergs. no total', es: '4 preg. en total', en: '4 qs. total');
 
   String questionnaireVariantLeanAction() =>
-      _localizedText(pt: 'Comecar agora', es: 'Empezar ahora', en: 'Start now');
+      _localizedText(pt: 'Começar agora', es: 'Empezar ahora', en: 'Start now');
 
   String questionnaireVariantSeparator() => _localizedText(
-    pt: 'ou se preferir mais precisao',
-    es: 'o si preferis mas precision',
+    pt: 'ou se preferir mais precisão',
+    es: 'o si preferís más precisión',
     en: 'or if you prefer more precision',
   );
 
   String questionnaireVariantStrategicBadge() =>
-      _localizedText(pt: 'Mais preciso', es: 'Mas preciso', en: 'More precise');
+      _localizedText(pt: '⭐ Mais preciso', es: '⭐ Más preciso', en: '⭐ More precise');
 
   String questionnaireVariantStrategicDescription() => _localizedText(
-    pt: '1 pergunta a mais sobre suas restricoes para uma recomendacao mais afinada ao seu perfil.',
-    es: '1 pregunta mas sobre tus restricciones para una recomendacion mas ajustada a tu perfil.',
-    en: '1 extra question about your constraints for a recommendation that fits your profile better.',
+    pt: '10 perguntas, resultado mais afinado ao seu perfil e restrições.',
+    es: '10 preguntas, resultado más ajustado a tu perfil y restricciones.',
+    en: '10 questions, result more tailored to your profile and constraints.',
   );
 
   String questionnaireVariantStrategicTime() =>
       _localizedText(pt: '~4 min', es: '~4 min', en: '~4 min');
 
   String questionnaireVariantStrategicQuestionCount() =>
-      _localizedText(pt: '10 perguntas', es: '10 preguntas', en: '10 questions');
+      _localizedText(pt: '10 pergs. no total', es: '10 preg. en total', en: '10 qs. total');
 
   String questionnaireVariantStrategicAction() => _localizedText(
-    pt: 'Escolher plano estrategico',
-    es: 'Elegir plan estrategico',
+    pt: 'Escolher plano estratégico',
+    es: 'Elegir plan estratégico',
     en: 'Choose strategic plan',
   );
 
