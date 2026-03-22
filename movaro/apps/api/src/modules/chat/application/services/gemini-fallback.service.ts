@@ -3,22 +3,29 @@ import { Injectable, Logger } from '@nestjs/common';
 import { AppConfigService } from '../../../../common/config/app-config.service';
 import { ChatHistoryItemDto } from '../../presentation/dto/ask-chat.dto';
 
-export interface GeminiResponse {
+export interface LlmResponse {
   text: string;
-  tokenCount?: number;
+  provider?: string;
 }
 
-const GEMINI_API_BASE =
+// ── Groq (Llama 3.3 70B) ─────────────────────────────────────────────────────
+const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+
+// ── Gemini 2.0 Flash ──────────────────────────────────────────────────────────
+const GEMINI_ENDPOINT =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 const CORRIDOR_KNOWLEDGE = `
 Key context for Argentina → Brasil corridor:
-- CPF (Cadastro de Pessoa Física) is the most critical first step for Argentines in Brazil. Without it, almost nothing works (bank account, lease, formal work).
-- MERCOSUL agreement facilitates residency but still requires a bureaucratic process at the Federal Police.
-- VITEM V is the common work visa type for professionals.
-- Diploma recognition (revalidação) through MEC/REVALIDA is lengthy, especially for healthcare and law professionals.
-- ARS→BRL exchange rate is volatile; cost data may need periodic verification.
-- Common destination cities: São Paulo, Florianópolis, Curitiba, Rio de Janeiro, Campinas, Porto Alegre.
+- CPF (Cadastro de Pessoa Física) is the most critical first step. Without it: no bank account, no lease, no formal work.
+- MERCOSUL residency: Argentines have the right to 2-year temporary residency (renewable) at the Federal Police.
+- VITEM V is the common work visa for professionals outside MERCOSUL agreement.
+- Diploma recognition (revalidação) via MEC/REVALIDA is lengthy for healthcare and law professionals.
+- ARS→BRL rate is volatile — always verify before making financial decisions.
+- Top cities for Argentines: São Paulo, Florianópolis, Curitiba, Rio de Janeiro, Campinas, Porto Alegre.
+- Nubank is the easiest bank to open without credit history.
+- Pix is Brazil's instant payment system — free, 24/7, used for everything.
 `;
 
 @Injectable()
@@ -36,14 +43,7 @@ export class GeminiFallbackService {
       locale = 'pt',
       history = [] as ChatHistoryItemDto[],
     } = {},
-  ): Promise<GeminiResponse> {
-    const apiKey = this.configService.geminiApiKey;
-
-    if (!apiKey) {
-      this.logger.warn('Gemini API key not configured — returning fallback message');
-      return { text: this.noKeyFallback(locale) };
-    }
-
+  ): Promise<LlmResponse> {
     const systemPrompt = this.buildSystemPrompt({
       originCountry,
       destinationCountry,
@@ -51,7 +51,88 @@ export class GeminiFallbackService {
       appDataBlock,
     });
 
-    // Build Gemini contents array with history
+    // ── 1st: Try Groq (Llama 3.3 70B — free, fast) ──────────────────────────
+    const groqKey = this.configService.groqApiKey;
+    if (groqKey) {
+      try {
+        const text = await this.callGroq(groqKey, systemPrompt, message, history);
+        if (text) {
+          this.logger.debug('[LLM] Groq answered ✓');
+          return { text, provider: 'groq' };
+        }
+      } catch (err) {
+        this.logger.warn(`[LLM] Groq failed: ${err} — trying Gemini`);
+      }
+    }
+
+    // ── 2nd: Try Gemini (backup) ─────────────────────────────────────────────
+    const geminiKey = this.configService.geminiApiKey;
+    if (geminiKey) {
+      try {
+        const text = await this.callGemini(geminiKey, systemPrompt, message, history);
+        if (text) {
+          this.logger.debug('[LLM] Gemini answered ✓');
+          return { text, provider: 'gemini' };
+        }
+      } catch (err) {
+        this.logger.warn(`[LLM] Gemini failed: ${err}`);
+      }
+    }
+
+    // ── Static fallback ───────────────────────────────────────────────────────
+    this.logger.warn('[LLM] All providers failed — returning static fallback');
+    return { text: this.staticFallback(locale), provider: 'static' };
+  }
+
+  // ── Groq call (OpenAI-compatible) ─────────────────────────────────────────
+
+  private async callGroq(
+    apiKey: string,
+    systemPrompt: string,
+    message: string,
+    history: ChatHistoryItemDto[],
+  ): Promise<string | null> {
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      ...history.map((h) => ({
+        role: h.role === 'assistant' ? 'assistant' : 'user',
+        content: h.text,
+      })),
+      { role: 'user', content: message },
+    ];
+
+    const res = await fetch(GROQ_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages,
+        temperature: 0.3,
+        max_tokens: 600,
+      }),
+      signal: AbortSignal.timeout(12_000),
+    });
+
+    if (!res.ok) {
+      const err = await res.text().catch(() => '');
+      throw new Error(`Groq ${res.status}: ${err.slice(0, 200)}`);
+    }
+
+    const data = (await res.json()) as GroqApiResponse;
+    return data?.choices?.[0]?.message?.content?.trim() ?? null;
+  }
+
+  // ── Gemini call ───────────────────────────────────────────────────────────
+
+  private async callGemini(
+    apiKey: string,
+    systemPrompt: string,
+    message: string,
+    history: ChatHistoryItemDto[],
+  ): Promise<string | null> {
     const contents: GeminiContent[] = [
       ...history.map((h) => ({
         role: h.role === 'assistant' ? 'model' : 'user',
@@ -60,47 +141,27 @@ export class GeminiFallbackService {
       { role: 'user', parts: [{ text: message }] },
     ];
 
-    try {
-      const url = `${GEMINI_API_BASE}?key=${apiKey}`;
-      const body = {
+    const res = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemPrompt }] },
         contents,
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 600,
-        },
-      };
+        generationConfig: { temperature: 0.3, maxOutputTokens: 600 },
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
 
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(15_000),
-      });
-
-      if (!res.ok) {
-        const errText = await res.text().catch(() => '');
-        this.logger.error(`Gemini API error ${res.status}: ${errText}`);
-        return { text: this.errorFallback(locale) };
-      }
-
-      const data = (await res.json()) as GeminiApiResponse;
-      const text =
-        data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
-
-      if (!text) {
-        return { text: this.errorFallback(locale) };
-      }
-
-      return {
-        text,
-        tokenCount: data?.usageMetadata?.totalTokenCount,
-      };
-    } catch (err) {
-      this.logger.error(`Gemini fallback error: ${err}`);
-      return { text: this.errorFallback(locale) };
+    if (!res.ok) {
+      const err = await res.text().catch(() => '');
+      throw new Error(`Gemini ${res.status}: ${err.slice(0, 200)}`);
     }
+
+    const data = (await res.json()) as GeminiApiResponse;
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? null;
   }
+
+  // ── System prompt ─────────────────────────────────────────────────────────
 
   private buildSystemPrompt(opts: {
     originCountry: string;
@@ -109,7 +170,6 @@ export class GeminiFallbackService {
     appDataBlock: string;
   }): string {
     const corridor = `${this.cap(opts.originCountry)} → ${this.cap(opts.destinationCountry)}`;
-    const langRule = this.langRule(opts.locale);
 
     return `=== MOVARO AI ASSISTANT ===
 
@@ -117,20 +177,17 @@ You are the Movaro Assistant — an in-app guide that helps users plan and execu
 You exist inside the Movaro app. Your sole purpose is to help users navigate the migration process.
 
 ACTIVE CORRIDOR: ${corridor}
-${langRule}
+${this.langRule(opts.locale)}
 
-TONE: Warm, practical, direct. Like a friend who already went through the migration process.
-Keep responses SHORT: 2-4 paragraphs maximum. Use bullet points only when listing steps or documents.
+TONE: Warm, practical, direct. Like a friend who already went through migration.
+Keep responses SHORT: 2-4 paragraphs max. Use bullet points only when listing steps or documents.
 Never start every response with "Claro!" or "Sure!" — vary your openings.
 
 SCOPE: Only answer questions about migration, documentation, costs, housing, work, and city selection
 for the ${corridor} corridor. Decline political, medical investment advice.
 
-SOURCE OF TRUTH RULES:
-1. When app data is available for a topic, use ONLY that data.
-2. When app data is NOT available, you may use general knowledge BUT flag it clearly.
-3. NEVER invent specific costs, deadlines, phone numbers, or document requirements.
-4. Use safe language: "Segundo os dados do app..." or "Essa informação pode variar."
+SOURCE OF TRUTH: When app data is available, use ONLY that data. For general migration concepts,
+you may use knowledge but flag it clearly. NEVER invent specific costs, deadlines, or requirements.
 
 ${CORRIDOR_KNOWLEDGE}
 
@@ -149,20 +206,20 @@ ${opts.appDataBlock ? `--- APP DATA (source of truth) ---\n${opts.appDataBlock}\
     return 'ALWAYS respond in English.';
   }
 
-  private noKeyFallback(locale: string): string {
-    if (locale === 'es') return 'El asistente de IA no está disponible en este momento. Consulta los guías en la pestaña Guías para información sobre tu migración.';
-    if (locale === 'en') return 'The AI assistant is not available right now. Check the Guides tab for migration information.';
-    return 'O assistente de IA não está disponível no momento. Consulte os guias na aba Guias para informações sobre sua migração.';
-  }
-
-  private errorFallback(locale: string): string {
-    if (locale === 'es') return 'Tuve un problema al procesar tu pregunta. ¿Podés intentar de nuevo?';
-    if (locale === 'en') return 'I had trouble processing your question. Could you try again?';
-    return 'Tive um problema ao processar sua pergunta. Pode tentar novamente?';
+  private staticFallback(locale: string): string {
+    if (locale === 'es')
+      return 'No pude obtener una respuesta ahora. Revisá los guías en la pestaña Guías — tienen información completa sobre tu migración.';
+    if (locale === 'en')
+      return 'I could not get a response right now. Check the Guides tab — it has comprehensive information about your migration.';
+    return 'Não consegui obter uma resposta agora. Confira os guias na aba Guias — lá tem informações completas sobre sua migração.';
   }
 }
 
-// ── Gemini API types ───────────────────────────────────────────────────────────
+// ── API types ─────────────────────────────────────────────────────────────────
+
+interface GroqApiResponse {
+  choices?: Array<{ message?: { content?: string } }>;
+}
 
 interface GeminiContent {
   role: string;
@@ -171,11 +228,6 @@ interface GeminiContent {
 
 interface GeminiApiResponse {
   candidates?: Array<{
-    content?: {
-      parts?: Array<{ text?: string }>;
-    };
+    content?: { parts?: Array<{ text?: string }> };
   }>;
-  usageMetadata?: {
-    totalTokenCount?: number;
-  };
 }

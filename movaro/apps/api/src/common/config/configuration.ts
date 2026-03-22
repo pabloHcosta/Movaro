@@ -44,4 +44,8 @@ export default (): AppConfiguration => ({
     apiKey: process.env.GEMINI_API_KEY?.trim() || null,
     configured: Boolean(process.env.GEMINI_API_KEY?.trim()),
   },
+  groq: {
+    apiKey: process.env.GROQ_API_KEY?.trim() || null,
+    configured: Boolean(process.env.GROQ_API_KEY?.trim()),
+  },
 });

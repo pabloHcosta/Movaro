@@ -9,6 +9,7 @@ import { OrchestratorService } from './application/services/orchestrator.service
 import { CityResolverService } from './application/services/resolvers/city-resolver.service';
 import { CostResolverService } from './application/services/resolvers/cost-resolver.service';
 import { DocResolverService } from './application/services/resolvers/doc-resolver.service';
+import { FaqResolverService } from './application/services/resolvers/faq-resolver.service';
 import { ChatController } from './presentation/chat.controller';
 
 @Module({
@@ -20,6 +21,7 @@ import { ChatController } from './presentation/chat.controller';
     CityResolverService,
     CostResolverService,
     DocResolverService,
+    FaqResolverService,
     GeminiFallbackService,
     OrchestratorService,
   ],

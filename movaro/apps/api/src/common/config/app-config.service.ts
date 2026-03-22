@@ -81,4 +81,12 @@ export class AppConfigService {
   get isGeminiConfigured(): boolean {
     return this.config.gemini.configured;
   }
+
+  get groqApiKey(): string | null {
+    return this.config.groq.apiKey;
+  }
+
+  get isGroqConfigured(): boolean {
+    return this.config.groq.configured;
+  }
 }
