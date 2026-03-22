@@ -617,6 +617,10 @@ class _CityDetailPageState extends State<CityDetailPage> {
       return;
     }
 
+    // Pre-select this city as the user's preference before entering the
+    // questionnaire. The plan generator will attach it so the result reveal
+    // page can compare the algorithm recommendation against the user's choice.
+    widget.migrationQuestionnaireController?.setPreferredCity(city);
     Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire);
   }
 

@@ -269,6 +269,19 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
   void _showCompatibilityBreakdown(City city, int compatibilityPct) {
     final l10n = context.l10n;
     final dims = MigrationPlanGenerator.cityDimensionsPublic(city);
+    final overallStars = _pctToStars(compatibilityPct);
+
+    final overallStarColor = compatibilityPct >= 80
+        ? AppColors.success
+        : compatibilityPct >= 60
+        ? AppColors.warning
+        : const Color(0xFF0088FF);
+
+    final compatLabel = compatibilityPct >= 80
+        ? l10n.migrationPlanResultCompatibilityHigh
+        : compatibilityPct >= 60
+        ? l10n.migrationPlanResultCompatibilityMedium
+        : l10n.migrationPlanResultCompatibilityInitial;
 
     showModalBottomSheet<void>(
       context: context,
@@ -280,7 +293,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
             child: FrostedPanel(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
               borderRadius: BorderRadius.circular(28),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -307,38 +320,101 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // ── Dimension bars ──────────────────────────────────
+
+                  // ── Overall star score ────────────────────────────────
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: overallStarColor.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: overallStarColor.withValues(alpha: 0.18),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.migrationResultRevealBreakdownOverall(),
+                          style: Theme.of(sheetCtx)
+                              .textTheme
+                              .labelMedium
+                              ?.copyWith(
+                                color: AppColors.textSoftFor(sheetCtx),
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            _StarRow(
+                              stars: overallStars,
+                              size: 28,
+                              color: overallStarColor,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              '${overallStars.toStringAsFixed(1)}/5',
+                              style: Theme.of(sheetCtx)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: overallStarColor,
+                                  ),
+                            ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: overallStarColor.withValues(alpha: 0.14),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                compatLabel,
+                                style: Theme.of(sheetCtx)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: overallStarColor,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ── Dimension breakdown ──────────────────────────────
+                  Text(
+                    _dimensionSectionTitle(sheetCtx),
+                    style: Theme.of(sheetCtx).textTheme.labelMedium?.copyWith(
+                      color: AppColors.textSoftFor(sheetCtx),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   ...dims.entries.map(
-                    (entry) => _DimensionBar(
+                    (entry) => _DimensionRow(
+                      icon: _dimensionIcon(entry.key),
                       label: l10n.dimensionLabel(entry.key),
                       value: entry.value,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  // ── Overall ────────────────────────────────────────
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          l10n.migrationResultRevealBreakdownOverall(),
-                          style: Theme.of(sheetCtx)
-                              .textTheme
-                              .titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                      Text(
-                        '$compatibilityPct%',
-                        style: Theme.of(sheetCtx)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.primary,
-                            ),
-                      ),
-                    ],
-                  ),
+                  const SizedBox(height: 20),
+
+                  // ── How compatibility works ───────────────────────────
+                  const _CompatibilityExplanationCard(),
                 ],
               ),
             ),
@@ -347,6 +423,26 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
       },
     );
   }
+
+  String _dimensionSectionTitle(BuildContext context) {
+    final lang = Localizations.localeOf(context).languageCode;
+    return switch (lang) {
+      'pt' => 'Pontuação por dimensão',
+      'es' => 'Puntuación por dimensión',
+      _ => 'Score by dimension',
+    };
+  }
+
+  static IconData _dimensionIcon(String key) => switch (key) {
+    'affordability'  => Icons.savings_outlined,
+    'job_market'     => Icons.work_outline_rounded,
+    'safety'         => Icons.shield_outlined,
+    'climate_warmth' => Icons.wb_sunny_outlined,
+    'transit_infra'  => Icons.directions_transit_outlined,
+    'nature'         => Icons.park_outlined,
+    'community'      => Icons.people_outline_rounded,
+    _                => Icons.tune_rounded,
+  };
 
   // ── Build ───────────────────────────────────────────────────────────────────
 
@@ -588,6 +684,50 @@ class _PlaceholderHero extends StatelessWidget {
   }
 }
 
+// ─── Compatibility star rating helper ─────────────────────────────────────────
+
+/// Converts a 0–100 compatibility percentage to a 0.0–5.0 star rating,
+/// snapped to the nearest half-star.
+double _pctToStars(int pct) {
+  final raw = (pct / 100) * 5;
+  return (raw * 2).round() / 2; // snap to 0.5 increments
+}
+
+// ─── Star row widget ─────────────────────────────────────────────────────────
+
+class _StarRow extends StatelessWidget {
+  const _StarRow({
+    required this.stars,
+    this.size = 22,
+    this.color,
+  });
+
+  final double stars; // 0.0 – 5.0 in 0.5 increments
+  final double size;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final starColor = color ?? AppColors.warning;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (i) {
+        final full = i + 1;
+        final half = i + 0.5;
+        IconData icon;
+        if (stars >= full) {
+          icon = Icons.star_rounded;
+        } else if (stars >= half) {
+          icon = Icons.star_half_rounded;
+        } else {
+          icon = Icons.star_outline_rounded;
+        }
+        return Icon(icon, size: size, color: starColor);
+      }),
+    );
+  }
+}
+
 // ─── Compatibility card ────────────────────────────────────────────────────────
 
 class _CompatibilityCard extends StatelessWidget {
@@ -604,13 +744,15 @@ class _CompatibilityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final stars = _pctToStars(compatibilityPct);
+
     final compatLabel = compatibilityPct >= 80
         ? l10n.migrationPlanResultCompatibilityHigh
         : compatibilityPct >= 60
         ? l10n.migrationPlanResultCompatibilityMedium
         : l10n.migrationPlanResultCompatibilityInitial;
 
-    final barColor = compatibilityPct >= 80
+    final starColor = compatibilityPct >= 80
         ? AppColors.success
         : compatibilityPct >= 60
         ? AppColors.warning
@@ -632,14 +774,6 @@ class _CompatibilityCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Text(
-                  l10n.migrationResultRevealCompatibilityLabel(compatibilityPct),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: barColor,
-                  ),
-                ),
-                const SizedBox(width: 6),
                 Icon(
                   Icons.info_outline_rounded,
                   size: 16,
@@ -647,18 +781,8 @@ class _CompatibilityCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: compatibilityPct / 100,
-                minHeight: 6,
-                backgroundColor: AppColors.isDark(context)
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.black.withValues(alpha: 0.08),
-                valueColor: AlwaysStoppedAnimation<Color>(barColor),
-              ),
-            ),
+            const SizedBox(height: 10),
+            _StarRow(stars: stars, size: 26, color: starColor),
             const SizedBox(height: 6),
             Text(
               l10n.migrationResultRevealTapToSeeDetails(),
@@ -832,26 +956,11 @@ class _AlternativesSection extends StatelessWidget {
                             ],
                           ),
                         ),
-                        // Compatibility badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            '$altPct%',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelMedium
-                                ?.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          ),
+                        // Compatibility mini-stars
+                        _StarRow(
+                          stars: _pctToStars(altPct),
+                          size: 14,
+                          color: AppColors.warning,
                         ),
                         const SizedBox(width: 6),
                         Icon(
@@ -895,55 +1004,165 @@ class _AltCityPlaceholder extends StatelessWidget {
   }
 }
 
-// ─── Dimension breakdown bar ──────────────────────────────────────────────────
+// ─── Dimension row (icon + label + mini-stars) ────────────────────────────────
 
-class _DimensionBar extends StatelessWidget {
-  const _DimensionBar({required this.label, required this.value});
+class _DimensionRow extends StatelessWidget {
+  const _DimensionRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
+  final IconData icon;
   final String label;
-  final double value;
+  final double value; // 0.0 – 1.0
 
   @override
   Widget build(BuildContext context) {
-    final pct = (value * 100).round();
+    final stars = _pctToStars((value * 100).round());
+    final cs = Theme.of(context).colorScheme;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: cs.onSurface.withValues(alpha: 0.45),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          _StarRow(stars: stars, size: 14, color: AppColors.warning),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Compatibility explanation card ──────────────────────────────────────────
+
+class _CompatibilityExplanationCard extends StatelessWidget {
+  const _CompatibilityExplanationCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isDark = AppColors.isDark(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.06),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+              Icon(
+                Icons.lightbulb_outline_rounded,
+                size: 16,
+                color: AppColors.textSoftFor(context),
               ),
+              const SizedBox(width: 6),
               Text(
-                '$pct%',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                l10n.migrationPlanResultCompatibilityHelpTitle,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
+                  color: AppColors.textSoftFor(context),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: LinearProgressIndicator(
-              value: value.clamp(0, 1),
-              minHeight: 5,
-              backgroundColor: AppColors.isDark(context)
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.06),
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+          const SizedBox(height: 8),
+          Text(
+            l10n.migrationPlanResultCompatibilityHelpBody,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.45,
             ),
           ),
+          const SizedBox(height: 10),
+          _HowStarsWorkExplanation(),
         ],
       ),
+    );
+  }
+}
+
+// ─── How stars work row ───────────────────────────────────────────────────────
+
+class _HowStarsWorkExplanation extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final lang = Localizations.localeOf(context).languageCode;
+
+    final rows = switch (lang) {
+      'pt' => const [
+        (5.0, '★★★★★', 'Excelente match para o seu perfil'),
+        (4.0, '★★★★☆', 'Muito boa compatibilidade'),
+        (3.0, '★★★☆☆', 'Boa compatibilidade'),
+        (2.0, '★★☆☆☆', 'Compatibilidade inicial'),
+      ],
+      'es' => const [
+        (5.0, '★★★★★', 'Excelente match con tu perfil'),
+        (4.0, '★★★★☆', 'Muy buena compatibilidad'),
+        (3.0, '★★★☆☆', 'Buena compatibilidad'),
+        (2.0, '★★☆☆☆', 'Compatibilidad inicial'),
+      ],
+      _ => const [
+        (5.0, '★★★★★', 'Excellent match for your profile'),
+        (4.0, '★★★★☆', 'Very good compatibility'),
+        (3.0, '★★★☆☆', 'Good compatibility'),
+        (2.0, '★★☆☆☆', 'Initial compatibility'),
+      ],
+    };
+
+    return Column(
+      children: rows.map((row) {
+        final (_, stars, label) = row;
+        return Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Row(
+            children: [
+              Text(
+                stars,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: AppColors.warning,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }
