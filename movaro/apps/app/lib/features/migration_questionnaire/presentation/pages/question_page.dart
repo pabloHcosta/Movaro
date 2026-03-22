@@ -20,7 +20,6 @@ import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
-import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_picker_bottom_sheet.dart';
@@ -506,11 +505,36 @@ class _QuestionPageState extends State<QuestionPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: _ScrollableOptionsViewport(
-                    controller: _optionsScrollController,
-                    showHint: _showScrollHint,
-                    hintLabel: l10n.bmpScrollHint,
-                    child: _buildQuestionOptions(context, question),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: _buildQuestionOptions(context, question),
+                      ),
+                      // Scroll indicator — simple arrow (no popover)
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: IgnorePointer(
+                          child: AnimatedOpacity(
+                            opacity: _showScrollHint ? 1.0 : 0.0,
+                            duration: const Duration(milliseconds: 250),
+                            child: Container(
+                              height: 36,
+                              alignment: Alignment.center,
+                              child: Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.7),
+                                size: 22,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 if (_inlineHint != null) ...[
@@ -553,6 +577,7 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   Widget _buildQuestionOptions(BuildContext context, Question question) {
+    // Special renderers ─────────────────────────────────────────────────────
     if (question.id == 'origin_country') {
       return SingleChildScrollView(
         controller: _optionsScrollController,
@@ -562,10 +587,7 @@ class _QuestionPageState extends State<QuestionPage> {
             FutureBuilder<bool>(
               future: locationController.shouldShowInlineBanner(),
               builder: (context, snapshot) {
-                if (snapshot.data != true) {
-                  return const SizedBox.shrink();
-                }
-
+                if (snapshot.data != true) return const SizedBox.shrink();
                 return LocationBannerWidget(
                   onActivate: _openLocationPermissionScreen,
                 );
@@ -582,378 +604,283 @@ class _QuestionPageState extends State<QuestionPage> {
       );
     }
 
-    if (question.id == 'travel_group') {
-      final selectedValue = controller.answerFor(question.id);
-      final selectedChildrenCount = controller.answerFor(
-        'travel_group_children_count',
-      );
-      final labels = question.options
-          .map(
-            (option) => _displayOptionLabel(context, question.id, option.value),
-          )
-          .toList(growable: false);
-      final layout = _resolveQuestionOptionLayout(question, labels);
-
-      return SingleChildScrollView(
-        controller: _optionsScrollController,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCompactOptionGrid(
-              context: context,
-              question: question,
-              labels: labels,
-              selectedValues: {selectedValue ?? ''},
-              isMultiSelect: false,
-              compact: layout == _QuestionOptionLayout.compactGrid,
-            ),
-            if (selectedValue == 'family_kids') ...[
-              const SizedBox(height: 12),
-              _TravelGroupChildrenSelector(
-                selectedValue: selectedChildrenCount,
-                onSelected: _handleTravelGroupChildrenSelect,
-              ),
-            ],
-          ],
-        ),
-      );
-    }
-
     if (question.id == 'preferred_city') {
       return _buildPreferredCityOptions(context, question);
     }
 
-    if (question.id == 'priorities') {
-      final values = controller.answerValuesFor(question.id);
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final columns = constraints.maxWidth < 300 ? 1 : 2;
-          final spacing = 10.0;
-          final tileWidth =
-              (constraints.maxWidth - (spacing * (columns - 1))) / columns;
-
-          return SingleChildScrollView(
-            controller: _optionsScrollController,
-            child: Wrap(
-              spacing: spacing,
-              runSpacing: spacing,
-              children: [
-                for (final option in question.options)
-                  SizedBox(
-                    width: tileWidth,
-                    child: _PriorityOptionCard(
-                      label: _displayOptionLabel(
-                        context,
-                        question.id,
-                        option.value,
-                      ),
-                      icon: _priorityIcon(option.value),
-                      isSelected: values.contains(option.value),
-                      onTap: () => _handleMultiSelect(question, option),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        },
-      );
+    // travel_group needs children-count sliver below the grid
+    if (question.id == 'travel_group') {
+      return _buildTravelGroupGrid(context, question);
     }
 
-    final labels = question.options
-        .map(
-          (option) => _displayOptionLabel(context, question.id, option.value),
-        )
-        .toList(growable: false);
-    final layout = _resolveQuestionOptionLayout(question, labels);
-
-    switch (question.type) {
-      case 'single_card':
-        if (layout == _QuestionOptionLayout.list) {
-          return ListView.separated(
-            controller: _optionsScrollController,
-            itemCount: question.options.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final option = question.options[index];
-              return _LargeOptionCard(
-                icon: _optionIcon(question.id, option.value),
-                label: labels[index],
-                isSelected: controller.answerFor(question.id) == option.value,
-                onTap: () => _handleSingleSelect(question, option),
-              );
-            },
-          );
-        }
-        return _buildCompactOptionGrid(
-          context: context,
-          question: question,
-          labels: labels,
-          selectedValues: {controller.answerFor(question.id) ?? ''},
-          isMultiSelect: false,
-          compact: layout == _QuestionOptionLayout.compactGrid,
-        );
-      case 'single_chip':
-      case 'multi_chip':
-        final values = controller.answerValuesFor(question.id);
-        if (layout == _QuestionOptionLayout.list) {
-          return ListView.separated(
-            controller: _optionsScrollController,
-            itemCount: question.options.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 10),
-            itemBuilder: (context, index) {
-              final option = question.options[index];
-              return _ChoiceChipCard(
-                icon: _optionIcon(question.id, option.value),
-                label: labels[index],
-                isSelected: values.contains(option.value),
-                onTap: () => question.type == 'single_chip'
-                    ? _handleSingleSelect(question, option)
-                    : _handleMultiSelect(question, option),
-              );
-            },
-          );
-        }
-        return _buildCompactOptionGrid(
-          context: context,
-          question: question,
-          labels: labels,
-          selectedValues: values.toSet(),
-          isMultiSelect: question.type == 'multi_chip',
-          compact: layout == _QuestionOptionLayout.compactGrid,
-        );
-      default:
-        return const SizedBox.shrink();
-    }
+    // All other questions → unified iconic 2-column grid
+    return _buildIconicGrid(context, question);
   }
 
-  Widget _buildCompactOptionGrid({
-    required BuildContext context,
-    required Question question,
-    required List<String> labels,
-    required Set<String> selectedValues,
-    required bool isMultiSelect,
-    required bool compact,
-  }) {
+  // ── Iconic SliverGrid for standard questions ─────────────────────────────
+  Widget _buildIconicGrid(BuildContext context, Question question) {
+    final isMulti = question.type == 'multi_chip';
+    final options = question.options;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columns = constraints.maxWidth < 300 ? 1 : 2;
-        final spacing = 10.0;
-        final tileWidth =
-            (constraints.maxWidth - (spacing * (columns - 1))) / columns;
+        const columns = 2;
+        const spacing = 10.0;
+        final childAspectRatio = _computeGridAspectRatio(
+          optionCount: options.length,
+          availableWidth: constraints.maxWidth,
+          availableHeight: constraints.maxHeight,
+          spacing: spacing,
+          columns: columns,
+        );
 
-        return SingleChildScrollView(
+        return CustomScrollView(
           controller: _optionsScrollController,
-          child: Wrap(
-            spacing: spacing,
-            runSpacing: spacing,
-            children: [
-              for (var index = 0; index < question.options.length; index++)
-                SizedBox(
-                  width: tileWidth,
-                  child: _GridOptionCard(
-                    icon: _optionIcon(
+          slivers: [
+            SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                mainAxisSpacing: spacing,
+                crossAxisSpacing: spacing,
+                childAspectRatio: childAspectRatio,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (ctx, index) {
+                  final option = options[index];
+                  final selectedValues = isMulti
+                      ? controller.answerValuesFor(question.id).toSet()
+                      : {controller.answerFor(question.id) ?? ''};
+                  final isSelected = selectedValues.contains(option.value);
+                  return _IconicGridCard(
+                    icon: _questionOptionIcon(
                       question.id,
-                      question.options[index].value,
+                      option.value,
+                      isSelected,
+                      ctx,
                     ),
-                    label: labels[index],
-                    isSelected: selectedValues.contains(
-                      question.options[index].value,
+                    label: _displayOptionLabel(
+                      context,
+                      question.id,
+                      option.value,
                     ),
-                    compact: compact,
-                    onTap: () => isMultiSelect
-                        ? _handleMultiSelect(question, question.options[index])
-                        : question.id == 'travel_group'
-                        ? _handleTravelGroupSelect(question.options[index])
-                        : _handleSingleSelect(
-                            question,
-                            question.options[index],
-                          ),
-                  ),
-                ),
-            ],
-          ),
+                    isSelected: isSelected,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      isMulti
+                          ? _handleMultiSelect(question, option)
+                          : _handleSingleSelect(question, option);
+                    },
+                  );
+                },
+                childCount: options.length,
+              ),
+            ),
+            const SliverPadding(padding: EdgeInsets.only(bottom: 4)),
+          ],
         );
       },
     );
   }
 
-  _QuestionOptionLayout _resolveQuestionOptionLayout(
-    Question question,
-    List<String> labels,
+  // ── travel_group: grid + optional children-count selector ───────────────
+  Widget _buildTravelGroupGrid(BuildContext context, Question question) {
+    final selectedValue = controller.answerFor(question.id);
+    final selectedChildrenCount = controller.answerFor(
+      'travel_group_children_count',
+    );
+    final options = question.options;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const columns = 2;
+        const spacing = 10.0;
+        final childAspectRatio = _computeGridAspectRatio(
+          optionCount: options.length,
+          availableWidth: constraints.maxWidth,
+          availableHeight: constraints.maxHeight,
+          spacing: spacing,
+          columns: columns,
+        );
+
+        return CustomScrollView(
+          controller: _optionsScrollController,
+          slivers: [
+            SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                mainAxisSpacing: spacing,
+                crossAxisSpacing: spacing,
+                childAspectRatio: childAspectRatio,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (ctx, index) {
+                  final option = options[index];
+                  final isSelected = selectedValue == option.value;
+                  return _IconicGridCard(
+                    icon: _questionOptionIcon(
+                      question.id,
+                      option.value,
+                      isSelected,
+                      ctx,
+                    ),
+                    label: _displayOptionLabel(
+                      context,
+                      question.id,
+                      option.value,
+                    ),
+                    isSelected: isSelected,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      _handleTravelGroupSelect(option);
+                    },
+                  );
+                },
+                childCount: options.length,
+              ),
+            ),
+            if (selectedValue == 'family_kids')
+              SliverPadding(
+                padding: const EdgeInsets.only(top: 12),
+                sliver: SliverToBoxAdapter(
+                  child: _TravelGroupChildrenSelector(
+                    selectedValue: selectedChildrenCount,
+                    onSelected: _handleTravelGroupChildrenSelect,
+                  ),
+                ),
+              ),
+            const SliverPadding(padding: EdgeInsets.only(bottom: 4)),
+          ],
+        );
+      },
+    );
+  }
+
+  double _computeGridAspectRatio({
+    required int optionCount,
+    required double availableWidth,
+    required double availableHeight,
+    required double spacing,
+    required int columns,
+  }) {
+    if (optionCount > 4) return 0.95;
+    final numRows = (optionCount / columns).ceil();
+    final tileWidth = (availableWidth - spacing * (columns - 1)) / columns;
+    final tileHeight =
+        (availableHeight - spacing * (numRows - 1)) / numRows;
+    if (tileHeight <= 0 || tileWidth <= 0) return 1.0;
+    return (tileWidth / tileHeight).clamp(0.5, 3.0);
+  }
+
+  // ── Centralized icon helper ───────────────────────────────────────────────
+  Widget _questionOptionIcon(
+    String questionId,
+    String value,
+    bool isSelected,
+    BuildContext context,
   ) {
-    final shortLabel = labels.every((label) => label.length <= 22);
-    final mediumLabel = labels.every((label) => label.length <= 32);
-    final gridFirstIds = {
-      'intent',
-      'timeline',
-      'travel_group',
-      'priorities',
-      'funding',
-      'constraints',
-      'available_capital',
-    };
-
-    if (gridFirstIds.contains(question.id) && shortLabel) {
-      return _QuestionOptionLayout.compactGrid;
-    }
-
-    if (gridFirstIds.contains(question.id) && mediumLabel) {
-      return _QuestionOptionLayout.grid;
-    }
-
-    if (question.options.length <= 4 && mediumLabel) {
-      return _QuestionOptionLayout.grid;
-    }
-
-    if (question.options.length <= 6 && shortLabel) {
-      return _QuestionOptionLayout.compactGrid;
-    }
-
-    return _QuestionOptionLayout.list;
+    final cs = Theme.of(context).colorScheme;
+    final color = isSelected
+        ? cs.primary
+        : cs.onSurface.withValues(alpha: 0.35);
+    return Semantics(
+      label: '$questionId.$value',
+      child: Icon(_iconDataFor(questionId, value), color: color, size: 32),
+    );
   }
 
-  IconData _priorityIcon(String value) {
-    switch (value) {
-      case 'low_cost':
-        return Icons.savings_rounded;
-      case 'job_opportunities':
-        return Icons.work_outline_rounded;
-      case 'safety':
-        return Icons.shield_outlined;
-      case 'warm_climate_beach':
-        return Icons.wb_sunny_outlined;
-      case 'transit_infra':
-        return Icons.train_rounded;
-      case 'nature':
-        return Icons.park_outlined;
-      case 'university':
-        return Icons.school_outlined;
-      case 'community':
-        return Icons.groups_2_outlined;
-      case 'close_to_argentina':
-        return Icons.near_me_outlined;
-      case 'balanced_unsure':
-        return Icons.tune_rounded;
-      default:
-        return Icons.radio_button_checked;
-    }
-  }
-
-  IconData _optionIcon(String questionId, String value) {
+  IconData _iconDataFor(String questionId, String value) {
     switch (questionId) {
-      case 'origin_country':
-        switch (value) {
-          case 'argentina':
-            return Icons.flag_rounded;
-          case 'chile':
-            return Icons.flag_outlined;
-          case 'uruguai':
-          case 'uruguay':
-            return Icons.explore_outlined;
-          case 'paraguai':
-          case 'paraguay':
-            return Icons.public_rounded;
-        }
       case 'intent':
-        switch (value) {
-          case 'find_job_br':
-            return Icons.work_outline_rounded;
-          case 'remote_income':
-            return Icons.laptop_mac_rounded;
-          case 'study':
-            return Icons.school_outlined;
-          case 'family_partner':
-            return Icons.favorite_border_rounded;
-          case 'fresh_start':
-            return Icons.wb_sunny_outlined;
-          case 'explore_unsure':
-            return Icons.explore_outlined;
-        }
+        return switch (value) {
+          'find_job_br' => Icons.work_outline_rounded,
+          'remote_income' => Icons.laptop_mac_rounded,
+          'study' => Icons.school_outlined,
+          'family_partner' => Icons.favorite_border_rounded,
+          'fresh_start' => Icons.wb_sunny_outlined,
+          _ => Icons.explore_outlined,
+        };
       case 'timeline':
-        switch (value) {
-          case 'just_exploring':
-            return Icons.travel_explore_rounded;
-          case 'in_0_3m':
-            return Icons.flash_on_outlined;
-          case 'in_3_6m':
-            return Icons.event_available_rounded;
-          case 'in_6_12m':
-            return Icons.calendar_month_outlined;
-          case 'in_12m_plus':
-            return Icons.event_note_outlined;
-          case 'depends':
-            return Icons.tune_rounded;
-        }
+        return switch (value) {
+          'just_exploring' => Icons.travel_explore_rounded,
+          'in_0_3m' => Icons.bolt_outlined,
+          'in_3_6m' => Icons.event_available_rounded,
+          'in_6_12m' => Icons.calendar_month_outlined,
+          'in_12m_plus' => Icons.event_note_outlined,
+          _ => Icons.all_inclusive_outlined,
+        };
+      case 'priorities':
+        return switch (value) {
+          'low_cost' => Icons.savings_outlined,
+          'job_opportunities' => Icons.work_outline_rounded,
+          'safety' => Icons.shield_outlined,
+          'warm_climate_beach' => Icons.wb_sunny_outlined,
+          'transit_infra' => Icons.directions_transit_outlined,
+          'nature' => Icons.park_outlined,
+          'university' => Icons.school_outlined,
+          'community' => Icons.people_outline_rounded,
+          'close_to_argentina' => Icons.near_me_outlined,
+          _ => Icons.tune_rounded,
+        };
       case 'funding':
-        switch (value) {
-          case 'savings':
-            return Icons.savings_outlined;
-          case 'remote_income':
-            return Icons.attach_money_rounded;
-          case 'job_search':
-            return Icons.manage_search_rounded;
-          case 'job_offer':
-            return Icons.badge_outlined;
-          case 'family_support':
-            return Icons.groups_2_outlined;
-          case 'dont_know':
-            return Icons.help_outline_rounded;
-        }
+        return switch (value) {
+          'savings' => Icons.savings_outlined,
+          'remote_income' => Icons.attach_money_rounded,
+          'job_search' => Icons.manage_search_rounded,
+          'job_offer' => Icons.badge_outlined,
+          'family_support' => Icons.groups_2_outlined,
+          _ => Icons.help_outline_rounded,
+        };
       case 'travel_group':
-        switch (value) {
-          case 'solo':
-            return Icons.person_outline_rounded;
-          case 'partner':
-            return Icons.favorite_border_rounded;
-          case 'family_no_kids':
-            return Icons.people_outline_rounded;
-          case 'family_kids':
-            return Icons.family_restroom_rounded;
-          case 'undecided':
-            return Icons.help_outline_rounded;
-        }
+        return switch (value) {
+          'solo' => Icons.person_outline_rounded,
+          'partner' => Icons.favorite_border_rounded,
+          'family_no_kids' => Icons.people_outline_rounded,
+          'family_kids' => Icons.family_restroom_rounded,
+          _ => Icons.help_outline_rounded,
+        };
+      case 'work_arrangement':
+        return switch (value) {
+          'remote' => Icons.laptop_outlined,
+          'local_job' => Icons.business_center_outlined,
+          'both_open' => Icons.swap_horiz_outlined,
+          _ => Icons.help_outline_rounded,
+        };
       case 'available_capital':
-        switch (value) {
-          case 'low':
-            return Icons.savings_outlined;
-          case 'medium':
-            return Icons.account_balance_wallet_outlined;
-          case 'high':
-            return Icons.payments_outlined;
-          case 'very_high':
-            return Icons.trending_up_rounded;
-          case 'prefer_not_say':
-            return Icons.lock_outline_rounded;
-        }
-      case 'preferred_city':
-        switch (value) {
-          case 'choose_on_map':
-            return Icons.map_outlined;
-          case 'dont_know':
-            return Icons.explore_outlined;
-        }
+        return switch (value) {
+          'low' => Icons.savings_outlined,
+          'medium' => Icons.account_balance_wallet_outlined,
+          'high' => Icons.payments_outlined,
+          'very_high' => Icons.trending_up_rounded,
+          _ => Icons.lock_outline_rounded,
+        };
       case 'constraints':
-        switch (value) {
-          case 'prefer_south':
-            return Icons.south_america_outlined;
-          case 'need_big_city':
-            return Icons.location_city_outlined;
-          case 'prefer_mid_city':
-            return Icons.apartment_outlined;
-          case 'want_coast':
-            return Icons.beach_access_outlined;
-          case 'prefer_cooler':
-            return Icons.ac_unit_rounded;
-          case 'need_transit':
-            return Icons.tram_outlined;
-          case 'avoid_expensive':
-            return Icons.price_change_outlined;
-          case 'no_constraints':
-            return Icons.adjust_rounded;
-        }
+        return switch (value) {
+          'prefer_south' => Icons.south_america_outlined,
+          'need_big_city' => Icons.location_city_outlined,
+          'prefer_mid_city' => Icons.apartment_outlined,
+          'want_coast' => Icons.beach_access_outlined,
+          'prefer_cooler' => Icons.ac_unit_rounded,
+          'need_transit' => Icons.tram_outlined,
+          'avoid_expensive' => Icons.price_change_outlined,
+          _ => Icons.adjust_rounded,
+        };
+      case 'argentina_origin':
+        return switch (value) {
+          'buenos_aires' => Icons.location_city_outlined,
+          'cordoba' => Icons.place_outlined,
+          'mendoza' => Icons.landscape_outlined,
+          'rosario' => Icons.anchor_outlined,
+          'salta_jujuy' => Icons.forest_outlined,
+          'litoral' => Icons.water_outlined,
+          _ => Icons.add_location_alt_outlined,
+        };
+      case 'preferred_city':
+        return switch (value) {
+          'choose_on_map' => Icons.map_outlined,
+          _ => Icons.explore_outlined,
+        };
     }
-
-    return Icons.radio_button_checked;
+    return Icons.circle_outlined;
   }
 
   Widget _buildFooter(BuildContext context, Question question) {
@@ -984,17 +911,43 @@ class _QuestionPageState extends State<QuestionPage> {
     final l10n = context.l10n;
     final isEnabled = controller.canGoNext && !controller.isGeneratingPlan;
     final isGenerate = controller.isLastQuestion;
+    final isMulti = question.type == 'multi_chip';
+    final selectedCount = isMulti
+        ? controller.answerValuesFor(question.id).length
+        : 0;
+    final maxSelections = question.maxSelections;
 
-    return FrostedPanel(
-      padding: const EdgeInsets.all(10),
-      borderRadius: BorderRadius.circular(24),
-      backgroundColor: AppColors.isDark(context)
-          ? const Color(0xE6101824)
-          : const Color(0xEFFFFFFF),
-      borderColor: AppColors.isDark(context)
-          ? Colors.white.withValues(alpha: 0.08)
-          : AppColors.primary.withValues(alpha: 0.10),
-      child: AnimatedContainer(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (isMulti && maxSelections > 0) ...[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Text(
+              '$selectedCount/$maxSelections ${_selectionCounterSuffix(context)}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withValues(
+                  alpha: 0.5,
+                ),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+        AnimatedOpacity(
+          opacity: isEnabled ? 1.0 : 0.4,
+          duration: const Duration(milliseconds: 200),
+          child: FrostedPanel(
+            padding: const EdgeInsets.all(10),
+            borderRadius: BorderRadius.circular(24),
+            backgroundColor: AppColors.isDark(context)
+                ? const Color(0xE6101824)
+                : const Color(0xEFFFFFFF),
+            borderColor: AppColors.isDark(context)
+                ? Colors.white.withValues(alpha: 0.08)
+                : AppColors.primary.withValues(alpha: 0.10),
+            child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
@@ -1123,8 +1076,18 @@ class _QuestionPageState extends State<QuestionPage> {
           ),
         ),
       ),
-    );
+        ),   // FrostedPanel
+      ),     // AnimatedOpacity
+      ],
+    ); // Column
   }
+
+  String _selectionCounterSuffix(BuildContext context) => _localizedText(
+    context,
+    pt: 'selecionados',
+    es: 'seleccionados',
+    en: 'selected',
+  );
 
   Future<void> _handleSingleSelect(Question question, Option option) async {
     setState(() {
@@ -1482,8 +1445,6 @@ class _QuestionPageState extends State<QuestionPage> {
     }
   }
 }
-
-enum _QuestionOptionLayout { list, grid, compactGrid }
 
 class _QuestionnaireVariantAppBar extends StatelessWidget {
   const _QuestionnaireVariantAppBar({
@@ -2103,6 +2064,103 @@ class _SelectedPreferredCityCard extends StatelessWidget {
   }
 }
 
+// ─── Iconic grid card — unified card for all standard question options ─────────
+
+class _IconicGridCard extends StatelessWidget {
+  const _IconicGridCard({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final Widget icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? cs.primary.withValues(alpha: 0.12)
+                : cs.surfaceContainerHighest,
+            border: isSelected
+                ? Border.all(color: cs.primary, width: 1.5)
+                : Border.all(
+                    color: cs.outline.withValues(alpha: 0.25),
+                  ),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Stack(
+            children: [
+              // Centered content
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(width: 32, height: 32, child: icon),
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(
+                        label,
+                        style: tt.bodyMedium?.copyWith(
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w400,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Checkmark indicator — top-right corner
+              Positioned(
+                top: 0,
+                right: 0,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: 16,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isSelected ? cs.primary : Colors.transparent,
+                    border: isSelected
+                        ? null
+                        : Border.all(
+                            color: cs.outline.withValues(alpha: 0.3),
+                          ),
+                  ),
+                  child: isSelected
+                      ? const Icon(Icons.check, size: 10, color: Colors.white)
+                      : null,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _LargeOptionCard extends StatelessWidget {
   const _LargeOptionCard({
     required this.icon,
@@ -2169,398 +2227,37 @@ class _LargeOptionCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.textPrimaryFor(context),
-                        fontWeight: FontWeight.w700,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    ScoreBadge(
-                      label: isSelected ? '✓' : '•',
-                      tone: isSelected ? ScoreTone.positive : ScoreTone.neutral,
-                    ),
-                  ],
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppColors.textPrimaryFor(context),
+                    fontWeight: FontWeight.w700,
+                    height: 1.2,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 160),
-                width: 34,
-                height: 34,
+                width: 24,
+                height: 24,
                 decoration: BoxDecoration(
+                  shape: BoxShape.circle,
                   color: isSelected
                       ? (isDark ? const Color(0xFF4AA7FF) : AppColors.primary)
-                      : (isDark
-                            ? Colors.white.withValues(alpha: 0.06)
-                            : const Color(0xFFEFF4FA)),
-                  borderRadius: BorderRadius.circular(12),
+                      : Colors.transparent,
+                  border: isSelected
+                      ? null
+                      : Border.all(
+                          color: (isDark
+                                  ? Colors.white
+                                  : AppColors.primary)
+                              .withValues(alpha: 0.3),
+                        ),
                 ),
-                child: Icon(
-                  isSelected
-                      ? Icons.check_rounded
-                      : Icons.arrow_forward_rounded,
-                  color: isSelected
-                      ? Colors.white
-                      : AppColors.textSoftFor(context),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ChoiceChipCard extends StatelessWidget {
-  const _ChoiceChipCard({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    final background = isSelected
-        ? AppColors.tintedSurfaceFor(
-            context,
-            tint: AppColors.primary,
-            lightColor: const Color(0xFFE9F4FF),
-            darkAlpha: 0.24,
-            darkBase: const Color(0xFF182536),
-          )
-        : (isDark
-              ? const Color(0xFF131C29).withValues(alpha: 0.94)
-              : Colors.white.withValues(alpha: 0.94));
-    final border = isSelected
-        ? (isDark ? const Color(0xFF57B1FF) : AppColors.primary)
-        : (isDark
-              ? Colors.white.withValues(alpha: 0.10)
-              : const Color(0x18071B3A));
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: border),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color:
-                        (isDark ? const Color(0xFF4AA7FF) : AppColors.primary)
-                            .withValues(alpha: isDark ? 0.18 : 0.12),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? (isDark ? const Color(0xFF4AA7FF) : AppColors.primary)
-                          .withValues(alpha: isDark ? 0.18 : 0.10)
-                    : (isDark
-                          ? Colors.white.withValues(alpha: 0.06)
-                          : const Color(0xFFF0F5FA)),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                icon,
-                size: 18,
-                color: isSelected
-                    ? (isDark ? const Color(0xFF76C3FF) : AppColors.primary)
-                    : AppColors.textSoftFor(context),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textPrimaryFor(context),
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  ScoreBadge(
-                    label: isSelected ? '✓' : '•',
-                    tone: isSelected ? ScoreTone.positive : ScoreTone.neutral,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Icon(
-              isSelected
-                  ? Icons.check_circle_rounded
-                  : Icons.add_circle_outline_rounded,
-              size: 20,
-              color: isSelected
-                  ? (isDark ? const Color(0xFF57B1FF) : AppColors.primary)
-                  : AppColors.textSoftFor(context),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PriorityOptionCard extends StatelessWidget {
-  const _PriorityOptionCard({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    final background = isSelected
-        ? AppColors.tintedSurfaceFor(
-            context,
-            tint: AppColors.primary,
-            lightColor: const Color(0xFFEAF4FF),
-            darkAlpha: 0.24,
-            darkBase: const Color(0xFF182536),
-          )
-        : (isDark
-              ? const Color(0xFF131C29).withValues(alpha: 0.95)
-              : Colors.white.withValues(alpha: 0.96));
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(22),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          constraints: const BoxConstraints(minHeight: 82),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: background,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(
-              color: isSelected
-                  ? (isDark ? const Color(0xFF57B1FF) : AppColors.primary)
-                  : (isDark
-                        ? Colors.white.withValues(alpha: 0.10)
-                        : const Color(0x16071B3A)),
-            ),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(
-                        alpha: isDark ? 0.20 : 0.10,
-                      ),
-                      blurRadius: 18,
-                      offset: const Offset(0, 10),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? (isDark
-                                ? const Color(0xFF4AA7FF)
-                                : AppColors.primary)
-                          : (isDark
-                                ? Colors.white.withValues(alpha: 0.06)
-                                : const Color(0xFFF0F5FA)),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      icon,
-                      size: 16,
-                      color: isSelected
-                          ? Colors.white
-                          : AppColors.textSoftFor(context),
-                    ),
-                  ),
-                  const Spacer(),
-                  Icon(
-                    isSelected
-                        ? Icons.check_circle_rounded
-                        : Icons.add_circle_outline_rounded,
-                    size: 18,
-                    color: isSelected
-                        ? (isDark ? const Color(0xFF57B1FF) : AppColors.primary)
-                        : AppColors.textSoftFor(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textPrimaryFor(context),
-                  fontWeight: FontWeight.w700,
-                  height: 1.18,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _GridOptionCard extends StatelessWidget {
-  const _GridOptionCard({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-    required this.compact,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    final background = isSelected
-        ? AppColors.tintedSurfaceFor(
-            context,
-            tint: AppColors.primary,
-            lightColor: const Color(0xFFEAF4FF),
-            darkAlpha: 0.24,
-            darkBase: const Color(0xFF182536),
-          )
-        : (isDark
-              ? const Color(0xFF131C29).withValues(alpha: 0.95)
-              : Colors.white.withValues(alpha: 0.96));
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          constraints: BoxConstraints(minHeight: compact ? 74 : 88),
-          padding: EdgeInsets.all(compact ? 10 : 12),
-          decoration: BoxDecoration(
-            color: background,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected
-                  ? (isDark ? const Color(0xFF57B1FF) : AppColors.primary)
-                  : (isDark
-                        ? Colors.white.withValues(alpha: 0.10)
-                        : const Color(0x16071B3A)),
-            ),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(
-                        alpha: isDark ? 0.20 : 0.10,
-                      ),
-                      blurRadius: 18,
-                      offset: const Offset(0, 10),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: compact ? 28 : 32,
-                    height: compact ? 28 : 32,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? (isDark
-                                ? const Color(0xFF4AA7FF)
-                                : AppColors.primary)
-                          : (isDark
-                                ? Colors.white.withValues(alpha: 0.06)
-                                : const Color(0xFFF0F5FA)),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      icon,
-                      size: compact ? 14 : 16,
-                      color: isSelected
-                          ? Colors.white
-                          : AppColors.textSoftFor(context),
-                    ),
-                  ),
-                  const Spacer(),
-                  Icon(
-                    isSelected
-                        ? Icons.check_circle_rounded
-                        : Icons.add_circle_outline_rounded,
-                    size: compact ? 16 : 18,
-                    color: isSelected
-                        ? (isDark ? const Color(0xFF57B1FF) : AppColors.primary)
-                        : AppColors.textSoftFor(context),
-                  ),
-                ],
-              ),
-              SizedBox(height: compact ? 6 : 8),
-              Text(
-                label,
-                maxLines: compact ? 2 : 3,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textPrimaryFor(context),
-                  fontWeight: FontWeight.w700,
-                  height: 1.16,
-                  fontSize: compact ? 12 : 13,
-                ),
+                child: isSelected
+                    ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
+                    : null,
               ),
             ],
           ),
@@ -3360,107 +3057,6 @@ class _ProcessingState extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _ScrollableOptionsViewport extends StatelessWidget {
-  const _ScrollableOptionsViewport({
-    required this.controller,
-    required this.showHint,
-    required this.hintLabel,
-    required this.child,
-  });
-
-  final ScrollController controller;
-  final bool showHint;
-  final String hintLabel;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned.fill(child: child),
-        IgnorePointer(
-          ignoring: !showHint,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 180),
-              opacity: showHint ? 1 : 0,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: GestureDetector(
-                  onTap: () {
-                    if (!controller.hasClients) {
-                      return;
-                    }
-
-                    final nextOffset = controller.offset + 180;
-                    controller.animateTo(
-                      nextOffset.clamp(0, controller.position.maxScrollExtent),
-                      duration: const Duration(milliseconds: 280),
-                      curve: Curves.easeOutCubic,
-                    );
-                  },
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Theme.of(
-                            context,
-                          ).scaffoldBackgroundColor.withValues(alpha: 0.72),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 22, 10, 4),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.isDark(context)
-                              ? const Color(0xE6152232)
-                              : const Color(0xF9FFFFFF),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.12),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              hintLabel,
-                              style: Theme.of(context).textTheme.labelMedium
-                                  ?.copyWith(
-                                    color: AppColors.textPrimaryFor(context),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              size: 18,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
