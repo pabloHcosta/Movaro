@@ -115,9 +115,9 @@ class MainNavigationBar extends StatelessWidget {
     ),
     _NavItemData(
       slot: 3,
-      label: _text(context, pt: 'Info', es: 'Info', en: 'Info'),
-      icon: Icons.info_outline,
-      activeIcon: Icons.info,
+      label: _text(context, pt: 'Assistente', es: 'Asistente', en: 'Assistant'),
+      icon: Icons.auto_awesome_outlined,
+      activeIcon: Icons.auto_awesome,
     ),
     _NavItemData(
       slot: 4,

@@ -25,7 +25,6 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/features/info/application/gemini_chat_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
 
 class PublicHomePage extends StatefulWidget {
@@ -212,30 +211,13 @@ class _PublicHomePageState extends State<PublicHomePage>
                     ),
                   ),
 
-                  // Assistant sheet — anchored above the floating nav bar.
+                  // Assistant entry strip — anchored above the floating nav bar.
                   if (hasActivePlan)
                     Positioned(
                       left: 0,
                       right: 0,
                       bottom: sheetBottom,
-                      child: AssistantBottomSheet(
-                        destination: city.name,
-                        originCountry: plan!.originCountry,
-                        destinationCountry: plan.destinationCountry,
-                        environment: widget.environment,
-                        userContext: UserMigrationContext(
-                          journeyState: 'copilot_active',
-                          migrationGoal: plan.goal.isNotEmpty ? plan.goal : null,
-                          recommendedCity: city.name,
-                          planTimeline: plan.timeline.isNotEmpty ? plan.timeline : null,
-                          currentPhase: guideState?.currentItem?.phase.name,
-                          currentItemTitle: guideState?.currentItem?.title,
-                          completedItemIds: guideState?.completedIds.toList() ?? const [],
-                          completedCount: guideState?.completedCount ?? 0,
-                          totalItems: guideState?.totalItems ?? 0,
-                          progressPercent: guideState?.progressPercent ?? 0,
-                        ),
-                      ),
+                      child: const AssistantBottomSheet(),
                     ),
                 ],
               );

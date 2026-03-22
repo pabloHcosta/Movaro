@@ -20,7 +20,8 @@ import 'package:movaro_app/features/explore/presentation/pages/documentation_gui
 import 'package:movaro_app/features/home/presentation/pages/home_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/pages/favorites_page.dart';
-// info_brazil_page removed — Info tab now loads DocumentationGuidePage
+import 'package:movaro_app/features/info/presentation/pages/assistant_page.dart';
+// info_brazil_page removed — Info tab now loads AssistantPage
 import 'package:movaro_app/features/home/presentation/pages/public_home_page.dart';
 import 'package:movaro_app/features/intro/presentation/pages/intro_page.dart';
 import 'package:movaro_app/features/journey/presentation/pages/journey_setup_page.dart';
@@ -217,12 +218,15 @@ class AppRouter {
       case AppRoutes.info:
         return _buildRoute(
           settings,
-          DocumentationGuidePage(
-            exchangeRatesService: copilotExchangeRatesService,
+          AssistantPage(
+            environment: environment,
             journeyContextController: journeyContextController,
             migrationQuestionnaireController: migrationQuestionnaireController,
             citiesController: citiesController,
-            showAsTab: true,
+            exchangeRatesService: copilotExchangeRatesService,
+            initialMessage: settings.arguments is String
+                ? settings.arguments! as String
+                : null,
           ),
         );
       case AppRoutes.documentationGuide:

@@ -41,6 +41,7 @@ class DocumentationGuidePage extends StatefulWidget {
     this.migrationQuestionnaireController,
     this.citiesController,
     this.showAsTab = false,
+    this.embedded = false,
     super.key,
   });
 
@@ -54,6 +55,10 @@ class DocumentationGuidePage extends StatefulWidget {
 
   /// When `true`, the page acts as a primary tab (shows nav bar + AI chat FAB).
   final bool showAsTab;
+
+  /// When `true`, renders without Scaffold/AppBar — used when embedded inside
+  /// another page (e.g. [AssistantPage] Guias mode).
+  final bool embedded;
 
   @override
   State<DocumentationGuidePage> createState() => _DocumentationGuidePageState();
@@ -233,56 +238,38 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     final hasActivePlan = _hasActivePlan;
     final hasGuideData = _normalizeCountryId(selectedCountry.id) == 'brasil';
 
-    return Scaffold(
-      extendBody: widget.showAsTab,
-      floatingActionButton: widget.showAsTab && _chatService != null
-          ? _AiChatFab(onTap: _openAiChat)
-          : null,
-      bottomNavigationBar:
-          widget.showAsTab &&
-              widget.citiesController != null &&
-              widget.journeyContextController != null &&
-              widget.migrationQuestionnaireController != null
-          ? MainNavigationBar(
-              currentIndex: 3,
-              journeyContextController: widget.journeyContextController!,
-              citiesController: widget.citiesController!,
-              migrationQuestionnaireController:
-                  widget.migrationQuestionnaireController!,
-            )
-          : null,
-      body: Stack(
-        children: [
-          const AmbientBackground(),
-          SafeArea(
-            child: Stack(
-              children: [
-                Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1120),
-                    child: ListView(
-                      controller: _scrollController,
-                      padding: EdgeInsets.fromLTRB(
-                        context.pageHorizontalPadding,
-                        context.pageVerticalPadding,
-                        context.pageHorizontalPadding,
-                        context.pageVerticalPadding + 96,
-                      ),
-                      children: [
-                        AppGlassHeader(
-                          title: l10n.documentationPageTitle,
-                          onBack: widget.showAsTab
-                              ? null
-                              : () => Navigator.maybePop(context),
-                          trailing: IconButton(
-                            onPressed: widget.showAsTab
-                                ? _showInfoGuide
-                                : _showGuideModal,
-                            icon: const Icon(Icons.help_outline_rounded),
-                            visualDensity: VisualDensity.compact,
-                          ),
+    final bodyWidget = Stack(
+      children: [
+        const AmbientBackground(),
+        SafeArea(
+          child: Stack(
+            children: [
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1120),
+                  child: ListView(
+                    controller: _scrollController,
+                    padding: EdgeInsets.fromLTRB(
+                      context.pageHorizontalPadding,
+                      context.pageVerticalPadding,
+                      context.pageHorizontalPadding,
+                      context.pageVerticalPadding + 96,
+                    ),
+                    children: [
+                      if (!widget.embedded) AppGlassHeader(
+                        title: l10n.documentationPageTitle,
+                        onBack: widget.showAsTab
+                            ? null
+                            : () => Navigator.maybePop(context),
+                        trailing: IconButton(
+                          onPressed: widget.showAsTab
+                              ? _showInfoGuide
+                              : _showGuideModal,
+                          icon: const Icon(Icons.help_outline_rounded),
+                          visualDensity: VisualDensity.compact,
                         ),
-                        const SizedBox(height: 20),
+                      ),
+                      if (!widget.embedded) const SizedBox(height: 20),
                         FrostedPanel(
                           padding: const EdgeInsets.all(24),
                           child: Column(
@@ -406,7 +393,29 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
             ),
           ),
         ],
-      ),
+      );
+
+    if (widget.embedded) return bodyWidget;
+
+    return Scaffold(
+      extendBody: widget.showAsTab,
+      floatingActionButton: widget.showAsTab && _chatService != null
+          ? _AiChatFab(onTap: _openAiChat)
+          : null,
+      bottomNavigationBar:
+          widget.showAsTab &&
+              widget.citiesController != null &&
+              widget.journeyContextController != null &&
+              widget.migrationQuestionnaireController != null
+          ? MainNavigationBar(
+              currentIndex: 3,
+              journeyContextController: widget.journeyContextController!,
+              citiesController: widget.citiesController!,
+              migrationQuestionnaireController:
+                  widget.migrationQuestionnaireController!,
+            )
+          : null,
+      body: bodyWidget,
     );
   }
 
