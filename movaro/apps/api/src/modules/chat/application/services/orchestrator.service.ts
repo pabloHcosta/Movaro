@@ -72,8 +72,12 @@ export class OrchestratorService {
 
     switch (intent.intent) {
       case 'city_info': {
-        const cityId = intent.entities['cityId'] ?? dto.recommendedCityId ?? null;
-        const result = await this.cityResolver.resolve(cityId ?? undefined, locale);
+        const cityId =
+          intent.entities['cityId'] ?? dto.recommendedCityId ?? null;
+        const result = await this.cityResolver.resolve(
+          cityId ?? undefined,
+          locale,
+        );
         if (result.found && result.confidence >= CONFIDENCE_THRESHOLD) {
           answer = result.summary ?? null;
           resolverConfidence = result.confidence;
@@ -142,7 +146,9 @@ export class OrchestratorService {
       });
       appDataBlock = context.appDataBlock;
     } catch {
-      this.logger.warn('[Orchestrator] context build failed — proceeding without app data');
+      this.logger.warn(
+        '[Orchestrator] context build failed — proceeding without app data',
+      );
     }
 
     const llmResult = await this.geminiFallback.ask(message, {
@@ -182,7 +188,9 @@ export class OrchestratorService {
 
   private putCache(key: string, answer: OrchestratorAnswer): void {
     if (this.cache.size >= MAX_CACHE_ENTRIES) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const firstKey = this.cache.keys().next().value;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       if (firstKey) this.cache.delete(firstKey);
     }
     this.cache.set(key, { answer, expiresAt: Date.now() + CACHE_TTL_MS });
