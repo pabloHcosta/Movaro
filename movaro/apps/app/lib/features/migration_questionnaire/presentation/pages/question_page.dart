@@ -495,7 +495,8 @@ class _QuestionPageState extends State<QuestionPage> {
                   ),
                   isComplete: controller
                       .answerValuesFor(question.id)
-                      .isNotEmpty,
+                      .length >=
+                      question.maxSelections,
                 ),
               ] else if (question.id == 'constraints') ...[
                 const SizedBox(height: 10),
