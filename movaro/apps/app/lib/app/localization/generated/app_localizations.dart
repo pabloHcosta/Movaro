@@ -9194,13 +9194,13 @@ abstract class AppLocalizations {
   /// No description provided for @qPrioritiesPrompt.
   ///
   /// In en, this message translates to:
-  /// **'For your first year, which 2 points matter most in a city choice?'**
+  /// **'What matters most when choosing a city?'**
   String get qPrioritiesPrompt;
 
   /// No description provided for @qPrioritiesHelper.
   ///
   /// In en, this message translates to:
-  /// **'Select 2 to continue'**
+  /// **'Select up to 3'**
   String get qPrioritiesHelper;
 
   /// No description provided for @qPrioritiesSelectedCount.
