@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as dev;
 
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -149,7 +150,9 @@ class GeminiChatService {
 
   /// Send a message and get a streamed response.
   Stream<String> sendMessage(String userMessage) async* {
+    dev.log('[GeminiChat] sendMessage: "${userMessage.substring(0, userMessage.length.clamp(0, 60))}"');
     if (_model == null || _chat == null) {
+      dev.log('[GeminiChat] ✗ model/chat is null — not initialized');
       yield _errorMessages.notInitialized;
       return;
     }
@@ -213,6 +216,7 @@ class GeminiChatService {
         _saveCache();
       }
     } on GenerativeAIException catch (e) {
+      dev.log('[GeminiChat] ✗ GenerativeAIException: ${e.message}');
       final errorMsg = e.message.contains('429') ||
               e.message.contains('RESOURCE_EXHAUSTED')
           ? _errorMessages.apiLimit
@@ -223,8 +227,8 @@ class GeminiChatService {
         timestamp: DateTime.now(),
       ));
       yield errorMsg;
-    } catch (_) {
-      // Network errors, socket exceptions, etc.
+    } catch (e) {
+      dev.log('[GeminiChat] ✗ Unexpected error: $e');
       final errorMsg = _errorMessages.generic;
       _history.add(ChatMessage(
         role: 'assistant',

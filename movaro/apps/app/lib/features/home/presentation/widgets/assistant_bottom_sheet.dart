@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer' as dev;
+
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/core/config/api_keys.dart';
@@ -77,34 +80,55 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).languageCode;
 
-    // Fetch real app data from the backend (city metrics + guide phase items).
-    // Falls back to empty string on network error — chat still works.
-    final contextService = ChatContextRemoteService(
-      networkClient: NetworkClient(environment: widget.environment),
-    );
-    final contextResult = await contextService.fetchContext(
-      originCountry: widget.originCountry,
-      destinationCountry: widget.destinationCountry,
-      userContext: widget.userContext,
-      locale: locale,
-    );
+    dev.log('[AssistantChat] Initializing — locale=$locale, '
+        'hasKey=${ApiKeys.hasGeminiApiKey}');
+
+    // ── 1. Fetch backend context (non-blocking, 4s max) ──────────────
+    ChatContextResult? contextResult;
+    try {
+      final contextService = ChatContextRemoteService(
+        networkClient: NetworkClient(environment: widget.environment),
+      );
+      contextResult = await contextService
+          .fetchContext(
+            originCountry: widget.originCountry,
+            destinationCountry: widget.destinationCountry,
+            userContext: widget.userContext,
+            locale: locale,
+          )
+          .timeout(const Duration(seconds: 4));
+      dev.log('[AssistantChat] Context fetched — '
+          'coverage=${contextResult?.coverageLevel ?? "null"}');
+    } on TimeoutException {
+      dev.log('[AssistantChat] Context fetch timed out — proceeding without');
+    } catch (e) {
+      dev.log('[AssistantChat] Context fetch failed: $e — proceeding without');
+    }
 
     if (!mounted) return;
 
-    _chatService = GeminiChatService(apiKey: ApiKeys.geminiApiKey);
-    _chatService!.initialize(
-      curatedContent: contextResult?.appDataBlock ?? '',
-      originCountry: widget.originCountry,
-      destinationCountry: widget.destinationCountry,
-      locale: locale,
-      userContext: widget.userContext,
-      errorMessages: ChatErrorMessages(
-        notInitialized: l10n.aiChatNotInitialized,
-        rateLimit: l10n.aiChatErrorRateLimit,
-        apiLimit: l10n.aiChatErrorApiLimit,
-        generic: l10n.aiChatErrorGeneric,
-      ),
-    );
+    // ── 2. Initialize Gemini service ─────────────────────────────────
+    try {
+      _chatService = GeminiChatService(apiKey: ApiKeys.geminiApiKey);
+      _chatService!.initialize(
+        curatedContent: contextResult?.appDataBlock ?? '',
+        originCountry: widget.originCountry,
+        destinationCountry: widget.destinationCountry,
+        locale: locale,
+        userContext: widget.userContext,
+        errorMessages: ChatErrorMessages(
+          notInitialized: l10n.aiChatNotInitialized,
+          rateLimit: l10n.aiChatErrorRateLimit,
+          apiLimit: l10n.aiChatErrorApiLimit,
+          generic: l10n.aiChatErrorGeneric,
+        ),
+      );
+      dev.log('[AssistantChat] Gemini service ready ✓');
+    } catch (e) {
+      dev.log('[AssistantChat] Gemini init failed: $e');
+      _chatService = null;
+    }
+
     if (mounted) setState(() => _isInitializing = false);
   }
 
