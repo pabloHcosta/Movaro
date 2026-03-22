@@ -25,4 +25,8 @@ export type AppConfiguration = {
     apiKey: string | null;
     configured: boolean;
   };
+  gemini: {
+    apiKey: string | null;
+    configured: boolean;
+  };
 };

@@ -40,4 +40,8 @@ export default (): AppConfiguration => ({
     apiKey: process.env.GOOGLE_PLACES_API_KEY?.trim() || null,
     configured: Boolean(process.env.GOOGLE_PLACES_API_KEY?.trim()),
   },
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY?.trim() || null,
+    configured: Boolean(process.env.GEMINI_API_KEY?.trim()),
+  },
 });

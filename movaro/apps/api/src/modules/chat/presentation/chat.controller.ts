@@ -1,6 +1,8 @@
 import { Body, Controller, Post } from '@nestjs/common';
 
 import { ChatContextBuilderService } from '../application/services/chat-context-builder.service';
+import { OrchestratorService } from '../application/services/orchestrator.service';
+import { AskChatDto } from './dto/ask-chat.dto';
 import { BuildChatContextDto } from './dto/build-chat-context.dto';
 
 @Controller({
@@ -10,6 +12,7 @@ import { BuildChatContextDto } from './dto/build-chat-context.dto';
 export class ChatController {
   constructor(
     private readonly chatContextBuilderService: ChatContextBuilderService,
+    private readonly orchestratorService: OrchestratorService,
   ) {}
 
   /**
@@ -24,5 +27,18 @@ export class ChatController {
   @Post('context')
   buildContext(@Body() body: BuildChatContextDto) {
     return this.chatContextBuilderService.buildContext(body);
+  }
+
+  /**
+   * Ask the AI assistant a question.
+   *
+   * The orchestrator detects intent, runs the appropriate resolver (city,
+   * cost, documents, plan), and falls back to Gemini when confidence is low.
+   *
+   * POST /v1/chat/ask
+   */
+  @Post('ask')
+  ask(@Body() body: AskChatDto) {
+    return this.orchestratorService.ask(body);
   }
 }
