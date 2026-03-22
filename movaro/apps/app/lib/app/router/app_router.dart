@@ -28,6 +28,7 @@ import 'package:movaro_app/features/migration_questionnaire/application/migratio
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_result_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_copilot_page.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_result_reveal_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_save_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/question_page.dart';
 import 'package:movaro_app/features/shared/presentation/pages/protected_placeholder_page.dart';
@@ -79,6 +80,7 @@ class AppRouter {
 
     const completeJourneyRequiredPaths = <String>{
       AppRoutes.migrationPlanResult,
+      AppRoutes.migrationResultReveal,
       AppRoutes.migrationPlanCopilot,
     };
 
@@ -115,6 +117,8 @@ class AppRouter {
       final args = settings.arguments;
       final selectForPlan =
           args is Map<String, dynamic> && args['selectForPlan'] == true;
+      final fromMigrationResult =
+          args is Map<String, dynamic> && args['fromMigrationResult'] == true;
       unawaited(citiesController.prefetchCityDetail(cityId));
       unawaited(citiesController.prefetchMethodology());
       return _buildRoute(
@@ -125,6 +129,7 @@ class AppRouter {
           migrationQuestionnaireController: migrationQuestionnaireController,
           locationController: locationController,
           selectForPlan: selectForPlan,
+          fromMigrationResult: fromMigrationResult,
         ),
       );
     }
@@ -324,12 +329,20 @@ class AppRouter {
             citiesController: citiesController,
           ),
         );
+      case AppRoutes.migrationResultReveal:
+        return _buildRoute(
+          settings,
+          MigrationResultRevealPage(
+            controller: migrationQuestionnaireController,
+            citiesController: citiesController,
+          ),
+        );
       case AppRoutes.migrationPlanCopilot:
         if (migrationQuestionnaireController.generatedPlan?.isCityConfirmed !=
             true) {
           return _buildRoute(
-            const RouteSettings(name: AppRoutes.migrationPlanResult),
-            MigrationPlanResultPage(
+            const RouteSettings(name: AppRoutes.migrationResultReveal),
+            MigrationResultRevealPage(
               controller: migrationQuestionnaireController,
               citiesController: citiesController,
             ),

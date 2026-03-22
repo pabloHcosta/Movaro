@@ -2552,5 +2552,27 @@
   "aiChatLoading": "Loading assistant...",
   "aiChatUnavailable": "Assistant unavailable",
   "aiChatRetry": "The assistant is still loading. Please try again in a moment.",
-  "aiChatNetworkError": "Connection error. Check your internet and try again."
+  "aiChatNetworkError": "Connection error. Check your internet and try again.",
+  "migrationResultRevealEyebrow": "Your recommended city",
+  "migrationResultRevealRedoAction": "Redo questionnaire",
+  "migrationResultRevealCompatibilityLabel": "{pct}% compatible",
+  "@migrationResultRevealCompatibilityLabel": {
+    "placeholders": {
+      "pct": { "type": "int" }
+    }
+  },
+  "migrationResultRevealWhyTitle": "Why {city}?",
+  "@migrationResultRevealWhyTitle": {
+    "placeholders": {
+      "city": { "type": "String" }
+    }
+  },
+  "migrationResultRevealOtherOptionsTitle": "Other options",
+  "migrationResultRevealStartCta": "Start plan in {city}",
+  "@migrationResultRevealStartCta": {
+    "placeholders": {
+      "city": { "type": "String" }
+    }
+  },
+  "migrationResultRevealExploreCity": "View city details"
 }

@@ -6413,4 +6413,31 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get aiChatNetworkError =>
       'Erro de conexão. Verifique sua internet e tente novamente.';
+
+  @override
+  String get migrationResultRevealEyebrow => 'Sua cidade recomendada';
+
+  @override
+  String get migrationResultRevealRedoAction => 'Refazer questionário';
+
+  @override
+  String migrationResultRevealCompatibilityLabel(int pct) {
+    return '$pct% compatível';
+  }
+
+  @override
+  String migrationResultRevealWhyTitle(String city) {
+    return 'Por que $city?';
+  }
+
+  @override
+  String get migrationResultRevealOtherOptionsTitle => 'Outras opções';
+
+  @override
+  String migrationResultRevealStartCta(String city) {
+    return 'Iniciar plano em $city';
+  }
+
+  @override
+  String get migrationResultRevealExploreCity => 'Ver detalhes da cidade';
 }

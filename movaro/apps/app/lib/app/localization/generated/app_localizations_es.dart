@@ -6414,4 +6414,31 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get aiChatNetworkError =>
       'Error de conexión. Verifica tu internet e intenta de nuevo.';
+
+  @override
+  String get migrationResultRevealEyebrow => 'Tu ciudad recomendada';
+
+  @override
+  String get migrationResultRevealRedoAction => 'Rehacer cuestionario';
+
+  @override
+  String migrationResultRevealCompatibilityLabel(int pct) {
+    return '$pct% compatible';
+  }
+
+  @override
+  String migrationResultRevealWhyTitle(String city) {
+    return '¿Por qué $city?';
+  }
+
+  @override
+  String get migrationResultRevealOtherOptionsTitle => 'Otras opciones';
+
+  @override
+  String migrationResultRevealStartCta(String city) {
+    return 'Iniciar plan en $city';
+  }
+
+  @override
+  String get migrationResultRevealExploreCity => 'Ver detalles de la ciudad';
 }

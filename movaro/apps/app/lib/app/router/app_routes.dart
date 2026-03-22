@@ -20,6 +20,7 @@ class AppRoutes {
   static const locationPermission = '/location/permission';
   static const migrationQuestionnaire = '/migration/questionnaire';
   static const migrationPlanResult = '/migration/result';
+  static const migrationResultReveal = '/migration/result/reveal';
   static const migrationPlanCopilot = '/migration/copilot';
   static const authenticatedHome = '/profile';
   static const communityCreate = '/community/create';
@@ -42,6 +43,7 @@ class AppRoutes {
     login,
     migrationQuestionnaire,
     migrationPlanResult,
+    migrationResultReveal,
     migrationPlanCopilot,
   };
 

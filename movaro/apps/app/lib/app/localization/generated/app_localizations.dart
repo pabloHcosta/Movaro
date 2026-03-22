@@ -10735,6 +10735,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connection error. Check your internet and try again.'**
   String get aiChatNetworkError;
+
+  /// No description provided for @migrationResultRevealEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Your recommended city'**
+  String get migrationResultRevealEyebrow;
+
+  /// No description provided for @migrationResultRevealRedoAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo questionnaire'**
+  String get migrationResultRevealRedoAction;
+
+  /// No description provided for @migrationResultRevealCompatibilityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% compatible'**
+  String migrationResultRevealCompatibilityLabel(int pct);
+
+  /// No description provided for @migrationResultRevealWhyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why {city}?'**
+  String migrationResultRevealWhyTitle(String city);
+
+  /// No description provided for @migrationResultRevealOtherOptionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Other options'**
+  String get migrationResultRevealOtherOptionsTitle;
+
+  /// No description provided for @migrationResultRevealStartCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Start plan in {city}'**
+  String migrationResultRevealStartCta(String city);
+
+  /// No description provided for @migrationResultRevealExploreCity.
+  ///
+  /// In en, this message translates to:
+  /// **'View city details'**
+  String get migrationResultRevealExploreCity;
 }
 
 class _AppLocalizationsDelegate
