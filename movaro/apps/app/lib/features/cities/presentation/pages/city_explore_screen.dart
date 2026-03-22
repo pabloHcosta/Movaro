@@ -123,65 +123,65 @@ class _CityExploreScreenState extends State<CityExploreScreen>
       body: Stack(
         children: [
           const AmbientBackground(),
-          SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                  child: AppGlassHeader(
-                    title: context.l10n.cityExploreTitle(),
-                    onBack: () => Navigator.maybePop(context),
-                    trailing: IconButton(
-                      onPressed: _shareExplore,
-                      icon: const Icon(Icons.share_outlined),
-                      tooltip: context.l10n.cityExploreShareTooltip(),
+          Column(
+            children: [
+              _ExploreHeroSection(
+                city: widget.city,
+                isPlanCity: widget.isPlanCity,
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                  children: [
+                    _ExploreTabSelector(
+                      selectedIndex: _tabController.index,
+                      videosLabel: context.l10n.cityExploreTabVideos(),
+                      photosLabel: context.l10n.cityExploreTabPhotos(),
+                      onTabChanged: (index) {
+                        _tabController.animateTo(index);
+                        setState(() {});
+                      },
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 720,
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _VideosTab(
+                            state: _videoState,
+                            result: _videos,
+                            city: widget.city,
+                            hasApiKey: hasApiKey,
+                            onOpenVideo: _openVideo,
+                            onOpenMore: () => _openMoreOnYouTube(widget.city),
+                          ),
+                          _PhotosTab(
+                            state: _photoState,
+                            result: _photos,
+                            city: widget.city,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
-                    children: [
-                      _MiniHero(
-                        city: widget.city,
-                        isPlanCity: widget.isPlanCity,
-                      ),
-                      const SizedBox(height: 16),
-                      _ExploreTabSelector(
-                        selectedIndex: _tabController.index,
-                        videosLabel: context.l10n.cityExploreTabVideos(),
-                        photosLabel: context.l10n.cityExploreTabPhotos(),
-                        onTabChanged: (index) {
-                          _tabController.animateTo(index);
-                          setState(() {});
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        height: 720,
-                        child: TabBarView(
-                          controller: _tabController,
-                          children: [
-                            _VideosTab(
-                              state: _videoState,
-                              result: _videos,
-                              city: widget.city,
-                              hasApiKey: hasApiKey,
-                              onOpenVideo: _openVideo,
-                              onOpenMore: () => _openMoreOnYouTube(widget.city),
-                            ),
-                            _PhotosTab(
-                              state: _photoState,
-                              result: _photos,
-                              city: widget.city,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+              ),
+            ],
+          ),
+          // Floating glass nav bar on top of the hero
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: AppGlassHeader(
+                title: context.l10n.cityExploreTitle(),
+                onBack: () => Navigator.maybePop(context),
+                trailing: IconButton(
+                  onPressed: _shareExplore,
+                  icon: const Icon(Icons.share_outlined),
+                  tooltip: context.l10n.cityExploreShareTooltip(),
                 ),
-              ],
+              ),
             ),
           ),
         ],
@@ -386,8 +386,8 @@ class _PlayIconPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class _MiniHero extends StatelessWidget {
-  const _MiniHero({
+class _ExploreHeroSection extends StatelessWidget {
+  const _ExploreHeroSection({
     required this.city,
     required this.isPlanCity,
   });
@@ -397,63 +397,80 @@ class _MiniHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final heroHeight = MediaQuery.of(context).size.height * 0.38;
+
     return SizedBox(
-      height: 168,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: CityImageBackdrop(
-          city: city,
-          overlayOpacity: 0.72,
-          padding: const EdgeInsets.all(18),
-          child: Stack(
-            children: [
-              if (isPlanCity)
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.92),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      context.l10n.cityExplorePlanBadge(),
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
+      height: heroHeight,
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CityResolvedImage(
+            city: city,
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.medium,
+            errorWidget: const SizedBox.shrink(),
+          ),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Color(0xCC000000)],
+                stops: [0.30, 1.0],
+              ),
+            ),
+          ),
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 20,
+            child: SafeArea(
+              top: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isPlanCity)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
                       ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.92),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        context.l10n.cityExplorePlanBadge(),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  Text(
+                    city.name,
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      height: 0.96,
                     ),
                   ),
-                ),
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      city.name,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                      ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${city.stateName} · ${city.stateCode}',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.84),
+                      fontWeight: FontWeight.w500,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${city.stateName} (${city.stateCode})',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.82),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

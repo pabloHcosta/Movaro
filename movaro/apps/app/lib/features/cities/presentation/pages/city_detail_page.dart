@@ -877,9 +877,12 @@ class _DetailHeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heroHeight = MediaQuery.of(context).size.height * 0.44;
+    final heroHeight = MediaQuery.of(context).size.height * 0.38;
     final weather = citiesController.weatherFor(city.id);
     final isFav = citiesController.isFavorite(city.id);
+    final tempLabel = weather != null
+        ? '${weather.temperatureCelsius.round()}°C'
+        : null;
 
     return SizedBox(
       height: heroHeight,
@@ -907,7 +910,7 @@ class _DetailHeroSection extends StatelessWidget {
             ),
           ),
 
-          // Bottom content: badge, name, state, attributes
+          // Bottom content: badge, name, state
           Positioned(
             left: 20,
             right: 20,
@@ -922,6 +925,18 @@ class _DetailHeroSection extends StatelessWidget {
                     children: [
                       _LifestyleBadge(city: city),
                       const Spacer(),
+                      if (tempLabel != null) ...[
+                        Text(
+                          tempLabel,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.80),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                      ],
                       _HeroIconButton(
                         icon: isFav
                             ? Icons.favorite_rounded
@@ -948,8 +963,6 @@ class _DetailHeroSection extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  _HeroAttributeRow(city: city, weather: weather),
                 ],
               ),
             ),
@@ -1064,59 +1077,6 @@ class _LifestyleBadge extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _HeroAttributeRow extends StatelessWidget {
-  const _HeroAttributeRow({required this.city, required this.weather});
-
-  final City city;
-  final dynamic weather;
-
-  @override
-  Widget build(BuildContext context) {
-    final cost = CityMetricPresentation.resolve(
-      context,
-      kind: CityMetricKind.cost,
-      value: city.movaroScores.economical,
-    );
-    final work = CityMetricPresentation.resolve(
-      context,
-      kind: CityMetricKind.work,
-      value: city.movaroScores.workOpportunity,
-    );
-
-    return Wrap(
-      spacing: 12,
-      runSpacing: 8,
-      children: [
-        _HeroAttributeChip(label: cost.headline, color: cost.tint),
-        _HeroAttributeChip(label: work.headline, color: work.tint),
-        if (weather?.temperatureCelsius != null)
-          _HeroAttributeChip(
-            label: '${weather.temperatureCelsius.round()}°C',
-            color: AppColors.primary,
-          ),
-      ],
-    );
-  }
-}
-
-class _HeroAttributeChip extends StatelessWidget {
-  const _HeroAttributeChip({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-        color: color,
-        fontWeight: FontWeight.w800,
       ),
     );
   }
@@ -1306,12 +1266,16 @@ class _CityLocationPanel extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _ExploreMediaCard(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) =>
-                  CityExploreScreen(city: city, isPlanCity: isActivePlanCity),
-            ),
-          ),
+          onTap: () async {
+            await precacheCityImage(context, city);
+            if (!context.mounted) return;
+            await Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) =>
+                    CityExploreScreen(city: city, isPlanCity: isActivePlanCity),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -1372,10 +1336,27 @@ class _MapBadge extends StatelessWidget {
   }
 }
 
-class _ExploreMediaCard extends StatelessWidget {
+class _ExploreMediaCard extends StatefulWidget {
   const _ExploreMediaCard({required this.onTap});
 
-  final VoidCallback onTap;
+  final Future<void> Function() onTap;
+
+  @override
+  State<_ExploreMediaCard> createState() => _ExploreMediaCardState();
+}
+
+class _ExploreMediaCardState extends State<_ExploreMediaCard> {
+  bool _loading = false;
+
+  Future<void> _handleTap() async {
+    if (_loading) return;
+    setState(() => _loading = true);
+    try {
+      await widget.onTap();
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1394,7 +1375,7 @@ class _ExploreMediaCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
+        onTap: _loading ? null : _handleTap,
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
@@ -1476,11 +1457,21 @@ class _ExploreMediaCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: Color(0xFF1F6FEB),
-                size: 20,
-              ),
+              if (_loading)
+                const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF1F6FEB),
+                  ),
+                )
+              else
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Color(0xFF1F6FEB),
+                  size: 20,
+                ),
             ],
           ),
         ),

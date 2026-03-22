@@ -8,6 +8,7 @@ import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 
@@ -65,13 +66,14 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
 
   // ── Navigation ──────────────────────────────────────────────────────────────
 
-  void _openCityDetail(City city) {
+  Future<void> _openCityDetail(City city) async {
+    if (!mounted) return;
+    await precacheCityImage(context, city);
+    if (!mounted) return;
     Navigator.pushNamed(
       context,
       AppRoutes.cityDetail(city.id),
-      arguments: <String, dynamic>{
-        'fromMigrationResult': true,
-      },
+      arguments: <String, dynamic>{'fromMigrationResult': true},
     );
   }
 
@@ -538,7 +540,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               _AlternativesSection(
                                 cities: alternatives,
                                 confidence: plan.confidence,
-                                onTap: _openCityDetail,
+                                onTap: (city) => _openCityDetail(city),
                               ),
                             ],
                           ],
@@ -1167,7 +1169,7 @@ class _HowStarsWorkExplanation extends StatelessWidget {
 
 // ─── Footer CTA ────────────────────────────────────────────────────────────────
 
-class _FooterCta extends StatelessWidget {
+class _FooterCta extends StatefulWidget {
   const _FooterCta({
     required this.city,
     required this.onViewDetails,
@@ -1175,8 +1177,25 @@ class _FooterCta extends StatelessWidget {
   });
 
   final City city;
-  final VoidCallback onViewDetails;
+  final Future<void> Function() onViewDetails;
   final VoidCallback onRedo;
+
+  @override
+  State<_FooterCta> createState() => _FooterCtaState();
+}
+
+class _FooterCtaState extends State<_FooterCta> {
+  bool _loading = false;
+
+  Future<void> _handleViewDetails() async {
+    if (_loading) return;
+    setState(() => _loading = true);
+    try {
+      await widget.onViewDetails();
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1208,22 +1227,31 @@ class _FooterCta extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: onViewDetails,
+              onPressed: _loading ? null : _handleViewDetails,
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: Text(
-                l10n.migrationResultRevealViewDetailsCta(city.name),
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
+              child: _loading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      l10n.migrationResultRevealViewDetailsCta(widget.city.name),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
             ),
           ),
           const SizedBox(height: 6),
           TextButton(
-            onPressed: onRedo,
+            onPressed: widget.onRedo,
             child: Text(
               l10n.migrationResultRevealRedoAction,
               style: TextStyle(
