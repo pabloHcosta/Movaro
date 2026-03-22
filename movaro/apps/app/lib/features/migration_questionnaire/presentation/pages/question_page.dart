@@ -245,7 +245,7 @@ class _QuestionPageState extends State<QuestionPage> {
                     if (completed && context.mounted) {
                       Navigator.pushReplacementNamed(
                         context,
-                        AppRoutes.migrationPlanResult,
+                        AppRoutes.migrationResultReveal,
                       );
                     }
                   },
@@ -1068,7 +1068,7 @@ class _QuestionPageState extends State<QuestionPage> {
                       }
                       Navigator.pushReplacementNamed(
                         context,
-                        AppRoutes.migrationPlanResult,
+                        AppRoutes.migrationResultReveal,
                       );
                     }
                   }

@@ -88,6 +88,18 @@ extension AppLocalizationsFormatting on AppLocalizations {
           es: '¿Cuánto tenés ahorrado para los primeros meses?',
           en: 'How much do you have saved for the first months?',
         );
+      case 'work_arrangement':
+        return _localizedText(
+          pt: 'Como você vai trabalhar no Brasil?',
+          es: '¿Cómo vas a trabajar en Brasil?',
+          en: 'How are you planning to work in Brazil?',
+        );
+      case 'argentina_origin':
+        return _localizedText(
+          pt: 'De onde na Argentina você vem?',
+          es: '¿De dónde en Argentina venís?',
+          en: 'Where in Argentina are you from?',
+        );
       default:
         return questionId;
     }
@@ -116,6 +128,84 @@ extension AppLocalizationsFormatting on AppLocalizations {
         return constraintLabel(value);
       case 'available_capital':
         return availableCapitalLabel(value);
+      case 'work_arrangement':
+        return workArrangementLabel(value);
+      case 'argentina_origin':
+        return argentinaOriginLabel(value);
+      default:
+        return value;
+    }
+  }
+
+  String workArrangementLabel(String value) {
+    switch (value) {
+      case 'remote':
+        return _localizedText(
+          pt: 'Trabalho remotamente (renda em outra moeda)',
+          es: 'Trabajo de forma remota (ingresos en otra moneda)',
+          en: 'I work remotely (income in another currency)',
+        );
+      case 'local_job':
+        return _localizedText(
+          pt: 'Preciso encontrar emprego local no Brasil',
+          es: 'Necesito encontrar trabajo local en Brasil',
+          en: 'I need to find a local job in Brazil',
+        );
+      case 'both_open':
+        return _localizedText(
+          pt: 'Aberto para as duas opções',
+          es: 'Abierto a las dos opciones',
+          en: 'Open to both options',
+        );
+      default:
+        return value;
+    }
+  }
+
+  String argentinaOriginLabel(String value) {
+    switch (value) {
+      case 'buenos_aires':
+        return _localizedText(
+          pt: 'Buenos Aires (CABA / Grande Buenos Aires)',
+          es: 'Buenos Aires (CABA / Gran Buenos Aires)',
+          en: 'Buenos Aires (CABA / Greater Buenos Aires)',
+        );
+      case 'cordoba':
+        return _localizedText(
+          pt: 'Córdoba',
+          es: 'Córdoba',
+          en: 'Córdoba',
+        );
+      case 'mendoza':
+        return _localizedText(
+          pt: 'Mendoza',
+          es: 'Mendoza',
+          en: 'Mendoza',
+        );
+      case 'rosario':
+        return _localizedText(
+          pt: 'Rosário (Santa Fe)',
+          es: 'Rosario (Santa Fe)',
+          en: 'Rosario (Santa Fe)',
+        );
+      case 'salta_jujuy':
+        return _localizedText(
+          pt: 'Salta / Jujuy (NOA)',
+          es: 'Salta / Jujuy (NOA)',
+          en: 'Salta / Jujuy (NOA)',
+        );
+      case 'litoral':
+        return _localizedText(
+          pt: 'Litoral (Misiones, Corrientes, Entre Ríos)',
+          es: 'Litoral (Misiones, Corrientes, Entre Ríos)',
+          en: 'Litoral (Misiones, Corrientes, Entre Ríos)',
+        );
+      case 'other_origin':
+        return _localizedText(
+          pt: 'Outra / Prefiro não informar',
+          es: 'Otra / Prefiero no informar',
+          en: 'Other / Prefer not to say',
+        );
       default:
         return value;
     }
@@ -636,7 +726,7 @@ extension AppLocalizationsFormatting on AppLocalizations {
       _localizedText(pt: '~4 min', es: '~4 min', en: '~4 min');
 
   String questionnaireVariantStrategicQuestionCount() =>
-      _localizedText(pt: '7 perguntas', es: '7 preguntas', en: '7 questions');
+      _localizedText(pt: '9 perguntas', es: '9 preguntas', en: '9 questions');
 
   String questionnaireVariantStrategicAction() => _localizedText(
     pt: 'Escolher plano estrategico',

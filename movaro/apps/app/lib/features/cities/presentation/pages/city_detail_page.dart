@@ -46,6 +46,7 @@ class CityDetailPage extends StatefulWidget {
     required this.locationController,
     this.migrationQuestionnaireController,
     this.selectForPlan = false,
+    this.fromMigrationResult = false,
     super.key,
   });
 
@@ -54,6 +55,11 @@ class CityDetailPage extends StatefulWidget {
   final LocationController locationController;
   final MigrationQuestionnaireController? migrationQuestionnaireController;
   final bool selectForPlan;
+
+  /// When `true`, the user arrived from [MigrationResultRevealPage] to explore
+  /// an alternative city. A compact confirmation bar is shown at the bottom so
+  /// they can start the plan with this city without digging through the UI.
+  final bool fromMigrationResult;
 
   @override
   State<CityDetailPage> createState() => _CityDetailPageState();
@@ -148,6 +154,12 @@ class _CityDetailPageState extends State<CityDetailPage> {
             : _resolvePlanContext(context, city);
 
         return Scaffold(
+          bottomNavigationBar: (widget.fromMigrationResult && city != null)
+              ? _MigrationResultBar(
+                  city: city,
+                  controller: widget.migrationQuestionnaireController,
+                )
+              : null,
           body: Stack(
             children: [
               const AmbientBackground(),
@@ -711,6 +723,185 @@ class _CityDetailPageState extends State<CityDetailPage> {
     return _DecisionSnapshotPanel.defaultWatchoutText(context, city);
   }
 }
+
+// ─── Compact bar shown when arriving from MigrationResultRevealPage ───────────
+
+class _MigrationResultBar extends StatefulWidget {
+  const _MigrationResultBar({
+    required this.city,
+    required this.controller,
+  });
+
+  final City city;
+  final MigrationQuestionnaireController? controller;
+
+  @override
+  State<_MigrationResultBar> createState() => _MigrationResultBarState();
+}
+
+class _MigrationResultBarState extends State<_MigrationResultBar> {
+  bool _isConfirming = false;
+
+  Future<void> _confirm() async {
+    if (_isConfirming) return;
+    setState(() => _isConfirming = true);
+    try {
+      final ctrl = widget.controller;
+      if (ctrl != null && ctrl.generatedPlan?.isCityConfirmed != true) {
+        await ctrl.confirmPlanCity(widget.city);
+      }
+      if (!mounted) return;
+      await _showCelebration();
+      if (!mounted) return;
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.migrationPlanCopilot,
+        (route) => route.settings.name == AppRoutes.publicHome,
+      );
+    } finally {
+      if (mounted) setState(() => _isConfirming = false);
+    }
+  }
+
+  Future<void> _showCelebration() async {
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        barrierColor: Colors.black.withValues(alpha: 0.8),
+        builder: (_) => _ResultBarCelebration(cityName: widget.city.name),
+      ),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 2500));
+    if (!mounted) return;
+    Navigator.of(context, rootNavigator: true).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final plan = widget.controller?.generatedPlan;
+    final compatibilityPct =
+        plan != null ? (plan.confidence * 100).round().clamp(0, 100) : null;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFF07101C).withValues(alpha: 0.96)
+            : Colors.white.withValues(alpha: 0.96),
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.08),
+          ),
+        ),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        12,
+        16,
+        MediaQuery.of(context).padding.bottom + 12,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Iniciar plano em ${widget.city.name}?',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (compatibilityPct != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    '$compatibilityPct% compatível',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          FilledButton(
+            onPressed: _isConfirming ? null : _confirm,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: _isConfirming
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text(
+                    'Iniciar →',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ResultBarCelebration extends StatelessWidget {
+  const _ResultBarCelebration({required this.cityName});
+
+  final String cityName;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0D2818),
+          border: Border.all(color: const Color(0xFF1A4428)),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('🎉', style: TextStyle(fontSize: 48)),
+            const SizedBox(height: 16),
+            Text(
+              'Plano iniciado!',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: const Color(0xFFF0F6FC),
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Você escolheu $cityName.\nVamos transformar isso em realidade.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: const Color(0xFF6B7280),
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── End of migration result bar ──────────────────────────────────────────────
 
 enum _SnapshotAlertTone { positive, watchout, context }
 

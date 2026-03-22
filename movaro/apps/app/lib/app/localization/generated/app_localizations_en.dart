@@ -6387,4 +6387,31 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aiChatNetworkError =>
       'Connection error. Check your internet and try again.';
+
+  @override
+  String get migrationResultRevealEyebrow => 'Your recommended city';
+
+  @override
+  String get migrationResultRevealRedoAction => 'Redo questionnaire';
+
+  @override
+  String migrationResultRevealCompatibilityLabel(int pct) {
+    return '$pct% compatible';
+  }
+
+  @override
+  String migrationResultRevealWhyTitle(String city) {
+    return 'Why $city?';
+  }
+
+  @override
+  String get migrationResultRevealOtherOptionsTitle => 'Other options';
+
+  @override
+  String migrationResultRevealStartCta(String city) {
+    return 'Start plan in $city';
+  }
+
+  @override
+  String get migrationResultRevealExploreCity => 'View city details';
 }

@@ -2552,5 +2552,27 @@
   "aiChatLoading": "Carregando assistente...",
   "aiChatUnavailable": "Assistente indisponível",
   "aiChatRetry": "O assistente ainda está carregando. Tente novamente em instantes.",
-  "aiChatNetworkError": "Erro de conexão. Verifique sua internet e tente novamente."
+  "aiChatNetworkError": "Erro de conexão. Verifique sua internet e tente novamente.",
+  "migrationResultRevealEyebrow": "Sua cidade recomendada",
+  "migrationResultRevealRedoAction": "Refazer questionário",
+  "migrationResultRevealCompatibilityLabel": "{pct}% compatível",
+  "@migrationResultRevealCompatibilityLabel": {
+    "placeholders": {
+      "pct": { "type": "int" }
+    }
+  },
+  "migrationResultRevealWhyTitle": "Por que {city}?",
+  "@migrationResultRevealWhyTitle": {
+    "placeholders": {
+      "city": { "type": "String" }
+    }
+  },
+  "migrationResultRevealOtherOptionsTitle": "Outras opções",
+  "migrationResultRevealStartCta": "Iniciar plano em {city}",
+  "@migrationResultRevealStartCta": {
+    "placeholders": {
+      "city": { "type": "String" }
+    }
+  },
+  "migrationResultRevealExploreCity": "Ver detalhes da cidade"
 }
