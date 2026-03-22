@@ -21,6 +21,7 @@ class MigrationPlanModel {
     this.selectedPriorities = const [],
     this.selectedConstraints = const [],
     this.recommendedCity,
+    this.preferredCity,
     this.candidateCities = const [],
     this.cityRecommendationReasons = const [],
     this.isCityConfirmed = false,
@@ -59,6 +60,11 @@ class MigrationPlanModel {
           : CityModel.fromJson(
               json['recommendedCity'] as Map<String, dynamic>,
             ).toEntity(),
+      preferredCity: json['preferredCity'] == null
+          ? null
+          : CityModel.fromJson(
+              json['preferredCity'] as Map<String, dynamic>,
+            ).toEntity(),
       candidateCities: (json['candidateCities'] as List<dynamic>? ?? const [])
           .map(
             (item) =>
@@ -90,6 +96,7 @@ class MigrationPlanModel {
       selectedConstraints: plan.selectedConstraints,
       steps: plan.steps.map(MigrationStepModel.fromEntity).toList(),
       recommendedCity: plan.recommendedCity,
+      preferredCity: plan.preferredCity,
       candidateCities: plan.candidateCities,
       cityRecommendationReasons: plan.cityRecommendationReasons,
       isCityConfirmed: plan.isCityConfirmed,
@@ -111,6 +118,7 @@ class MigrationPlanModel {
   final List<String> selectedConstraints;
   final List<MigrationStepModel> steps;
   final City? recommendedCity;
+  final City? preferredCity;
   final List<City> candidateCities;
   final List<String> cityRecommendationReasons;
   final bool isCityConfirmed;
@@ -133,6 +141,9 @@ class MigrationPlanModel {
     'recommendedCity': recommendedCity == null
         ? null
         : CityModel.fromEntity(recommendedCity!).toJson(),
+    'preferredCity': preferredCity == null
+        ? null
+        : CityModel.fromEntity(preferredCity!).toJson(),
     'candidateCities': candidateCities
         .map((city) => CityModel.fromEntity(city).toJson())
         .toList(),
@@ -156,6 +167,7 @@ class MigrationPlanModel {
     selectedConstraints: selectedConstraints,
     steps: steps.map((step) => step.toEntity()).toList(),
     recommendedCity: recommendedCity,
+    preferredCity: preferredCity,
     candidateCities: candidateCities,
     cityRecommendationReasons: cityRecommendationReasons,
     isCityConfirmed: isCityConfirmed,

@@ -23,6 +23,7 @@ import 'package:movaro_app/features/cities/application/services/city_coastal_pro
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_arrival_profile_ranker.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_card.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_picker_bottom_sheet.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 
@@ -457,23 +458,16 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
     }
 
     final cities = widget.citiesController.catalog;
-    await showModalBottomSheet<void>(
+    final selected = await CityPickerBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return FractionallySizedBox(
-          heightFactor: 0.88,
-          child: _CitiesMapBottomSheet(
-            cities: cities,
-            onTapCity: (city) {
-              Navigator.of(sheetContext).pop();
-              _openCityDetail(city);
-            },
-          ),
-        );
-      },
+      cities: cities,
+      title: context.l10n.citiesMapSheetTitle,
+      subtitle: context.l10n.citiesMapSheetBody,
+      confirmLabel: context.l10n.citiesMapOpenCityAction,
     );
+    if (selected != null && mounted) {
+      _openCityDetail(selected);
+    }
   }
 
   void _retryCurrentMode(bool hasQuery) {

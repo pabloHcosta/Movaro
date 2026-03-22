@@ -171,6 +171,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _answers = const [];
     _syncJourneyAnswers();
     _generatedPlan = null;
+    _preferredCity = null;
     _selectedVariant = null;
     _currentIndex = 0;
     _showRefinePrompt = false;
@@ -415,6 +416,15 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     }
   }
 
+  City? _preferredCity;
+
+  City? get preferredCity => _preferredCity;
+
+  void setPreferredCity(City city) {
+    _preferredCity = city;
+    notifyListeners();
+  }
+
   Future<void> confirmPlanCity(City city) async {
     final plan = _generatedPlan;
     if (plan == null) {
@@ -460,10 +470,15 @@ class MigrationQuestionnaireController extends ChangeNotifier {
 
     _setGeneratingPlan(true);
     try {
-      _generatedPlan = await _planGenerator.generate(
+      var plan = await _planGenerator.generate(
         answers: _answers,
         variant: _selectedVariant ?? QuestionnaireVariant.lean,
       );
+      // Attach preferred city if the user selected one.
+      if (_preferredCity != null) {
+        plan = plan.copyWith(preferredCity: _preferredCity);
+      }
+      _generatedPlan = plan;
       await _migrationPlanRepository.setCurrentPlan(_generatedPlan);
       await _flowDraftStore.clear();
       notifyListeners();
