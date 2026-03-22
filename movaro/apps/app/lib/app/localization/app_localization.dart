@@ -1450,6 +1450,131 @@ extension AppLocalizationsFormatting on AppLocalizations {
     }
   }
 
+  // ── MigrationResultRevealPage strings ─────────────────────────────────────
+
+  String migrationResultRevealBreakdownTitle(String cityName) =>
+      _localizedText(
+        pt: 'Por que $cityName?',
+        es: '¿Por qué $cityName?',
+        en: 'Why $cityName?',
+      );
+
+  String migrationResultRevealBreakdownOverall() => _localizedText(
+    pt: 'Compatibilidade geral',
+    es: 'Compatibilidad general',
+    en: 'Overall compatibility',
+  );
+
+  String migrationResultRevealTapToSeeDetails() => _localizedText(
+    pt: 'Toque para ver o detalhamento',
+    es: 'Toca para ver el detalle',
+    en: 'Tap to see breakdown',
+  );
+
+  String migrationResultRevealViewDetailsCta(String cityName) =>
+      _localizedText(
+        pt: 'Ver detalhes de $cityName',
+        es: 'Ver detalles de $cityName',
+        en: 'View details of $cityName',
+      );
+
+  /// Labels for individual scoring dimensions shown in the compatibility
+  /// breakdown bottom sheet.
+  String dimensionLabel(String key) {
+    switch (key) {
+      case 'affordability':
+        return _localizedText(
+          pt: 'Custo de vida',
+          es: 'Costo de vida',
+          en: 'Cost of living',
+        );
+      case 'job_market':
+        return _localizedText(
+          pt: 'Mercado de trabalho',
+          es: 'Mercado laboral',
+          en: 'Job market',
+        );
+      case 'safety':
+        return _localizedText(
+          pt: 'Segurança',
+          es: 'Seguridad',
+          en: 'Safety',
+        );
+      case 'climate_warmth':
+        return _localizedText(
+          pt: 'Clima',
+          es: 'Clima',
+          en: 'Climate',
+        );
+      case 'transit_infra':
+        return _localizedText(
+          pt: 'Infraestrutura e transporte',
+          es: 'Infraestructura y transporte',
+          en: 'Infrastructure & transit',
+        );
+      case 'nature':
+        return _localizedText(
+          pt: 'Natureza e praia',
+          es: 'Naturaleza y playa',
+          en: 'Nature & beach',
+        );
+      case 'community':
+        return _localizedText(
+          pt: 'Comunidade argentina',
+          es: 'Comunidad argentina',
+          en: 'Argentine community',
+        );
+      case 'university':
+        return _localizedText(
+          pt: 'Universidades',
+          es: 'Universidades',
+          en: 'Universities',
+        );
+      case 'proximity_argentina':
+        return _localizedText(
+          pt: 'Proximidade da Argentina',
+          es: 'Proximidad a Argentina',
+          en: 'Proximity to Argentina',
+        );
+      default:
+        return key;
+    }
+  }
+
+  // ── FlightSearchTool strings ───────────────────────────────────────────────
+
+  String flightSearchDepartureDateLabel() => _localizedText(
+    pt: 'Quando você vai partir?',
+    es: '¿Cuándo vas a partir?',
+    en: 'When are you departing?',
+  );
+
+  String flightSearchDateRequired() => _localizedText(
+    pt: 'Selecione a data de partida para continuar',
+    es: 'Seleccioná la fecha de partida para continuar',
+    en: 'Please select a departure date to continue',
+  );
+
+  String flightSearchDestinationLabel() => _localizedText(
+    pt: 'Para onde?',
+    es: '¿A dónde vas?',
+    en: 'Where to?',
+  );
+
+  String flightSearchButtonLabel() => _localizedText(
+    pt: 'Buscar voos',
+    es: 'Buscar vuelos',
+    en: 'Search flights',
+  );
+
+  String flightSearchSelectDateHint() => _localizedText(
+    pt: 'Selecione a data de partida',
+    es: 'Seleccioná la fecha de partida',
+    en: 'Select departure date',
+  );
+
+  // ─────────────────────────────────────────────────────────────────────────
+
   String _localizedText({
     required String pt,
     required String es,
