@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/app.dart';
 import 'package:movaro_app/app/localization/locale_controller.dart';
+import 'package:movaro_app/app/theme/theme_controller.dart';
 import 'package:movaro_app/core/catalog/data/datasources/seed_catalog_data_source.dart';
 import 'package:movaro_app/core/catalog/data/repositories/catalog_repository_impl.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
@@ -64,6 +65,8 @@ Future<void> bootstrap({required AppFlavor defaultFlavor}) async {
   );
   final localeController = LocaleController();
   await localeController.initialize();
+  final themeController = ThemeController();
+  await themeController.initialize();
   await PlanNotificationService.instance.initialize();
 
   runApp(
@@ -78,6 +81,7 @@ Future<void> bootstrap({required AppFlavor defaultFlavor}) async {
       journeyContextController: journeyContextController,
       locationController: locationController,
       localeController: localeController,
+      themeController: themeController,
     ),
   );
 }

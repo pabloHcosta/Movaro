@@ -5,6 +5,7 @@ import 'package:movaro_app/app/localization/locale_scope.dart';
 import 'package:movaro_app/app/router/app_router.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_theme.dart';
+import 'package:movaro_app/app/theme/theme_controller.dart';
 import 'package:movaro_app/core/catalog/domain/repositories/catalog_repository.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
@@ -27,6 +28,7 @@ class MovaroApp extends StatelessWidget {
     required this.journeyContextController,
     required this.locationController,
     required this.localeController,
+    required this.themeController,
     super.key,
   });
 
@@ -40,11 +42,12 @@ class MovaroApp extends StatelessWidget {
   final JourneyContextController journeyContextController;
   final LocationController locationController;
   final LocaleController localeController;
+  final ThemeController themeController;
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: localeController,
+      listenable: Listenable.merge([localeController, themeController]),
       builder: (context, _) {
         return LocaleScope(
           controller: localeController,
@@ -53,7 +56,7 @@ class MovaroApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
-            themeMode: ThemeMode.system,
+            themeMode: themeController.themeMode,
             locale: localeController.locale,
             supportedLocales: AppLocalization.supportedLocales,
             localizationsDelegates: AppLocalization.localizationsDelegates,
@@ -72,6 +75,7 @@ class MovaroApp extends StatelessWidget {
               journeyContextController: journeyContextController,
               locationController: locationController,
               localeController: localeController,
+              themeController: themeController,
             ).onGenerateRoute,
             initialRoute: AppRoutes.splash,
           ),

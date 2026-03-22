@@ -910,13 +910,17 @@ class _ActiveHero extends StatelessWidget {
                             ?.copyWith(
                               fontWeight: FontWeight.w900,
                               letterSpacing: -0.6,
-                              color: Colors.white,
-                              shadows: const [
-                                Shadow(
-                                  blurRadius: 12,
-                                  color: Color(0x80000000),
-                                ),
-                              ],
+                              color: isDark
+                                  ? Colors.white
+                                  : _primaryText(context),
+                              shadows: isDark
+                                  ? const [
+                                      Shadow(
+                                        blurRadius: 12,
+                                        color: Color(0x80000000),
+                                      ),
+                                    ]
+                                  : null,
                             ),
                       ),
                       const SizedBox(height: 2),
@@ -926,7 +930,7 @@ class _ActiveHero extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           color: isDark
                               ? Colors.white.withValues(alpha: 0.55)
-                              : Colors.white.withValues(alpha: 0.70),
+                              : _secondaryText(context),
                         ),
                       ),
                     ],
@@ -941,7 +945,7 @@ class _ActiveHero extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                     color: isDark
                         ? Colors.white.withValues(alpha: 0.65)
-                        : Colors.white.withValues(alpha: 0.75),
+                        : _secondaryText(context),
                   ),
                 ),
               ],

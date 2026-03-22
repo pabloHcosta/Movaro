@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/locale_controller.dart';
+import 'package:movaro_app/app/theme/theme_controller.dart';
 import 'package:movaro_app/core/catalog/domain/repositories/catalog_repository.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
@@ -49,6 +50,7 @@ class AppRouter {
     required this.journeyContextController,
     required this.locationController,
     required this.localeController,
+    required this.themeController,
   });
 
   final AppEnvironment environment;
@@ -61,6 +63,7 @@ class AppRouter {
   final JourneyContextController journeyContextController;
   final LocationController locationController;
   final LocaleController localeController;
+  final ThemeController themeController;
 
   Route<dynamic> onGenerateRoute(RouteSettings settings) {
     final routeName = settings.name ?? AppRoutes.splash;
@@ -324,7 +327,10 @@ class AppRouter {
       case AppRoutes.settings:
         return _buildRoute(
           settings,
-          AppSettingsPage(localeController: localeController),
+          AppSettingsPage(
+            localeController: localeController,
+            themeController: themeController,
+          ),
         );
       case AppRoutes.migrationPlanResult:
         return _buildRoute(
