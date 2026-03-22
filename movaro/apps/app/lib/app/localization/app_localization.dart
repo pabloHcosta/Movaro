@@ -671,6 +671,30 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'Open settings',
   );
 
+  String settingsThemeTitle() => _localizedText(
+    pt: 'Aparencia',
+    es: 'Apariencia',
+    en: 'Appearance',
+  );
+
+  String settingsThemeBody() => _localizedText(
+    pt: 'Escolha o tema visual do aplicativo. Por padrao, o app usa o modo escuro.',
+    es: 'Elegí el tema visual de la app. Por defecto, la app usa el modo oscuro.',
+    en: 'Choose the visual theme of the app. By default, the app uses dark mode.',
+  );
+
+  String settingsThemeDark() =>
+      _localizedText(pt: 'Modo escuro', es: 'Modo oscuro', en: 'Dark mode');
+
+  String settingsThemeLight() =>
+      _localizedText(pt: 'Modo claro', es: 'Modo claro', en: 'Light mode');
+
+  String settingsThemeSystem() => _localizedText(
+    pt: 'Seguir sistema',
+    es: 'Seguir sistema',
+    en: 'Follow system',
+  );
+
   String helpHideAgainLabel() => _localizedText(
     pt: 'Nao mostrar novamente',
     es: 'No mostrar de nuevo',
