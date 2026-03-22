@@ -355,6 +355,7 @@ class AppRouter {
             exchangeRatesService: copilotExchangeRatesService,
             citiesController: citiesController,
             journeyContextController: journeyContextController,
+            locationController: locationController,
           ),
         );
       case AppRoutes.authenticatedHome:

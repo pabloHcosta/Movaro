@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
@@ -11,6 +9,7 @@ import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 
 /// Shown immediately after the questionnaire completes.
 ///
@@ -38,8 +37,6 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
   late final Animation<double> _fadeIn;
   late final Animation<Offset> _slideUp;
 
-  bool _isStarting = false;
-
   @override
   void initState() {
     super.initState();
@@ -66,40 +63,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
     super.dispose();
   }
 
-  Future<void> _startPlan(City city) async {
-    if (_isStarting) return;
-    setState(() => _isStarting = true);
-
-    try {
-      if (!widget.controller.generatedPlan!.isCityConfirmed) {
-        await widget.controller.confirmPlanCity(city);
-      }
-      if (!mounted) return;
-      await _showCelebration(city.name);
-      if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.migrationPlanCopilot,
-        (route) => route.settings.name == AppRoutes.publicHome,
-      );
-    } finally {
-      if (mounted) setState(() => _isStarting = false);
-    }
-  }
-
-  Future<void> _showCelebration(String cityName) async {
-    unawaited(
-      showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        barrierColor: Colors.black.withValues(alpha: 0.8),
-        builder: (_) => _CelebrationOverlay(cityName: cityName),
-      ),
-    );
-    await Future<void>.delayed(const Duration(milliseconds: 2500));
-    if (!mounted) return;
-    Navigator.of(context, rootNavigator: true).pop();
-  }
+  // ── Navigation ──────────────────────────────────────────────────────────────
 
   void _openCityDetail(City city) {
     Navigator.pushNamed(
@@ -110,6 +74,90 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
       },
     );
   }
+
+  void _showCompatibilityBreakdown(City city, int compatibilityPct) {
+    final l10n = context.l10n;
+    final dims = MigrationPlanGenerator.cityDimensionsPublic(city);
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetCtx) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+            child: FrostedPanel(
+              padding: const EdgeInsets.all(20),
+              borderRadius: BorderRadius.circular(28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Header ───────────────────────────────────────────
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.migrationResultRevealBreakdownTitle(city.name),
+                          style: Theme.of(sheetCtx)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, size: 20),
+                        onPressed: () => Navigator.of(sheetCtx).pop(),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // ── Dimension bars ──────────────────────────────────
+                  ...dims.entries.map(
+                    (entry) => _DimensionBar(
+                      label: l10n.dimensionLabel(entry.key),
+                      value: entry.value,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // ── Overall ────────────────────────────────────────
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.migrationResultRevealBreakdownOverall(),
+                          style: Theme.of(sheetCtx)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      Text(
+                        '$compatibilityPct%',
+                        style: Theme.of(sheetCtx)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primary,
+                            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ── Build ───────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -159,11 +207,15 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                       _HeroSection(city: recommendedCity),
                       Expanded(
                         child: ListView(
-                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
+                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
                           children: [
                             _CompatibilityCard(
                               city: recommendedCity,
                               compatibilityPct: compatibilityPct,
+                              onTap: () => _showCompatibilityBreakdown(
+                                recommendedCity,
+                                compatibilityPct,
+                              ),
                             ),
                             if (reasons.isNotEmpty) ...[
                               const SizedBox(height: 16),
@@ -176,6 +228,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               const SizedBox(height: 16),
                               _AlternativesSection(
                                 cities: alternatives,
+                                confidence: plan.confidence,
                                 onTap: _openCityDetail,
                               ),
                             ],
@@ -191,8 +244,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                     bottom: 0,
                     child: _FooterCta(
                       city: recommendedCity,
-                      isLoading: _isStarting,
-                      onStart: () => _startPlan(recommendedCity),
+                      onViewDetails: () => _openCityDetail(recommendedCity),
                       onRedo: () => Navigator.pushReplacementNamed(
                         context,
                         AppRoutes.migrationQuestionnaire,
@@ -330,10 +382,12 @@ class _CompatibilityCard extends StatelessWidget {
   const _CompatibilityCard({
     required this.city,
     required this.compatibilityPct,
+    required this.onTap,
   });
 
   final City city;
   final int compatibilityPct;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -350,42 +404,59 @@ class _CompatibilityCard extends StatelessWidget {
         ? AppColors.warning
         : const Color(0xFF0088FF);
 
-    return FrostedPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  compatLabel,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
+    return GestureDetector(
+      onTap: onTap,
+      child: FrostedPanel(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    compatLabel,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-              ),
-              Text(
-                l10n.migrationResultRevealCompatibilityLabel(compatibilityPct),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: barColor,
+                Text(
+                  l10n.migrationResultRevealCompatibilityLabel(compatibilityPct),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: barColor,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: compatibilityPct / 100,
-              minHeight: 6,
-              backgroundColor: AppColors.isDark(context)
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.black.withValues(alpha: 0.08),
-              valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                const SizedBox(width: 6),
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 16,
+                  color: AppColors.textSoftFor(context),
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: compatibilityPct / 100,
+                minHeight: 6,
+                backgroundColor: AppColors.isDark(context)
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.08),
+                valueColor: AlwaysStoppedAnimation<Color>(barColor),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              l10n.migrationResultRevealTapToSeeDetails(),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -405,13 +476,14 @@ class _WhyCitySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 10),
           child: Text(
-            context.l10n.migrationResultRevealWhyTitle(cityName),
+            l10n.migrationResultRevealWhyTitle(cityName),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -438,7 +510,8 @@ class _WhyCitySection extends StatelessWidget {
                   ),
                   Expanded(
                     child: Text(
-                      reason,
+                      // Resolve l10n key → human-readable text
+                      l10n.recommendationReasonLabel(reason),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         height: 1.4,
                       ),
@@ -459,30 +532,40 @@ class _WhyCitySection extends StatelessWidget {
 class _AlternativesSection extends StatelessWidget {
   const _AlternativesSection({
     required this.cities,
+    required this.confidence,
     required this.onTap,
   });
 
   final List<City> cities;
+  final double confidence;
   final void Function(City) onTap;
 
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 10),
           child: Text(
-            context.l10n.migrationResultRevealOtherOptionsTitle,
+            l10n.migrationResultRevealOtherOptionsTitle,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
         ),
-        ...cities.take(2).map(
-          (city) {
+        ...cities.take(2).indexed.map(
+          (entry) {
+            final (index, city) = entry;
             final imageUrl = cityImageUrlFor(city.id);
+            // Alternatives receive a lower compatibility estimate:
+            // 2nd city = ~85% of top; 3rd city = ~70% of top
+            final altPct = ((confidence * (index == 0 ? 0.85 : 0.70)) * 100)
+                .round()
+                .clamp(0, 100);
+
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Material(
@@ -537,6 +620,28 @@ class _AlternativesSection extends StatelessWidget {
                             ],
                           ),
                         ),
+                        // Compatibility badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '$altPct%',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
                         Icon(
                           Icons.arrow_forward_ios_rounded,
                           size: 14,
@@ -578,24 +683,76 @@ class _AltCityPlaceholder extends StatelessWidget {
   }
 }
 
+// ─── Dimension breakdown bar ──────────────────────────────────────────────────
+
+class _DimensionBar extends StatelessWidget {
+  const _DimensionBar({required this.label, required this.value});
+
+  final String label;
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = (value * 100).round();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Text(
+                '$pct%',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: value.clamp(0, 1),
+              minHeight: 5,
+              backgroundColor: AppColors.isDark(context)
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.06),
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ─── Footer CTA ────────────────────────────────────────────────────────────────
 
 class _FooterCta extends StatelessWidget {
   const _FooterCta({
     required this.city,
-    required this.isLoading,
-    required this.onStart,
+    required this.onViewDetails,
     required this.onRedo,
   });
 
   final City city;
-  final bool isLoading;
-  final VoidCallback onStart;
+  final VoidCallback onViewDetails;
   final VoidCallback onRedo;
 
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
+    final l10n = context.l10n;
 
     return Container(
       decoration: BoxDecoration(
@@ -622,33 +779,24 @@ class _FooterCta extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: isLoading ? null : onStart,
+              onPressed: onViewDetails,
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Text(
-                      context.l10n.migrationResultRevealStartCta(city.name),
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
+              child: Text(
+                l10n.migrationResultRevealViewDetailsCta(city.name),
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
             ),
           ),
           const SizedBox(height: 6),
           TextButton(
             onPressed: onRedo,
             child: Text(
-              context.l10n.migrationResultRevealRedoAction,
+              l10n.migrationResultRevealRedoAction,
               style: TextStyle(
                 color: AppColors.textSoftFor(context),
                 fontSize: 13,
@@ -714,70 +862,5 @@ class _RevealSkeleton extends StatelessWidget {
         ),
       ],
     );
-  }
-}
-
-// ─── Celebration overlay ───────────────────────────────────────────────────────
-
-class _CelebrationOverlay extends StatelessWidget {
-  const _CelebrationOverlay({required this.cityName});
-
-  final String cityName;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 24),
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0D2818),
-          border: Border.all(color: const Color(0xFF1A4428)),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('🎉', style: TextStyle(fontSize: 48)),
-            const SizedBox(height: 16),
-            Text(
-              _localized(context, pt: 'Plano iniciado!', es: 'Plan iniciado!', en: 'Plan started!'),
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: const Color(0xFFF0F6FC),
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _localized(
-                context,
-                pt: 'Você escolheu $cityName.\nVamos transformar isso em realidade.',
-                es: 'Elegiste $cityName.\nVamos a convertirlo en realidad.',
-                en: 'You chose $cityName.\nLet\'s turn that into reality.',
-              ),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF6B7280),
-                height: 1.5,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  static String _localized(
-    BuildContext context, {
-    required String pt,
-    required String es,
-    required String en,
-  }) {
-    final lang = Localizations.localeOf(context).languageCode;
-    return switch (lang) {
-      'pt' => pt,
-      'es' => es,
-      _ => en,
-    };
   }
 }

@@ -783,6 +783,57 @@ class MigrationPlanGenerator {
     };
   }
 
+  /// Public access to the city dimension scores (0–1 per dimension).
+  ///
+  /// Used by the result reveal page to show a compatibility breakdown.
+  static Map<String, double> cityDimensionsPublic(City city) {
+    final populationNormalized = (city.population / 2200000)
+        .clamp(0, 1)
+        .toDouble();
+    final affordability = _normalizeScoreStatic(city.movaroScores.economical);
+    final jobMarket =
+        ((_normalizeScoreStatic(city.movaroScores.workOpportunity) +
+                    _normalizeScoreStatic(city.jobMarketScore)) /
+                2)
+            .clamp(0, 1)
+            .toDouble();
+    final safety = _normalizeScoreStatic(city.safetyScore);
+    final climateWarmth = (1 - (((city.latitude.abs() - 5) / 30).clamp(0, 1)))
+        .clamp(0, 1)
+        .toDouble();
+    final transitInfra =
+        ((populationNormalized * 0.55) +
+                (_normalizeScoreStatic(city.jobMarketScore) * 0.45))
+            .clamp(0, 1)
+            .toDouble();
+    final nature =
+        (CityCoastalProfile.isCoastal(city)
+                ? 0.92
+                : (0.42 + (1 - populationNormalized) * 0.28))
+            .clamp(0, 1)
+            .toDouble();
+    final community =
+        ((_normalizeScoreStatic(city.movaroScores.popularForArgentinians) *
+                        0.70 +
+                    _normalizeScoreStatic(city.movaroScores.languageAdaptation) *
+                        0.30))
+            .clamp(0, 1)
+            .toDouble();
+
+    return {
+      'affordability': affordability,
+      'job_market': jobMarket,
+      'safety': safety,
+      'climate_warmth': climateWarmth,
+      'transit_infra': transitInfra,
+      'nature': nature,
+      'community': community,
+    };
+  }
+
+  static double _normalizeScoreStatic(num score) =>
+      (score / 100).clamp(0, 1).toDouble();
+
   String _firstValue(List<String>? values) =>
       values == null || values.isEmpty ? '' : values.first;
 

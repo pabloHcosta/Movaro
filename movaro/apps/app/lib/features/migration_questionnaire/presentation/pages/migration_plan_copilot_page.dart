@@ -13,8 +13,10 @@ import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/core/widgets/visual_data_cards.dart';
+import 'package:movaro_app/core/location/location_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/flight_search/presentation/widgets/flight_search_tool.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
@@ -49,6 +51,7 @@ class MigrationPlanCopilotPage extends StatefulWidget {
     required this.exchangeRatesService,
     required this.citiesController,
     required this.journeyContextController,
+    required this.locationController,
     super.key,
   });
 
@@ -56,6 +59,7 @@ class MigrationPlanCopilotPage extends StatefulWidget {
   final CopilotExchangeRatesService exchangeRatesService;
   final CitiesController citiesController;
   final JourneyContextController journeyContextController;
+  final LocationController locationController;
 
   @override
   State<MigrationPlanCopilotPage> createState() =>
@@ -127,6 +131,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
           city: city,
           citiesController: widget.citiesController,
           migrationQuestionnaireController: widget.controller,
+          locationController: widget.locationController,
           exchangeRatesFuture: _exchangeRatesFuture,
           initialReadinessCompletedIds: _readinessCompletedIds,
           initialDocumentCompletedIds: _documentCompletedIds,
@@ -262,6 +267,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       city: city,
       exchangeRatesFuture: _exchangeRatesFuture,
       onManagePlan: _handleManagePlan,
+      locationController: widget.locationController,
     );
   }
 
@@ -543,8 +549,11 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
         await _showPreparationSheet(
           context,
           title: item.title,
-          child: _FlightSearchPlannerCard(
-            destinationCityName: city?.name ?? '',
+          child: FlightSearchTool(
+            locationController: widget.locationController,
+            originCountryIso: plan.originCountry == 'argentina' ? 'AR' : 'AR',
+            destinationCountryIso: 'BR',
+            destinationCityName: city?.name,
           ),
         );
       case GuideToolType.housing:
@@ -998,6 +1007,7 @@ class _PlanStageScreen extends StatefulWidget {
     required this.city,
     required this.citiesController,
     required this.migrationQuestionnaireController,
+    required this.locationController,
     required this.exchangeRatesFuture,
     required this.initialReadinessCompletedIds,
     required this.initialDocumentCompletedIds,
@@ -1017,6 +1027,7 @@ class _PlanStageScreen extends StatefulWidget {
   final City? city;
   final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
+  final LocationController locationController;
   final Future<CopilotExchangeRates?> exchangeRatesFuture;
   final Set<String> initialReadinessCompletedIds;
   final Set<String> initialDocumentCompletedIds;
@@ -1124,6 +1135,7 @@ class _PlanStageScreenState extends State<_PlanStageScreen> {
           citiesController: widget.citiesController,
           migrationQuestionnaireController:
               widget.migrationQuestionnaireController,
+          locationController: widget.locationController,
           exchangeRatesFuture: widget.exchangeRatesFuture,
           initialReadinessCompletedIds: _readinessCompletedIds,
           initialDocumentCompletedIds: _documentCompletedIds,
@@ -1156,6 +1168,7 @@ class _PlanStageScreenState extends State<_PlanStageScreen> {
       city: widget.city,
       exchangeRatesFuture: widget.exchangeRatesFuture,
       onManagePlan: widget.onManagePlan,
+      locationController: widget.locationController,
     );
   }
 
@@ -1268,6 +1281,7 @@ Future<void> _showPlanToolsSheet(
   required City? city,
   required Future<CopilotExchangeRates?> exchangeRatesFuture,
   required Future<void> Function() onManagePlan,
+  required LocationController locationController,
 }) {
   final planResetCopy = PlanResetDialogCopy.fromContext(context);
 
@@ -1393,7 +1407,10 @@ Future<void> _showPlanToolsSheet(
                           es: 'Planear mi vuelo a Brasil',
                           en: 'Plan my flight to Brazil',
                         ),
-                        child: _FlightSearchPlannerCard(
+                        child: FlightSearchTool(
+                          locationController: locationController,
+                          originCountryIso: 'AR',
+                          destinationCountryIso: 'BR',
                           destinationCityName: city?.name,
                         ),
                       );
