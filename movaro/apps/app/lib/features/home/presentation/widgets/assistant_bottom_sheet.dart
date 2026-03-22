@@ -200,7 +200,7 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet>
     return AnimatedBuilder(
       animation: _expandAnim,
       builder: (context, child) {
-        const collapsedH = 200.0;
+        const collapsedH = 140.0;
         // Scaffold(extendBody:true) sets padding.bottom to
         // max(safeArea, navBarHeight). SafeArea consumes it, so the
         // Stack height = screenHeight - padding.bottom. The sheet
@@ -445,22 +445,16 @@ class _CollapsedContentState extends State<_CollapsedContent> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-      child: Column(
-        children: [
-          _TipCard(l10n: widget.l10n),
-          const SizedBox(height: 10),
-          _InputRow(
-            controller: _controller,
-            placeholder: widget.isInitializing
-                ? context.l10n.aiChatLoading
-                : widget.chatService != null
-                    ? widget.l10n.homeAssistantInputPlaceholder
-                    : context.l10n.aiChatUnavailable,
-            onSend: _send,
-            enabled: true, // always tappable — feedback shown by parent
-            isLoading: widget.isInitializing,
-          ),
-        ],
+      child: _InputRow(
+        controller: _controller,
+        placeholder: widget.isInitializing
+            ? context.l10n.aiChatLoading
+            : widget.chatService != null
+                ? widget.l10n.homeAssistantInputPlaceholder
+                : context.l10n.aiChatUnavailable,
+        onSend: _send,
+        enabled: true, // always tappable — feedback shown by parent
+        isLoading: widget.isInitializing,
       ),
     );
   }
@@ -473,24 +467,21 @@ class _TipCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF4FC3F7).withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFF4FC3F7).withValues(alpha: 0.15),
-        ),
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           const Icon(Icons.lightbulb_outline_rounded,
-              size: 16, color: Color(0xFF4FC3F7)),
+              size: 14, color: Color(0xFF4FC3F7)),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              loco(context, l10n),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.75),
+              _tipText(context),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Colors.white.withValues(alpha: 0.60),
                 height: 1.4,
               ),
             ),
@@ -500,7 +491,7 @@ class _TipCard extends StatelessWidget {
     );
   }
 
-  String loco(BuildContext context, dynamic l10n) {
+  String _tipText(BuildContext context) {
     final lang = Localizations.localeOf(context).languageCode;
     return switch (lang) {
       'pt' => 'Dica do dia: O CPF é o documento mais importante para se estabelecer no Brasil.',
@@ -576,6 +567,10 @@ class _ExpandedContentState extends State<_ExpandedContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Tip of the day (moved from collapsed state)
+          _TipCard(l10n: l10n),
+          const SizedBox(height: 12),
+
           // Welcome bubble
           _WelcomeBubble(l10n: l10n, destination: dest),
           const SizedBox(height: 16),

@@ -15,6 +15,7 @@ import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
+import 'package:movaro_app/features/home/application/streak_service.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/widgets/assistant_bottom_sheet.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
@@ -51,8 +52,10 @@ class _PublicHomePageState extends State<PublicHomePage>
     with WidgetsBindingObserver {
   final MigrationCopilotProgressStore _progressStore =
       MigrationCopilotProgressStore();
+  final StreakService _streakService = StreakService();
   MigrationCopilotProgressSnapshot _progressSnapshot =
       const MigrationCopilotProgressSnapshot();
+  int _streakDays = 0;
   String? _loadedPlanKey;
   String? _loadedWeatherCityId;
   bool _didTryPromptLocation = false;
@@ -69,6 +72,7 @@ class _PublicHomePageState extends State<PublicHomePage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_syncPlanState());
       unawaited(_maybePromptLocationPermission());
+      unawaited(_recordStreak());
     });
   }
 
@@ -127,7 +131,7 @@ class _PublicHomePageState extends State<PublicHomePage>
               // offset is needed.
               const sheetBottom = 0.0;
               // Extra bottom padding so scroll content clears the sheet.
-              const sheetCollapsedH = 200.0;
+              const sheetCollapsedH = 140.0;
 
               return Stack(
                 children: [
@@ -178,6 +182,7 @@ class _PublicHomePageState extends State<PublicHomePage>
                                         city.id,
                                       ),
                                       guideState: guideState!,
+                                      streakDays: _streakDays,
                                       extraBottomPadding:
                                           sheetBottom + sheetCollapsedH,
                                       onOpenSettings: _openSettings,
@@ -497,17 +502,26 @@ class _PublicHomePageState extends State<PublicHomePage>
     );
   }
 
+  Future<void> _recordStreak() async {
+    final days = await _streakService.recordActivity();
+    if (!mounted) return;
+    setState(() => _streakDays = days);
+  }
+
   /// Force-refreshes the progress snapshot from disk (e.g. after returning
   /// from the guide page where the user may have completed items).
   Future<void> _refreshProgress() async {
     final plan = widget.migrationQuestionnaireController.generatedPlan;
     if (plan == null) return;
 
+    // Record activity — user was actively using the guide.
+    final days = await _streakService.recordActivity();
     final snapshot = await _progressStore.read(plan);
     if (!mounted) return;
 
     setState(() {
       _progressSnapshot = snapshot;
+      _streakDays = days;
     });
   }
 
@@ -720,6 +734,7 @@ class _ActiveHomeState extends StatelessWidget {
     required this.city,
     required this.weather,
     required this.guideState,
+    required this.streakDays,
     required this.onOpenSettings,
     required this.onOpenGuide,
     required this.onViewCurrentAction,
@@ -733,6 +748,7 @@ class _ActiveHomeState extends StatelessWidget {
   final City city;
   final CityWeather? weather;
   final _HomeGuideState guideState;
+  final int streakDays;
   final VoidCallback onOpenSettings;
   final VoidCallback onOpenGuide;
   final VoidCallback onViewCurrentAction;
@@ -755,10 +771,9 @@ class _ActiveHomeState extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(12, 10, 12, 16 + extraBottomPadding),
             child: Column(
               children: [
-                _ProgressCard(state: guideState),
-                const SizedBox(height: 8),
-                _NextActionCard(
+                _MigrationProgressCard(
                   state: guideState,
+                  streakDays: streakDays,
                   onOpenGuide: onOpenGuide,
                   onViewAction: onViewCurrentAction,
                 ),
@@ -922,167 +937,32 @@ class _ActiveHero extends StatelessWidget {
   }
 }
 
-class _ProgressCard extends StatelessWidget {
-  const _ProgressCard({required this.state});
+// ─── Unified migration progress + next-action card ────────────────────────────
+//
+// Replaces the old _ProgressCard + _NextActionCard pair.
+// Only rendered when the plan is active (progress > 0 or guide started).
 
-  final _HomeGuideState state;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      decoration: BoxDecoration(
-        color: _cardBackground(context),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _progressBorder(context)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _text(
-                        context,
-                        pt: 'PROGRESSO GERAL',
-                        es: 'PROGRESO GENERAL',
-                        en: 'GENERAL PROGRESS',
-                      ),
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                        color: _tertiaryText(context),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    RichText(
-                      text: TextSpan(
-                        style: context.textStyles.displayNumber.copyWith(
-                              fontWeight: FontWeight.w900,
-                              color: _primaryText(context),
-                            ),
-                        children: [
-                          TextSpan(text: '${state.progressPercent}'),
-                          TextSpan(
-                            text: '%',
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  color: _tertiaryText(context),
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 9,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: _badgeBackground(context),
-                      border: Border.all(color: _badgeBorder(context)),
-                    ),
-                    child: Text(
-                      '${_text(context, pt: 'Etapa', es: 'Etapa', en: 'Stage')} ${state.currentPhaseIndex} / ${state.totalPhases}',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: _accentText(context),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${state.completedCount} ${_text(context, pt: 'de', es: 'de', en: 'of')} ${state.totalItems} ${_text(context, pt: 'feitas', es: 'hechas', en: 'done')}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: _tertiaryText(context),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              return Stack(
-                children: [
-                  Container(
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: _progressTrack(context),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.easeOut,
-                    height: 4,
-                    width: constraints.maxWidth * (state.progressPercent / 100),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(2),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF0369A1), Color(0xFF0EA5E9)],
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              for (var index = 0; index < state.totalItems; index++) ...[
-                Expanded(
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween<double>(begin: 0, end: 1),
-                    duration: Duration(milliseconds: 300 + (50 * index)),
-                    builder: (context, value, _) {
-                      return Container(
-                        height: 3,
-                        decoration: BoxDecoration(
-                          color: state
-                              .segmentColor(context, index)
-                              .withValues(alpha: value),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                if (index != state.totalItems - 1) const SizedBox(width: 3),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NextActionCard extends StatelessWidget {
-  const _NextActionCard({
+class _MigrationProgressCard extends StatelessWidget {
+  const _MigrationProgressCard({
     required this.state,
+    required this.streakDays,
     required this.onOpenGuide,
     required this.onViewAction,
   });
 
   final _HomeGuideState state;
+  final int streakDays;
   final VoidCallback onOpenGuide;
   final VoidCallback onViewAction;
+
+  // Canonical display order for the 5 phases.
+  static const _phaseOrder = [
+    GuidePhase.preparation,
+    GuidePhase.documents,
+    GuidePhase.housing,
+    GuidePhase.work,
+    GuidePhase.arrival,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -1091,109 +971,395 @@ class _NextActionCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: _cardBackground(context),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _cardBorder(context)),
+        border: Border.all(color: _progressBorder(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            isComplete
-                ? _text(
-                    context,
-                    pt: 'PLANO CONCLUÍDO',
-                    es: 'PLAN COMPLETADO',
-                    en: 'PLAN COMPLETED',
-                  )
-                : '${_text(context, pt: 'Próxima ação', es: 'Próxima acción', en: 'Next action')} · ${state.phaseName(context)}',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.7,
-              color: _accentText(context),
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            isComplete
-                ? _text(
-                    context,
-                    pt: 'Seu plano já está completo',
-                    es: 'Tu plan ya está completo',
-                    en: 'Your plan is already complete',
-                  )
-                : state.currentItem!.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.1,
-              height: 1.3,
-              color: _primaryText(context),
-            ),
-          ),
-          const SizedBox(height: 10),
+          // ── BLOCK 1: Header ──────────────────────────────────────────
           Row(
             children: [
               Expanded(
-                child: FilledButton(
-                  onPressed: onOpenGuide,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF0284C7),
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(11),
-                    ),
+                child: Text(
+                  _text(
+                    context,
+                    pt: 'SUA JORNADA',
+                    es: 'TU JORNADA',
+                    en: 'YOUR JOURNEY',
                   ),
-                  child: Text(
-                    isComplete
-                        ? _text(
-                            context,
-                            pt: 'Ver resumo do plano',
-                            es: 'Ver resumen del plan',
-                            en: 'See plan summary',
-                          )
-                        : _text(
-                            context,
-                            pt: 'Continuar o guia →',
-                            es: 'Continuar la guía →',
-                            en: 'Continue guide →',
-                          ),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.40),
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
-              const SizedBox(width: 7),
-              TextButton(
-                onPressed: onViewAction,
-                style: TextButton.styleFrom(
-                  backgroundColor: _mutedButtonBackground(context),
-                  foregroundColor: _mutedButtonForeground(context),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 13,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(11),
+              if (streakDays > 0) _StreakBadge(days: streakDays),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // ── BLOCK 2: Journey list + Metrics ─────────────────────────
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Phase list
+              Expanded(
+                child: _PhaseList(state: state, phases: _phaseOrder),
+              ),
+              // Vertical divider
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: SizedBox(
+                  height: 80,
+                  child: VerticalDivider(
+                    width: 1,
+                    thickness: 1,
+                    color: Colors.white.withValues(alpha: 0.08),
                   ),
                 ),
-                child: Text(
-                  _text(context, pt: 'Ver', es: 'Ver', en: 'View'),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
+              ),
+              // Metrics column
+              _MetricsColumn(state: state),
+            ],
+          ),
+
+          // ── Divider ─────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Container(
+              height: 1,
+              color: Colors.white.withValues(alpha: 0.06),
+            ),
+          ),
+
+          // ── BLOCK 3: Next action ─────────────────────────────────────
+          Text(
+            isComplete
+                ? _text(
+                    context,
+                    pt: 'Jornada concluída! 🎉',
+                    es: '¡Jornada completada! 🎉',
+                    en: 'Journey complete! 🎉',
+                  )
+                : state.currentItem!.title,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(
+                child: _CardPrimaryButton(
+                  label: isComplete
+                      ? _text(
+                          context,
+                          pt: 'Ver resumo →',
+                          es: 'Ver resumen →',
+                          en: 'See summary →',
+                        )
+                      : _text(
+                          context,
+                          pt: 'Continuar o guia →',
+                          es: 'Continuar la guía →',
+                          en: 'Continue guide →',
+                        ),
+                  onTap: onOpenGuide,
                 ),
+              ),
+              const SizedBox(width: 5),
+              _CardSecondaryButton(
+                label: _text(context, pt: 'Ver', es: 'Ver', en: 'View'),
+                onTap: onViewAction,
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Streak badge ──────────────────────────────────────────────────────────────
+
+class _StreakBadge extends StatelessWidget {
+  const _StreakBadge({required this.days});
+
+  final int days;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = days == 1
+        ? _text(context, pt: 'dia ativo', es: 'día activo', en: 'active day')
+        : _text(
+            context,
+            pt: 'dias ativos',
+            es: 'días activos',
+            en: 'active days',
+          );
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.30)),
+      ),
+      child: Text(
+        '🔥 $days $label',
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: _accentText(context),
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Phase list (Block 2, left column) ─────────────────────────────────────────
+
+enum _PhaseStatus { completed, current, future }
+
+class _PhaseList extends StatelessWidget {
+  const _PhaseList({required this.state, required this.phases});
+
+  final _HomeGuideState state;
+  final List<GuidePhase> phases;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < phases.length; i++) ...[
+          _PhaseRow(phase: phases[i], status: _status(phases[i])),
+          if (i < phases.length - 1) const SizedBox(height: 4),
+        ],
+      ],
+    );
+  }
+
+  _PhaseStatus _status(GuidePhase phase) {
+    final phaseItems = state.items.where((it) => it.phase == phase).toList();
+    if (phaseItems.isEmpty) return _PhaseStatus.future;
+    if (phaseItems.every((it) => state.completedIds.contains(it.id))) {
+      return _PhaseStatus.completed;
+    }
+    if (state.currentItem?.phase == phase) return _PhaseStatus.current;
+    return _PhaseStatus.future;
+  }
+}
+
+class _PhaseRow extends StatelessWidget {
+  const _PhaseRow({required this.phase, required this.status});
+
+  final GuidePhase phase;
+  final _PhaseStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = _phaseLabel(context, phase);
+
+    final nameStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
+      color: switch (status) {
+        _PhaseStatus.completed => Colors.white.withValues(alpha: 0.45),
+        _PhaseStatus.current => Colors.white,
+        _PhaseStatus.future => Colors.white.withValues(alpha: 0.25),
+      },
+      fontWeight: status == _PhaseStatus.current
+          ? FontWeight.w700
+          : FontWeight.w400,
+    );
+
+    final Widget indicator = switch (status) {
+      _PhaseStatus.completed => Icon(
+        Icons.check_rounded,
+        size: 12,
+        color: _accentText(context),
+      ),
+      _PhaseStatus.current => Text(
+        _text(context, pt: '→ agora', es: '→ ahora', en: '→ now'),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      _PhaseStatus.future => Text(
+        _text(context, pt: 'bloq.', es: 'bloq.', en: 'lock.'),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: Colors.white.withValues(alpha: 0.20),
+        ),
+      ),
+    };
+
+    final rowContent = Row(
+      children: [
+        Expanded(child: Text(label, style: nameStyle)),
+        indicator,
+      ],
+    );
+
+    if (status == _PhaseStatus.current) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: rowContent,
+      );
+    }
+    return rowContent;
+  }
+
+  String _phaseLabel(BuildContext context, GuidePhase phase) =>
+      switch (phase) {
+        GuidePhase.preparation => _text(
+          context,
+          pt: 'Preparação',
+          es: 'Preparación',
+          en: 'Preparation',
+        ),
+        GuidePhase.documents => _text(
+          context,
+          pt: 'Documentação',
+          es: 'Documentación',
+          en: 'Documentation',
+        ),
+        GuidePhase.housing => _text(
+          context,
+          pt: 'Moradia',
+          es: 'Vivienda',
+          en: 'Housing',
+        ),
+        GuidePhase.work => _text(
+          context,
+          pt: 'Trabalho',
+          es: 'Trabajo',
+          en: 'Work',
+        ),
+        GuidePhase.arrival => _text(
+          context,
+          pt: 'Chegada',
+          es: 'Llegada',
+          en: 'Arrival',
+        ),
+      };
+}
+
+// ─── Metrics column (Block 2, right column) ────────────────────────────────────
+
+class _MetricsColumn extends StatelessWidget {
+  const _MetricsColumn({required this.state});
+
+  final _HomeGuideState state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '${state.progressPercent}%',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+              color: _accentText(context),
+              height: 1.1,
+            ),
+          ),
+          Text(
+            _text(context, pt: 'feito', es: 'hecho', en: 'done'),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.35),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '${state.completedCount}/${state.totalItems}',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              height: 1.1,
+            ),
+          ),
+          Text(
+            _text(context, pt: 'itens', es: 'ítems', en: 'items'),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.35),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Card action buttons ────────────────────────────────────────────────────────
+
+class _CardPrimaryButton extends StatelessWidget {
+  const _CardPrimaryButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.primary,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(vertical: 7),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CardSecondaryButton extends StatelessWidget {
+  const _CardSecondaryButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.60),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1805,17 +1971,6 @@ Color _accentText(BuildContext context) => AppColors.isDark(context)
     ? const Color(0xFF38BDF8)
     : const Color(0xFF0369A1);
 
-Color _progressTrack(BuildContext context) => AppColors.isDark(context)
-    ? Colors.white.withValues(alpha: 0.07)
-    : Colors.black.withValues(alpha: 0.07);
-
-Color _mutedButtonBackground(BuildContext context) => AppColors.isDark(context)
-    ? Colors.white.withValues(alpha: 0.07)
-    : Colors.black.withValues(alpha: 0.06);
-
-Color _mutedButtonForeground(BuildContext context) => AppColors.isDark(context)
-    ? Colors.white.withValues(alpha: 0.35)
-    : Colors.black.withValues(alpha: 0.35);
 
 String _text(
   BuildContext context, {
