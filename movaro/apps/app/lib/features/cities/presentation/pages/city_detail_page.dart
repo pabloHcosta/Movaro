@@ -163,33 +163,24 @@ class _CityDetailPageState extends State<CityDetailPage> {
           body: Stack(
             children: [
               const AmbientBackground(),
-              SafeArea(
-                child: Stack(
-                  children: [
-                    ListView(
-                      controller: _scrollController,
-                      padding: EdgeInsets.fromLTRB(
-                        context.pageHorizontalPadding,
-                        context.pageVerticalPadding,
-                        context.pageHorizontalPadding,
-                        context.pageVerticalPadding + 96,
-                      ),
-                      children: [
-                        if (city == null &&
-                            widget.citiesController.isLoadingCity)
-                          ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: 1160),
-                            child: DetailSkeleton(),
-                          )
-                        else if (city == null &&
-                            widget.citiesController.cityError != null)
-                          Builder(
+
+              // ── Main content ───────────────────────────────────────────────
+              if (city == null)
+                SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      context.pageHorizontalPadding,
+                      72,
+                      context.pageHorizontalPadding,
+                      context.pageVerticalPadding,
+                    ),
+                    child: widget.citiesController.cityError != null
+                        ? Builder(
                             builder: (context) {
                               final error = ErrorHandler.resolve(
                                 context,
                                 widget.citiesController.cityError!,
                               );
-
                               return ErrorStateWidget(
                                 title: error.title,
                                 description: error.description,
@@ -199,111 +190,33 @@ class _CityDetailPageState extends State<CityDetailPage> {
                               );
                             },
                           )
-                        else if (city == null)
-                          ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: 1160),
-                            child: DetailSkeleton(),
-                          )
-                        else ...[
-                          AppGlassHeader(
-                            title: l10n.cityDetailHeaderTitle(),
-                            onBack: _goBackToCities,
-                            onHelp: _showHelp,
-                          ),
-                          const SizedBox(height: 16),
-                          ConstrainedBox(
+                        : ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 1160),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(32),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.08),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.18),
-                                    blurRadius: 28,
-                                    offset: const Offset(0, 16),
-                                  ),
-                                ],
-                              ),
-                              child: CityImageBackdrop(
-                                city: city,
-                                borderRadius: BorderRadius.circular(32),
-                                padding: const EdgeInsets.all(28),
-                                overlayOpacity: 0.8,
-                                child: LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    final compactHero =
-                                        constraints.maxWidth < 760;
-                                    final weather = widget.citiesController
-                                        .weatherFor(city.id);
-
-                                    return SizedBox(
-                                      height: compactHero ? 248 : 286,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              _LifestyleBadge(city: city),
-                                              const Spacer(),
-                                              _HeroIconButton(
-                                                icon:
-                                                    widget.citiesController
-                                                        .isFavorite(city.id)
-                                                    ? Icons.favorite_rounded
-                                                    : Icons
-                                                          .favorite_border_rounded,
-                                                active: widget.citiesController
-                                                    .isFavorite(city.id),
-                                                onTap: () =>
-                                                    _toggleFavoriteCity(
-                                                      context,
-                                                      city,
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                          const Spacer(),
-                                          Text(
-                                            city.name,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .displaySmall
-                                                ?.copyWith(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w800,
-                                                  height: 0.96,
-                                                ),
-                                          ),
-                                          const SizedBox(height: 10),
-                                          Text(
-                                            '${city.stateName} (${city.stateCode})',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium
-                                                ?.copyWith(
-                                                  color: Colors.white
-                                                      .withValues(alpha: 0.84),
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                          const SizedBox(height: 12),
-                                          _HeroAttributeRow(
-                                            city: city,
-                                            weather: weather,
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
+                            child: const DetailSkeleton(),
                           ),
-                          const SizedBox(height: 16),
+                  ),
+                )
+              else
+                Column(
+                  children: [
+                    // ── Full-width hero ─────────────────────────────────────
+                    _DetailHeroSection(
+                      city: city,
+                      citiesController: widget.citiesController,
+                      onToggleFavorite: () =>
+                          _toggleFavoriteCity(context, city),
+                    ),
+                    // ── Scrollable panels ───────────────────────────────────
+                    Expanded(
+                      child: ListView(
+                        controller: _scrollController,
+                        padding: EdgeInsets.fromLTRB(
+                          context.pageHorizontalPadding,
+                          16,
+                          context.pageHorizontalPadding,
+                          context.pageVerticalPadding + 96,
+                        ),
+                        children: [
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 1160),
                             child: _CitySummaryPanel(
@@ -323,7 +236,6 @@ class _CityDetailPageState extends State<CityDetailPage> {
                               if (snapshot.data != true) {
                                 return const SizedBox.shrink();
                               }
-
                               return ConstrainedBox(
                                 constraints: const BoxConstraints(
                                   maxWidth: 1160,
@@ -491,16 +403,35 @@ class _CityDetailPageState extends State<CityDetailPage> {
                             ),
                           ),
                         ],
-                      ],
-                    ),
-                    _ScrollHintOverlay(
-                      visible: _showScrollHint,
-                      label: context.l10n.bmpScrollHint,
-                      onTap: _scrollDown,
+                      ),
                     ),
                   ],
                 ),
+
+              // ── Floating glass nav bar (always on top) ─────────────────────
+              SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    context.pageHorizontalPadding,
+                    context.pageVerticalPadding,
+                    context.pageHorizontalPadding,
+                    0,
+                  ),
+                  child: AppGlassHeader(
+                    title: l10n.cityDetailHeaderTitle(),
+                    onBack: _goBackToCities,
+                    onHelp: _showHelp,
+                  ),
+                ),
               ),
+
+              // ── Scroll hint ────────────────────────────────────────────────
+              if (city != null)
+                _ScrollHintOverlay(
+                  visible: _showScrollHint,
+                  label: context.l10n.bmpScrollHint,
+                  onTap: _scrollDown,
+                ),
             ],
           ),
         );
@@ -929,6 +860,104 @@ class _PlanCityContext {
   final String watchout;
   final List<String> priorityChips;
   final List<String> constraintChips;
+}
+
+// ── Full-width hero section (matches recommendation screen style) ─────────────
+
+class _DetailHeroSection extends StatelessWidget {
+  const _DetailHeroSection({
+    required this.city,
+    required this.citiesController,
+    required this.onToggleFavorite,
+  });
+
+  final City city;
+  final CitiesController citiesController;
+  final VoidCallback onToggleFavorite;
+
+  @override
+  Widget build(BuildContext context) {
+    final heroHeight = MediaQuery.of(context).size.height * 0.44;
+    final weather = citiesController.weatherFor(city.id);
+    final isFav = citiesController.isFavorite(city.id);
+
+    return SizedBox(
+      height: heroHeight,
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background city image
+          CityResolvedImage(
+            city: city,
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.medium,
+            errorWidget: const SizedBox.shrink(),
+          ),
+
+          // Gradient overlay: transparent top → dark bottom
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Color(0xCC000000)],
+                stops: [0.30, 1.0],
+              ),
+            ),
+          ),
+
+          // Bottom content: badge, name, state, attributes
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 20,
+            child: SafeArea(
+              top: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      _LifestyleBadge(city: city),
+                      const Spacer(),
+                      _HeroIconButton(
+                        icon: isFav
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        active: isFav,
+                        onTap: onToggleFavorite,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    city.name,
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      height: 0.96,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${city.stateName} · ${city.stateCode}',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.84),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _HeroAttributeRow(city: city, weather: weather),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _HeroIconButton extends StatelessWidget {
