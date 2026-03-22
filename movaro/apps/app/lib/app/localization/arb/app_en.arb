@@ -2224,8 +2224,8 @@
   "qFundingPrompt": "How do you plan to support yourself during the first 3 months?",
   "qFundingSubtitle": "This helps us adjust your starting point without asking for personal data.",
   "qTimelinePrompt": "When would you like to be in Brazil? (roughly)",
-  "qPrioritiesPrompt": "For your first year, which 2 points matter most in a city choice?",
-  "qPrioritiesHelper": "Select 2 to continue",
+  "qPrioritiesPrompt": "What matters most when choosing a city?",
+  "qPrioritiesHelper": "Select up to 3",
   "qPrioritiesSelectedCount": "{selected}/{total}",
   "@qPrioritiesSelectedCount": {
     "placeholders": {

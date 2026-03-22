@@ -5477,11 +5477,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'When would you like to be in Brazil? (roughly)';
 
   @override
-  String get qPrioritiesPrompt =>
-      'For your first year, which 2 points matter most in a city choice?';
+  String get qPrioritiesPrompt => 'What matters most when choosing a city?';
 
   @override
-  String get qPrioritiesHelper => 'Select 2 to continue';
+  String get qPrioritiesHelper => 'Select up to 3';
 
   @override
   String qPrioritiesSelectedCount(Object selected, Object total) {

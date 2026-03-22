@@ -55,6 +55,7 @@ class _QuestionPageState extends State<QuestionPage> {
   String? _scrollScopeKey;
   bool _showScrollHint = false;
   bool _didTryAutoHelp = false;
+  bool _locationPrecheckDone = false;
 
   MigrationQuestionnaireController get controller => widget.controller;
   LocationController get locationController => widget.locationController;
@@ -164,7 +165,26 @@ class _QuestionPageState extends State<QuestionPage> {
                                   onHelp: _showHelp,
                                 ),
                                 const SizedBox(height: 20),
-                                if (_showProcessingScreen)
+                                if (!_locationPrecheckDone &&
+                                    controller.selectedVariant ==
+                                        QuestionnaireVariant.strategic)
+                                  Expanded(
+                                    child: _LocationPrecheck(
+                                      locationController: locationController,
+                                      onComplete: (String? argentineOrigin) {
+                                        if (argentineOrigin != null) {
+                                          controller.selectAnswer(
+                                            'argentina_origin',
+                                            argentineOrigin,
+                                          );
+                                        }
+                                        setState(() {
+                                          _locationPrecheckDone = true;
+                                        });
+                                      },
+                                    ),
+                                  )
+                                else if (_showProcessingScreen)
                                   Expanded(
                                     child: _ProcessingState(
                                       title: l10n.questionnaireProcessingTitle,
@@ -613,178 +633,121 @@ class _QuestionPageState extends State<QuestionPage> {
       return _buildTravelGroupGrid(context, question);
     }
 
-    // All other questions → unified iconic 2-column grid
+    // priorities → pill chip layout
+    if (question.id == 'priorities') {
+      return _buildPriorityChips(context, question);
+    }
+
+    // All other questions → horizontal compact list
     return _buildIconicGrid(context, question);
   }
 
-  // ── Iconic SliverGrid for standard questions ─────────────────────────────
+  // ── Horizontal compact list for standard single-select questions ──────────
   Widget _buildIconicGrid(BuildContext context, Question question) {
-    final isMulti = question.type == 'multi_chip';
     final options = question.options;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const columns = 2;
-        const spacing = 10.0;
-        final childAspectRatio = _computeGridAspectRatio(
-          optionCount: options.length,
-          availableWidth: constraints.maxWidth,
-          availableHeight: constraints.maxHeight,
-          spacing: spacing,
-          columns: columns,
-        );
-
-        return CustomScrollView(
-          controller: _optionsScrollController,
-          slivers: [
-            SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: columns,
-                mainAxisSpacing: spacing,
-                crossAxisSpacing: spacing,
-                childAspectRatio: childAspectRatio,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (ctx, index) {
-                  final option = options[index];
-                  final selectedValues = isMulti
-                      ? controller.answerValuesFor(question.id).toSet()
-                      : {controller.answerFor(question.id) ?? ''};
-                  final isSelected = selectedValues.contains(option.value);
-                  return _IconicGridCard(
-                    icon: _questionOptionIcon(
-                      question.id,
-                      option.value,
-                      isSelected,
-                      ctx,
-                    ),
-                    label: _displayOptionLabel(
-                      context,
-                      question.id,
-                      option.value,
-                    ),
-                    isSelected: isSelected,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      isMulti
-                          ? _handleMultiSelect(question, option)
-                          : _handleSingleSelect(question, option);
-                    },
-                  );
-                },
-                childCount: options.length,
-              ),
-            ),
-            const SliverPadding(padding: EdgeInsets.only(bottom: 4)),
-          ],
-        );
-      },
+    return CustomScrollView(
+      controller: _optionsScrollController,
+      slivers: [
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (ctx, index) {
+              final option = options[index];
+              final selectedValue = controller.answerFor(question.id) ?? '';
+              final isSelected = selectedValue == option.value;
+              return Padding(
+                padding: EdgeInsets.only(bottom: index < options.length - 1 ? 8 : 0),
+                child: _CompactOptionRow(
+                  icon: _iconDataFor(question.id, option.value),
+                  label: _displayOptionLabel(context, question.id, option.value),
+                  isSelected: isSelected,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    _handleSingleSelect(question, option);
+                  },
+                ),
+              );
+            },
+            childCount: options.length,
+          ),
+        ),
+        const SliverPadding(padding: EdgeInsets.only(bottom: 4)),
+      ],
     );
   }
 
-  // ── travel_group: grid + optional children-count selector ───────────────
+  // ── Priority pill chips (multi-select) ────────────────────────────────────
+  Widget _buildPriorityChips(BuildContext context, Question question) {
+    final options = question.options;
+    final selectedValues = controller.answerValuesFor(question.id).toSet();
+
+    return SingleChildScrollView(
+      controller: _optionsScrollController,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: options.map((option) {
+          final isSelected = selectedValues.contains(option.value);
+          return _PriorityChip(
+            icon: _iconDataFor(question.id, option.value),
+            label: _displayOptionLabel(context, question.id, option.value),
+            isSelected: isSelected,
+            onTap: () {
+              HapticFeedback.selectionClick();
+              _handleMultiSelect(question, option);
+            },
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // ── travel_group: compact list + optional children-count selector ────────
   Widget _buildTravelGroupGrid(BuildContext context, Question question) {
     final selectedValue = controller.answerFor(question.id);
     final selectedChildrenCount = controller.answerFor(
       'travel_group_children_count',
     );
     final options = question.options;
+    final showChildrenSelector =
+        selectedValue == 'family_kids' || selectedValue == 'solo_parent';
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const columns = 2;
-        const spacing = 10.0;
-        final childAspectRatio = _computeGridAspectRatio(
-          optionCount: options.length,
-          availableWidth: constraints.maxWidth,
-          availableHeight: constraints.maxHeight,
-          spacing: spacing,
-          columns: columns,
-        );
-
-        return CustomScrollView(
-          controller: _optionsScrollController,
-          slivers: [
-            SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: columns,
-                mainAxisSpacing: spacing,
-                crossAxisSpacing: spacing,
-                childAspectRatio: childAspectRatio,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (ctx, index) {
-                  final option = options[index];
-                  final isSelected = selectedValue == option.value;
-                  return _IconicGridCard(
-                    icon: _questionOptionIcon(
-                      question.id,
-                      option.value,
-                      isSelected,
-                      ctx,
-                    ),
-                    label: _displayOptionLabel(
-                      context,
-                      question.id,
-                      option.value,
-                    ),
-                    isSelected: isSelected,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      _handleTravelGroupSelect(option);
-                    },
-                  );
-                },
-                childCount: options.length,
+    return CustomScrollView(
+      controller: _optionsScrollController,
+      slivers: [
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (ctx, index) {
+              final option = options[index];
+              final isSelected = selectedValue == option.value;
+              return Padding(
+                padding: EdgeInsets.only(bottom: index < options.length - 1 ? 8 : 0),
+                child: _CompactOptionRow(
+                  icon: _iconDataFor(question.id, option.value),
+                  label: _displayOptionLabel(context, question.id, option.value),
+                  isSelected: isSelected,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    _handleTravelGroupSelect(option);
+                  },
+                ),
+              );
+            },
+            childCount: options.length,
+          ),
+        ),
+        if (showChildrenSelector)
+          SliverPadding(
+            padding: const EdgeInsets.only(top: 12),
+            sliver: SliverToBoxAdapter(
+              child: _TravelGroupChildrenSelector(
+                selectedValue: selectedChildrenCount,
+                onSelected: _handleTravelGroupChildrenSelect,
               ),
             ),
-            if (selectedValue == 'family_kids')
-              SliverPadding(
-                padding: const EdgeInsets.only(top: 12),
-                sliver: SliverToBoxAdapter(
-                  child: _TravelGroupChildrenSelector(
-                    selectedValue: selectedChildrenCount,
-                    onSelected: _handleTravelGroupChildrenSelect,
-                  ),
-                ),
-              ),
-            const SliverPadding(padding: EdgeInsets.only(bottom: 4)),
-          ],
-        );
-      },
-    );
-  }
-
-  double _computeGridAspectRatio({
-    required int optionCount,
-    required double availableWidth,
-    required double availableHeight,
-    required double spacing,
-    required int columns,
-  }) {
-    if (optionCount > 4) return 0.95;
-    final numRows = (optionCount / columns).ceil();
-    final tileWidth = (availableWidth - spacing * (columns - 1)) / columns;
-    final tileHeight =
-        (availableHeight - spacing * (numRows - 1)) / numRows;
-    if (tileHeight <= 0 || tileWidth <= 0) return 1.0;
-    return (tileWidth / tileHeight).clamp(0.5, 3.0);
-  }
-
-  // ── Centralized icon helper ───────────────────────────────────────────────
-  Widget _questionOptionIcon(
-    String questionId,
-    String value,
-    bool isSelected,
-    BuildContext context,
-  ) {
-    final cs = Theme.of(context).colorScheme;
-    final color = isSelected
-        ? cs.primary
-        : cs.onSurface.withValues(alpha: 0.35);
-    return Semantics(
-      label: '$questionId.$value',
-      child: Icon(_iconDataFor(questionId, value), color: color, size: 32),
+          ),
+        const SliverPadding(padding: EdgeInsets.only(bottom: 4)),
+      ],
     );
   }
 
@@ -834,8 +797,8 @@ class _QuestionPageState extends State<QuestionPage> {
         return switch (value) {
           'solo' => Icons.person_outline_rounded,
           'partner' => Icons.favorite_border_rounded,
-          'family_no_kids' => Icons.people_outline_rounded,
           'family_kids' => Icons.family_restroom_rounded,
+          'solo_parent' => Icons.escalator_warning_rounded,
           _ => Icons.help_outline_rounded,
         };
       case 'work_arrangement':
@@ -863,16 +826,6 @@ class _QuestionPageState extends State<QuestionPage> {
           'need_transit' => Icons.tram_outlined,
           'avoid_expensive' => Icons.price_change_outlined,
           _ => Icons.adjust_rounded,
-        };
-      case 'argentina_origin':
-        return switch (value) {
-          'buenos_aires' => Icons.location_city_outlined,
-          'cordoba' => Icons.place_outlined,
-          'mendoza' => Icons.landscape_outlined,
-          'rosario' => Icons.anchor_outlined,
-          'salta_jujuy' => Icons.forest_outlined,
-          'litoral' => Icons.water_outlined,
-          _ => Icons.add_location_alt_outlined,
         };
       case 'preferred_city':
         return switch (value) {
@@ -2064,17 +2017,16 @@ class _SelectedPreferredCityCard extends StatelessWidget {
   }
 }
 
-// ─── Iconic grid card — unified card for all standard question options ─────────
-
-class _IconicGridCard extends StatelessWidget {
-  const _IconicGridCard({
+// ── Compact horizontal option row (~44px) ────────────────────────────────────
+class _CompactOptionRow extends StatelessWidget {
+  const _CompactOptionRow({
     required this.icon,
     required this.label,
     required this.isSelected,
     required this.onTap,
   });
 
-  final Widget icon;
+  final IconData icon;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
@@ -2092,69 +2044,117 @@ class _IconicGridCard extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+          height: 44,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
             color: isSelected
-                ? cs.primary.withValues(alpha: 0.12)
+                ? cs.primary.withValues(alpha: 0.10)
                 : cs.surfaceContainerHighest,
             border: isSelected
                 ? Border.all(color: cs.primary, width: 1.5)
-                : Border.all(
-                    color: cs.outline.withValues(alpha: 0.25),
-                  ),
-            borderRadius: BorderRadius.circular(14),
+                : Border.all(color: cs.outline.withValues(alpha: 0.20)),
+            borderRadius: BorderRadius.circular(12),
           ),
-          child: Stack(
+          child: Row(
             children: [
-              // Centered content
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(width: 32, height: 32, child: icon),
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Text(
-                        label,
-                        style: tt.bodyMedium?.copyWith(
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w400,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+              Icon(
+                icon,
+                size: 20,
+                color: isSelected
+                    ? cs.primary
+                    : cs.onSurface.withValues(alpha: 0.40),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: tt.bodyMedium?.copyWith(
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              // Checkmark indicator — top-right corner
-              Positioned(
-                top: 0,
-                right: 0,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isSelected ? cs.primary : Colors.transparent,
-                    border: isSelected
-                        ? null
-                        : Border.all(
-                            color: cs.outline.withValues(alpha: 0.3),
-                          ),
-                  ),
-                  child: isSelected
-                      ? const Icon(Icons.check, size: 10, color: Colors.white)
-                      : null,
+              const SizedBox(width: 8),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected ? cs.primary : Colors.transparent,
+                  border: isSelected
+                      ? null
+                      : Border.all(
+                          color: cs.outline.withValues(alpha: 0.35),
+                        ),
                 ),
+                child: isSelected
+                    ? const Icon(Icons.check, size: 10, color: Colors.white)
+                    : null,
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Priority pill chip (multi-select) ────────────────────────────────────────
+class _PriorityChip extends StatelessWidget {
+  const _PriorityChip({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? cs.primary.withValues(alpha: 0.12)
+              : cs.surfaceContainerHighest,
+          border: isSelected
+              ? Border.all(color: cs.primary, width: 1.5)
+              : Border.all(color: cs.outline.withValues(alpha: 0.20)),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected
+                  ? cs.primary
+                  : cs.onSurface.withValues(alpha: 0.45),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: tt.labelMedium?.copyWith(
+                color: isSelected ? cs.primary : cs.onSurface,
+                fontWeight:
+                    isSelected ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -3342,4 +3342,281 @@ String _localizedText(
     'es' => es,
     _ => en,
   };
+}
+
+// ── Location pre-check screen (shown before step 1 in strategic flow) ─────────
+//
+// Case A: GPS already granted + city detected → confirmation
+// Case B: Not asked yet → permission request
+// Case C: Denied / permanently denied → manual Argentine city picker
+class _LocationPrecheck extends StatefulWidget {
+  const _LocationPrecheck({
+    required this.locationController,
+    required this.onComplete,
+  });
+
+  final LocationController locationController;
+
+  /// Called when the user completes this screen.
+  /// [argentineOrigin] is non-null only in Case C when user picks a city.
+  final void Function(String? argentineOrigin) onComplete;
+
+  @override
+  State<_LocationPrecheck> createState() => _LocationPrecheckState();
+}
+
+class _LocationPrecheckState extends State<_LocationPrecheck> {
+  bool _isRequesting = false;
+  String? _selectedOrigin;
+
+  // Argentine origin options (same as removed argentina_origin question)
+  static const _argentineOrigins = [
+    ('buenos_aires', Icons.location_city_outlined),
+    ('cordoba', Icons.place_outlined),
+    ('mendoza', Icons.landscape_outlined),
+    ('rosario', Icons.anchor_outlined),
+    ('salta_jujuy', Icons.forest_outlined),
+    ('litoral', Icons.water_outlined),
+    ('other_origin', Icons.add_location_alt_outlined),
+  ];
+
+  String _originLabel(BuildContext context, String value) {
+    return switch (value) {
+      'buenos_aires' => 'Buenos Aires',
+      'cordoba' => 'Córdoba',
+      'mendoza' => 'Mendoza',
+      'rosario' => 'Rosario',
+      'salta_jujuy' => 'Salta / Jujuy',
+      'litoral' => _localizedText(
+        context,
+        pt: 'Litoral (Entre Ríos, Corrientes…)',
+        es: 'Litoral (Entre Ríos, Corrientes…)',
+        en: 'Litoral (Entre Ríos, Corrientes…)',
+      ),
+      _ => _localizedText(
+        context,
+        pt: 'Outro lugar',
+        es: 'Otro lugar',
+        en: 'Other',
+      ),
+    };
+  }
+
+  Future<void> _requestPermission() async {
+    setState(() => _isRequesting = true);
+    await widget.locationController.requestPermissionAndCapture();
+    if (mounted) setState(() => _isRequesting = false);
+    // After requesting, rebuild will show Case A or C
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final lc = widget.locationController;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    final hasGranted = lc.hasGrantedPermission;
+    final isPermanentlyDenied = lc.isPermanentlyDenied;
+    final hasSavedLocation = lc.savedLocation != null;
+
+    // Case A: GPS granted + city detected
+    if (hasGranted && hasSavedLocation) {
+      final city = lc.savedLocation!.cityName.isNotEmpty
+          ? lc.savedLocation!.cityName
+          : lc.savedLocation!.stateName;
+      final country = lc.savedLocation!.countryName;
+      return _buildConfirmation(context, cs, tt, city, country);
+    }
+
+    // Case C: permanently denied → manual picker
+    if (isPermanentlyDenied || lc.permissionStatus == 'denied') {
+      return _buildManualPicker(context, cs, tt);
+    }
+
+    // Case B: not asked yet → show request UI
+    return _buildRequestScreen(context, cs, tt);
+  }
+
+  Widget _buildConfirmation(
+    BuildContext context,
+    ColorScheme cs,
+    TextTheme tt,
+    String city,
+    String country,
+  ) {
+    final title = _localizedText(
+      context,
+      pt: 'Localização detectada',
+      es: 'Ubicación detectada',
+      en: 'Location detected',
+    );
+    final subtitle = _localizedText(
+      context,
+      pt: 'Encontramos você em $city, $country. Usaremos isso para personalizar sua jornada.',
+      es: 'Te encontramos en $city, $country. Lo usaremos para personalizar tu experiencia.',
+      en: 'We found you in $city, $country. We\'ll use this to personalise your journey.',
+    );
+    final ctaLabel = _localizedText(
+      context,
+      pt: 'Continuar',
+      es: 'Continuar',
+      en: 'Continue',
+    );
+
+    return FrostedPanel(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Spacer(),
+          Icon(Icons.my_location_rounded, size: 40, color: cs.primary),
+          const SizedBox(height: 20),
+          Text(title, style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 12),
+          Text(subtitle, style: tt.bodyMedium),
+          const Spacer(),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () => widget.onComplete(null),
+              child: Text(ctaLabel),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRequestScreen(
+    BuildContext context,
+    ColorScheme cs,
+    TextTheme tt,
+  ) {
+    final title = _localizedText(
+      context,
+      pt: 'Onde você está na Argentina?',
+      es: '¿Desde dónde salís en Argentina?',
+      en: 'Where are you in Argentina?',
+    );
+    final subtitle = _localizedText(
+      context,
+      pt: 'Sua localização nos ajuda a estimar distâncias e personalizar recomendações.',
+      es: 'Tu ubicación nos ayuda a estimar distancias y personalizar recomendaciones.',
+      en: 'Your location helps us estimate distances and personalise recommendations.',
+    );
+    final ctaLabel = _localizedText(
+      context,
+      pt: 'Usar minha localização',
+      es: 'Usar mi ubicación',
+      en: 'Use my location',
+    );
+    final skipLabel = _localizedText(
+      context,
+      pt: 'Escolher manualmente',
+      es: 'Elegir manualmente',
+      en: 'Choose manually',
+    );
+
+    return FrostedPanel(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Spacer(),
+          Icon(Icons.location_on_outlined, size: 40, color: cs.primary),
+          const SizedBox(height: 20),
+          Text(title, style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 12),
+          Text(subtitle, style: tt.bodyMedium),
+          const Spacer(),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: _isRequesting ? null : _requestPermission,
+              child: _isRequesting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(ctaLabel),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () => _showManualPickerSheet(context),
+              child: Text(skipLabel),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildManualPicker(
+    BuildContext context,
+    ColorScheme cs,
+    TextTheme tt,
+  ) {
+    final title = _localizedText(
+      context,
+      pt: 'De onde na Argentina você vem?',
+      es: '¿De dónde en Argentina venís?',
+      en: 'Where in Argentina are you from?',
+    );
+    final ctaLabel = _localizedText(
+      context,
+      pt: 'Continuar',
+      es: 'Continuar',
+      en: 'Continue',
+    );
+
+    return FrostedPanel(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 16),
+          Expanded(
+            child: ListView.separated(
+              itemCount: _argentineOrigins.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 8),
+              itemBuilder: (ctx, index) {
+                final (value, iconData) = _argentineOrigins[index];
+                final isSelected = _selectedOrigin == value;
+                return _CompactOptionRow(
+                  icon: iconData,
+                  label: _originLabel(context, value),
+                  isSelected: isSelected,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    setState(() => _selectedOrigin = value);
+                  },
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: _selectedOrigin != null
+                  ? () => widget.onComplete(_selectedOrigin)
+                  : null,
+              child: Text(ctaLabel),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showManualPickerSheet(BuildContext context) async {
+    // Dismiss current and go to manual picker by simulating a permanent deny
+    await widget.locationController.deferPermission();
+    if (mounted) setState(() {});
+  }
 }
