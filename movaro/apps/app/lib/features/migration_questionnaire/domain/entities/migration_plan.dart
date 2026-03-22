@@ -19,6 +19,7 @@ class MigrationPlan {
     this.selectedPriorities = const [],
     this.selectedConstraints = const [],
     this.recommendedCity,
+    this.preferredCity,
     this.candidateCities = const [],
     this.cityRecommendationReasons = const [],
     this.isCityConfirmed = false,
@@ -39,6 +40,7 @@ class MigrationPlan {
   final List<String> selectedPriorities;
   final List<String> selectedConstraints;
   final City? recommendedCity;
+  final City? preferredCity;
   final List<City> candidateCities;
   final List<String> cityRecommendationReasons;
   final bool isCityConfirmed;
@@ -59,6 +61,7 @@ class MigrationPlan {
     List<String>? selectedPriorities,
     List<String>? selectedConstraints,
     City? recommendedCity,
+    Object? preferredCity = _migrationPlanNoChange,
     List<City>? candidateCities,
     List<String>? cityRecommendationReasons,
     bool? isCityConfirmed,
@@ -81,6 +84,9 @@ class MigrationPlan {
       selectedPriorities: selectedPriorities ?? this.selectedPriorities,
       selectedConstraints: selectedConstraints ?? this.selectedConstraints,
       recommendedCity: recommendedCity ?? this.recommendedCity,
+      preferredCity: identical(preferredCity, _migrationPlanNoChange)
+          ? this.preferredCity
+          : preferredCity as City?,
       candidateCities: candidateCities ?? this.candidateCities,
       cityRecommendationReasons:
           cityRecommendationReasons ?? this.cityRecommendationReasons,

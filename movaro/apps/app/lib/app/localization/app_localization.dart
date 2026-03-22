@@ -100,6 +100,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
           es: '¿De dónde en Argentina venís?',
           en: 'Where in Argentina are you from?',
         );
+      case 'preferred_city':
+        return preferredCityQuestionTitle();
       default:
         return questionId;
     }
@@ -132,6 +134,19 @@ extension AppLocalizationsFormatting on AppLocalizations {
         return workArrangementLabel(value);
       case 'argentina_origin':
         return argentinaOriginLabel(value);
+      case 'preferred_city':
+        return preferredCityOptionLabel(value);
+      default:
+        return value;
+    }
+  }
+
+  String preferredCityOptionLabel(String value) {
+    switch (value) {
+      case 'choose_on_map':
+        return preferredCityChooseOnMap();
+      case 'dont_know':
+        return preferredCityDontKnow();
       default:
         return value;
     }
@@ -726,7 +741,7 @@ extension AppLocalizationsFormatting on AppLocalizations {
       _localizedText(pt: '~4 min', es: '~4 min', en: '~4 min');
 
   String questionnaireVariantStrategicQuestionCount() =>
-      _localizedText(pt: '9 perguntas', es: '9 preguntas', en: '9 questions');
+      _localizedText(pt: '10 perguntas', es: '10 preguntas', en: '10 questions');
 
   String questionnaireVariantStrategicAction() => _localizedText(
     pt: 'Escolher plano estrategico',
@@ -1571,6 +1586,147 @@ extension AppLocalizationsFormatting on AppLocalizations {
     pt: 'Selecione a data de partida',
     es: 'Seleccioná la fecha de partida',
     en: 'Select departure date',
+  );
+
+  // ── Redo Questionnaire Confirmation Dialog ──────────────────────────────
+
+  String redoQuestionnaireDialogTitle() => _localizedText(
+    pt: 'Refazer questionário?',
+    es: '¿Rehacer cuestionario?',
+    en: 'Redo questionnaire?',
+  );
+
+  String redoQuestionnaireDialogBody() => _localizedText(
+    pt: 'Suas respostas anteriores serão apagadas e você vai recomeçar desde a primeira pergunta.',
+    es: 'Tus respuestas anteriores se borrarán y vas a recomenzar desde la primera pregunta.',
+    en: 'Your previous answers will be erased and you will start over from the first question.',
+  );
+
+  String redoQuestionnaireDialogWarning() => _localizedText(
+    pt: 'A cidade recomendada e o plano atual serão descartados.',
+    es: 'La ciudad recomendada y el plan actual se descartarán.',
+    en: 'The recommended city and current plan will be discarded.',
+  );
+
+  String redoQuestionnaireDialogConfirm() => _localizedText(
+    pt: 'Sim, começar do zero',
+    es: 'Sí, empezar de cero',
+    en: 'Yes, start from scratch',
+  );
+
+  String redoQuestionnaireDialogCancel() => _localizedText(
+    pt: 'Cancelar — manter resultado',
+    es: 'Cancelar — mantener resultado',
+    en: 'Cancel — keep result',
+  );
+
+  // ── City Picker Bottom Sheet ──────────────────────────────────────────────
+
+  String cityPickerMapTab() => _localizedText(
+    pt: 'Mapa',
+    es: 'Mapa',
+    en: 'Map',
+  );
+
+  String cityPickerListTab() => _localizedText(
+    pt: 'Lista',
+    es: 'Lista',
+    en: 'List',
+  );
+
+  String cityPickerSearchHint() => _localizedText(
+    pt: 'Buscar cidade (ex: Floripa, San Pablo...)',
+    es: 'Buscar ciudad (ej: Floripa, San Pablo...)',
+    en: 'Search city (e.g. Floripa, São Paulo...)',
+  );
+
+  String cityPickerConfirmLabel() => _localizedText(
+    pt: 'Escolher esta cidade',
+    es: 'Elegir esta ciudad',
+    en: 'Choose this city',
+  );
+
+  String cityPickerSkipLabel() => _localizedText(
+    pt: 'Ainda não sei, pular',
+    es: 'Todavía no sé, omitir',
+    en: "I don't know yet, skip",
+  );
+
+  String cityPickerNoResults() => _localizedText(
+    pt: 'Nenhuma cidade encontrada',
+    es: 'Ninguna ciudad encontrada',
+    en: 'No cities found',
+  );
+
+  // ── Preferred City Questionnaire Step ──────────────────────────────────
+
+  String preferredCityQuestionTitle() => _localizedText(
+    pt: 'Você já tem alguma cidade em mente?',
+    es: '¿Ya tenés alguna ciudad en mente?',
+    en: 'Do you already have a city in mind?',
+  );
+
+  String preferredCityChooseOnMap() => _localizedText(
+    pt: 'Sim, quero escolher no mapa',
+    es: 'Sí, quiero elegir en el mapa',
+    en: 'Yes, I want to choose on the map',
+  );
+
+  String preferredCityDontKnow() => _localizedText(
+    pt: 'Ainda não sei, me surpreenda',
+    es: 'Todavía no sé, sorprendeme',
+    en: "I don't know yet, surprise me",
+  );
+
+  // ── Anti-Anchoring (Result Reveal) ─────────────────────────────────────
+
+  String antiAnchorReinforcementTitle(String cityName) => _localizedText(
+    pt: 'Sua intuição estava certa!',
+    es: '¡Tu intuición estaba bien!',
+    en: 'Your intuition was right!',
+  );
+
+  String antiAnchorReinforcementBody(String cityName) => _localizedText(
+    pt: '$cityName também é a nossa recomendação com base no seu perfil.',
+    es: '$cityName también es nuestra recomendación según tu perfil.',
+    en: '$cityName is also our recommendation based on your profile.',
+  );
+
+  String antiAnchorComparisonTitle(String preferredCity) => _localizedText(
+    pt: 'Você pensou em $preferredCity — ótima cidade!',
+    es: 'Pensaste en $preferredCity — ¡gran ciudad!',
+    en: 'You thought about $preferredCity — great city!',
+  );
+
+  String antiAnchorComparisonBody(String preferredCity, String recommendedCity) =>
+      _localizedText(
+    pt: 'Mas com base no seu perfil, $recommendedCity pode ser uma opção ainda melhor. Veja a comparação:',
+    es: 'Pero según tu perfil, $recommendedCity podría ser una opción aún mejor. Mirá la comparación:',
+    en: 'But based on your profile, $recommendedCity might be an even better option. See the comparison:',
+  );
+
+  String antiAnchorGoWithPreferred(String cityName) => _localizedText(
+    pt: 'Continuar com $cityName',
+    es: 'Continuar con $cityName',
+    en: 'Continue with $cityName',
+  );
+
+  String antiAnchorTryRecommended(String cityName) => _localizedText(
+    pt: 'Ver detalhes de $cityName',
+    es: 'Ver detalles de $cityName',
+    en: 'See details of $cityName',
+  );
+
+  String antiAnchorStrength() => _localizedText(
+    pt: 'Ponto forte',
+    es: 'Punto fuerte',
+    en: 'Strength',
+  );
+
+  String antiAnchorAttention() => _localizedText(
+    pt: 'Ponto de atenção',
+    es: 'Punto de atención',
+    en: 'Attention point',
   );
 
   // ─────────────────────────────────────────────────────────────────────────

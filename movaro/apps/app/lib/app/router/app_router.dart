@@ -303,6 +303,7 @@ class AppRouter {
           QuestionPage(
             controller: migrationQuestionnaireController,
             locationController: locationController,
+            citiesController: citiesController,
           ),
         );
       case AppRoutes.locationPermission:

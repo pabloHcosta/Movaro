@@ -20,6 +20,8 @@ import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/core/widgets/visual_data_cards.dart';
+import 'package:movaro_app/features/cities/application/cities_controller.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_picker_bottom_sheet.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/available_capital_ranges_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/option.dart';
@@ -31,11 +33,13 @@ class QuestionPage extends StatefulWidget {
   const QuestionPage({
     required this.controller,
     required this.locationController,
+    required this.citiesController,
     super.key,
   });
 
   final MigrationQuestionnaireController controller;
   final LocationController locationController;
+  final CitiesController citiesController;
 
   @override
   State<QuestionPage> createState() => _QuestionPageState();
@@ -955,6 +959,13 @@ class _QuestionPageState extends State<QuestionPage> {
           case 'prefer_not_say':
             return Icons.lock_outline_rounded;
         }
+      case 'preferred_city':
+        switch (value) {
+          case 'choose_on_map':
+            return Icons.map_outlined;
+          case 'dont_know':
+            return Icons.explore_outlined;
+        }
       case 'constraints':
         switch (value) {
           case 'prefer_south':
@@ -1154,7 +1165,41 @@ class _QuestionPageState extends State<QuestionPage> {
       _inlineHint = null;
     });
 
+    // Special handling: preferred_city → open city picker map.
+    if (question.id == 'preferred_city' && option.value == 'choose_on_map') {
+      await _openPreferredCityPicker(question);
+      return;
+    }
+
     controller.selectAnswer(question.id, option.value);
+  }
+
+  Future<void> _openPreferredCityPicker(Question question) async {
+    // Ensure cities are loaded.
+    await widget.citiesController.loadCatalog();
+    if (!mounted) return;
+
+    final cities = widget.citiesController.catalog;
+    if (cities.isEmpty) return;
+
+    final selected = await CityPickerBottomSheet.show(
+      context: context,
+      cities: cities,
+      title: context.l10n.preferredCityQuestionTitle(),
+      subtitle: context.l10n.cityPickerSearchHint(),
+      showSkipOption: true,
+      onSkip: () {
+        controller.selectAnswer(question.id, 'dont_know');
+      },
+    );
+
+    if (!mounted) return;
+
+    if (selected != null) {
+      // Store the city name as the answer value so the generator can look it up.
+      controller.selectAnswer(question.id, selected.id);
+      controller.setPreferredCity(selected);
+    }
   }
 
   void _handleTravelGroupSelect(Option option) {
@@ -1198,6 +1243,8 @@ class _QuestionPageState extends State<QuestionPage> {
     switch (question.id) {
       case 'origin_country':
         return context.l10n.questionnaireSectionOrigin;
+      case 'preferred_city':
+        return context.l10n.questionnaireSectionPreferences;
       case 'timeline':
       case 'travel_group':
         return context.l10n.questionnaireSectionBasicProfile;

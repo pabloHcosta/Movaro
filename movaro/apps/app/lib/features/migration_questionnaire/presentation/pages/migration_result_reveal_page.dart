@@ -75,6 +75,197 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
     );
   }
 
+  Future<void> _confirmAndRedo() async {
+    final confirmed = await _showRedoConfirmationDialog();
+    if (confirmed != true || !mounted) return;
+
+    await widget.controller.clearCurrentPlan();
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, AppRoutes.migrationQuestionnaire);
+  }
+
+  Future<bool?> _showRedoConfirmationDialog() {
+    final l10n = context.l10n;
+
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF111827),
+              border: Border.all(color: const Color(0xFF1E2636)),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  blurRadius: 48,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Icon
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0C1A2E),
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Icon(
+                          Icons.refresh_rounded,
+                          color: AppColors.primary,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Title
+                      Text(
+                        l10n.redoQuestionnaireDialogTitle(),
+                        style: Theme.of(
+                          dialogContext,
+                        ).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFFF0F6FC),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      // Body
+                      Text(
+                        l10n.redoQuestionnaireDialogBody(),
+                        style: Theme.of(
+                          dialogContext,
+                        ).textTheme.bodyLarge?.copyWith(
+                          color: const Color(0xFF6B7280),
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      // Warning callout
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withValues(alpha: 0.08),
+                          border: Border.all(
+                            color: AppColors.warning.withValues(alpha: 0.2),
+                          ),
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline_rounded,
+                              color: AppColors.warning,
+                              size: 13,
+                            ),
+                            const SizedBox(width: 7),
+                            Expanded(
+                              child: Text(
+                                l10n.redoQuestionnaireDialogWarning(),
+                                style: Theme.of(dialogContext)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: AppColors.warning,
+                                      height: 1.4,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(height: 1, color: const Color(0xFF0D1117)),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                  child: Column(
+                    children: [
+                      // Confirm button
+                      GestureDetector(
+                        onTap: () => Navigator.of(dialogContext).pop(true),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1F6FEB),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.refresh_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                l10n.redoQuestionnaireDialogConfirm(),
+                                style: Theme.of(dialogContext)
+                                    .textTheme
+                                    .labelLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Cancel button
+                      GestureDetector(
+                        onTap: () => Navigator.of(dialogContext).pop(false),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1C2128),
+                            border: Border.all(
+                              color: const Color(0xFF2D333B),
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            l10n.redoQuestionnaireDialogCancel(),
+                            textAlign: TextAlign.center,
+                            style: Theme.of(dialogContext)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFF6B7280),
+                                ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _showCompatibilityBreakdown(City city, int compatibilityPct) {
     final l10n = context.l10n;
     final dims = MigrationPlanGenerator.cityDimensionsPublic(city);
@@ -193,6 +384,11 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
             ? plan.cityRecommendationReasons
             : recommendedCity.recommendationReasons;
 
+        final preferredCity = plan.preferredCity;
+        final hasPreferred = preferredCity != null;
+        final preferredMatchesRecommended =
+            hasPreferred && preferredCity.id == recommendedCity.id;
+
         return Scaffold(
           body: FadeTransition(
             opacity: _fadeIn,
@@ -209,6 +405,25 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                         child: ListView(
                           padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
                           children: [
+                            // ── Anti-anchoring: reinforcement ──
+                            if (hasPreferred && preferredMatchesRecommended)
+                              _AntiAnchorReinforcementBanner(
+                                cityName: recommendedCity.name,
+                              ),
+
+                            // ── Anti-anchoring: comparison ──
+                            if (hasPreferred && !preferredMatchesRecommended)
+                              _AntiAnchorComparisonSection(
+                                preferredCity: preferredCity,
+                                recommendedCity: recommendedCity,
+                                onGoWithPreferred: () =>
+                                    _openCityDetail(preferredCity),
+                                onTryRecommended: () =>
+                                    _openCityDetail(recommendedCity),
+                              ),
+
+                            if (hasPreferred) const SizedBox(height: 16),
+
                             _CompatibilityCard(
                               city: recommendedCity,
                               compatibilityPct: compatibilityPct,
@@ -245,10 +460,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                     child: _FooterCta(
                       city: recommendedCity,
                       onViewDetails: () => _openCityDetail(recommendedCity),
-                      onRedo: () => Navigator.pushReplacementNamed(
-                        context,
-                        AppRoutes.migrationQuestionnaire,
-                      ),
+                      onRedo: _confirmAndRedo,
                     ),
                   ),
                 ],
@@ -861,6 +1073,253 @@ class _RevealSkeleton extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─── Anti-Anchoring: Reinforcement Banner ───────────────────────────────────
+
+class _AntiAnchorReinforcementBanner extends StatelessWidget {
+  const _AntiAnchorReinforcementBanner({required this.cityName});
+
+  final String cityName;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return FrostedPanel(
+      padding: const EdgeInsets.all(16),
+      borderRadius: BorderRadius.circular(20),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.thumb_up_alt_rounded,
+              color: AppColors.success,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.antiAnchorReinforcementTitle(cityName),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.antiAnchorReinforcementBody(cityName),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Anti-Anchoring: Comparison Section ─────────────────────────────────────
+
+class _AntiAnchorComparisonSection extends StatelessWidget {
+  const _AntiAnchorComparisonSection({
+    required this.preferredCity,
+    required this.recommendedCity,
+    required this.onGoWithPreferred,
+    required this.onTryRecommended,
+  });
+
+  final City preferredCity;
+  final City recommendedCity;
+  final VoidCallback onGoWithPreferred;
+  final VoidCallback onTryRecommended;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final textSoft = AppColors.textSoftFor(context);
+
+    // Build dimension comparisons.
+    final prefDims = MigrationPlanGenerator.cityDimensionsPublic(preferredCity);
+    final recDims = MigrationPlanGenerator.cityDimensionsPublic(recommendedCity);
+
+    // Find key differences (where recommended beats preferred by >10 points).
+    final strengths = <String>[];
+    final attentionPoints = <String>[];
+
+    for (final key in recDims.keys) {
+      final recVal = recDims[key] ?? 0;
+      final prefVal = prefDims[key] ?? 0;
+      final diff = recVal - prefVal;
+      if (diff > 0.10) {
+        strengths.add(l10n.dimensionLabel(key));
+      } else if (diff < -0.10) {
+        attentionPoints.add(l10n.dimensionLabel(key));
+      }
+    }
+
+    return FrostedPanel(
+      padding: const EdgeInsets.all(18),
+      borderRadius: BorderRadius.circular(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(alpha: 0.14),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.compare_arrows_rounded,
+                  color: AppColors.warning,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.antiAnchorComparisonTitle(preferredCity.name),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.antiAnchorComparisonBody(
+                        preferredCity.name,
+                        recommendedCity.name,
+                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: textSoft,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Strengths of recommended city
+          if (strengths.isNotEmpty) ...[
+            Text(
+              '${l10n.antiAnchorStrength()} · ${recommendedCity.name}',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.success,
+              ),
+            ),
+            const SizedBox(height: 6),
+            ...strengths.map(
+              (s) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  children: [
+                    Icon(Icons.add_circle_outline, size: 14, color: AppColors.success),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(s, style: Theme.of(context).textTheme.bodySmall),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // Attention points (where preferred city does better)
+          if (attentionPoints.isNotEmpty) ...[
+            Text(
+              '${l10n.antiAnchorAttention()} · ${recommendedCity.name}',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.warning,
+              ),
+            ),
+            const SizedBox(height: 6),
+            ...attentionPoints.map(
+              (s) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 14, color: AppColors.warning),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(s, style: Theme.of(context).textTheme.bodySmall),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // Dual CTA
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onGoWithPreferred,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    l10n.antiAnchorGoWithPreferred(preferredCity.name),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton(
+                  onPressed: onTryRecommended,
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    l10n.antiAnchorTryRecommended(recommendedCity.name),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

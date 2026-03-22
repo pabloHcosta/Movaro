@@ -64,6 +64,25 @@ class QuestionRepositoryImpl implements QuestionRepository {
         options: originOptions,
       ).toEntity(),
       QuestionModel(
+        id: 'preferred_city',
+        title: 'preferred_city',
+        type: 'single_card',
+        variants: QuestionnaireVariant.values,
+        isOptional: true,
+        options: const [
+          OptionModel(
+            id: 'choose_on_map',
+            label: 'choose_on_map',
+            value: 'choose_on_map',
+          ),
+          OptionModel(
+            id: 'dont_know',
+            label: 'dont_know',
+            value: 'dont_know',
+          ),
+        ],
+      ).toEntity(),
+      QuestionModel(
         id: 'timeline',
         title: 'timeline',
         type: 'single_chip',
