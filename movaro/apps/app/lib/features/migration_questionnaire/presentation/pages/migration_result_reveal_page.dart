@@ -349,25 +349,22 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               ),
                         ),
                         const SizedBox(height: 8),
-                        Row(
+                        Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 10,
+                          runSpacing: 8,
                           children: [
-                            _StarRow(
-                              stars: overallStars,
-                              size: 28,
-                              color: overallStarColor,
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _StarRow(
+                                  stars: overallStars,
+                                  size: 28,
+                                  color: overallStarColor,
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 10),
-                            Text(
-                              '${overallStars.toStringAsFixed(1)}/5',
-                              style: Theme.of(sheetCtx)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    color: overallStarColor,
-                                  ),
-                            ),
-                            const Spacer(),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
@@ -379,6 +376,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               ),
                               child: Text(
                                 compatLabel,
+                                overflow: TextOverflow.ellipsis,
                                 style: Theme.of(sheetCtx)
                                     .textTheme
                                     .labelSmall
