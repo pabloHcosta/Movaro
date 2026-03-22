@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
@@ -420,49 +421,9 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   Widget _buildVariantSelector(BuildContext context) {
-    final l10n = context.l10n;
     _prepareScrollableScope('variant_selector');
-
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _QuestionnaireVariantHeader(
-            eyebrow: l10n.questionnaireVariantEyebrow(),
-            title: l10n.questionnaireVariantHeroTitle(),
-            body: l10n.questionnaireVariantHeroBody(),
-          ),
-          const SizedBox(height: 10),
-          _QuestionnaireVariantPrimaryCard(
-            badge: l10n.questionnaireVariantLeanBadge(),
-            title: l10n.bmpVariantLeanTitle,
-            body: l10n.questionnaireVariantLeanDescription(),
-            timeValue: l10n.questionnaireVariantLeanTime(),
-            timeLabel: l10n.questionnaireVariantTimeLabel(),
-            questionValue: l10n.questionnaireVariantLeanQuestionCount(),
-            questionLabel: l10n.questionnaireVariantCountLabel(),
-            actionLabel: l10n.questionnaireVariantLeanAction(),
-            onTap: () => controller.selectVariant(QuestionnaireVariant.lean),
-          ),
-          const SizedBox(height: 14),
-          _QuestionnaireVariantSeparator(
-            label: l10n.questionnaireVariantSeparator(),
-          ),
-          const SizedBox(height: 14),
-          _QuestionnaireVariantSecondaryCard(
-            badge: l10n.questionnaireVariantStrategicBadge(),
-            title: l10n.bmpVariantStrategicTitle,
-            body: l10n.questionnaireVariantStrategicDescription(),
-            timeValue: l10n.questionnaireVariantStrategicTime(),
-            timeLabel: l10n.questionnaireVariantTimeLabel(),
-            questionValue: l10n.questionnaireVariantStrategicQuestionCount(),
-            questionLabel: l10n.questionnaireVariantCountLabel(),
-            actionLabel: l10n.questionnaireVariantStrategicAction(),
-            onTap: () =>
-                controller.selectVariant(QuestionnaireVariant.strategic),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
+    return _VariantSelectorBody(
+      onSelect: (variant) => controller.selectVariant(variant),
     );
   }
 
@@ -1597,329 +1558,268 @@ class _QuestionnaireVariantIconButton extends StatelessWidget {
   }
 }
 
-class _QuestionnaireVariantHeader extends StatelessWidget {
-  const _QuestionnaireVariantHeader({
-    required this.eyebrow,
-    required this.title,
-    required this.body,
-  });
+// ─── Variant selector body (stateful — owns selection state) ──────────────────
 
-  final String eyebrow;
-  final String title;
-  final String body;
+class _VariantSelectorBody extends StatefulWidget {
+  const _VariantSelectorBody({required this.onSelect});
+
+  final ValueChanged<QuestionnaireVariant> onSelect;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          eyebrow,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF58A6FF),
-            letterSpacing: 1.2,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFFF0F6FC),
-            letterSpacing: -0.5,
-            height: 1.2,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          body,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Color(0xFF6B7280),
-            height: 1.5,
-          ),
-        ),
-      ],
-    );
-  }
+  State<_VariantSelectorBody> createState() => _VariantSelectorBodyState();
 }
 
-class _QuestionnaireVariantPrimaryCard extends StatelessWidget {
-  const _QuestionnaireVariantPrimaryCard({
-    required this.badge,
-    required this.title,
-    required this.body,
-    required this.timeValue,
-    required this.timeLabel,
-    required this.questionValue,
-    required this.questionLabel,
-    required this.actionLabel,
-    required this.onTap,
-  });
+class _VariantSelectorBodyState extends State<_VariantSelectorBody> {
+  QuestionnaireVariant _selected = QuestionnaireVariant.lean;
 
-  final String badge;
-  final String title;
-  final String body;
-  final String timeValue;
-  final String timeLabel;
-  final String questionValue;
-  final String questionLabel;
-  final String actionLabel;
-  final VoidCallback onTap;
+  void _pick(QuestionnaireVariant v) {
+    if (_selected == v) return;
+    HapticFeedback.selectionClick();
+    setState(() => _selected = v);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0D1F38),
-          border: Border.all(color: const Color(0xFF1D4A70), width: 1.5),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned(
-              top: -20,
-              right: -20,
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1D4A70).withValues(alpha: 0.30),
-                  shape: BoxShape.circle,
-                ),
-              ),
+    final l10n = context.l10n;
+    final cs = Theme.of(context).colorScheme;
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Section 1: what you'll get ───────────────────────────────────
+          _ResultOutcomeHeader(),
+          const SizedBox(height: 20),
+          Divider(height: 1, thickness: 1, color: cs.outline.withValues(alpha: 0.2)),
+          const SizedBox(height: 20),
+          Text(
+            l10n.questionnaireVariantHowLabel(),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: cs.onSurface.withValues(alpha: 0.5),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _QuestionnaireVariantBadge(
-                  backgroundColor: const Color(0xFF0A1A2E),
-                  borderColor: const Color(0xFF1D4A70),
-                  icon: Icons.bolt_rounded,
-                  color: const Color(0xFF58A6FF),
-                  label: badge,
-                ),
-                const SizedBox(height: 14),
-                const SizedBox(
-                  height: 54,
-                  child: CustomPaint(painter: _FastPlanPainter()),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFFF0F6FC),
-                    letterSpacing: -0.4,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  body,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF8B949E),
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    _QuestionnaireVariantStat(
-                      icon: Icons.access_time_rounded,
-                      value: timeValue,
-                      label: timeLabel,
-                      color: const Color(0xFF58A6FF),
-                    ),
-                    const SizedBox(width: 8),
-                    _QuestionnaireVariantStat(
-                      icon: Icons.help_outline_rounded,
-                      value: questionValue,
-                      label: questionLabel,
-                      color: const Color(0xFF58A6FF),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1F6FEB),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        actionLabel,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      const Icon(
-                        Icons.arrow_forward_rounded,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 14),
+          // ── Section 2: plan cards ────────────────────────────────────────
+          _VariantSelectionCard(
+            isSelected: _selected == QuestionnaireVariant.lean,
+            badge: l10n.questionnaireVariantLeanBadge(),
+            badgeIcon: Icons.bolt_rounded,
+            badgeColor: cs.primary,
+            badgeBackground: cs.primary.withValues(alpha: 0.15),
+            title: l10n.bmpVariantLeanTitle,
+            body: l10n.questionnaireVariantLeanDescription(),
+            timeValue: l10n.questionnaireVariantLeanTime(),
+            timeLabel: l10n.questionnaireVariantTimeLabel(),
+            questionValue: l10n.questionnaireVariantLeanQuestionCount(),
+            onTap: () => _pick(QuestionnaireVariant.lean),
+          ),
+          const SizedBox(height: 10),
+          _VariantSelectionCard(
+            isSelected: _selected == QuestionnaireVariant.strategic,
+            badge: l10n.questionnaireVariantStrategicBadge(),
+            badgeIcon: Icons.star_outline_rounded,
+            badgeColor: Colors.amber,
+            badgeBackground: Colors.amber.withValues(alpha: 0.15),
+            title: l10n.bmpVariantStrategicTitle,
+            body: l10n.questionnaireVariantStrategicDescription(),
+            timeValue: l10n.questionnaireVariantStrategicTime(),
+            timeLabel: l10n.questionnaireVariantTimeLabel(),
+            questionValue: l10n.questionnaireVariantStrategicQuestionCount(),
+            onTap: () => _pick(QuestionnaireVariant.strategic),
+          ),
+          const SizedBox(height: 24),
+          // ── Section 3: shared CTA ────────────────────────────────────────
+          _VariantCtaButton(
+            selected: _selected,
+            ctaLabel: l10n.questionnaireVariantCtaLabel(),
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              widget.onSelect(_selected);
+            },
+          ),
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }
 }
 
-class _QuestionnaireVariantSeparator extends StatelessWidget {
-  const _QuestionnaireVariantSeparator({required this.label});
+// ─── Section 1: Result outcome header ─────────────────────────────────────────
 
-  final String label;
+class _ResultOutcomeHeader extends StatelessWidget {
+  const _ResultOutcomeHeader();
+
+  InlineSpan _buildRichItem(
+    BuildContext context,
+    String full,
+    String bold,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final baseStyle = tt.bodyMedium?.copyWith(
+      color: cs.onSurface.withValues(alpha: 0.6),
+    );
+    final boldStyle = tt.bodyMedium?.copyWith(
+      color: cs.onSurface,
+      fontWeight: FontWeight.w600,
+    );
+    final parts = full.split(bold);
+    if (parts.length != 2) return TextSpan(text: full, style: baseStyle);
+    return TextSpan(
+      children: [
+        if (parts[0].isNotEmpty) TextSpan(text: parts[0], style: baseStyle),
+        TextSpan(text: bold, style: boldStyle),
+        if (parts[1].isNotEmpty) TextSpan(text: parts[1], style: baseStyle),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final l10n = context.l10n;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    final items = [
+      (l10n.questionnaireVariantItem1Full(), l10n.questionnaireVariantItem1Bold()),
+      (l10n.questionnaireVariantItem2Full(), l10n.questionnaireVariantItem2Bold()),
+      (l10n.questionnaireVariantItem3Full(), l10n.questionnaireVariantItem3Bold()),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Expanded(
-          child: Divider(height: 1, thickness: 1, color: Color(0xFF1E2636)),
+        Text(
+          l10n.questionnaireVariantHeroTitle(),
+          style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Color(0xFF2D333B),
-              fontWeight: FontWeight.w500,
+        const SizedBox(height: 16),
+        ...items.map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.check_circle_outline_rounded,
+                  color: cs.primary,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: RichText(
+                    text: TextSpan(
+                      children: [_buildRichItem(context, item.$1, item.$2)],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-        const Expanded(
-          child: Divider(height: 1, thickness: 1, color: Color(0xFF1E2636)),
         ),
       ],
     );
   }
 }
 
-class _QuestionnaireVariantSecondaryCard extends StatelessWidget {
-  const _QuestionnaireVariantSecondaryCard({
+// ─── Unified selection card (animated, theme-based) ───────────────────────────
+
+class _VariantSelectionCard extends StatelessWidget {
+  const _VariantSelectionCard({
+    required this.isSelected,
     required this.badge,
+    required this.badgeIcon,
+    required this.badgeColor,
+    required this.badgeBackground,
     required this.title,
     required this.body,
     required this.timeValue,
     required this.timeLabel,
     required this.questionValue,
-    required this.questionLabel,
-    required this.actionLabel,
     required this.onTap,
   });
 
+  final bool isSelected;
   final String badge;
+  final IconData badgeIcon;
+  final Color badgeColor;
+  final Color badgeBackground;
   final String title;
   final String body;
   final String timeValue;
   final String timeLabel;
   final String questionValue;
-  final String questionLabel;
-  final String actionLabel;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
         width: double.infinity,
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF111827),
-          border: Border.all(color: const Color(0xFF1E2636), width: 1.5),
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected
+              ? cs.primary.withValues(alpha: 0.08)
+              : cs.surfaceContainerHighest,
+          border: isSelected
+              ? Border.all(color: cs.primary, width: 2)
+              : Border.all(color: cs.outline.withValues(alpha: 0.3)),
+          borderRadius: BorderRadius.circular(14),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _QuestionnaireVariantBadge(
-              backgroundColor: const Color(0xFF1A1200),
-              borderColor: const Color(0xFF3D2800),
-              icon: Icons.star_outline_rounded,
-              color: const Color(0xFFF59E0B),
-              label: badge,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFFF0F6FC),
-                letterSpacing: -0.3,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _QuestionnaireVariantBadge(
+                    backgroundColor: badgeBackground,
+                    borderColor: badgeColor.withValues(alpha: 0.35),
+                    icon: badgeIcon,
+                    color: badgeColor,
+                    label: badge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    title,
+                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    body,
+                    style: tt.bodySmall?.copyWith(
+                      color: cs.onSurface.withValues(alpha: 0.55),
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      _StatChip(
+                        icon: Icons.timer_outlined,
+                        value: timeValue,
+                        label: timeLabel,
+                      ),
+                      const SizedBox(width: 8),
+                      _StatChip(
+                        icon: Icons.help_outline_rounded,
+                        value: questionValue,
+                        label: '',
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 6),
-            Text(
-              body,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFF8B949E),
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                _QuestionnaireVariantStat(
-                  icon: Icons.access_time_rounded,
-                  value: timeValue,
-                  label: timeLabel,
-                  color: const Color(0xFFF59E0B),
-                ),
-                const SizedBox(width: 8),
-                _QuestionnaireVariantStat(
-                  icon: Icons.help_outline_rounded,
-                  value: questionValue,
-                  label: questionLabel,
-                  color: const Color(0xFFF59E0B),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 13),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1C2128),
-                border: Border.all(color: const Color(0xFF2D333B)),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Text(
-                actionLabel,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF8B949E),
-                ),
-              ),
-            ),
+            const SizedBox(width: 12),
+            _SelectionCircle(selected: isSelected),
           ],
         ),
       ),
@@ -1970,31 +1870,61 @@ class _QuestionnaireVariantBadge extends StatelessWidget {
   }
 }
 
-class _QuestionnaireVariantStat extends StatelessWidget {
-  const _QuestionnaireVariantStat({
+// ─── Selection circle indicator ───────────────────────────────────────────────
+
+class _SelectionCircle extends StatelessWidget {
+  const _SelectionCircle({required this.selected});
+
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: 22,
+      height: 22,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: selected ? cs.primary : Colors.transparent,
+        border: selected
+            ? null
+            : Border.all(color: cs.outline.withValues(alpha: 0.4), width: 2),
+      ),
+      child: selected
+          ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
+          : null,
+    );
+  }
+}
+
+// ─── Stat chip (theme-based replacement for old _QuestionnaireVariantStat) ────
+
+class _StatChip extends StatelessWidget {
+  const _StatChip({
     required this.icon,
     required this.value,
     required this.label,
-    required this.color,
   });
 
   final IconData icon;
   final String value;
   final String label;
-  final Color color;
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.25),
-        borderRadius: BorderRadius.circular(9),
+        color: cs.onSurface.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: color),
+          Icon(icon, size: 14, color: cs.onSurface.withValues(alpha: 0.55)),
           const SizedBox(width: 5),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -2002,16 +1932,16 @@ class _QuestionnaireVariantStat extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFFF0F6FC),
+                style: tt.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              if (label.isNotEmpty)
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: cs.onSurface.withValues(alpha: 0.45),
+                  ),
                 ),
-              ),
-              Text(
-                label,
-                style: const TextStyle(fontSize: 9, color: Color(0xFF4B5563)),
-              ),
             ],
           ),
         ],
@@ -2020,58 +1950,50 @@ class _QuestionnaireVariantStat extends StatelessWidget {
   }
 }
 
-class _FastPlanPainter extends CustomPainter {
-  const _FastPlanPainter();
+// ─── Shared CTA button ────────────────────────────────────────────────────────
+
+class _VariantCtaButton extends StatelessWidget {
+  const _VariantCtaButton({
+    required this.selected,
+    required this.ctaLabel,
+    required this.onTap,
+  });
+
+  final QuestionnaireVariant selected;
+  final String ctaLabel;
+  final VoidCallback onTap;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final background = Paint()
-      ..color = Colors.white.withValues(alpha: 0.06)
-      ..style = PaintingStyle.fill;
-    final foreground = Paint()
-      ..color = const Color(0xFF1F6FEB)
-      ..style = PaintingStyle.fill;
-    final circlePaint = Paint()
-      ..color = const Color(0xFF1D4A70).withValues(alpha: 0.4)
-      ..style = PaintingStyle.fill;
-    final circleBorder = Paint()
-      ..color = const Color(0xFF1D4A70)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    final iconPaint = Paint()
-      ..color = const Color(0xFF58A6FF)
-      ..style = PaintingStyle.fill;
-
-    RRect bar(double top, double width) => RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, top, width, 8),
-      const Radius.circular(4),
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: FilledButton(
+        onPressed: onTap,
+        style: FilledButton.styleFrom(
+          backgroundColor: cs.primary,
+          foregroundColor: cs.onPrimary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          minimumSize: const Size(double.infinity, 52),
+        ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: Text(
+            ctaLabel,
+            key: ValueKey(selected),
+            style: tt.labelLarge?.copyWith(
+              color: cs.onPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
     );
-
-    canvas.drawRRect(bar(0, size.width * 0.72), background);
-    canvas.drawRRect(bar(0, size.width * 0.72), foreground);
-    canvas.drawRRect(bar(16, size.width * 0.72), background);
-    canvas.drawRRect(bar(16, size.width * 0.50), foreground);
-    canvas.drawRRect(bar(32, size.width * 0.72), background);
-    canvas.drawRRect(bar(32, size.width * 0.28), foreground);
-
-    final cx = size.width - 20;
-    final cy = size.height / 2;
-    canvas.drawCircle(Offset(cx, cy), 18, circlePaint);
-    canvas.drawCircle(Offset(cx, cy), 18, circleBorder);
-
-    final path = Path()
-      ..moveTo(cx + 3, cy - 7)
-      ..lineTo(cx - 2, cy + 1)
-      ..lineTo(cx + 1, cy + 1)
-      ..lineTo(cx - 3, cy + 7)
-      ..lineTo(cx + 2, cy - 1)
-      ..lineTo(cx - 1, cy - 1)
-      ..close();
-    canvas.drawPath(path, iconPaint);
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _SelectedPreferredCityCard extends StatelessWidget {
