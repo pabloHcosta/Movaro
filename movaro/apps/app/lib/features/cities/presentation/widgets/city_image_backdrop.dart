@@ -4,6 +4,37 @@ import 'package:movaro_app/features/cities/application/services/city_image_catal
 import 'package:movaro_app/features/cities/application/services/places_photo_service.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 
+/// Pre-warms the Flutter image cache for [city] before navigation.
+///
+/// Uses the curated catalog URL if available, otherwise fetches the first
+/// Places API photo. Silently ignores errors — [CityResolvedImage] handles
+/// its own fallback chain if the image isn't cached.
+Future<void> precacheCityImage(BuildContext context, City city) async {
+  const headers = {'User-Agent': 'Movaro/1.0'};
+  final primaryUrl = cityImageUrlFor(city.id);
+  if (primaryUrl != null) {
+    try {
+      await precacheImage(NetworkImage(primaryUrl, headers: headers), context);
+    } catch (_) {}
+    return;
+  }
+  try {
+    final result = await PlacesPhotoService().getPhotos(
+      cityId: city.id,
+      cityName: city.name,
+      stateName: city.stateName,
+    );
+    final fallbackUrl =
+        result.photos.isEmpty ? null : result.photos.first.url;
+    if (fallbackUrl != null && context.mounted) {
+      await precacheImage(
+        NetworkImage(fallbackUrl, headers: headers),
+        context,
+      );
+    }
+  } catch (_) {}
+}
+
 class CityImageBackdrop extends StatelessWidget {
   const CityImageBackdrop({
     required this.city,
