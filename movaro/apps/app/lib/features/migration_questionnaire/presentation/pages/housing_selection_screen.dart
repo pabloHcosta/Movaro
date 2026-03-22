@@ -130,6 +130,20 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
   Widget build(BuildContext context) {
     final portals = <_TemporaryPortal>[
       _TemporaryPortal(
+        name: 'Hostelworld',
+        emoji: '🛏️',
+        description: _text(
+          context,
+          pt: 'Hostels e dormitórios baratos',
+          es: 'Hostels y dormitorios baratos',
+          en: 'Budget hostels and dorms',
+        ),
+        bgColor: const Color(0xFF0A1808),
+        borderColor: const Color(0xFF1A3A10),
+        urlBuilder: (city, _) =>
+            PreparationResourceLinks.buildHostelworldSearch(city),
+      ),
+      _TemporaryPortal(
         name: 'Airbnb',
         emoji: '🏠',
         description: _text(
@@ -340,6 +354,33 @@ class LongTermHousingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final portals = <_LongTermPortal>[
       _LongTermPortal(
+        name: 'QuintoAndar',
+        emoji: '⭐',
+        description: _text(
+          context,
+          pt: 'Sem fiador · Aceita passaporte · Digital',
+          es: 'Sin garante · Acepta pasaporte · Digital',
+          en: 'No guarantor · Accepts passport · Digital',
+        ),
+        provider: null,
+        customUrl: (city) =>
+            PreparationResourceLinks.buildQuintoAndarSearch(city),
+        isRecommended: true,
+      ),
+      _LongTermPortal(
+        name: 'Flatio',
+        emoji: '🌐',
+        description: _text(
+          context,
+          pt: 'Médio prazo · Sem depósito · Para expats',
+          es: 'Mediano plazo · Sin depósito · Para expats',
+          en: 'Medium-term · No deposit · For expats',
+        ),
+        provider: null,
+        customUrl: (city) =>
+            PreparationResourceLinks.buildFlatioSearch(city),
+      ),
+      _LongTermPortal(
         name: 'Zap Imoveis',
         emoji: '🔑',
         description: _text(
@@ -407,8 +448,21 @@ class LongTermHousingScreen extends StatelessWidget {
                         for (final portal in portals) ...[
                           _LongTermPortalCard(
                             portal: portal,
-                            onTap: () =>
-                                onOpenRentalSearch(city, portal.provider),
+                            onTap: () {
+                              if (portal.customUrl != null) {
+                                final uri = portal.customUrl!(city);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => PreparationWebViewPage(
+                                      title: portal.name,
+                                      uri: uri,
+                                    ),
+                                  ),
+                                );
+                              } else if (portal.provider != null) {
+                                onOpenRentalSearch(city, portal.provider!);
+                              }
+                            },
                           ),
                           const SizedBox(height: 10),
                         ],
@@ -1106,8 +1160,14 @@ class _LongTermPortalCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFF111827),
-          border: Border.all(color: const Color(0xFF1E2636)),
+          color: portal.isRecommended
+              ? const Color(0xFF071A2E)
+              : const Color(0xFF111827),
+          border: Border.all(
+            color: portal.isRecommended
+                ? const Color(0xFF1F6FEB).withValues(alpha: 0.5)
+                : const Color(0xFF1E2636),
+          ),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
@@ -1118,12 +1178,42 @@ class _LongTermPortalCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    portal.name,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: const Color(0xFFF0F6FC),
-                      fontWeight: FontWeight.w700,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        portal.name,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: const Color(0xFFF0F6FC),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (portal.isRecommended) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1F6FEB).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            _text(
+                              context,
+                              pt: 'Para estrangeiros',
+                              es: 'Para extranjeros',
+                              en: 'For foreigners',
+                            ),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: const Color(0xFF58A6FF),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 3),
                   Text(
@@ -1396,11 +1486,15 @@ class _LongTermPortal {
     required this.name,
     required this.emoji,
     required this.description,
-    required this.provider,
+    this.provider,
+    this.customUrl,
+    this.isRecommended = false,
   });
 
   final String name;
   final String emoji;
   final String description;
-  final RentalProvider provider;
+  final RentalProvider? provider;
+  final Uri Function(City city)? customUrl;
+  final bool isRecommended;
 }

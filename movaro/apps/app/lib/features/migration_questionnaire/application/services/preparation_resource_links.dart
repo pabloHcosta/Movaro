@@ -59,6 +59,28 @@ class PreparationResourceLinks {
     'https://www.gov.br/mj/pt-br/assuntos/noticias/governo-federal-alerta-para-risco-de-trafico-de-brasileiros-atraidos-por-ofertas-de-trabalho-no-sudeste-asiatico',
   );
 
+  static Uri buildHostelworldSearch(City city) {
+    final query = Uri.encodeComponent('${city.name}, Brazil');
+    return Uri.parse(
+      'https://www.hostelworld.com/search#where=$query&accommodation=Hostels',
+    );
+  }
+
+  static Uri buildQuintoAndarSearch(City city) {
+    final uf = city.stateCode.toLowerCase();
+    final slug = _slugify(city.name);
+    return Uri.parse(
+      'https://quintoandar.com.br/alugar/imovel/$uf/$slug/',
+    );
+  }
+
+  static Uri buildFlatioSearch(City city) {
+    final query = Uri.encodeComponent(city.name);
+    return Uri.parse(
+      'https://www.flatio.com/pt-BR/s?location=$query&country=BR',
+    );
+  }
+
   static Uri buildFlightsSearch({
     required String originCity,
     required String destinationCity,
