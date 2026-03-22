@@ -73,4 +73,20 @@ export class AppConfigService {
   get isGooglePlacesConfigured(): boolean {
     return this.config.googlePlaces.configured;
   }
+
+  get geminiApiKey(): string | null {
+    return this.config.gemini.apiKey;
+  }
+
+  get isGeminiConfigured(): boolean {
+    return this.config.gemini.configured;
+  }
+
+  get groqApiKey(): string | null {
+    return this.config.groq.apiKey;
+  }
+
+  get isGroqConfigured(): boolean {
+    return this.config.groq.configured;
+  }
 }

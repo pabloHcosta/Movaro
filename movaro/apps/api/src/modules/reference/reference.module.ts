@@ -12,5 +12,6 @@ import { ReferenceController } from './presentation/reference.controller';
     BcraExchangeRateService,
     ExchangeRatesService,
   ],
+  exports: [ExchangeRatesService],
 })
 export class ReferenceModule {}

@@ -4,7 +4,6 @@ import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/config/api_keys.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/network/network_client.dart';
@@ -12,7 +11,7 @@ import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
-import 'package:movaro_app/features/info/application/chat_context_remote_service.dart';
+import 'package:movaro_app/features/info/application/chat_service.dart';
 import 'package:movaro_app/features/info/application/gemini_chat_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
@@ -50,21 +49,19 @@ class AssistantPage extends StatefulWidget {
 
 class _AssistantPageState extends State<AssistantPage> {
   _AssistantMode _mode = _AssistantMode.conversation;
-  GeminiChatService? _chatService;
-  bool _isInitializing = false;
+  ChatService? _chatService;
   bool _chatInitStarted = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_chatInitStarted && ApiKeys.hasGeminiApiKey) {
+    if (!_chatInitStarted) {
       _chatInitStarted = true;
-      _isInitializing = true;
       _initChatService();
     }
   }
 
-  Future<void> _initChatService() async {
+  void _initChatService() {
     final locale = Localizations.localeOf(context).languageCode;
     final plan = widget.migrationQuestionnaireController.generatedPlan;
     final originCountry =
@@ -78,57 +75,36 @@ class _AssistantPageState extends State<AssistantPage> {
             : widget.journeyContextController.selection.destination?.name ??
                 'brasil';
 
-    ChatContextResult? contextResult;
     try {
-      final contextService = ChatContextRemoteService(
+      _chatService = ChatService(
         networkClient: NetworkClient(environment: widget.environment),
-      );
-      contextResult = await contextService
-          .fetchContext(
-            originCountry: originCountry,
-            destinationCountry: destinationCountry,
-            userContext: const UserMigrationContext(),
-            locale: locale,
-          )
-          .timeout(const Duration(seconds: 4));
-      dev.log('[AssistantPage] Context fetched');
-    } on TimeoutException {
-      dev.log('[AssistantPage] Context fetch timed out');
-    } catch (e) {
-      dev.log('[AssistantPage] Context fetch failed: $e');
-    }
-
-    if (!mounted) return;
-
-    try {
-      final l10n = context.l10n;
-      _chatService = GeminiChatService(apiKey: ApiKeys.geminiApiKey);
-      _chatService!.initialize(
-        curatedContent: contextResult?.appDataBlock ?? '',
         originCountry: originCountry,
         destinationCountry: destinationCountry,
         locale: locale,
-        userContext: UserMigrationContext(
-          journeyState: plan?.isCityConfirmed == true
-              ? 'copilot_active'
-              : plan != null
-                  ? 'plan_generated'
-                  : 'destination_selected',
-        ),
-        errorMessages: ChatErrorMessages(
-          notInitialized: l10n.aiChatNotInitialized,
-          rateLimit: l10n.aiChatErrorRateLimit,
-          apiLimit: l10n.aiChatErrorApiLimit,
-          generic: l10n.aiChatErrorGeneric,
-        ),
+        recommendedCityId: plan?.recommendedCity != null
+            ? _toKebabCase(plan!.recommendedCity!.name)
+            : null,
       );
-      dev.log('[AssistantPage] Gemini ready ✓');
+      dev.log('[AssistantPage] ChatService ready ✓');
     } catch (e) {
-      dev.log('[AssistantPage] Gemini init failed: $e');
+      dev.log('[AssistantPage] ChatService init failed: $e');
       _chatService = null;
     }
+  }
 
-    if (mounted) setState(() => _isInitializing = false);
+  static String _toKebabCase(String name) {
+    const accents = 'àáâãäåæçèéêëìíîïðñòóôõöùúûüýÿ'
+        'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖÙÚÛÜÝŸ';
+    const normalized = 'aaaaaaaceeeeiiiidnoooooouuuuyy'
+        'aaaaaaaceeeeiiiidnoooooouuuuyy';
+    var result = name.toLowerCase();
+    for (var i = 0; i < accents.length; i++) {
+      result = result.replaceAll(accents[i], normalized[i]);
+    }
+    return result
+        .replaceAll(RegExp(r'[^a-z0-9\s-]'), '')
+        .replaceAll(RegExp(r'\s+'), '-')
+        .trim();
   }
 
   @override
@@ -164,7 +140,7 @@ class _AssistantPageState extends State<AssistantPage> {
                       ? _ConversationBody(
                           key: const ValueKey('conversation'),
                           chatService: _chatService,
-                          isInitializing: _isInitializing,
+                          isInitializing: false,
                           initialMessage: widget.initialMessage,
                         )
                       : DocumentationGuidePage(
@@ -312,7 +288,7 @@ class _ConversationBody extends StatefulWidget {
     super.key,
   });
 
-  final GeminiChatService? chatService;
+  final ChatService? chatService;
   final bool isInitializing;
   final String? initialMessage;
 
