@@ -8,6 +8,7 @@ import 'package:movaro_app/features/flight_search/domain/models/airport.dart';
 import 'package:movaro_app/features/flight_search/domain/models/flight_search_params.dart';
 import 'package:movaro_app/features/flight_search/domain/services/airport_finder_service.dart';
 import 'package:movaro_app/features/flight_search/domain/services/flight_url_builder.dart';
+import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
 
 // ── Public entry-point widget ─────────────────────────────────────────────────
@@ -178,6 +179,15 @@ class _FlightSearchToolState extends State<FlightSearchTool> {
             ),
           ),
           const SizedBox(height: 20),
+
+          // ── Seasonality card ──────────────────────────────────────────
+          if (_selectedDestination != null) ...[
+            FlightSeasonalityCard(
+              originCountryIso: widget.originCountryIso,
+              destIata: _selectedDestination?.iataCode,
+            ),
+            const SizedBox(height: 20),
+          ],
 
           // ── Origin section ───────────────────────────────────────────
           _SectionLabel(l10n.migrationPlanPrepFlightsOriginLabel),

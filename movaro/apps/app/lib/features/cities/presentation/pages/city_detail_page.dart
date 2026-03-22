@@ -22,6 +22,7 @@ import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
+import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_map_card.dart';
@@ -383,6 +384,14 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                   ),
                                 ],
                               ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1160),
+                            child: FlightSeasonalityCard(
+                              originCountryIso: 'AR',
+                              cityId: city.id,
                             ),
                           ),
                           const SizedBox(height: 16),

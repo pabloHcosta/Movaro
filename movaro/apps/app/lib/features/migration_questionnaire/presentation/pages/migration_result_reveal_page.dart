@@ -9,6 +9,7 @@ import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
+import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 
@@ -529,6 +530,12 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                                 recommendedCity,
                                 compatibilityPct,
                               ),
+                            ),
+                            const SizedBox(height: 12),
+                            FlightPriceBadge(
+                              originCountryIso:
+                                  plan.originCountry == 'argentina' ? 'AR' : 'AR',
+                              cityId: recommendedCity.id,
                             ),
                             if (reasons.isNotEmpty) ...[
                               const SizedBox(height: 16),
