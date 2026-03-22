@@ -367,18 +367,12 @@ extension AppLocalizationsFormatting on AppLocalizations {
   String travelGroupLabel(String value) {
     switch (value) {
       case 'solo':
-        return _localizedText(pt: 'Sozinho', es: 'Solo', en: 'Solo');
+        return _localizedText(pt: 'Sozinho(a)', es: 'Solo/a', en: 'Solo');
       case 'partner':
         return _localizedText(
           pt: 'Com parceiro(a)',
           es: 'Con pareja',
           en: 'With a partner',
-        );
-      case 'family_no_kids':
-        return _localizedText(
-          pt: 'Com parceiro(a) e sem filhos',
-          es: 'Con pareja y sin hijos',
-          en: 'With a partner and no kids',
         );
       case 'family_kids':
         return _localizedText(
@@ -386,11 +380,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
           es: 'Con hijos',
           en: 'With kids',
         );
-      case 'undecided':
+      case 'solo_parent':
         return _localizedText(
-          pt: 'Ainda não sei',
-          es: 'Todavía no lo sé',
-          en: "I don't know yet",
+          pt: 'Só eu e meus filhos',
+          es: 'Solo yo y mis hijos',
+          en: 'Just me and my kids',
         );
       default:
         return value;

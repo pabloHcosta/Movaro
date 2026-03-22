@@ -5507,11 +5507,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get qTimelinePrompt => '¿Cuándo te gustaría estar en Brasil? (aprox.)';
 
   @override
-  String get qPrioritiesPrompt =>
-      'Para tu primer año, ¿qué 2 puntos pesan más al elegir ciudad?';
+  String get qPrioritiesPrompt => '¿Qué es lo más importante al elegir ciudad?';
 
   @override
-  String get qPrioritiesHelper => 'Elegí 2 para seguir';
+  String get qPrioritiesHelper => 'Elegí hasta 3';
 
   @override
   String qPrioritiesSelectedCount(Object selected, Object total) {

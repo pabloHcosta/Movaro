@@ -2017,8 +2017,8 @@
   "qFundingPrompt": "Como você pretende se sustentar nos primeiros 3 meses?",
   "qFundingSubtitle": "Isso ajuda a ajustar seu ponto de partida sem pedir dados pessoais.",
   "qTimelinePrompt": "Quando você gostaria de estar no Brasil? (aprox.)",
-  "qPrioritiesPrompt": "No seu primeiro ano, quais 2 pontos mais importam na escolha da cidade?",
-  "qPrioritiesHelper": "Selecione 2 para continuar",
+  "qPrioritiesPrompt": "O que mais importa na escolha da cidade?",
+  "qPrioritiesHelper": "Selecione até 3",
   "qPrioritiesSelectedCount": "{selected}/{total}",
   "@qPrioritiesSelectedCount": {
     "placeholders": {

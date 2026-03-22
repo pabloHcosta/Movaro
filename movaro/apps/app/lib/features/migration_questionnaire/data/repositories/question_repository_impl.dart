@@ -113,16 +113,15 @@ class QuestionRepositoryImpl implements QuestionRepository {
           OptionModel(id: 'solo', label: 'solo', value: 'solo'),
           OptionModel(id: 'partner', label: 'partner', value: 'partner'),
           OptionModel(
-            id: 'family_no_kids',
-            label: 'family_no_kids',
-            value: 'family_no_kids',
-          ),
-          OptionModel(
             id: 'family_kids',
             label: 'family_kids',
             value: 'family_kids',
           ),
-          OptionModel(id: 'undecided', label: 'undecided', value: 'undecided'),
+          OptionModel(
+            id: 'solo_parent',
+            label: 'solo_parent',
+            value: 'solo_parent',
+          ),
         ],
       ).toEntity(),
       QuestionModel(
@@ -141,33 +140,6 @@ class QuestionRepositoryImpl implements QuestionRepository {
             id: 'both_open',
             label: 'both_open',
             value: 'both_open',
-          ),
-        ],
-      ).toEntity(),
-      QuestionModel(
-        id: 'argentina_origin',
-        title: 'argentina_origin',
-        type: 'single_card',
-        variants: const [QuestionnaireVariant.strategic],
-        options: const [
-          OptionModel(
-            id: 'buenos_aires',
-            label: 'buenos_aires',
-            value: 'buenos_aires',
-          ),
-          OptionModel(id: 'cordoba', label: 'cordoba', value: 'cordoba'),
-          OptionModel(id: 'mendoza', label: 'mendoza', value: 'mendoza'),
-          OptionModel(id: 'rosario', label: 'rosario', value: 'rosario'),
-          OptionModel(
-            id: 'salta_jujuy',
-            label: 'salta_jujuy',
-            value: 'salta_jujuy',
-          ),
-          OptionModel(id: 'litoral', label: 'litoral', value: 'litoral'),
-          OptionModel(
-            id: 'other_origin',
-            label: 'other_origin',
-            value: 'other_origin',
           ),
         ],
       ).toEntity(),
