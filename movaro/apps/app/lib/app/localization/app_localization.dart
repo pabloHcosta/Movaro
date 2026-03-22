@@ -1678,6 +1678,12 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: "I don't know yet, surprise me",
   );
 
+  String preferredCityChangeLabel() => _localizedText(
+    pt: 'Trocar cidade',
+    es: 'Cambiar ciudad',
+    en: 'Change city',
+  );
+
   // ── Anti-Anchoring (Result Reveal) ─────────────────────────────────────
 
   String antiAnchorReinforcementTitle(String cityName) => _localizedText(

@@ -420,7 +420,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
 
   City? get preferredCity => _preferredCity;
 
-  void setPreferredCity(City city) {
+  void setPreferredCity(City? city) {
     _preferredCity = city;
     notifyListeners();
   }

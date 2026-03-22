@@ -21,6 +21,7 @@ import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
+import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_picker_bottom_sheet.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/available_capital_ranges_store.dart';
@@ -657,6 +658,10 @@ class _QuestionPageState extends State<QuestionPage> {
       );
     }
 
+    if (question.id == 'preferred_city') {
+      return _buildPreferredCityOptions(context, question);
+    }
+
     if (question.id == 'priorities') {
       final values = controller.answerValuesFor(question.id);
       return LayoutBuilder(
@@ -1172,6 +1177,62 @@ class _QuestionPageState extends State<QuestionPage> {
     }
 
     controller.selectAnswer(question.id, option.value);
+  }
+
+  Widget _buildPreferredCityOptions(BuildContext context, Question question) {
+    final l10n = context.l10n;
+    final selectedCity = controller.preferredCity;
+    final answer = controller.answerFor(question.id);
+    final hasCitySelected =
+        selectedCity != null &&
+        answer != null &&
+        answer != 'dont_know' &&
+        answer != 'choose_on_map';
+
+    return SingleChildScrollView(
+      controller: _optionsScrollController,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // If a city was already selected, show it prominently.
+          if (hasCitySelected) ...[
+            _SelectedPreferredCityCard(
+              city: selectedCity,
+              onChangeTap: () => _openPreferredCityPicker(question),
+            ),
+            const SizedBox(height: 16),
+            // "Skip / don't know" option below
+            _LargeOptionCard(
+              icon: Icons.explore_outlined,
+              label: l10n.preferredCityDontKnow(),
+              isSelected: false,
+              onTap: () {
+                controller.selectAnswer(question.id, 'dont_know');
+                controller.setPreferredCity(null);
+              },
+            ),
+          ] else ...[
+            // Default: two initial options
+            _LargeOptionCard(
+              icon: Icons.map_outlined,
+              label: l10n.preferredCityChooseOnMap(),
+              isSelected: false,
+              onTap: () => _openPreferredCityPicker(question),
+            ),
+            const SizedBox(height: 12),
+            _LargeOptionCard(
+              icon: Icons.explore_outlined,
+              label: l10n.preferredCityDontKnow(),
+              isSelected: answer == 'dont_know',
+              onTap: () {
+                controller.selectAnswer(question.id, 'dont_know');
+                controller.setPreferredCity(null);
+              },
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   Future<void> _openPreferredCityPicker(Question question) async {
@@ -2011,6 +2072,113 @@ class _FastPlanPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _SelectedPreferredCityCard extends StatelessWidget {
+  const _SelectedPreferredCityCard({
+    required this.city,
+    required this.onChangeTap,
+  });
+
+  final City city;
+  final VoidCallback onChangeTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final l10n = context.l10n;
+
+    return FrostedPanel(
+      padding: const EdgeInsets.all(16),
+      borderRadius: BorderRadius.circular(24),
+      borderColor: isDark ? const Color(0xFF5BB6FF) : AppColors.primary,
+      backgroundColor: AppColors.tintedSurfaceFor(
+        context,
+        tint: AppColors.primary,
+        lightColor: const Color(0xFFEAF4FF),
+        darkAlpha: 0.28,
+        darkBase: const Color(0xFF162235),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: (isDark
+                          ? const Color(0xFF4AA7FF)
+                          : AppColors.primary)
+                      .withValues(alpha: isDark ? 0.18 : 0.10),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
+                  Icons.location_city_rounded,
+                  color:
+                      isDark ? const Color(0xFF76C3FF) : AppColors.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      city.name,
+                      style:
+                          Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimaryFor(context),
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${city.stateName} · ${city.stateCode}',
+                      style:
+                          Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSoftFor(context),
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.check_circle_rounded,
+                color: isDark
+                    ? const Color(0xFF76C3FF)
+                    : AppColors.primary,
+                size: 22,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onChangeTap,
+              icon: const Icon(Icons.swap_horiz_rounded, size: 18),
+              label: Text(l10n.preferredCityChangeLabel()),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                side: BorderSide(
+                  color: (isDark
+                          ? const Color(0xFF5BB6FF)
+                          : AppColors.primary)
+                      .withValues(alpha: 0.3),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _LargeOptionCard extends StatelessWidget {
