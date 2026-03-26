@@ -37,4 +37,20 @@ describe('ChatContextBuilderService', () => {
     expect(context.appDataBlock).toContain('Florianopolis');
     expect(context.appDataBlock).toContain('Santa Catarina');
   });
+
+  it('supports country aliases when resolving corridor coverage', async () => {
+    const service = new ChatContextBuilderService({
+      resolveCityId: jest.fn().mockReturnValue(null),
+      getCityById: jest.fn(),
+    } as unknown as CitiesCatalogService);
+
+    const context = await service.buildContext({
+      originCountry: 'AR',
+      destinationCountry: 'Brazil',
+      locale: 'pt',
+    });
+
+    expect(context.coverageLevel).toBe('full');
+    expect(context.supportedCorridor).toBe('Argentina → Brasil');
+  });
 });

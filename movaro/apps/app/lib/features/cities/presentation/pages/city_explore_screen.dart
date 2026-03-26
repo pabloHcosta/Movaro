@@ -38,6 +38,8 @@ class _CityExploreScreenState extends State<CityExploreScreen>
     with SingleTickerProviderStateMixin {
   final YouTubeService _youTubeService = YouTubeService();
   final PlacesPhotoService _photoService = PlacesPhotoService();
+  final ScrollController _videoScrollController = ScrollController();
+  final ScrollController _photoScrollController = ScrollController();
 
   ExploreState _videoState = ExploreState.loading;
   ExploreState _photoState = ExploreState.loading;
@@ -59,6 +61,8 @@ class _CityExploreScreenState extends State<CityExploreScreen>
 
   @override
   void dispose() {
+    _videoScrollController.dispose();
+    _photoScrollController.dispose();
     _tabController
       ..removeListener(_handleTabChanged)
       ..dispose();
@@ -119,6 +123,12 @@ class _CityExploreScreenState extends State<CityExploreScreen>
 
   @override
   Widget build(BuildContext context) {
+    final scrollAnimation = Listenable.merge([
+      _videoScrollController,
+      _photoScrollController,
+      _tabController,
+    ]);
+
     return Scaffold(
       body: Stack(
         children: [
@@ -128,41 +138,40 @@ class _CityExploreScreenState extends State<CityExploreScreen>
               _ExploreHeroSection(
                 city: widget.city,
                 isPlanCity: widget.isPlanCity,
+                scrollController: _activeScrollController,
               ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+                child: _ExploreTabSelector(
+                  selectedIndex: _tabController.index,
+                  videosLabel: context.l10n.cityExploreTabVideos(),
+                  photosLabel: context.l10n.cityExploreTabPhotos(),
+                  onTabChanged: (index) {
+                    _tabController.animateTo(index);
+                    setState(() {});
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                child: TabBarView(
+                  controller: _tabController,
+                  physics: const NeverScrollableScrollPhysics(),
                   children: [
-                    _ExploreTabSelector(
-                      selectedIndex: _tabController.index,
-                      videosLabel: context.l10n.cityExploreTabVideos(),
-                      photosLabel: context.l10n.cityExploreTabPhotos(),
-                      onTabChanged: (index) {
-                        _tabController.animateTo(index);
-                        setState(() {});
-                      },
+                    _VideosTab(
+                      state: _videoState,
+                      result: _videos,
+                      city: widget.city,
+                      hasApiKey: hasApiKey,
+                      onOpenVideo: _openVideo,
+                      onOpenMore: () => _openMoreOnYouTube(widget.city),
+                      scrollController: _videoScrollController,
                     ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      height: 720,
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          _VideosTab(
-                            state: _videoState,
-                            result: _videos,
-                            city: widget.city,
-                            hasApiKey: hasApiKey,
-                            onOpenVideo: _openVideo,
-                            onOpenMore: () => _openMoreOnYouTube(widget.city),
-                          ),
-                          _PhotosTab(
-                            state: _photoState,
-                            result: _photos,
-                            city: widget.city,
-                          ),
-                        ],
-                      ),
+                    _PhotosTab(
+                      state: _photoState,
+                      result: _photos,
+                      city: widget.city,
+                      scrollController: _photoScrollController,
                     ),
                   ],
                 ),
@@ -173,14 +182,24 @@ class _CityExploreScreenState extends State<CityExploreScreen>
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: AppGlassHeader(
-                title: context.l10n.cityExploreTitle(),
-                onBack: () => Navigator.maybePop(context),
-                trailing: IconButton(
-                  onPressed: _shareExplore,
-                  icon: const Icon(Icons.share_outlined),
-                  tooltip: context.l10n.cityExploreShareTooltip(),
-                ),
+              child: AnimatedBuilder(
+                animation: scrollAnimation,
+                builder: (context, _) {
+                  final showCityTitle =
+                      _activeScrollController.hasClients &&
+                      _activeScrollController.offset > 72;
+                  return AppGlassHeader(
+                    title: showCityTitle
+                        ? widget.city.name
+                        : context.l10n.cityExploreTitle(),
+                    onBack: () => Navigator.maybePop(context),
+                    trailing: IconButton(
+                      onPressed: _shareExplore,
+                      icon: const Icon(Icons.share_outlined),
+                      tooltip: context.l10n.cityExploreShareTooltip(),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -188,6 +207,10 @@ class _CityExploreScreenState extends State<CityExploreScreen>
       ),
     );
   }
+
+  ScrollController get _activeScrollController => _tabController.index == 1
+      ? _photoScrollController
+      : _videoScrollController;
 
   void _handleTabChanged() {
     if (mounted) {
@@ -251,13 +274,23 @@ class _ExploreTabSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFF1E2636), width: 1)),
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceFor(context).withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.borderFor(context)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Row(
         children: [
           _ExploreTabSelectorItem(
-            icon: const _YouTubeTabIcon(selected: true),
+            icon: _YouTubeTabIcon(selected: selectedIndex == 0),
             label: videosLabel,
             isSelected: selectedIndex == 0,
             onTap: () => onTabChanged(0),
@@ -265,10 +298,10 @@ class _ExploreTabSelector extends StatelessWidget {
           _ExploreTabSelectorItem(
             icon: Icon(
               Icons.photo_camera_outlined,
-              size: 14,
+              size: 18,
               color: selectedIndex == 1
-                  ? const Color(0xFFF0F6FC)
-                  : const Color(0xFF4B5563),
+                  ? AppColors.primary
+                  : AppColors.textSoftFor(context),
             ),
             label: photosLabel,
             isSelected: selectedIndex == 1,
@@ -296,44 +329,50 @@ class _ExploreTabSelectorItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  icon,
-                  const SizedBox(width: 6),
-                  Text(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            constraints: const BoxConstraints(minHeight: 56),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppColors.primary.withValues(alpha: 0.12)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isSelected
+                    ? AppColors.primary.withValues(alpha: 0.32)
+                    : Colors.transparent,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                icon,
+                const SizedBox(width: 10),
+                Flexible(
+                  child: Text(
                     label,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: isSelected
-                          ? const Color(0xFFF0F6FC)
-                          : const Color(0xFF4B5563),
+                          ? AppColors.primary
+                          : AppColors.textSoftFor(context),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-              height: 2.5,
-              width: isSelected ? 36 : 0,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1F6FEB),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 1),
-          ],
+          ),
         ),
       ),
     );
@@ -347,15 +386,26 @@ class _YouTubeTabIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 18,
-      height: 13,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      width: 22,
+      height: 16,
       decoration: BoxDecoration(
         color: const Color(0xFFFF0000),
-        borderRadius: BorderRadius.circular(3),
+        borderRadius: BorderRadius.circular(4),
+        boxShadow: selected
+            ? [
+                BoxShadow(
+                  color: const Color(0xFFFF0000).withValues(alpha: 0.28),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: const Center(
-        child: CustomPaint(size: Size(7, 8), painter: _PlayIconPainter()),
+        child: CustomPaint(size: Size(8, 9), painter: _PlayIconPainter()),
       ),
     );
   }
@@ -382,88 +432,48 @@ class _PlayIconPainter extends CustomPainter {
 }
 
 class _ExploreHeroSection extends StatelessWidget {
-  const _ExploreHeroSection({required this.city, required this.isPlanCity});
+  const _ExploreHeroSection({
+    required this.city,
+    required this.isPlanCity,
+    required this.scrollController,
+  });
 
   final City city;
   final bool isPlanCity;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
     final heroHeight = MediaQuery.of(context).size.height * 0.38;
 
-    return SizedBox(
-      height: heroHeight,
-      width: double.infinity,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          CityResolvedImage(
-            city: city,
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.medium,
-            errorWidget: const SizedBox.shrink(),
-          ),
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.transparent, Color(0xCC000000)],
-                stops: [0.30, 1.0],
-              ),
-            ),
-          ),
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 20,
-            child: SafeArea(
-              top: false,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isPlanCity)
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.92),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        context.l10n.cityExplorePlanBadge(),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  Text(
-                    city.name,
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      height: 0.96,
-                    ),
+    return CollapsibleCityHero(
+      city: city,
+      scrollController: scrollController,
+      title: city.name,
+      subtitle: '${city.stateName} · ${city.stateCode}',
+      maxHeight: heroHeight,
+      meta: isPlanCity
+          ? Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  context.l10n.cityExplorePlanBadge(),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${city.stateName} · ${city.stateCode}',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.84),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ],
-      ),
+            )
+          : null,
     );
   }
 }
@@ -476,6 +486,7 @@ class _VideosTab extends StatelessWidget {
     required this.hasApiKey,
     required this.onOpenVideo,
     required this.onOpenMore,
+    required this.scrollController,
   });
 
   final ExploreState state;
@@ -484,6 +495,7 @@ class _VideosTab extends StatelessWidget {
   final bool hasApiKey;
   final ValueChanged<YouTubeVideo> onOpenVideo;
   final VoidCallback onOpenMore;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -525,6 +537,12 @@ class _VideosTab extends StatelessWidget {
         final extra = videos.skip(1).take(3).toList(growable: false);
 
         return ListView(
+          controller: scrollController,
+          primary: false,
+          physics: const ClampingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
           children: [
             Text(
               context.l10n.cityExploreFeaturedLabel(),
@@ -622,11 +640,13 @@ class _PhotosTab extends StatelessWidget {
     required this.state,
     required this.result,
     required this.city,
+    required this.scrollController,
   });
 
   final ExploreState state;
   final CityPhotosResult? result;
   final City city;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -644,6 +664,12 @@ class _PhotosTab extends StatelessWidget {
         final attribution = _attributionLabel(context, result);
         final previewPhotos = photos.take(5).toList(growable: false);
         return ListView(
+          controller: scrollController,
+          primary: false,
+          physics: const ClampingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
           children: [
             _PhotoPreviewGrid(photos: previewPhotos, allPhotos: photos),
             const SizedBox(height: 14),

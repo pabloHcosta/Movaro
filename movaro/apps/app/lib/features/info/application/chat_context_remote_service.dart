@@ -30,7 +30,7 @@ class ChatContextRemoteService {
 
   final NetworkClient _client;
 
-  /// Calls `POST /v1/chat/context` and returns the structured app data block.
+  /// Calls `POST /api/v1/chat/context` and returns the structured app data block.
   ///
   /// Returns `null` on any network error so the caller can fall back to an
   /// empty context rather than blocking the chat from opening.
@@ -57,7 +57,7 @@ class ChatContextRemoteService {
           'planTimeline': userContext.planTimeline,
       };
 
-      final data = await _client.postJsonMap('/v1/chat/context', body);
+      final data = await _client.postJsonMap('/api/v1/chat/context', body);
 
       return ChatContextResult(
         appDataBlock: data['appDataBlock'] as String? ?? '',

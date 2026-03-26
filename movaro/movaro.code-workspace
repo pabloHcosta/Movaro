@@ -20,17 +20,33 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "Movaro App (Development - Chrome)",
+        "name": "Movaro App (Development - Local API - Chrome)",
         "request": "launch",
         "type": "dart",
         "program": "lib/main_development.dart",
         "cwd": "${workspaceFolder:app}",
         "deviceId": "chrome",
+        "toolArgs": ["--dart-define-from-file=.env.development.json"]
+      },
+      {
+        "name": "Movaro App (Production - Current API Source - Chrome)",
+        "request": "launch",
+        "type": "dart",
+        "program": "lib/main_production.dart",
+        "cwd": "${workspaceFolder:app}",
+        "deviceId": "chrome",
+        "toolArgs": ["--dart-define-from-file=.env.production.json"]
+      },
+      {
+        "name": "Movaro App (Production - Railway Override - Chrome)",
+        "request": "launch",
+        "type": "dart",
+        "program": "lib/main_production.dart",
+        "cwd": "${workspaceFolder:app}",
+        "deviceId": "chrome",
         "toolArgs": [
-          "--dart-define=APP_FLAVOR=dev",
-          "--dart-define=APP_ENV=development",
-          "--dart-define=APP_NAME=Movaro Dev",
-          "--dart-define=API_BASE_URL=http://192.168.1.40:3000"
+          "--dart-define-from-file=.env.production.json",
+          "--dart-define=API_SOURCE=railway"
         ]
       },
       {
@@ -42,6 +58,13 @@
         "env": {
           "NODE_ENV": "development"
         }
+      },
+      {
+        "name": "Movaro App (Cloudflare Tunnel - localhost:3000)",
+        "type": "node-terminal",
+        "request": "launch",
+        "command": "bash ./scripts/start_cloudflare_tunnel.sh",
+        "cwd": "${workspaceFolder:app}"
       }
     ],
     "compounds": [
@@ -49,7 +72,22 @@
         "name": "Movaro App + API (Development)",
         "configurations": [
           "Movaro API (Development)",
-          "Movaro App (Development - Chrome)"
+          "Movaro App (Development - Local API - Chrome)"
+        ]
+      },
+      {
+        "name": "Movaro Local Stack (API + Tunnel)",
+        "configurations": [
+          "Movaro API (Development)",
+          "Movaro App (Cloudflare Tunnel - localhost:3000)"
+        ]
+      },
+      {
+        "name": "Movaro Production Local (API + Tunnel + Chrome)",
+        "configurations": [
+          "Movaro API (Development)",
+          "Movaro App (Cloudflare Tunnel - localhost:3000)",
+          "Movaro App (Production - Current API Source - Chrome)"
         ]
       }
     ]

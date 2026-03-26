@@ -11,6 +11,7 @@ import 'package:movaro_app/app/theme/app_theme.dart';
 import 'package:movaro_app/app/theme/theme_controller.dart';
 import 'package:movaro_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
 import 'package:movaro_app/features/catalog/data/repositories/catalog_repository_impl.dart';
+import 'package:movaro_app/core/environment/api_source.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/environment/app_flavor.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
@@ -72,10 +73,7 @@ void main() {
       await _pumpScreen(tester);
 
       expect(find.text('Plano'), findsNothing);
-      expect(
-        find.text('Do questionário ao guia passo a passo'),
-        findsOneWidget,
-      );
+      expect(find.text('Montar meu plano'), findsOneWidget);
 
       await tester.pumpWidget(harness.buildApp(initialRoute: AppRoutes.cities));
       await _pumpScreen(tester);
@@ -252,7 +250,10 @@ class _AppTestHarness {
     final environment = AppEnvironment(
       flavor: AppFlavor.development,
       environmentName: 'test',
+      apiSource: ApiSource.local,
       apiBaseUrl: 'http://127.0.0.1:3000',
+      localApiBaseUrl: 'http://127.0.0.1:3000',
+      railwayApiBaseUrl: 'https://movaro-production.up.railway.app',
       appName: 'Movaro Test',
     );
     final catalogRepository = CatalogRepositoryImpl(

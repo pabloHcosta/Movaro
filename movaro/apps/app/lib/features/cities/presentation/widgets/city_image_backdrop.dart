@@ -1,3 +1,5 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
@@ -183,6 +185,230 @@ class CityImageHeader extends StatelessWidget {
         width: double.infinity,
         child: Stack(fit: StackFit.expand, children: layers),
       ),
+    );
+  }
+}
+
+class CollapsibleCityHero extends StatelessWidget {
+  const CollapsibleCityHero({
+    required this.city,
+    required this.scrollController,
+    required this.title,
+    this.eyebrow,
+    this.subtitle,
+    this.meta,
+    this.maxHeightFactor = 0.38,
+    this.minHeight = 140,
+    this.maxHeight,
+    super.key,
+  });
+
+  final City city;
+  final ScrollController scrollController;
+  final String title;
+  final String? eyebrow;
+  final String? subtitle;
+  final Widget? meta;
+  final double maxHeightFactor;
+  final double minHeight;
+  final double? maxHeight;
+
+  double _progress(double collapseRange) {
+    if (!scrollController.hasClients || collapseRange <= 0) {
+      return 0;
+    }
+    final raw = (scrollController.offset / collapseRange).clamp(0.0, 1.0);
+    return Curves.easeOutCubic.transform(raw);
+  }
+
+  Future<void> _toggle(BuildContext context, double collapseRange) async {
+    if (!scrollController.hasClients) {
+      return;
+    }
+    final progress = _progress(collapseRange);
+    final target = progress < 0.68 ? collapseRange : 0.0;
+    await scrollController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOutQuart,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final viewportHeight = MediaQuery.of(context).size.height;
+    final resolvedMaxHeight =
+        maxHeight ?? (viewportHeight * maxHeightFactor).clamp(240.0, 360.0);
+    final collapseRange = (resolvedMaxHeight - minHeight).clamp(0.0, 240.0);
+
+    return AnimatedBuilder(
+      animation: scrollController,
+      builder: (context, _) {
+        final progress = _progress(collapseRange);
+        final currentHeight =
+            lerpDouble(resolvedMaxHeight, minHeight, progress) ?? minHeight;
+        final titleFontSize = lerpDouble(40, 31, progress) ?? 31;
+        final subtitleOpacity = (1 - (progress * 2.4)).clamp(0.0, 1.0);
+        final eyebrowOpacity = (1 - (progress * 2.0)).clamp(0.0, 1.0);
+        final metaOpacity = (1 - (progress * 2.8)).clamp(0.0, 1.0);
+        final imageScale = lerpDouble(1.0, 1.05, progress) ?? 1.0;
+        final imageShift = lerpDouble(0, -18, progress) ?? 0;
+        final bottomPadding = lerpDouble(20, 12, progress) ?? 12;
+        final topOverlayAlpha = lerpDouble(0.10, 0.28, progress) ?? 0.28;
+        final bottomOverlayAlpha = lerpDouble(0.74, 0.88, progress) ?? 0.88;
+        final titleShadowAlpha = lerpDouble(0.18, 0.32, progress) ?? 0.32;
+        final compactControlAlpha = lerpDouble(0.24, 0.42, progress) ?? 0.42;
+
+        return SizedBox(
+          height: currentHeight,
+          width: double.infinity,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Transform.translate(
+                offset: Offset(0, imageShift),
+                child: Transform.scale(
+                  scale: imageScale,
+                  child: CityResolvedImage(
+                    city: city,
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.medium,
+                    errorWidget: const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: topOverlayAlpha),
+                      Colors.black.withValues(alpha: bottomOverlayAlpha),
+                    ],
+                    stops: const [0.18, 1.0],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 20,
+                right: 20,
+                bottom: bottomPadding,
+                child: SafeArea(
+                  top: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (meta != null)
+                        AnimatedOpacity(
+                          duration: const Duration(milliseconds: 180),
+                          opacity: metaOpacity,
+                          child: IgnorePointer(
+                            ignoring: metaOpacity < 0.05,
+                            child: meta!,
+                          ),
+                        ),
+                      if (meta != null) const SizedBox(height: 10),
+                      if (eyebrow != null)
+                        AnimatedOpacity(
+                          duration: const Duration(milliseconds: 180),
+                          opacity: eyebrowOpacity,
+                          child: Text(
+                            eyebrow!,
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.78),
+                                  letterSpacing: 0.4,
+                                ),
+                          ),
+                        ),
+                      if (eyebrow != null) const SizedBox(height: 4),
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.displaySmall
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: titleFontSize,
+                              height: 0.98,
+                              shadows: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(
+                                    alpha: titleShadowAlpha,
+                                  ),
+                                  blurRadius: 18,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                      ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 6),
+                        AnimatedOpacity(
+                          duration: const Duration(milliseconds: 180),
+                          opacity: subtitleOpacity,
+                          child: IgnorePointer(
+                            ignoring: subtitleOpacity < 0.05,
+                            child: Text(
+                              subtitle!,
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.84),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 16,
+                bottom: 14,
+                child: SafeArea(
+                  top: false,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _toggle(context, collapseRange),
+                      borderRadius: BorderRadius.circular(999),
+                      child: Ink(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(
+                            alpha: compactControlAlpha,
+                          ),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.16),
+                          ),
+                        ),
+                        child: Center(
+                          child: AnimatedRotation(
+                            duration: const Duration(milliseconds: 220),
+                            turns: progress > 0.55 ? 0.5 : 0.0,
+                            child: const Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

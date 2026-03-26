@@ -1,4 +1,5 @@
 import 'package:movaro_app/core/constants/dart_define_keys.dart';
+import 'package:movaro_app/core/environment/api_source.dart';
 import 'package:movaro_app/core/environment/app_flavor.dart';
 import 'package:movaro_app/core/error/app_configuration_exception.dart';
 
@@ -6,7 +7,10 @@ class AppEnvironment {
   const AppEnvironment({
     required this.flavor,
     required this.environmentName,
+    required this.apiSource,
     required this.apiBaseUrl,
+    required this.localApiBaseUrl,
+    required this.railwayApiBaseUrl,
     required this.appName,
     this.supabaseUrl,
     this.supabaseAnonKey,
@@ -23,6 +27,18 @@ class AppEnvironment {
     );
     final apiBaseUrlValue = const String.fromEnvironment(
       DartDefineKeys.apiBaseUrl,
+      defaultValue: '',
+    );
+    final apiSourceValue = const String.fromEnvironment(
+      DartDefineKeys.apiSource,
+      defaultValue: '',
+    );
+    final localApiBaseUrlValue = const String.fromEnvironment(
+      DartDefineKeys.localApiBaseUrl,
+      defaultValue: '',
+    );
+    final railwayApiBaseUrlValue = const String.fromEnvironment(
+      DartDefineKeys.railwayApiBaseUrl,
       defaultValue: '',
     );
     final appNameValue = const String.fromEnvironment(
@@ -44,9 +60,24 @@ class AppEnvironment {
     final environmentName = environmentValue.isEmpty
         ? flavor.environmentName
         : environmentValue;
+    final apiSource = ApiSourceX.fromName(
+      apiSourceValue.isEmpty
+          ? _defaultApiSourceFor(flavor).defineValue
+          : apiSourceValue,
+    );
+    final localApiBaseUrl = localApiBaseUrlValue.isEmpty
+        ? _defaultLocalApiBaseUrlFor(flavor)
+        : localApiBaseUrlValue.trim();
+    final railwayApiBaseUrl = railwayApiBaseUrlValue.isEmpty
+        ? _defaultRailwayApiBaseUrlFor(flavor)
+        : railwayApiBaseUrlValue.trim();
     final apiBaseUrl = apiBaseUrlValue.isEmpty
-        ? _defaultApiBaseUrlFor(flavor)
-        : apiBaseUrlValue;
+        ? _resolveApiBaseUrl(
+            apiSource: apiSource,
+            localApiBaseUrl: localApiBaseUrl,
+            railwayApiBaseUrl: railwayApiBaseUrl,
+          )
+        : apiBaseUrlValue.trim();
     final appName = appNameValue.isEmpty
         ? (flavor == AppFlavor.production
               ? 'Movaro'
@@ -59,24 +90,11 @@ class AppEnvironment {
       );
     }
 
-    if (apiBaseUrl.trim().isEmpty) {
-      throw const AppConfigurationException(
-        'API_BASE_URL is required to resolve the API base URL.',
-      );
-    }
-
-    final parsedApiBaseUrl = Uri.tryParse(apiBaseUrl);
-    if (parsedApiBaseUrl == null || !parsedApiBaseUrl.hasScheme) {
-      throw const AppConfigurationException(
-        'API_BASE_URL must be a valid absolute URL.',
-      );
-    }
-
-    if (flavor != AppFlavor.development && parsedApiBaseUrl.scheme != 'https') {
-      throw const AppConfigurationException(
-        'API_BASE_URL must use HTTPS outside development.',
-      );
-    }
+    _validateApiBaseUrl(
+      apiBaseUrl,
+      keyName: DartDefineKeys.apiBaseUrl,
+      flavor: flavor,
+    );
 
     if (appName.trim().isEmpty) {
       throw const AppConfigurationException(
@@ -114,7 +132,10 @@ class AppEnvironment {
     return AppEnvironment(
       flavor: flavor,
       environmentName: environmentName,
+      apiSource: apiSource,
       apiBaseUrl: apiBaseUrl,
+      localApiBaseUrl: localApiBaseUrl,
+      railwayApiBaseUrl: railwayApiBaseUrl,
       appName: appName,
       supabaseUrl: hasSupabaseUrl ? normalizedSupabaseUrl : null,
       supabaseAnonKey: hasSupabaseAnonKey ? normalizedSupabaseAnonKey : null,
@@ -123,23 +144,83 @@ class AppEnvironment {
 
   final AppFlavor flavor;
   final String environmentName;
+  final ApiSource apiSource;
   final String apiBaseUrl;
+  final String localApiBaseUrl;
+  final String railwayApiBaseUrl;
   final String appName;
   final String? supabaseUrl;
   final String? supabaseAnonKey;
 
   bool get isDevelopment => flavor == AppFlavor.development;
+  bool get isLocalApiSource => apiSource == ApiSource.local;
   bool get hasSupabaseClientConfig =>
       supabaseUrl != null && supabaseAnonKey != null;
 
-  static String _defaultApiBaseUrlFor(AppFlavor flavor) {
+  static ApiSource _defaultApiSourceFor(AppFlavor flavor) {
+    switch (flavor) {
+      case AppFlavor.development:
+        return ApiSource.local;
+      case AppFlavor.staging:
+        return ApiSource.railway;
+      case AppFlavor.production:
+        return ApiSource.railway;
+    }
+  }
+
+  static String _defaultLocalApiBaseUrlFor(AppFlavor flavor) {
     switch (flavor) {
       case AppFlavor.development:
         return _resolveDevelopmentApiBaseUrl();
       case AppFlavor.staging:
-        return 'https://staging.api.movaro.local';
+      case AppFlavor.production:
+        return '';
+    }
+  }
+
+  static String _defaultRailwayApiBaseUrlFor(AppFlavor flavor) {
+    switch (flavor) {
+      case AppFlavor.development:
       case AppFlavor.production:
         return 'https://movaro-production.up.railway.app';
+      case AppFlavor.staging:
+        return 'https://staging.api.movaro.local';
+    }
+  }
+
+  static String _resolveApiBaseUrl({
+    required ApiSource apiSource,
+    required String localApiBaseUrl,
+    required String railwayApiBaseUrl,
+  }) {
+    switch (apiSource) {
+      case ApiSource.local:
+        return localApiBaseUrl;
+      case ApiSource.railway:
+        return railwayApiBaseUrl;
+    }
+  }
+
+  static void _validateApiBaseUrl(
+    String value, {
+    required String keyName,
+    required AppFlavor flavor,
+  }) {
+    if (value.trim().isEmpty) {
+      throw AppConfigurationException(
+        '$keyName is required to resolve the API base URL.',
+      );
+    }
+
+    final parsedApiBaseUrl = Uri.tryParse(value);
+    if (parsedApiBaseUrl == null || !parsedApiBaseUrl.hasScheme) {
+      throw AppConfigurationException('$keyName must be a valid absolute URL.');
+    }
+
+    if (flavor != AppFlavor.development && parsedApiBaseUrl.scheme != 'https') {
+      throw AppConfigurationException(
+        '$keyName must use HTTPS outside development.',
+      );
     }
   }
 

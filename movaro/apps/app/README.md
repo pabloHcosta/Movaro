@@ -1,17 +1,41 @@
 # movaro_app
 
-A new Flutter project.
+## API environment switching
 
-## Getting Started
+The app resolves its backend URL from build-time dart defines.
 
-This project is a starting point for a Flutter application.
+Primary keys:
 
-A few resources to get you started if this is your first Flutter project:
+- `APP_ENV=development|production|staging`
+- `API_SOURCE=local|railway`
+- `LOCAL_API_BASE_URL`
+- `RAILWAY_API_BASE_URL`
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+`API_BASE_URL` is still supported as a direct override for backward compatibility,
+but the preferred setup is to switch with `API_SOURCE`.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Current checked-in defaults:
+
+- [`.env.production.json`](/Users/pablocosta/Developer/Movaro/movaro/apps/app/.env.production.json) defaults to `API_SOURCE=local`
+- [`.env.development.json`](/Users/pablocosta/Developer/Movaro/movaro/apps/app/.env.development.json) defaults to `API_SOURCE=local`
+- Railway remains available in `RAILWAY_API_BASE_URL`
+
+To switch production back to Railway, change only this value in
+[`.env.production.json`](/Users/pablocosta/Developer/Movaro/movaro/apps/app/.env.production.json):
+
+```json
+{
+  "API_SOURCE": "railway"
+}
+```
+
+To update the Cloudflare Tunnel URL, change only `LOCAL_API_BASE_URL` in
+[`.env.production.json`](/Users/pablocosta/Developer/Movaro/movaro/apps/app/.env.production.json).
+
+Example build:
+
+```bash
+flutter build apk \
+  --target lib/main_production.dart \
+  --dart-define-from-file=.env.production.json
+```

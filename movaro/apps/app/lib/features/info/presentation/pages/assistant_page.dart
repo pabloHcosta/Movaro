@@ -96,7 +96,12 @@ class _AssistantPageState extends State<AssistantPage> {
         migrationGoal: plan?.goal.isNotEmpty == true ? plan!.goal : null,
         planTimeline: plan?.timeline.isNotEmpty == true ? plan!.timeline : null,
       );
-      _starterPrompts = await _chatService!.fetchStarterPrompts();
+      try {
+        _starterPrompts = await _chatService!.fetchStarterPrompts();
+      } catch (e) {
+        dev.log('[AssistantPage] Starter prompts unavailable: $e');
+        _starterPrompts = null;
+      }
       dev.log('[AssistantPage] ChatService ready ✓');
     } catch (e) {
       dev.log('[AssistantPage] ChatService init failed: $e');
@@ -150,25 +155,29 @@ class _AssistantPageState extends State<AssistantPage> {
                 ),
                 const SizedBox(height: 8),
                 Expanded(
-                  child: _mode == _AssistantMode.conversation
-                      ? _ConversationBody(
-                          key: const ValueKey('conversation'),
-                          chatService: _chatService,
-                          starterPrompts: _starterPrompts,
-                          isInitializing: _isChatInitializing,
-                          initialMessage: widget.initialMessage,
-                        )
-                      : DocumentationGuidePage(
-                          key: const ValueKey('guides'),
-                          environment: widget.environment,
-                          embedded: true,
-                          exchangeRatesService: widget.exchangeRatesService,
-                          journeyContextController:
-                              widget.journeyContextController,
-                          migrationQuestionnaireController:
-                              widget.migrationQuestionnaireController,
-                          citiesController: widget.citiesController,
-                        ),
+                  child: IndexedStack(
+                    index: _mode == _AssistantMode.conversation ? 0 : 1,
+                    children: [
+                      _ConversationBody(
+                        key: const ValueKey('conversation'),
+                        chatService: _chatService,
+                        starterPrompts: _starterPrompts,
+                        isInitializing: _isChatInitializing,
+                        initialMessage: widget.initialMessage,
+                      ),
+                      DocumentationGuidePage(
+                        key: const ValueKey('guides'),
+                        environment: widget.environment,
+                        embedded: true,
+                        exchangeRatesService: widget.exchangeRatesService,
+                        journeyContextController:
+                            widget.journeyContextController,
+                        migrationQuestionnaireController:
+                            widget.migrationQuestionnaireController,
+                        citiesController: widget.citiesController,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

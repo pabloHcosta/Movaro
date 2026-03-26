@@ -32,7 +32,7 @@ class GuideAnswersRemoteService {
       body['originCountry'] = originCountry;
     }
 
-    final data = await _client.postJsonMap('/v1/chat/guide-answers', body);
+    final data = await _client.postJsonMap('/api/v1/chat/guide-answers', body);
 
     final rawItems = data['items'];
     if (rawItems is! List) {

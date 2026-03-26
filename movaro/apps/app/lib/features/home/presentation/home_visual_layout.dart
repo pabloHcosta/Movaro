@@ -39,19 +39,33 @@ class HomeVisualLayout extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTitle(context, scheme),
-                  const SizedBox(height: 9),
-                  _buildSubtitle(context, scheme),
-                  const SizedBox(height: 8),
-                  _buildSupportLine(context, scheme),
-                  const SizedBox(height: 18),
-                  _buildPrimaryButton(context, scheme, isDark),
-                  const SizedBox(height: 8),
-                  Expanded(child: _buildSecondaryLinks(context, scheme)),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    padding: EdgeInsets.zero,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTitle(context, scheme),
+                            const SizedBox(height: 9),
+                            _buildSubtitle(context, scheme),
+                            const SizedBox(height: 8),
+                            _buildSupportLine(context, scheme),
+                            const SizedBox(height: 18),
+                            _buildPrimaryButton(context, scheme, isDark),
+                            const SizedBox(height: 8),
+                            _buildSecondaryLinks(context, scheme),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),

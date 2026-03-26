@@ -18,6 +18,7 @@ export interface OrchestratorAnswer {
   source: AnswerSource;
   intent: ChatIntent;
   confidence: number;
+  provider?: string;
 }
 
 /** Minimum confidence to return a resolver answer without LLM fallback. */
@@ -76,6 +77,25 @@ export class OrchestratorService {
     this.logger.debug(
       `[Orchestrator] ask: "${message.substring(0, 60)}" | locale=${locale}`,
     );
+
+    const exactQuickPrompt = await this.corridorGuidanceResolver.resolve({
+      ...dto,
+      locale,
+    });
+    if (
+      exactQuickPrompt.found &&
+      exactQuickPrompt.topic &&
+      this.corridorGuidanceResolver.isExactQuickPrompt(message)
+    ) {
+      const result: OrchestratorAnswer = {
+        answer: exactQuickPrompt.answer,
+        source: 'app_data',
+        intent: 'general',
+        confidence: exactQuickPrompt.confidence,
+      };
+      this.putCache(cacheKey, result);
+      return result;
+    }
 
     // ── Intent detection ───────────────────────────────────────────────────────
     const intent = this.intentDetector.detect(message);
@@ -206,6 +226,7 @@ export class OrchestratorService {
       source: 'ai',
       intent: intent.intent,
       confidence: 0.5,
+      provider: llmResult.provider,
     };
 
     this.putCache(cacheKey, result);

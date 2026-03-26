@@ -39,6 +39,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
   late final AnimationController _anim;
   late final Animation<double> _fadeIn;
   late final Animation<Offset> _slideUp;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -62,6 +63,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _anim.dispose();
     super.dispose();
   }
@@ -496,9 +498,13 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                   // ── Main scrollable content ─────────────────────────
                   Column(
                     children: [
-                      _HeroSection(city: recommendedCity),
+                      _HeroSection(
+                        city: recommendedCity,
+                        scrollController: _scrollController,
+                      ),
                       Expanded(
                         child: ListView(
+                          controller: _scrollController,
                           padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
                           children: [
                             if (hasPreferred && preferredMatchesRecommended)
@@ -575,113 +581,22 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
 class _HeroSection extends StatelessWidget {
-  const _HeroSection({required this.city});
+  const _HeroSection({required this.city, required this.scrollController});
 
   final City city;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = cityImageUrlFor(city.id);
     final heroHeight = MediaQuery.of(context).size.height * 0.38;
 
-    return SizedBox(
-      height: heroHeight,
-      width: double.infinity,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Background image
-          if (imageUrl != null)
-            CachedNetworkImage(
-              imageUrl: imageUrl,
-              fit: BoxFit.cover,
-              errorWidget: (_, _, _) => _PlaceholderHero(city: city),
-            )
-          else
-            _PlaceholderHero(city: city),
-
-          // Gradient overlay: transparent top → dark bottom
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withValues(alpha: 0.72),
-                ],
-                stops: const [0.45, 1.0],
-              ),
-            ),
-          ),
-
-          // City name + eyebrow
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 24,
-            child: SafeArea(
-              top: true,
-              bottom: false,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    context.l10n.migrationResultRevealEyebrow,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.78),
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    city.name,
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      height: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${city.stateName} · ${city.stateCode}',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.82),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PlaceholderHero extends StatelessWidget {
-  const _PlaceholderHero({required this.city});
-
-  final City city;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.isDark(context)
-          ? const Color(0xFF0D1B2A)
-          : const Color(0xFF1A3A5C),
-      child: Center(
-        child: Text(
-          city.name[0],
-          style: Theme.of(context).textTheme.displayLarge?.copyWith(
-            color: Colors.white.withValues(alpha: 0.2),
-            fontSize: 120,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-      ),
+    return CollapsibleCityHero(
+      city: city,
+      scrollController: scrollController,
+      title: city.name,
+      eyebrow: context.l10n.migrationResultRevealEyebrow,
+      subtitle: '${city.stateName} · ${city.stateCode}',
+      maxHeight: heroHeight,
     );
   }
 }

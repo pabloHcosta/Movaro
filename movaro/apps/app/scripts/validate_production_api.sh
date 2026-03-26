@@ -10,10 +10,24 @@ if [[ ! -f "$ENV_FILE" ]]; then
   exit 1
 fi
 
-API_BASE_URL="$(node -p "require(process.argv[1]).API_BASE_URL" "$ENV_FILE")"
+API_BASE_URL="$(
+  node -e '
+    const env = require(process.argv[1]);
+    const source = process.env.API_SOURCE || env.API_SOURCE || "railway";
+    const resolved =
+      env.API_BASE_URL ||
+      (source === "local" ? env.LOCAL_API_BASE_URL : env.RAILWAY_API_BASE_URL);
+
+    if (!resolved) {
+      process.exit(1);
+    }
+
+    process.stdout.write(resolved);
+  ' "$ENV_FILE"
+)"
 
 if [[ -z "$API_BASE_URL" || "$API_BASE_URL" == "undefined" ]]; then
-  echo "API_BASE_URL missing in $ENV_FILE" >&2
+  echo "Resolved API base URL missing in $ENV_FILE" >&2
   exit 1
 fi
 

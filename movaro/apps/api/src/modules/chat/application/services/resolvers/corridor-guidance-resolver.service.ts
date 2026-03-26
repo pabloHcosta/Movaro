@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { CitiesCatalogService } from '../../../../cities/application/services/cities-catalog.service';
 import { AssistantKnowledgeService } from '../assistant-knowledge.service';
+import { normalizeChatCorridor } from '../chat-country-normalizer';
 import { AskChatDto } from '../../../presentation/dto/ask-chat.dto';
 import {
   corridorGuidanceProfiles,
@@ -16,6 +17,63 @@ export interface CorridorGuidanceResult {
   answer: string;
   topic?: GuidanceTopic;
 }
+
+type SeasonalityProfileKey =
+  | 'default'
+  | 'coastal_south'
+  | 'northeast'
+  | 'north';
+
+const EXACT_QUICK_PROMPTS: Record<GuidanceTopic, string[]> = {
+  documents: [],
+  cpf: [
+    'como tirar o cpf',
+    'como obter o cpf',
+    'como obtener mi cpf',
+    'how do i get my cpf',
+  ],
+  visa: ['preciso de visto', 'necesito visa', 'do i need a visa'],
+  costs: [],
+  housing: [],
+  activities: [],
+  best_time: [
+    'melhor epoca pra ir',
+    'melhor epoca para ir',
+    'mejor epoca para ir',
+    'best time to go',
+  ],
+};
+
+const CITY_TO_SEASONALITY_PROFILE: Record<string, SeasonalityProfileKey> = {
+  'florianopolis-sc': 'coastal_south',
+  'balneario-camboriu-sc': 'coastal_south',
+  'itajai-sc': 'coastal_south',
+  'joinville-sc': 'coastal_south',
+  'blumenau-sc': 'coastal_south',
+  'sao-paulo-sp': 'default',
+  'curitiba-pr': 'default',
+  'rio-de-janeiro-rj': 'default',
+  'armacao-dos-buzios-rj': 'default',
+  'porto-alegre-rs': 'default',
+  'belo-horizonte-mg': 'default',
+  'campo-grande-ms': 'default',
+  'salvador-ba': 'northeast',
+  'recife-pe': 'northeast',
+  'fortaleza-ce': 'northeast',
+  'natal-rn': 'northeast',
+  'joao-pessoa-pb': 'northeast',
+  'aracaju-se': 'northeast',
+  'maceio-al': 'northeast',
+  'manaus-am': 'north',
+  'belem-pa': 'north',
+};
+
+const LOW_MONTHS_BY_PROFILE: Record<SeasonalityProfileKey, number[]> = {
+  default: [4, 5, 9, 10, 11],
+  coastal_south: [3, 4, 9, 10, 11],
+  northeast: [4, 5, 9, 10, 11],
+  north: [5, 6, 9, 10],
+};
 
 const TOPIC_KEYWORDS: Record<GuidanceTopic, string[]> = {
   documents: [
@@ -110,15 +168,35 @@ export class CorridorGuidanceResolverService {
       profile,
     );
 
+    const resolvedCityId = dto.recommendedCityId
+      ? this.citiesCatalogService.resolveCityId(dto.recommendedCityId)
+      : null;
     const cityName = dto.recommendedCityId
       ? this.citiesCatalogService.getCityDisplayNameById(dto.recommendedCityId)
       : null;
+
+    const exactQuickPrompt = this.detectExactQuickPromptTopic(dto.message);
+    if (exactQuickPrompt) {
+      return {
+        found: true,
+        confidence: 0.97,
+        topic: exactQuickPrompt,
+        answer: this.buildExactQuickPromptAnswer(
+          exactQuickPrompt,
+          locale,
+          dto.currentPhase,
+          normalizedCompletedItemIds,
+          cityName,
+          resolvedCityId,
+        ),
+      };
+    }
 
     return {
       found: true,
       confidence: 0.93,
       topic,
-        answer: profile.buildAnswer(topic, locale, {
+      answer: profile.buildAnswer(topic, locale, {
         cityName,
         currentPhase: dto.currentPhase,
         completedItemIds: normalizedCompletedItemIds,
@@ -202,6 +280,22 @@ export class CorridorGuidanceResolverService {
     return bestScore > 0 ? bestTopic : null;
   }
 
+  isExactQuickPrompt(message: string): boolean {
+    return this.detectExactQuickPromptTopic(message) != null;
+  }
+
+  private detectExactQuickPromptTopic(message: string): GuidanceTopic | null {
+    const normalizedMessage = this.normalizePrompt(message);
+
+    for (const [topic, prompts] of Object.entries(EXACT_QUICK_PROMPTS)) {
+      if (prompts.includes(normalizedMessage)) {
+        return topic as GuidanceTopic;
+      }
+    }
+
+    return null;
+  }
+
   private resolveProfile(
     originCountry: string,
     destinationCountry: string,
@@ -213,9 +307,17 @@ export class CorridorGuidanceResolverService {
   }
 
   private normalizeCorridor(originCountry: string, destinationCountry: string) {
-    return `${originCountry.toLowerCase().trim()}->${destinationCountry
+    return normalizeChatCorridor(originCountry, destinationCountry);
+  }
+
+  private normalizePrompt(message: string): string {
+    return message
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
-      .trim()}`;
+      .replace(/[!?.,;:]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   private normalizeLocale(locale?: string): GuidanceLocale {
@@ -337,5 +439,176 @@ export class CorridorGuidanceResolverService {
       return 'What is the first local document I should sort out after arrival?';
     }
     return 'Qual é o primeiro documento local que eu deveria resolver ao chegar?';
+  }
+
+  private buildExactQuickPromptAnswer(
+    topic: GuidanceTopic,
+    locale: GuidanceLocale,
+    currentPhase: string | undefined,
+    completedItemIds: string[],
+    cityName: string | null,
+    cityId: string | null,
+  ): string {
+    switch (topic) {
+      case 'visa':
+        return this.buildVisaQuickAnswer(locale);
+      case 'cpf':
+        return this.buildCpfQuickAnswer(locale, completedItemIds);
+      case 'best_time':
+        return this.buildBestTimeQuickAnswer(
+          locale,
+          currentPhase,
+          cityName,
+          cityId,
+        );
+      default:
+        return '';
+    }
+  }
+
+  private buildVisaQuickAnswer(locale: GuidanceLocale): string {
+    if (locale === 'es') {
+      return 'No para entrar como visitante: argentinos pueden entrar a Brasil con DNI o pasaporte y quedarse hasta 90 días. Si la idea es vivir en Brasil, el camino usual es la residencia Mercosur, no una visa de turismo.';
+    }
+    if (locale === 'en') {
+      return 'Not for visitor entry: Argentinians can enter Brazil with DNI or passport and stay for up to 90 days. If the goal is to live in Brazil, the usual path is Mercosur residency, not a tourist visa.';
+    }
+    return 'Não para entrar como visitante: argentinos podem entrar no Brasil com DNI ou passaporte e ficar até 90 dias. Se a ideia é morar no Brasil, o caminho usual é a residência Mercosul, não visto de turismo.';
+  }
+
+  private buildCpfQuickAnswer(
+    locale: GuidanceLocale,
+    completedItemIds: string[],
+  ): string {
+    const alreadyDone = completedItemIds.includes('doc-01');
+    if (locale === 'es') {
+      return alreadyDone
+        ? 'El CPF ya aparece como concluido en tu progreso. Es lo que destraba banco, alquiler y trabajo formal.'
+        : 'El CPF es uno de los primeros pasos prácticos en Brasil. Se puede pedir con documento válido en la Receita Federal, Correios o en el consulado brasileño; sin CPF se complica abrir cuenta, alquilar y trabajar formalmente.';
+    }
+    if (locale === 'en') {
+      return alreadyDone
+        ? 'CPF already appears as completed in your progress. It is what unlocks banking, rent, and formal work.'
+        : 'CPF is one of the first practical steps in Brazil. It can be requested with a valid ID through Receita Federal, Correios, or the Brazilian consulate; without CPF, banking, rent, and formal work get harder.';
+    }
+    return alreadyDone
+      ? 'O CPF já aparece como concluído no seu progresso. É ele que destrava banco, aluguel e trabalho formal.'
+      : 'O CPF é um dos primeiros passos práticos no Brasil. Ele pode ser pedido com documento válido na Receita Federal, nos Correios ou no consulado brasileiro; sem CPF, fica mais difícil abrir conta, alugar e trabalhar formalmente.';
+  }
+
+  private buildBestTimeQuickAnswer(
+    locale: GuidanceLocale,
+    currentPhase: string | undefined,
+    cityName: string | null,
+    cityId: string | null,
+  ): string {
+    const seasonalProfile = cityId
+      ? CITY_TO_SEASONALITY_PROFILE[cityId] ?? 'default'
+      : 'default';
+    const lowMonths = LOW_MONTHS_BY_PROFILE[seasonalProfile].map((month) =>
+      this.monthLabel(month, locale),
+    );
+    const cityReference = cityName ?? this.genericDestinationLabel(locale);
+    const climateNote = this.climateNote(seasonalProfile, locale, cityReference);
+    const planningNote = this.bestTimePlanningNote(locale, currentPhase);
+
+    if (locale === 'es') {
+      return `Para ${cityReference}, normalmente conviene mirar ${this.joinMonths(lowMonths, locale)}: suelen equilibrar mejor tarifa de vuelo y llegada. ${climateNote} ${planningNote}`;
+    }
+    if (locale === 'en') {
+      return `For ${cityReference}, ${this.joinMonths(lowMonths, locale)} usually gives the best balance between flight price and arrival conditions. ${climateNote} ${planningNote}`;
+    }
+    return `Para ${cityReference}, ${this.joinMonths(lowMonths, locale)} costumam dar o melhor equilíbrio entre passagem e chegada. ${climateNote} ${planningNote}`;
+  }
+
+  private monthLabel(month: number, locale: GuidanceLocale): string {
+    const labels: Record<GuidanceLocale, string[]> = {
+      pt: ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'],
+      es: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
+      en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    };
+    return labels[locale][month - 1] ?? String(month);
+  }
+
+  private joinMonths(months: string[], locale: GuidanceLocale): string {
+    if (months.length <= 1) {
+      return months.join('');
+    }
+    const last = months[months.length - 1];
+    const head = months.slice(0, -1).join(', ');
+    const conjunction = locale === 'es' ? ' y ' : locale === 'en' ? ' and ' : ' e ';
+    return `${head}${conjunction}${last}`;
+  }
+
+  private climateNote(
+    profile: SeasonalityProfileKey,
+    locale: GuidanceLocale,
+    cityReference: string,
+  ): string {
+    if (profile === 'coastal_south') {
+      if (locale === 'es') {
+        return `${cityReference} suele estar más llena y cara en pleno verano.`;
+      }
+      if (locale === 'en') {
+        return `${cityReference} is usually busier and pricier in peak summer.`;
+      }
+      return `${cityReference} costuma ficar mais cheia e mais cara no pico do verão.`;
+    }
+    if (profile === 'northeast') {
+      if (locale === 'es') {
+        return 'Fin de año y vacaciones suelen presionar más las tarifas.';
+      }
+      if (locale === 'en') {
+        return 'Year-end and holiday periods usually push fares higher.';
+      }
+      return 'Fim de ano e férias costumam pressionar mais as tarifas.';
+    }
+    if (profile === 'north') {
+      if (locale === 'es') {
+        return 'En ciudades del norte conviene evitar las ventanas más lluviosas.';
+      }
+      if (locale === 'en') {
+        return 'For northern cities, it is better to avoid the rainiest windows.';
+      }
+      return 'Em cidades do Norte, vale evitar as janelas mais chuvosas.';
+    }
+    if (locale === 'es') {
+      return 'Carnaval, vacaciones y compra encima de la fecha suelen encarecer bastante.';
+    }
+    if (locale === 'en') {
+      return 'Carnival, holiday periods, and last-minute buying usually raise fares a lot.';
+    }
+    return 'Carnaval, férias e compra em cima da hora costumam encarecer bastante.';
+  }
+
+  private bestTimePlanningNote(
+    locale: GuidanceLocale,
+    currentPhase?: string,
+  ): string {
+    const documentationOpen =
+      !currentPhase || currentPhase === 'preparation' || currentPhase === 'documents';
+    if (locale === 'es') {
+      return documentationOpen
+        ? 'Si tu documentación todavía no está cerrada, no conviene comprar antes de resolver eso.'
+        : 'Si tu documentación ya está encaminada, esas ventanas suelen ser las más seguras para monitorear.';
+    }
+    if (locale === 'en') {
+      return documentationOpen
+        ? 'If your paperwork is still open, do not lock flights before that.'
+        : 'If your paperwork is already moving, those windows are usually the safest to monitor.';
+    }
+    return documentationOpen
+      ? 'Se a sua documentação ainda não está fechada, não vale travar voo antes disso.'
+      : 'Se a sua documentação já está andando, essas janelas costumam ser as mais seguras para monitorar.';
+  }
+
+  private genericDestinationLabel(locale: GuidanceLocale): string {
+    if (locale === 'es') {
+      return 'tu ciudad base';
+    }
+    if (locale === 'en') {
+      return 'your base city';
+    }
+    return 'sua cidade base';
   }
 }

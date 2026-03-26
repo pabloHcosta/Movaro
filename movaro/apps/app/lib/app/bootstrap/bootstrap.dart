@@ -37,6 +37,10 @@ Future<AppDependencies> buildAppDependencies({
   final environment = AppEnvironment.fromDartDefines(
     defaultFlavor: defaultFlavor,
   );
+  debugPrint(
+    'Movaro API source: ${environment.apiSource.name} '
+    '(${environment.apiBaseUrl})',
+  );
   await SupabaseBootstrap.initializeIfConfigured(environment);
   final catalogRepository = CatalogRepositoryImpl(
     dataSource: SeedCatalogDataSource(),

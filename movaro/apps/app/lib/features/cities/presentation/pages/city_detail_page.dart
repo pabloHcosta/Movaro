@@ -40,6 +40,7 @@ import 'package:movaro_app/features/migration_questionnaire/application/migratio
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
 
 class CityDetailPage extends StatefulWidget {
   const CityDetailPage({
@@ -225,6 +226,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
                     // ── Full-width hero ─────────────────────────────────────
                     _DetailHeroSection(
                       city: city,
+                      scrollController: _scrollController,
                       citiesController: widget.citiesController,
                       onToggleFavorite: () =>
                           _toggleFavoriteCity(context, city),
@@ -449,10 +451,20 @@ class _CityDetailPageState extends State<CityDetailPage> {
                     context.pageHorizontalPadding,
                     0,
                   ),
-                  child: AppGlassHeader(
-                    title: l10n.cityDetailHeaderTitle(),
-                    onBack: _goBackToCities,
-                    onHelp: _showHelp,
+                  child: AnimatedBuilder(
+                    animation: _scrollController,
+                    builder: (context, _) {
+                      final showCityTitle =
+                          _scrollController.hasClients &&
+                          _scrollController.offset > 72;
+                      return AppGlassHeader(
+                        title: showCityTitle
+                            ? city?.name ?? l10n.cityDetailHeaderTitle()
+                            : l10n.cityDetailHeaderTitle(),
+                        onBack: _goBackToCities,
+                        onHelp: _showHelp,
+                      );
+                    },
                   ),
                 ),
               ),
@@ -572,6 +584,35 @@ class _CityDetailPageState extends State<CityDetailPage> {
     }
 
     if (plan != null) {
+      final isSamePlanCity = plan.recommendedCity?.id == city.id;
+      if (!isSamePlanCity) {
+        final choice = await showPlanResetDialog(
+          context,
+          currentCityName: plan.recommendedCity?.name,
+        );
+        if (!context.mounted || choice != PlanResetChoice.rebuild) {
+          return;
+        }
+        await widget.migrationQuestionnaireController?.clearCurrentPlan();
+        if (!context.mounted) {
+          return;
+        }
+        final generated =
+            await widget.migrationQuestionnaireController?.generatePlanFromCity(
+              city,
+            ) ??
+            false;
+        if (!context.mounted || !generated) {
+          return;
+        }
+        await widget.migrationQuestionnaireController?.confirmPlanCity(city);
+        if (!context.mounted) {
+          return;
+        }
+        Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
+        return;
+      }
+
       await widget.migrationQuestionnaireController?.confirmPlanCity(city);
       if (!context.mounted) {
         return;
@@ -905,11 +946,13 @@ class _PlanCityContext {
 class _DetailHeroSection extends StatelessWidget {
   const _DetailHeroSection({
     required this.city,
+    required this.scrollController,
     required this.citiesController,
     required this.onToggleFavorite,
   });
 
   final City city;
+  final ScrollController scrollController;
   final CitiesController citiesController;
   final VoidCallback onToggleFavorite;
 
@@ -922,87 +965,32 @@ class _DetailHeroSection extends StatelessWidget {
         ? '${weather.temperatureCelsius.round()}°C'
         : null;
 
-    return SizedBox(
-      height: heroHeight,
-      width: double.infinity,
-      child: Stack(
-        fit: StackFit.expand,
+    return CollapsibleCityHero(
+      city: city,
+      scrollController: scrollController,
+      title: city.name,
+      subtitle: '${city.stateName} · ${city.stateCode}',
+      maxHeight: heroHeight,
+      meta: Row(
         children: [
-          // Background city image
-          CityResolvedImage(
-            city: city,
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.medium,
-            errorWidget: const SizedBox.shrink(),
-          ),
-
-          // Gradient overlay: transparent top → dark bottom
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.transparent, Color(0xCC000000)],
-                stops: [0.30, 1.0],
+          _LifestyleBadge(city: city),
+          const Spacer(),
+          if (tempLabel != null) ...[
+            Text(
+              tempLabel,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: Colors.white.withValues(alpha: 0.80),
+                fontWeight: FontWeight.w700,
               ),
             ),
-          ),
-
-          // Bottom content: badge, name, state
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 20,
-            child: SafeArea(
-              top: false,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      _LifestyleBadge(city: city),
-                      const Spacer(),
-                      if (tempLabel != null) ...[
-                        Text(
-                          tempLabel,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.80),
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
-                        const SizedBox(width: 10),
-                      ],
-                      _HeroIconButton(
-                        icon: isFav
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                        active: isFav,
-                        onTap: onToggleFavorite,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    city.name,
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      height: 0.96,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${city.stateName} · ${city.stateCode}',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.84),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(width: 10),
+          ],
+          _HeroIconButton(
+            icon: isFav
+                ? Icons.favorite_rounded
+                : Icons.favorite_border_rounded,
+            active: isFav,
+            onTap: onToggleFavorite,
           ),
         ],
       ),

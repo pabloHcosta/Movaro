@@ -9,15 +9,18 @@ import 'package:http/http.dart' as http;
 
 class NetworkClient {
   NetworkClient({required AppEnvironment environment})
-    : _environment = environment;
+    : _environment = environment,
+      _timeout = environment.isLocalApiSource
+          ? const Duration(seconds: 15)
+          : const Duration(seconds: 8),
+      _retrySchedule = environment.isLocalApiSource
+          ? const [Duration(milliseconds: 500), Duration(milliseconds: 1200)]
+          : const [Duration(milliseconds: 350), Duration(milliseconds: 700)];
 
   final AppEnvironment _environment;
   final http.Client _httpClient = http.Client();
-  final Duration _timeout = const Duration(seconds: 8);
-  final List<Duration> _retrySchedule = const [
-    Duration(milliseconds: 350),
-    Duration(milliseconds: 700),
-  ];
+  final Duration _timeout;
+  final List<Duration> _retrySchedule;
 
   Future<Map<String, dynamic>> getJsonMap(String path) async {
     final data = await _get(path);

@@ -4,6 +4,9 @@ class DartDefineKeys {
   static const appFlavor = 'APP_FLAVOR';
   static const appEnvironment = 'APP_ENV';
   static const apiBaseUrl = 'API_BASE_URL';
+  static const apiSource = 'API_SOURCE';
+  static const localApiBaseUrl = 'LOCAL_API_BASE_URL';
+  static const railwayApiBaseUrl = 'RAILWAY_API_BASE_URL';
   static const appName = 'APP_NAME';
   static const supabaseUrl = 'SUPABASE_URL';
   static const supabaseAnonKey = 'SUPABASE_ANON_KEY';

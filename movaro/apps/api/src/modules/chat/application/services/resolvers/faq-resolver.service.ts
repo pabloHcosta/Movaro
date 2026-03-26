@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { AssistantKnowledgeService } from '../assistant-knowledge.service';
+import { normalizeChatCorridor, normalizeChatCountry } from '../chat-country-normalizer';
 
 export interface FaqResolverResult {
   found: boolean;
@@ -512,12 +513,23 @@ export class FaqResolverService {
     const normalizedLocale = locale === 'es' || locale === 'en' ? locale : 'pt';
     const corridorKey =
       originCountry && destinationCountry
-        ? `${originCountry.toLowerCase().trim()}->${destinationCountry
-            .toLowerCase()
-            .trim()}`
+        ? normalizeChatCorridor(originCountry, destinationCountry)
         : '';
+    const normalizedDestinationCountry = destinationCountry
+      ? normalizeChatCountry(destinationCountry)
+      : '';
 
     if (corridorKey) {
+      const guideAnswer = await this.assistantKnowledgeService.resolveGuideAnswer(
+        message,
+        normalizedLocale,
+        normalizedDestinationCountry,
+        corridorKey,
+      );
+      if (guideAnswer.found) {
+        return guideAnswer;
+      }
+
       const dbAnswer = await this.assistantKnowledgeService.resolveFaq(
         message,
         normalizedLocale,

@@ -8,6 +8,10 @@ import {
   corridorGuidanceProfiles,
   CorridorGuidanceProfile,
 } from './resolvers/corridor-guidance-profiles';
+import {
+  normalizeChatCorridor,
+  normalizeChatCountry,
+} from './chat-country-normalizer';
 
 @Injectable()
 export class ChatContextBuilderService {
@@ -18,8 +22,8 @@ export class ChatContextBuilderService {
   ) {}
 
   async buildContext(dto: BuildChatContextDto): Promise<ChatContextEntity> {
-    const origin = dto.originCountry.toLowerCase().trim();
-    const destination = dto.destinationCountry.toLowerCase().trim();
+    const origin = normalizeChatCountry(dto.originCountry);
+    const destination = normalizeChatCountry(dto.destinationCountry);
     const profile = this.resolveProfile(origin, destination);
 
     const coverageLevel = this.resolveCoverageLevel(profile);
@@ -292,10 +296,7 @@ export class ChatContextBuilderService {
   ): CorridorGuidanceProfile | null {
     return (
       corridorGuidanceProfiles.find(
-        (profile) =>
-          profile.key === `${origin.toLowerCase().trim()}->${destination
-            .toLowerCase()
-            .trim()}`,
+        (profile) => profile.key === normalizeChatCorridor(origin, destination),
       ) ?? null
     );
   }

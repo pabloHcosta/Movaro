@@ -459,6 +459,57 @@ export class AssistantKnowledgeService {
       .filter((entry) => entry.question.length > 0 && entry.answer.length > 0);
   }
 
+  async resolveGuideAnswer(
+    message: string,
+    locale: SupportedLocale,
+    destinationCountry: string,
+    corridorKey?: string,
+  ): Promise<{ found: boolean; confidence: number; answer: string }> {
+    const entries = await this.getGuideAnswers(locale, destinationCountry, corridorKey);
+    if (entries.length === 0) {
+      return { found: false, confidence: 0, answer: '' };
+    }
+
+    const normalizedMessage = message.toLowerCase();
+    let bestEntry: (typeof entries)[number] | null = null;
+    let bestScore = 0;
+
+    for (const entry of entries) {
+      let score = 0;
+
+      for (const keyword of entry.keywords) {
+        if (normalizedMessage.includes(keyword.toLowerCase())) {
+          score += 1.2 + keyword.length * 0.04;
+        }
+      }
+
+      const question = entry.question.toLowerCase();
+      const answer = entry.answer.toLowerCase();
+      if (question && normalizedMessage.includes(question)) {
+        score += 4;
+      }
+      if (answer && answer.length > 0 && normalizedMessage.includes(answer.slice(0, 24))) {
+        score += 0.6;
+      }
+      score += Math.max(0, 0.8 - entries.indexOf(entry) * 0.02);
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestEntry = entry;
+      }
+    }
+
+    if (!bestEntry || bestScore < 1.2) {
+      return { found: false, confidence: 0, answer: '' };
+    }
+
+    return {
+      found: true,
+      confidence: Math.min(0.94, 0.64 + bestScore * 0.06),
+      answer: bestEntry.answer,
+    };
+  }
+
   private async getLanguageRules(): Promise<LanguageRule[]> {
     const cached = this.languageRulesCache;
     if (cached && cached.expiresAt > Date.now()) {

@@ -49,7 +49,7 @@ class ChatStarterPrompts {
 
 /// Backend-mediated chat service.
 ///
-/// Calls `POST /v1/chat/ask` on the Movaro API. The backend orchestrator
+/// Calls `POST /api/v1/chat/ask` on the Movaro API. The backend orchestrator
 /// handles intent detection, structured resolver lookup (city, cost, docs,
 /// plan), and Gemini fallback — so no Gemini API key is needed in the app.
 ///
@@ -154,7 +154,7 @@ class ChatService {
             .toList(),
     };
 
-    final data = await _client.postJsonMap('/v1/chat/ask', body);
+    final data = await _client.postJsonMap('/api/v1/chat/ask', body);
 
     final text = data['answer'] as String? ?? '';
     final sourceRaw = data['source'] as String? ?? '';
@@ -174,34 +174,157 @@ class ChatService {
   }
 
   Future<ChatStarterPrompts> fetchStarterPrompts() async {
-    final data = await _client.postJsonMap('/v1/chat/prompts', {
-      'originCountry': _originCountry,
-      'destinationCountry': _destinationCountry,
-      'locale': _locale,
-    });
+    try {
+      final data = await _client.postJsonMap('/api/v1/chat/prompts', {
+        'originCountry': _originCountry,
+        'destinationCountry': _destinationCountry,
+        'locale': _locale,
+      });
 
-    List<ChatStarterPrompt> parseItems(String key) {
-      final raw = data[key];
-      if (raw is! List) {
-        return const [];
+      List<ChatStarterPrompt> parseItems(String key) {
+        final raw = data[key];
+        if (raw is! List) {
+          return const [];
+        }
+
+        return raw
+            .whereType<Map<String, dynamic>>()
+            .map(
+              (item) => ChatStarterPrompt(
+                key: item['key'] as String? ?? '',
+                label: item['label'] as String? ?? '',
+                message: item['message'] as String? ?? '',
+              ),
+            )
+            .where((item) => item.label.isNotEmpty && item.message.isNotEmpty)
+            .toList(growable: false);
       }
 
-      return raw
-          .whereType<Map<String, dynamic>>()
-          .map(
-            (item) => ChatStarterPrompt(
-              key: item['key'] as String? ?? '',
-              label: item['label'] as String? ?? '',
-              message: item['message'] as String? ?? '',
-            ),
-          )
-          .where((item) => item.label.isNotEmpty && item.message.isNotEmpty)
-          .toList(growable: false);
+      final prompts = ChatStarterPrompts(
+        categories: parseItems('categories'),
+        chips: parseItems('chips'),
+      );
+      if (prompts.categories.isNotEmpty || prompts.chips.isNotEmpty) {
+        return prompts;
+      }
+    } catch (e) {
+      dev.log('[ChatService] starter prompts fallback: $e');
     }
 
+    return _buildFallbackStarterPrompts();
+  }
+
+  ChatStarterPrompts _buildFallbackStarterPrompts() {
+    final destinationLabel = _destinationCountry.trim().isNotEmpty
+        ? _destinationCountry.trim()
+        : (_locale == 'es'
+              ? 'tu destino'
+              : _locale == 'en'
+              ? 'your destination'
+              : 'seu destino');
+    final localDocPrompt = _firstLocalDocumentPrompt();
+
     return ChatStarterPrompts(
-      categories: parseItems('categories'),
-      chips: parseItems('chips'),
+      categories: [
+        ChatStarterPrompt(
+          key: 'documents',
+          label: _locale == 'es'
+              ? 'Documentos'
+              : _locale == 'en'
+              ? 'Documents'
+              : 'Documentos',
+          message: _locale == 'es'
+              ? '¿Qué documentos necesito para migrar a $destinationLabel? Explica visa y $localDocPrompt.'
+              : _locale == 'en'
+              ? 'What documents do I need to move to $destinationLabel? Explain visas and $localDocPrompt.'
+              : 'Quais documentos preciso para migrar para $destinationLabel? Explique visto e $localDocPrompt.',
+        ),
+        ChatStarterPrompt(
+          key: 'costs',
+          label: _locale == 'es'
+              ? 'Costos'
+              : _locale == 'en'
+              ? 'Costs'
+              : 'Custos',
+          message: _locale == 'es'
+              ? '¿Cuánto cuesta mudarse? Dame una visión general de los costos.'
+              : _locale == 'en'
+              ? 'How much does it cost to move? Give me a cost overview.'
+              : 'Quanto custa se mudar? Me dê uma visão geral dos custos.',
+        ),
+        ChatStarterPrompt(
+          key: 'activities',
+          label: _locale == 'es'
+              ? 'Qué hacer'
+              : _locale == 'en'
+              ? 'What to do'
+              : 'O que fazer',
+          message: _locale == 'es'
+              ? '¿Qué debo saber sobre la vida en la ciudad destino?'
+              : _locale == 'en'
+              ? 'What should I know about life in the destination city?'
+              : 'O que devo saber sobre a vida na cidade destino?',
+        ),
+        ChatStarterPrompt(
+          key: 'stay',
+          label: _locale == 'es'
+              ? 'Dónde quedarse'
+              : _locale == 'en'
+              ? 'Where to stay'
+              : 'Onde ficar',
+          message: _locale == 'es'
+              ? '¿Cómo encontrar vivienda en $destinationLabel? Consejos para alquilar.'
+              : _locale == 'en'
+              ? 'How do I find housing in $destinationLabel? Renting tips.'
+              : 'Como encontrar moradia em $destinationLabel? Dicas para alugar.',
+        ),
+      ],
+      chips: [
+        ChatStarterPrompt(
+          key: 'visa',
+          label: _locale == 'es'
+              ? '¿Necesito visa?'
+              : _locale == 'en'
+              ? 'Do I need a visa?'
+              : 'Preciso de visto?',
+          message: _locale == 'es'
+              ? '¿Necesito visa?'
+              : _locale == 'en'
+              ? 'Do I need a visa?'
+              : 'Preciso de visto?',
+        ),
+        ChatStarterPrompt(
+          key: 'best_time',
+          label: _locale == 'es'
+              ? '¿Mejor época para ir?'
+              : _locale == 'en'
+              ? 'Best time to go?'
+              : 'Melhor época pra ir?',
+          message: _locale == 'es'
+              ? '¿Mejor época para ir?'
+              : _locale == 'en'
+              ? 'Best time to go?'
+              : 'Melhor época pra ir?',
+        ),
+        ChatStarterPrompt(
+          key: 'first_local_document',
+          label: localDocPrompt,
+          message: localDocPrompt,
+        ),
+      ],
     );
+  }
+
+  String _firstLocalDocumentPrompt() {
+    final normalized = _destinationCountry.toLowerCase().trim();
+    if (normalized == 'brasil' || normalized == 'brazil') {
+      if (_locale == 'es') return '¿Cómo obtener mi CPF?';
+      if (_locale == 'en') return 'How do I get my CPF?';
+      return 'Como tirar o CPF?';
+    }
+
+    if (_locale == 'es') return '¿Cuál es mi primer documento local?';
+    if (_locale == 'en') return 'What is my first local document?';
+    return 'Qual é meu primeiro documento local?';
   }
 }
