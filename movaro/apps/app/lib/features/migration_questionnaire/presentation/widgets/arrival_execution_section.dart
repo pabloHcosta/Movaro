@@ -121,25 +121,12 @@ class ArrivalExecutionSection extends StatelessWidget {
   }
 
   String _stageTitle(BuildContext context, ArrivalExecutionStage stage) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => switch (stage) {
-        ArrivalExecutionStage.firstWeek =>
-          'PRIMEIRA SEMANA — prioridade maxima',
-        ArrivalExecutionStage.firstMonth => 'PRIMEIRO MES — consolidar a base',
-        ArrivalExecutionStage.firstQuarter =>
-          'PRIMEIROS 3 MESES — estabilizar a vida',
-      },
-      'es' => switch (stage) {
-        ArrivalExecutionStage.firstWeek => 'PRIMERA SEMANA — prioridad maxima',
-        ArrivalExecutionStage.firstMonth => 'PRIMER MES — consolidar la base',
-        ArrivalExecutionStage.firstQuarter =>
-          'PRIMEROS 3 MESES — estabilizar la vida',
-      },
-      _ => switch (stage) {
-        ArrivalExecutionStage.firstWeek => 'FIRST WEEK — top priority',
-        ArrivalExecutionStage.firstMonth => 'FIRST MONTH — build your base',
-        ArrivalExecutionStage.firstQuarter => 'FIRST 3 MONTHS — stabilize life',
-      },
+    final l10n = context.l10n;
+    return switch (stage) {
+      ArrivalExecutionStage.firstWeek => l10n.arrivalExecutionStageFirstWeek,
+      ArrivalExecutionStage.firstMonth => l10n.arrivalExecutionStageFirstMonth,
+      ArrivalExecutionStage.firstQuarter =>
+        l10n.arrivalExecutionStageFirstQuarter,
     };
   }
 }
@@ -308,11 +295,7 @@ class _ExecutionItemTile extends StatelessWidget {
   }
 
   String _doneLabel(BuildContext context) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => 'Feito ✓',
-      'es' => 'Hecho ✓',
-      _ => 'Done ✓',
-    };
+    return context.l10n.commonDoneCheck;
   }
 }
 

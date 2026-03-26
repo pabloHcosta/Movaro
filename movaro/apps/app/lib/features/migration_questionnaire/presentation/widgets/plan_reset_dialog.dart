@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movaro_app/app/localization/app_localization.dart';
 
 enum PlanResetChoice { deleteOnly, rebuild }
 
@@ -176,7 +177,10 @@ class PlanResetDialogCopy {
     required this.rebuildLabel,
     required this.cancelLabel,
     required this.currentPlanFallbackLabel,
-  });
+    required String Function(String cityName) cityWarningBuilder,
+    required String Function(String cityName) cancelWithCityBuilder,
+  }) : _cityWarningBuilder = cityWarningBuilder,
+       _cancelWithCityBuilder = cancelWithCityBuilder;
 
   final String manageActionLabel;
   final String manageActionBody;
@@ -186,60 +190,27 @@ class PlanResetDialogCopy {
   final String currentPlanFallbackLabel;
 
   String cityWarning(String cityName) {
-    return switch (currentPlanFallbackLabel) {
-      'plano atual' =>
-        'Seu progresso em $cityName e todos os itens marcados serão apagados.',
-      'plan actual' =>
-        'Tu progreso en $cityName y todos los items marcados se borrarán.',
-      _ => 'Your progress in $cityName and all checked items will be erased.',
-    };
+    return _cityWarningBuilder(cityName);
   }
 
   String cancelWithCity(String cityName) {
-    return switch (currentPlanFallbackLabel) {
-      'plano atual' => 'Cancelar — manter $cityName',
-      'plan actual' => 'Cancelar — mantener $cityName',
-      _ => 'Cancel — keep $cityName',
-    };
+    return _cancelWithCityBuilder(cityName);
   }
 
-  static PlanResetDialogCopy fromContext(BuildContext context) {
-    final languageCode = Localizations.localeOf(context).languageCode;
+  final String Function(String cityName) _cityWarningBuilder;
+  final String Function(String cityName) _cancelWithCityBuilder;
 
-    switch (languageCode) {
-      case 'pt':
-        return const PlanResetDialogCopy(
-          manageActionLabel: 'Começar um novo plano',
-          manageActionBody:
-              'Se quiser recomeçar, você pode apagar o progresso atual e montar um novo plano desde o início.',
-          dialogBody:
-              'Você vai recomeçar o questionário e escolher uma nova cidade. Isso não pode ser desfeito.',
-          rebuildLabel: 'Sim, começar do zero',
-          cancelLabel: 'Cancelar',
-          currentPlanFallbackLabel: 'plano atual',
-        );
-      case 'es':
-        return const PlanResetDialogCopy(
-          manageActionLabel: 'Empezar un plan nuevo',
-          manageActionBody:
-              'Si querés recomenzar, podés borrar tu progreso actual y armar un nuevo plan desde el principio.',
-          dialogBody:
-              'Vas a reiniciar el cuestionario y elegir una nueva ciudad. Esto no se puede deshacer.',
-          rebuildLabel: 'Sí, empezar de cero',
-          cancelLabel: 'Cancelar',
-          currentPlanFallbackLabel: 'plan actual',
-        );
-      default:
-        return const PlanResetDialogCopy(
-          manageActionLabel: 'Start a new plan',
-          manageActionBody:
-              'If you want to restart, you can clear your current progress and build a new plan from the beginning.',
-          dialogBody:
-              'You will restart the questionnaire and choose a new city. This cannot be undone.',
-          rebuildLabel: 'Yes, start from scratch',
-          cancelLabel: 'Cancel',
-          currentPlanFallbackLabel: 'current plan',
-        );
-    }
+  static PlanResetDialogCopy fromContext(BuildContext context) {
+    final l10n = context.l10n;
+    return PlanResetDialogCopy(
+      manageActionLabel: l10n.planResetManageAction,
+      manageActionBody: l10n.planResetManageBody,
+      dialogBody: l10n.planResetDialogBody,
+      rebuildLabel: l10n.planResetRebuildLabel,
+      cancelLabel: l10n.planResetCancelLabel,
+      currentPlanFallbackLabel: l10n.planResetCurrentPlanFallbackLabel,
+      cityWarningBuilder: l10n.planResetCityWarning,
+      cancelWithCityBuilder: l10n.planResetCancelWithCity,
+    );
   }
 }

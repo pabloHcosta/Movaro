@@ -2045,6 +2045,123 @@ extension AppLocalizationsFormatting on AppLocalizations {
     }
   }
 
+  String guideActionTitleLabel(String value) {
+    switch (value) {
+      case 'item_0_1_rule_90_days':
+        return _localizedText(
+          pt: 'Entender a regra dos 90 dias',
+          es: 'Entender la regla de los 90 días',
+          en: 'Understand the 90-day rule',
+        );
+      case 'item_0_2_antecedentes':
+        return _localizedText(
+          pt: 'Providenciar certificado de antecedentes criminais',
+          es: 'Gestionar certificado de antecedentes penales',
+          en: 'Get your criminal record certificate',
+        );
+      case 'item_0_3_budget':
+        return _localizedText(
+          pt: 'Calcular quanto você vai precisar nos primeiros meses',
+          es: 'Calcular cuánto vas a necesitar en los primeros meses',
+          en: 'Estimate what you need for the first months',
+        );
+      case 'item_1_3_money':
+        return _localizedText(
+          pt: 'Organizar o dinheiro para os primeiros dias',
+          es: 'Organizar el dinero para los primeros días',
+          en: 'Organize money for the first days',
+        );
+      case 'item_0_4_flight':
+        return flightPlannerTitle();
+      case 'item_1_1_chip':
+        return _localizedText(
+          pt: 'Comprar chip de celular brasileiro',
+          es: 'Comprar un chip de celular brasileño',
+          en: 'Buy a Brazilian SIM card',
+        );
+      case 'item_1_2_housing_temporary':
+        return _localizedText(
+          pt: 'Garantir onde ficar nos primeiros 30 a 60 dias',
+          es: 'Asegurar dónde quedarte en los primeros 30 a 60 días',
+          en: 'Secure where to stay for the first 30 to 60 days',
+        );
+      case 'item_2_1_cpf':
+        return _localizedText(
+          pt: 'Tirar o CPF',
+          es: 'Sacar el CPF',
+          en: 'Get your CPF',
+        );
+      case 'item_2_2_residencia':
+        return _localizedText(
+          pt: 'Solicitar residência Mercosul na Polícia Federal',
+          es: 'Solicitar residencia Mercosur en la Policía Federal',
+          en: 'Apply for Mercosur residence at the Federal Police',
+        );
+      case 'item_2_3_ctps':
+        return _localizedText(
+          pt: 'Emitir a Carteira de Trabalho Digital',
+          es: 'Emitir la Carteira de Trabalho Digital',
+          en: 'Issue the digital work card',
+        );
+      case 'item_3_1_conta_bancaria':
+        return _localizedText(
+          pt: 'Abrir conta bancária no Brasil',
+          es: 'Abrir una cuenta bancaria en Brasil',
+          en: 'Open a bank account in Brazil',
+        );
+      case 'item_3_2_aluguel_fixo':
+        return _localizedText(
+          pt: 'Buscar aluguel fixo na sua cidade',
+          es: 'Buscar alquiler fijo en tu ciudad',
+          en: 'Search for a long-term rental in your city',
+        );
+      case 'item_3_3_pix':
+        return _localizedText(
+          pt: 'Entender como funcionam os pagamentos no Brasil',
+          es: 'Entender cómo funcionan los pagos en Brasil',
+          en: 'Understand how payments work in Brazil',
+        );
+      case 'item_3_4_trabalho':
+        return _localizedText(
+          pt: 'Estruturar sua renda no Brasil',
+          es: 'Estructurar tus ingresos en Brasil',
+          en: 'Structure your income in Brazil',
+        );
+      case 'item_3_5_revalidacao_estudos':
+        return _localizedText(
+          pt: 'Verificar se seu diploma precisa de revalidação',
+          es: 'Verificar si tu diploma necesita revalidación',
+          en: 'Check whether your diploma needs validation',
+        );
+      case 'item_4_1_cnh':
+        return _localizedText(
+          pt: 'Converter a carteira argentina para CNH brasileira',
+          es: 'Convertir la licencia argentina en CNH brasileña',
+          en: 'Convert your Argentine license to a Brazilian license',
+        );
+      case 'item_4_2_saude':
+        return _localizedText(
+          pt: 'Cuidar da saúde no Brasil',
+          es: 'Resolver la salud en Brasil',
+          en: 'Handle healthcare in Brazil',
+        );
+      case 'item_4_3_permanencia':
+        return _localizedText(
+          pt: 'Transformar a residência temporária em permanente',
+          es: 'Transformar la residencia temporaria en permanente',
+          en: 'Turn temporary residence into permanent residence',
+        );
+      case 'item_4_4_mei':
+        return _localizedText(
+          pt: 'Abrir MEI para trabalhar como autônomo',
+          es: 'Abrir MEI para trabajar como autónomo',
+          en: 'Open an MEI to work independently',
+        );
+      default:
+        return value;
+    }
+  }
+
   String planStepDescriptionLabel(String value) {
     switch (value) {
       case 'step_desc_visa_residence':

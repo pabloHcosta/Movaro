@@ -108,22 +108,11 @@ class MigrationReadinessSection extends StatelessWidget {
   }
 
   String _stageTitle(BuildContext context, MigrationReadinessStage stage) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => switch (stage) {
-        MigrationReadinessStage.now => 'AGORA',
-        MigrationReadinessStage.soon => 'EM BREVE',
-        MigrationReadinessStage.landing => 'AO CHEGAR',
-      },
-      'es' => switch (stage) {
-        MigrationReadinessStage.now => 'AHORA',
-        MigrationReadinessStage.soon => 'EN BREVE',
-        MigrationReadinessStage.landing => 'AL LLEGAR',
-      },
-      _ => switch (stage) {
-        MigrationReadinessStage.now => 'NOW',
-        MigrationReadinessStage.soon => 'SOON',
-        MigrationReadinessStage.landing => 'ON ARRIVAL',
-      },
+    final l10n = context.l10n;
+    return switch (stage) {
+      MigrationReadinessStage.now => l10n.readinessStageNow,
+      MigrationReadinessStage.soon => l10n.readinessStageSoon,
+      MigrationReadinessStage.landing => l10n.readinessStageOnArrival,
     };
   }
 }
@@ -269,11 +258,7 @@ class _ReadinessItemTile extends StatelessWidget {
   }
 
   String _doneLabel(BuildContext context) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => 'Feito ✓',
-      'es' => 'Hecho ✓',
-      _ => 'Done ✓',
-    };
+    return context.l10n.commonDoneCheck;
   }
 }
 

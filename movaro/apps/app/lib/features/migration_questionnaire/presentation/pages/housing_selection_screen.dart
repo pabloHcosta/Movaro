@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
@@ -51,12 +52,7 @@ class HousingSelectionScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                   child: AppGlassHeader(
-                    title: _text(
-                      context,
-                      pt: 'Moradia',
-                      es: 'Vivienda',
-                      en: 'Housing',
-                    ),
+                    title: context.l10n.housingSelectionTitle,
                     onBack: () => Navigator.of(context).pop(),
                     onHelp: onHelp,
                   ),
@@ -132,12 +128,7 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
       _TemporaryPortal(
         name: 'Hostelworld',
         emoji: '🛏️',
-        description: _text(
-          context,
-          pt: 'Hostels e dormitórios baratos',
-          es: 'Hostels y dormitorios baratos',
-          en: 'Budget hostels and dorms',
-        ),
+        description: context.l10n.housingTemporaryPortalHostelworld,
         bgColor: const Color(0xFF0A1808),
         borderColor: const Color(0xFF1A3A10),
         urlBuilder: (city, _) =>
@@ -146,12 +137,7 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
       _TemporaryPortal(
         name: 'Airbnb',
         emoji: '🏠',
-        description: _text(
-          context,
-          pt: 'Apartamentos mobiliados',
-          es: 'Departamentos amoblados',
-          en: 'Furnished apartments',
-        ),
+        description: context.l10n.housingTemporaryPortalAirbnb,
         bgColor: const Color(0xFF1C0808),
         borderColor: const Color(0xFF4A0D0D),
         urlBuilder: (city, duration) =>
@@ -160,12 +146,7 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
       _TemporaryPortal(
         name: 'Booking',
         emoji: '🌐',
-        description: _text(
-          context,
-          pt: 'Hoteis e apart-hoteis',
-          es: 'Hoteles y apart-hoteles',
-          en: 'Hotels and aparthotels',
-        ),
+        description: context.l10n.housingTemporaryPortalBooking,
         bgColor: const Color(0xFF08081C),
         borderColor: const Color(0xFF0D0D4A),
         urlBuilder: (city, duration) =>
@@ -174,12 +155,7 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
       _TemporaryPortal(
         name: 'Viva Real',
         emoji: '🏢',
-        description: _text(
-          context,
-          pt: 'Aluguel por temporada',
-          es: 'Alquiler temporal',
-          en: 'Temporary rental',
-        ),
+        description: context.l10n.housingTemporaryPortalVivaReal,
         bgColor: const Color(0xFF0D1F38),
         borderColor: const Color(0xFF1D4A70),
         urlBuilder: (city, duration) =>
@@ -191,12 +167,7 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
       _TemporaryPortal(
         name: 'Zap Imoveis',
         emoji: '🔑',
-        description: _text(
-          context,
-          pt: 'Temporada e mensal',
-          es: 'Temporal y mensual',
-          en: 'Monthly and seasonal',
-        ),
+        description: context.l10n.housingTemporaryPortalZap,
         bgColor: const Color(0xFF0D1F38),
         borderColor: const Color(0xFF1D4A70),
         urlBuilder: (city, duration) =>
@@ -215,12 +186,7 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                   child: AppGlassHeader(
-                    title: _text(
-                      context,
-                      pt: 'Temporaria',
-                      es: 'Temporal',
-                      en: 'Temporary',
-                    ),
+                    title: context.l10n.housingTemporaryTitle,
                     onBack: () => Navigator.of(context).pop(),
                     onHelp: widget.onHelp,
                   ),
@@ -271,8 +237,9 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
                             Navigator.of(context).push(
                               MaterialPageRoute<void>(
                                 builder: (_) => PreparationWebViewPage(
-                                  title:
-                                      '${_text(context, pt: 'Moradia em', es: 'Vivienda en', en: 'Stay in')} ${widget.city.name}',
+                                  title: context.l10n.housingStayInCityTitle(
+                                    widget.city.name,
+                                  ),
                                   uri: uri,
                                 ),
                               ),
@@ -295,11 +262,9 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  _text(
-                                    context,
-                                    pt: 'Buscar em ${widget.city.name} - ${_durationLabel(context, _duration)}',
-                                    es: 'Buscar en ${widget.city.name} - ${_durationLabel(context, _duration)}',
-                                    en: 'Search in ${widget.city.name} - ${_durationLabel(context, _duration)}',
+                                  context.l10n.housingTemporarySearchAction(
+                                    widget.city.name,
+                                    _durationLabel(context, _duration),
                                   ),
                                   style: const TextStyle(
                                     fontSize: 12,
@@ -314,12 +279,7 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
                         const SizedBox(height: 8),
                         Center(
                           child: Text(
-                            _text(
-                              context,
-                              pt: 'Abre no app ou site selecionado',
-                              es: 'Abre en la app o sitio elegido',
-                              en: 'Opens in the selected app or site',
-                            ),
+                            context.l10n.housingOpenSelectedSourceHint,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: const Color(0xFF6B7280)),
                           ),
@@ -356,12 +316,7 @@ class LongTermHousingScreen extends StatelessWidget {
       _LongTermPortal(
         name: 'QuintoAndar',
         emoji: '⭐',
-        description: _text(
-          context,
-          pt: 'Sem fiador · Aceita passaporte · Digital',
-          es: 'Sin garante · Acepta pasaporte · Digital',
-          en: 'No guarantor · Accepts passport · Digital',
-        ),
+        description: context.l10n.housingLongTermPortalQuintoAndar,
         provider: null,
         customUrl: (city) =>
             PreparationResourceLinks.buildQuintoAndarSearch(city),
@@ -370,46 +325,26 @@ class LongTermHousingScreen extends StatelessWidget {
       _LongTermPortal(
         name: 'Flatio',
         emoji: '🌐',
-        description: _text(
-          context,
-          pt: 'Médio prazo · Sem depósito · Para expats',
-          es: 'Mediano plazo · Sin depósito · Para expats',
-          en: 'Medium-term · No deposit · For expats',
-        ),
+        description: context.l10n.housingLongTermPortalFlatio,
         provider: null,
         customUrl: (city) => PreparationResourceLinks.buildFlatioSearch(city),
       ),
       _LongTermPortal(
         name: 'Zap Imoveis',
         emoji: '🔑',
-        description: _text(
-          context,
-          pt: 'Maior base de imoveis do Brasil',
-          es: 'Base grande de inmuebles en Brasil',
-          en: 'Large listing base in Brazil',
-        ),
+        description: context.l10n.housingLongTermPortalZap,
         provider: RentalProvider.zapImoveis,
       ),
       _LongTermPortal(
         name: 'Viva Real',
         emoji: '🏢',
-        description: _text(
-          context,
-          pt: 'Fotos e plantas mais detalhadas',
-          es: 'Fotos y planos mas detallados',
-          en: 'More detailed photos and floor plans',
-        ),
+        description: context.l10n.housingLongTermPortalVivaReal,
         provider: RentalProvider.vivaReal,
       ),
       _LongTermPortal(
         name: 'Chaves na Mao',
         emoji: '🗝️',
-        description: _text(
-          context,
-          pt: 'Boa cobertura em varias cidades do Sul',
-          es: 'Buena cobertura en varias ciudades del sur',
-          en: 'Useful coverage across southern cities',
-        ),
+        description: context.l10n.housingLongTermPortalChaves,
         provider: RentalProvider.chavesNaMao,
       ),
     ];
@@ -424,12 +359,7 @@ class LongTermHousingScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                   child: AppGlassHeader(
-                    title: _text(
-                      context,
-                      pt: 'Aluguel fixo',
-                      es: 'Alquiler fijo',
-                      en: 'Long-term rent',
-                    ),
+                    title: context.l10n.housingLongTermTitle,
                     onBack: () => Navigator.of(context).pop(),
                     onHelp: onHelp,
                   ),
@@ -504,7 +434,7 @@ class _SelectionBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${city.name} (${city.stateCode}) - ${_text(context, pt: 'cidade do seu plano', es: 'ciudad de tu plan', en: 'your plan city')}',
+                  context.l10n.housingPlanCityBanner(city.name, city.stateCode),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     color: const Color(0xFF3FB950),
                     fontWeight: FontWeight.w700,
@@ -512,12 +442,7 @@ class _SelectionBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  _text(
-                    context,
-                    pt: 'A maioria dos argentinos chega com moradia temporaria e assina contrato depois de conhecer os bairros. Esse costuma ser o caminho mais seguro para começar.',
-                    es: 'La mayoria de los argentinos llega con vivienda temporal y firma contrato despues de conocer los barrios. Suele ser el camino mas seguro para arrancar.',
-                    en: 'Most Argentine movers start with temporary housing and only sign a long contract after learning the neighborhoods. That is usually the safest path.',
-                  ),
+                  context.l10n.housingPlanCityBannerBody,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: const Color(0xFF6B7280),
                     height: 1.5,
@@ -586,12 +511,7 @@ class _TemporaryCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        _text(
-                          context,
-                          pt: 'Recomendado para chegada',
-                          es: 'Recomendado para llegar',
-                          en: 'Recommended for arrival',
-                        ),
+                        context.l10n.housingTemporaryBadge,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                           color: const Color(0xFF58A6FF),
                           fontWeight: FontWeight.w700,
@@ -602,12 +522,7 @@ class _TemporaryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  _text(
-                    context,
-                    pt: 'Moradia temporaria',
-                    es: 'Vivienda temporal',
-                    en: 'Temporary housing',
-                  ),
+                  context.l10n.housingTemporaryCardTitle,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: const Color(0xFFF0F6FC),
                     fontWeight: FontWeight.w800,
@@ -615,12 +530,7 @@ class _TemporaryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  _text(
-                    context,
-                    pt: 'Para os primeiros 30 a 90 dias. Sem contrato longo, sem fiador e com tempo para conhecer a cidade antes de decidir.',
-                    es: 'Para los primeros 30 a 90 dias. Sin contrato largo, sin garante y con tiempo para conocer la ciudad antes de decidir.',
-                    en: 'For the first 30 to 90 days. No long contract, no guarantor, and time to understand the city before deciding.',
-                  ),
+                  context.l10n.housingTemporaryCardBody,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: const Color(0xFF8B949E),
                     height: 1.5,
@@ -631,41 +541,21 @@ class _TemporaryCard extends StatelessWidget {
                   children: [
                     _buildStat(
                       context: context,
-                      value: _text(
-                        context,
-                        pt: '1-3 meses',
-                        es: '1-3 meses',
-                        en: '1-3 months',
-                      ),
-                      label: _text(
-                        context,
-                        pt: 'duracao',
-                        es: 'duracion',
-                        en: 'length',
-                      ),
+                      value: context.l10n.housingTemporaryStatDurationValue,
+                      label: context.l10n.housingTemporaryStatDurationLabel,
                       color: const Color(0xFF58A6FF),
                     ),
                     const SizedBox(width: 6),
                     _buildStat(
                       context: context,
-                      value: _text(
-                        context,
-                        pt: 'Sem fiador',
-                        es: 'Sin garante',
-                        en: 'No guarantor',
-                      ),
+                      value: context.l10n.housingTemporaryStatNoGuarantor,
                       label: '',
                       color: const Color(0xFF58A6FF),
                     ),
                     const SizedBox(width: 6),
                     _buildStat(
                       context: context,
-                      value: _text(
-                        context,
-                        pt: 'Mobiliado',
-                        es: 'Amoblado',
-                        en: 'Furnished',
-                      ),
+                      value: context.l10n.housingTemporaryStatFurnished,
                       label: '',
                       color: const Color(0xFF58A6FF),
                     ),
@@ -689,12 +579,7 @@ class _TemporaryCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        _text(
-                          context,
-                          pt: 'Buscar moradia temporaria',
-                          es: 'Buscar vivienda temporal',
-                          en: 'Search temporary housing',
-                        ),
+                        context.l10n.housingTemporaryCardAction,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -749,12 +634,7 @@ class _LongTermCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    _text(
-                      context,
-                      pt: 'Quando voce ja conhece a cidade',
-                      es: 'Cuando ya conoces la ciudad',
-                      en: 'When you already know the city',
-                    ),
+                    context.l10n.housingLongTermBadge,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: const Color(0xFFF59E0B),
                       fontWeight: FontWeight.w700,
@@ -765,12 +645,7 @@ class _LongTermCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              _text(
-                context,
-                pt: 'Aluguel definitivo',
-                es: 'Alquiler definitivo',
-                en: 'Long-term rental',
-              ),
+              context.l10n.housingLongTermCardTitle,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: const Color(0xFFF0F6FC),
                 fontWeight: FontWeight.w800,
@@ -778,12 +653,7 @@ class _LongTermCard extends StatelessWidget {
             ),
             const SizedBox(height: 5),
             Text(
-              _text(
-                context,
-                pt: 'Contrato de 12 a 30 meses. Fica mais barato por mes, mas costuma exigir garantia, documentos e mais cuidado na assinatura.',
-                es: 'Contrato de 12 a 30 meses. Suele ser mas barato por mes, pero normalmente pide garantia, documentos y mas cuidado al firmar.',
-                en: 'A 12 to 30 month contract. Usually cheaper per month, but it often requires guarantees, documents, and more care before signing.',
-              ),
+              context.l10n.housingLongTermCardBody,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: const Color(0xFF8B949E),
                 height: 1.5,
@@ -799,12 +669,7 @@ class _LongTermCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                _text(
-                  context,
-                  pt: 'Ver opcoes de aluguel fixo',
-                  es: 'Ver opciones de alquiler fijo',
-                  en: 'See long-term rental options',
-                ),
+                context.l10n.housingLongTermCardAction,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: const Color(0xFF8B949E),
@@ -837,7 +702,7 @@ class _TemporaryHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${_text(context, pt: 'Sua base em', es: 'Tu base en', en: 'Your base in')} ${city.name}',
+            context.l10n.housingTemporaryHeaderTitle(city.name),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: const Color(0xFFF0F6FC),
               fontWeight: FontWeight.w800,
@@ -845,12 +710,7 @@ class _TemporaryHeader extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            _text(
-              context,
-              pt: 'Sem contrato fixo. Mobiliado. Pode ajustar quando quiser.',
-              es: 'Sin contrato fijo. Amoblado. Lo ajustas cuando quieras.',
-              en: 'No fixed contract. Furnished. Easy to adjust as you settle in.',
-            ),
+            context.l10n.housingTemporaryHeaderBody,
             style: Theme.of(
               context,
             ).textTheme.bodyMedium?.copyWith(color: const Color(0xFF6B7280)),
@@ -869,12 +729,7 @@ class _TemporaryHeader extends StatelessWidget {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    _text(
-                      context,
-                      pt: 'Airbnb costuma oferecer descontos para estadias longas de 28 dias ou mais. E um caminho muito usado na chegada.',
-                      es: 'Airbnb suele ofrecer descuentos para estadias largas de 28 dias o mas. Es un camino muy usado al llegar.',
-                      en: 'Airbnb often gives discounts on 28+ day stays. It is a common soft-landing option after arrival.',
-                    ),
+                    context.l10n.housingTemporaryAirbnbTip,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: const Color(0xFF58A6FF),
                       height: 1.4,
@@ -1006,7 +861,7 @@ class _LongTermHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${_text(context, pt: 'Aluguel em', es: 'Alquiler en', en: 'Rent in')} ${city.name}',
+            context.l10n.housingLongTermHeaderTitle(city.name),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: const Color(0xFFF0F6FC),
               fontWeight: FontWeight.w800,
@@ -1014,12 +869,7 @@ class _LongTermHeader extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            _text(
-              context,
-              pt: 'Contrato de 12 a 30 meses. Mais barato no longo prazo.',
-              es: 'Contrato de 12 a 30 meses. Mas barato a largo plazo.',
-              en: 'A 12 to 30 month contract. Usually cheaper long term.',
-            ),
+            context.l10n.housingLongTermHeaderBody,
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: const Color(0xFF6B7280)),
@@ -1031,30 +881,15 @@ class _LongTermHeader extends StatelessWidget {
                 child: _buildStatChip(
                   context: context,
                   value: estimate,
-                  label: _text(
-                    context,
-                    pt: '1 quarto',
-                    es: '1 dormitorio',
-                    en: '1 bedroom',
-                  ),
+                  label: context.l10n.housingLongTermStatBedroom,
                 ),
               ),
               const SizedBox(width: 5),
               Expanded(
                 child: _buildStatChip(
                   context: context,
-                  value: _text(
-                    context,
-                    pt: '3x caucao',
-                    es: '3x deposito',
-                    en: '3x deposit',
-                  ),
-                  label: _text(
-                    context,
-                    pt: 'entrada',
-                    es: 'entrada',
-                    en: 'entry',
-                  ),
+                  value: context.l10n.housingLongTermStatEntryValue,
+                  label: context.l10n.housingLongTermStatEntry,
                 ),
               ),
               const SizedBox(width: 5),
@@ -1062,12 +897,7 @@ class _LongTermHeader extends StatelessWidget {
                 child: _buildStatChip(
                   context: context,
                   value: 'CPF',
-                  label: _text(
-                    context,
-                    pt: 'necessario',
-                    es: 'necesario',
-                    en: 'required',
-                  ),
+                  label: context.l10n.housingLongTermStatRequired,
                 ),
               ),
             ],
@@ -1113,12 +943,7 @@ class _LongTermAlert extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _text(
-                    context,
-                    pt: 'Antes de assinar qualquer contrato',
-                    es: 'Antes de firmar cualquier contrato',
-                    en: 'Before signing any contract',
-                  ),
+                  context.l10n.housingLongTermAlertTitle,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: const Color(0xFFE24B4A),
                     fontWeight: FontWeight.w700,
@@ -1126,12 +951,7 @@ class _LongTermAlert extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  _text(
-                    context,
-                    pt: 'Como estrangeiro, voce normalmente vai precisar de CPF e de garantia, como fiador brasileiro ou seguro fianca. Nao assine sem ler as clausulas com calma.',
-                    es: 'Como extranjero, normalmente vas a necesitar CPF y alguna garantia, como garante brasileno o seguro fianza. No firmes sin leer bien las clausulas.',
-                    en: 'As a foreigner, you will usually need CPF and a guarantee, such as a Brazilian guarantor or rental insurance. Do not sign without reading the clauses carefully.',
-                  ),
+                  context.l10n.housingLongTermAlertBody,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: const Color(0xFF6B7280),
                     height: 1.45,
@@ -1201,12 +1021,7 @@ class _LongTermPortalCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            _text(
-                              context,
-                              pt: 'Para estrangeiros',
-                              es: 'Para extranjeros',
-                              en: 'For foreigners',
-                            ),
+                            context.l10n.housingLongTermForeignersBadge,
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   color: const Color(0xFF58A6FF),
@@ -1257,13 +1072,8 @@ class _ForeignTipsCard extends StatelessWidget {
             children: [
               const Text('💡', style: TextStyle(fontSize: 12)),
               const SizedBox(width: 6),
-              Text(
-                _text(
-                  context,
-                  pt: 'Dicas para estrangeiros',
-                  es: 'Consejos para extranjeros',
-                  en: 'Tips for foreigners',
-                ),
+                Text(
+                  context.l10n.housingForeignTipsTitle,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: const Color(0xFFF59E0B),
                   fontWeight: FontWeight.w700,
@@ -1273,36 +1083,16 @@ class _ForeignTipsCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           _TipRow(
-            text: _text(
-              context,
-              pt: 'Sem fiador? Avalie seguro fianca ou caucao antes de negociar.',
-              es: 'Sin garante? Evalua seguro fianza o deposito antes de negociar.',
-              en: 'No guarantor? Check rental insurance or deposit paths first.',
-            ),
+            text: context.l10n.housingForeignTipOne,
           ),
           _TipRow(
-            text: _text(
-              context,
-              pt: 'Nao precisa esperar a residencia pronta para começar a entender o mercado.',
-              es: 'No hace falta esperar la residencia lista para empezar a entender el mercado.',
-              en: 'You do not need to wait for full residence approval to start learning the market.',
-            ),
+            text: context.l10n.housingForeignTipTwo,
           ),
           _TipRow(
-            text: _text(
-              context,
-              pt: 'Exija recibo e contrato assinado. Nunca pague sem registro.',
-              es: 'Exigi recibo y contrato firmado. Nunca pagues sin registro.',
-              en: 'Always ask for receipts and a signed contract. Never pay without records.',
-            ),
+            text: context.l10n.housingForeignTipThree,
           ),
           _TipRow(
-            text: _text(
-              context,
-              pt: 'Desconfie de valores muito baixos e pressa para fechar sem visita.',
-              es: 'Desconfia de valores muy bajos y de la urgencia para cerrar sin visita.',
-              en: 'Be careful with prices that are too low and pressure to close without a visit.',
-            ),
+            text: context.l10n.housingForeignTipFour,
           ),
         ],
       ),
@@ -1431,37 +1221,10 @@ TextStyle? _housingTextStyle(
 
 String _durationLabel(BuildContext context, TemporaryHousingDuration value) {
   return switch (value) {
-    TemporaryHousingDuration.oneWeek => _text(
-      context,
-      pt: '7-14 dias',
-      es: '7-14 dias',
-      en: '7-14 days',
-    ),
-    TemporaryHousingDuration.oneMonth => _text(
-      context,
-      pt: '1 mes',
-      es: '1 mes',
-      en: '1 month',
-    ),
-    TemporaryHousingDuration.twoThreeMonths => _text(
-      context,
-      pt: '2-3 meses',
-      es: '2-3 meses',
-      en: '2-3 months',
-    ),
-  };
-}
-
-String _text(
-  BuildContext context, {
-  required String pt,
-  required String es,
-  required String en,
-}) {
-  return switch (Localizations.localeOf(context).languageCode) {
-    'pt' => pt,
-    'es' => es,
-    _ => en,
+    TemporaryHousingDuration.oneWeek => context.l10n.housingDurationOneWeek,
+    TemporaryHousingDuration.oneMonth => context.l10n.housingDurationOneMonth,
+    TemporaryHousingDuration.twoThreeMonths =>
+      context.l10n.housingDurationTwoThreeMonths,
   };
 }
 

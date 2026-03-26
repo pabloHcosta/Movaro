@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:movaro_app/app/localization/app_localization.dart';
+import 'package:movaro_app/app/localization/generated/app_localizations.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
@@ -12,7 +14,7 @@ class _RouteData {
     required this.months,
     required this.lowUsdMin,
     required this.lowUsdMax,
-    this.seasonalWarning,
+    this.seasonalWarningKey,
   });
 
   final String originIata;
@@ -20,7 +22,7 @@ class _RouteData {
   final List<_PriceLevel> months;
   final int lowUsdMin;
   final int lowUsdMax;
-  final String? seasonalWarning;
+  final String? seasonalWarningKey;
 }
 
 class _DestinationSeasonalityProfile {
@@ -28,13 +30,13 @@ class _DestinationSeasonalityProfile {
     required this.months,
     required this.lowUsdMin,
     required this.lowUsdMax,
-    this.seasonalWarning,
+    this.seasonalWarningKey,
   });
 
   final List<_PriceLevel> months;
   final int lowUsdMin;
   final int lowUsdMax;
-  final String? seasonalWarning;
+  final String? seasonalWarningKey;
 }
 
 class _OriginPriceAdjustment {
@@ -80,21 +82,6 @@ class _FlightSeasonalityCatalog {
     'manaus-am': 'MAO',
     'belem-pa': 'BEL',
   };
-
-  static const monthLabels = [
-    'Jan',
-    'Fev',
-    'Mar',
-    'Abr',
-    'Mai',
-    'Jun',
-    'Jul',
-    'Ago',
-    'Set',
-    'Out',
-    'Nov',
-    'Dez',
-  ];
 
   static const _defaultMonths = [
     _PriceLevel.high,
@@ -167,15 +154,13 @@ class _FlightSeasonalityCatalog {
       months: _coastalSouthMonths,
       lowUsdMin: 150,
       lowUsdMax: 200,
-      seasonalWarning:
-          'Floripa costuma ter menos voos diretos fora de mar-abr. Em outros meses, conexoes via SP ou POA sao comuns.',
+      seasonalWarningKey: 'fln',
     ),
     'NVT': _DestinationSeasonalityProfile(
       months: _coastalSouthMonths,
       lowUsdMin: 160,
       lowUsdMax: 210,
-      seasonalWarning:
-          'Navegantes atende Balneario, Itajai e Blumenau. Em parte do ano, a melhor tarifa aparece com conexao curta em SP.',
+      seasonalWarningKey: 'nvt',
     ),
     'CWB': _DestinationSeasonalityProfile(
       months: _defaultMonths,
@@ -186,8 +171,7 @@ class _FlightSeasonalityCatalog {
       months: _defaultMonths,
       lowUsdMin: 150,
       lowUsdMax: 220,
-      seasonalWarning:
-          'Fev costuma concentrar alta forte no Rio por conta do Carnaval. Se essa janela fizer sentido, vale monitorar cedo.',
+      seasonalWarningKey: 'gig',
     ),
     'POA': _DestinationSeasonalityProfile(
       months: _defaultMonths,
@@ -243,15 +227,13 @@ class _FlightSeasonalityCatalog {
       months: _northMonths,
       lowUsdMin: 260,
       lowUsdMax: 360,
-      seasonalWarning:
-          'Manaus costuma variar mais por conexoes e oferta. Comparar alguns dias ao redor da data ajuda bastante.',
+      seasonalWarningKey: 'mao',
     ),
     'BEL': _DestinationSeasonalityProfile(
       months: _northMonths,
       lowUsdMin: 250,
       lowUsdMax: 340,
-      seasonalWarning:
-          'Belem tende a oscilar bastante entre conexoes e horarios. Vale abrir a busca ao vivo com alguma flexibilidade.',
+      seasonalWarningKey: 'bel',
     ),
   };
 
@@ -298,11 +280,11 @@ class _FlightSeasonalityCatalog {
       months: destinationProfile.months,
       lowUsdMin: destinationProfile.lowUsdMin + originAdjustment.lowMinDelta,
       lowUsdMax: destinationProfile.lowUsdMax + originAdjustment.lowMaxDelta,
-      seasonalWarning: destinationProfile.seasonalWarning,
+      seasonalWarningKey: destinationProfile.seasonalWarningKey,
     );
   }
 
-  static List<String> cheapMonths(_RouteData data) => [
+  static List<String> cheapMonths(_RouteData data, List<String> monthLabels) => [
     for (var i = 0; i < data.months.length; i++)
       if (data.months[i] == _PriceLevel.low) monthLabels[i],
   ];
@@ -346,6 +328,7 @@ class FlightSeasonalityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final originIata = _resolvedOriginIata;
     final destinationIata = _resolvedDestIata;
     if (originIata == null || destinationIata == null) {
@@ -353,9 +336,10 @@ class FlightSeasonalityCard extends StatelessWidget {
     }
 
     final data = _route;
+    final monthLabels = _monthLabels(l10n);
     final cheapMonths = data == null
         ? const <String>[]
-        : _FlightSeasonalityCatalog.cheapMonths(data);
+        : _FlightSeasonalityCatalog.cheapMonths(data, monthLabels);
 
     return FrostedPanel(
       padding: const EdgeInsets.all(20),
@@ -371,21 +355,24 @@ class FlightSeasonalityCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Melhor epoca para voar',
+                l10n.flightSeasonalityTitle,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
-            '$originIata -> $destinationIata · Faixas historicas (USD)',
+            l10n.flightSeasonalitySubtitle(originIata, destinationIata),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSoftFor(context),
             ),
           ),
           const SizedBox(height: 16),
           if (data != null) ...[
-            _MonthBarChart(months: data.months),
+            _MonthBarChart(
+              months: data.months,
+              labels: _monthInitials(l10n),
+            ),
             const SizedBox(height: 12),
             _PriceLegend(lowMin: data.lowUsdMin, lowMax: data.lowUsdMax),
             const SizedBox(height: 12),
@@ -393,23 +380,23 @@ class FlightSeasonalityCard extends StatelessWidget {
               _InfoCallout(
                 icon: Icons.savings_outlined,
                 color: AppColors.success,
-                text:
-                    'Mais barato: ${cheapMonths.join(', ')} · Ate 40% de economia',
+                text: l10n.flightSeasonalitySavingsMonths(
+                  cheapMonths.join(', '),
+                ),
               ),
-            if (data.seasonalWarning != null) ...[
+            if (data.seasonalWarningKey != null) ...[
               const SizedBox(height: 8),
               _InfoCallout(
                 icon: Icons.info_outline_rounded,
                 color: AppColors.caution,
-                text: data.seasonalWarning!,
+                text: _seasonalWarning(l10n, data.seasonalWarningKey!),
               ),
             ],
           ] else
             _InfoCallout(
               icon: Icons.insights_outlined,
               color: AppColors.primary,
-              text:
-                  'Ainda nao temos historico suficiente para essa rota exata. Use a busca ao vivo abaixo para ver a combinacao real entre origem e destino.',
+              text: l10n.flightSeasonalityFallback,
             ),
           const SizedBox(height: 14),
           SizedBox(
@@ -419,14 +406,14 @@ class FlightSeasonalityCard extends StatelessWidget {
                   _openSkyscanner(context, originIata, destinationIata),
               icon: const Icon(Icons.open_in_new_rounded, size: 16),
               label: Text(
-                'Ver precos ao vivo  $originIata -> $destinationIata',
+                l10n.flightSeasonalityLiveButton(originIata, destinationIata),
               ),
             ),
           ),
           const SizedBox(height: 6),
           Center(
             child: Text(
-              'Faixas historicas · Precos reais variam conforme a data',
+              l10n.flightSeasonalityFooter,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: AppColors.textSoftFor(context),
                 fontSize: 10,
@@ -447,7 +434,7 @@ class FlightSeasonalityCard extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => PreparationWebViewPage(
-          title: 'Passagens $origin -> $dest',
+          title: context.l10n.flightSeasonalityWebviewTitle(origin, dest),
           uri: uri,
         ),
       ),
@@ -456,24 +443,10 @@ class FlightSeasonalityCard extends StatelessWidget {
 }
 
 class _MonthBarChart extends StatelessWidget {
-  const _MonthBarChart({required this.months});
+  const _MonthBarChart({required this.months, required this.labels});
 
   final List<_PriceLevel> months;
-
-  static const _labels = [
-    'J',
-    'F',
-    'M',
-    'A',
-    'M',
-    'J',
-    'J',
-    'A',
-    'S',
-    'O',
-    'N',
-    'D',
-  ];
+  final List<String> labels;
 
   Color _barColor(_PriceLevel level) => switch (level) {
     _PriceLevel.low => AppColors.success,
@@ -512,7 +485,7 @@ class _MonthBarChart extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    _labels[i],
+                    labels[i],
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       fontSize: 8,
                       height: 1,
@@ -543,10 +516,16 @@ class _PriceLegend extends StatelessWidget {
       children: [
         _LegendDot(
           color: AppColors.success,
-          label: 'Barato (\$$lowMin-\$$lowMax)',
+          label: context.l10n.flightSeasonalityLegendLow(lowMin, lowMax),
         ),
-        const _LegendDot(color: AppColors.warning, label: 'Medio'),
-        const _LegendDot(color: AppColors.danger, label: 'Caro'),
+        _LegendDot(
+          color: AppColors.warning,
+          label: context.l10n.flightSeasonalityLegendMid,
+        ),
+        _LegendDot(
+          color: AppColors.danger,
+          label: context.l10n.flightSeasonalityLegendHigh,
+        ),
       ],
     );
   }
@@ -666,6 +645,7 @@ class FlightPriceBadge extends StatelessWidget {
     }
     final bestMonths = _FlightSeasonalityCatalog.cheapMonths(
       route,
+      _monthLabels(context.l10n),
     ).take(4).join(', ');
 
     return Container(
@@ -690,15 +670,19 @@ class FlightPriceBadge extends StatelessWidget {
                   color: AppColors.textSoftFor(context),
                 ),
                 children: [
-                  const TextSpan(text: 'Passagem: '),
+                  TextSpan(text: context.l10n.flightSeasonalityBadgePrefix),
                   TextSpan(
-                    text: 'a partir de \$${route.lowUsdMin} USD',
+                    text: context.l10n.flightSeasonalityBadgeFrom(
+                      route.lowUsdMin,
+                    ),
                     style: const TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const TextSpan(text: '  ·  Mais barato: '),
+                  TextSpan(
+                    text: context.l10n.flightSeasonalityBadgeCheapestPrefix,
+                  ),
                   TextSpan(
                     text: bestMonths,
                     style: const TextStyle(
@@ -715,3 +699,42 @@ class FlightPriceBadge extends StatelessWidget {
     );
   }
 }
+
+List<String> _monthLabels(AppLocalizations l10n) => [
+  l10n.commonMonthAbbrevJan,
+  l10n.commonMonthAbbrevFeb,
+  l10n.commonMonthAbbrevMar,
+  l10n.commonMonthAbbrevApr,
+  l10n.commonMonthAbbrevMay,
+  l10n.commonMonthAbbrevJun,
+  l10n.commonMonthAbbrevJul,
+  l10n.commonMonthAbbrevAug,
+  l10n.commonMonthAbbrevSep,
+  l10n.commonMonthAbbrevOct,
+  l10n.commonMonthAbbrevNov,
+  l10n.commonMonthAbbrevDec,
+];
+
+List<String> _monthInitials(AppLocalizations l10n) => [
+  l10n.commonMonthInitialJan,
+  l10n.commonMonthInitialFeb,
+  l10n.commonMonthInitialMar,
+  l10n.commonMonthInitialApr,
+  l10n.commonMonthInitialMay,
+  l10n.commonMonthInitialJun,
+  l10n.commonMonthInitialJul,
+  l10n.commonMonthInitialAug,
+  l10n.commonMonthInitialSep,
+  l10n.commonMonthInitialOct,
+  l10n.commonMonthInitialNov,
+  l10n.commonMonthInitialDec,
+];
+
+String _seasonalWarning(AppLocalizations l10n, String key) => switch (key) {
+  'fln' => l10n.flightSeasonalityWarningFln,
+  'nvt' => l10n.flightSeasonalityWarningNvt,
+  'gig' => l10n.flightSeasonalityWarningGig,
+  'mao' => l10n.flightSeasonalityWarningMao,
+  'bel' => l10n.flightSeasonalityWarningBel,
+  _ => '',
+};

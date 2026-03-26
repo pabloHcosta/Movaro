@@ -10855,6 +10855,1236 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'route'**
   String get homeVisualWaypointRoute;
+
+  /// No description provided for @assistantEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Movaro Assistant'**
+  String get assistantEntryTitle;
+
+  /// No description provided for @assistantEntrySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get answers about your move'**
+  String get assistantEntrySubtitle;
+
+  /// No description provided for @assistantEntryOpenAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open ↑'**
+  String get assistantEntryOpenAction;
+
+  /// No description provided for @assistantEntryInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Or type your question...'**
+  String get assistantEntryInputHint;
+
+  /// No description provided for @assistantEntryQuickVisa.
+  ///
+  /// In en, this message translates to:
+  /// **'Do I need a visa?'**
+  String get assistantEntryQuickVisa;
+
+  /// No description provided for @assistantEntryQuickBestTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Best time to go?'**
+  String get assistantEntryQuickBestTime;
+
+  /// No description provided for @assistantEntryQuickCpf.
+  ///
+  /// In en, this message translates to:
+  /// **'How to get CPF?'**
+  String get assistantEntryQuickCpf;
+
+  /// No description provided for @assistantModeConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'💬 Chat'**
+  String get assistantModeConversation;
+
+  /// No description provided for @assistantModeGuides.
+  ///
+  /// In en, this message translates to:
+  /// **'📋 Guides'**
+  String get assistantModeGuides;
+
+  /// No description provided for @planResetManageAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new plan'**
+  String get planResetManageAction;
+
+  /// No description provided for @planResetManageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If you want to restart, you can clear your current progress and build a new plan from the beginning.'**
+  String get planResetManageBody;
+
+  /// No description provided for @planResetDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You will restart the questionnaire and choose a new city. This cannot be undone.'**
+  String get planResetDialogBody;
+
+  /// No description provided for @planResetRebuildLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, start from scratch'**
+  String get planResetRebuildLabel;
+
+  /// No description provided for @planResetCancelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get planResetCancelLabel;
+
+  /// No description provided for @planResetCurrentPlanFallbackLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'current plan'**
+  String get planResetCurrentPlanFallbackLabel;
+
+  /// No description provided for @planResetCityWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Your progress in {cityName} and all checked items will be erased.'**
+  String planResetCityWarning(String cityName);
+
+  /// No description provided for @planResetCancelWithCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel — keep {cityName}'**
+  String planResetCancelWithCity(String cityName);
+
+  /// No description provided for @homeActivePlanBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'ACTIVE PLAN'**
+  String get homeActivePlanBadge;
+
+  /// No description provided for @homeJourneyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'YOUR JOURNEY'**
+  String get homeJourneyTitle;
+
+  /// No description provided for @homeJourneyComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Journey complete! 🎉'**
+  String get homeJourneyComplete;
+
+  /// No description provided for @homeJourneySeeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'See summary →'**
+  String get homeJourneySeeSummary;
+
+  /// No description provided for @homeJourneyContinueGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue guide →'**
+  String get homeJourneyContinueGuide;
+
+  /// No description provided for @homeJourneyViewAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get homeJourneyViewAction;
+
+  /// No description provided for @homeJourneyActiveDaySingle.
+  ///
+  /// In en, this message translates to:
+  /// **'active day'**
+  String get homeJourneyActiveDaySingle;
+
+  /// No description provided for @homeJourneyActiveDayPlural.
+  ///
+  /// In en, this message translates to:
+  /// **'active days'**
+  String get homeJourneyActiveDayPlural;
+
+  /// No description provided for @homeJourneyCurrentPhaseMarker.
+  ///
+  /// In en, this message translates to:
+  /// **'→ now'**
+  String get homeJourneyCurrentPhaseMarker;
+
+  /// No description provided for @homeJourneyLockedPhaseMarker.
+  ///
+  /// In en, this message translates to:
+  /// **'lock.'**
+  String get homeJourneyLockedPhaseMarker;
+
+  /// No description provided for @homeJourneyPhasePreparation.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparation'**
+  String get homeJourneyPhasePreparation;
+
+  /// No description provided for @homeJourneyPhaseDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Documentation'**
+  String get homeJourneyPhaseDocuments;
+
+  /// No description provided for @homeJourneyPhaseHousing.
+  ///
+  /// In en, this message translates to:
+  /// **'Housing'**
+  String get homeJourneyPhaseHousing;
+
+  /// No description provided for @homeJourneyPhaseWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get homeJourneyPhaseWork;
+
+  /// No description provided for @homeJourneyPhaseArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrival'**
+  String get homeJourneyPhaseArrival;
+
+  /// No description provided for @homeJourneyDoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'done'**
+  String get homeJourneyDoneLabel;
+
+  /// No description provided for @homeJourneyItemsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'items'**
+  String get homeJourneyItemsLabel;
+
+  /// No description provided for @homeActionCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get homeActionCompare;
+
+  /// No description provided for @homeActionViewCity.
+  ///
+  /// In en, this message translates to:
+  /// **'View city'**
+  String get homeActionViewCity;
+
+  /// No description provided for @homeActionNewPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'New plan'**
+  String get homeActionNewPlan;
+
+  /// No description provided for @homeJourneyPhaseBeforeTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Before travel'**
+  String get homeJourneyPhaseBeforeTravel;
+
+  /// No description provided for @homeJourneyPhaseFirstDays.
+  ///
+  /// In en, this message translates to:
+  /// **'First days'**
+  String get homeJourneyPhaseFirstDays;
+
+  /// No description provided for @homeJourneyPhaseDocumentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Documentation'**
+  String get homeJourneyPhaseDocumentation;
+
+  /// No description provided for @homeJourneyPhaseLifeWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Life working'**
+  String get homeJourneyPhaseLifeWorking;
+
+  /// No description provided for @homeJourneyPhaseIntegration.
+  ///
+  /// In en, this message translates to:
+  /// **'Integration'**
+  String get homeJourneyPhaseIntegration;
+
+  /// No description provided for @questionRemainingTimeUnderOneMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'under 1 min left'**
+  String get questionRemainingTimeUnderOneMinute;
+
+  /// No description provided for @questionRemainingTimeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'~{minutes} min left'**
+  String questionRemainingTimeMinutes(int minutes);
+
+  /// No description provided for @questionSelectionCounterSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'selected'**
+  String get questionSelectionCounterSelected;
+
+  /// No description provided for @questionArgentinaOriginLitoral.
+  ///
+  /// In en, this message translates to:
+  /// **'Litoral (Entre Ríos, Corrientes…)'**
+  String get questionArgentinaOriginLitoral;
+
+  /// No description provided for @questionArgentinaOriginOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get questionArgentinaOriginOther;
+
+  /// No description provided for @questionLocationDetectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location detected'**
+  String get questionLocationDetectedTitle;
+
+  /// No description provided for @questionLocationDetectedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We found you in {city}, {country}. We\'ll use this to personalise your journey.'**
+  String questionLocationDetectedBody(String city, String country);
+
+  /// No description provided for @questionLocationContinueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get questionLocationContinueAction;
+
+  /// No description provided for @questionLocationRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where are you in Argentina?'**
+  String get questionLocationRequestTitle;
+
+  /// No description provided for @questionLocationRequestBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your location helps us estimate distances and personalise recommendations.'**
+  String get questionLocationRequestBody;
+
+  /// No description provided for @questionLocationUseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my location'**
+  String get questionLocationUseAction;
+
+  /// No description provided for @questionLocationChooseManualAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose manually'**
+  String get questionLocationChooseManualAction;
+
+  /// No description provided for @questionLocationManualTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where in Argentina are you from?'**
+  String get questionLocationManualTitle;
+
+  /// No description provided for @commonDoneCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Done ✓'**
+  String get commonDoneCheck;
+
+  /// No description provided for @commonOpenOfficialSiteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open official site ->'**
+  String get commonOpenOfficialSiteAction;
+
+  /// No description provided for @readinessStageOnArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'On arrival'**
+  String get readinessStageOnArrival;
+
+  /// No description provided for @arrivalExecutionStageFirstWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'FIRST WEEK — top priority'**
+  String get arrivalExecutionStageFirstWeek;
+
+  /// No description provided for @arrivalExecutionStageFirstMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'FIRST MONTH — build your base'**
+  String get arrivalExecutionStageFirstMonth;
+
+  /// No description provided for @arrivalExecutionStageFirstQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'FIRST 3 MONTHS — stabilize life'**
+  String get arrivalExecutionStageFirstQuarter;
+
+  /// No description provided for @cityDetailMediaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'See videos and photos'**
+  String get cityDetailMediaTitle;
+
+  /// No description provided for @cityDetailMediaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the city visual content'**
+  String get cityDetailMediaBody;
+
+  /// No description provided for @migrationPlanResultCelebrationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan started!'**
+  String get migrationPlanResultCelebrationTitle;
+
+  /// No description provided for @migrationPlanResultCelebrationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You chose {cityName}.\nLet’s turn that into reality.'**
+  String migrationPlanResultCelebrationBody(String cityName);
+
+  /// No description provided for @chatServiceErrorProcessingQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'I couldn\'t process your question. Please try again.'**
+  String get chatServiceErrorProcessingQuestion;
+
+  /// No description provided for @chatFallbackDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'your destination'**
+  String get chatFallbackDestination;
+
+  /// No description provided for @chatFallbackMessageDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'What documents do I need to move to {destination}? Explain visas and {localDocument}.'**
+  String chatFallbackMessageDocuments(String destination, String localDocument);
+
+  /// No description provided for @chatFallbackMessageCosts.
+  ///
+  /// In en, this message translates to:
+  /// **'How much does it cost to move? Give me a cost overview.'**
+  String get chatFallbackMessageCosts;
+
+  /// No description provided for @chatFallbackMessageActivities.
+  ///
+  /// In en, this message translates to:
+  /// **'What should I know about life in the destination city?'**
+  String get chatFallbackMessageActivities;
+
+  /// No description provided for @chatFallbackMessageStay.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I find housing in {destination}? Renting tips.'**
+  String chatFallbackMessageStay(String destination);
+
+  /// No description provided for @chatFallbackFirstLocalDocumentBrazil.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I get my CPF?'**
+  String get chatFallbackFirstLocalDocumentBrazil;
+
+  /// No description provided for @chatFallbackFirstLocalDocumentDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'What is my first local document?'**
+  String get chatFallbackFirstLocalDocumentDefault;
+
+  /// No description provided for @commonMonthAbbrevJan.
+  ///
+  /// In en, this message translates to:
+  /// **'Jan'**
+  String get commonMonthAbbrevJan;
+
+  /// No description provided for @commonMonthAbbrevFeb.
+  ///
+  /// In en, this message translates to:
+  /// **'Feb'**
+  String get commonMonthAbbrevFeb;
+
+  /// No description provided for @commonMonthAbbrevMar.
+  ///
+  /// In en, this message translates to:
+  /// **'Mar'**
+  String get commonMonthAbbrevMar;
+
+  /// No description provided for @commonMonthAbbrevApr.
+  ///
+  /// In en, this message translates to:
+  /// **'Apr'**
+  String get commonMonthAbbrevApr;
+
+  /// No description provided for @commonMonthAbbrevMay.
+  ///
+  /// In en, this message translates to:
+  /// **'May'**
+  String get commonMonthAbbrevMay;
+
+  /// No description provided for @commonMonthAbbrevJun.
+  ///
+  /// In en, this message translates to:
+  /// **'Jun'**
+  String get commonMonthAbbrevJun;
+
+  /// No description provided for @commonMonthAbbrevJul.
+  ///
+  /// In en, this message translates to:
+  /// **'Jul'**
+  String get commonMonthAbbrevJul;
+
+  /// No description provided for @commonMonthAbbrevAug.
+  ///
+  /// In en, this message translates to:
+  /// **'Aug'**
+  String get commonMonthAbbrevAug;
+
+  /// No description provided for @commonMonthAbbrevSep.
+  ///
+  /// In en, this message translates to:
+  /// **'Sep'**
+  String get commonMonthAbbrevSep;
+
+  /// No description provided for @commonMonthAbbrevOct.
+  ///
+  /// In en, this message translates to:
+  /// **'Oct'**
+  String get commonMonthAbbrevOct;
+
+  /// No description provided for @commonMonthAbbrevNov.
+  ///
+  /// In en, this message translates to:
+  /// **'Nov'**
+  String get commonMonthAbbrevNov;
+
+  /// No description provided for @commonMonthAbbrevDec.
+  ///
+  /// In en, this message translates to:
+  /// **'Dec'**
+  String get commonMonthAbbrevDec;
+
+  /// No description provided for @commonMonthInitialJan.
+  ///
+  /// In en, this message translates to:
+  /// **'J'**
+  String get commonMonthInitialJan;
+
+  /// No description provided for @commonMonthInitialFeb.
+  ///
+  /// In en, this message translates to:
+  /// **'F'**
+  String get commonMonthInitialFeb;
+
+  /// No description provided for @commonMonthInitialMar.
+  ///
+  /// In en, this message translates to:
+  /// **'M'**
+  String get commonMonthInitialMar;
+
+  /// No description provided for @commonMonthInitialApr.
+  ///
+  /// In en, this message translates to:
+  /// **'A'**
+  String get commonMonthInitialApr;
+
+  /// No description provided for @commonMonthInitialMay.
+  ///
+  /// In en, this message translates to:
+  /// **'M'**
+  String get commonMonthInitialMay;
+
+  /// No description provided for @commonMonthInitialJun.
+  ///
+  /// In en, this message translates to:
+  /// **'J'**
+  String get commonMonthInitialJun;
+
+  /// No description provided for @commonMonthInitialJul.
+  ///
+  /// In en, this message translates to:
+  /// **'J'**
+  String get commonMonthInitialJul;
+
+  /// No description provided for @commonMonthInitialAug.
+  ///
+  /// In en, this message translates to:
+  /// **'A'**
+  String get commonMonthInitialAug;
+
+  /// No description provided for @commonMonthInitialSep.
+  ///
+  /// In en, this message translates to:
+  /// **'S'**
+  String get commonMonthInitialSep;
+
+  /// No description provided for @commonMonthInitialOct.
+  ///
+  /// In en, this message translates to:
+  /// **'O'**
+  String get commonMonthInitialOct;
+
+  /// No description provided for @commonMonthInitialNov.
+  ///
+  /// In en, this message translates to:
+  /// **'N'**
+  String get commonMonthInitialNov;
+
+  /// No description provided for @commonMonthInitialDec.
+  ///
+  /// In en, this message translates to:
+  /// **'D'**
+  String get commonMonthInitialDec;
+
+  /// No description provided for @flightSeasonalityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Best time to fly'**
+  String get flightSeasonalityTitle;
+
+  /// No description provided for @flightSeasonalitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{origin} -> {destination} · Historical ranges (USD)'**
+  String flightSeasonalitySubtitle(String origin, String destination);
+
+  /// No description provided for @flightSeasonalitySavingsMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Cheapest: {months} · Up to 40% savings'**
+  String flightSeasonalitySavingsMonths(String months);
+
+  /// No description provided for @flightSeasonalityFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'We do not have enough history for this exact route yet. Use the live search below to see the real origin and destination combination.'**
+  String get flightSeasonalityFallback;
+
+  /// No description provided for @flightSeasonalityLiveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'See live prices  {origin} -> {destination}'**
+  String flightSeasonalityLiveButton(String origin, String destination);
+
+  /// No description provided for @flightSeasonalityFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Historical ranges · Real prices vary by date'**
+  String get flightSeasonalityFooter;
+
+  /// No description provided for @flightSeasonalityWebviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Flights {origin} -> {destination}'**
+  String flightSeasonalityWebviewTitle(String origin, String destination);
+
+  /// No description provided for @flightSeasonalityLegendLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Cheap (USD {min}-{max})'**
+  String flightSeasonalityLegendLow(int min, int max);
+
+  /// No description provided for @flightSeasonalityLegendMid.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get flightSeasonalityLegendMid;
+
+  /// No description provided for @flightSeasonalityLegendHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Expensive'**
+  String get flightSeasonalityLegendHigh;
+
+  /// No description provided for @flightSeasonalityBadgePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight: '**
+  String get flightSeasonalityBadgePrefix;
+
+  /// No description provided for @flightSeasonalityBadgeFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'from {value} USD'**
+  String flightSeasonalityBadgeFrom(int value);
+
+  /// No description provided for @flightSeasonalityBadgeCheapestPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'  ·  Cheapest: '**
+  String get flightSeasonalityBadgeCheapestPrefix;
+
+  /// No description provided for @flightSeasonalityWarningFln.
+  ///
+  /// In en, this message translates to:
+  /// **'Florianópolis usually has fewer direct flights outside Mar-Apr. In other months, connections via São Paulo or Porto Alegre are common.'**
+  String get flightSeasonalityWarningFln;
+
+  /// No description provided for @flightSeasonalityWarningNvt.
+  ///
+  /// In en, this message translates to:
+  /// **'Navegantes serves Balneário, Itajaí, and Blumenau. In part of the year, the best fare appears with a short connection in São Paulo.'**
+  String get flightSeasonalityWarningNvt;
+
+  /// No description provided for @flightSeasonalityWarningGig.
+  ///
+  /// In en, this message translates to:
+  /// **'February usually concentrates the strongest high season in Rio because of Carnival. If that window fits your plan, monitor early.'**
+  String get flightSeasonalityWarningGig;
+
+  /// No description provided for @flightSeasonalityWarningMao.
+  ///
+  /// In en, this message translates to:
+  /// **'Manaus tends to vary more because of connections and supply. Comparing a few days around your date helps a lot.'**
+  String get flightSeasonalityWarningMao;
+
+  /// No description provided for @flightSeasonalityWarningBel.
+  ///
+  /// In en, this message translates to:
+  /// **'Belém tends to swing a lot between connections and schedules. It is worth opening the live search with some flexibility.'**
+  String get flightSeasonalityWarningBel;
+
+  /// No description provided for @housingSelectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Housing'**
+  String get housingSelectionTitle;
+
+  /// No description provided for @housingTemporaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary'**
+  String get housingTemporaryTitle;
+
+  /// No description provided for @housingLongTermTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-term rent'**
+  String get housingLongTermTitle;
+
+  /// No description provided for @housingTemporaryPortalHostelworld.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget hostels and dorms'**
+  String get housingTemporaryPortalHostelworld;
+
+  /// No description provided for @housingTemporaryPortalAirbnb.
+  ///
+  /// In en, this message translates to:
+  /// **'Furnished apartments'**
+  String get housingTemporaryPortalAirbnb;
+
+  /// No description provided for @housingTemporaryPortalBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Hotels and aparthotels'**
+  String get housingTemporaryPortalBooking;
+
+  /// No description provided for @housingTemporaryPortalVivaReal.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary rental'**
+  String get housingTemporaryPortalVivaReal;
+
+  /// No description provided for @housingTemporaryPortalZap.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly and seasonal'**
+  String get housingTemporaryPortalZap;
+
+  /// No description provided for @housingStayInCityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay in {city}'**
+  String housingStayInCityTitle(String city);
+
+  /// No description provided for @housingTemporarySearchAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Search in {city} - {duration}'**
+  String housingTemporarySearchAction(String city, String duration);
+
+  /// No description provided for @housingOpenSelectedSourceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens in the selected app or site'**
+  String get housingOpenSelectedSourceHint;
+
+  /// No description provided for @housingLongTermPortalQuintoAndar.
+  ///
+  /// In en, this message translates to:
+  /// **'No guarantor · Accepts passport · Digital'**
+  String get housingLongTermPortalQuintoAndar;
+
+  /// No description provided for @housingLongTermPortalFlatio.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium-term · No deposit · For expats'**
+  String get housingLongTermPortalFlatio;
+
+  /// No description provided for @housingLongTermPortalZap.
+  ///
+  /// In en, this message translates to:
+  /// **'Large listing base in Brazil'**
+  String get housingLongTermPortalZap;
+
+  /// No description provided for @housingLongTermPortalVivaReal.
+  ///
+  /// In en, this message translates to:
+  /// **'More detailed photos and floor plans'**
+  String get housingLongTermPortalVivaReal;
+
+  /// No description provided for @housingLongTermPortalChaves.
+  ///
+  /// In en, this message translates to:
+  /// **'Useful coverage across southern cities'**
+  String get housingLongTermPortalChaves;
+
+  /// No description provided for @housingPlanCityBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'{city} ({state}) - your plan city'**
+  String housingPlanCityBanner(String city, String state);
+
+  /// No description provided for @housingPlanCityBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Argentine movers start with temporary housing and only sign a long contract after learning the neighborhoods. That is usually the safest path.'**
+  String get housingPlanCityBannerBody;
+
+  /// No description provided for @housingTemporaryBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended for arrival'**
+  String get housingTemporaryBadge;
+
+  /// No description provided for @housingTemporaryCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary housing'**
+  String get housingTemporaryCardTitle;
+
+  /// No description provided for @housingTemporaryCardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'For the first 30 to 90 days. No long contract, no guarantor, and time to understand the city before deciding.'**
+  String get housingTemporaryCardBody;
+
+  /// No description provided for @housingTemporaryStatDurationValue.
+  ///
+  /// In en, this message translates to:
+  /// **'1-3 months'**
+  String get housingTemporaryStatDurationValue;
+
+  /// No description provided for @housingTemporaryStatDurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'length'**
+  String get housingTemporaryStatDurationLabel;
+
+  /// No description provided for @housingTemporaryStatNoGuarantor.
+  ///
+  /// In en, this message translates to:
+  /// **'No guarantor'**
+  String get housingTemporaryStatNoGuarantor;
+
+  /// No description provided for @housingTemporaryStatFurnished.
+  ///
+  /// In en, this message translates to:
+  /// **'Furnished'**
+  String get housingTemporaryStatFurnished;
+
+  /// No description provided for @housingTemporaryCardAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Search temporary housing'**
+  String get housingTemporaryCardAction;
+
+  /// No description provided for @housingLongTermBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'When you already know the city'**
+  String get housingLongTermBadge;
+
+  /// No description provided for @housingLongTermCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-term rental'**
+  String get housingLongTermCardTitle;
+
+  /// No description provided for @housingLongTermCardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A 12 to 30 month contract. Usually cheaper per month, but it often requires guarantees, documents, and more care before signing.'**
+  String get housingLongTermCardBody;
+
+  /// No description provided for @housingLongTermCardAction.
+  ///
+  /// In en, this message translates to:
+  /// **'See long-term rental options'**
+  String get housingLongTermCardAction;
+
+  /// No description provided for @housingTemporaryHeaderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your base in {city}'**
+  String housingTemporaryHeaderTitle(String city);
+
+  /// No description provided for @housingTemporaryHeaderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No fixed contract. Furnished. Easy to adjust as you settle in.'**
+  String get housingTemporaryHeaderBody;
+
+  /// No description provided for @housingTemporaryAirbnbTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Airbnb often gives discounts on 28+ day stays. It is a common soft-landing option after arrival.'**
+  String get housingTemporaryAirbnbTip;
+
+  /// No description provided for @housingLongTermHeaderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rent in {city}'**
+  String housingLongTermHeaderTitle(String city);
+
+  /// No description provided for @housingLongTermHeaderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A 12 to 30 month contract. Usually cheaper long term.'**
+  String get housingLongTermHeaderBody;
+
+  /// No description provided for @housingLongTermStatBedroom.
+  ///
+  /// In en, this message translates to:
+  /// **'1 bedroom'**
+  String get housingLongTermStatBedroom;
+
+  /// No description provided for @housingLongTermStatEntryValue.
+  ///
+  /// In en, this message translates to:
+  /// **'3x deposit'**
+  String get housingLongTermStatEntryValue;
+
+  /// No description provided for @housingLongTermStatEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'entry'**
+  String get housingLongTermStatEntry;
+
+  /// No description provided for @housingLongTermStatRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'required'**
+  String get housingLongTermStatRequired;
+
+  /// No description provided for @housingLongTermAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before signing any contract'**
+  String get housingLongTermAlertTitle;
+
+  /// No description provided for @housingLongTermAlertBody.
+  ///
+  /// In en, this message translates to:
+  /// **'As a foreigner, you will usually need CPF and a guarantee, such as a Brazilian guarantor or rental insurance. Do not sign without reading the clauses carefully.'**
+  String get housingLongTermAlertBody;
+
+  /// No description provided for @housingLongTermForeignersBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'For foreigners'**
+  String get housingLongTermForeignersBadge;
+
+  /// No description provided for @housingForeignTipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips for foreigners'**
+  String get housingForeignTipsTitle;
+
+  /// No description provided for @housingForeignTipOne.
+  ///
+  /// In en, this message translates to:
+  /// **'No guarantor? Check rental insurance or deposit paths first.'**
+  String get housingForeignTipOne;
+
+  /// No description provided for @housingForeignTipTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not need to wait for full residence approval to start learning the market.'**
+  String get housingForeignTipTwo;
+
+  /// No description provided for @housingForeignTipThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Always ask for receipts and a signed contract. Never pay without records.'**
+  String get housingForeignTipThree;
+
+  /// No description provided for @housingForeignTipFour.
+  ///
+  /// In en, this message translates to:
+  /// **'Be careful with prices that are too low and pressure to close without a visit.'**
+  String get housingForeignTipFour;
+
+  /// No description provided for @housingDurationOneWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'7-14 days'**
+  String get housingDurationOneWeek;
+
+  /// No description provided for @housingDurationOneMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'1 month'**
+  String get housingDurationOneMonth;
+
+  /// No description provided for @housingDurationTwoThreeMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'2-3 months'**
+  String get housingDurationTwoThreeMonths;
+
+  /// No description provided for @copilotProgressCompletedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'completed'**
+  String get copilotProgressCompletedLabel;
+
+  /// No description provided for @copilotProgressRemainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'remaining'**
+  String get copilotProgressRemainingLabel;
+
+  /// No description provided for @copilotPlanCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan completed!'**
+  String get copilotPlanCompletedTitle;
+
+  /// No description provided for @copilotPlanCompletedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You completed every step in your guide.'**
+  String get copilotPlanCompletedBody;
+
+  /// No description provided for @copilotNextActionUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Great. The next action is unlocked.'**
+  String get copilotNextActionUnlocked;
+
+  /// No description provided for @copilotTagNextAction.
+  ///
+  /// In en, this message translates to:
+  /// **'NEXT ACTION'**
+  String get copilotTagNextAction;
+
+  /// No description provided for @copilotTagExternalAction.
+  ///
+  /// In en, this message translates to:
+  /// **'EXTERNAL ACTION'**
+  String get copilotTagExternalAction;
+
+  /// No description provided for @copilotTagUseTool.
+  ///
+  /// In en, this message translates to:
+  /// **'USE A TOOL'**
+  String get copilotTagUseTool;
+
+  /// No description provided for @copilotTagToComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'TO COMPLETE'**
+  String get copilotTagToComplete;
+
+  /// No description provided for @copilotCompletionMessageFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'First step done. Keep going.'**
+  String get copilotCompletionMessageFirst;
+
+  /// No description provided for @copilotCompletionMessageFew.
+  ///
+  /// In en, this message translates to:
+  /// **'Great pace. {count} steps done.'**
+  String copilotCompletionMessageFew(int count);
+
+  /// No description provided for @copilotCompletionMessageMid.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} steps completed. You are moving forward.'**
+  String copilotCompletionMessageMid(int count);
+
+  /// No description provided for @copilotCompletionMessageHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Amazing — {count} steps ready.'**
+  String copilotCompletionMessageHigh(int count);
+
+  /// No description provided for @copilotPrepOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan overview'**
+  String get copilotPrepOverview;
+
+  /// No description provided for @copilotPrepDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'View my documents'**
+  String get copilotPrepDocuments;
+
+  /// No description provided for @copilotPrepHousing.
+  ///
+  /// In en, this message translates to:
+  /// **'View housing'**
+  String get copilotPrepHousing;
+
+  /// No description provided for @copilotPrepWork.
+  ///
+  /// In en, this message translates to:
+  /// **'View work and prep'**
+  String get copilotPrepWork;
+
+  /// No description provided for @copilotPrepArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'View arrival'**
+  String get copilotPrepArrival;
+
+  /// No description provided for @copilotGoalFindJob.
+  ///
+  /// In en, this message translates to:
+  /// **'looking for work in Brazil'**
+  String get copilotGoalFindJob;
+
+  /// No description provided for @copilotGoalRemoteIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'working remotely'**
+  String get copilotGoalRemoteIncome;
+
+  /// No description provided for @copilotGoalStudy.
+  ///
+  /// In en, this message translates to:
+  /// **'moving to study'**
+  String get copilotGoalStudy;
+
+  /// No description provided for @copilotGoalFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'bringing family together'**
+  String get copilotGoalFamily;
+
+  /// No description provided for @copilotGoalFreshStart.
+  ///
+  /// In en, this message translates to:
+  /// **'starting over'**
+  String get copilotGoalFreshStart;
+
+  /// No description provided for @copilotGoalDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'planning the move'**
+  String get copilotGoalDefault;
+
+  /// No description provided for @copilotOpenSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Open: {section}'**
+  String copilotOpenSection(String section);
+
+  /// No description provided for @copilotJobMarketHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'active — good demand for professionals'**
+  String get copilotJobMarketHigh;
+
+  /// No description provided for @copilotJobMarketMid.
+  ///
+  /// In en, this message translates to:
+  /// **'moderate — opportunities in specific areas'**
+  String get copilotJobMarketMid;
+
+  /// No description provided for @copilotJobMarketLow.
+  ///
+  /// In en, this message translates to:
+  /// **'developing — research before you arrive'**
+  String get copilotJobMarketLow;
+
+  /// No description provided for @copilotPhaseShortPreparation.
+  ///
+  /// In en, this message translates to:
+  /// **'Prep'**
+  String get copilotPhaseShortPreparation;
+
+  /// No description provided for @copilotPhaseShortHousing.
+  ///
+  /// In en, this message translates to:
+  /// **'1st days'**
+  String get copilotPhaseShortHousing;
+
+  /// No description provided for @copilotPhaseShortDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Docs'**
+  String get copilotPhaseShortDocuments;
+
+  /// No description provided for @copilotPhaseShortWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Life'**
+  String get copilotPhaseShortWork;
+
+  /// No description provided for @copilotPhaseShortArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'Settle'**
+  String get copilotPhaseShortArrival;
+
+  /// No description provided for @copilotButtonNextStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it, next step'**
+  String get copilotButtonNextStep;
+
+  /// No description provided for @copilotButtonViewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get copilotButtonViewDetails;
+
+  /// No description provided for @copilotButtonChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve checked this'**
+  String get copilotButtonChecked;
+
+  /// No description provided for @copilotButtonOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {label}'**
+  String copilotButtonOpen(String label);
+
+  /// No description provided for @copilotButtonCompleteStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete this step'**
+  String get copilotButtonCompleteStep;
+
+  /// No description provided for @copilotButtonOpenTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Open tool'**
+  String get copilotButtonOpenTool;
+
+  /// No description provided for @copilotButtonComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get copilotButtonComplete;
 }
 
 class _AppLocalizationsDelegate

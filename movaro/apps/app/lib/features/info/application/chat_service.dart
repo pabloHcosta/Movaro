@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:developer' as dev;
+import 'dart:ui';
 
+import 'package:movaro_app/app/localization/generated/app_localizations.dart';
 import 'package:movaro_app/core/network/network_client.dart';
 import 'package:movaro_app/features/info/application/gemini_chat_service.dart';
 
@@ -83,6 +85,8 @@ class ChatService {
 
   final List<ChatMessage> _history = [];
 
+  AppLocalizations get _l10n => lookupAppLocalizations(Locale(_locale));
+
   List<ChatMessage> get history => List.unmodifiable(_history);
 
   /// Send a message and stream the response character by character for a
@@ -104,7 +108,7 @@ class ChatService {
       answer = await _ask(trimmed);
     } catch (e) {
       dev.log('[ChatService] error: $e');
-      const errorText = 'Não consegui processar sua pergunta. Tente novamente.';
+      final errorText = _l10n.chatServiceErrorProcessingQuestion;
       _history.add(
         ChatMessage(
           role: 'assistant',
@@ -215,96 +219,48 @@ class ChatService {
   }
 
   ChatStarterPrompts _buildFallbackStarterPrompts() {
+    final l10n = _l10n;
     final destinationLabel = _destinationCountry.trim().isNotEmpty
         ? _destinationCountry.trim()
-        : (_locale == 'es'
-              ? 'tu destino'
-              : _locale == 'en'
-              ? 'your destination'
-              : 'seu destino');
+        : l10n.chatFallbackDestination;
     final localDocPrompt = _firstLocalDocumentPrompt();
 
     return ChatStarterPrompts(
       categories: [
         ChatStarterPrompt(
           key: 'documents',
-          label: _locale == 'es'
-              ? 'Documentos'
-              : _locale == 'en'
-              ? 'Documents'
-              : 'Documentos',
-          message: _locale == 'es'
-              ? '¿Qué documentos necesito para migrar a $destinationLabel? Explica visa y $localDocPrompt.'
-              : _locale == 'en'
-              ? 'What documents do I need to move to $destinationLabel? Explain visas and $localDocPrompt.'
-              : 'Quais documentos preciso para migrar para $destinationLabel? Explique visto e $localDocPrompt.',
+          label: l10n.homeAssistantCategoryDocuments,
+          message: l10n.chatFallbackMessageDocuments(
+            destinationLabel,
+            localDocPrompt,
+          ),
         ),
         ChatStarterPrompt(
           key: 'costs',
-          label: _locale == 'es'
-              ? 'Costos'
-              : _locale == 'en'
-              ? 'Costs'
-              : 'Custos',
-          message: _locale == 'es'
-              ? '¿Cuánto cuesta mudarse? Dame una visión general de los costos.'
-              : _locale == 'en'
-              ? 'How much does it cost to move? Give me a cost overview.'
-              : 'Quanto custa se mudar? Me dê uma visão geral dos custos.',
+          label: l10n.homeAssistantCategoryCosts,
+          message: l10n.chatFallbackMessageCosts,
         ),
         ChatStarterPrompt(
           key: 'activities',
-          label: _locale == 'es'
-              ? 'Qué hacer'
-              : _locale == 'en'
-              ? 'What to do'
-              : 'O que fazer',
-          message: _locale == 'es'
-              ? '¿Qué debo saber sobre la vida en la ciudad destino?'
-              : _locale == 'en'
-              ? 'What should I know about life in the destination city?'
-              : 'O que devo saber sobre a vida na cidade destino?',
+          label: l10n.homeAssistantCategoryActivities,
+          message: l10n.chatFallbackMessageActivities,
         ),
         ChatStarterPrompt(
           key: 'stay',
-          label: _locale == 'es'
-              ? 'Dónde quedarse'
-              : _locale == 'en'
-              ? 'Where to stay'
-              : 'Onde ficar',
-          message: _locale == 'es'
-              ? '¿Cómo encontrar vivienda en $destinationLabel? Consejos para alquilar.'
-              : _locale == 'en'
-              ? 'How do I find housing in $destinationLabel? Renting tips.'
-              : 'Como encontrar moradia em $destinationLabel? Dicas para alugar.',
+          label: l10n.homeAssistantCategoryStay,
+          message: l10n.chatFallbackMessageStay(destinationLabel),
         ),
       ],
       chips: [
         ChatStarterPrompt(
           key: 'visa',
-          label: _locale == 'es'
-              ? '¿Necesito visa?'
-              : _locale == 'en'
-              ? 'Do I need a visa?'
-              : 'Preciso de visto?',
-          message: _locale == 'es'
-              ? '¿Necesito visa?'
-              : _locale == 'en'
-              ? 'Do I need a visa?'
-              : 'Preciso de visto?',
+          label: l10n.assistantEntryQuickVisa,
+          message: l10n.assistantEntryQuickVisa,
         ),
         ChatStarterPrompt(
           key: 'best_time',
-          label: _locale == 'es'
-              ? '¿Mejor época para ir?'
-              : _locale == 'en'
-              ? 'Best time to go?'
-              : 'Melhor época pra ir?',
-          message: _locale == 'es'
-              ? '¿Mejor época para ir?'
-              : _locale == 'en'
-              ? 'Best time to go?'
-              : 'Melhor época pra ir?',
+          label: l10n.assistantEntryQuickBestTime,
+          message: l10n.assistantEntryQuickBestTime,
         ),
         ChatStarterPrompt(
           key: 'first_local_document',
@@ -318,13 +274,9 @@ class ChatService {
   String _firstLocalDocumentPrompt() {
     final normalized = _destinationCountry.toLowerCase().trim();
     if (normalized == 'brasil' || normalized == 'brazil') {
-      if (_locale == 'es') return '¿Cómo obtener mi CPF?';
-      if (_locale == 'en') return 'How do I get my CPF?';
-      return 'Como tirar o CPF?';
+      return _l10n.chatFallbackFirstLocalDocumentBrazil;
     }
 
-    if (_locale == 'es') return '¿Cuál es mi primer documento local?';
-    if (_locale == 'en') return 'What is my first local document?';
-    return 'Qual é meu primeiro documento local?';
+    return _l10n.chatFallbackFirstLocalDocumentDefault;
   }
 }

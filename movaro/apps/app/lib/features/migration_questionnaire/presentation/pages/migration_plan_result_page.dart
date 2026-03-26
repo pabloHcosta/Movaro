@@ -405,12 +405,7 @@ class _CelebrationOverlay extends StatelessWidget {
             const Text('🎉', style: TextStyle(fontSize: 48)),
             const SizedBox(height: 16),
             Text(
-              _localizedCelebration(
-                context,
-                pt: 'Plano iniciado!',
-                es: 'Plan iniciado!',
-                en: 'Plan started!',
-              ),
+              context.l10n.migrationPlanResultCelebrationTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: const Color(0xFFF0F6FC),
                 fontWeight: FontWeight.w800,
@@ -418,12 +413,7 @@ class _CelebrationOverlay extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              _localizedCelebration(
-                context,
-                pt: 'Voce escolheu $cityName.\nVamos transformar isso em realidade.',
-                es: 'Elegiste $cityName.\nVamos a convertirlo en realidad.',
-                en: 'You chose $cityName.\nLet’s turn that into reality.',
-              ),
+              context.l10n.migrationPlanResultCelebrationBody(cityName),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: const Color(0xFF6B7280),
@@ -435,19 +425,6 @@ class _CelebrationOverlay extends StatelessWidget {
       ),
     );
   }
-}
-
-String _localizedCelebration(
-  BuildContext context, {
-  required String pt,
-  required String es,
-  required String en,
-}) {
-  return switch (Localizations.localeOf(context).languageCode) {
-    'pt' => pt,
-    'es' => es,
-    _ => en,
-  };
 }
 
 class _PlanResultSkeleton extends StatelessWidget {

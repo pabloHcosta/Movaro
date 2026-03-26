@@ -552,12 +552,9 @@ class _QuestionPageState extends State<QuestionPage> {
     final secondsPerQuestion =
         controller.selectedVariant == QuestionnaireVariant.lean ? 30 : 40;
     final minutes = ((remaining * secondsPerQuestion) / 60).ceil();
-    return _localizedText(
-      context,
-      pt: minutes <= 1 ? 'menos de 1 min' : '~$minutes min restantes',
-      es: minutes <= 1 ? 'menos de 1 min' : '~$minutes min restantes',
-      en: minutes <= 1 ? 'under 1 min left' : '~$minutes min left',
-    );
+    return minutes <= 1
+        ? context.l10n.questionRemainingTimeUnderOneMinute
+        : context.l10n.questionRemainingTimeMinutes(minutes);
   }
 
   Widget _buildQuestionOptions(BuildContext context, Question question) {
@@ -999,12 +996,8 @@ class _QuestionPageState extends State<QuestionPage> {
     ); // Column
   }
 
-  String _selectionCounterSuffix(BuildContext context) => _localizedText(
-    context,
-    pt: 'selecionados',
-    es: 'seleccionados',
-    en: 'selected',
-  );
+  String _selectionCounterSuffix(BuildContext context) =>
+      context.l10n.questionSelectionCounterSelected;
 
   Future<void> _handleSingleSelect(Question question, Option option) async {
     setState(() {
@@ -2872,20 +2865,6 @@ class _QuestionLocationDialog extends StatelessWidget {
     );
   }
 }
-
-String _localizedText(
-  BuildContext context, {
-  required String pt,
-  required String es,
-  required String en,
-}) {
-  return switch (Localizations.localeOf(context).languageCode) {
-    'pt' => pt,
-    'es' => es,
-    _ => en,
-  };
-}
-
 // ── Location pre-check screen (shown before step 1 in strategic flow) ─────────
 //
 // Case A: GPS already granted + city detected → confirmation
@@ -2929,18 +2908,8 @@ class _LocationPrecheckState extends State<_LocationPrecheck> {
       'mendoza' => 'Mendoza',
       'rosario' => 'Rosario',
       'salta_jujuy' => 'Salta / Jujuy',
-      'litoral' => _localizedText(
-        context,
-        pt: 'Litoral (Entre Ríos, Corrientes…)',
-        es: 'Litoral (Entre Ríos, Corrientes…)',
-        en: 'Litoral (Entre Ríos, Corrientes…)',
-      ),
-      _ => _localizedText(
-        context,
-        pt: 'Outro lugar',
-        es: 'Otro lugar',
-        en: 'Other',
-      ),
+      'litoral' => context.l10n.questionArgentinaOriginLitoral,
+      _ => context.l10n.questionArgentinaOriginOther,
     };
   }
 
@@ -2986,24 +2955,9 @@ class _LocationPrecheckState extends State<_LocationPrecheck> {
     String city,
     String country,
   ) {
-    final title = _localizedText(
-      context,
-      pt: 'Localização detectada',
-      es: 'Ubicación detectada',
-      en: 'Location detected',
-    );
-    final subtitle = _localizedText(
-      context,
-      pt: 'Encontramos você em $city, $country. Usaremos isso para personalizar sua jornada.',
-      es: 'Te encontramos en $city, $country. Lo usaremos para personalizar tu experiencia.',
-      en: 'We found you in $city, $country. We\'ll use this to personalise your journey.',
-    );
-    final ctaLabel = _localizedText(
-      context,
-      pt: 'Continuar',
-      es: 'Continuar',
-      en: 'Continue',
-    );
+    final title = context.l10n.questionLocationDetectedTitle;
+    final subtitle = context.l10n.questionLocationDetectedBody(city, country);
+    final ctaLabel = context.l10n.questionLocationContinueAction;
 
     return FrostedPanel(
       padding: const EdgeInsets.all(24),
@@ -3037,30 +2991,10 @@ class _LocationPrecheckState extends State<_LocationPrecheck> {
     ColorScheme cs,
     TextTheme tt,
   ) {
-    final title = _localizedText(
-      context,
-      pt: 'Onde você está na Argentina?',
-      es: '¿Desde dónde salís en Argentina?',
-      en: 'Where are you in Argentina?',
-    );
-    final subtitle = _localizedText(
-      context,
-      pt: 'Sua localização nos ajuda a estimar distâncias e personalizar recomendações.',
-      es: 'Tu ubicación nos ayuda a estimar distancias y personalizar recomendaciones.',
-      en: 'Your location helps us estimate distances and personalise recommendations.',
-    );
-    final ctaLabel = _localizedText(
-      context,
-      pt: 'Usar minha localização',
-      es: 'Usar mi ubicación',
-      en: 'Use my location',
-    );
-    final skipLabel = _localizedText(
-      context,
-      pt: 'Escolher manualmente',
-      es: 'Elegir manualmente',
-      en: 'Choose manually',
-    );
+    final title = context.l10n.questionLocationRequestTitle;
+    final subtitle = context.l10n.questionLocationRequestBody;
+    final ctaLabel = context.l10n.questionLocationUseAction;
+    final skipLabel = context.l10n.questionLocationChooseManualAction;
 
     return FrostedPanel(
       padding: const EdgeInsets.all(24),
@@ -3108,18 +3042,8 @@ class _LocationPrecheckState extends State<_LocationPrecheck> {
     ColorScheme cs,
     TextTheme tt,
   ) {
-    final title = _localizedText(
-      context,
-      pt: 'De onde na Argentina você vem?',
-      es: '¿De dónde en Argentina venís?',
-      en: 'Where in Argentina are you from?',
-    );
-    final ctaLabel = _localizedText(
-      context,
-      pt: 'Continuar',
-      es: 'Continuar',
-      en: 'Continue',
-    );
+    final title = context.l10n.questionLocationManualTitle;
+    final ctaLabel = context.l10n.questionLocationContinueAction;
 
     return FrostedPanel(
       padding: const EdgeInsets.all(18),

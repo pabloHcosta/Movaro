@@ -6481,4 +6481,705 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeVisualWaypointRoute => 'ruta';
+
+  @override
+  String get assistantEntryTitle => 'Asistente Movaro';
+
+  @override
+  String get assistantEntrySubtitle => 'Resuelve dudas sobre tu mudanza';
+
+  @override
+  String get assistantEntryOpenAction => 'Abrir ↑';
+
+  @override
+  String get assistantEntryInputHint => 'O escribe tu pregunta...';
+
+  @override
+  String get assistantEntryQuickVisa => '¿Necesito visa?';
+
+  @override
+  String get assistantEntryQuickBestTime => '¿Mejor época para ir?';
+
+  @override
+  String get assistantEntryQuickCpf => '¿Cómo obtener el CPF?';
+
+  @override
+  String get assistantModeConversation => '💬 Conversación';
+
+  @override
+  String get assistantModeGuides => '📋 Guías';
+
+  @override
+  String get planResetManageAction => 'Empezar un plan nuevo';
+
+  @override
+  String get planResetManageBody =>
+      'Si querés recomenzar, podés borrar tu progreso actual y armar un nuevo plan desde el principio.';
+
+  @override
+  String get planResetDialogBody =>
+      'Vas a reiniciar el cuestionario y elegir una nueva ciudad. Esto no se puede deshacer.';
+
+  @override
+  String get planResetRebuildLabel => 'Sí, empezar de cero';
+
+  @override
+  String get planResetCancelLabel => 'Cancelar';
+
+  @override
+  String get planResetCurrentPlanFallbackLabel => 'plan actual';
+
+  @override
+  String planResetCityWarning(String cityName) {
+    return 'Tu progreso en $cityName y todos los items marcados se borrarán.';
+  }
+
+  @override
+  String planResetCancelWithCity(String cityName) {
+    return 'Cancelar — mantener $cityName';
+  }
+
+  @override
+  String get homeActivePlanBadge => 'PLAN ACTIVO';
+
+  @override
+  String get homeJourneyTitle => 'TU JORNADA';
+
+  @override
+  String get homeJourneyComplete => '¡Jornada completada! 🎉';
+
+  @override
+  String get homeJourneySeeSummary => 'Ver resumen →';
+
+  @override
+  String get homeJourneyContinueGuide => 'Continuar la guía →';
+
+  @override
+  String get homeJourneyViewAction => 'Ver';
+
+  @override
+  String get homeJourneyActiveDaySingle => 'día activo';
+
+  @override
+  String get homeJourneyActiveDayPlural => 'días activos';
+
+  @override
+  String get homeJourneyCurrentPhaseMarker => '→ ahora';
+
+  @override
+  String get homeJourneyLockedPhaseMarker => 'bloq.';
+
+  @override
+  String get homeJourneyPhasePreparation => 'Preparación';
+
+  @override
+  String get homeJourneyPhaseDocuments => 'Documentación';
+
+  @override
+  String get homeJourneyPhaseHousing => 'Vivienda';
+
+  @override
+  String get homeJourneyPhaseWork => 'Trabajo';
+
+  @override
+  String get homeJourneyPhaseArrival => 'Llegada';
+
+  @override
+  String get homeJourneyDoneLabel => 'hecho';
+
+  @override
+  String get homeJourneyItemsLabel => 'ítems';
+
+  @override
+  String get homeActionCompare => 'Comparar';
+
+  @override
+  String get homeActionViewCity => 'Ver ciudad';
+
+  @override
+  String get homeActionNewPlan => 'Nuevo plan';
+
+  @override
+  String get homeJourneyPhaseBeforeTravel => 'Antes de viajar';
+
+  @override
+  String get homeJourneyPhaseFirstDays => 'Primeros días';
+
+  @override
+  String get homeJourneyPhaseDocumentation => 'Documentación';
+
+  @override
+  String get homeJourneyPhaseLifeWorking => 'Vida funcionando';
+
+  @override
+  String get homeJourneyPhaseIntegration => 'Integración';
+
+  @override
+  String get questionRemainingTimeUnderOneMinute => 'menos de 1 min';
+
+  @override
+  String questionRemainingTimeMinutes(int minutes) {
+    return '~$minutes min restantes';
+  }
+
+  @override
+  String get questionSelectionCounterSelected => 'seleccionados';
+
+  @override
+  String get questionArgentinaOriginLitoral =>
+      'Litoral (Entre Ríos, Corrientes…)';
+
+  @override
+  String get questionArgentinaOriginOther => 'Otro lugar';
+
+  @override
+  String get questionLocationDetectedTitle => 'Ubicación detectada';
+
+  @override
+  String questionLocationDetectedBody(String city, String country) {
+    return 'Te encontramos en $city, $country. Lo usaremos para personalizar tu experiencia.';
+  }
+
+  @override
+  String get questionLocationContinueAction => 'Continuar';
+
+  @override
+  String get questionLocationRequestTitle => '¿Desde dónde salís en Argentina?';
+
+  @override
+  String get questionLocationRequestBody =>
+      'Tu ubicación nos ayuda a estimar distancias y personalizar recomendaciones.';
+
+  @override
+  String get questionLocationUseAction => 'Usar mi ubicación';
+
+  @override
+  String get questionLocationChooseManualAction => 'Elegir manualmente';
+
+  @override
+  String get questionLocationManualTitle => '¿De dónde en Argentina venís?';
+
+  @override
+  String get commonDoneCheck => 'Hecho ✓';
+
+  @override
+  String get commonOpenOfficialSiteAction => 'Abrir sitio oficial ->';
+
+  @override
+  String get readinessStageOnArrival => 'Al llegar';
+
+  @override
+  String get arrivalExecutionStageFirstWeek =>
+      'PRIMERA SEMANA — prioridad máxima';
+
+  @override
+  String get arrivalExecutionStageFirstMonth =>
+      'PRIMER MES — consolidar la base';
+
+  @override
+  String get arrivalExecutionStageFirstQuarter =>
+      'PRIMEROS 3 MESES — estabilizar la vida';
+
+  @override
+  String get cityDetailMediaTitle => 'Ver videos y fotos';
+
+  @override
+  String get cityDetailMediaBody => 'Abrí el contenido visual de la ciudad';
+
+  @override
+  String get migrationPlanResultCelebrationTitle => '¡Plan iniciado!';
+
+  @override
+  String migrationPlanResultCelebrationBody(String cityName) {
+    return 'Elegiste $cityName.\nVamos a convertirlo en realidad.';
+  }
+
+  @override
+  String get chatServiceErrorProcessingQuestion =>
+      'No pude procesar tu pregunta. Intenta de nuevo.';
+
+  @override
+  String get chatFallbackDestination => 'tu destino';
+
+  @override
+  String chatFallbackMessageDocuments(
+    String destination,
+    String localDocument,
+  ) {
+    return '¿Qué documentos necesito para migrar a $destination? Explica visa y $localDocument.';
+  }
+
+  @override
+  String get chatFallbackMessageCosts =>
+      '¿Cuánto cuesta mudarse? Dame una visión general de los costos.';
+
+  @override
+  String get chatFallbackMessageActivities =>
+      '¿Qué debo saber sobre la vida en la ciudad destino?';
+
+  @override
+  String chatFallbackMessageStay(String destination) {
+    return '¿Cómo encontrar vivienda en $destination? Consejos para alquilar.';
+  }
+
+  @override
+  String get chatFallbackFirstLocalDocumentBrazil => '¿Cómo obtener mi CPF?';
+
+  @override
+  String get chatFallbackFirstLocalDocumentDefault =>
+      '¿Cuál es mi primer documento local?';
+
+  @override
+  String get commonMonthAbbrevJan => 'Ene';
+
+  @override
+  String get commonMonthAbbrevFeb => 'Feb';
+
+  @override
+  String get commonMonthAbbrevMar => 'Mar';
+
+  @override
+  String get commonMonthAbbrevApr => 'Abr';
+
+  @override
+  String get commonMonthAbbrevMay => 'May';
+
+  @override
+  String get commonMonthAbbrevJun => 'Jun';
+
+  @override
+  String get commonMonthAbbrevJul => 'Jul';
+
+  @override
+  String get commonMonthAbbrevAug => 'Ago';
+
+  @override
+  String get commonMonthAbbrevSep => 'Sep';
+
+  @override
+  String get commonMonthAbbrevOct => 'Oct';
+
+  @override
+  String get commonMonthAbbrevNov => 'Nov';
+
+  @override
+  String get commonMonthAbbrevDec => 'Dic';
+
+  @override
+  String get commonMonthInitialJan => 'E';
+
+  @override
+  String get commonMonthInitialFeb => 'F';
+
+  @override
+  String get commonMonthInitialMar => 'M';
+
+  @override
+  String get commonMonthInitialApr => 'A';
+
+  @override
+  String get commonMonthInitialMay => 'M';
+
+  @override
+  String get commonMonthInitialJun => 'J';
+
+  @override
+  String get commonMonthInitialJul => 'J';
+
+  @override
+  String get commonMonthInitialAug => 'A';
+
+  @override
+  String get commonMonthInitialSep => 'S';
+
+  @override
+  String get commonMonthInitialOct => 'O';
+
+  @override
+  String get commonMonthInitialNov => 'N';
+
+  @override
+  String get commonMonthInitialDec => 'D';
+
+  @override
+  String get flightSeasonalityTitle => 'Mejor época para volar';
+
+  @override
+  String flightSeasonalitySubtitle(String origin, String destination) {
+    return '$origin -> $destination · Rangos históricos (USD)';
+  }
+
+  @override
+  String flightSeasonalitySavingsMonths(String months) {
+    return 'Más barato: $months · Hasta 40% de ahorro';
+  }
+
+  @override
+  String get flightSeasonalityFallback =>
+      'Todavía no tenemos historial suficiente para esta ruta exacta. Usa la búsqueda en vivo de abajo para ver la combinación real entre origen y destino.';
+
+  @override
+  String flightSeasonalityLiveButton(String origin, String destination) {
+    return 'Ver precios en vivo  $origin -> $destination';
+  }
+
+  @override
+  String get flightSeasonalityFooter =>
+      'Rangos históricos · Los precios reales varían según la fecha';
+
+  @override
+  String flightSeasonalityWebviewTitle(String origin, String destination) {
+    return 'Pasajes $origin -> $destination';
+  }
+
+  @override
+  String flightSeasonalityLegendLow(int min, int max) {
+    return 'Barato (USD $min-$max)';
+  }
+
+  @override
+  String get flightSeasonalityLegendMid => 'Medio';
+
+  @override
+  String get flightSeasonalityLegendHigh => 'Caro';
+
+  @override
+  String get flightSeasonalityBadgePrefix => 'Pasaje: ';
+
+  @override
+  String flightSeasonalityBadgeFrom(int value) {
+    return 'desde $value USD';
+  }
+
+  @override
+  String get flightSeasonalityBadgeCheapestPrefix => '  ·  Más barato: ';
+
+  @override
+  String get flightSeasonalityWarningFln =>
+      'Florianópolis suele tener menos vuelos directos fuera de mar-abr. En otros meses, las conexiones vía São Paulo o Porto Alegre son comunes.';
+
+  @override
+  String get flightSeasonalityWarningNvt =>
+      'Navegantes sirve a Balneário, Itajaí y Blumenau. En parte del año, la mejor tarifa aparece con una conexión corta en São Paulo.';
+
+  @override
+  String get flightSeasonalityWarningGig =>
+      'Febrero suele concentrar la temporada más alta en Río por el Carnaval. Si esa ventana te sirve, conviene monitorear temprano.';
+
+  @override
+  String get flightSeasonalityWarningMao =>
+      'Manaus suele variar más por conexiones y oferta. Comparar algunos días alrededor de la fecha ayuda bastante.';
+
+  @override
+  String get flightSeasonalityWarningBel =>
+      'Belém tiende a oscilar bastante entre conexiones y horarios. Vale la pena abrir la búsqueda en vivo con algo de flexibilidad.';
+
+  @override
+  String get housingSelectionTitle => 'Vivienda';
+
+  @override
+  String get housingTemporaryTitle => 'Temporal';
+
+  @override
+  String get housingLongTermTitle => 'Alquiler fijo';
+
+  @override
+  String get housingTemporaryPortalHostelworld =>
+      'Hostels y dormitorios baratos';
+
+  @override
+  String get housingTemporaryPortalAirbnb => 'Departamentos amoblados';
+
+  @override
+  String get housingTemporaryPortalBooking => 'Hoteles y apart-hoteles';
+
+  @override
+  String get housingTemporaryPortalVivaReal => 'Alquiler temporal';
+
+  @override
+  String get housingTemporaryPortalZap => 'Temporal y mensual';
+
+  @override
+  String housingStayInCityTitle(String city) {
+    return 'Vivienda en $city';
+  }
+
+  @override
+  String housingTemporarySearchAction(String city, String duration) {
+    return 'Buscar en $city - $duration';
+  }
+
+  @override
+  String get housingOpenSelectedSourceHint => 'Abre en la app o sitio elegido';
+
+  @override
+  String get housingLongTermPortalQuintoAndar =>
+      'Sin garante · Acepta pasaporte · Digital';
+
+  @override
+  String get housingLongTermPortalFlatio =>
+      'Mediano plazo · Sin depósito · Para expats';
+
+  @override
+  String get housingLongTermPortalZap => 'Base grande de inmuebles en Brasil';
+
+  @override
+  String get housingLongTermPortalVivaReal => 'Fotos y planos más detallados';
+
+  @override
+  String get housingLongTermPortalChaves =>
+      'Buena cobertura en varias ciudades del sur';
+
+  @override
+  String housingPlanCityBanner(String city, String state) {
+    return '$city ($state) - ciudad de tu plan';
+  }
+
+  @override
+  String get housingPlanCityBannerBody =>
+      'La mayoría de los argentinos llega con vivienda temporal y firma contrato después de conocer los barrios. Suele ser el camino más seguro para arrancar.';
+
+  @override
+  String get housingTemporaryBadge => 'Recomendado para llegar';
+
+  @override
+  String get housingTemporaryCardTitle => 'Vivienda temporal';
+
+  @override
+  String get housingTemporaryCardBody =>
+      'Para los primeros 30 a 90 días. Sin contrato largo, sin garante y con tiempo para conocer la ciudad antes de decidir.';
+
+  @override
+  String get housingTemporaryStatDurationValue => '1-3 meses';
+
+  @override
+  String get housingTemporaryStatDurationLabel => 'duración';
+
+  @override
+  String get housingTemporaryStatNoGuarantor => 'Sin garante';
+
+  @override
+  String get housingTemporaryStatFurnished => 'Amoblado';
+
+  @override
+  String get housingTemporaryCardAction => 'Buscar vivienda temporal';
+
+  @override
+  String get housingLongTermBadge => 'Cuando ya conoces la ciudad';
+
+  @override
+  String get housingLongTermCardTitle => 'Alquiler definitivo';
+
+  @override
+  String get housingLongTermCardBody =>
+      'Contrato de 12 a 30 meses. Suele ser más barato por mes, pero normalmente pide garantía, documentos y más cuidado al firmar.';
+
+  @override
+  String get housingLongTermCardAction => 'Ver opciones de alquiler fijo';
+
+  @override
+  String housingTemporaryHeaderTitle(String city) {
+    return 'Tu base en $city';
+  }
+
+  @override
+  String get housingTemporaryHeaderBody =>
+      'Sin contrato fijo. Amoblado. Lo ajustas cuando quieras.';
+
+  @override
+  String get housingTemporaryAirbnbTip =>
+      'Airbnb suele ofrecer descuentos para estadías largas de 28 días o más. Es un camino muy usado al llegar.';
+
+  @override
+  String housingLongTermHeaderTitle(String city) {
+    return 'Alquiler en $city';
+  }
+
+  @override
+  String get housingLongTermHeaderBody =>
+      'Contrato de 12 a 30 meses. Más barato a largo plazo.';
+
+  @override
+  String get housingLongTermStatBedroom => '1 dormitorio';
+
+  @override
+  String get housingLongTermStatEntryValue => '3x depósito';
+
+  @override
+  String get housingLongTermStatEntry => 'entrada';
+
+  @override
+  String get housingLongTermStatRequired => 'necesario';
+
+  @override
+  String get housingLongTermAlertTitle => 'Antes de firmar cualquier contrato';
+
+  @override
+  String get housingLongTermAlertBody =>
+      'Como extranjero, normalmente vas a necesitar CPF y alguna garantía, como garante brasileño o seguro de fianza. No firmes sin leer bien las cláusulas.';
+
+  @override
+  String get housingLongTermForeignersBadge => 'Para extranjeros';
+
+  @override
+  String get housingForeignTipsTitle => 'Consejos para extranjeros';
+
+  @override
+  String get housingForeignTipOne =>
+      '¿Sin garante? Evalúa seguro de fianza o depósito antes de negociar.';
+
+  @override
+  String get housingForeignTipTwo =>
+      'No hace falta esperar la residencia lista para empezar a entender el mercado.';
+
+  @override
+  String get housingForeignTipThree =>
+      'Exigí recibo y contrato firmado. Nunca pagues sin registro.';
+
+  @override
+  String get housingForeignTipFour =>
+      'Desconfiá de valores muy bajos y de la urgencia para cerrar sin visita.';
+
+  @override
+  String get housingDurationOneWeek => '7-14 días';
+
+  @override
+  String get housingDurationOneMonth => '1 mes';
+
+  @override
+  String get housingDurationTwoThreeMonths => '2-3 meses';
+
+  @override
+  String get copilotProgressCompletedLabel => 'completado';
+
+  @override
+  String get copilotProgressRemainingLabel => 'restantes';
+
+  @override
+  String get copilotPlanCompletedTitle => '¡Plan completado!';
+
+  @override
+  String get copilotPlanCompletedBody =>
+      'Completaste todos los pasos de tu guía.';
+
+  @override
+  String get copilotNextActionUnlocked =>
+      'Genial. Se desbloqueó la siguiente acción.';
+
+  @override
+  String get copilotTagNextAction => 'PRÓXIMA ACCIÓN';
+
+  @override
+  String get copilotTagExternalAction => 'ACCIÓN EXTERNA';
+
+  @override
+  String get copilotTagUseTool => 'USA UNA HERRAMIENTA';
+
+  @override
+  String get copilotTagToComplete => 'PARA COMPLETAR';
+
+  @override
+  String get copilotCompletionMessageFirst => 'Primer paso hecho. Seguí así.';
+
+  @override
+  String copilotCompletionMessageFew(int count) {
+    return 'Buen ritmo. $count etapas hechas.';
+  }
+
+  @override
+  String copilotCompletionMessageMid(int count) {
+    return '$count etapas completadas. Estás avanzando.';
+  }
+
+  @override
+  String copilotCompletionMessageHigh(int count) {
+    return 'Increíble: $count etapas listas.';
+  }
+
+  @override
+  String get copilotPrepOverview => 'Vista general';
+
+  @override
+  String get copilotPrepDocuments => 'Ver mis documentos';
+
+  @override
+  String get copilotPrepHousing => 'Ver vivienda';
+
+  @override
+  String get copilotPrepWork => 'Ver trabajo y preparación';
+
+  @override
+  String get copilotPrepArrival => 'Ver llegada';
+
+  @override
+  String get copilotGoalFindJob => 'buscando trabajo en Brasil';
+
+  @override
+  String get copilotGoalRemoteIncome => 'trabajando de forma remota';
+
+  @override
+  String get copilotGoalStudy => 'yendo a estudiar';
+
+  @override
+  String get copilotGoalFamily => 'reuniendo a la familia';
+
+  @override
+  String get copilotGoalFreshStart => 'empezando de cero';
+
+  @override
+  String get copilotGoalDefault => 'planeando la mudanza';
+
+  @override
+  String copilotOpenSection(String section) {
+    return 'Abrir: $section';
+  }
+
+  @override
+  String get copilotJobMarketHigh => 'activo — buena demanda de profesionales';
+
+  @override
+  String get copilotJobMarketMid =>
+      'moderado — oportunidades en áreas específicas';
+
+  @override
+  String get copilotJobMarketLow =>
+      'en desarrollo — conviene investigar antes de llegar';
+
+  @override
+  String get copilotPhaseShortPreparation => 'Preparo';
+
+  @override
+  String get copilotPhaseShortHousing => '1os días';
+
+  @override
+  String get copilotPhaseShortDocuments => 'Docs';
+
+  @override
+  String get copilotPhaseShortWork => 'Vida';
+
+  @override
+  String get copilotPhaseShortArrival => 'Integrar';
+
+  @override
+  String get copilotButtonNextStep => 'Entendido, siguiente paso';
+
+  @override
+  String get copilotButtonViewDetails => 'Ver detalles';
+
+  @override
+  String get copilotButtonChecked => 'Ya lo verifiqué';
+
+  @override
+  String copilotButtonOpen(String label) {
+    return 'Abrir $label';
+  }
+
+  @override
+  String get copilotButtonCompleteStep => 'Completar esta etapa';
+
+  @override
+  String get copilotButtonOpenTool => 'Abrir herramienta';
+
+  @override
+  String get copilotButtonComplete => 'Completar';
 }

@@ -508,19 +508,11 @@ class _ChecklistItem extends StatelessWidget {
   }
 
   String _openOfficialSiteLabel(BuildContext context) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => 'Abrir site oficial ->',
-      'es' => 'Abrir sitio oficial ->',
-      _ => 'Open official site ->',
-    };
+    return context.l10n.commonOpenOfficialSiteAction;
   }
 
   String _doneLabel(BuildContext context) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => 'Feito ✓',
-      'es' => 'Hecho ✓',
-      _ => 'Done ✓',
-    };
+    return context.l10n.commonDoneCheck;
   }
 }
 

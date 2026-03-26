@@ -3,6 +3,7 @@ import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
+import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
@@ -223,11 +224,6 @@ class _AssistantPageState extends State<AssistantPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
-    final plan = widget.migrationQuestionnaireController.generatedPlan;
-    final city = plan?.isCityConfirmed == true ? plan?.recommendedCity : null;
-    final subtitle = city != null
-        ? '${city.name} · ${plan!.originCountry} → ${plan.destinationCountry}'
-        : null;
 
     return Scaffold(
       extendBody: true,
@@ -245,32 +241,11 @@ class _AssistantPageState extends State<AssistantPage> {
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: AppGlassHeader(
                     title: context.l10n.aiChatTitle,
+                    onBack: () => Navigator.pushReplacementNamed(
+                      context,
+                      AppRoutes.publicHome,
+                    ),
                     onHelp: _showAssistantGuide,
-                    trailing: subtitle == null
-                        ? null
-                        : Tooltip(
-                            message: subtitle,
-                            child: Container(
-                              width: 44,
-                              height: 44,
-                              alignment: Alignment.center,
-                              child: Container(
-                                width: 32,
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.12,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Icon(
-                                  Icons.auto_awesome_rounded,
-                                  size: 18,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ),
-                          ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -330,17 +305,9 @@ class _ModeSegmentedControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lang = Localizations.localeOf(context).languageCode;
-    final conversationLabel = switch (lang) {
-      'pt' => '💬 Conversa',
-      'es' => '💬 Conversación',
-      _ => '💬 Chat',
-    };
-    final guidesLabel = switch (lang) {
-      'pt' => '📋 Guias',
-      'es' => '📋 Guías',
-      _ => '📋 Guides',
-    };
+    final l10n = context.l10n;
+    final conversationLabel = l10n.assistantModeConversation;
+    final guidesLabel = l10n.assistantModeGuides;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -580,22 +547,28 @@ class _ConversationBodyState extends State<_ConversationBody> {
     bool isDark,
   ) {
     final allMessages = [...messages];
+    final visibleMessages =
+        _isStreaming &&
+            allMessages.isNotEmpty &&
+            allMessages.last.role == 'assistant'
+        ? allMessages.sublist(0, allMessages.length - 1)
+        : allMessages;
     final showStreamingBubble = _isStreaming && _streamingText.isNotEmpty;
 
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       itemCount:
-          allMessages.length +
+          visibleMessages.length +
           (showStreamingBubble ? 1 : 0) +
           (_isStreaming && _streamingText.isEmpty ? 1 : 0),
       itemBuilder: (context, index) {
         if (_isStreaming &&
             _streamingText.isEmpty &&
-            index == allMessages.length) {
+            index == visibleMessages.length) {
           return _buildTypingIndicator(isDark);
         }
-        if (showStreamingBubble && index == allMessages.length) {
+        if (showStreamingBubble && index == visibleMessages.length) {
           return _buildBubble(
             text: _streamingText,
             isUser: false,
@@ -604,9 +577,9 @@ class _ConversationBodyState extends State<_ConversationBody> {
             isDark: isDark,
           );
         }
-        if (index >= allMessages.length) return const SizedBox.shrink();
+        if (index >= visibleMessages.length) return const SizedBox.shrink();
 
-        final msg = allMessages[index];
+        final msg = visibleMessages[index];
         return _buildBubble(
           text: msg.text,
           isUser: msg.role == 'user',

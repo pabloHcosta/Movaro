@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 
 /// A compact, non-expandable entry strip anchored above the navigation bar.
@@ -35,38 +36,16 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = Localizations.localeOf(context).languageCode;
-
-    final title = switch (lang) {
-      'pt' => 'Assistente Movaro',
-      'es' => 'Asistente Movaro',
-      _ => 'Movaro Assistant',
-    };
-    final subtitle = switch (lang) {
-      'pt' => 'Tire dúvidas sobre sua mudança',
-      'es' => 'Resuelve dudas sobre tu mudanza',
-      _ => 'Get answers about your move',
-    };
-    final openLabel = switch (lang) {
-      'pt' => 'Abrir ↑',
-      'es' => 'Abrir ↑',
-      _ => 'Open ↑',
-    };
-    final inputHint = switch (lang) {
-      'pt' => 'Ou digite sua pergunta...',
-      'es' => 'O escribe tu pregunta...',
-      _ => 'Or type your question...',
-    };
-
-    final chips = switch (lang) {
-      'pt' => ['Preciso de visto?', 'Melhor época para ir?', 'Como tirar CPF?'],
-      'es' => [
-        '¿Necesito visa?',
-        '¿Mejor época para ir?',
-        '¿Cómo obtener el CPF?',
-      ],
-      _ => ['Do I need a visa?', 'Best time to go?', 'How to get CPF?'],
-    };
+    final l10n = context.l10n;
+    final title = l10n.assistantEntryTitle;
+    final subtitle = l10n.assistantEntrySubtitle;
+    final openLabel = l10n.assistantEntryOpenAction;
+    final inputHint = l10n.assistantEntryInputHint;
+    final chips = [
+      l10n.assistantEntryQuickVisa,
+      l10n.assistantEntryQuickBestTime,
+      l10n.assistantEntryQuickCpf,
+    ];
 
     return _SheetSurface(
       child: Padding(

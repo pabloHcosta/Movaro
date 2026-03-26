@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_text_styles.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
@@ -75,19 +76,19 @@ class MainNavigationBar extends StatelessWidget {
   List<_NavItemData> _emptyItems(BuildContext context) => [
     _NavItemData(
       slot: 0,
-      label: _text(context, pt: 'Home', es: 'Inicio', en: 'Home'),
+      label: context.l10n.mainNavHome,
       icon: Icons.home_outlined,
       activeIcon: Icons.home,
     ),
     _NavItemData(
       slot: 1,
-      label: _text(context, pt: 'Explorar', es: 'Explorar', en: 'Explore'),
+      label: context.l10n.mainNavExplore,
       icon: Icons.explore_outlined,
       activeIcon: Icons.explore,
     ),
     _NavItemData(
       slot: 4,
-      label: _text(context, pt: 'Favoritos', es: 'Favoritos', en: 'Favorites'),
+      label: context.l10n.favoritesPageTitle,
       icon: Icons.favorite_outline,
       activeIcon: Icons.favorite,
     ),
@@ -96,31 +97,31 @@ class MainNavigationBar extends StatelessWidget {
   List<_NavItemData> _activeItems(BuildContext context) => [
     _NavItemData(
       slot: 0,
-      label: _text(context, pt: 'Home', es: 'Inicio', en: 'Home'),
+      label: context.l10n.mainNavHome,
       icon: Icons.home_outlined,
       activeIcon: Icons.home,
     ),
     _NavItemData(
       slot: 1,
-      label: _text(context, pt: 'Explorar', es: 'Explorar', en: 'Explore'),
+      label: context.l10n.mainNavExplore,
       icon: Icons.explore_outlined,
       activeIcon: Icons.explore,
     ),
     _NavItemData(
       slot: 2,
-      label: _text(context, pt: 'Guia', es: 'Guía', en: 'Guide'),
+      label: context.l10n.mainNavCopilot,
       icon: Icons.route_outlined,
       activeIcon: Icons.route,
     ),
     _NavItemData(
       slot: 3,
-      label: _text(context, pt: 'Assistente', es: 'Asistente', en: 'Assistant'),
+      label: context.l10n.aiChatTitle,
       icon: Icons.auto_awesome_outlined,
       activeIcon: Icons.auto_awesome,
     ),
     _NavItemData(
       slot: 4,
-      label: _text(context, pt: 'Favoritos', es: 'Favoritos', en: 'Favorites'),
+      label: context.l10n.favoritesPageTitle,
       icon: Icons.favorite_outline,
       activeIcon: Icons.favorite,
     ),
@@ -232,17 +233,4 @@ class _NavTab extends StatelessWidget {
       ),
     );
   }
-}
-
-String _text(
-  BuildContext context, {
-  required String pt,
-  required String es,
-  required String en,
-}) {
-  return switch (Localizations.localeOf(context).languageCode) {
-    'pt' => pt,
-    'es' => es,
-    _ => en,
-  };
 }

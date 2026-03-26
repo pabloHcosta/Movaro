@@ -2587,5 +2587,333 @@
   "homeVisualDestinationLabel": "DESTINATION",
   "homeVisualWaypointDocuments": "docs",
   "homeVisualWaypointCosts": "costs",
-  "homeVisualWaypointRoute": "route"
+  "homeVisualWaypointRoute": "route",
+  "assistantEntryTitle": "Movaro Assistant",
+  "assistantEntrySubtitle": "Get answers about your move",
+  "assistantEntryOpenAction": "Open ↑",
+  "assistantEntryInputHint": "Or type your question...",
+  "assistantEntryQuickVisa": "Do I need a visa?",
+  "assistantEntryQuickBestTime": "Best time to go?",
+  "assistantEntryQuickCpf": "How to get CPF?",
+  "assistantModeConversation": "💬 Chat",
+  "assistantModeGuides": "📋 Guides",
+  "planResetManageAction": "Start a new plan",
+  "planResetManageBody": "If you want to restart, you can clear your current progress and build a new plan from the beginning.",
+  "planResetDialogBody": "You will restart the questionnaire and choose a new city. This cannot be undone.",
+  "planResetRebuildLabel": "Yes, start from scratch",
+  "planResetCancelLabel": "Cancel",
+  "planResetCurrentPlanFallbackLabel": "current plan",
+  "planResetCityWarning": "Your progress in {cityName} and all checked items will be erased.",
+  "@planResetCityWarning": {
+    "placeholders": {
+      "cityName": { "type": "String" }
+    }
+  },
+  "planResetCancelWithCity": "Cancel — keep {cityName}",
+  "@planResetCancelWithCity": {
+    "placeholders": {
+      "cityName": { "type": "String" }
+    }
+  },
+  "homeActivePlanBadge": "ACTIVE PLAN",
+  "homeJourneyTitle": "YOUR JOURNEY",
+  "homeJourneyComplete": "Journey complete! 🎉",
+  "homeJourneySeeSummary": "See summary →",
+  "homeJourneyContinueGuide": "Continue guide →",
+  "homeJourneyViewAction": "View",
+  "homeJourneyActiveDaySingle": "active day",
+  "homeJourneyActiveDayPlural": "active days",
+  "homeJourneyCurrentPhaseMarker": "→ now",
+  "homeJourneyLockedPhaseMarker": "lock.",
+  "homeJourneyPhasePreparation": "Preparation",
+  "homeJourneyPhaseDocuments": "Documentation",
+  "homeJourneyPhaseHousing": "Housing",
+  "homeJourneyPhaseWork": "Work",
+  "homeJourneyPhaseArrival": "Arrival",
+  "homeJourneyDoneLabel": "done",
+  "homeJourneyItemsLabel": "items",
+  "homeActionCompare": "Compare",
+  "homeActionViewCity": "View city",
+  "homeActionNewPlan": "New plan",
+  "homeJourneyPhaseBeforeTravel": "Before travel",
+  "homeJourneyPhaseFirstDays": "First days",
+  "homeJourneyPhaseDocumentation": "Documentation",
+  "homeJourneyPhaseLifeWorking": "Life working",
+  "homeJourneyPhaseIntegration": "Integration",
+  "questionRemainingTimeUnderOneMinute": "under 1 min left",
+  "questionRemainingTimeMinutes": "~{minutes} min left",
+  "@questionRemainingTimeMinutes": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "questionSelectionCounterSelected": "selected",
+  "questionArgentinaOriginLitoral": "Litoral (Entre Ríos, Corrientes…)",
+  "questionArgentinaOriginOther": "Other",
+  "questionLocationDetectedTitle": "Location detected",
+  "questionLocationDetectedBody": "We found you in {city}, {country}. We'll use this to personalise your journey.",
+  "@questionLocationDetectedBody": {
+    "placeholders": {
+      "city": { "type": "String" },
+      "country": { "type": "String" }
+    }
+  },
+  "questionLocationContinueAction": "Continue",
+  "questionLocationRequestTitle": "Where are you in Argentina?",
+  "questionLocationRequestBody": "Your location helps us estimate distances and personalise recommendations.",
+  "questionLocationUseAction": "Use my location",
+  "questionLocationChooseManualAction": "Choose manually",
+  "questionLocationManualTitle": "Where in Argentina are you from?",
+  "commonDoneCheck": "Done ✓",
+  "commonOpenOfficialSiteAction": "Open official site ->",
+  "readinessStageOnArrival": "On arrival",
+  "arrivalExecutionStageFirstWeek": "FIRST WEEK — top priority",
+  "arrivalExecutionStageFirstMonth": "FIRST MONTH — build your base",
+  "arrivalExecutionStageFirstQuarter": "FIRST 3 MONTHS — stabilize life",
+  "cityDetailMediaTitle": "See videos and photos",
+  "cityDetailMediaBody": "Open the city visual content",
+  "migrationPlanResultCelebrationTitle": "Plan started!",
+  "migrationPlanResultCelebrationBody": "You chose {cityName}.\nLet’s turn that into reality.",
+  "@migrationPlanResultCelebrationBody": {
+    "placeholders": {
+      "cityName": { "type": "String" }
+    }
+  },
+  "chatServiceErrorProcessingQuestion": "I couldn't process your question. Please try again.",
+  "chatFallbackDestination": "your destination",
+  "chatFallbackMessageDocuments": "What documents do I need to move to {destination}? Explain visas and {localDocument}.",
+  "@chatFallbackMessageDocuments": {
+    "placeholders": {
+      "destination": { "type": "String" },
+      "localDocument": { "type": "String" }
+    }
+  },
+  "chatFallbackMessageCosts": "How much does it cost to move? Give me a cost overview.",
+  "chatFallbackMessageActivities": "What should I know about life in the destination city?",
+  "chatFallbackMessageStay": "How do I find housing in {destination}? Renting tips.",
+  "@chatFallbackMessageStay": {
+    "placeholders": {
+      "destination": { "type": "String" }
+    }
+  },
+  "chatFallbackFirstLocalDocumentBrazil": "How do I get my CPF?",
+  "chatFallbackFirstLocalDocumentDefault": "What is my first local document?",
+  "commonMonthAbbrevJan": "Jan",
+  "commonMonthAbbrevFeb": "Feb",
+  "commonMonthAbbrevMar": "Mar",
+  "commonMonthAbbrevApr": "Apr",
+  "commonMonthAbbrevMay": "May",
+  "commonMonthAbbrevJun": "Jun",
+  "commonMonthAbbrevJul": "Jul",
+  "commonMonthAbbrevAug": "Aug",
+  "commonMonthAbbrevSep": "Sep",
+  "commonMonthAbbrevOct": "Oct",
+  "commonMonthAbbrevNov": "Nov",
+  "commonMonthAbbrevDec": "Dec",
+  "commonMonthInitialJan": "J",
+  "commonMonthInitialFeb": "F",
+  "commonMonthInitialMar": "M",
+  "commonMonthInitialApr": "A",
+  "commonMonthInitialMay": "M",
+  "commonMonthInitialJun": "J",
+  "commonMonthInitialJul": "J",
+  "commonMonthInitialAug": "A",
+  "commonMonthInitialSep": "S",
+  "commonMonthInitialOct": "O",
+  "commonMonthInitialNov": "N",
+  "commonMonthInitialDec": "D",
+  "flightSeasonalityTitle": "Best time to fly",
+  "flightSeasonalitySubtitle": "{origin} -> {destination} · Historical ranges (USD)",
+  "@flightSeasonalitySubtitle": {
+    "placeholders": {
+      "origin": { "type": "String" },
+      "destination": { "type": "String" }
+    }
+  },
+  "flightSeasonalitySavingsMonths": "Cheapest: {months} · Up to 40% savings",
+  "@flightSeasonalitySavingsMonths": {
+    "placeholders": {
+      "months": { "type": "String" }
+    }
+  },
+  "flightSeasonalityFallback": "We do not have enough history for this exact route yet. Use the live search below to see the real origin and destination combination.",
+  "flightSeasonalityLiveButton": "See live prices  {origin} -> {destination}",
+  "@flightSeasonalityLiveButton": {
+    "placeholders": {
+      "origin": { "type": "String" },
+      "destination": { "type": "String" }
+    }
+  },
+  "flightSeasonalityFooter": "Historical ranges · Real prices vary by date",
+  "flightSeasonalityWebviewTitle": "Flights {origin} -> {destination}",
+  "@flightSeasonalityWebviewTitle": {
+    "placeholders": {
+      "origin": { "type": "String" },
+      "destination": { "type": "String" }
+    }
+  },
+  "flightSeasonalityLegendLow": "Cheap (USD {min}-{max})",
+  "@flightSeasonalityLegendLow": {
+    "placeholders": {
+      "min": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+  "flightSeasonalityLegendMid": "Average",
+  "flightSeasonalityLegendHigh": "Expensive",
+  "flightSeasonalityBadgePrefix": "Flight: ",
+  "flightSeasonalityBadgeFrom": "from {value} USD",
+  "@flightSeasonalityBadgeFrom": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+  "flightSeasonalityBadgeCheapestPrefix": "  ·  Cheapest: ",
+  "flightSeasonalityWarningFln": "Florianópolis usually has fewer direct flights outside Mar-Apr. In other months, connections via São Paulo or Porto Alegre are common.",
+  "flightSeasonalityWarningNvt": "Navegantes serves Balneário, Itajaí, and Blumenau. In part of the year, the best fare appears with a short connection in São Paulo.",
+  "flightSeasonalityWarningGig": "February usually concentrates the strongest high season in Rio because of Carnival. If that window fits your plan, monitor early.",
+  "flightSeasonalityWarningMao": "Manaus tends to vary more because of connections and supply. Comparing a few days around your date helps a lot.",
+  "flightSeasonalityWarningBel": "Belém tends to swing a lot between connections and schedules. It is worth opening the live search with some flexibility.",
+  "housingSelectionTitle": "Housing",
+  "housingTemporaryTitle": "Temporary",
+  "housingLongTermTitle": "Long-term rent",
+  "housingTemporaryPortalHostelworld": "Budget hostels and dorms",
+  "housingTemporaryPortalAirbnb": "Furnished apartments",
+  "housingTemporaryPortalBooking": "Hotels and aparthotels",
+  "housingTemporaryPortalVivaReal": "Temporary rental",
+  "housingTemporaryPortalZap": "Monthly and seasonal",
+  "housingStayInCityTitle": "Stay in {city}",
+  "@housingStayInCityTitle": {
+    "placeholders": {
+      "city": { "type": "String" }
+    }
+  },
+  "housingTemporarySearchAction": "Search in {city} - {duration}",
+  "@housingTemporarySearchAction": {
+    "placeholders": {
+      "city": { "type": "String" },
+      "duration": { "type": "String" }
+    }
+  },
+  "housingOpenSelectedSourceHint": "Opens in the selected app or site",
+  "housingLongTermPortalQuintoAndar": "No guarantor · Accepts passport · Digital",
+  "housingLongTermPortalFlatio": "Medium-term · No deposit · For expats",
+  "housingLongTermPortalZap": "Large listing base in Brazil",
+  "housingLongTermPortalVivaReal": "More detailed photos and floor plans",
+  "housingLongTermPortalChaves": "Useful coverage across southern cities",
+  "housingPlanCityBanner": "{city} ({state}) - your plan city",
+  "@housingPlanCityBanner": {
+    "placeholders": {
+      "city": { "type": "String" },
+      "state": { "type": "String" }
+    }
+  },
+  "housingPlanCityBannerBody": "Most Argentine movers start with temporary housing and only sign a long contract after learning the neighborhoods. That is usually the safest path.",
+  "housingTemporaryBadge": "Recommended for arrival",
+  "housingTemporaryCardTitle": "Temporary housing",
+  "housingTemporaryCardBody": "For the first 30 to 90 days. No long contract, no guarantor, and time to understand the city before deciding.",
+  "housingTemporaryStatDurationValue": "1-3 months",
+  "housingTemporaryStatDurationLabel": "length",
+  "housingTemporaryStatNoGuarantor": "No guarantor",
+  "housingTemporaryStatFurnished": "Furnished",
+  "housingTemporaryCardAction": "Search temporary housing",
+  "housingLongTermBadge": "When you already know the city",
+  "housingLongTermCardTitle": "Long-term rental",
+  "housingLongTermCardBody": "A 12 to 30 month contract. Usually cheaper per month, but it often requires guarantees, documents, and more care before signing.",
+  "housingLongTermCardAction": "See long-term rental options",
+  "housingTemporaryHeaderTitle": "Your base in {city}",
+  "@housingTemporaryHeaderTitle": {
+    "placeholders": {
+      "city": { "type": "String" }
+    }
+  },
+  "housingTemporaryHeaderBody": "No fixed contract. Furnished. Easy to adjust as you settle in.",
+  "housingTemporaryAirbnbTip": "Airbnb often gives discounts on 28+ day stays. It is a common soft-landing option after arrival.",
+  "housingLongTermHeaderTitle": "Rent in {city}",
+  "@housingLongTermHeaderTitle": {
+    "placeholders": {
+      "city": { "type": "String" }
+    }
+  },
+  "housingLongTermHeaderBody": "A 12 to 30 month contract. Usually cheaper long term.",
+  "housingLongTermStatBedroom": "1 bedroom",
+  "housingLongTermStatEntryValue": "3x deposit",
+  "housingLongTermStatEntry": "entry",
+  "housingLongTermStatRequired": "required",
+  "housingLongTermAlertTitle": "Before signing any contract",
+  "housingLongTermAlertBody": "As a foreigner, you will usually need CPF and a guarantee, such as a Brazilian guarantor or rental insurance. Do not sign without reading the clauses carefully.",
+  "housingLongTermForeignersBadge": "For foreigners",
+  "housingForeignTipsTitle": "Tips for foreigners",
+  "housingForeignTipOne": "No guarantor? Check rental insurance or deposit paths first.",
+  "housingForeignTipTwo": "You do not need to wait for full residence approval to start learning the market.",
+  "housingForeignTipThree": "Always ask for receipts and a signed contract. Never pay without records.",
+  "housingForeignTipFour": "Be careful with prices that are too low and pressure to close without a visit.",
+  "housingDurationOneWeek": "7-14 days",
+  "housingDurationOneMonth": "1 month",
+  "housingDurationTwoThreeMonths": "2-3 months",
+  "copilotProgressCompletedLabel": "completed",
+  "copilotProgressRemainingLabel": "remaining",
+  "copilotPlanCompletedTitle": "Plan completed!",
+  "copilotPlanCompletedBody": "You completed every step in your guide.",
+  "copilotNextActionUnlocked": "Great. The next action is unlocked.",
+  "copilotTagNextAction": "NEXT ACTION",
+  "copilotTagExternalAction": "EXTERNAL ACTION",
+  "copilotTagUseTool": "USE A TOOL",
+  "copilotTagToComplete": "TO COMPLETE",
+  "copilotCompletionMessageFirst": "First step done. Keep going.",
+  "copilotCompletionMessageFew": "Great pace. {count} steps done.",
+  "@copilotCompletionMessageFew": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "copilotCompletionMessageMid": "{count} steps completed. You are moving forward.",
+  "@copilotCompletionMessageMid": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "copilotCompletionMessageHigh": "Amazing — {count} steps ready.",
+  "@copilotCompletionMessageHigh": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "copilotPrepOverview": "Plan overview",
+  "copilotPrepDocuments": "View my documents",
+  "copilotPrepHousing": "View housing",
+  "copilotPrepWork": "View work and prep",
+  "copilotPrepArrival": "View arrival",
+  "copilotGoalFindJob": "looking for work in Brazil",
+  "copilotGoalRemoteIncome": "working remotely",
+  "copilotGoalStudy": "moving to study",
+  "copilotGoalFamily": "bringing family together",
+  "copilotGoalFreshStart": "starting over",
+  "copilotGoalDefault": "planning the move",
+  "copilotOpenSection": "Open: {section}",
+  "@copilotOpenSection": {
+    "placeholders": {
+      "section": { "type": "String" }
+    }
+  },
+  "copilotJobMarketHigh": "active — good demand for professionals",
+  "copilotJobMarketMid": "moderate — opportunities in specific areas",
+  "copilotJobMarketLow": "developing — research before you arrive",
+  "copilotPhaseShortPreparation": "Prep",
+  "copilotPhaseShortHousing": "1st days",
+  "copilotPhaseShortDocuments": "Docs",
+  "copilotPhaseShortWork": "Life",
+  "copilotPhaseShortArrival": "Settle",
+  "copilotButtonNextStep": "Got it, next step",
+  "copilotButtonViewDetails": "View details",
+  "copilotButtonChecked": "I've checked this",
+  "copilotButtonOpen": "Open {label}",
+  "@copilotButtonOpen": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
+  "copilotButtonCompleteStep": "Complete this step",
+  "copilotButtonOpenTool": "Open tool",
+  "copilotButtonComplete": "Complete"
 }

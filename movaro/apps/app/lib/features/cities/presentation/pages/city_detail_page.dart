@@ -1382,16 +1382,9 @@ class _ExploreMediaCardState extends State<_ExploreMediaCard> {
 
   @override
   Widget build(BuildContext context) {
-    final title = switch (Localizations.localeOf(context).languageCode) {
-      'es' => 'Ver videos y fotos',
-      'en' => 'See videos and photos',
-      _ => 'Ver videos e fotos',
-    };
-    final body = switch (Localizations.localeOf(context).languageCode) {
-      'es' => 'Abrí el contenido visual de la ciudad',
-      'en' => 'Open the city visual content',
-      _ => 'Abra o conteudo visual da cidade',
-    };
+    final l10n = context.l10n;
+    final title = l10n.cityDetailMediaTitle;
+    final body = l10n.cityDetailMediaBody;
 
     return Material(
       color: Colors.transparent,

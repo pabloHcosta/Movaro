@@ -141,86 +141,141 @@ class _MigrationStartPageState extends State<MigrationStartPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
 
     return Scaffold(
       body: Stack(
         children: [
           const AmbientBackground(),
           SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 760),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    context.pageHorizontalPadding,
-                    context.pageVerticalPadding,
-                    context.pageHorizontalPadding,
-                    context.pageVerticalPadding,
-                  ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                context.pageHorizontalPadding,
+                context.pageVerticalPadding,
+                context.pageHorizontalPadding,
+                context.pageVerticalPadding,
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 980),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AppGlassHeader(
                         title: context.l10n.migrationStartPageTitle(),
                         onBack: () => Navigator.maybePop(context),
                       ),
-                      const SizedBox(height: 14),
-                      FrostedPanel(
-                        padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              context.l10n.migrationStartHeroTitle(),
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    height: 1.15,
-                                  ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              context.l10n.migrationStartHeroBody(),
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: AppColors.textSoftFor(context),
-                                    height: 1.35,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 18),
                       Expanded(
-                        child: Column(
-                          children: [
-                            _StartOptionCard(
-                              icon: Icons.location_city_outlined,
-                              title: context.l10n
-                                  .migrationStartKnownCityTitle(),
-                              subtitle: context.l10n
-                                  .migrationStartKnownCitySubtitle(),
-                              ctaLabel: context.l10n
-                                  .migrationStartKnownCityCta(),
-                              isLoading: _isOpeningCityPicker,
-                              onTap: _handleKnownCity,
-                              accent: Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(height: 12),
-                            _StartOptionCard(
-                              icon: Icons.alt_route_rounded,
-                              title: context.l10n.migrationStartDecidingTitle(),
-                              subtitle: context.l10n
-                                  .migrationStartDecidingSubtitle(),
-                              ctaLabel: context.l10n
-                                  .migrationStartDecidingCta(),
-                              isLoading: _isStartingQuestions,
-                              onTap: _handleDeciding,
-                              accent: isDark
-                                  ? Colors.white.withValues(alpha: 0.88)
-                                  : Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ],
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isWide = constraints.maxWidth >= 760;
+
+                            return ListView(
+                              padding: EdgeInsets.zero,
+                              children: [
+                                _StartHeroPanel(
+                                  title: context.l10n.migrationStartHeroTitle(),
+                                  body: context.l10n.migrationStartHeroBody(),
+                                  primary: primary,
+                                  isDark: isDark,
+                                ),
+                                const SizedBox(height: 18),
+                                if (isWide)
+                                  IntrinsicHeight(
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Expanded(
+                                          child: _StartPathCard(
+                                            icon: Icons.location_city_outlined,
+                                            title: context.l10n
+                                                .migrationStartKnownCityTitle(),
+                                            subtitle: context.l10n
+                                                .migrationStartKnownCitySubtitle(),
+                                            ctaLabel: context.l10n
+                                                .migrationStartKnownCityCta(),
+                                            isLoading: _isOpeningCityPicker,
+                                            onTap: _handleKnownCity,
+                                            accent: primary,
+                                            surfaceTint: primary.withValues(
+                                              alpha: isDark ? 0.16 : 0.10,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: _StartPathCard(
+                                            icon: Icons.alt_route_rounded,
+                                            title: context.l10n
+                                                .migrationStartDecidingTitle(),
+                                            subtitle: context.l10n
+                                                .migrationStartDecidingSubtitle(),
+                                            ctaLabel: context.l10n
+                                                .migrationStartDecidingCta(),
+                                            isLoading: _isStartingQuestions,
+                                            onTap: _handleDeciding,
+                                            accent: isDark
+                                                ? Colors.white
+                                                : theme.colorScheme.onSurface,
+                                            surfaceTint: isDark
+                                                ? Colors.white.withValues(
+                                                    alpha: 0.06,
+                                                  )
+                                                : Colors.black.withValues(
+                                                    alpha: 0.03,
+                                                  ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                else
+                                  Column(
+                                    children: [
+                                      _StartPathCard(
+                                        icon: Icons.location_city_outlined,
+                                        title: context.l10n
+                                            .migrationStartKnownCityTitle(),
+                                        subtitle: context.l10n
+                                            .migrationStartKnownCitySubtitle(),
+                                        ctaLabel: context.l10n
+                                            .migrationStartKnownCityCta(),
+                                        isLoading: _isOpeningCityPicker,
+                                        onTap: _handleKnownCity,
+                                        accent: primary,
+                                        surfaceTint: primary.withValues(
+                                          alpha: isDark ? 0.16 : 0.10,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 14),
+                                      _StartPathCard(
+                                        icon: Icons.alt_route_rounded,
+                                        title: context.l10n
+                                            .migrationStartDecidingTitle(),
+                                        subtitle: context.l10n
+                                            .migrationStartDecidingSubtitle(),
+                                        ctaLabel: context.l10n
+                                            .migrationStartDecidingCta(),
+                                        isLoading: _isStartingQuestions,
+                                        onTap: _handleDeciding,
+                                        accent: isDark
+                                            ? Colors.white
+                                            : theme.colorScheme.onSurface,
+                                        surfaceTint: isDark
+                                            ? Colors.white.withValues(
+                                                alpha: 0.06,
+                                              )
+                                            : Colors.black.withValues(
+                                                alpha: 0.03,
+                                              ),
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -235,8 +290,66 @@ class _MigrationStartPageState extends State<MigrationStartPage> {
   }
 }
 
-class _StartOptionCard extends StatelessWidget {
-  const _StartOptionCard({
+class _StartHeroPanel extends StatelessWidget {
+  const _StartHeroPanel({
+    required this.title,
+    required this.body,
+    required this.primary,
+    required this.isDark,
+  });
+
+  final String title;
+  final String body;
+  final Color primary;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return FrostedPanel(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+      borderRadius: BorderRadius.circular(36),
+      backgroundColor: isDark
+          ? const Color(0xC0161D29)
+          : Colors.white.withValues(alpha: 0.72),
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          primary.withValues(alpha: isDark ? 0.24 : 0.12),
+          (isDark ? const Color(0xFF111827) : Colors.white).withValues(
+            alpha: isDark ? 0.82 : 0.56,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              height: 1.05,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: Text(
+              body,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.45,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StartPathCard extends StatelessWidget {
+  const _StartPathCard({
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -244,6 +357,7 @@ class _StartOptionCard extends StatelessWidget {
     required this.isLoading,
     required this.onTap,
     required this.accent,
+    required this.surfaceTint,
   });
 
   final IconData icon;
@@ -253,49 +367,70 @@ class _StartOptionCard extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onTap;
   final Color accent;
+  final Color surfaceTint;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 240),
       child: FrostedPanel(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+        padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
+        borderRadius: BorderRadius.circular(32),
+        backgroundColor: surfaceTint == Colors.transparent
+            ? AppColors.frostedBackgroundFor(context)
+            : AppColors.frostedBackgroundFor(context).withValues(alpha: 0.92),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [surfaceTint, AppColors.frostedBackgroundFor(context)],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(icon, color: accent, size: 22),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Icon(icon, color: accent, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      height: 1.1,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 14),
-            Text(
-              title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 6),
             Text(
               subtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppColors.textSoftFor(context),
-                height: 1.35,
+                height: 1.45,
               ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
             ),
-            const Spacer(),
-            const SizedBox(height: 14),
+            const SizedBox(height: 18),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: isLoading ? null : onTap,
                 style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
+                  minimumSize: const Size.fromHeight(54),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
                 icon: isLoading

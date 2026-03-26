@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
@@ -393,9 +394,12 @@ class _PublicHomePageState extends State<PublicHomePage>
       return;
     }
 
-    final body = item.fullContent?.trim().isNotEmpty == true
-        ? item.fullContent!
-        : item.shortDescription;
+    final body = [
+      item.summaryText,
+      if (item.whyItMatters != null) item.whyItMatters!,
+      if (item.doneCriteria != null) item.doneCriteria!,
+      if (item.fullContent?.trim().isNotEmpty == true) item.fullContent!,
+    ].join('\n\n');
 
     await showModalBottomSheet<void>(
       context: context,
@@ -463,7 +467,11 @@ class _PublicHomePageState extends State<PublicHomePage>
   ) {
     final completedIds = snapshot.getAllCompletedIds();
     final items =
-        ArgentinaBrazilGuideDataSource.build(plan)
+        ArgentinaBrazilGuideDataSource.build(
+              plan,
+              currentLocation: widget.locationController.savedLocation,
+              localeCode: Localizations.localeOf(context).languageCode,
+            )
             .map(
               (item) =>
                   item.copyWith(isCompleted: completedIds.contains(item.id)),
@@ -709,12 +717,7 @@ class _ActiveHero extends StatelessWidget {
                   ),
                   const SizedBox(width: 5),
                   Text(
-                    _text(
-                      context,
-                      pt: 'PLANO ATIVO',
-                      es: 'PLAN ACTIVO',
-                      en: 'ACTIVE PLAN',
-                    ),
+                    context.l10n.homeActivePlanBadge,
                     style: AppTypography.compactBadge.copyWith(
                       fontWeight: FontWeight.w800,
                       color: _accentText(context),
@@ -762,7 +765,7 @@ class _ActiveHero extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '$stateLabel, ${_text(context, pt: 'Brasil', es: 'Brasil', en: 'Brazil')}',
+                        '$stateLabel, ${context.l10n.countryLabel('brazil')}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: isDark
@@ -859,12 +862,7 @@ class _MigrationProgressCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  _text(
-                    context,
-                    pt: 'SUA JORNADA',
-                    es: 'TU JORNADA',
-                    en: 'YOUR JOURNEY',
-                  ),
+                  context.l10n.homeJourneyTitle,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: Colors.white.withValues(alpha: 0.40),
                     letterSpacing: 0.5,
@@ -911,20 +909,28 @@ class _MigrationProgressCard extends StatelessWidget {
           ),
 
           // ── BLOCK 3: Next action ─────────────────────────────────────
+          if (!isComplete) ...[
+            Text(
+              state.phaseName(context),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Colors.white.withValues(alpha: 0.45),
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.2,
+              ),
+            ),
+            SizedBox(height: actionGap),
+          ],
           Text(
             isComplete
-                ? _text(
-                    context,
-                    pt: 'Jornada concluída! 🎉',
-                    es: '¡Jornada completada! 🎉',
-                    en: 'Journey complete! 🎉',
-                  )
-                : state.currentItem!.title,
+                ? context.l10n.homeJourneyComplete
+                : state.currentTitle(context),
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w700,
               color: Colors.white,
               height: 1.3,
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
           SizedBox(height: actionGap),
           Row(
@@ -932,24 +938,14 @@ class _MigrationProgressCard extends StatelessWidget {
               Expanded(
                 child: _CardPrimaryButton(
                   label: isComplete
-                      ? _text(
-                          context,
-                          pt: 'Ver resumo →',
-                          es: 'Ver resumen →',
-                          en: 'See summary →',
-                        )
-                      : _text(
-                          context,
-                          pt: 'Continuar o guia →',
-                          es: 'Continuar la guía →',
-                          en: 'Continue guide →',
-                        ),
+                      ? context.l10n.homeJourneySeeSummary
+                      : context.l10n.homeJourneyContinueGuide,
                   onTap: onOpenGuide,
                 ),
               ),
               const SizedBox(width: 5),
               _CardSecondaryButton(
-                label: _text(context, pt: 'Ver', es: 'Ver', en: 'View'),
+                label: context.l10n.homeJourneyViewAction,
                 onTap: onViewAction,
               ),
             ],
@@ -970,13 +966,8 @@ class _StreakBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = days == 1
-        ? _text(context, pt: 'dia ativo', es: 'día activo', en: 'active day')
-        : _text(
-            context,
-            pt: 'dias ativos',
-            es: 'días activos',
-            en: 'active days',
-          );
+        ? context.l10n.homeJourneyActiveDaySingle
+        : context.l10n.homeJourneyActiveDayPlural;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
@@ -1058,14 +1049,14 @@ class _PhaseRow extends StatelessWidget {
         color: _accentText(context),
       ),
       _PhaseStatus.current => Text(
-        _text(context, pt: '→ agora', es: '→ ahora', en: '→ now'),
+        context.l10n.homeJourneyCurrentPhaseMarker,
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.w700,
         ),
       ),
       _PhaseStatus.future => Text(
-        _text(context, pt: 'bloq.', es: 'bloq.', en: 'lock.'),
+        context.l10n.homeJourneyLockedPhaseMarker,
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
           color: Colors.white.withValues(alpha: 0.20),
         ),
@@ -1093,36 +1084,11 @@ class _PhaseRow extends StatelessWidget {
   }
 
   String _phaseLabel(BuildContext context, GuidePhase phase) => switch (phase) {
-    GuidePhase.preparation => _text(
-      context,
-      pt: 'Preparação',
-      es: 'Preparación',
-      en: 'Preparation',
-    ),
-    GuidePhase.documents => _text(
-      context,
-      pt: 'Documentação',
-      es: 'Documentación',
-      en: 'Documentation',
-    ),
-    GuidePhase.housing => _text(
-      context,
-      pt: 'Moradia',
-      es: 'Vivienda',
-      en: 'Housing',
-    ),
-    GuidePhase.work => _text(
-      context,
-      pt: 'Trabalho',
-      es: 'Trabajo',
-      en: 'Work',
-    ),
-    GuidePhase.arrival => _text(
-      context,
-      pt: 'Chegada',
-      es: 'Llegada',
-      en: 'Arrival',
-    ),
+    GuidePhase.preparation => context.l10n.homeJourneyPhasePreparation,
+    GuidePhase.documents => context.l10n.homeJourneyPhaseDocuments,
+    GuidePhase.housing => context.l10n.homeJourneyPhaseHousing,
+    GuidePhase.work => context.l10n.homeJourneyPhaseWork,
+    GuidePhase.arrival => context.l10n.homeJourneyPhaseArrival,
   };
 }
 
@@ -1151,7 +1117,7 @@ class _MetricsColumn extends StatelessWidget {
             ),
           ),
           Text(
-            _text(context, pt: 'feito', es: 'hecho', en: 'done'),
+            context.l10n.homeJourneyDoneLabel,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Colors.white.withValues(alpha: 0.35),
             ),
@@ -1166,7 +1132,7 @@ class _MetricsColumn extends StatelessWidget {
             ),
           ),
           Text(
-            _text(context, pt: 'itens', es: 'ítems', en: 'items'),
+            context.l10n.homeJourneyItemsLabel,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Colors.white.withValues(alpha: 0.35),
             ),
@@ -1270,12 +1236,7 @@ class _SecondaryActionRow extends StatelessWidget {
         Expanded(
           child: _ActionChip(
             icon: Icons.compare_arrows_rounded,
-            label: _text(
-              context,
-              pt: 'Comparar',
-              es: 'Comparar',
-              en: 'Compare',
-            ),
+            label: context.l10n.homeActionCompare,
             onTap: onCompare,
           ),
         ),
@@ -1283,12 +1244,7 @@ class _SecondaryActionRow extends StatelessWidget {
         Expanded(
           child: _ActionChip(
             icon: Icons.location_city_outlined,
-            label: _text(
-              context,
-              pt: 'Ver cidade',
-              es: 'Ver ciudad',
-              en: 'View city',
-            ),
+            label: context.l10n.homeActionViewCity,
             onTap: onViewCity,
           ),
         ),
@@ -1296,12 +1252,7 @@ class _SecondaryActionRow extends StatelessWidget {
         Expanded(
           child: _ActionChip(
             icon: Icons.restart_alt_rounded,
-            label: _text(
-              context,
-              pt: 'Novo plano',
-              es: 'Nuevo plan',
-              en: 'New plan',
-            ),
+            label: context.l10n.homeActionNewPlan,
             onTap: onNewPlan,
           ),
         ),
@@ -1481,39 +1432,53 @@ class _HomeGuideState {
   final int currentPhaseIndex;
   final int totalPhases;
 
+  String currentTitle(BuildContext context) {
+    final item = currentItem;
+    if (item == null) {
+      return context.l10n.homeJourneyComplete;
+    }
+    final prefix = switch (Localizations.localeOf(context).languageCode) {
+      'es' => 'Siguiente paso',
+      'pt' => 'Próximo passo',
+      _ => 'Next step',
+    };
+    return '$prefix: ${item.title}';
+  }
+
   String phaseName(BuildContext context) {
     final phase = currentItem?.phase ?? GuidePhase.arrival;
+    final locale = Localizations.localeOf(context).languageCode;
     return switch (phase) {
-      GuidePhase.preparation => _text(
-        context,
-        pt: 'Antes de viajar',
-        es: 'Antes de viajar',
-        en: 'Before travel',
-      ),
-      GuidePhase.housing => _text(
-        context,
-        pt: 'Primeiros dias',
-        es: 'Primeros días',
-        en: 'First days',
-      ),
-      GuidePhase.documents => _text(
-        context,
-        pt: 'Documentação',
-        es: 'Documentación',
-        en: 'Documentation',
-      ),
-      GuidePhase.work => _text(
-        context,
-        pt: 'Vida funcionando',
-        es: 'Vida funcionando',
-        en: 'Life working',
-      ),
-      GuidePhase.arrival => _text(
-        context,
-        pt: 'Integração',
-        es: 'Integración',
-        en: 'Integration',
-      ),
+      GuidePhase.preparation =>
+        locale == 'es'
+            ? 'Empezando'
+            : locale == 'pt'
+            ? 'Começando'
+            : 'Getting started',
+      GuidePhase.housing =>
+        locale == 'es'
+            ? 'Donde quedarte'
+            : locale == 'pt'
+            ? 'Onde ficar'
+            : 'Where to stay',
+      GuidePhase.documents =>
+        locale == 'es'
+            ? 'Documentos esenciales'
+            : locale == 'pt'
+            ? 'Documentos essenciais'
+            : 'Essential documents',
+      GuidePhase.work =>
+        locale == 'es'
+            ? 'Dinero y trabajo'
+            : locale == 'pt'
+            ? 'Dinheiro e trabalho'
+            : 'Money and work',
+      GuidePhase.arrival =>
+        locale == 'es'
+            ? 'Estabilizandote'
+            : locale == 'pt'
+            ? 'Estabilizando'
+            : 'Settling in',
     };
   }
 
@@ -1568,19 +1533,6 @@ Color _badgeBorder(BuildContext context) => AppColors.isDark(context)
 Color _accentText(BuildContext context) => AppColors.isDark(context)
     ? const Color(0xFF38BDF8)
     : const Color(0xFF0369A1);
-
-String _text(
-  BuildContext context, {
-  required String pt,
-  required String es,
-  required String en,
-}) {
-  return switch (Localizations.localeOf(context).languageCode) {
-    'pt' => pt,
-    'es' => es,
-    _ => en,
-  };
-}
 
 // ─── Screen-size breakpoints ─────────────────────────────────────────────────
 //
