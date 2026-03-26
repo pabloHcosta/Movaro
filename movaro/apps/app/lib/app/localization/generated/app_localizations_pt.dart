@@ -1481,14 +1481,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get pendingActionSaveCity => 'salvar esta cidade';
 
   @override
-  String get onboardingPageTitle => 'Seu contexto';
+  String get onboardingPageTitle => 'Sua rota';
 
   @override
-  String get onboardingHeadline => 'Vamos entender seu momento';
+  String get onboardingHeadline =>
+      'Para começar, escolha sua origem e seu destino';
 
   @override
   String get onboardingDescription =>
-      'Isso ajuda a tornar sua experiência mais útil sem pedir informações demais.';
+      'Com isso, a gente organiza os próximos passos do jeito certo para você.';
 
   @override
   String get onboardingOriginLabel => 'De onde você vem?';
@@ -2999,7 +3000,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get introPrimaryAction => 'Começar a explorar';
 
   @override
-  String get introSkipAction => 'Pular';
+  String get introSkipAction => 'Agora não';
 
   @override
   String get cityPracticalAnswersTitle =>
@@ -6439,4 +6440,45 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get migrationResultRevealExploreCity => 'Ver detalhes da cidade';
+
+  @override
+  String get homeVisualTitlePrefix => 'Pensando em viver em ';
+
+  @override
+  String get homeVisualTitleHighlight => 'outro país?';
+
+  @override
+  String get homeVisualSubtitle =>
+      'A gente te ajuda a entender o que fazer, quanto pode custar e por onde começar.';
+
+  @override
+  String get homeVisualSupportLine =>
+      'Você pode começar mesmo sem ter tudo decidido.';
+
+  @override
+  String get homeVisualCostsAction => 'Ver quanto pode custar';
+
+  @override
+  String get homeVisualDocumentsAction => 'Entender documentos';
+
+  @override
+  String get homeVisualStartAction => 'Descobrir por onde começar';
+
+  @override
+  String get homeVisualPrimaryAction => 'Montar meu plano';
+
+  @override
+  String get homeVisualOriginLabel => 'ORIGEM';
+
+  @override
+  String get homeVisualDestinationLabel => 'DESTINO';
+
+  @override
+  String get homeVisualWaypointDocuments => 'docs';
+
+  @override
+  String get homeVisualWaypointCosts => 'custos';
+
+  @override
+  String get homeVisualWaypointRoute => 'rota';
 }

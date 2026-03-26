@@ -397,15 +397,15 @@ extension AppLocalizationsFormatting on AppLocalizations {
   }
 
   String locationPermissionTitle() => _localizedText(
-    pt: 'Ative sua localização',
-    es: 'Activá tu ubicación',
-    en: 'Turn on your location',
+    pt: 'Podemos deixar tudo mais preciso para você',
+    es: 'Podemos hacer todo más preciso para vos',
+    en: 'We can make everything more precise for you',
   );
 
   String locationPermissionSubtitle() => _localizedText(
-    pt: 'Isso nos ajuda a personalizar sua experiência desde o início',
-    es: 'Esto nos ayuda a personalizar tu experiencia desde el inicio',
-    en: 'This helps us personalize your experience from the start',
+    pt: 'Com sua localização, ajustamos custos, documentos e recomendações.',
+    es: 'Con tu ubicación, ajustamos costos, documentos y recomendaciones.',
+    en: 'With your location, we can tailor costs, documents, and recommendations.',
   );
 
   String locationPermissionBenefitAutoOrigin() => _localizedText(
@@ -427,9 +427,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String locationPermissionAllowAction() => _localizedText(
-    pt: 'Permitir localização',
-    es: 'Permitir ubicación',
-    en: 'Allow location',
+    pt: 'Continuar',
+    es: 'Continuar',
+    en: 'Continue',
   );
 
   String locationPermissionLaterAction() =>
@@ -469,55 +469,55 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String introRedesignCityTitle() => _localizedText(
-    pt: 'Encontre a cidade certa para você',
-    es: 'Encontrá la ciudad ideal para vos',
-    en: 'Find the right city for you',
+    pt: 'Descubra qual cidade faz mais sentido para você',
+    es: 'Descubrí qué ciudad tiene más sentido para vos',
+    en: 'Discover which city makes the most sense for you',
   );
 
   String introRedesignCityDescription() => _localizedText(
-    pt: 'Comparamos custo, segurança e mercado para recomendar onde você vai viver melhor.',
-    es: 'Comparamos costo, seguridad y mercado para recomendar dónde vas a vivir mejor.',
-    en: 'We compare cost, safety, and job market to recommend where you can live better.',
+    pt: 'A gente compara custo, trabalho e qualidade de vida para te ajudar a decidir com mais segurança.',
+    es: 'Comparamos costo, trabajo y calidad de vida para ayudarte a decidir con más seguridad.',
+    en: 'We compare cost, work, and quality of life to help you decide with more confidence.',
   );
 
   String introRedesignPlanTitle() => _localizedText(
-    pt: '5 minutos para seu plano personalizado',
-    es: '5 minutos para tu plan personalizado',
-    en: '5 minutes to your personalized plan',
+    pt: 'Em poucos passos, você já sabe o que fazer',
+    es: 'En pocos pasos, ya sabés qué hacer',
+    en: 'In just a few steps, you will know what to do',
   );
 
   String introRedesignPlanDescription() => _localizedText(
-    pt: 'Respondendo algumas perguntas simples, geramos a cidade e o guia certos para você.',
-    es: 'Respondiendo algunas preguntas simples, generamos la ciudad y la guía correctas para vos.',
-    en: 'By answering a few simple questions, we generate the right city and guide for you.',
+    pt: 'A gente transforma suas respostas em um plano claro para você seguir.',
+    es: 'Transformamos tus respuestas en un plan claro para que lo sigas.',
+    en: 'We turn your answers into a clear plan for you to follow.',
   );
 
   String introRedesignGuideTitle() => _localizedText(
-    pt: 'Do CPF ao primeiro dia — tudo organizado',
-    es: 'Del CPF al primer día: todo organizado',
-    en: 'From CPF to day one, everything organized',
+    pt: 'Saiba exatamente o que precisa resolver antes de chegar',
+    es: 'Sabé exactamente qué necesitás resolver antes de llegar',
+    en: 'Know exactly what you need to sort out before you arrive',
   );
 
   String introRedesignGuideDescription() => _localizedText(
-    pt: 'Documentos, moradia, saúde e banco. Um guia prático para cada etapa da chegada.',
-    es: 'Documentos, vivienda, salud y banco. Una guía práctica para cada etapa de la llegada.',
-    en: 'Documents, housing, healthcare, and banking. A practical guide for each arrival step.',
+    pt: 'Documentos, moradia e primeiros passos organizados para você não se perder.',
+    es: 'Documentos, vivienda y primeros pasos organizados para que no te pierdas.',
+    en: 'Documents, housing, and first steps organized so you do not get lost.',
   );
 
   String introRedesignLocationTitle() => _localizedText(
-    pt: 'Ative sua localização',
-    es: 'Activá tu ubicación',
-    en: 'Turn on your location',
+    pt: 'Podemos deixar tudo mais preciso para você',
+    es: 'Podemos hacer todo más preciso para vos',
+    en: 'We can make everything more precise for you',
   );
 
   String introRedesignLocationDescription() => _localizedText(
-    pt: 'Detectamos de onde você está saindo e personalizamos tudo antes mesmo do questionário.',
-    es: 'Detectamos desde dónde salís y personalizamos todo incluso antes del cuestionario.',
-    en: 'We detect where you are leaving from and personalize everything before the questionnaire.',
+    pt: 'Com sua localização, ajustamos custos, documentos e recomendações.',
+    es: 'Con tu ubicación, ajustamos costos, documentos y recomendaciones.',
+    en: 'With your location, we can tailor costs, documents, and recommendations.',
   );
 
   String commonNextAction() =>
-      _localizedText(pt: 'Próximo', es: 'Siguiente', en: 'Next');
+      _localizedText(pt: 'Continuar', es: 'Continuar', en: 'Continue');
 
   String cityDetailHeaderTitle() =>
       _localizedText(pt: 'Detalhes', es: 'Detalles', en: 'Details');

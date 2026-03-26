@@ -467,9 +467,9 @@
   "pendingActionSavePlan": "salvar seu plano",
   "pendingActionPostCommunity": "publicar na comunidade",
   "pendingActionSaveCity": "salvar esta cidade",
-  "onboardingPageTitle": "Seu contexto",
-  "onboardingHeadline": "Vamos entender seu momento",
-  "onboardingDescription": "Isso ajuda a tornar sua experiência mais útil sem pedir informações demais.",
+  "onboardingPageTitle": "Sua rota",
+  "onboardingHeadline": "Para começar, escolha sua origem e seu destino",
+  "onboardingDescription": "Com isso, a gente organiza os próximos passos do jeito certo para você.",
   "onboardingOriginLabel": "De onde você vem?",
   "onboardingDestinationLabel": "Para onde quer ir?",
   "onboardingContinueAction": "Continuar",
@@ -1111,7 +1111,7 @@
   "introBetaDescription": "Esta versão foca em clareza. Você já pode explorar cidades, comparar sinais e gerar um plano inicial antes de chegar às funções mais profundas de conta.",
   "introBottomSupportLabel": "Próximo passo",
   "introPrimaryAction": "Começar a explorar",
-  "introSkipAction": "Pular",
+  "introSkipAction": "Agora não",
   "cityPracticalAnswersTitle": "Respostas rápidas para dúvidas comuns",
   "cityPracticalLanguageQuestion": "O dia a dia ficaria mais fácil se eu ainda dependesse do espanhol?",
   "cityPracticalCostQuestion": "Essa cidade parece administrável no custo de vida cotidiano?",
@@ -2574,5 +2574,18 @@
       "city": { "type": "String" }
     }
   },
-  "migrationResultRevealExploreCity": "Ver detalhes da cidade"
+  "migrationResultRevealExploreCity": "Ver detalhes da cidade",
+  "homeVisualTitlePrefix": "Pensando em viver em ",
+  "homeVisualTitleHighlight": "outro país?",
+  "homeVisualSubtitle": "A gente te ajuda a entender o que fazer, quanto pode custar e por onde começar.",
+  "homeVisualSupportLine": "Você pode começar mesmo sem ter tudo decidido.",
+  "homeVisualCostsAction": "Ver quanto pode custar",
+  "homeVisualDocumentsAction": "Entender documentos",
+  "homeVisualStartAction": "Descobrir por onde começar",
+  "homeVisualPrimaryAction": "Montar meu plano",
+  "homeVisualOriginLabel": "ORIGEM",
+  "homeVisualDestinationLabel": "DESTINO",
+  "homeVisualWaypointDocuments": "docs",
+  "homeVisualWaypointCosts": "custos",
+  "homeVisualWaypointRoute": "rota"
 }

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/app/theme/app_text_styles.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
@@ -17,6 +16,7 @@ import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/home/application/streak_service.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
+import 'package:movaro_app/features/home/presentation/home_visual_layout.dart';
 import 'package:movaro_app/features/home/presentation/widgets/assistant_bottom_sheet.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
@@ -26,6 +26,7 @@ import 'package:movaro_app/features/migration_questionnaire/domain/entities/guid
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
+import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 
 class PublicHomePage extends StatefulWidget {
   const PublicHomePage({
@@ -203,8 +204,11 @@ class _PublicHomePageState extends State<PublicHomePage>
                                     )
                                   : _EmptyHomeState(
                                       key: const ValueKey('empty-home'),
-                                      onOpenSettings: _openSettings,
-                                      onStart: () => _startPlanFlow(context),
+                                      onActionTap: (index) =>
+                                          _handleEmptyStateAction(
+                                            context,
+                                            index,
+                                          ),
                                     ),
                             ),
                           ),
@@ -315,6 +319,27 @@ class _PublicHomePageState extends State<PublicHomePage>
 
   void _openSettings() {
     Navigator.pushNamed(context, AppRoutes.settings);
+  }
+
+  Future<void> _handleEmptyStateAction(BuildContext context, int index) async {
+    switch (index) {
+      case 0:
+        await Navigator.pushNamed(
+          context,
+          AppRoutes.documentationGuide,
+          arguments: DocumentationGuideSection.costs,
+        );
+      case 1:
+        await Navigator.pushNamed(
+          context,
+          AppRoutes.documentationGuide,
+          arguments: DocumentationGuideSection.documents,
+        );
+      case 2:
+        await Navigator.pushNamed(context, AppRoutes.cities);
+      case 3:
+        await _startPlanFlow(context);
+    }
   }
 
   Future<void> _openGuide() async {
@@ -521,197 +546,13 @@ class _PublicHomePageState extends State<PublicHomePage>
 }
 
 class _EmptyHomeState extends StatelessWidget {
-  const _EmptyHomeState({
-    required this.onOpenSettings,
-    required this.onStart,
-    super.key,
-  });
+  const _EmptyHomeState({required this.onActionTap, super.key});
 
-  final VoidCallback onOpenSettings;
-  final VoidCallback onStart;
+  final ValueChanged<int> onActionTap;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _EmptyHero(onOpenSettings: onOpenSettings),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
-            child: Column(
-              children: [
-                const SizedBox(height: 12),
-                const _StepTimeline(),
-                const SizedBox(height: 12),
-                _StartPlanCta(onTap: onStart),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _EmptyHero extends StatelessWidget {
-  const _EmptyHero({required this.onOpenSettings});
-
-  final VoidCallback onOpenSettings;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-
-    return SizedBox(
-      height: MediaQuery.of(context).padding.top + 240,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: ColoredBox(
-              color: isDark ? const Color(0xFF07090E) : const Color(0xFFEEF2F9),
-            ),
-          ),
-          const Positioned(top: -70, right: -50, child: _BlueOrb()),
-          const Positioned(bottom: -40, left: -50, child: _IndigoOrb()),
-          const Positioned(top: 80, left: 60, child: _BlueLightOrb()),
-          Positioned.fill(
-            child: CustomPaint(painter: _HeroGridPainter(isDark)),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: IgnorePointer(
-              child: Container(
-                height: 80,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      isDark
-                          ? const Color(0xFF07090E)
-                          : const Color(0xFFF4F6FA),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
-            right: 14,
-            child: _SettingsButton(onTap: onOpenSettings),
-          ),
-          Positioned.fill(
-            child: Padding(
-              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-              child: Center(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 300),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            color: _badgeBackground(context),
-                            border: Border.all(color: _badgeBorder(context)),
-                          ),
-                          child: Icon(
-                            Icons.route_rounded,
-                            size: 22,
-                            color: _accentText(context),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          _greeting(context),
-                          textAlign: TextAlign.center,
-                          style: context.textStyles.sectionLabel.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: _tertiaryText(context),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text:
-                                    '${_text(context, pt: 'Planeje sua', es: 'Planeá tu', en: 'Plan your')}\n',
-                                style: TextStyle(color: _primaryText(context)),
-                              ),
-                              TextSpan(
-                                text: _text(
-                                  context,
-                                  pt: 'mudança',
-                                  es: 'mudanza',
-                                  en: 'move',
-                                ),
-                                style: TextStyle(color: _accentText(context)),
-                              ),
-                            ],
-                          ),
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineMedium
-                              ?.copyWith(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w900,
-                                height: 1.15,
-                              ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          _text(
-                            context,
-                            pt: 'Do questionário ao guia passo a passo',
-                            es: 'Del cuestionario a la guía paso a paso',
-                            en: 'From questionnaire to step-by-step guide',
-                          ),
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                fontSize: 15,
-                                color: _tertiaryText(context),
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _greeting(BuildContext context) {
-    final hour = DateTime.now().hour;
-    if (hour < 12) {
-      return _text(context, pt: 'Bom dia', es: 'Buen día', en: 'Good morning');
-    }
-    if (hour < 18) {
-      return _text(
-        context,
-        pt: 'Boa tarde',
-        es: 'Buenas tardes',
-        en: 'Good afternoon',
-      );
-    }
-    return _text(
-      context,
-      pt: 'Boa noite',
-      es: 'Buenas noches',
-      en: 'Good evening',
-    );
+    return HomeVisualLayout(onActionTap: onActionTap);
   }
 }
 
@@ -1542,213 +1383,6 @@ class _ActionChip extends StatelessWidget {
   }
 }
 
-class _StepTimeline extends StatelessWidget {
-  const _StepTimeline();
-
-  @override
-  Widget build(BuildContext context) {
-    final steps = [
-      (
-        title: _text(
-          context,
-          pt: 'Responder o questionário',
-          es: 'Responder el cuestionario',
-          en: 'Answer the questionnaire',
-        ),
-        subtitle: _text(
-          context,
-          pt: '5 minutos · seu perfil de vida e objetivos',
-          es: '5 minutos · tu perfil de vida y objetivos',
-          en: '5 minutes · your life profile and goals',
-        ),
-      ),
-      (
-        title: _text(
-          context,
-          pt: 'Receber a cidade ideal',
-          es: 'Recibir la ciudad ideal',
-          en: 'Get your ideal city',
-        ),
-        subtitle: _text(
-          context,
-          pt: 'Indicação personalizada para o seu perfil',
-          es: 'Recomendación personalizada para tu perfil',
-          en: 'Personalized recommendation for your profile',
-        ),
-      ),
-      (
-        title: _text(
-          context,
-          pt: 'Executar com o guia GPS',
-          es: 'Ejecutar con la guía GPS',
-          en: 'Execute with the GPS guide',
-        ),
-        subtitle: _text(
-          context,
-          pt: 'Passo a passo da mudança, do zero',
-          es: 'Paso a paso de la mudanza, desde cero',
-          en: 'Step by step from zero',
-        ),
-      ),
-    ];
-
-    return Column(
-      children: [
-        for (var index = 0; index < steps.length; index++)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 34,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 34,
-                        height: 34,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _badgeBackground(context),
-                          border: Border.all(color: _badgeBorder(context)),
-                        ),
-                        child: Text(
-                          '${index + 1}',
-                          style: context.textStyles.badgeLabel.copyWith(
-                            fontWeight: FontWeight.w900,
-                            color: _accentText(context),
-                          ),
-                        ),
-                      ),
-                      if (index != steps.length - 1)
-                        Container(
-                          width: 1,
-                          height: 32,
-                          color: AppColors.isDark(context)
-                              ? const Color(0x330EA5E9)
-                              : const Color(0x400EA5E9),
-                        ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 10, top: 4),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          steps[index].title,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: _primaryText(context),
-                              ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          steps[index].subtitle,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: _tertiaryText(context)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _StartPlanCta extends StatefulWidget {
-  const _StartPlanCta({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  State<_StartPlanCta> createState() => _StartPlanCtaState();
-}
-
-class _StartPlanCtaState extends State<_StartPlanCta> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTap: widget.onTap,
-      child: AnimatedScale(
-        duration: const Duration(milliseconds: 140),
-        scale: _pressed ? 0.97 : 1,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0284C7),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _text(
-                      context,
-                      pt: 'Montar meu plano',
-                      es: 'Armar mi plan',
-                      en: 'Build my plan',
-                    ),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _text(
-                      context,
-                      pt: 'Leva cerca de 5 minutos',
-                      es: 'Toma unos 5 minutos',
-                      en: 'Takes about 5 minutes',
-                    ),
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.60),
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: const Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 18,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _HeroCityImage extends StatelessWidget {
   const _HeroCityImage({required this.city});
 
@@ -1824,105 +1458,6 @@ class _SettingsButton extends StatelessWidget {
       ),
     );
   }
-}
-
-class _BlueOrb extends StatelessWidget {
-  const _BlueOrb();
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    return Container(
-      width: 220,
-      height: 220,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: isDark
-              ? const [Color(0x8C0284C7), Color(0x260284C7), Colors.transparent]
-              : const [
-                  Color(0x400284C7),
-                  Color(0x140284C7),
-                  Colors.transparent,
-                ],
-          stops: const [0, 0.45, 0.70],
-        ),
-      ),
-    );
-  }
-}
-
-class _IndigoOrb extends StatelessWidget {
-  const _IndigoOrb();
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    return Container(
-      width: 200,
-      height: 200,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: isDark
-              ? const [Color(0x596366F1), Color(0x146366F1), Colors.transparent]
-              : const [
-                  Color(0x266366F1),
-                  Color(0x0A6366F1),
-                  Colors.transparent,
-                ],
-          stops: const [0, 0.50, 0.70],
-        ),
-      ),
-    );
-  }
-}
-
-class _BlueLightOrb extends StatelessWidget {
-  const _BlueLightOrb();
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    return Container(
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: isDark
-              ? const [Color(0x330EA5E9), Colors.transparent]
-              : const [Color(0x1A0EA5E9), Colors.transparent],
-          stops: const [0, 0.65],
-        ),
-      ),
-    );
-  }
-}
-
-class _HeroGridPainter extends CustomPainter {
-  const _HeroGridPainter(this.isDark);
-
-  final bool isDark;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = isDark ? const Color(0x0A0EA5E9) : const Color(0x0F0EA5E9)
-      ..strokeWidth = 1;
-
-    const spacing = 28.0;
-    for (double x = 0; x <= size.width; x += spacing) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    for (double y = 0; y <= size.height; y += spacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _HeroGridPainter oldDelegate) =>
-      oldDelegate.isDark != isDark;
 }
 
 class _HomeGuideState {

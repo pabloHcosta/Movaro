@@ -2530,19 +2530,19 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingPageTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your context'**
+  /// **'Your route'**
   String get onboardingPageTitle;
 
   /// No description provided for @onboardingHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Let’s understand your situation'**
+  /// **'To start, choose your origin and destination'**
   String get onboardingHeadline;
 
   /// No description provided for @onboardingDescription.
   ///
   /// In en, this message translates to:
-  /// **'This helps make the experience more useful without asking for too much information.'**
+  /// **'That helps us organize the next steps in the right way for you.'**
   String get onboardingDescription;
 
   /// No description provided for @onboardingOriginLabel.
@@ -5098,7 +5098,7 @@ abstract class AppLocalizations {
   /// No description provided for @introSkipAction.
   ///
   /// In en, this message translates to:
-  /// **'Skip'**
+  /// **'Not now'**
   String get introSkipAction;
 
   /// No description provided for @cityPracticalAnswersTitle.
@@ -10777,6 +10777,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View city details'**
   String get migrationResultRevealExploreCity;
+
+  /// No description provided for @homeVisualTitlePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking about living in '**
+  String get homeVisualTitlePrefix;
+
+  /// No description provided for @homeVisualTitleHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'another country?'**
+  String get homeVisualTitleHighlight;
+
+  /// No description provided for @homeVisualSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We help you understand what to do, what it may cost, and where to start.'**
+  String get homeVisualSubtitle;
+
+  /// No description provided for @homeVisualSupportLine.
+  ///
+  /// In en, this message translates to:
+  /// **'You can start even if you have not decided everything yet.'**
+  String get homeVisualSupportLine;
+
+  /// No description provided for @homeVisualCostsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'See what it may cost'**
+  String get homeVisualCostsAction;
+
+  /// No description provided for @homeVisualDocumentsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand documents'**
+  String get homeVisualDocumentsAction;
+
+  /// No description provided for @homeVisualStartAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Find where to start'**
+  String get homeVisualStartAction;
+
+  /// No description provided for @homeVisualPrimaryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Build my plan'**
+  String get homeVisualPrimaryAction;
+
+  /// No description provided for @homeVisualOriginLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ORIGIN'**
+  String get homeVisualOriginLabel;
+
+  /// No description provided for @homeVisualDestinationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'DESTINATION'**
+  String get homeVisualDestinationLabel;
+
+  /// No description provided for @homeVisualWaypointDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'docs'**
+  String get homeVisualWaypointDocuments;
+
+  /// No description provided for @homeVisualWaypointCosts.
+  ///
+  /// In en, this message translates to:
+  /// **'costs'**
+  String get homeVisualWaypointCosts;
+
+  /// No description provided for @homeVisualWaypointRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'route'**
+  String get homeVisualWaypointRoute;
 }
 
 class _AppLocalizationsDelegate

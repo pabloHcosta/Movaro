@@ -467,9 +467,9 @@
   "pendingActionSavePlan": "guardar tu plan",
   "pendingActionPostCommunity": "publicar en la comunidad",
   "pendingActionSaveCity": "guardar esta ciudad",
-  "onboardingPageTitle": "Tu contexto",
-  "onboardingHeadline": "Queremos entender tu momento",
-  "onboardingDescription": "Esto ayuda a que la experiencia sea más útil sin pedir demasiada información.",
+  "onboardingPageTitle": "Tu ruta",
+  "onboardingHeadline": "Para empezar, elegí tu origen y tu destino",
+  "onboardingDescription": "Con eso, organizamos los próximos pasos de la manera correcta para vos.",
   "onboardingOriginLabel": "¿De dónde venís?",
   "onboardingDestinationLabel": "¿A dónde querés ir?",
   "onboardingContinueAction": "Continuar",
@@ -1111,7 +1111,7 @@
   "introBetaDescription": "Esta versión se enfoca en claridad. Ya podés explorar ciudades, comparar señales y generar un plan inicial antes de que lleguen las funciones más profundas de cuenta.",
   "introBottomSupportLabel": "Siguiente paso",
   "introPrimaryAction": "Empezar a explorar",
-  "introSkipAction": "Saltar",
+  "introSkipAction": "Ahora no",
   "cityPracticalAnswersTitle": "Respuestas rápidas para dudas comunes",
   "cityPracticalLanguageQuestion": "¿La vida diaria sería más fácil si todavía dependés del español?",
   "cityPracticalCostQuestion": "¿Esta ciudad parece manejable en costo de vida cotidiano?",
@@ -2574,5 +2574,18 @@
       "city": { "type": "String" }
     }
   },
-  "migrationResultRevealExploreCity": "Ver detalles de la ciudad"
+  "migrationResultRevealExploreCity": "Ver detalles de la ciudad",
+  "homeVisualTitlePrefix": "Pensando en vivir en ",
+  "homeVisualTitleHighlight": "otro país?",
+  "homeVisualSubtitle": "Te ayudamos a entender qué hacer, cuánto puede costar y por dónde empezar.",
+  "homeVisualSupportLine": "Puedes empezar incluso sin tener todo decidido.",
+  "homeVisualCostsAction": "Ver cuánto puede costar",
+  "homeVisualDocumentsAction": "Entender documentos",
+  "homeVisualStartAction": "Descubrir por dónde empezar",
+  "homeVisualPrimaryAction": "Armar mi plan",
+  "homeVisualOriginLabel": "ORIGEN",
+  "homeVisualDestinationLabel": "DESTINO",
+  "homeVisualWaypointDocuments": "docs",
+  "homeVisualWaypointCosts": "costos",
+  "homeVisualWaypointRoute": "ruta"
 }

@@ -529,9 +529,9 @@
   "pendingActionSavePlan": "save your plan",
   "pendingActionPostCommunity": "post in the community",
   "pendingActionSaveCity": "save this city",
-  "onboardingPageTitle": "Your context",
-  "onboardingHeadline": "Let’s understand your situation",
-  "onboardingDescription": "This helps make the experience more useful without asking for too much information.",
+  "onboardingPageTitle": "Your route",
+  "onboardingHeadline": "To start, choose your origin and destination",
+  "onboardingDescription": "That helps us organize the next steps in the right way for you.",
   "onboardingOriginLabel": "Where are you coming from?",
   "onboardingDestinationLabel": "Where do you want to go?",
   "onboardingContinueAction": "Continue",
@@ -1218,7 +1218,7 @@
   "introBetaDescription": "This version focuses on clarity. You can explore cities, compare signals, and generate an initial plan before deeper account features arrive.",
   "introBottomSupportLabel": "Next step",
   "introPrimaryAction": "Start exploring",
-  "introSkipAction": "Skip",
+  "introSkipAction": "Not now",
   "cityPracticalAnswersTitle": "Quick answers for common questions",
   "cityPracticalLanguageQuestion": "Would daily life feel easier if I still depend on Spanish?",
   "cityPracticalCostQuestion": "Does this city look manageable in day-to-day costs?",
@@ -2574,5 +2574,18 @@
       "city": { "type": "String" }
     }
   },
-  "migrationResultRevealExploreCity": "View city details"
+  "migrationResultRevealExploreCity": "View city details",
+  "homeVisualTitlePrefix": "Thinking about living in ",
+  "homeVisualTitleHighlight": "another country?",
+  "homeVisualSubtitle": "We help you understand what to do, what it may cost, and where to start.",
+  "homeVisualSupportLine": "You can start even if you have not decided everything yet.",
+  "homeVisualCostsAction": "See what it may cost",
+  "homeVisualDocumentsAction": "Understand documents",
+  "homeVisualStartAction": "Find where to start",
+  "homeVisualPrimaryAction": "Build my plan",
+  "homeVisualOriginLabel": "ORIGIN",
+  "homeVisualDestinationLabel": "DESTINATION",
+  "homeVisualWaypointDocuments": "docs",
+  "homeVisualWaypointCosts": "costs",
+  "homeVisualWaypointRoute": "route"
 }
