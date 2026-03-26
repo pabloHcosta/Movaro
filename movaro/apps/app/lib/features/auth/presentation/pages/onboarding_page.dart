@@ -96,7 +96,22 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final surfaceMuted = AppColors.surfaceMutedFor(context);
     final textSoft = AppColors.textSoftFor(context);
     final borderColor = AppColors.borderFor(context);
+    final size = MediaQuery.sizeOf(context);
     final visibleCountries = _visibleCountries(_countries);
+    final titleStyle =
+        (size.width < 380
+                ? Theme.of(context).textTheme.headlineLarge
+                : Theme.of(context).textTheme.displaySmall)
+            ?.copyWith(fontWeight: FontWeight.w800, height: 1.04);
+    final subtitleStyle =
+        (size.width < 380
+                ? Theme.of(context).textTheme.titleSmall
+                : Theme.of(context).textTheme.titleMedium)
+            ?.copyWith(
+              color: textSoft,
+              fontWeight: FontWeight.w500,
+              height: 1.35,
+            );
 
     return Scaffold(
       body: Stack(
@@ -130,16 +145,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              l10n.onboardingHeadline,
-                              style: Theme.of(context).textTheme.displaySmall,
-                            ),
+                            Text(l10n.onboardingHeadline, style: titleStyle),
                             const SizedBox(height: 12),
                             Text(
                               l10n.onboardingDescription,
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodyLarge?.copyWith(color: textSoft),
+                              style: subtitleStyle,
                             ),
                             const SizedBox(height: 18),
                             _StepMarker(

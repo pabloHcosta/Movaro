@@ -452,6 +452,25 @@ class _IntroSlidePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final titleStyle =
+        (isCompact
+                ? Theme.of(context).textTheme.headlineLarge
+                : Theme.of(context).textTheme.displaySmall)
+            ?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              height: 1.04,
+            );
+    final descriptionStyle =
+        (isCompact
+                ? Theme.of(context).textTheme.titleSmall
+                : Theme.of(context).textTheme.titleMedium)
+            ?.copyWith(
+              color: Colors.white.withValues(alpha: 0.74),
+              fontWeight: FontWeight.w500,
+              height: 1.4,
+            );
+
     return Column(
       children: [
         Expanded(
@@ -482,12 +501,7 @@ class _IntroSlidePage extends StatelessWidget {
                         Text(
                           slide.title,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineMedium
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                height: 1.06,
-                              ),
+                          style: titleStyle,
                         ),
                         const SizedBox(height: 14),
                         ConstrainedBox(
@@ -495,11 +509,7 @@ class _IntroSlidePage extends StatelessWidget {
                           child: Text(
                             slide.description,
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.72),
-                                  height: 1.45,
-                                ),
+                            style: descriptionStyle,
                           ),
                         ),
                       ],

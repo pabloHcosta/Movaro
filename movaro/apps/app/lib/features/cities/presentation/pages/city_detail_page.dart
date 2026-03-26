@@ -456,13 +456,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
                   child: AnimatedBuilder(
                     animation: _scrollController,
                     builder: (context, _) {
-                      final showCityTitle =
-                          _scrollController.hasClients &&
-                          _scrollController.offset > 72;
                       return AppGlassHeader(
-                        title: showCityTitle
-                            ? city?.name ?? l10n.cityDetailHeaderTitle()
-                            : l10n.cityDetailHeaderTitle(),
+                        title: l10n.cityDetailHeaderTitle(),
                         onBack: _goBackToCities,
                         onHelp: _showHelp,
                       );

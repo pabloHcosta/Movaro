@@ -185,13 +185,8 @@ class _CityExploreScreenState extends State<CityExploreScreen>
               child: AnimatedBuilder(
                 animation: scrollAnimation,
                 builder: (context, _) {
-                  final showCityTitle =
-                      _activeScrollController.hasClients &&
-                      _activeScrollController.offset > 72;
                   return AppGlassHeader(
-                    title: showCityTitle
-                        ? widget.city.name
-                        : context.l10n.cityExploreTitle(),
+                    title: context.l10n.cityExploreTitle(),
                     onBack: () => Navigator.maybePop(context),
                     trailing: IconButton(
                       onPressed: _shareExplore,

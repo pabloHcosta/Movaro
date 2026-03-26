@@ -1120,7 +1120,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationPageTitle.
   ///
   /// In en, this message translates to:
-  /// **'Documentation and practical life'**
+  /// **'Guide'**
   String get documentationPageTitle;
 
   /// No description provided for @documentationHeroEyebrow.
@@ -4558,7 +4558,7 @@ abstract class AppLocalizations {
   /// No description provided for @favoritesPageTitle.
   ///
   /// In en, this message translates to:
-  /// **'Saved cities'**
+  /// **'Favorites'**
   String get favoritesPageTitle;
 
   /// No description provided for @favoritesPageCount.
@@ -4654,7 +4654,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityComparisonTitle.
   ///
   /// In en, this message translates to:
-  /// **'Compare cities'**
+  /// **'Compare'**
   String get cityComparisonTitle;
 
   /// No description provided for @cityComparisonCompareAction.
@@ -10493,7 +10493,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiChatTitle.
   ///
   /// In en, this message translates to:
-  /// **'Movaro Assistant'**
+  /// **'Assistant'**
   String get aiChatTitle;
 
   /// No description provided for @aiChatSubtitle.

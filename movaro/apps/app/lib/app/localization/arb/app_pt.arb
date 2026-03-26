@@ -205,7 +205,7 @@
   "exploreTrailPrepBodyStart": "Quando você ainda não confirmou uma cidade, comece pelo plano inicial para organizar a decisão.",
   "exploreTrailPrepBodyReady": "Como você já confirmou uma cidade, aqui o foco passa a ser checklist, documentos, moradia e chegada.",
   "exploreSavePlanAction": "Salvar plano",
-  "documentationPageTitle": "Documentação e vida prática",
+  "documentationPageTitle": "Guia",
   "documentationHeroEyebrow": "Guia prático",
   "documentationHeroTitle": "Entenda melhor como organizar a vida prática no Brasil",
   "documentationHeroDescription": "Escreva uma dúvida ou escolha um tema. O Movaro ajuda você a encontrar a orientação e o guia certo sobre documentos, saúde, trabalho, moradia, mobilidade e custos iniciais.",
@@ -1001,7 +1001,7 @@
   "favoritesEmptyTitle": "Nenhuma cidade favorita ainda",
   "favoritesEmptyBody": "Quando você favoritar cidades, elas ficam reunidas aqui para acompanhar detalhes, clima e comparação mais rápido.",
   "favoritesEmptyHint": "Explore cidades, salve as mais promissoras e volte aqui quando quiser retomar.",
-  "favoritesPageTitle": "Cidades salvas",
+  "favoritesPageTitle": "Favoritos",
   "favoritesPageCount": "{current} de {total}",
   "@favoritesPageCount": {
     "placeholders": {
@@ -1034,7 +1034,7 @@
   "favoritesClimateLabel": "Clima agora",
   "favoritesClimatePending": "Carregando",
   "favoritesQualityLabel": "Qualidade",
-  "cityComparisonTitle": "Comparar cidades",
+  "cityComparisonTitle": "Comparar",
   "cityComparisonCompareAction": "Comparar",
   "cityComparisonEditAction": "Alterar",
   "cityComparisonModeTwo": "2 cidades",
@@ -2486,7 +2486,7 @@
   "infoGuideStepThreeTitle": "Pergunte ao assistente IA",
   "infoGuideStepThreeBody": "Toque no botão azul no canto inferior direito para conversar com nosso assistente e obter respostas personalizadas.",
 
-  "aiChatTitle": "Assistente Movaro",
+  "aiChatTitle": "Assistente",
   "aiChatSubtitle": "Tire suas dúvidas sobre migração",
   "aiChatClearTooltip": "Limpar conversa",
   "aiChatInputHint": "Pergunte sobre migração...",

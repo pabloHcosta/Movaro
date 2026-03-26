@@ -612,7 +612,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Check work setup, contribution paths, and what to validate before treating income as solved.';
 
   @override
-  String get documentationPageTitle => 'Documentação e vida prática';
+  String get documentationPageTitle => 'Guia';
 
   @override
   String get documentationHeroEyebrow => 'Guia prático';
@@ -2694,7 +2694,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Explore cidades, salve as mais promissoras e volte aqui quando quiser retomar.';
 
   @override
-  String get favoritesPageTitle => 'Cidades salvas';
+  String get favoritesPageTitle => 'Favoritos';
 
   @override
   String favoritesPageCount(Object current, Object total) {
@@ -2749,7 +2749,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get favoritesQualityLabel => 'Qualidade';
 
   @override
-  String get cityComparisonTitle => 'Comparar cidades';
+  String get cityComparisonTitle => 'Comparar';
 
   @override
   String get cityComparisonCompareAction => 'Comparar';
@@ -6271,7 +6271,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Toque no botão azul no canto inferior direito para conversar com nosso assistente e obter respostas personalizadas.';
 
   @override
-  String get aiChatTitle => 'Assistente Movaro';
+  String get aiChatTitle => 'Assistente';
 
   @override
   String get aiChatSubtitle => 'Tire suas dúvidas sobre migração';

@@ -252,7 +252,7 @@
   "exploreContentDocumentsBody": "See CPF, registration, banking, and legal stay with less noise and clearer routing.",
   "exploreContentHousingBody": "Review rent pressure, guarantees, deposits, and first-landing decisions before choosing a neighborhood.",
   "exploreContentWorkBody": "Check work setup, contribution paths, and what to validate before treating income as solved.",
-  "documentationPageTitle": "Documentation and practical life",
+  "documentationPageTitle": "Guide",
   "documentationHeroEyebrow": "Practical guide",
   "documentationHeroTitle": "Understand practical life in Brazil with more clarity",
   "documentationHeroDescription": "Type a question or choose a topic. Movaro helps you find the right guidance and guide across documents, health, work, housing, mobility, and early costs.",
@@ -1080,7 +1080,7 @@
   "favoritesEmptyTitle": "No favorite cities yet",
   "favoritesEmptyBody": "When you favorite cities, they stay here together so you can track details, weather, and comparison faster.",
   "favoritesEmptyHint": "Explore cities, save the strongest ones, and come back here whenever you want to resume.",
-  "favoritesPageTitle": "Saved cities",
+  "favoritesPageTitle": "Favorites",
   "favoritesPageCount": "{current} of {total}",
   "@favoritesPageCount": {
     "placeholders": {
@@ -1113,7 +1113,7 @@
   "favoritesClimateLabel": "Climate now",
   "favoritesClimatePending": "Loading",
   "favoritesQualityLabel": "Quality",
-  "cityComparisonTitle": "Compare cities",
+  "cityComparisonTitle": "Compare",
   "cityComparisonCompareAction": "Compare",
   "cityComparisonEditAction": "Edit",
   "cityComparisonModeTwo": "2 cities",
@@ -2486,7 +2486,7 @@
   "infoGuideStepThreeTitle": "Ask the AI assistant",
   "infoGuideStepThreeBody": "Tap the blue button at the bottom right to chat with our assistant and get personalized answers.",
 
-  "aiChatTitle": "Movaro Assistant",
+  "aiChatTitle": "Assistant",
   "aiChatSubtitle": "Get answers about migration",
   "aiChatClearTooltip": "Clear chat",
   "aiChatInputHint": "Ask about migration...",

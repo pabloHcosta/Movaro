@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 
-const _headerSideWidth = 120.0;
-
 class AppGlassHeader extends StatelessWidget {
   const AppGlassHeader({
     required this.title,
@@ -21,6 +19,7 @@ class AppGlassHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
+    final sideWidth = _headerSideWidthFor(context);
     final helpAction = onHelp == null
         ? null
         : IconButton(
@@ -40,7 +39,7 @@ class AppGlassHeader extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-            width: _headerSideWidth,
+            width: sideWidth,
             child: Align(
               alignment: Alignment.centerLeft,
               child: _HeaderActionSlot(
@@ -64,7 +63,7 @@ class AppGlassHeader extends StatelessWidget {
             ),
           ),
           SizedBox(
-            width: _headerSideWidth,
+            width: sideWidth,
             child: Align(
               alignment: Alignment.centerRight,
               child: Row(
@@ -82,6 +81,13 @@ class AppGlassHeader extends StatelessWidget {
       ),
     );
   }
+}
+
+double _headerSideWidthFor(BuildContext context) {
+  final width = MediaQuery.sizeOf(context).width;
+  if (width < 380) return 80;
+  if (width < 430) return 92;
+  return 120;
 }
 
 class _HeaderActionSlot extends StatelessWidget {

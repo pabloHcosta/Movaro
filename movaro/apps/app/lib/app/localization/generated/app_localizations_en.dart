@@ -610,7 +610,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Check work setup, contribution paths, and what to validate before treating income as solved.';
 
   @override
-  String get documentationPageTitle => 'Documentation and practical life';
+  String get documentationPageTitle => 'Guide';
 
   @override
   String get documentationHeroEyebrow => 'Practical guide';
@@ -2685,7 +2685,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Explore cities, save the strongest ones, and come back here whenever you want to resume.';
 
   @override
-  String get favoritesPageTitle => 'Saved cities';
+  String get favoritesPageTitle => 'Favorites';
 
   @override
   String favoritesPageCount(Object current, Object total) {
@@ -2740,7 +2740,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get favoritesQualityLabel => 'Quality';
 
   @override
-  String get cityComparisonTitle => 'Compare cities';
+  String get cityComparisonTitle => 'Compare';
 
   @override
   String get cityComparisonCompareAction => 'Compare';
@@ -6247,7 +6247,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tap the blue button at the bottom right to chat with our assistant and get personalized answers.';
 
   @override
-  String get aiChatTitle => 'Movaro Assistant';
+  String get aiChatTitle => 'Assistant';
 
   @override
   String get aiChatSubtitle => 'Get answers about migration';
