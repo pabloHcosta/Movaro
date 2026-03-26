@@ -175,6 +175,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
                       cityCountryCode: city.countryCode,
                       planDestinationCountry: plan?.destinationCountry,
                     ),
+                destinationLatitude: city.latitude,
+                destinationLongitude: city.longitude,
               );
 
         return Scaffold(

@@ -325,6 +325,76 @@ class AirportDatabase {
     longitude: -60.0497,
   );
 
+  static const _navegantes = Airport(
+    iataCode: 'NVT',
+    name: 'Navegantes / Ministro Victor Konder',
+    city: 'Navegantes',
+    countryIso: 'BR',
+    region: 'Santa Catarina',
+    latitude: -26.8797,
+    longitude: -48.6514,
+  );
+
+  static const _joaoPessoa = Airport(
+    iataCode: 'JPA',
+    name: 'Presidente Castro Pinto',
+    city: 'João Pessoa',
+    countryIso: 'BR',
+    region: 'Paraíba',
+    latitude: -7.1458,
+    longitude: -34.9486,
+  );
+
+  static const _natal = Airport(
+    iataCode: 'NAT',
+    name: 'Governador Aluízio Alves',
+    city: 'Natal',
+    countryIso: 'BR',
+    region: 'Rio Grande do Norte',
+    latitude: -5.7681,
+    longitude: -35.3761,
+  );
+
+  static const _aracaju = Airport(
+    iataCode: 'AJU',
+    name: 'Santa Maria',
+    city: 'Aracaju',
+    countryIso: 'BR',
+    region: 'Sergipe',
+    latitude: -10.9840,
+    longitude: -37.0703,
+  );
+
+  static const _maceio = Airport(
+    iataCode: 'MCZ',
+    name: 'Zumbi dos Palmares',
+    city: 'Maceió',
+    countryIso: 'BR',
+    region: 'Alagoas',
+    latitude: -9.5108,
+    longitude: -35.7917,
+  );
+
+  static const _belem = Airport(
+    iataCode: 'BEL',
+    name: 'Val-de-Cans / Júlio Cezar Ribeiro',
+    city: 'Belém',
+    countryIso: 'BR',
+    region: 'Pará',
+    latitude: -1.3793,
+    longitude: -48.4763,
+  );
+
+  static const _campoGrande = Airport(
+    iataCode: 'CGR',
+    name: 'Campo Grande',
+    city: 'Campo Grande',
+    countryIso: 'BR',
+    region: 'Mato Grosso do Sul',
+    latitude: -20.4687,
+    longitude: -54.6725,
+  );
+
   // ── Public catalogue ───────────────────────────────────────────────────────
 
   static const Map<String, List<Airport>> airportsByCountry = {
@@ -354,6 +424,7 @@ class AirportDatabase {
       _viracopos,
       _galeao,
       _florianopolis,
+      _navegantes,
       _curitiba,
       _portoAlegre,
       _beloBrizonte,
@@ -361,7 +432,13 @@ class AirportDatabase {
       _salvador,
       _recife,
       _fortaleza,
+      _natal,
+      _joaoPessoa,
+      _aracaju,
+      _maceio,
+      _campoGrande,
       _manaus,
+      _belem,
     ],
   };
 
@@ -381,14 +458,53 @@ class AirportDatabase {
   /// Returns the airport that best matches the given [cityName] by checking
   /// whether the city name contains the airport's city (case-insensitive).
   static Airport? forCityName(String cityName, String countryIso) {
-    final normalised = cityName.toLowerCase();
+    final normalised = _normalizeText(cityName);
     final airports = forCountry(countryIso);
     for (final a in airports) {
-      if (normalised.contains(a.city.toLowerCase()) ||
-          a.city.toLowerCase().contains(normalised)) {
+      final airportCity = _normalizeText(a.city);
+      final airportRegion = _normalizeText(a.region);
+      if (normalised.contains(airportCity) ||
+          airportCity.contains(normalised) ||
+          normalised.contains(airportRegion)) {
         return a;
       }
     }
     return null;
+  }
+
+  static String _normalizeText(String value) {
+    const replacements = {
+      'á': 'a',
+      'à': 'a',
+      'ã': 'a',
+      'â': 'a',
+      'ä': 'a',
+      'é': 'e',
+      'è': 'e',
+      'ê': 'e',
+      'ë': 'e',
+      'í': 'i',
+      'ì': 'i',
+      'î': 'i',
+      'ï': 'i',
+      'ó': 'o',
+      'ò': 'o',
+      'õ': 'o',
+      'ô': 'o',
+      'ö': 'o',
+      'ú': 'u',
+      'ù': 'u',
+      'û': 'u',
+      'ü': 'u',
+      'ç': 'c',
+      'ñ': 'n',
+    };
+
+    final buffer = StringBuffer();
+    for (final rune in value.trim().toLowerCase().runes) {
+      final char = String.fromCharCode(rune);
+      buffer.write(replacements[char] ?? char);
+    }
+    return buffer.toString().replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
   }
 }

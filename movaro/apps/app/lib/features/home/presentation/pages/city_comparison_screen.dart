@@ -226,25 +226,12 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
             child: AppGlassHeader(
               title: context.l10n.cityComparisonTitle,
               onBack: () => Navigator.of(context).pop(),
-              trailing: SizedBox(
-                width: 92,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      onPressed: () => setState(() => _isComparing = false),
-                      icon: const Icon(Icons.edit_outlined),
-                      tooltip: context.l10n.cityComparisonEditAction,
-                      visualDensity: VisualDensity.compact,
-                    ),
-                    IconButton(
-                      onPressed: _showHelp,
-                      icon: const Icon(Icons.help_outline_rounded),
-                      tooltip: context.l10n.cityComparisonGuideTitle(),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ],
-                ),
+              onHelp: _showHelp,
+              trailing: IconButton(
+                onPressed: () => setState(() => _isComparing = false),
+                icon: const Icon(Icons.edit_outlined),
+                tooltip: context.l10n.cityComparisonEditAction,
+                visualDensity: VisualDensity.compact,
               ),
             ),
           ),

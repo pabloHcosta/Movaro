@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 
+const _headerSideWidth = 120.0;
+
 class AppGlassHeader extends StatelessWidget {
   const AppGlassHeader({
     required this.title,
@@ -19,6 +21,13 @@ class AppGlassHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
+    final helpAction = onHelp == null
+        ? null
+        : IconButton(
+            onPressed: onHelp,
+            icon: const Icon(Icons.help_outline_rounded),
+            visualDensity: VisualDensity.compact,
+          );
 
     return FrostedPanel(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -30,17 +39,21 @@ class AppGlassHeader extends StatelessWidget {
       boxShadow: const [],
       child: Row(
         children: [
-          if (onBack != null)
-            SizedBox(
-              width: 44,
-              child: IconButton(
-                onPressed: onBack,
-                icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                visualDensity: VisualDensity.compact,
+          SizedBox(
+            width: _headerSideWidth,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: _HeaderActionSlot(
+                child: onBack == null
+                    ? null
+                    : IconButton(
+                        onPressed: onBack,
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                        visualDensity: VisualDensity.compact,
+                      ),
               ),
-            )
-          else
-            const SizedBox(width: 44),
+            ),
+          ),
           Expanded(
             child: Text(
               title,
@@ -50,23 +63,39 @@ class AppGlassHeader extends StatelessWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (onHelp != null)
-                SizedBox(
-                  width: 44,
-                  child: IconButton(
-                    onPressed: onHelp,
-                    icon: const Icon(Icons.help_outline_rounded),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-              trailing ?? const SizedBox(width: 44),
-            ],
+          SizedBox(
+            width: _headerSideWidth,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (helpAction != null) _HeaderActionSlot(child: helpAction),
+                  if (trailing != null) _HeaderActionSlot(child: trailing),
+                  if (helpAction == null && trailing == null)
+                    const _HeaderActionSlot(),
+                ],
+              ),
+            ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _HeaderActionSlot extends StatelessWidget {
+  const _HeaderActionSlot({this.child});
+
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+      child: child == null
+          ? const SizedBox(width: 44, height: 44)
+          : Center(child: child),
     );
   }
 }

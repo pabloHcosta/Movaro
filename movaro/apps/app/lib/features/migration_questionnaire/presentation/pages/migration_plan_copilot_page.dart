@@ -566,6 +566,8 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
             originCountryIso: originCountryIso,
             destinationCountryIso: destinationCountryIso,
             destinationCityName: city?.name,
+            destinationLatitude: city?.latitude,
+            destinationLongitude: city?.longitude,
           ),
         );
       case GuideToolType.housing:
@@ -1425,6 +1427,8 @@ Future<void> _showPlanToolsSheet(
                           originCountryIso: originCountryIso,
                           destinationCountryIso: destinationCountryIso,
                           destinationCityName: city?.name,
+                          destinationLatitude: city?.latitude,
+                          destinationLongitude: city?.longitude,
                         ),
                       );
                     },

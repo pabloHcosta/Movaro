@@ -82,6 +82,8 @@ class FlightRouteContextResolver {
   static Airport? resolveDestinationAirport({
     String? destinationCityName,
     String? destinationCountryIso,
+    double? destinationLatitude,
+    double? destinationLongitude,
   }) {
     final normalizedCountry = normalizeCountryIso(destinationCountryIso);
     if (normalizedCountry == null) {
@@ -90,8 +92,25 @@ class FlightRouteContextResolver {
 
     final normalizedCity = destinationCityName?.trim();
     if (normalizedCity != null && normalizedCity.isNotEmpty) {
-      return AirportDatabase.forCityName(normalizedCity, normalizedCountry) ??
-          AirportDatabase.mainHubFor(normalizedCountry);
+      final directMatch = AirportDatabase.forCityName(
+        normalizedCity,
+        normalizedCountry,
+      );
+      if (directMatch != null) {
+        return directMatch;
+      }
+    }
+
+    if (destinationLatitude != null && destinationLongitude != null) {
+      final nearest = _finder.findNearest(
+        latitude: destinationLatitude,
+        longitude: destinationLongitude,
+        countryIso: normalizedCountry,
+        maxResults: 1,
+      );
+      if (nearest.isNotEmpty) {
+        return nearest.first;
+      }
     }
 
     return AirportDatabase.mainHubFor(normalizedCountry);

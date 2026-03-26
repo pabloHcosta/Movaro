@@ -8,6 +8,9 @@ import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/network/network_client.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
+import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/contextual_help.dart';
+import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
@@ -49,6 +52,7 @@ class AssistantPage extends StatefulWidget {
 }
 
 class _AssistantPageState extends State<AssistantPage> {
+  static const _assistantHelpKey = 'assistant_tab';
   _AssistantMode _mode = _AssistantMode.conversation;
   ChatService? _chatService;
   ChatStarterPrompts? _starterPrompts;
@@ -126,6 +130,96 @@ class _AssistantPageState extends State<AssistantPage> {
     return null;
   }
 
+  Future<void> _showAssistantGuide() {
+    return showContextualHelpGuide(
+      context,
+      preferenceKey: _assistantHelpKey,
+      content: _assistantHelpContent(context),
+    );
+  }
+
+  ContextualHelpContent _assistantHelpContent(BuildContext context) {
+    final l10n = context.l10n;
+    final isConversation = _mode == _AssistantMode.conversation;
+    final lang = Localizations.localeOf(context).languageCode;
+    final title = isConversation
+        ? l10n.aiChatTitle
+        : l10n.documentationPageTitle;
+    final body = switch ((isConversation, lang)) {
+      (true, 'pt') =>
+        'Faça perguntas diretas sobre mudança, documentos, custos e primeiros passos para receber respostas mais rápidas.',
+      (true, 'es') =>
+        'Hacé preguntas directas sobre mudanza, documentos, costos y primeros pasos para recibir respuestas más rápidas.',
+      (true, _) =>
+        'Ask direct questions about moving, documents, costs, and first steps to get faster answers.',
+      (false, 'pt') =>
+        'Use os guias para navegar por temas práticos e abrir o conteúdo certo sem ficar procurando sozinho.',
+      (false, 'es') =>
+        'Usá las guías para navegar por temas prácticos y abrir el contenido correcto sin buscar solo.',
+      (false, _) =>
+        'Use the guides to browse practical topics and open the right content without searching on your own.',
+    };
+
+    return ContextualHelpContent(
+      eyebrow: l10n.infoGuideEyebrow,
+      contextIcon: isConversation
+          ? Icons.chat_bubble_outline_rounded
+          : Icons.help_outline_rounded,
+      title: title,
+      body: body,
+      steps: [
+        FeatureGuideStep(
+          number: '1',
+          title: switch (lang) {
+            'pt' => 'Comece pelo ponto real da sua dúvida',
+            'es' => 'Empezá por el punto real de tu duda',
+            _ => 'Start with the real point of your question',
+          },
+          body: switch (lang) {
+            'pt' =>
+              'Pergunte do jeito que você falaria com uma pessoa: custo, documentos, moradia ou trabalho.',
+            'es' =>
+              'Preguntá como hablarías con una persona: costo, documentos, vivienda o trabajo.',
+            _ =>
+              'Ask the way you would ask a person: costs, documents, housing, or work.',
+          },
+        ),
+        FeatureGuideStep(
+          number: '2',
+          title: switch (lang) {
+            'pt' => 'Use o modo certo para cada necessidade',
+            'es' => 'Usá el modo correcto para cada necesidad',
+            _ => 'Use the right mode for each need',
+          },
+          body: switch (lang) {
+            'pt' =>
+              'Conversa ajuda a tirar dúvidas rápidas. Guias ajuda a abrir conteúdo organizado por tema.',
+            'es' =>
+              'Conversación sirve para dudas rápidas. Guías sirve para abrir contenido organizado por tema.',
+            _ =>
+              'Conversation is best for quick questions. Guides are best for organized content by topic.',
+          },
+        ),
+        FeatureGuideStep(
+          number: '3',
+          title: switch (lang) {
+            'pt' => 'Refine quando precisar',
+            'es' => 'Ajustá cuando haga falta',
+            _ => 'Refine when needed',
+          },
+          body: switch (lang) {
+            'pt' =>
+              'Se a resposta vier ampla, complete com seu país de origem, destino ou momento da mudança.',
+            'es' =>
+              'Si la respuesta sale muy amplia, agregá tu país de origen, destino o momento de la mudanza.',
+            _ =>
+              'If the answer is too broad, add your origin country, destination, or moving stage.',
+          },
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
@@ -147,7 +241,38 @@ class _AssistantPageState extends State<AssistantPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _AssistantHeader(subtitle: subtitle),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: AppGlassHeader(
+                    title: context.l10n.aiChatTitle,
+                    onHelp: _showAssistantGuide,
+                    trailing: subtitle == null
+                        ? null
+                        : Tooltip(
+                            message: subtitle,
+                            child: Container(
+                              width: 44,
+                              height: 44,
+                              alignment: Alignment.center,
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  Icons.auto_awesome_rounded,
+                                  size: 18,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                  ),
+                ),
                 const SizedBox(height: 8),
                 _ModeSegmentedControl(
                   mode: _mode,
@@ -190,69 +315,6 @@ class _AssistantPageState extends State<AssistantPage> {
         citiesController: widget.citiesController,
         migrationQuestionnaireController:
             widget.migrationQuestionnaireController,
-      ),
-    );
-  }
-}
-
-// ─── Header ──────────────────────────────────────────────────────────────────
-
-class _AssistantHeader extends StatelessWidget {
-  const _AssistantHeader({this.subtitle});
-  final String? subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final lang = Localizations.localeOf(context).languageCode;
-    final title = switch (lang) {
-      'pt' => 'Assistente Movaro',
-      'es' => 'Asistente Movaro',
-      _ => 'Movaro Assistant',
-    };
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF0088FF), Color(0xFF00BBFF)],
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.auto_awesome,
-              size: 20,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                if (subtitle != null)
-                  Text(
-                    subtitle!,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSoftFor(context),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -451,7 +513,8 @@ class _ConversationBodyState extends State<_ConversationBody> {
   }
 
   Widget _buildEmptyState(BuildContext context, dynamic l10n, bool isDark) {
-    final categories = widget.starterPrompts?.categories ?? const <ChatStarterPrompt>[];
+    final categories =
+        widget.starterPrompts?.categories ?? const <ChatStarterPrompt>[];
     final chips = widget.starterPrompts?.chips ?? const <ChatStarterPrompt>[];
 
     final isDark2 = isDark;
@@ -488,11 +551,10 @@ class _ConversationBodyState extends State<_ConversationBody> {
               scrollDirection: Axis.horizontal,
               itemCount: chips.length,
               separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (_, i) =>
-                  _QuickChip(
-                    label: chips[i].label,
-                    onTap: () => _send(chips[i].message),
-                  ),
+              itemBuilder: (_, i) => _QuickChip(
+                label: chips[i].label,
+                onTap: () => _send(chips[i].message),
+              ),
             ),
           ),
           const SizedBox(height: 16),

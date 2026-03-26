@@ -25,6 +25,8 @@ class FlightSearchTool extends StatefulWidget {
     required this.originCountryIso,
     required this.destinationCountryIso,
     this.destinationCityName,
+    this.destinationLatitude,
+    this.destinationLongitude,
     super.key,
   });
 
@@ -38,6 +40,8 @@ class FlightSearchTool extends StatefulWidget {
 
   /// Optional city name used to pre-select the nearest destination airport.
   final String? destinationCityName;
+  final double? destinationLatitude;
+  final double? destinationLongitude;
 
   @override
   State<FlightSearchTool> createState() => _FlightSearchToolState();
@@ -104,20 +108,24 @@ class _FlightSearchToolState extends State<FlightSearchTool> {
     }
 
     // ── Destination airports ────────────────────────────────────────────
-    _destinationAirports = AirportDatabase.forCountry(destinationCountryIso);
-
-    // Pre-select: airport matching the plan city, or the main hub
-    if (widget.destinationCityName != null &&
-        widget.destinationCityName!.isNotEmpty) {
-      _selectedDestination =
-          AirportDatabase.forCityName(
-            widget.destinationCityName!,
-            destinationCountryIso,
-          ) ??
-          AirportDatabase.mainHubFor(destinationCountryIso);
+    if (widget.destinationLatitude != null &&
+        widget.destinationLongitude != null) {
+      _destinationAirports = _finder.findNearest(
+        latitude: widget.destinationLatitude!,
+        longitude: widget.destinationLongitude!,
+        countryIso: destinationCountryIso,
+        maxResults: AirportDatabase.forCountry(destinationCountryIso).length,
+      );
     } else {
-      _selectedDestination = AirportDatabase.mainHubFor(destinationCountryIso);
+      _destinationAirports = AirportDatabase.forCountry(destinationCountryIso);
     }
+
+    _selectedDestination = FlightRouteContextResolver.resolveDestinationAirport(
+      destinationCityName: widget.destinationCityName,
+      destinationCountryIso: destinationCountryIso,
+      destinationLatitude: widget.destinationLatitude,
+      destinationLongitude: widget.destinationLongitude,
+    );
   }
 
   // ── Actions ───────────────────────────────────────────────────────────────

@@ -481,6 +481,8 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                     cityCountryCode: recommendedCity.countryCode,
                     planDestinationCountry: plan.destinationCountry,
                   ),
+              destinationLatitude: recommendedCity.latitude,
+              destinationLongitude: recommendedCity.longitude,
             );
         final originCountryIso =
             FlightRouteContextResolver.resolveOriginCountryIso(

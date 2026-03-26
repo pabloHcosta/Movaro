@@ -21,6 +21,29 @@ print_section() {
   printf '\n[%s]\n' "$1"
 }
 
+prefer_java_17() {
+  local preferred_java_home=""
+
+  if command -v /usr/libexec/java_home >/dev/null 2>&1; then
+    preferred_java_home="$(/usr/libexec/java_home -v 17 2>/dev/null || true)"
+  fi
+
+  if [[ -z "$preferred_java_home" ]] && command -v brew >/dev/null 2>&1; then
+    local brew_prefix=""
+    brew_prefix="$(brew --prefix openjdk@17 2>/dev/null || true)"
+    if [[ -n "$brew_prefix" && -d "$brew_prefix/libexec/openjdk.jdk/Contents/Home" ]]; then
+      preferred_java_home="$brew_prefix/libexec/openjdk.jdk/Contents/Home"
+    fi
+  fi
+
+  if [[ -z "$preferred_java_home" ]]; then
+    return 0
+  fi
+
+  export JAVA_HOME="$preferred_java_home"
+  export PATH="$JAVA_HOME/bin:$PATH"
+}
+
 resolve_api_source() {
   node -e '
     const env = require(process.argv[1]);
@@ -61,8 +84,12 @@ else
 fi
 
 print_section "Building APK"
+prefer_java_17
 echo "Build mode: $BUILD_MODE"
 echo "API source: $(resolve_api_source)"
+if [[ -n "${JAVA_HOME:-}" ]]; then
+  echo "JAVA_HOME: $JAVA_HOME"
+fi
 if [[ -n "$API_SOURCE_OVERRIDE" ]]; then
   echo "API source override: $API_SOURCE_OVERRIDE"
 fi

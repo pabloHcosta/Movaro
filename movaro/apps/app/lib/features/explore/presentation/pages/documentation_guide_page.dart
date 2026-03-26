@@ -87,7 +87,9 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     _preferencesStore = DocumentationGuidePreferencesStore();
     _selectedSection = widget.initialSection;
     widget.journeyContextController?.initialize();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadRemoteGuideAnswers());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _loadRemoteGuideAnswers(),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshScrollHint();
       if (widget.showAsTab) {
@@ -110,7 +112,10 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
   Future<void> _loadRemoteGuideAnswers() async {
     final locale = Localizations.localeOf(context).languageCode;
     final destination =
-        widget.migrationQuestionnaireController?.generatedPlan?.destinationCountry ??
+        widget
+            .migrationQuestionnaireController
+            ?.generatedPlan
+            ?.destinationCountry ??
         widget.journeyContextController?.selection.destination?.name ??
         'brasil';
     final origin =
@@ -132,13 +137,15 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
 
       setState(() {
         _remoteQuickAnswers = items
-            .map((item) => _GuideQuickAnswerMeta(
-                  section: _sectionFromApi(item.section),
-                  icon: _iconForSection(_sectionFromApi(item.section)),
-                  question: item.question,
-                  answer: item.answer,
-                  keywords: item.keywords,
-                ))
+            .map(
+              (item) => _GuideQuickAnswerMeta(
+                section: _sectionFromApi(item.section),
+                icon: _iconForSection(_sectionFromApi(item.section)),
+                question: item.question,
+                answer: item.answer,
+                keywords: item.keywords,
+              ),
+            )
             .toList(growable: false);
       });
     } catch (_) {
@@ -253,13 +260,9 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                           onBack: widget.showAsTab
                               ? null
                               : () => Navigator.maybePop(context),
-                          trailing: IconButton(
-                            onPressed: widget.showAsTab
-                                ? _showInfoGuide
-                                : _showGuideModal,
-                            icon: const Icon(Icons.help_outline_rounded),
-                            visualDensity: VisualDensity.compact,
-                          ),
+                          onHelp: widget.showAsTab
+                              ? _showInfoGuide
+                              : _showGuideModal,
                         ),
                       if (!widget.embedded) const SizedBox(height: 20),
                       FrostedPanel(
