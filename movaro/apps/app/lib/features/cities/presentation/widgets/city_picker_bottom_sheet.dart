@@ -114,8 +114,7 @@ class _CityPickerBottomSheetState extends State<CityPickerBottomSheet>
 
     // State filter
     if (_selectedState != null) {
-      cities =
-          cities.where((c) => c.stateCode == _selectedState).toList();
+      cities = cities.where((c) => c.stateCode == _selectedState).toList();
     }
 
     // Search filter
@@ -171,20 +170,16 @@ class _CityPickerBottomSheetState extends State<CityPickerBottomSheet>
             const SizedBox(height: 16),
 
             // Title
-            Text(
-              widget.title,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text(widget.title, style: Theme.of(context).textTheme.titleLarge),
 
             // Subtitle
             if (widget.subtitle != null) ...[
               const SizedBox(height: 8),
               Text(
                 widget.subtitle!,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: textSoft),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: textSoft),
               ),
             ],
 
@@ -206,10 +201,9 @@ class _CityPickerBottomSheetState extends State<CityPickerBottomSheet>
                 dividerColor: Colors.transparent,
                 labelColor: AppColors.primary,
                 unselectedLabelColor: textSoft,
-                labelStyle: Theme.of(context)
-                    .textTheme
-                    .labelLarge
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                labelStyle: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
                 tabs: [
                   Tab(
                     child: Row(
@@ -258,8 +252,7 @@ class _CityPickerBottomSheetState extends State<CityPickerBottomSheet>
                     onSearchChanged: _onSearchChanged,
                     onStateSelected: (state) {
                       setState(() {
-                        _selectedState =
-                            _selectedState == state ? null : state;
+                        _selectedState = _selectedState == state ? null : state;
                       });
                     },
                     onCitySelected: (city) {
@@ -275,8 +268,8 @@ class _CityPickerBottomSheetState extends State<CityPickerBottomSheet>
             // Preview card + confirm
             _PreviewCard(
               city: _selectedCity,
-              confirmLabel: widget.confirmLabel ??
-                  context.l10n.cityPickerConfirmLabel(),
+              confirmLabel:
+                  widget.confirmLabel ?? context.l10n.cityPickerConfirmLabel(),
               onConfirm: _confirmSelection,
             ),
 
@@ -355,10 +348,7 @@ class _MapTab extends StatelessWidget {
           ),
           RichAttributionWidget(
             attributions: [
-              TextSourceAttribution(
-                'OpenStreetMap contributors',
-                onTap: () {},
-              ),
+              TextSourceAttribution('OpenStreetMap contributors', onTap: () {}),
             ],
           ),
         ],
@@ -453,8 +443,9 @@ class _ListTab extends StatelessWidget {
                     state,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: isSelected ? AppColors.primary : textSoft,
-                      fontWeight:
-                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
                     ),
                   ),
                 ),
@@ -564,28 +555,22 @@ class _CityListTile extends StatelessWidget {
                   children: [
                     Text(
                       city.name,
-                      style:
-                          Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       '${city.stateName} (${city.stateCode})',
-                      style:
-                          Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSoftFor(context),
-                          ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                      ),
                     ),
                   ],
                 ),
               ),
               if (selected)
-                Icon(
-                  Icons.check_circle,
-                  color: AppColors.primary,
-                  size: 20,
-                ),
+                Icon(Icons.check_circle, color: AppColors.primary, size: 20),
             ],
           ),
         ),
@@ -612,8 +597,7 @@ class _PreviewCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
-        border:
-            Border.all(color: AppColors.primary.withValues(alpha: 0.14)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.14)),
       ),
       child: Row(
         children: [
@@ -621,10 +605,7 @@ class _PreviewCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  city.name,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                Text(city.name, style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 4),
                 Text(
                   '${city.stateName} (${city.stateCode})',
@@ -636,10 +617,7 @@ class _PreviewCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          FilledButton(
-            onPressed: onConfirm,
-            child: Text(confirmLabel),
-          ),
+          FilledButton(onPressed: onConfirm, child: Text(confirmLabel)),
         ],
       ),
     );

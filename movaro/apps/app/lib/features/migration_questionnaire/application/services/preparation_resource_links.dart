@@ -69,9 +69,7 @@ class PreparationResourceLinks {
   static Uri buildQuintoAndarSearch(City city) {
     final uf = city.stateCode.toLowerCase();
     final slug = _slugify(city.name);
-    return Uri.parse(
-      'https://quintoandar.com.br/alugar/imovel/$uf/$slug/',
-    );
+    return Uri.parse('https://quintoandar.com.br/alugar/imovel/$uf/$slug/');
   }
 
   static Uri buildFlatioSearch(City city) {

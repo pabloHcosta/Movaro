@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/location/location_controller.dart';
+import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/features/flight_search/data/airport_database.dart';
 import 'package:movaro_app/features/flight_search/domain/models/airport.dart';
@@ -67,7 +67,8 @@ class _FlightSearchToolState extends State<FlightSearchTool> {
 
     // ── Origin airports (GPS-aware) ──────────────────────────────────────
     if (loc != null &&
-        loc.countryCode.toUpperCase() == widget.originCountryIso.toUpperCase()) {
+        loc.countryCode.toUpperCase() ==
+            widget.originCountryIso.toUpperCase()) {
       _suggestedOrigins = _finder.findNearest(
         latitude: loc.latitude,
         longitude: loc.longitude,
@@ -94,7 +95,8 @@ class _FlightSearchToolState extends State<FlightSearchTool> {
     // Pre-select: airport matching the plan city, or the main hub
     if (widget.destinationCityName != null &&
         widget.destinationCityName!.isNotEmpty) {
-      _selectedDestination = AirportDatabase.forCityName(
+      _selectedDestination =
+          AirportDatabase.forCityName(
             widget.destinationCityName!,
             widget.destinationCountryIso,
           ) ??
@@ -293,10 +295,7 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.labelLarge,
-    );
+    return Text(text, style: Theme.of(context).textTheme.labelLarge);
   }
 }
 
@@ -372,9 +371,7 @@ class _DatePickerTile extends StatelessWidget {
             Icon(
               Icons.event_outlined,
               size: 18,
-              color: hasError
-                  ? Theme.of(context).colorScheme.error
-                  : null,
+              color: hasError ? Theme.of(context).colorScheme.error : null,
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -424,17 +421,11 @@ class _RouteSummaryTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.route_rounded,
-            size: 18,
-            color: AppColors.primary,
-          ),
+          Icon(Icons.route_rounded, size: 18, color: AppColors.primary),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -442,9 +433,9 @@ class _RouteSummaryTile extends StatelessWidget {
               children: [
                 Text(
                   '${origin.iataCode} → ${destination.iataCode}',
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: AppColors.primary,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(color: AppColors.primary),
                 ),
                 const SizedBox(height: 2),
                 Text(

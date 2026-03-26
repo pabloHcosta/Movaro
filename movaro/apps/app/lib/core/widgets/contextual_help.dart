@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/core/persistence/feature_guide_preferences_store.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
-import 'package:movaro_app/shared/widgets/help_bottom_sheet.dart';
+import 'package:movaro_app/core/widgets/help_bottom_sheet.dart';
 
 class ContextualHelpContent {
   const ContextualHelpContent({

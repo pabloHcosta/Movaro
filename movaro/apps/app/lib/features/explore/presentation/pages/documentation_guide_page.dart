@@ -3,9 +3,9 @@ import 'package:movaro_app/core/config/api_keys.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/catalog/domain/entities/catalog_country.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/journey/journey_country_metadata.dart';
+import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart';
+import 'package:movaro_app/features/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/journey/journey_country_metadata.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -192,8 +192,8 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
       final journeyState = plan?.isCityConfirmed == true
           ? 'copilot_active'
           : plan != null
-              ? 'plan_generated'
-              : 'destination_selected';
+          ? 'plan_generated'
+          : 'destination_selected';
 
       _chatService!.initialize(
         curatedContent: buffer.toString(),
@@ -204,7 +204,9 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
           journeyState: journeyState,
           migrationGoal: plan?.goal.isNotEmpty == true ? plan!.goal : null,
           recommendedCity: plan?.recommendedCity?.name,
-          planTimeline: plan?.timeline.isNotEmpty == true ? plan!.timeline : null,
+          planTimeline: plan?.timeline.isNotEmpty == true
+              ? plan!.timeline
+              : null,
         ),
         errorMessages: ChatErrorMessages(
           notInitialized: l10n.aiChatNotInitialized,
@@ -256,144 +258,144 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                       context.pageVerticalPadding + 96,
                     ),
                     children: [
-                      if (!widget.embedded) AppGlassHeader(
-                        title: l10n.documentationPageTitle,
-                        onBack: widget.showAsTab
-                            ? null
-                            : () => Navigator.maybePop(context),
-                        trailing: IconButton(
-                          onPressed: widget.showAsTab
-                              ? _showInfoGuide
-                              : _showGuideModal,
-                          icon: const Icon(Icons.help_outline_rounded),
-                          visualDensity: VisualDensity.compact,
+                      if (!widget.embedded)
+                        AppGlassHeader(
+                          title: l10n.documentationPageTitle,
+                          onBack: widget.showAsTab
+                              ? null
+                              : () => Navigator.maybePop(context),
+                          trailing: IconButton(
+                            onPressed: widget.showAsTab
+                                ? _showInfoGuide
+                                : _showGuideModal,
+                            icon: const Icon(Icons.help_outline_rounded),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ),
+                      if (!widget.embedded) const SizedBox(height: 20),
+                      FrostedPanel(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _GuideCountryBar(
+                              selectedCountry: selectedCountry,
+                              selectedCountryLabel: _localizedCountryName(
+                                context,
+                                selectedCountry,
+                              ),
+                              hasActivePlan: hasActivePlan,
+                              onTapCountry: () => _showCountryPicker(
+                                context,
+                                availableCountries,
+                                selectedCountry.id,
+                              ),
+                            ),
+                            if (!hasActivePlan) ...[
+                              const SizedBox(height: 14),
+                              _GuideStatusNotice(
+                                title: l10n.documentationGuideNoPlanTitle,
+                                body: l10n.documentationGuideNoPlanBody(
+                                  selectedCountry.name,
+                                ),
+                              ),
+                            ] else if (!hasGuideData) ...[
+                              const SizedBox(height: 14),
+                              _GuideStatusNotice(
+                                title: l10n
+                                    .documentationGuideCountryPendingTitle(
+                                      selectedCountry.name,
+                                    ),
+                                body: l10n.documentationGuideCountryPendingBody,
+                              ),
+                            ],
+                            const SizedBox(height: 14),
+                            _GuideSearchField(
+                              controller: _searchController,
+                              hint: l10n.documentationSearchHint,
+                              onSubmitted: (_) => _handlePrimarySearchAction(
+                                context,
+                                searchResults,
+                              ),
+                              onChanged: hasGuideData
+                                  ? (value) {
+                                      setState(() {
+                                        _searchQuery = value;
+                                        if (value.trim().isNotEmpty) {
+                                          _selectedSection = null;
+                                        }
+                                      });
+                                    }
+                                  : null,
+                              onClear: _searchQuery.isEmpty
+                                  ? null
+                                  : () {
+                                      _searchController.clear();
+                                      setState(() {
+                                        _searchQuery = '';
+                                      });
+                                    },
+                              enabled: hasGuideData,
+                            ),
+                            if (hasGuideData &&
+                                _searchQuery.trim().isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              _SearchMatchPanel(
+                                l10n: l10n,
+                                results: searchResults,
+                                onTapResult: (result) =>
+                                    _handleSearchResultTap(context, result),
+                              ),
+                            ],
+                            if (hasGuideData) ...[
+                              const SizedBox(height: 14),
+                              _SectionFilterRail(
+                                l10n: l10n,
+                                paths: paths,
+                                selectedSection: _selectedSection,
+                                onSelected: (section) {
+                                  setState(() {
+                                    _selectedSection =
+                                        _selectedSection == section
+                                        ? null
+                                        : section;
+                                  });
+                                },
+                              ),
+                            ],
+                          ],
                         ),
                       ),
-                      if (!widget.embedded) const SizedBox(height: 20),
-                        FrostedPanel(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _GuideCountryBar(
-                                selectedCountry: selectedCountry,
-                                selectedCountryLabel: _localizedCountryName(
-                                  context,
-                                  selectedCountry,
-                                ),
-                                hasActivePlan: hasActivePlan,
-                                onTapCountry: () => _showCountryPicker(
-                                  context,
-                                  availableCountries,
-                                  selectedCountry.id,
-                                ),
-                              ),
-                              if (!hasActivePlan) ...[
-                                const SizedBox(height: 14),
-                                _GuideStatusNotice(
-                                  title: l10n.documentationGuideNoPlanTitle,
-                                  body: l10n.documentationGuideNoPlanBody(
-                                    selectedCountry.name,
-                                  ),
-                                ),
-                              ] else if (!hasGuideData) ...[
-                                const SizedBox(height: 14),
-                                _GuideStatusNotice(
-                                  title: l10n
-                                      .documentationGuideCountryPendingTitle(
-                                        selectedCountry.name,
-                                      ),
-                                  body:
-                                      l10n.documentationGuideCountryPendingBody,
-                                ),
-                              ],
-                              const SizedBox(height: 14),
-                              _GuideSearchField(
-                                controller: _searchController,
-                                hint: l10n.documentationSearchHint,
-                                onSubmitted: (_) => _handlePrimarySearchAction(
-                                  context,
-                                  searchResults,
-                                ),
-                                onChanged: hasGuideData
-                                    ? (value) {
-                                        setState(() {
-                                          _searchQuery = value;
-                                          if (value.trim().isNotEmpty) {
-                                            _selectedSection = null;
-                                          }
-                                        });
-                                      }
-                                    : null,
-                                onClear: _searchQuery.isEmpty
-                                    ? null
-                                    : () {
-                                        _searchController.clear();
-                                        setState(() {
-                                          _searchQuery = '';
-                                        });
-                                      },
-                                enabled: hasGuideData,
-                              ),
-                              if (hasGuideData &&
-                                  _searchQuery.trim().isNotEmpty) ...[
-                                const SizedBox(height: 12),
-                                _SearchMatchPanel(
-                                  l10n: l10n,
-                                  results: searchResults,
-                                  onTapResult: (result) =>
-                                      _handleSearchResultTap(context, result),
-                                ),
-                              ],
-                              if (hasGuideData) ...[
-                                const SizedBox(height: 14),
-                                _SectionFilterRail(
-                                  l10n: l10n,
-                                  paths: paths,
-                                  selectedSection: _selectedSection,
-                                  onSelected: (section) {
-                                    setState(() {
-                                      _selectedSection =
-                                          _selectedSection == section
-                                          ? null
-                                          : section;
-                                    });
-                                  },
-                                ),
-                              ],
-                            ],
+                      const SizedBox(height: 16),
+                      if (hasGuideData)
+                        _GuideResultsSection(
+                          key: _resultsKey,
+                          l10n: l10n,
+                          filteredPaths: filteredPaths,
+                          filteredAnswers: displayedAnswers,
+                          hasActiveFilter:
+                              _searchQuery.trim().isNotEmpty ||
+                              _selectedSection != null,
+                          onOpenSection: (section) => Navigator.pushNamed(
+                            context,
+                            AppRoutes.documentationTopic,
+                            arguments: section,
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        if (hasGuideData)
-                          _GuideResultsSection(
-                            key: _resultsKey,
-                            l10n: l10n,
-                            filteredPaths: filteredPaths,
-                            filteredAnswers: displayedAnswers,
-                            hasActiveFilter:
-                                _searchQuery.trim().isNotEmpty ||
-                                _selectedSection != null,
-                            onOpenSection: (section) => Navigator.pushNamed(
-                              context,
-                              AppRoutes.documentationTopic,
-                              arguments: section,
-                            ),
-                          ),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
-                _ScrollHintOverlay(
-                  visible: _showScrollHint,
-                  label: 'See more',
-                  onTap: _scrollDown,
-                ),
-              ],
-            ),
+              ),
+              _ScrollHintOverlay(
+                visible: _showScrollHint,
+                label: 'See more',
+                onTap: _scrollDown,
+              ),
+            ],
           ),
-        ],
-      );
+        ),
+      ],
+    );
 
     if (widget.embedded) return bodyWidget;
 

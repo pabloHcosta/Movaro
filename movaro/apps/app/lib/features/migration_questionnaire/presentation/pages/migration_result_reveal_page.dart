@@ -138,23 +138,21 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                       // Title
                       Text(
                         l10n.redoQuestionnaireDialogTitle(),
-                        style: Theme.of(
-                          dialogContext,
-                        ).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFFF0F6FC),
-                        ),
+                        style: Theme.of(dialogContext).textTheme.titleLarge
+                            ?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFFF0F6FC),
+                            ),
                       ),
                       const SizedBox(height: 6),
                       // Body
                       Text(
                         l10n.redoQuestionnaireDialogBody(),
-                        style: Theme.of(
-                          dialogContext,
-                        ).textTheme.bodyLarge?.copyWith(
-                          color: const Color(0xFF6B7280),
-                          height: 1.5,
-                        ),
+                        style: Theme.of(dialogContext).textTheme.bodyLarge
+                            ?.copyWith(
+                              color: const Color(0xFF6B7280),
+                              height: 1.5,
+                            ),
                       ),
                       const SizedBox(height: 10),
                       // Warning callout
@@ -240,17 +238,13 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                           padding: const EdgeInsets.symmetric(vertical: 11),
                           decoration: BoxDecoration(
                             color: const Color(0xFF1C2128),
-                            border: Border.all(
-                              color: const Color(0xFF2D333B),
-                            ),
+                            border: Border.all(color: const Color(0xFF2D333B)),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             l10n.redoQuestionnaireDialogCancel(),
                             textAlign: TextAlign.center,
-                            style: Theme.of(dialogContext)
-                                .textTheme
-                                .bodyLarge
+                            style: Theme.of(dialogContext).textTheme.bodyLarge
                                 ?.copyWith(
                                   fontWeight: FontWeight.w500,
                                   color: const Color(0xFF6B7280),
@@ -308,9 +302,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                       Expanded(
                         child: Text(
                           l10n.migrationResultRevealBreakdownTitle(city.name),
-                          style: Theme.of(sheetCtx)
-                              .textTheme
-                              .titleMedium
+                          style: Theme.of(sheetCtx).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                       ),
@@ -343,9 +335,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                       children: [
                         Text(
                           l10n.migrationResultRevealBreakdownOverall(),
-                          style: Theme.of(sheetCtx)
-                              .textTheme
-                              .labelMedium
+                          style: Theme.of(sheetCtx).textTheme.labelMedium
                               ?.copyWith(
                                 color: AppColors.textSoftFor(sheetCtx),
                                 fontWeight: FontWeight.w600,
@@ -380,9 +370,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               child: Text(
                                 compatLabel,
                                 overflow: TextOverflow.ellipsis,
-                                style: Theme.of(sheetCtx)
-                                    .textTheme
-                                    .labelSmall
+                                style: Theme.of(sheetCtx).textTheme.labelSmall
                                     ?.copyWith(
                                       color: overallStarColor,
                                       fontWeight: FontWeight.w700,
@@ -435,14 +423,14 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
   }
 
   static IconData _dimensionIcon(String key) => switch (key) {
-    'affordability'  => Icons.savings_outlined,
-    'job_market'     => Icons.work_outline_rounded,
-    'safety'         => Icons.shield_outlined,
+    'affordability' => Icons.savings_outlined,
+    'job_market' => Icons.work_outline_rounded,
+    'safety' => Icons.shield_outlined,
     'climate_warmth' => Icons.wb_sunny_outlined,
-    'transit_infra'  => Icons.directions_transit_outlined,
-    'nature'         => Icons.park_outlined,
-    'community'      => Icons.people_outline_rounded,
-    _                => Icons.tune_rounded,
+    'transit_infra' => Icons.directions_transit_outlined,
+    'nature' => Icons.park_outlined,
+    'community' => Icons.people_outline_rounded,
+    _ => Icons.tune_rounded,
   };
 
   // ── Build ───────────────────────────────────────────────────────────────────
@@ -462,9 +450,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
             body: Stack(
               children: [
                 AmbientBackground(),
-                SafeArea(
-                  child: _RevealSkeleton(),
-                ),
+                SafeArea(child: _RevealSkeleton()),
               ],
             ),
           );
@@ -474,8 +460,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
             .where((c) => c.id != recommendedCity.id)
             .toList(growable: false);
 
-        final compatibilityPct =
-            (plan.confidence * 100).round().clamp(0, 100);
+        final compatibilityPct = (plan.confidence * 100).round().clamp(0, 100);
 
         final reasons = plan.cityRecommendationReasons.isNotEmpty
             ? plan.cityRecommendationReasons
@@ -532,7 +517,9 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                             const SizedBox(height: 12),
                             FlightPriceBadge(
                               originCountryIso:
-                                  plan.originCountry == 'argentina' ? 'AR' : 'AR',
+                                  plan.originCountry == 'argentina'
+                                  ? 'AR'
+                                  : 'AR',
                               cityId: recommendedCity.id,
                             ),
                             if (reasons.isNotEmpty) ...[
@@ -641,12 +628,11 @@ class _HeroSection extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     city.name,
-                    style:
-                        Theme.of(context).textTheme.displaySmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          height: 1.0,
-                        ),
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      height: 1.0,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -703,11 +689,7 @@ double _pctToStars(int pct) {
 // ─── Star row widget ─────────────────────────────────────────────────────────
 
 class _StarRow extends StatelessWidget {
-  const _StarRow({
-    required this.stars,
-    this.size = 22,
-    this.color,
-  });
+  const _StarRow({required this.stars, this.size = 22, this.color});
 
   final double stars; // 0.0 – 5.0 in 0.5 increments
   final double size;
@@ -808,10 +790,7 @@ class _CompatibilityCard extends StatelessWidget {
 // ─── Why this city ─────────────────────────────────────────────────────────────
 
 class _WhyCitySection extends StatelessWidget {
-  const _WhyCitySection({
-    required this.cityName,
-    required this.reasons,
-  });
+  const _WhyCitySection({required this.cityName, required this.reasons});
 
   final String cityName;
   final List<String> reasons;
@@ -827,44 +806,49 @@ class _WhyCitySection extends StatelessWidget {
           padding: const EdgeInsets.only(left: 4, bottom: 10),
           child: Text(
             l10n.migrationResultRevealWhyTitle(cityName),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
         ),
-        ...reasons.take(3).map(
-          (reason) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: FrostedPanel(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 7,
-                    height: 7,
-                    margin: const EdgeInsets.only(top: 5, right: 12),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.5)
-                          : Colors.black.withValues(alpha: 0.4),
-                      shape: BoxShape.circle,
-                    ),
+        ...reasons
+            .take(3)
+            .map(
+              (reason) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: FrostedPanel(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
                   ),
-                  Expanded(
-                    child: Text(
-                      // Resolve l10n key → human-readable text
-                      l10n.recommendationReasonLabel(reason),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        height: 1.4,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        margin: const EdgeInsets.only(top: 5, right: 12),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.5)
+                              : Colors.black.withValues(alpha: 0.4),
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
+                      Expanded(
+                        child: Text(
+                          // Resolve l10n key → human-readable text
+                          l10n.recommendationReasonLabel(reason),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(height: 1.4),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
       ],
     );
   }
@@ -894,95 +878,90 @@ class _AlternativesSection extends StatelessWidget {
           padding: const EdgeInsets.only(left: 4, bottom: 10),
           child: Text(
             l10n.migrationResultRevealOtherOptionsTitle,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
         ),
-        ...cities.take(2).indexed.map(
-          (entry) {
-            final (index, city) = entry;
-            final imageUrl = cityImageUrlFor(city.id);
-            // Alternatives receive a lower compatibility estimate:
-            // 2nd city = ~85% of top; 3rd city = ~70% of top
-            final altPct = ((confidence * (index == 0 ? 0.85 : 0.70)) * 100)
-                .round()
-                .clamp(0, 100);
+        ...cities.take(2).indexed.map((entry) {
+          final (index, city) = entry;
+          final imageUrl = cityImageUrlFor(city.id);
+          // Alternatives receive a lower compatibility estimate:
+          // 2nd city = ~85% of top; 3rd city = ~70% of top
+          final altPct = ((confidence * (index == 0 ? 0.85 : 0.70)) * 100)
+              .round()
+              .clamp(0, 100);
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Material(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : Colors.black.withValues(alpha: 0.03),
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Material(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.03),
+              borderRadius: BorderRadius.circular(16),
+              child: InkWell(
+                onTap: () => onTap(city),
                 borderRadius: BorderRadius.circular(16),
-                child: InkWell(
-                  onTap: () => onTap(city),
-                  borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Row(
-                      children: [
-                        // City thumbnail
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: SizedBox(
-                            width: 52,
-                            height: 52,
-                            child: imageUrl != null
-                                ? CachedNetworkImage(
-                                    imageUrl: imageUrl,
-                                    fit: BoxFit.cover,
-                                    errorWidget: (_, _, _) =>
-                                        _AltCityPlaceholder(city: city),
-                                  )
-                                : _AltCityPlaceholder(city: city),
-                          ),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      // City thumbnail
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: SizedBox(
+                          width: 52,
+                          height: 52,
+                          child: imageUrl != null
+                              ? CachedNetworkImage(
+                                  imageUrl: imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorWidget: (_, _, _) =>
+                                      _AltCityPlaceholder(city: city),
+                                )
+                              : _AltCityPlaceholder(city: city),
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                city.name,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
-                                    ?.copyWith(fontWeight: FontWeight.w700),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${city.stateName} · ${city.stateCode}',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSoftFor(context),
-                                ),
-                              ),
-                            ],
-                          ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              city.name,
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${city.stateName} · ${city.stateCode}',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: AppColors.textSoftFor(context),
+                                  ),
+                            ),
+                          ],
                         ),
-                        // Compatibility mini-stars
-                        _StarRow(
-                          stars: _pctToStars(altPct),
-                          size: 14,
-                          color: AppColors.warning,
-                        ),
-                        const SizedBox(width: 6),
-                        Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 14,
-                          color: AppColors.textSoftFor(context),
-                        ),
-                      ],
-                    ),
+                      ),
+                      // Compatibility mini-stars
+                      _StarRow(
+                        stars: _pctToStars(altPct),
+                        size: 14,
+                        color: AppColors.warning,
+                      ),
+                      const SizedBox(width: 6),
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: AppColors.textSoftFor(context),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        }),
       ],
     );
   }
@@ -1033,18 +1012,14 @@ class _DimensionRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 18,
-            color: cs.onSurface.withValues(alpha: 0.45),
-          ),
+          Icon(icon, size: 18, color: cs.onSurface.withValues(alpha: 0.45)),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
             ),
           ),
           _StarRow(stars: stars, size: 14, color: AppColors.warning),
@@ -1251,7 +1226,9 @@ class _FooterCtaState extends State<_FooterCta> {
                       ),
                     )
                   : Text(
-                      l10n.migrationResultRevealViewDetailsCta(widget.city.name),
+                      l10n.migrationResultRevealViewDetailsCta(
+                        widget.city.name,
+                      ),
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
             ),
@@ -1365,9 +1342,9 @@ class _AntiAnchorReinforcementBanner extends StatelessWidget {
               children: [
                 Text(
                   l10n.antiAnchorReinforcementTitle(cityName),
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -1408,7 +1385,9 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
 
     // Build dimension comparisons.
     final prefDims = MigrationPlanGenerator.cityDimensionsPublic(preferredCity);
-    final recDims = MigrationPlanGenerator.cityDimensionsPublic(recommendedCity);
+    final recDims = MigrationPlanGenerator.cityDimensionsPublic(
+      recommendedCity,
+    );
 
     // Find key differences (where recommended beats preferred by >10 points).
     final strengths = <String>[];
@@ -1493,10 +1472,17 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Row(
                   children: [
-                    Icon(Icons.add_circle_outline, size: 14, color: AppColors.success),
+                    Icon(
+                      Icons.add_circle_outline,
+                      size: 14,
+                      color: AppColors.success,
+                    ),
                     const SizedBox(width: 6),
                     Expanded(
-                      child: Text(s, style: Theme.of(context).textTheme.bodySmall),
+                      child: Text(
+                        s,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ),
                   ],
                 ),
@@ -1520,10 +1506,17 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, size: 14, color: AppColors.warning),
+                    Icon(
+                      Icons.info_outline,
+                      size: 14,
+                      color: AppColors.warning,
+                    ),
                     const SizedBox(width: 6),
                     Expanded(
-                      child: Text(s, style: Theme.of(context).textTheme.bodySmall),
+                      child: Text(
+                        s,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ),
                   ],
                 ),

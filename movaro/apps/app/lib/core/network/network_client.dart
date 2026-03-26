@@ -81,10 +81,7 @@ class NetworkClient {
     return _executeWithRetry(() => _requestPost(path, body));
   }
 
-  Future<Object?> _requestPost(
-    String path,
-    Map<String, dynamic> body,
-  ) async {
+  Future<Object?> _requestPost(String path, Map<String, dynamic> body) async {
     if (!path.startsWith('/')) {
       throw const NetworkException('invalid_api_path', isRetryable: false);
     }
@@ -142,10 +139,7 @@ class NetworkClient {
     }
   }
 
-  Future<Object?> _get(
-    String path, {
-    Map<String, String> headers = const {},
-  }) {
+  Future<Object?> _get(String path, {Map<String, String> headers = const {}}) {
     return _executeWithRetry(() => _request(path, headers: headers));
   }
 

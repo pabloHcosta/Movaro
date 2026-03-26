@@ -1,6 +1,6 @@
-import 'package:movaro_app/core/catalog/domain/repositories/catalog_repository.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/journey/journey_country_metadata.dart';
+import 'package:movaro_app/features/catalog/domain/repositories/catalog_repository.dart';
+import 'package:movaro_app/features/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/journey/journey_country_metadata.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/available_capital_ranges_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/models/option_model.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/models/question_model.dart';
@@ -75,11 +75,7 @@ class QuestionRepositoryImpl implements QuestionRepository {
             label: 'choose_on_map',
             value: 'choose_on_map',
           ),
-          OptionModel(
-            id: 'dont_know',
-            label: 'dont_know',
-            value: 'dont_know',
-          ),
+          OptionModel(id: 'dont_know', label: 'dont_know', value: 'dont_know'),
         ],
       ).toEntity(),
       QuestionModel(
@@ -131,16 +127,8 @@ class QuestionRepositoryImpl implements QuestionRepository {
         variants: const [QuestionnaireVariant.strategic],
         options: const [
           OptionModel(id: 'remote', label: 'remote', value: 'remote'),
-          OptionModel(
-            id: 'local_job',
-            label: 'local_job',
-            value: 'local_job',
-          ),
-          OptionModel(
-            id: 'both_open',
-            label: 'both_open',
-            value: 'both_open',
-          ),
+          OptionModel(id: 'local_job', label: 'local_job', value: 'local_job'),
+          OptionModel(id: 'both_open', label: 'both_open', value: 'both_open'),
         ],
       ).toEntity(),
       QuestionModel(

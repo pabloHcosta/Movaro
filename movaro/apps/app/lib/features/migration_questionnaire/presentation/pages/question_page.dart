@@ -5,14 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/catalog/domain/entities/catalog_country.dart';
-import 'package:movaro_app/core/journey/country_coverage.dart';
-import 'package:movaro_app/core/journey/detected_location.dart';
-import 'package:movaro_app/core/journey/journey_country_metadata.dart';
-import 'package:movaro_app/core/location/location_controller.dart';
-import 'package:movaro_app/core/location/location_data.dart';
-import 'package:movaro_app/core/location/presentation/pages/location_permission_screen.dart';
-import 'package:movaro_app/core/location/presentation/widgets/location_banner_widget.dart';
+import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart';
+import 'package:movaro_app/features/journey/country_coverage.dart';
+import 'package:movaro_app/features/journey/detected_location.dart';
+import 'package:movaro_app/features/journey/journey_country_metadata.dart';
+import 'package:movaro_app/features/location/location_controller.dart';
+import 'package:movaro_app/features/location/location_data.dart';
+import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
+import 'package:movaro_app/features/location/presentation/widgets/location_banner_widget.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -493,9 +493,8 @@ class _QuestionPageState extends State<QuestionPage> {
                     controller.answerValuesFor(question.id).length,
                     question.maxSelections,
                   ),
-                  isComplete: controller
-                      .answerValuesFor(question.id)
-                      .length >=
+                  isComplete:
+                      controller.answerValuesFor(question.id).length >=
                       question.maxSelections,
                 ),
               ] else if (question.id == 'constraints') ...[
@@ -545,10 +544,9 @@ class _QuestionPageState extends State<QuestionPage> {
                               alignment: Alignment.center,
                               child: Icon(
                                 Icons.keyboard_arrow_down_rounded,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withValues(alpha: 0.7),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withValues(alpha: 0.7),
                                 size: 22,
                               ),
                             ),
@@ -651,26 +649,25 @@ class _QuestionPageState extends State<QuestionPage> {
       controller: _optionsScrollController,
       slivers: [
         SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (ctx, index) {
-              final option = options[index];
-              final selectedValue = controller.answerFor(question.id) ?? '';
-              final isSelected = selectedValue == option.value;
-              return Padding(
-                padding: EdgeInsets.only(bottom: index < options.length - 1 ? 8 : 0),
-                child: _CompactOptionRow(
-                  icon: _iconDataFor(question.id, option.value),
-                  label: _displayOptionLabel(context, question.id, option.value),
-                  isSelected: isSelected,
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    _handleSingleSelect(question, option);
-                  },
-                ),
-              );
-            },
-            childCount: options.length,
-          ),
+          delegate: SliverChildBuilderDelegate((ctx, index) {
+            final option = options[index];
+            final selectedValue = controller.answerFor(question.id) ?? '';
+            final isSelected = selectedValue == option.value;
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: index < options.length - 1 ? 8 : 0,
+              ),
+              child: _CompactOptionRow(
+                icon: _iconDataFor(question.id, option.value),
+                label: _displayOptionLabel(context, question.id, option.value),
+                isSelected: isSelected,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  _handleSingleSelect(question, option);
+                },
+              ),
+            );
+          }, childCount: options.length),
         ),
         const SliverPadding(padding: EdgeInsets.only(bottom: 4)),
       ],
@@ -717,25 +714,24 @@ class _QuestionPageState extends State<QuestionPage> {
       controller: _optionsScrollController,
       slivers: [
         SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (ctx, index) {
-              final option = options[index];
-              final isSelected = selectedValue == option.value;
-              return Padding(
-                padding: EdgeInsets.only(bottom: index < options.length - 1 ? 8 : 0),
-                child: _CompactOptionRow(
-                  icon: _iconDataFor(question.id, option.value),
-                  label: _displayOptionLabel(context, question.id, option.value),
-                  isSelected: isSelected,
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    _handleTravelGroupSelect(option);
-                  },
-                ),
-              );
-            },
-            childCount: options.length,
-          ),
+          delegate: SliverChildBuilderDelegate((ctx, index) {
+            final option = options[index];
+            final isSelected = selectedValue == option.value;
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: index < options.length - 1 ? 8 : 0,
+              ),
+              child: _CompactOptionRow(
+                icon: _iconDataFor(question.id, option.value),
+                label: _displayOptionLabel(context, question.id, option.value),
+                isSelected: isSelected,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  _handleTravelGroupSelect(option);
+                },
+              ),
+            );
+          }, childCount: options.length),
         ),
         if (showChildrenSelector)
           SliverPadding(
@@ -881,9 +877,9 @@ class _QuestionPageState extends State<QuestionPage> {
             child: Text(
               '$selectedCount/$maxSelections ${_selectionCounterSuffix(context)}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(
-                  alpha: 0.5,
-                ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
               textAlign: TextAlign.center,
             ),
@@ -902,136 +898,138 @@ class _QuestionPageState extends State<QuestionPage> {
                 ? Colors.white.withValues(alpha: 0.08)
                 : AppColors.primary.withValues(alpha: 0.10),
             child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutCubic,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: isEnabled
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(
-                      alpha: AppColors.isDark(context) ? 0.22 : 0.16,
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: isEnabled
+                    ? [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(
+                            alpha: AppColors.isDark(context) ? 0.22 : 0.16,
+                          ),
+                          blurRadius: 24,
+                          offset: const Offset(0, 12),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  style: _primaryButtonStyle(context).copyWith(
+                    padding: WidgetStatePropertyAll(
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
                     ),
-                    blurRadius: 24,
-                    offset: const Offset(0, 12),
+                    shape: WidgetStatePropertyAll(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
                   ),
-                ]
-              : null,
-        ),
-        child: SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            style: _primaryButtonStyle(context).copyWith(
-              padding: WidgetStatePropertyAll(
-                const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-              ),
-              shape: WidgetStatePropertyAll(
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                  onPressed: isEnabled
+                      ? () async {
+                          setState(() {
+                            _showProcessingScreen = controller.isLastQuestion;
+                          });
+                          final completed = await controller.goNext();
+                          if (!mounted) {
+                            return;
+                          }
+                          if (!completed) {
+                            setState(() {
+                              _showProcessingScreen = false;
+                            });
+                          }
+                          if (completed && context.mounted) {
+                            await Future<void>.delayed(
+                              const Duration(milliseconds: 700),
+                            );
+                            if (!context.mounted) {
+                              return;
+                            }
+                            Navigator.pushReplacementNamed(
+                              context,
+                              AppRoutes.migrationResultReveal,
+                            );
+                          }
+                        }
+                      : null,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    child: controller.isGeneratingPlan
+                        ? Row(
+                            key: const ValueKey('loading'),
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white.withValues(alpha: 0.96),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                l10n.bmpCtaGenerate,
+                                style: Theme.of(context).textTheme.labelLarge
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            key: ValueKey(isGenerate ? 'generate' : 'continue'),
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                isGenerate
+                                    ? l10n.bmpCtaGenerate
+                                    : l10n.bmpCtaContinue,
+                                style: Theme.of(context).textTheme.labelLarge
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                              const SizedBox(width: 12),
+                              AnimatedSlide(
+                                duration: const Duration(milliseconds: 220),
+                                offset: isEnabled
+                                    ? const Offset(0.08, 0)
+                                    : Offset.zero,
+                                curve: Curves.easeOutCubic,
+                                child: Container(
+                                  width: 30,
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.18),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    isGenerate
+                                        ? Icons.auto_awesome_rounded
+                                        : Icons.arrow_forward_rounded,
+                                    size: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
               ),
             ),
-            onPressed: isEnabled
-                ? () async {
-                    setState(() {
-                      _showProcessingScreen = controller.isLastQuestion;
-                    });
-                    final completed = await controller.goNext();
-                    if (!mounted) {
-                      return;
-                    }
-                    if (!completed) {
-                      setState(() {
-                        _showProcessingScreen = false;
-                      });
-                    }
-                    if (completed && context.mounted) {
-                      await Future<void>.delayed(
-                        const Duration(milliseconds: 700),
-                      );
-                      if (!context.mounted) {
-                        return;
-                      }
-                      Navigator.pushReplacementNamed(
-                        context,
-                        AppRoutes.migrationResultReveal,
-                      );
-                    }
-                  }
-                : null,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 180),
-              switchInCurve: Curves.easeOut,
-              switchOutCurve: Curves.easeIn,
-              child: controller.isGeneratingPlan
-                  ? Row(
-                      key: const ValueKey('loading'),
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white.withValues(alpha: 0.96),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          l10n.bmpCtaGenerate,
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
-                      ],
-                    )
-                  : Row(
-                      key: ValueKey(isGenerate ? 'generate' : 'continue'),
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          isGenerate
-                              ? l10n.bmpCtaGenerate
-                              : l10n.bmpCtaContinue,
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
-                        const SizedBox(width: 12),
-                        AnimatedSlide(
-                          duration: const Duration(milliseconds: 220),
-                          offset: isEnabled
-                              ? const Offset(0.08, 0)
-                              : Offset.zero,
-                          curve: Curves.easeOutCubic,
-                          child: Container(
-                            width: 30,
-                            height: 30,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              isGenerate
-                                  ? Icons.auto_awesome_rounded
-                                  : Icons.arrow_forward_rounded,
-                              size: 18,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
-          ),
-        ),
-      ),
-        ),   // FrostedPanel
-      ),     // AnimatedOpacity
+          ), // FrostedPanel
+        ), // AnimatedOpacity
       ],
     ); // Column
   }
@@ -1505,7 +1503,11 @@ class _VariantSelectorBodyState extends State<_VariantSelectorBody> {
           // ── Section 1: what you'll get ───────────────────────────────────
           _ResultOutcomeHeader(),
           const SizedBox(height: 20),
-          Divider(height: 1, thickness: 1, color: cs.outline.withValues(alpha: 0.2)),
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: cs.outline.withValues(alpha: 0.2),
+          ),
           const SizedBox(height: 20),
           Text(
             l10n.questionnaireVariantHowLabel(),
@@ -1564,11 +1566,7 @@ class _VariantSelectorBodyState extends State<_VariantSelectorBody> {
 class _ResultOutcomeHeader extends StatelessWidget {
   const _ResultOutcomeHeader();
 
-  InlineSpan _buildRichItem(
-    BuildContext context,
-    String full,
-    String bold,
-  ) {
+  InlineSpan _buildRichItem(BuildContext context, String full, String bold) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final baseStyle = tt.bodyMedium?.copyWith(
@@ -1596,9 +1594,18 @@ class _ResultOutcomeHeader extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     final items = [
-      (l10n.questionnaireVariantItem1Full(), l10n.questionnaireVariantItem1Bold()),
-      (l10n.questionnaireVariantItem2Full(), l10n.questionnaireVariantItem2Bold()),
-      (l10n.questionnaireVariantItem3Full(), l10n.questionnaireVariantItem3Bold()),
+      (
+        l10n.questionnaireVariantItem1Full(),
+        l10n.questionnaireVariantItem1Bold(),
+      ),
+      (
+        l10n.questionnaireVariantItem2Full(),
+        l10n.questionnaireVariantItem2Bold(),
+      ),
+      (
+        l10n.questionnaireVariantItem3Full(),
+        l10n.questionnaireVariantItem3Bold(),
+      ),
     ];
 
     return Column(
@@ -1704,7 +1711,9 @@ class _VariantSelectionCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     title,
-                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: tt.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -1945,16 +1954,13 @@ class _SelectedPreferredCityCard extends StatelessWidget {
                 width: 46,
                 height: 46,
                 decoration: BoxDecoration(
-                  color: (isDark
-                          ? const Color(0xFF4AA7FF)
-                          : AppColors.primary)
+                  color: (isDark ? const Color(0xFF4AA7FF) : AppColors.primary)
                       .withValues(alpha: isDark ? 0.18 : 0.10),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
                   Icons.location_city_rounded,
-                  color:
-                      isDark ? const Color(0xFF76C3FF) : AppColors.primary,
+                  color: isDark ? const Color(0xFF76C3FF) : AppColors.primary,
                   size: 24,
                 ),
               ),
@@ -1965,28 +1971,24 @@ class _SelectedPreferredCityCard extends StatelessWidget {
                   children: [
                     Text(
                       city.name,
-                      style:
-                          Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimaryFor(context),
-                          ),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimaryFor(context),
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       '${city.stateName} · ${city.stateCode}',
-                      style:
-                          Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSoftFor(context),
-                          ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                      ),
                     ),
                   ],
                 ),
               ),
               Icon(
                 Icons.check_circle_rounded,
-                color: isDark
-                    ? const Color(0xFF76C3FF)
-                    : AppColors.primary,
+                color: isDark ? const Color(0xFF76C3FF) : AppColors.primary,
                 size: 22,
               ),
             ],
@@ -2004,9 +2006,7 @@ class _SelectedPreferredCityCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
                 side: BorderSide(
-                  color: (isDark
-                          ? const Color(0xFF5BB6FF)
-                          : AppColors.primary)
+                  color: (isDark ? const Color(0xFF5BB6FF) : AppColors.primary)
                       .withValues(alpha: 0.3),
                 ),
               ),
@@ -2070,8 +2070,7 @@ class _CompactOptionRow extends StatelessWidget {
                 child: Text(
                   label,
                   style: tt.bodyMedium?.copyWith(
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w400,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -2087,9 +2086,7 @@ class _CompactOptionRow extends StatelessWidget {
                   color: isSelected ? cs.primary : Colors.transparent,
                   border: isSelected
                       ? null
-                      : Border.all(
-                          color: cs.outline.withValues(alpha: 0.35),
-                        ),
+                      : Border.all(color: cs.outline.withValues(alpha: 0.35)),
                 ),
                 child: isSelected
                     ? const Icon(Icons.check, size: 10, color: Colors.white)
@@ -2151,8 +2148,7 @@ class _PriorityChip extends StatelessWidget {
               label,
               style: tt.labelMedium?.copyWith(
                 color: isSelected ? cs.primary : cs.onSurface,
-                fontWeight:
-                    isSelected ? FontWeight.w600 : FontWeight.w400,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
           ],
@@ -2250,14 +2246,16 @@ class _LargeOptionCard extends StatelessWidget {
                   border: isSelected
                       ? null
                       : Border.all(
-                          color: (isDark
-                                  ? Colors.white
-                                  : AppColors.primary)
+                          color: (isDark ? Colors.white : AppColors.primary)
                               .withValues(alpha: 0.3),
                         ),
                 ),
                 child: isSelected
-                    ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
+                    ? const Icon(
+                        Icons.check_rounded,
+                        color: Colors.white,
+                        size: 14,
+                      )
                     : null,
               ),
             ],
@@ -3472,7 +3470,10 @@ class _LocationPrecheckState extends State<_LocationPrecheck> {
           const Spacer(),
           Icon(Icons.my_location_rounded, size: 40, color: cs.primary),
           const SizedBox(height: 20),
-          Text(title, style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
+          Text(
+            title,
+            style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 12),
           Text(subtitle, style: tt.bodyMedium),
           const Spacer(),
@@ -3526,7 +3527,10 @@ class _LocationPrecheckState extends State<_LocationPrecheck> {
           const Spacer(),
           Icon(Icons.location_on_outlined, size: 40, color: cs.primary),
           const SizedBox(height: 20),
-          Text(title, style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
+          Text(
+            title,
+            style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 12),
           Text(subtitle, style: tt.bodyMedium),
           const Spacer(),
@@ -3579,7 +3583,10 @@ class _LocationPrecheckState extends State<_LocationPrecheck> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+          Text(
+            title,
+            style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 16),
           Expanded(
             child: ListView.separated(

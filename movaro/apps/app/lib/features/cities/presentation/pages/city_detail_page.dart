@@ -7,10 +7,10 @@ import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/errors/error_handler.dart';
-import 'package:movaro_app/core/journey/detected_location.dart';
-import 'package:movaro_app/core/location/location_controller.dart';
-import 'package:movaro_app/core/location/presentation/pages/location_permission_screen.dart';
-import 'package:movaro_app/core/location/presentation/widgets/location_banner_widget.dart';
+import 'package:movaro_app/features/journey/detected_location.dart';
+import 'package:movaro_app/features/location/location_controller.dart';
+import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
+import 'package:movaro_app/features/location/presentation/widgets/location_banner_widget.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/utils/number_formatters.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
@@ -671,10 +671,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
 // ─── Compact bar shown when arriving from MigrationResultRevealPage ───────────
 
 class _MigrationResultBar extends StatefulWidget {
-  const _MigrationResultBar({
-    required this.city,
-    required this.controller,
-  });
+  const _MigrationResultBar({required this.city, required this.controller});
 
   final City city;
   final MigrationQuestionnaireController? controller;
@@ -725,8 +722,9 @@ class _MigrationResultBarState extends State<_MigrationResultBar> {
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final plan = widget.controller?.generatedPlan;
-    final compatibilityPct =
-        plan != null ? (plan.confidence * 100).round().clamp(0, 100) : null;
+    final compatibilityPct = plan != null
+        ? (plan.confidence * 100).round().clamp(0, 100)
+        : null;
 
     return Container(
       decoration: BoxDecoration(
@@ -756,9 +754,9 @@ class _MigrationResultBarState extends State<_MigrationResultBar> {
               children: [
                 Text(
                   'Iniciar plano em ${widget.city.name}?',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 if (compatibilityPct != null) ...[
                   const SizedBox(height: 2),
@@ -937,12 +935,11 @@ class _DetailHeroSection extends StatelessWidget {
                       if (tempLabel != null) ...[
                         Text(
                           tempLabel,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleSmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.80),
-                            fontWeight: FontWeight.w700,
-                          ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.80),
+                                fontWeight: FontWeight.w700,
+                              ),
                         ),
                         const SizedBox(width: 10),
                       ],

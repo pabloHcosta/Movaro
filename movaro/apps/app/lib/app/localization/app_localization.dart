@@ -186,17 +186,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
           en: 'Buenos Aires (CABA / Greater Buenos Aires)',
         );
       case 'cordoba':
-        return _localizedText(
-          pt: 'Córdoba',
-          es: 'Córdoba',
-          en: 'Córdoba',
-        );
+        return _localizedText(pt: 'Córdoba', es: 'Córdoba', en: 'Córdoba');
       case 'mendoza':
-        return _localizedText(
-          pt: 'Mendoza',
-          es: 'Mendoza',
-          en: 'Mendoza',
-        );
+        return _localizedText(pt: 'Mendoza', es: 'Mendoza', en: 'Mendoza');
       case 'rosario':
         return _localizedText(
           pt: 'Rosário (Santa Fe)',
@@ -671,11 +663,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'Open settings',
   );
 
-  String settingsThemeTitle() => _localizedText(
-    pt: 'Aparencia',
-    es: 'Apariencia',
-    en: 'Appearance',
-  );
+  String settingsThemeTitle() =>
+      _localizedText(pt: 'Aparencia', es: 'Apariencia', en: 'Appearance');
 
   String settingsThemeBody() => _localizedText(
     pt: 'Escolha o tema visual do aplicativo. Por padrao, o app usa o modo escuro.',
@@ -730,11 +719,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'Your ideal city in Brazil',
   );
 
-  String questionnaireVariantItem1Bold() => _localizedText(
-    pt: 'cidade ideal',
-    es: 'ciudad ideal',
-    en: 'ideal city',
-  );
+  String questionnaireVariantItem1Bold() =>
+      _localizedText(pt: 'cidade ideal', es: 'ciudad ideal', en: 'ideal city');
 
   String questionnaireVariantItem2Full() => _localizedText(
     pt: 'Um guia personalizado de migração',
@@ -785,8 +771,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
   String questionnaireVariantLeanTime() =>
       _localizedText(pt: '~2 min', es: '~2 min', en: '~2 min');
 
-  String questionnaireVariantLeanQuestionCount() =>
-      _localizedText(pt: '4 pergs. no total', es: '4 preg. en total', en: '4 qs. total');
+  String questionnaireVariantLeanQuestionCount() => _localizedText(
+    pt: '4 pergs. no total',
+    es: '4 preg. en total',
+    en: '4 qs. total',
+  );
 
   String questionnaireVariantLeanAction() =>
       _localizedText(pt: 'Começar agora', es: 'Empezar ahora', en: 'Start now');
@@ -797,8 +786,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'or if you prefer more precision',
   );
 
-  String questionnaireVariantStrategicBadge() =>
-      _localizedText(pt: '⭐ Mais preciso', es: '⭐ Más preciso', en: '⭐ More precise');
+  String questionnaireVariantStrategicBadge() => _localizedText(
+    pt: '⭐ Mais preciso',
+    es: '⭐ Más preciso',
+    en: '⭐ More precise',
+  );
 
   String questionnaireVariantStrategicDescription() => _localizedText(
     pt: '10 perguntas, resultado mais afinado ao seu perfil e restrições.',
@@ -809,8 +801,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
   String questionnaireVariantStrategicTime() =>
       _localizedText(pt: '~4 min', es: '~4 min', en: '~4 min');
 
-  String questionnaireVariantStrategicQuestionCount() =>
-      _localizedText(pt: '10 pergs. no total', es: '10 preg. en total', en: '10 qs. total');
+  String questionnaireVariantStrategicQuestionCount() => _localizedText(
+    pt: '10 pergs. no total',
+    es: '10 preg. en total',
+    en: '10 qs. total',
+  );
 
   String questionnaireVariantStrategicAction() => _localizedText(
     pt: 'Escolher plano estratégico',
@@ -1536,12 +1531,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
 
   // ── MigrationResultRevealPage strings ─────────────────────────────────────
 
-  String migrationResultRevealBreakdownTitle(String cityName) =>
-      _localizedText(
-        pt: 'Por que $cityName?',
-        es: '¿Por qué $cityName?',
-        en: 'Why $cityName?',
-      );
+  String migrationResultRevealBreakdownTitle(String cityName) => _localizedText(
+    pt: 'Por que $cityName?',
+    es: '¿Por qué $cityName?',
+    en: 'Why $cityName?',
+  );
 
   String migrationResultRevealBreakdownOverall() => _localizedText(
     pt: 'Compatibilidade geral',
@@ -1555,12 +1549,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'Tap to see breakdown',
   );
 
-  String migrationResultRevealViewDetailsCta(String cityName) =>
-      _localizedText(
-        pt: 'Ver detalhes de $cityName',
-        es: 'Ver detalles de $cityName',
-        en: 'View details of $cityName',
-      );
+  String migrationResultRevealViewDetailsCta(String cityName) => _localizedText(
+    pt: 'Ver detalhes de $cityName',
+    es: 'Ver detalles de $cityName',
+    en: 'View details of $cityName',
+  );
 
   /// Labels for individual scoring dimensions shown in the compatibility
   /// breakdown bottom sheet.
@@ -1579,17 +1572,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
           en: 'Job market',
         );
       case 'safety':
-        return _localizedText(
-          pt: 'Segurança',
-          es: 'Seguridad',
-          en: 'Safety',
-        );
+        return _localizedText(pt: 'Segurança', es: 'Seguridad', en: 'Safety');
       case 'climate_warmth':
-        return _localizedText(
-          pt: 'Clima',
-          es: 'Clima',
-          en: 'Climate',
-        );
+        return _localizedText(pt: 'Clima', es: 'Clima', en: 'Climate');
       case 'transit_infra':
         return _localizedText(
           pt: 'Infraestrutura e transporte',
@@ -1639,11 +1624,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'Please select a departure date to continue',
   );
 
-  String flightSearchDestinationLabel() => _localizedText(
-    pt: 'Para onde?',
-    es: '¿A dónde vas?',
-    en: 'Where to?',
-  );
+  String flightSearchDestinationLabel() =>
+      _localizedText(pt: 'Para onde?', es: '¿A dónde vas?', en: 'Where to?');
 
   String flightSearchButtonLabel() => _localizedText(
     pt: 'Buscar voos',
@@ -1691,17 +1673,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
 
   // ── City Picker Bottom Sheet ──────────────────────────────────────────────
 
-  String cityPickerMapTab() => _localizedText(
-    pt: 'Mapa',
-    es: 'Mapa',
-    en: 'Map',
-  );
+  String cityPickerMapTab() =>
+      _localizedText(pt: 'Mapa', es: 'Mapa', en: 'Map');
 
-  String cityPickerListTab() => _localizedText(
-    pt: 'Lista',
-    es: 'Lista',
-    en: 'List',
-  );
+  String cityPickerListTab() =>
+      _localizedText(pt: 'Lista', es: 'Lista', en: 'List');
 
   String cityPickerSearchHint() => _localizedText(
     pt: 'Buscar cidade (ex: Floripa, San Pablo...)',
@@ -1773,8 +1749,10 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'You thought about $preferredCity — great city!',
   );
 
-  String antiAnchorComparisonBody(String preferredCity, String recommendedCity) =>
-      _localizedText(
+  String antiAnchorComparisonBody(
+    String preferredCity,
+    String recommendedCity,
+  ) => _localizedText(
     pt: 'Mas com base no seu perfil, $recommendedCity pode ser uma opção ainda melhor. Veja a comparação:',
     es: 'Pero según tu perfil, $recommendedCity podría ser una opción aún mejor. Mirá la comparación:',
     en: 'But based on your profile, $recommendedCity might be an even better option. See the comparison:',
@@ -1792,11 +1770,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'See details of $cityName',
   );
 
-  String antiAnchorStrength() => _localizedText(
-    pt: 'Ponto forte',
-    es: 'Punto fuerte',
-    en: 'Strength',
-  );
+  String antiAnchorStrength() =>
+      _localizedText(pt: 'Ponto forte', es: 'Punto fuerte', en: 'Strength');
 
   String antiAnchorAttention() => _localizedText(
     pt: 'Ponto de atenção',

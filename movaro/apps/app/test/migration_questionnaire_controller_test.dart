@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/core/catalog/data/datasources/seed_catalog_data_source.dart';
-import 'package:movaro_app/core/catalog/data/repositories/catalog_repository_impl.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/journey/journey_preferences_store.dart';
+import 'package:movaro_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
+import 'package:movaro_app/features/catalog/data/repositories/catalog_repository_impl.dart';
+import 'package:movaro_app/features/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/journey/journey_preferences_store.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
@@ -78,8 +78,10 @@ void main() {
     test('inserts travel group and keeps capital question conditional', () {
       expect(controller.activeQuestions.map((question) => question.id), [
         'origin_country',
+        'preferred_city',
         'timeline',
         'travel_group',
+        'work_arrangement',
         'priorities',
         'constraints',
         'funding',
@@ -90,8 +92,10 @@ void main() {
 
       expect(controller.activeQuestions.map((question) => question.id), [
         'origin_country',
+        'preferred_city',
         'timeline',
         'travel_group',
+        'work_arrangement',
         'priorities',
         'constraints',
         'funding',
@@ -103,8 +107,10 @@ void main() {
 
       expect(controller.activeQuestions.map((question) => question.id), [
         'origin_country',
+        'preferred_city',
         'timeline',
         'travel_group',
+        'work_arrangement',
         'priorities',
         'constraints',
         'funding',
@@ -112,30 +118,34 @@ void main() {
       ]);
     });
 
-    test('family with kids requires children count before continuing',
-        () async {
-      expect(controller.currentQuestion?.id, 'origin_country');
-      await controller.goNext();
-      expect(controller.currentQuestion?.id, 'timeline');
+    test(
+      'family with kids requires children count before continuing',
+      () async {
+        expect(controller.currentQuestion?.id, 'origin_country');
+        await controller.goNext();
+        expect(controller.currentQuestion?.id, 'preferred_city');
 
-      controller.selectAnswer('timeline', 'in_3_6m');
-      await controller.goNext();
-      expect(controller.currentQuestion?.id, 'travel_group');
+        await controller.goNext();
+        expect(controller.currentQuestion?.id, 'timeline');
 
-      controller.selectAnswer('travel_group', 'family_kids');
-      expect(controller.canGoNext, isFalse);
+        controller.selectAnswer('timeline', 'in_3_6m');
+        await controller.goNext();
+        expect(controller.currentQuestion?.id, 'travel_group');
 
-      controller.selectAnswer('travel_group_children_count', '3+');
-      expect(controller.canGoNext, isTrue);
+        controller.selectAnswer('travel_group', 'family_kids');
+        expect(controller.canGoNext, isFalse);
 
-      controller.selectAnswer('travel_group', 'partner');
-      expect(controller.answerFor('travel_group_children_count'), isNull);
-    });
+        controller.selectAnswer('travel_group_children_count', '3+');
+        expect(controller.canGoNext, isTrue);
+
+        controller.selectAnswer('travel_group', 'partner');
+        expect(controller.answerFor('travel_group_children_count'), isNull);
+      },
+    );
   });
 }
 
-class _InMemoryQuestionnaireFlowDraftStore
-    extends QuestionnaireFlowDraftStore {
+class _InMemoryQuestionnaireFlowDraftStore extends QuestionnaireFlowDraftStore {
   _InMemoryQuestionnaireFlowDraftStore();
 
   QuestionnaireFlowDraftSnapshot? _snapshot;

@@ -145,7 +145,9 @@ class _LandingCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: tint.withValues(alpha: AppColors.isDark(context) ? 0.16 : 0.10),
+              color: tint.withValues(
+                alpha: AppColors.isDark(context) ? 0.16 : 0.10,
+              ),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(icon, color: tint, size: 20),
@@ -167,10 +169,7 @@ class _LandingCard extends StatelessWidget {
 }
 
 class _SurvivalLine extends StatelessWidget {
-  const _SurvivalLine({
-    required this.icon,
-    required this.label,
-  });
+  const _SurvivalLine({required this.icon, required this.label});
 
   final IconData icon;
   final String label;

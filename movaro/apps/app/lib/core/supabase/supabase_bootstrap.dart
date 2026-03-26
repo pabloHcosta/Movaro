@@ -17,13 +17,9 @@ class SupabaseBootstrap {
       url: environment.supabaseUrl!,
       anonKey: environment.supabaseAnonKey!,
       debug: environment.isDevelopment,
-      authOptions: const FlutterAuthClientOptions(
-        autoRefreshToken: true,
-      ),
+      authOptions: const FlutterAuthClientOptions(autoRefreshToken: true),
       realtimeClientOptions: RealtimeClientOptions(
-        logLevel: environment.isDevelopment
-            ? RealtimeLogLevel.info
-            : null,
+        logLevel: environment.isDevelopment ? RealtimeLogLevel.info : null,
       ),
     );
   }

@@ -1,20 +1,21 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:movaro_app/app/bootstrap/app_dependencies.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/localization/locale_controller.dart';
 import 'package:movaro_app/app/localization/locale_scope.dart';
 import 'package:movaro_app/app/router/app_router.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_theme.dart';
-import 'package:movaro_app/core/catalog/data/datasources/seed_catalog_data_source.dart';
-import 'package:movaro_app/core/catalog/data/repositories/catalog_repository_impl.dart';
+import 'package:movaro_app/app/theme/theme_controller.dart';
+import 'package:movaro_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
+import 'package:movaro_app/features/catalog/data/repositories/catalog_repository_impl.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/environment/app_flavor.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/journey/journey_preferences_store.dart';
-import 'package:movaro_app/core/location/location_controller.dart';
+import 'package:movaro_app/features/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/journey/journey_preferences_store.dart';
+import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/core/network/api_health_service.dart';
 import 'package:movaro_app/features/auth/application/auth_controller.dart';
 import 'package:movaro_app/features/auth/data/datasources/fake_auth_data_source.dart';
@@ -30,11 +31,13 @@ import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/repositories/question_repository_impl.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/answer.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -56,28 +59,28 @@ void main() {
   testWidgets(
     'public home supports no-journey entry and cities remain accessible',
     (tester) async {
-      await harness.migrationQuestionnaireController.clearCurrentPlan();
-      await harness.journeyContextController.clearJourney();
+      tester.view.physicalSize = const Size(1170, 2532);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
 
       await tester.pumpWidget(
         harness.buildApp(initialRoute: AppRoutes.publicHome),
       );
       await _pumpScreen(tester);
 
+      expect(find.text('Plano'), findsNothing);
       expect(
-        find.text('Escolha seu destino e comece mais rápido'),
+        find.text('Do questionário ao guia passo a passo'),
         findsOneWidget,
       );
-      expect(find.text('Plano'), findsNothing);
-      expect(find.text('Começar meu plano'), findsOneWidget);
-      expect(find.text('Descobrir cidades'), findsOneWidget);
-      expect(find.text('PT'), findsOneWidget);
 
       await tester.pumpWidget(harness.buildApp(initialRoute: AppRoutes.cities));
       await _pumpScreen(tester);
 
-      expect(find.text('Cidades'), findsWidgets);
-      expect(find.text('Descubra cidades com mais contexto'), findsOneWidget);
+      expect(find.byType(TextField), findsWidgets);
 
       await tester.enterText(find.byType(TextField).first, 'Curitiba');
       await tester.pump(const Duration(milliseconds: 350));
@@ -218,33 +221,31 @@ Future<void> _pumpScreen(WidgetTester tester) async {
 }
 
 class _AppTestHarness {
-  _AppTestHarness({
-    required this.environment,
-    required this.authController,
-    required this.catalogRepository,
-    required this.citiesController,
-    required this.migrationQuestionnaireController,
-    required this.copilotExchangeRatesService,
-    required this.apiHealthService,
-    required this.journeyContextController,
-    required this.locationController,
-    required this.localeController,
-    required this.tempDirectory,
-  });
+  _AppTestHarness({required this.dependencies, required this.tempDirectory});
 
-  final AppEnvironment environment;
-  final AuthController authController;
-  final CatalogRepositoryImpl catalogRepository;
-  final CitiesController citiesController;
-  final MigrationQuestionnaireController migrationQuestionnaireController;
-  final CopilotExchangeRatesService copilotExchangeRatesService;
-  final ApiHealthService apiHealthService;
-  final JourneyContextController journeyContextController;
-  final LocationController locationController;
-  final LocaleController localeController;
+  final AppDependencies dependencies;
   final Directory tempDirectory;
 
-  static Future<_AppTestHarness> create() async {
+  AppEnvironment get environment => dependencies.environment;
+  AuthController get authController => dependencies.authController;
+  CatalogRepositoryImpl get catalogRepository =>
+      dependencies.catalogRepository as CatalogRepositoryImpl;
+  CitiesController get citiesController => dependencies.citiesController;
+  MigrationQuestionnaireController get migrationQuestionnaireController =>
+      dependencies.migrationQuestionnaireController;
+  CopilotExchangeRatesService get copilotExchangeRatesService =>
+      dependencies.copilotExchangeRatesService;
+  ApiHealthService get apiHealthService => dependencies.apiHealthService;
+  JourneyContextController get journeyContextController =>
+      dependencies.journeyContextController;
+  LocationController get locationController => dependencies.locationController;
+  LocaleController get localeController => dependencies.localeController;
+  ThemeController get themeController => dependencies.themeController;
+
+  static Future<_AppTestHarness> create({
+    bool seedJourney = true,
+    bool initializeQuestionnaire = true,
+  }) async {
     final tempDirectory = await Directory.systemTemp.createTemp(
       'movaro_app_smoke',
     );
@@ -268,11 +269,13 @@ class _AppTestHarness {
         directoryProvider: () async => tempDirectory,
       ),
     );
-    final locationController = LocationController(
+    final locationController = _FakeLocationController(
       journeyContextController: journeyContextController,
     );
     const citiesRepository = _FakeCitiesRepository();
-    final citiesController = CitiesController(repository: citiesRepository);
+    final citiesController = _SmokeCitiesController(
+      repository: citiesRepository,
+    );
     final migrationQuestionnaireController = MigrationQuestionnaireController(
       questionRepository: QuestionRepositoryImpl(
         catalogRepository: catalogRepository,
@@ -283,6 +286,7 @@ class _AppTestHarness {
       ),
       planGenerator: MigrationPlanGenerator(citiesRepository: citiesRepository),
       journeyContextController: journeyContextController,
+      flowDraftStore: _InMemoryQuestionnaireFlowDraftStore(),
     );
     final copilotExchangeRatesService = _FakeCopilotExchangeRatesService(
       environment: environment,
@@ -293,27 +297,35 @@ class _AppTestHarness {
     final apiHealthService = ApiHealthService(environment: environment);
     final localeController = LocaleController();
     localeController.setLocale(const Locale('pt'));
+    final themeController = ThemeController();
 
     await journeyContextController.initialize();
     await journeyContextController.markIntroSeen();
-    await journeyContextController.completeJourney(
-      originCountryId: 'argentina',
-      destinationCountryId: 'brasil',
-    );
+    if (seedJourney) {
+      await journeyContextController.completeJourney(
+        originCountryId: 'argentina',
+        destinationCountryId: 'brasil',
+      );
+    }
     await authController.initialize();
-    await migrationQuestionnaireController.initialize();
+    if (initializeQuestionnaire) {
+      await migrationQuestionnaireController.initialize();
+    }
 
     return _AppTestHarness(
-      environment: environment,
-      authController: authController,
-      catalogRepository: catalogRepository,
-      citiesController: citiesController,
-      migrationQuestionnaireController: migrationQuestionnaireController,
-      copilotExchangeRatesService: copilotExchangeRatesService,
-      apiHealthService: apiHealthService,
-      journeyContextController: journeyContextController,
-      locationController: locationController,
-      localeController: localeController,
+      dependencies: AppDependencies(
+        environment: environment,
+        authController: authController,
+        catalogRepository: catalogRepository,
+        citiesController: citiesController,
+        migrationQuestionnaireController: migrationQuestionnaireController,
+        copilotExchangeRatesService: copilotExchangeRatesService,
+        apiHealthService: apiHealthService,
+        journeyContextController: journeyContextController,
+        locationController: locationController,
+        localeController: localeController,
+        themeController: themeController,
+      ),
       tempDirectory: tempDirectory,
     );
   }
@@ -325,25 +337,16 @@ class _AppTestHarness {
         return LocaleScope(
           controller: localeController,
           child: MaterialApp(
+            key: ValueKey(initialRoute),
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
-            themeMode: ThemeMode.light,
+            themeMode: themeController.themeMode,
             locale: localeController.locale,
             supportedLocales: AppLocalization.supportedLocales,
             localizationsDelegates: AppLocalization.localizationsDelegates,
             onGenerateRoute: AppRouter(
-              environment: environment,
-              authController: authController,
-              catalogRepository: catalogRepository,
-              citiesController: citiesController,
-              migrationQuestionnaireController:
-                  migrationQuestionnaireController,
-              copilotExchangeRatesService: copilotExchangeRatesService,
-              apiHealthService: apiHealthService,
-              journeyContextController: journeyContextController,
-              locationController: locationController,
-              localeController: localeController,
+              dependencies: dependencies,
             ).onGenerateRoute,
             initialRoute: initialRoute,
           ),
@@ -355,6 +358,10 @@ class _AppTestHarness {
   Future<void> generateLeanPlan() async {
     migrationQuestionnaireController.selectVariant(QuestionnaireVariant.lean);
     await migrationQuestionnaireController.goNext();
+    if (migrationQuestionnaireController.currentQuestion?.id ==
+        'preferred_city') {
+      await migrationQuestionnaireController.goNext();
+    }
     migrationQuestionnaireController.selectAnswer('timeline', 'in_3_6m');
     await migrationQuestionnaireController.goNext();
     migrationQuestionnaireController.toggleAnswer('priorities', 'low_cost');
@@ -425,6 +432,63 @@ class _FakeCitiesRepository implements CitiesRepository {
       windSpeedKmh: 11,
       fetchedAt: '2026-03-12T12:00:00Z',
     );
+  }
+}
+
+class _SmokeCitiesController extends CitiesController {
+  _SmokeCitiesController({required super.repository});
+
+  @override
+  Future<void> prefetchCatalog() async {}
+
+  @override
+  Future<void> prefetchExplore() async {}
+
+  @override
+  Future<void> prefetchMethodology() async {}
+}
+
+class _FakeLocationController extends LocationController {
+  _FakeLocationController({required super.journeyContextController});
+
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  Future<bool> shouldRequestAgain() async => false;
+
+  @override
+  Future<bool> shouldShowInlineBanner() async => false;
+}
+
+class _InMemoryQuestionnaireFlowDraftStore extends QuestionnaireFlowDraftStore {
+  QuestionnaireFlowDraftSnapshot? _snapshot;
+
+  @override
+  Future<QuestionnaireFlowDraftSnapshot?> read() async => _snapshot;
+
+  @override
+  Future<void> write({
+    required List<Answer> answers,
+    required int currentIndex,
+    required String? selectedVariantId,
+    required bool showRefinePrompt,
+    required bool isRefineResolved,
+    required bool includeConstraints,
+  }) async {
+    _snapshot = QuestionnaireFlowDraftSnapshot(
+      answers: answers,
+      currentIndex: currentIndex,
+      selectedVariantId: selectedVariantId,
+      showRefinePrompt: showRefinePrompt,
+      isRefineResolved: isRefineResolved,
+      includeConstraints: includeConstraints,
+    );
+  }
+
+  @override
+  Future<void> clear() async {
+    _snapshot = null;
   }
 }
 

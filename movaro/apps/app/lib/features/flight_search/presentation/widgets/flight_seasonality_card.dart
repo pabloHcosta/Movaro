@@ -89,10 +89,18 @@ class FlightSeasonalityCard extends StatelessWidget {
       originIata: 'EZE',
       destIata: 'GRU',
       months: [
-        _PriceLevel.high, _PriceLevel.high, _PriceLevel.mid,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.mid,
-        _PriceLevel.high, _PriceLevel.mid,  _PriceLevel.low,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.mid,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.high,
       ],
       lowUsdMin: 133,
       lowUsdMax: 160,
@@ -101,10 +109,18 @@ class FlightSeasonalityCard extends StatelessWidget {
       originIata: 'EZE',
       destIata: 'FLN',
       months: [
-        _PriceLevel.high, _PriceLevel.high, _PriceLevel.low,
-        _PriceLevel.low,  _PriceLevel.high, _PriceLevel.high,
-        _PriceLevel.high, _PriceLevel.high, _PriceLevel.low,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.high,
       ],
       lowUsdMin: 150,
       lowUsdMax: 200,
@@ -116,10 +132,18 @@ class FlightSeasonalityCard extends StatelessWidget {
       originIata: 'EZE',
       destIata: 'CWB',
       months: [
-        _PriceLevel.high, _PriceLevel.high, _PriceLevel.mid,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.mid,
-        _PriceLevel.high, _PriceLevel.mid,  _PriceLevel.low,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.mid,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.high,
       ],
       lowUsdMin: 170,
       lowUsdMax: 250,
@@ -128,10 +152,18 @@ class FlightSeasonalityCard extends StatelessWidget {
       originIata: 'EZE',
       destIata: 'GIG',
       months: [
-        _PriceLevel.high, _PriceLevel.high, _PriceLevel.mid,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.mid,
-        _PriceLevel.high, _PriceLevel.mid,  _PriceLevel.low,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.mid,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.high,
       ],
       lowUsdMin: 150,
       lowUsdMax: 220,
@@ -143,10 +175,18 @@ class FlightSeasonalityCard extends StatelessWidget {
       originIata: 'EZE',
       destIata: 'POA',
       months: [
-        _PriceLevel.high, _PriceLevel.high, _PriceLevel.mid,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.mid,
-        _PriceLevel.high, _PriceLevel.mid,  _PriceLevel.low,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.mid,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.high,
       ],
       lowUsdMin: 140,
       lowUsdMax: 190,
@@ -155,10 +195,18 @@ class FlightSeasonalityCard extends StatelessWidget {
       originIata: 'EZE',
       destIata: 'SSA',
       months: [
-        _PriceLevel.high, _PriceLevel.high, _PriceLevel.mid,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.mid,
-        _PriceLevel.high, _PriceLevel.mid,  _PriceLevel.low,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.mid,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.high,
       ],
       lowUsdMin: 200,
       lowUsdMax: 280,
@@ -167,10 +215,18 @@ class FlightSeasonalityCard extends StatelessWidget {
       originIata: 'EZE',
       destIata: 'REC',
       months: [
-        _PriceLevel.high, _PriceLevel.high, _PriceLevel.mid,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.mid,
-        _PriceLevel.high, _PriceLevel.mid,  _PriceLevel.low,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.mid,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.high,
       ],
       lowUsdMin: 210,
       lowUsdMax: 290,
@@ -179,10 +235,18 @@ class FlightSeasonalityCard extends StatelessWidget {
       originIata: 'EZE',
       destIata: 'FOR',
       months: [
-        _PriceLevel.high, _PriceLevel.high, _PriceLevel.mid,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.mid,
-        _PriceLevel.high, _PriceLevel.mid,  _PriceLevel.low,
-        _PriceLevel.low,  _PriceLevel.low,  _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.mid,
+        _PriceLevel.high,
+        _PriceLevel.mid,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.low,
+        _PriceLevel.high,
       ],
       lowUsdMin: 210,
       lowUsdMax: 300,
@@ -190,8 +254,18 @@ class FlightSeasonalityCard extends StatelessWidget {
   };
 
   static const _monthLabels = [
-    'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+    'Jan',
+    'Fev',
+    'Mar',
+    'Abr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Set',
+    'Out',
+    'Nov',
+    'Dez',
   ];
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -200,8 +274,12 @@ class FlightSeasonalityCard extends StatelessWidget {
       _originHub[originCountryIso.toUpperCase()] ?? 'EZE';
 
   String get _resolvedDestIata {
-    if (destIata != null && destIata!.isNotEmpty) return destIata!.toUpperCase();
-    if (cityId != null) return _cityToIata[cityId!] ?? 'GRU';
+    if (destIata != null && destIata!.isNotEmpty) {
+      return destIata!.toUpperCase();
+    }
+    if (cityId != null) {
+      return _cityToIata[cityId!] ?? 'GRU';
+    }
     return 'GRU';
   }
 
@@ -211,9 +289,9 @@ class FlightSeasonalityCard extends StatelessWidget {
   }
 
   List<String> _cheapMonths(_RouteData data) => [
-        for (var i = 0; i < 12; i++)
-          if (data.months[i] == _PriceLevel.low) _monthLabels[i],
-      ];
+    for (var i = 0; i < 12; i++)
+      if (data.months[i] == _PriceLevel.low) _monthLabels[i],
+  ];
 
   // ── Build ────────────────────────────────────────────────────────────────────
 
@@ -234,7 +312,11 @@ class FlightSeasonalityCard extends StatelessWidget {
           // ── Header ─────────────────────────────────────────────────────────
           Row(
             children: [
-              const Icon(Icons.flight_takeoff_rounded, size: 18, color: AppColors.primary),
+              const Icon(
+                Icons.flight_takeoff_rounded,
+                size: 18,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Melhor época para voar',
@@ -327,19 +409,32 @@ class _MonthBarChart extends StatelessWidget {
 
   final List<_PriceLevel> months;
 
-  static const _labels = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+  static const _labels = [
+    'J',
+    'F',
+    'M',
+    'A',
+    'M',
+    'J',
+    'J',
+    'A',
+    'S',
+    'O',
+    'N',
+    'D',
+  ];
 
   Color _barColor(_PriceLevel level) => switch (level) {
-        _PriceLevel.low  => AppColors.success,
-        _PriceLevel.mid  => AppColors.warning,
-        _PriceLevel.high => AppColors.danger,
-      };
+    _PriceLevel.low => AppColors.success,
+    _PriceLevel.mid => AppColors.warning,
+    _PriceLevel.high => AppColors.danger,
+  };
 
   double _barHeight(_PriceLevel level) => switch (level) {
-        _PriceLevel.low  => 24.0,
-        _PriceLevel.mid  => 40.0,
-        _PriceLevel.high => 54.0,
-      };
+    _PriceLevel.low => 24.0,
+    _PriceLevel.mid => 40.0,
+    _PriceLevel.high => 54.0,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -397,9 +492,12 @@ class _PriceLegend extends StatelessWidget {
       spacing: 14,
       runSpacing: 6,
       children: [
-        _LegendDot(color: AppColors.success, label: 'Barato (\$$lowMin–\$$lowMax)'),
+        _LegendDot(
+          color: AppColors.success,
+          label: 'Barato (\$$lowMin–\$$lowMax)',
+        ),
         _LegendDot(color: AppColors.warning, label: 'Médio'),
-        _LegendDot(color: AppColors.danger,  label: 'Caro'),
+        _LegendDot(color: AppColors.danger, label: 'Caro'),
       ],
     );
   }
@@ -537,8 +635,12 @@ class FlightPriceBadge extends StatelessWidget {
       _originHub[originCountryIso.toUpperCase()] ?? 'EZE';
 
   String get _resolvedDest {
-    if (destIata != null && destIata!.isNotEmpty) return destIata!.toUpperCase();
-    if (cityId != null) return _cityToIata[cityId!] ?? 'GRU';
+    if (destIata != null && destIata!.isNotEmpty) {
+      return destIata!.toUpperCase();
+    }
+    if (cityId != null) {
+      return _cityToIata[cityId!] ?? 'GRU';
+    }
     return 'GRU';
   }
 
@@ -557,7 +659,11 @@ class FlightPriceBadge extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.flight_takeoff_rounded, size: 15, color: AppColors.primary),
+          const Icon(
+            Icons.flight_takeoff_rounded,
+            size: 15,
+            color: AppColors.primary,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: RichText(
@@ -566,9 +672,7 @@ class FlightPriceBadge extends StatelessWidget {
                   color: AppColors.textSoftFor(context),
                 ),
                 children: [
-                  TextSpan(
-                    text: 'Passagem: ',
-                  ),
+                  TextSpan(text: 'Passagem: '),
                   TextSpan(
                     text: 'a partir de \$${data.min} USD',
                     style: const TextStyle(

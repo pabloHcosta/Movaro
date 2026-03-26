@@ -55,7 +55,8 @@ class YouTubeSearchResult {
   final bool quotaExceeded;
   final bool missingApiKey;
 
-  bool get hasInlineVideos => videos.isNotEmpty && !quotaExceeded && !missingApiKey;
+  bool get hasInlineVideos =>
+      videos.isNotEmpty && !quotaExceeded && !missingApiKey;
 }
 
 class YouTubeService {
@@ -194,10 +195,7 @@ class YouTubeService {
 }
 
 class _YouTubeCacheEntry {
-  const _YouTubeCacheEntry({
-    required this.result,
-    required this.savedAt,
-  });
+  const _YouTubeCacheEntry({required this.result, required this.savedAt});
 
   final YouTubeSearchResult result;
   final DateTime savedAt;

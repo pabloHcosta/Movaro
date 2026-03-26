@@ -4,10 +4,7 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 
 class HousingDecisionSupportSection extends StatelessWidget {
-  const HousingDecisionSupportSection({
-    this.cityName,
-    super.key,
-  });
+  const HousingDecisionSupportSection({this.cityName, super.key});
 
   final String? cityName;
 
@@ -84,7 +81,9 @@ class HousingDecisionSupportSection extends StatelessWidget {
                       tint: AppColors.secondary,
                       title: cityName == null
                           ? l10n.housingDecisionCityReadTitle
-                          : l10n.housingDecisionCityReadTitleWithCity(cityName!),
+                          : l10n.housingDecisionCityReadTitleWithCity(
+                              cityName!,
+                            ),
                       body: cityName == null
                           ? l10n.housingDecisionCityReadBody
                           : l10n.housingDecisionCityReadBodyWithCity(cityName!),
@@ -166,7 +165,9 @@ class _HousingSignalCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: tint.withValues(alpha: AppColors.isDark(context) ? 0.16 : 0.10),
+              color: tint.withValues(
+                alpha: AppColors.isDark(context) ? 0.16 : 0.10,
+              ),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(icon, color: tint, size: 20),

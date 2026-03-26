@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/network/network_client.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
@@ -64,16 +64,13 @@ class _AssistantPageState extends State<AssistantPage> {
   void _initChatService() {
     final locale = Localizations.localeOf(context).languageCode;
     final plan = widget.migrationQuestionnaireController.generatedPlan;
-    final originCountry =
-        plan?.originCountry.isNotEmpty == true
-            ? plan!.originCountry
-            : widget.journeyContextController.selection.origin?.name ??
-                'argentina';
-    final destinationCountry =
-        plan?.destinationCountry.isNotEmpty == true
-            ? plan!.destinationCountry
-            : widget.journeyContextController.selection.destination?.name ??
-                'brasil';
+    final originCountry = plan?.originCountry.isNotEmpty == true
+        ? plan!.originCountry
+        : widget.journeyContextController.selection.origin?.name ?? 'argentina';
+    final destinationCountry = plan?.destinationCountry.isNotEmpty == true
+        ? plan!.destinationCountry
+        : widget.journeyContextController.selection.destination?.name ??
+              'brasil';
 
     try {
       _chatService = ChatService(
@@ -93,9 +90,11 @@ class _AssistantPageState extends State<AssistantPage> {
   }
 
   static String _toKebabCase(String name) {
-    const accents = 'àáâãäåæçèéêëìíîïðñòóôõöùúûüýÿ'
+    const accents =
+        'àáâãäåæçèéêëìíîïðñòóôõöùúûüýÿ'
         'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖÙÚÛÜÝŸ';
-    const normalized = 'aaaaaaaceeeeiiiidnoooooouuuuyy'
+    const normalized =
+        'aaaaaaaceeeeiiiidnoooooouuuuyy'
         'aaaaaaaceeeeiiiidnoooooouuuuyy';
     var result = name.toLowerCase();
     for (var i = 0; i < accents.length; i++) {
@@ -111,16 +110,16 @@ class _AssistantPageState extends State<AssistantPage> {
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final plan = widget.migrationQuestionnaireController.generatedPlan;
-    final city =
-        plan?.isCityConfirmed == true ? plan?.recommendedCity : null;
+    final city = plan?.isCityConfirmed == true ? plan?.recommendedCity : null;
     final subtitle = city != null
         ? '${city.name} · ${plan!.originCountry} → ${plan.destinationCountry}'
         : null;
 
     return Scaffold(
       extendBody: true,
-      backgroundColor:
-          isDark ? const Color(0xFF07090E) : const Color(0xFFF4F6FA),
+      backgroundColor: isDark
+          ? const Color(0xFF07090E)
+          : const Color(0xFFF4F6FA),
       body: Stack(
         children: [
           const AmbientBackground(),
@@ -198,7 +197,11 @@ class _AssistantHeader extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.auto_awesome, size: 20, color: Colors.white),
+            child: const Icon(
+              Icons.auto_awesome,
+              size: 20,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -232,10 +235,7 @@ class _AssistantHeader extends StatelessWidget {
 // ─── Segmented control ────────────────────────────────────────────────────────
 
 class _ModeSegmentedControl extends StatelessWidget {
-  const _ModeSegmentedControl({
-    required this.mode,
-    required this.onChanged,
-  });
+  const _ModeSegmentedControl({required this.mode, required this.onChanged});
 
   final _AssistantMode mode;
   final ValueChanged<_AssistantMode> onChanged;
@@ -262,10 +262,7 @@ class _ModeSegmentedControl extends StatelessWidget {
             value: _AssistantMode.conversation,
             label: Text(conversationLabel),
           ),
-          ButtonSegment(
-            value: _AssistantMode.guides,
-            label: Text(guidesLabel),
-          ),
+          ButtonSegment(value: _AssistantMode.guides, label: Text(guidesLabel)),
         ],
         selected: {mode},
         onSelectionChanged: (s) => onChanged(s.first),
@@ -360,25 +357,27 @@ class _ConversationBodyState extends State<_ConversationBody> {
     _scrollToBottom();
 
     _streamSub?.cancel();
-    _streamSub = widget.chatService!.sendMessage(trimmed).listen(
-      (chunk) {
-        if (!mounted) return;
-        setState(() => _streamingText += chunk);
-        _scrollToBottom();
-      },
-      onDone: () {
-        if (!mounted) return;
-        setState(() => _isStreaming = false);
-        _scrollToBottom();
-      },
-      onError: (_) {
-        if (!mounted) return;
-        setState(() {
-          _isStreaming = false;
-          _streamingText = context.l10n.aiChatNetworkError;
-        });
-      },
-    );
+    _streamSub = widget.chatService!
+        .sendMessage(trimmed)
+        .listen(
+          (chunk) {
+            if (!mounted) return;
+            setState(() => _streamingText += chunk);
+            _scrollToBottom();
+          },
+          onDone: () {
+            if (!mounted) return;
+            setState(() => _isStreaming = false);
+            _scrollToBottom();
+          },
+          onError: (_) {
+            if (!mounted) return;
+            setState(() {
+              _isStreaming = false;
+              _streamingText = context.l10n.aiChatNetworkError;
+            });
+          },
+        );
   }
 
   void _scrollToBottom() {
@@ -423,11 +422,7 @@ class _ConversationBodyState extends State<_ConversationBody> {
     );
   }
 
-  Widget _buildEmptyState(
-    BuildContext context,
-    dynamic l10n,
-    bool isDark,
-  ) {
+  Widget _buildEmptyState(BuildContext context, dynamic l10n, bool isDark) {
     final lang = Localizations.localeOf(context).languageCode;
 
     final categories = [
@@ -435,7 +430,8 @@ class _ConversationBodyState extends State<_ConversationBody> {
         icon: Icons.description_outlined,
         label: l10n.homeAssistantCategoryDocuments as String,
         message: switch (lang) {
-          'pt' => 'Quais documentos preciso para migrar? Explique vistos e CPF.',
+          'pt' =>
+            'Quais documentos preciso para migrar? Explique vistos e CPF.',
           'es' => '¿Qué documentos necesito para migrar? Explica visas y CPF.',
           _ => 'What documents do I need to migrate? Explain visas and CPF.',
         },
@@ -445,7 +441,8 @@ class _ConversationBodyState extends State<_ConversationBody> {
         label: l10n.homeAssistantCategoryCosts as String,
         message: switch (lang) {
           'pt' => 'Quanto custa se mudar? Me dê uma visão geral dos custos.',
-          'es' => '¿Cuánto cuesta mudarse? Dame una visión general de los costos.',
+          'es' =>
+            '¿Cuánto cuesta mudarse? Dame una visión general de los costos.',
           _ => 'How much does it cost to move? Give me a cost overview.',
         },
       ),
@@ -489,12 +486,16 @@ class _ConversationBodyState extends State<_ConversationBody> {
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
             childAspectRatio: 2.0,
-            children: categories.map((c) => _CategoryCard(
-              icon: c.icon,
-              label: c.label,
-              isDark: isDark2,
-              onTap: () => _send(c.message),
-            )).toList(),
+            children: categories
+                .map(
+                  (c) => _CategoryCard(
+                    icon: c.icon,
+                    label: c.label,
+                    isDark: isDark2,
+                    onTap: () => _send(c.message),
+                  ),
+                )
+                .toList(),
           ),
           const SizedBox(height: 16),
 
@@ -505,10 +506,8 @@ class _ConversationBodyState extends State<_ConversationBody> {
               scrollDirection: Axis.horizontal,
               itemCount: chips.length,
               separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (_, i) => _QuickChip(
-                label: chips[i],
-                onTap: () => _send(chips[i]),
-              ),
+              itemBuilder: (_, i) =>
+                  _QuickChip(label: chips[i], onTap: () => _send(chips[i])),
             ),
           ),
           const SizedBox(height: 16),
@@ -529,11 +528,13 @@ class _ConversationBodyState extends State<_ConversationBody> {
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      itemCount: allMessages.length +
+      itemCount:
+          allMessages.length +
           (showStreamingBubble ? 1 : 0) +
           (_isStreaming && _streamingText.isEmpty ? 1 : 0),
       itemBuilder: (context, index) {
-        if (_isStreaming && _streamingText.isEmpty &&
+        if (_isStreaming &&
+            _streamingText.isEmpty &&
             index == allMessages.length) {
           return _buildTypingIndicator(isDark);
         }
@@ -587,7 +588,9 @@ class _ConversationBodyState extends State<_ConversationBody> {
         child: Text(
           text,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: isUser ? Colors.white : (isDark ? Colors.white : Colors.black87),
+            color: isUser
+                ? Colors.white
+                : (isDark ? Colors.white : Colors.black87),
             height: 1.4,
           ),
         ),
@@ -646,7 +649,9 @@ class _ChatInputBar extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.fromLTRB(
-        16, 8, 8,
+        16,
+        8,
+        8,
         MediaQuery.of(context).padding.bottom + 8,
       ),
       decoration: BoxDecoration(
@@ -795,9 +800,9 @@ class _QuickChip extends StatelessWidget {
           ),
           child: Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: cs.primary,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: cs.primary),
           ),
         ),
       ),

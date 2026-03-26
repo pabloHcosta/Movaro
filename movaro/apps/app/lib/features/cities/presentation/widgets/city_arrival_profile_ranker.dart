@@ -1,10 +1,6 @@
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 
-enum CityArrivalProfile {
-  softLanding,
-  familyStability,
-  incomeStart,
-}
+enum CityArrivalProfile { softLanding, familyStability, incomeStart }
 
 class CityArrivalProfileRanker {
   const CityArrivalProfileRanker._();

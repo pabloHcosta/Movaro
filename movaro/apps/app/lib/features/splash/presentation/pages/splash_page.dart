@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/location/location_controller.dart';
+import 'package:movaro_app/features/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/core/network/api_health_service.dart';
 import 'package:movaro_app/features/auth/application/auth_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
@@ -111,7 +111,8 @@ class _SplashPageState extends State<SplashPage> {
       context,
       resolvedRoute,
       arguments:
-          shouldReplayIntroFlow || !widget.journeyContextController.hasSeenIntro,
+          shouldReplayIntroFlow ||
+          !widget.journeyContextController.hasSeenIntro,
     );
   }
 

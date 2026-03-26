@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/app.dart';
+import 'package:movaro_app/app/bootstrap/app_dependencies.dart';
 import 'package:movaro_app/app/localization/locale_controller.dart';
 import 'package:movaro_app/app/theme/theme_controller.dart';
-import 'package:movaro_app/core/catalog/data/datasources/seed_catalog_data_source.dart';
-import 'package:movaro_app/core/catalog/data/repositories/catalog_repository_impl.dart';
+import 'package:movaro_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
+import 'package:movaro_app/features/catalog/data/repositories/catalog_repository_impl.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/environment/app_flavor.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/location/location_controller.dart';
+import 'package:movaro_app/features/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/core/network/api_health_service.dart';
 import 'package:movaro_app/core/supabase/supabase_bootstrap.dart';
 import 'package:movaro_app/features/auth/application/auth_controller.dart';
@@ -27,6 +28,13 @@ import 'package:movaro_app/features/migration_questionnaire/data/repositories/qu
 Future<void> bootstrap({required AppFlavor defaultFlavor}) async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  final dependencies = await buildAppDependencies(defaultFlavor: defaultFlavor);
+  runApp(MovaroApp(dependencies: dependencies));
+}
+
+Future<AppDependencies> buildAppDependencies({
+  required AppFlavor defaultFlavor,
+}) async {
   final environment = AppEnvironment.fromDartDefines(
     defaultFlavor: defaultFlavor,
   );
@@ -69,19 +77,17 @@ Future<void> bootstrap({required AppFlavor defaultFlavor}) async {
   await themeController.initialize();
   await PlanNotificationService.instance.initialize();
 
-  runApp(
-    MovaroApp(
-      environment: environment,
-      authController: authController,
-      catalogRepository: catalogRepository,
-      citiesController: citiesController,
-      migrationQuestionnaireController: migrationQuestionnaireController,
-      copilotExchangeRatesService: copilotExchangeRatesService,
-      apiHealthService: apiHealthService,
-      journeyContextController: journeyContextController,
-      locationController: locationController,
-      localeController: localeController,
-      themeController: themeController,
-    ),
+  return AppDependencies(
+    environment: environment,
+    authController: authController,
+    catalogRepository: catalogRepository,
+    citiesController: citiesController,
+    migrationQuestionnaireController: migrationQuestionnaireController,
+    copilotExchangeRatesService: copilotExchangeRatesService,
+    apiHealthService: apiHealthService,
+    journeyContextController: journeyContextController,
+    locationController: locationController,
+    localeController: localeController,
+    themeController: themeController,
   );
 }

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -13,7 +13,7 @@ import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/core/widgets/visual_data_cards.dart';
-import 'package:movaro_app/core/location/location_controller.dart';
+import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/flight_search/presentation/widgets/flight_search_tool.dart';
@@ -714,9 +714,9 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                 ),
                                 onLinkTap: (url, label) =>
                                     _openExternalPreparationLink(
-                                  title: label,
-                                  uri: Uri.parse(url),
-                                ),
+                                      title: label,
+                                      uri: Uri.parse(url),
+                                    ),
                                 onChecklistToggle: (itemId, subItemId) async {
                                   await gpsController.toggleChecklistSubItem(
                                     itemId,
@@ -2235,14 +2235,16 @@ class _GuideContextBand extends StatelessWidget {
               Expanded(
                 child: Text(
                   _guidePhaseName(context, phase),
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.success.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
@@ -2271,8 +2273,8 @@ class _GuideContextBand extends StatelessWidget {
                       color: i < phaseIndex
                           ? AppColors.success
                           : i == phaseIndex
-                              ? AppColors.primary
-                              : AppColors.surfaceMutedFor(context),
+                          ? AppColors.primary
+                          : AppColors.surfaceMutedFor(context),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -2294,8 +2296,9 @@ class _GuideContextBand extends StatelessWidget {
                       color: i <= phaseIndex
                           ? null
                           : AppColors.textSoftFor(context),
-                      fontWeight:
-                          i == phaseIndex ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight: i == phaseIndex
+                          ? FontWeight.w700
+                          : FontWeight.w500,
                     ),
                   ),
                 ),
@@ -2734,10 +2737,9 @@ class _UpcomingGuideItemTile extends StatelessWidget {
                 ] else ...[
                   Text(
                     indexLabel,
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelLarge
-                        ?.copyWith(fontWeight: FontWeight.w800),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(width: 12),
                 ],

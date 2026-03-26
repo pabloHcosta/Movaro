@@ -31,7 +31,8 @@ class CityPhotosResult {
 class PlacesPhotoService {
   PlacesPhotoService({http.Client? client}) : _client = client ?? http.Client();
 
-  static final Map<String, _PhotoCacheEntry> _cache = <String, _PhotoCacheEntry>{};
+  static final Map<String, _PhotoCacheEntry> _cache =
+      <String, _PhotoCacheEntry>{};
   static const _ttl = Duration(minutes: 30);
 
   final http.Client _client;
@@ -48,9 +49,7 @@ class PlacesPhotoService {
     }
 
     CityPhotosResult result;
-    if (placeId != null &&
-        placeId.isNotEmpty &&
-        ApiKeys.hasGooglePlacesKey) {
+    if (placeId != null && placeId.isNotEmpty && ApiKeys.hasGooglePlacesKey) {
       final googlePhotos = await _loadGooglePhotos(
         cityName: cityName,
         stateName: stateName,
@@ -61,7 +60,10 @@ class PlacesPhotoService {
           photos: googlePhotos,
           attributionSource: 'google_places',
         );
-        _cache[cityId] = _PhotoCacheEntry(result: result, savedAt: DateTime.now());
+        _cache[cityId] = _PhotoCacheEntry(
+          result: result,
+          savedAt: DateTime.now(),
+        );
         return result;
       }
     }
@@ -84,15 +86,16 @@ class PlacesPhotoService {
     required String stateName,
     required String placeId,
   }) async {
-    final detailsUri = Uri.parse(
-      'https://maps.googleapis.com/maps/api/place/details/json',
-    ).replace(
-      queryParameters: <String, String>{
-        'place_id': placeId,
-        'fields': 'photos',
-        'key': ApiKeys.googlePlacesKey,
-      },
-    );
+    final detailsUri =
+        Uri.parse(
+          'https://maps.googleapis.com/maps/api/place/details/json',
+        ).replace(
+          queryParameters: <String, String>{
+            'place_id': placeId,
+            'fields': 'photos',
+            'key': ApiKeys.googlePlacesKey,
+          },
+        );
 
     final response = await _client.get(detailsUri);
     if (response.statusCode != 200) {
@@ -104,17 +107,20 @@ class PlacesPhotoService {
     final placeName = result['name'] as String?;
     final photos = result['photos'] as List<dynamic>? ?? const <dynamic>[];
 
-    return photos.take(8).map((photo) {
-      final map = photo as Map<String, dynamic>;
-      final reference = map['photo_reference'] as String? ?? '';
-      return CityPhotoItem(
-        url:
-            'https://maps.googleapis.com/maps/api/place/photo'
-            '?maxwidth=800&photo_reference=$reference&key=${ApiKeys.googlePlacesKey}',
-        label: placeName ?? '',
-        sourceLabel: 'Google Places',
-      );
-    }).toList(growable: false);
+    return photos
+        .take(8)
+        .map((photo) {
+          final map = photo as Map<String, dynamic>;
+          final reference = map['photo_reference'] as String? ?? '';
+          return CityPhotoItem(
+            url:
+                'https://maps.googleapis.com/maps/api/place/photo'
+                '?maxwidth=800&photo_reference=$reference&key=${ApiKeys.googlePlacesKey}',
+            label: placeName ?? '',
+            sourceLabel: 'Google Places',
+          );
+        })
+        .toList(growable: false);
   }
 
   Future<List<CityPhotoItem>> _loadPexelsPhotos({
@@ -148,9 +154,7 @@ class PlacesPhotoService {
     }
 
     for (final query in queries) {
-      final uri = Uri.parse(
-        'https://api.pexels.com/v1/search',
-      ).replace(
+      final uri = Uri.parse('https://api.pexels.com/v1/search').replace(
         queryParameters: <String, String>{
           'query': query,
           'per_page': '6',
@@ -245,7 +249,8 @@ class PlacesPhotoService {
         .split(' ')
         .where((token) => token.length >= 3)
         .toList(growable: false);
-    final hasAllCityTokens = cityTokens.isNotEmpty &&
+    final hasAllCityTokens =
+        cityTokens.isNotEmpty &&
         cityTokens.every((token) => alt.contains(token));
     if (hasAllCityTokens) {
       return true;
@@ -298,18 +303,15 @@ class PlacesPhotoService {
     replacements.forEach((from, to) {
       normalized = normalized.replaceAll(from, to);
     });
-    return normalized.replaceAll(RegExp(r'[^a-z0-9 ]'), ' ').replaceAll(
-      RegExp(r'\s+'),
-      ' ',
-    ).trim();
+    return normalized
+        .replaceAll(RegExp(r'[^a-z0-9 ]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
   }
 }
 
 class _PhotoCacheEntry {
-  const _PhotoCacheEntry({
-    required this.result,
-    required this.savedAt,
-  });
+  const _PhotoCacheEntry({required this.result, required this.savedAt});
 
   final CityPhotosResult result;
   final DateTime savedAt;

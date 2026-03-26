@@ -11,9 +11,7 @@ class ApiHealthService {
   Future<void> check() async {
     final response = await _networkClient.getJsonMapWithHeaders(
       '/api/v1/health',
-      headers: const {
-        'x-movaro-health-check': 'startup',
-      },
+      headers: const {'x-movaro-health-check': 'startup'},
     );
 
     final status = response['status'];

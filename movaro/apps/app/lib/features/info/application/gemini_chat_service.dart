@@ -7,11 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// A chat message in the conversation.
 class ChatMessage {
-  const ChatMessage({
-    required this.role,
-    required this.text,
-    this.timestamp,
-  });
+  const ChatMessage({required this.role, required this.text, this.timestamp});
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) => ChatMessage(
     role: json['role'] as String,
@@ -150,28 +146,26 @@ class GeminiChatService {
 
   /// Send a message and get a streamed response.
   Stream<String> sendMessage(String userMessage) async* {
-    dev.log('[GeminiChat] sendMessage: "${userMessage.substring(0, userMessage.length.clamp(0, 60))}"');
+    dev.log(
+      '[GeminiChat] sendMessage: "${userMessage.substring(0, userMessage.length.clamp(0, 60))}"',
+    );
     if (_model == null || _chat == null) {
       dev.log('[GeminiChat] ✗ model/chat is null — not initialized');
       yield _errorMessages.notInitialized;
       return;
     }
 
-    _history.add(ChatMessage(
-      role: 'user',
-      text: userMessage,
-      timestamp: DateTime.now(),
-    ));
+    _history.add(
+      ChatMessage(role: 'user', text: userMessage, timestamp: DateTime.now()),
+    );
 
     // Check cache first
     final cacheKey = _normalizeCacheKey(userMessage);
     final cached = _responseCache[cacheKey];
     if (cached != null) {
-      _history.add(ChatMessage(
-        role: 'assistant',
-        text: cached,
-        timestamp: DateTime.now(),
-      ));
+      _history.add(
+        ChatMessage(role: 'assistant', text: cached, timestamp: DateTime.now()),
+      );
       yield cached;
       return;
     }
@@ -180,11 +174,9 @@ class GeminiChatService {
     final canProceed = await _waitForRateLimit();
     if (!canProceed) {
       final msg = _errorMessages.rateLimit;
-      _history.add(ChatMessage(
-        role: 'assistant',
-        text: msg,
-        timestamp: DateTime.now(),
-      ));
+      _history.add(
+        ChatMessage(role: 'assistant', text: msg, timestamp: DateTime.now()),
+      );
       yield msg;
       return;
     }
@@ -192,9 +184,7 @@ class GeminiChatService {
     // Call Gemini with streaming
     try {
       final buffer = StringBuffer();
-      final stream = _chat!.sendMessageStream(
-        Content.text(userMessage),
-      );
+      final stream = _chat!.sendMessageStream(Content.text(userMessage));
 
       await for (final chunk in stream) {
         final text = chunk.text;
@@ -206,35 +196,41 @@ class GeminiChatService {
 
       final fullResponse = buffer.toString();
       if (fullResponse.isNotEmpty) {
-        _history.add(ChatMessage(
-          role: 'assistant',
-          text: fullResponse,
-          timestamp: DateTime.now(),
-        ));
+        _history.add(
+          ChatMessage(
+            role: 'assistant',
+            text: fullResponse,
+            timestamp: DateTime.now(),
+          ),
+        );
 
         _responseCache[cacheKey] = fullResponse;
         _saveCache();
       }
     } on GenerativeAIException catch (e) {
       dev.log('[GeminiChat] ✗ GenerativeAIException: ${e.message}');
-      final errorMsg = e.message.contains('429') ||
-              e.message.contains('RESOURCE_EXHAUSTED')
+      final errorMsg =
+          e.message.contains('429') || e.message.contains('RESOURCE_EXHAUSTED')
           ? _errorMessages.apiLimit
           : _errorMessages.generic;
-      _history.add(ChatMessage(
-        role: 'assistant',
-        text: errorMsg,
-        timestamp: DateTime.now(),
-      ));
+      _history.add(
+        ChatMessage(
+          role: 'assistant',
+          text: errorMsg,
+          timestamp: DateTime.now(),
+        ),
+      );
       yield errorMsg;
     } catch (e) {
       dev.log('[GeminiChat] ✗ Unexpected error: $e');
       final errorMsg = _errorMessages.generic;
-      _history.add(ChatMessage(
-        role: 'assistant',
-        text: errorMsg,
-        timestamp: DateTime.now(),
-      ));
+      _history.add(
+        ChatMessage(
+          role: 'assistant',
+          text: errorMsg,
+          timestamp: DateTime.now(),
+        ),
+      );
       yield errorMsg;
     }
   }
@@ -254,7 +250,8 @@ class GeminiChatService {
     required String curatedContent,
     required UserMigrationContext userContext,
   }) {
-    final corridor = '${_capitalize(originCountry)} → ${_capitalize(destinationCountry)}';
+    final corridor =
+        '${_capitalize(originCountry)} → ${_capitalize(destinationCountry)}';
 
     return '''
 === MOVARO AI ASSISTANT — SYSTEM PROMPT ===
@@ -405,9 +402,12 @@ ${curatedContent.isNotEmpty ? '--- APP DATA (source of truth) ---\n$curatedConte
       s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
   static String _langInstruction(String locale) => switch (locale) {
-    'pt' => 'ALWAYS respond in Português Brasileiro, regardless of what language the system prompt is written in.',
-    'es' => 'ALWAYS respond in Español, regardless of what language the system prompt is written in.',
-    _ => 'ALWAYS respond in English, regardless of what language the system prompt is written in.',
+    'pt' =>
+      'ALWAYS respond in Português Brasileiro, regardless of what language the system prompt is written in.',
+    'es' =>
+      'ALWAYS respond in Español, regardless of what language the system prompt is written in.',
+    _ =>
+      'ALWAYS respond in English, regardless of what language the system prompt is written in.',
   };
 
   static String _buildContextSection(UserMigrationContext ctx) {
@@ -528,9 +528,7 @@ ${curatedContent.isNotEmpty ? '--- APP DATA (source of truth) ---\n$curatedConte
       final raw = prefs.getString(_cacheKey);
       if (raw != null) {
         final map = jsonDecode(raw) as Map<String, dynamic>;
-        _responseCache.addAll(
-          map.map((k, v) => MapEntry(k, v as String)),
-        );
+        _responseCache.addAll(map.map((k, v) => MapEntry(k, v as String)));
       }
     } catch (_) {
       // Ignore cache load errors

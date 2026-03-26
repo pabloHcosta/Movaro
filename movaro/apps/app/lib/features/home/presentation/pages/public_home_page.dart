@@ -6,10 +6,10 @@ import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_text_styles.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/location/location_controller.dart';
-import 'package:movaro_app/core/location/presentation/pages/location_permission_screen.dart';
-import 'package:movaro_app/core/location/presentation/widgets/location_banner_widget.dart';
+import 'package:movaro_app/features/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/location/location_controller.dart';
+import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
+import 'package:movaro_app/features/location/presentation/widgets/location_banner_widget.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
@@ -147,16 +147,20 @@ class _PublicHomePageState extends State<PublicHomePage>
                                 return const SizedBox.shrink();
                               }
                               return Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                                padding: const EdgeInsets.fromLTRB(
+                                  12,
+                                  8,
+                                  12,
+                                  0,
+                                ),
                                 child: LocationBannerWidget(
                                   onActivate: () => Navigator.pushNamed(
                                     context,
                                     AppRoutes.locationPermission,
                                     arguments:
                                         const LocationPermissionScreenArgs(
-                                      returnToPrevious: true,
-                                    ),
+                                          returnToPrevious: true,
+                                        ),
                                   ),
                                 ),
                               );
@@ -176,10 +180,8 @@ class _PublicHomePageState extends State<PublicHomePage>
                                   ? _ActiveHomeState(
                                       key: const ValueKey('active-home'),
                                       city: city,
-                                      weather:
-                                          widget.citiesController.weatherFor(
-                                        city.id,
-                                      ),
+                                      weather: widget.citiesController
+                                          .weatherFor(city.id),
                                       guideState: guideState!,
                                       streakDays: _streakDays,
                                       extraBottomPadding:
@@ -188,9 +190,9 @@ class _PublicHomePageState extends State<PublicHomePage>
                                       onOpenGuide: _openGuide,
                                       onViewCurrentAction: () =>
                                           _showActionDetails(
-                                        context,
-                                        guideState.currentItem,
-                                      ),
+                                            context,
+                                            guideState.currentItem,
+                                          ),
                                       onCompare: () => _openComparison(city),
                                       onViewCity: () => Navigator.pushNamed(
                                         context,
@@ -604,86 +606,88 @@ class _EmptyHero extends StatelessWidget {
           ),
           Positioned.fill(
             child: Padding(
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top,
-              ),
+              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
               child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 300),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: _badgeBackground(context),
-                        border: Border.all(color: _badgeBorder(context)),
-                      ),
-                      child: Icon(
-                        Icons.route_rounded,
-                        size: 22,
-                        color: _accentText(context),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      _greeting(context),
-                      textAlign: TextAlign.center,
-                      style: context.textStyles.sectionLabel.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: _tertiaryText(context),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text.rich(
-                      TextSpan(
-                        children: [
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 300),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: _badgeBackground(context),
+                            border: Border.all(color: _badgeBorder(context)),
+                          ),
+                          child: Icon(
+                            Icons.route_rounded,
+                            size: 22,
+                            color: _accentText(context),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          _greeting(context),
+                          textAlign: TextAlign.center,
+                          style: context.textStyles.sectionLabel.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: _tertiaryText(context),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text.rich(
                           TextSpan(
-                            text:
-                                '${_text(context, pt: 'Planeje sua', es: 'Planeá tu', en: 'Plan your')}\n',
-                            style: TextStyle(color: _primaryText(context)),
+                            children: [
+                              TextSpan(
+                                text:
+                                    '${_text(context, pt: 'Planeje sua', es: 'Planeá tu', en: 'Plan your')}\n',
+                                style: TextStyle(color: _primaryText(context)),
+                              ),
+                              TextSpan(
+                                text: _text(
+                                  context,
+                                  pt: 'mudança',
+                                  es: 'mudanza',
+                                  en: 'move',
+                                ),
+                                style: TextStyle(color: _accentText(context)),
+                              ),
+                            ],
                           ),
-                          TextSpan(
-                            text: _text(
-                              context,
-                              pt: 'mudança',
-                              es: 'mudanza',
-                              en: 'move',
-                            ),
-                            style: TextStyle(color: _accentText(context)),
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w900,
+                                height: 1.15,
+                              ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _text(
+                            context,
+                            pt: 'Do questionário ao guia passo a passo',
+                            es: 'Del cuestionario a la guía paso a paso',
+                            en: 'From questionnaire to step-by-step guide',
                           ),
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium
-                          ?.copyWith(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                            height: 1.15,
-                          ),
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                fontSize: 15,
+                                color: _tertiaryText(context),
+                              ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      _text(
-                        context,
-                        pt: 'Do questionário ao guia passo a passo',
-                        es: 'Del cuestionario a la guía paso a paso',
-                        en: 'From questionnaire to step-by-step guide',
-                      ),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 15,
-                        color: _tertiaryText(context),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
         ],
       ),
     );
@@ -774,11 +778,7 @@ class _ActiveHomeState extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                progressCard,
-                const SizedBox(height: 8),
-                actionRow,
-              ],
+              children: [progressCard, const SizedBox(height: 8), actionRow],
             ),
           ),
           // Fills the remaining space so content floats above the sheet overlay.
@@ -795,11 +795,7 @@ class _ActiveHomeState extends StatelessWidget {
           child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(12, 10, 12, 16 + extraBottomPadding),
             child: Column(
-              children: [
-                progressCard,
-                const SizedBox(height: 8),
-                actionRow,
-              ],
+              children: [progressCard, const SizedBox(height: 8), actionRow],
             ),
           ),
         ),
@@ -1255,39 +1251,38 @@ class _PhaseRow extends StatelessWidget {
     return rowContent;
   }
 
-  String _phaseLabel(BuildContext context, GuidePhase phase) =>
-      switch (phase) {
-        GuidePhase.preparation => _text(
-          context,
-          pt: 'Preparação',
-          es: 'Preparación',
-          en: 'Preparation',
-        ),
-        GuidePhase.documents => _text(
-          context,
-          pt: 'Documentação',
-          es: 'Documentación',
-          en: 'Documentation',
-        ),
-        GuidePhase.housing => _text(
-          context,
-          pt: 'Moradia',
-          es: 'Vivienda',
-          en: 'Housing',
-        ),
-        GuidePhase.work => _text(
-          context,
-          pt: 'Trabalho',
-          es: 'Trabajo',
-          en: 'Work',
-        ),
-        GuidePhase.arrival => _text(
-          context,
-          pt: 'Chegada',
-          es: 'Llegada',
-          en: 'Arrival',
-        ),
-      };
+  String _phaseLabel(BuildContext context, GuidePhase phase) => switch (phase) {
+    GuidePhase.preparation => _text(
+      context,
+      pt: 'Preparação',
+      es: 'Preparación',
+      en: 'Preparation',
+    ),
+    GuidePhase.documents => _text(
+      context,
+      pt: 'Documentação',
+      es: 'Documentación',
+      en: 'Documentation',
+    ),
+    GuidePhase.housing => _text(
+      context,
+      pt: 'Moradia',
+      es: 'Vivienda',
+      en: 'Housing',
+    ),
+    GuidePhase.work => _text(
+      context,
+      pt: 'Trabalho',
+      es: 'Trabajo',
+      en: 'Work',
+    ),
+    GuidePhase.arrival => _text(
+      context,
+      pt: 'Chegada',
+      es: 'Llegada',
+      en: 'Arrival',
+    ),
+  };
 }
 
 // ─── Metrics column (Block 2, right column) ────────────────────────────────────
@@ -1400,7 +1395,10 @@ class _CardSecondaryButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         child: Container(
           alignment: Alignment.center,
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: verticalPadding),
+          padding: EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: verticalPadding,
+          ),
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
@@ -1506,7 +1504,10 @@ class _ActionChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(13),
         onTap: onTap,
         child: Ink(
-          padding: EdgeInsets.symmetric(vertical: verticalPadding, horizontal: 8),
+          padding: EdgeInsets.symmetric(
+            vertical: verticalPadding,
+            horizontal: 8,
+          ),
           decoration: BoxDecoration(
             color: AppColors.isDark(context)
                 ? const Color(0xFF0E1825)
@@ -1529,9 +1530,9 @@ class _ActionChip extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: _tertiaryText(context),
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: _tertiaryText(context)),
               ),
             ],
           ),
@@ -1615,9 +1616,9 @@ class _StepTimeline extends StatelessWidget {
                         child: Text(
                           '${index + 1}',
                           style: context.textStyles.badgeLabel.copyWith(
-                                fontWeight: FontWeight.w900,
-                                color: _accentText(context),
-                              ),
+                            fontWeight: FontWeight.w900,
+                            color: _accentText(context),
+                          ),
                         ),
                       ),
                       if (index != steps.length - 1)
@@ -1649,9 +1650,7 @@ class _StepTimeline extends StatelessWidget {
                         Text(
                           steps[index].subtitle,
                           style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: _tertiaryText(context),
-                              ),
+                              ?.copyWith(color: _tertiaryText(context)),
                         ),
                       ],
                     ),
@@ -2034,7 +2033,6 @@ Color _badgeBorder(BuildContext context) => AppColors.isDark(context)
 Color _accentText(BuildContext context) => AppColors.isDark(context)
     ? const Color(0xFF38BDF8)
     : const Color(0xFF0369A1);
-
 
 String _text(
   BuildContext context, {

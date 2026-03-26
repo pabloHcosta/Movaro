@@ -1,83 +1,51 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/locale_controller.dart';
-import 'package:movaro_app/app/theme/theme_controller.dart';
-import 'package:movaro_app/core/catalog/domain/repositories/catalog_repository.dart';
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/location/location_controller.dart';
-import 'package:movaro_app/core/location/presentation/pages/location_permission_screen.dart';
-import 'package:movaro_app/core/network/api_health_service.dart';
-import 'package:movaro_app/features/auth/application/auth_controller.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
+import 'package:movaro_app/app/bootstrap/app_dependencies.dart';
+import 'package:movaro_app/app/router/app_routes.dart';
+import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
+import 'package:movaro_app/features/auth/presentation/pages/onboarding_page.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/pages/cities_explore_page.dart';
 import 'package:movaro_app/features/cities/presentation/pages/city_detail_page.dart';
 import 'package:movaro_app/features/cities/presentation/pages/city_search_page.dart';
-import 'package:movaro_app/features/auth/presentation/pages/onboarding_page.dart';
 import 'package:movaro_app/features/explore/presentation/pages/countries_page.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
-import 'package:movaro_app/features/home/presentation/pages/home_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/pages/favorites_page.dart';
-import 'package:movaro_app/features/info/presentation/pages/assistant_page.dart';
-// info_brazil_page removed — Info tab now loads AssistantPage
+import 'package:movaro_app/features/home/presentation/pages/home_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/public_home_page.dart';
+import 'package:movaro_app/features/info/presentation/pages/assistant_page.dart';
 import 'package:movaro_app/features/intro/presentation/pages/intro_page.dart';
 import 'package:movaro_app/features/journey/presentation/pages/journey_setup_page.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_result_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_copilot_page.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_result_reveal_page.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_result_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_save_page.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_result_reveal_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/question_page.dart';
-import 'package:movaro_app/features/shared/presentation/pages/protected_placeholder_page.dart';
-import 'package:movaro_app/features/shared/presentation/pages/app_settings_page.dart';
+import 'package:movaro_app/app/presentation/pages/app_settings_page.dart';
+import 'package:movaro_app/app/presentation/pages/protected_placeholder_page.dart';
 import 'package:movaro_app/features/splash/presentation/pages/splash_page.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
 
 class AppRouter {
-  const AppRouter({
-    required this.environment,
-    required this.authController,
-    required this.catalogRepository,
-    required this.citiesController,
-    required this.migrationQuestionnaireController,
-    required this.copilotExchangeRatesService,
-    required this.apiHealthService,
-    required this.journeyContextController,
-    required this.locationController,
-    required this.localeController,
-    required this.themeController,
-  });
+  const AppRouter({required this.dependencies});
 
-  final AppEnvironment environment;
-  final AuthController authController;
-  final CatalogRepository catalogRepository;
-  final CitiesController citiesController;
-  final MigrationQuestionnaireController migrationQuestionnaireController;
-  final CopilotExchangeRatesService copilotExchangeRatesService;
-  final ApiHealthService apiHealthService;
-  final JourneyContextController journeyContextController;
-  final LocationController locationController;
-  final LocaleController localeController;
-  final ThemeController themeController;
+  final AppDependencies dependencies;
 
   Route<dynamic> onGenerateRoute(RouteSettings settings) {
     final routeName = settings.name ?? AppRoutes.splash;
 
     if (AppRoutes.privatePaths.contains(routeName) &&
-        !authController.isAuthenticated) {
+        !dependencies.authController.isAuthenticated) {
       return _buildRoute(
         const RouteSettings(name: AppRoutes.publicHome),
         PublicHomePage(
-          journeyContextController: journeyContextController,
-          citiesController: citiesController,
-          migrationQuestionnaireController: migrationQuestionnaireController,
-          locationController: locationController,
-          environment: environment,
+          journeyContextController: dependencies.journeyContextController,
+          citiesController: dependencies.citiesController,
+          migrationQuestionnaireController:
+              dependencies.migrationQuestionnaireController,
+          locationController: dependencies.locationController,
+          environment: dependencies.environment,
         ),
       );
     }
@@ -89,15 +57,16 @@ class AppRouter {
     };
 
     if (completeJourneyRequiredPaths.contains(routeName) &&
-        !journeyContextController.isJourneyReadyForPlanning) {
+        !dependencies.journeyContextController.isJourneyReadyForPlanning) {
       return _buildRoute(
         const RouteSettings(name: AppRoutes.publicHome),
         PublicHomePage(
-          journeyContextController: journeyContextController,
-          citiesController: citiesController,
-          migrationQuestionnaireController: migrationQuestionnaireController,
-          locationController: locationController,
-          environment: environment,
+          journeyContextController: dependencies.journeyContextController,
+          citiesController: dependencies.citiesController,
+          migrationQuestionnaireController:
+              dependencies.migrationQuestionnaireController,
+          locationController: dependencies.locationController,
+          environment: dependencies.environment,
         ),
       );
     }
@@ -105,13 +74,13 @@ class AppRouter {
     if (routeName != AppRoutes.onboarding &&
         routeName != AppRoutes.login &&
         AppRoutes.privatePaths.contains(routeName) &&
-        authController.needsOnboarding) {
+        dependencies.authController.needsOnboarding) {
       return _buildRoute(
         const RouteSettings(name: AppRoutes.onboarding),
         OnboardingPage(
-          authController: authController,
-          catalogRepository: catalogRepository,
-          locationController: locationController,
+          authController: dependencies.authController,
+          catalogRepository: dependencies.catalogRepository,
+          locationController: dependencies.locationController,
         ),
       );
     }
@@ -123,15 +92,16 @@ class AppRouter {
           args is Map<String, dynamic> && args['selectForPlan'] == true;
       final fromMigrationResult =
           args is Map<String, dynamic> && args['fromMigrationResult'] == true;
-      unawaited(citiesController.prefetchCityDetail(cityId));
-      unawaited(citiesController.prefetchMethodology());
+      unawaited(dependencies.citiesController.prefetchCityDetail(cityId));
+      unawaited(dependencies.citiesController.prefetchMethodology());
       return _buildRoute(
         settings,
         CityDetailPage(
           cityId: cityId,
-          citiesController: citiesController,
-          migrationQuestionnaireController: migrationQuestionnaireController,
-          locationController: locationController,
+          citiesController: dependencies.citiesController,
+          migrationQuestionnaireController:
+              dependencies.migrationQuestionnaireController,
+          locationController: dependencies.locationController,
           selectForPlan: selectForPlan,
           fromMigrationResult: fromMigrationResult,
         ),
@@ -143,48 +113,52 @@ class AppRouter {
         return _buildRoute(
           settings,
           SplashPage(
-            environment: environment,
-            authController: authController,
-            citiesController: citiesController,
-            migrationQuestionnaireController: migrationQuestionnaireController,
-            apiHealthService: apiHealthService,
-            journeyContextController: journeyContextController,
-            locationController: locationController,
+            environment: dependencies.environment,
+            authController: dependencies.authController,
+            citiesController: dependencies.citiesController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
+            apiHealthService: dependencies.apiHealthService,
+            journeyContextController: dependencies.journeyContextController,
+            locationController: dependencies.locationController,
           ),
         );
       case AppRoutes.publicHome:
-        unawaited(citiesController.prefetchCatalog());
+        unawaited(dependencies.citiesController.prefetchCatalog());
         return _buildRoute(
           settings,
           PublicHomePage(
-            environment: environment,
-            journeyContextController: journeyContextController,
-            citiesController: citiesController,
-            migrationQuestionnaireController: migrationQuestionnaireController,
-            locationController: locationController,
+            environment: dependencies.environment,
+            journeyContextController: dependencies.journeyContextController,
+            citiesController: dependencies.citiesController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
+            locationController: dependencies.locationController,
           ),
         );
       case AppRoutes.favorites:
-        unawaited(citiesController.prefetchCatalog());
+        unawaited(dependencies.citiesController.prefetchCatalog());
         return _buildRoute(
           settings,
           FavoritesPage(
-            journeyContextController: journeyContextController,
-            citiesController: citiesController,
-            migrationQuestionnaireController: migrationQuestionnaireController,
+            journeyContextController: dependencies.journeyContextController,
+            citiesController: dependencies.citiesController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
           ),
         );
       case AppRoutes.cityComparison:
         final initialCities = settings.arguments is List<City>
             ? settings.arguments! as List<City>
             : const <City>[];
-        unawaited(citiesController.prefetchCatalog());
+        unawaited(dependencies.citiesController.prefetchCatalog());
         return _buildRoute(
           settings,
           CityComparisonScreen(
             initialCities: initialCities,
-            citiesController: citiesController,
-            migrationQuestionnaireController: migrationQuestionnaireController,
+            citiesController: dependencies.citiesController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
           ),
         );
       case AppRoutes.intro:
@@ -192,41 +166,46 @@ class AppRouter {
         return _buildRoute(
           settings,
           IntroPage(
-            journeyContextController: journeyContextController,
-            locationController: locationController,
+            journeyContextController: dependencies.journeyContextController,
+            locationController: dependencies.locationController,
             isFirstLaunch: isFirstLaunch,
           ),
         );
       case AppRoutes.journeySetup:
-        unawaited(catalogRepository.getCountries());
+        unawaited(dependencies.catalogRepository.getCountries());
         return _buildRoute(
           settings,
           JourneySetupPage(
-            catalogRepository: catalogRepository,
-            journeyContextController: journeyContextController,
-            locationController: locationController,
+            catalogRepository: dependencies.catalogRepository,
+            journeyContextController: dependencies.journeyContextController,
+            locationController: dependencies.locationController,
           ),
         );
       case AppRoutes.explore:
-        unawaited(citiesController.prefetchExplore());
-        unawaited(citiesController.prefetchCatalog());
+      case AppRoutes.cities:
+        unawaited(dependencies.citiesController.prefetchExplore());
+        if (routeName == AppRoutes.explore) {
+          unawaited(dependencies.citiesController.prefetchCatalog());
+        }
         return _buildRoute(
           settings,
           CitiesExplorePage(
-            citiesController: citiesController,
-            journeyContextController: journeyContextController,
-            migrationQuestionnaireController: migrationQuestionnaireController,
+            citiesController: dependencies.citiesController,
+            journeyContextController: dependencies.journeyContextController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
           ),
         );
       case AppRoutes.info:
         return _buildRoute(
           settings,
           AssistantPage(
-            environment: environment,
-            journeyContextController: journeyContextController,
-            migrationQuestionnaireController: migrationQuestionnaireController,
-            citiesController: citiesController,
-            exchangeRatesService: copilotExchangeRatesService,
+            environment: dependencies.environment,
+            journeyContextController: dependencies.journeyContextController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
+            citiesController: dependencies.citiesController,
+            exchangeRatesService: dependencies.copilotExchangeRatesService,
             initialMessage: settings.arguments is String
                 ? settings.arguments! as String
                 : null,
@@ -239,10 +218,11 @@ class AppRouter {
         return _buildRoute(
           settings,
           DocumentationGuidePage(
-            exchangeRatesService: copilotExchangeRatesService,
+            exchangeRatesService: dependencies.copilotExchangeRatesService,
             initialSection: initialSection,
-            journeyContextController: journeyContextController,
-            migrationQuestionnaireController: migrationQuestionnaireController,
+            journeyContextController: dependencies.journeyContextController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
           ),
         );
       case AppRoutes.documentationTopic:
@@ -253,64 +233,58 @@ class AppRouter {
           settings,
           DocumentationTopicPage(
             section: section,
-            exchangeRatesService: copilotExchangeRatesService,
+            exchangeRatesService: dependencies.copilotExchangeRatesService,
             preferredCurrencyCountryId:
-                locationController.fallbackPreferredCountryId(
-                  journeyContextController.originCountryId,
+                dependencies.locationController.fallbackPreferredCountryId(
+                  dependencies.journeyContextController.originCountryId,
                 ) ??
-                migrationQuestionnaireController.generatedPlan?.originCountry,
-          ),
-        );
-      case AppRoutes.cities:
-        unawaited(citiesController.prefetchExplore());
-        return _buildRoute(
-          settings,
-          CitiesExplorePage(
-            citiesController: citiesController,
-            journeyContextController: journeyContextController,
-            migrationQuestionnaireController: migrationQuestionnaireController,
+                dependencies
+                    .migrationQuestionnaireController
+                    .generatedPlan
+                    ?.originCountry,
           ),
         );
       case AppRoutes.citiesSearch:
-        unawaited(citiesController.prefetchCatalog());
+        unawaited(dependencies.citiesController.prefetchCatalog());
         return _buildRoute(
           settings,
-          CitySearchPage(citiesController: citiesController),
+          CitySearchPage(citiesController: dependencies.citiesController),
         );
       case AppRoutes.countries:
-        unawaited(catalogRepository.getCountries());
+        unawaited(dependencies.catalogRepository.getCountries());
         return _buildRoute(
           settings,
-          CountriesPage(catalogRepository: catalogRepository),
+          CountriesPage(catalogRepository: dependencies.catalogRepository),
         );
       case AppRoutes.login:
         return _buildRoute(
           const RouteSettings(name: AppRoutes.publicHome),
           PublicHomePage(
-            environment: environment,
-            journeyContextController: journeyContextController,
-            citiesController: citiesController,
-            migrationQuestionnaireController: migrationQuestionnaireController,
-            locationController: locationController,
+            environment: dependencies.environment,
+            journeyContextController: dependencies.journeyContextController,
+            citiesController: dependencies.citiesController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
+            locationController: dependencies.locationController,
           ),
         );
       case AppRoutes.onboarding:
-        unawaited(catalogRepository.getCountries());
+        unawaited(dependencies.catalogRepository.getCountries());
         return _buildRoute(
           settings,
           OnboardingPage(
-            authController: authController,
-            catalogRepository: catalogRepository,
-            locationController: locationController,
+            authController: dependencies.authController,
+            catalogRepository: dependencies.catalogRepository,
+            locationController: dependencies.locationController,
           ),
         );
       case AppRoutes.migrationQuestionnaire:
         return _buildRoute(
           settings,
           QuestionPage(
-            controller: migrationQuestionnaireController,
-            locationController: locationController,
-            citiesController: citiesController,
+            controller: dependencies.migrationQuestionnaireController,
+            locationController: dependencies.locationController,
+            citiesController: dependencies.citiesController,
           ),
         );
       case AppRoutes.locationPermission:
@@ -320,7 +294,7 @@ class AppRouter {
         return _buildRoute(
           settings,
           LocationPermissionScreen(
-            locationController: locationController,
+            locationController: dependencies.locationController,
             args: args,
           ),
         );
@@ -328,54 +302,58 @@ class AppRouter {
         return _buildRoute(
           settings,
           AppSettingsPage(
-            localeController: localeController,
-            themeController: themeController,
+            localeController: dependencies.localeController,
+            themeController: dependencies.themeController,
           ),
         );
       case AppRoutes.migrationPlanResult:
         return _buildRoute(
           settings,
           MigrationPlanResultPage(
-            controller: migrationQuestionnaireController,
-            citiesController: citiesController,
+            controller: dependencies.migrationQuestionnaireController,
+            citiesController: dependencies.citiesController,
           ),
         );
       case AppRoutes.migrationResultReveal:
         return _buildRoute(
           settings,
           MigrationResultRevealPage(
-            controller: migrationQuestionnaireController,
-            citiesController: citiesController,
+            controller: dependencies.migrationQuestionnaireController,
+            citiesController: dependencies.citiesController,
           ),
         );
       case AppRoutes.migrationPlanCopilot:
-        if (migrationQuestionnaireController.generatedPlan?.isCityConfirmed !=
+        if (dependencies
+                .migrationQuestionnaireController
+                .generatedPlan
+                ?.isCityConfirmed !=
             true) {
           return _buildRoute(
             const RouteSettings(name: AppRoutes.migrationResultReveal),
             MigrationResultRevealPage(
-              controller: migrationQuestionnaireController,
-              citiesController: citiesController,
+              controller: dependencies.migrationQuestionnaireController,
+              citiesController: dependencies.citiesController,
             ),
           );
         }
         return _buildRoute(
           settings,
           MigrationPlanCopilotPage(
-            controller: migrationQuestionnaireController,
-            exchangeRatesService: copilotExchangeRatesService,
-            citiesController: citiesController,
-            journeyContextController: journeyContextController,
-            locationController: locationController,
+            controller: dependencies.migrationQuestionnaireController,
+            exchangeRatesService: dependencies.copilotExchangeRatesService,
+            citiesController: dependencies.citiesController,
+            journeyContextController: dependencies.journeyContextController,
+            locationController: dependencies.locationController,
           ),
         );
       case AppRoutes.authenticatedHome:
         return _buildRoute(
           settings,
           HomePage(
-            environment: environment,
-            authController: authController,
-            migrationQuestionnaireController: migrationQuestionnaireController,
+            environment: dependencies.environment,
+            authController: dependencies.authController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
           ),
         );
       case AppRoutes.communityCreate:
@@ -388,15 +366,17 @@ class AppRouter {
       case AppRoutes.migrationSave:
         return _buildRoute(
           settings,
-          MigrationPlanSavePage(controller: migrationQuestionnaireController),
+          MigrationPlanSavePage(
+            controller: dependencies.migrationQuestionnaireController,
+          ),
         );
       default:
         return _buildRoute(
           const RouteSettings(name: AppRoutes.journeySetup),
           JourneySetupPage(
-            catalogRepository: catalogRepository,
-            journeyContextController: journeyContextController,
-            locationController: locationController,
+            catalogRepository: dependencies.catalogRepository,
+            journeyContextController: dependencies.journeyContextController,
+            locationController: dependencies.locationController,
           ),
         );
     }
@@ -418,19 +398,28 @@ class AppRouter {
         transitionDuration: const Duration(milliseconds: 220),
         reverseTransitionDuration: const Duration(milliseconds: 220),
         pageBuilder: (context, animation, secondaryAnimation) => child,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          final curved = CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeInOut,
-          );
-          return FadeTransition(
-            opacity: Tween<double>(begin: 0.0, end: 1.0).animate(curved),
-            child: child,
-          );
-        },
+        transitionsBuilder:
+            (context, animation, secondaryAnimation, pageChild) {
+              final curved = CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+                reverseCurve: Curves.easeInCubic,
+              );
+
+              return FadeTransition(
+                opacity: Tween<double>(begin: 0.94, end: 1).animate(curved),
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.02),
+                    end: Offset.zero,
+                  ).animate(curved),
+                  child: pageChild,
+                ),
+              );
+            },
       );
     }
 
-    return MaterialPageRoute<void>(builder: (_) => child, settings: settings);
+    return MaterialPageRoute<void>(settings: settings, builder: (_) => child);
   }
 }

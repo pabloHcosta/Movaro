@@ -17,13 +17,10 @@ class ThemePreferencesStore {
 
   Future<void> saveThemeMode(ThemeMode mode) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      _themeKey,
-      switch (mode) {
-        ThemeMode.dark => 'dark',
-        ThemeMode.light => 'light',
-        ThemeMode.system => 'system',
-      },
-    );
+    await prefs.setString(_themeKey, switch (mode) {
+      ThemeMode.dark => 'dark',
+      ThemeMode.light => 'light',
+      ThemeMode.system => 'system',
+    });
   }
 }

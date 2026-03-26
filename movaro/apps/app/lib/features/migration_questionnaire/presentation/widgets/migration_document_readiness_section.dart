@@ -388,13 +388,13 @@ class _ChecklistItem extends StatelessWidget {
                         child: Text(
                           item.title,
                           style: context.textStyles.itemTitle.copyWith(
-                                color: isCompleted
-                                    ? const Color(0xFF4B5563)
-                                    : const Color(0xFFF0F6FC),
-                                decoration: isCompleted
-                                    ? TextDecoration.lineThrough
-                                    : null,
-                              ),
+                            color: isCompleted
+                                ? const Color(0xFF4B5563)
+                                : const Color(0xFFF0F6FC),
+                            decoration: isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
+                          ),
                         ),
                       ),
                       if (isCompleted)
@@ -434,8 +434,8 @@ class _ChecklistItem extends StatelessWidget {
                         Text(
                           item.timeEstimate,
                           style: AppTypography.compactLabel.copyWith(
-                                color: const Color(0xFF4B5563),
-                              ),
+                            color: const Color(0xFF4B5563),
+                          ),
                         ),
                       ],
                     ),
@@ -460,9 +460,9 @@ class _ChecklistItem extends StatelessWidget {
                               child: Text(
                                 item.tip!,
                                 style: AppTypography.compactLabel.copyWith(
-                                      color: const Color(0xFFF59E0B),
-                                      height: 1.4,
-                                    ),
+                                  color: const Color(0xFFF59E0B),
+                                  height: 1.4,
+                                ),
                               ),
                             ),
                           ],
@@ -485,9 +485,9 @@ class _ChecklistItem extends StatelessWidget {
                           child: Text(
                             _openOfficialSiteLabel(context),
                             style: AppTypography.compactBadge.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),

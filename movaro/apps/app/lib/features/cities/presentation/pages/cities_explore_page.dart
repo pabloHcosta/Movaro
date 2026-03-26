@@ -17,7 +17,7 @@ import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/loading_state_widget.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';

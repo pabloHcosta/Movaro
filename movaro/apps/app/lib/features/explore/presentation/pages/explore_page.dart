@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -362,11 +362,7 @@ class _ExploreHeroPanel extends StatelessWidget {
           if (stacked) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                content,
-                const SizedBox(height: 18),
-                stats,
-              ],
+              children: [content, const SizedBox(height: 18), stats],
             );
           }
 
@@ -621,11 +617,7 @@ class _PlanFocusCard extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
-              children: [
-                content,
-                const SizedBox(height: 16),
-                action,
-              ],
+              children: [content, const SizedBox(height: 16), action],
             );
           }
 

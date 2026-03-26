@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/catalog/domain/entities/catalog_country.dart';
-import 'package:movaro_app/core/catalog/domain/repositories/catalog_repository.dart';
-import 'package:movaro_app/core/location/location_controller.dart';
+import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart';
+import 'package:movaro_app/features/catalog/domain/repositories/catalog_repository.dart';
+import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';

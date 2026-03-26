@@ -203,13 +203,11 @@ class CityScoreBadge extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             metric.headline,
-            style: (compact
-                    ? Theme.of(context).textTheme.titleSmall
-                    : Theme.of(context).textTheme.titleSmall)
-                ?.copyWith(
-              color: textPrimary,
-              fontWeight: FontWeight.w800,
-            ),
+            style:
+                (compact
+                        ? Theme.of(context).textTheme.titleSmall
+                        : Theme.of(context).textTheme.titleSmall)
+                    ?.copyWith(color: textPrimary, fontWeight: FontWeight.w800),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),

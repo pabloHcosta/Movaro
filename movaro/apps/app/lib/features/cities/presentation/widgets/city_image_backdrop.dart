@@ -24,13 +24,9 @@ Future<void> precacheCityImage(BuildContext context, City city) async {
       cityName: city.name,
       stateName: city.stateName,
     );
-    final fallbackUrl =
-        result.photos.isEmpty ? null : result.photos.first.url;
+    final fallbackUrl = result.photos.isEmpty ? null : result.photos.first.url;
     if (fallbackUrl != null && context.mounted) {
-      await precacheImage(
-        NetworkImage(fallbackUrl, headers: headers),
-        context,
-      );
+      await precacheImage(NetworkImage(fallbackUrl, headers: headers), context);
     }
   } catch (_) {}
 }
@@ -98,9 +94,7 @@ class CityImageBackdrop extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    const Color(
-                      0xFF08111E,
-                    ).withValues(alpha: topOverlayAlpha),
+                    const Color(0xFF08111E).withValues(alpha: topOverlayAlpha),
                     const Color(
                       0xFF08111E,
                     ).withValues(alpha: bottomOverlayAlpha),
@@ -112,9 +106,7 @@ class CityImageBackdrop extends StatelessWidget {
             ),
           ),
           Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(color: ambientTint),
-            ),
+            child: DecoratedBox(decoration: BoxDecoration(color: ambientTint)),
           ),
           Padding(padding: padding, child: child),
         ],
@@ -189,10 +181,7 @@ class CityImageHeader extends StatelessWidget {
       child: SizedBox(
         height: height,
         width: double.infinity,
-        child: Stack(
-          fit: StackFit.expand,
-          children: layers,
-        ),
+        child: Stack(fit: StackFit.expand, children: layers),
       ),
     );
   }

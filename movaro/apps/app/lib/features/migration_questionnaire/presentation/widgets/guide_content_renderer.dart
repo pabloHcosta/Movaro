@@ -129,9 +129,9 @@ class GuideContentRenderer extends StatelessWidget {
       padding: const EdgeInsets.only(top: 4),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.w700,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -157,9 +157,7 @@ class GuideContentRenderer extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Expanded(
-                child: _buildRichText(context, bullet),
-              ),
+              Expanded(child: _buildRichText(context, bullet)),
             ],
           ),
         );
@@ -210,10 +208,10 @@ class GuideContentRenderer extends StatelessWidget {
   Widget _buildCallout(BuildContext context, String line) {
     // Strip prefix like "Dica prática:" or "Importante:"
     final colonIndex = line.indexOf(':');
-    final label =
-        colonIndex > 0 ? line.substring(0, colonIndex).trim() : 'Dica';
-    final body =
-        colonIndex > 0 ? line.substring(colonIndex + 1).trim() : line;
+    final label = colonIndex > 0
+        ? line.substring(0, colonIndex).trim()
+        : 'Dica';
+    final body = colonIndex > 0 ? line.substring(colonIndex + 1).trim() : line;
 
     return Container(
       width: double.infinity,
@@ -221,12 +219,7 @@ class GuideContentRenderer extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.warning.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border(
-          left: BorderSide(
-            color: AppColors.warning,
-            width: 3,
-          ),
-        ),
+        border: Border(left: BorderSide(color: AppColors.warning, width: 3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,9 +247,9 @@ class GuideContentRenderer extends StatelessWidget {
   /// Builds a RichText widget that highlights URLs as tappable links
   /// and R$ values with a subtle emphasis.
   Widget _buildRichText(BuildContext context, String text) {
-    final baseStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
-      height: 1.5,
-    );
+    final baseStyle = Theme.of(
+      context,
+    ).textTheme.bodyMedium?.copyWith(height: 1.5);
 
     final spans = <InlineSpan>[];
     var lastEnd = 0;
@@ -264,48 +257,46 @@ class GuideContentRenderer extends StatelessWidget {
     // Find all URLs
     for (final match in _urlPattern.allMatches(text)) {
       if (match.start > lastEnd) {
-        spans.add(TextSpan(
-          text: text.substring(lastEnd, match.start),
-          style: baseStyle,
-        ));
+        spans.add(
+          TextSpan(
+            text: text.substring(lastEnd, match.start),
+            style: baseStyle,
+          ),
+        );
       }
 
       final url = match.group(0)!;
-      final fullUrl =
-          url.startsWith('http') ? url : 'https://$url';
+      final fullUrl = url.startsWith('http') ? url : 'https://$url';
 
-      spans.add(WidgetSpan(
-        alignment: PlaceholderAlignment.baseline,
-        baseline: TextBaseline.alphabetic,
-        child: GestureDetector(
-          onTap: () => onLinkTap(fullUrl, url),
-          child: Text(
-            url,
-            style: baseStyle?.copyWith(
-              color: AppColors.primary,
-              decoration: TextDecoration.underline,
-              decorationColor: AppColors.primary.withValues(alpha: 0.4),
+      spans.add(
+        WidgetSpan(
+          alignment: PlaceholderAlignment.baseline,
+          baseline: TextBaseline.alphabetic,
+          child: GestureDetector(
+            onTap: () => onLinkTap(fullUrl, url),
+            child: Text(
+              url,
+              style: baseStyle?.copyWith(
+                color: AppColors.primary,
+                decoration: TextDecoration.underline,
+                decorationColor: AppColors.primary.withValues(alpha: 0.4),
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       lastEnd = match.end;
     }
 
     if (lastEnd < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(lastEnd),
-        style: baseStyle,
-      ));
+      spans.add(TextSpan(text: text.substring(lastEnd), style: baseStyle));
     }
 
     if (spans.isEmpty) {
       return Text(text, style: baseStyle);
     }
 
-    return Text.rich(
-      TextSpan(children: spans),
-    );
+    return Text.rich(TextSpan(children: spans));
   }
 }

@@ -37,8 +37,9 @@ class FlightUrlBuilder {
 
     // Locale is driven by where the user is flying FROM, not where they go.
     final locale = _localeByCountry[params.origin.countryIso.toUpperCase()];
-    final extraParams =
-        locale != null ? '&curr=${locale.curr}&hl=${locale.hl}' : '';
+    final extraParams = locale != null
+        ? '&curr=${locale.curr}&hl=${locale.hl}'
+        : '';
 
     return Uri.parse(
       'https://www.google.com/travel/flights'

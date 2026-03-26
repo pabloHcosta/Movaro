@@ -53,7 +53,8 @@ class CityCoastalProfile {
     if (borderCityIds.contains(_baseId(city.id))) {
       return CityLifestyleKind.border;
     }
-    if (metropolisCityIds.contains(_baseId(city.id)) || city.population >= 1000000) {
+    if (metropolisCityIds.contains(_baseId(city.id)) ||
+        city.population >= 1000000) {
       return CityLifestyleKind.metropolis;
     }
     return CityLifestyleKind.inland;
@@ -72,9 +73,8 @@ class CityCoastalProfile {
   static List<City> rankCoastalSoftLanding(List<City> cities) {
     final coastal = cities.where(isCoastal).toList()
       ..sort(
-        (left, right) => softLandingScore(right).compareTo(
-          softLandingScore(left),
-        ),
+        (left, right) =>
+            softLandingScore(right).compareTo(softLandingScore(left)),
       );
     return coastal;
   }
@@ -82,9 +82,7 @@ class CityCoastalProfile {
   static List<City> rankCoastalBalanced(List<City> cities) {
     final coastal = cities.where(isCoastal).toList()
       ..sort(
-        (left, right) => balancedScore(right).compareTo(
-          balancedScore(left),
-        ),
+        (left, right) => balancedScore(right).compareTo(balancedScore(left)),
       );
     return coastal;
   }

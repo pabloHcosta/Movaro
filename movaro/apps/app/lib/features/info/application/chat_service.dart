@@ -42,10 +42,10 @@ class ChatService {
     this.recommendedCityId,
     this.currentPhase,
     this.completedItemIds = const [],
-  })  : _client = networkClient,
-        _originCountry = originCountry,
-        _destinationCountry = destinationCountry,
-        _locale = locale;
+  }) : _client = networkClient,
+       _originCountry = originCountry,
+       _destinationCountry = destinationCountry,
+       _locale = locale;
 
   final NetworkClient _client;
   final String _originCountry;
@@ -65,13 +65,13 @@ class ChatService {
     final trimmed = userMessage.trim();
     if (trimmed.isEmpty) return;
 
-    _history.add(ChatMessage(
-      role: 'user',
-      text: trimmed,
-      timestamp: DateTime.now(),
-    ));
+    _history.add(
+      ChatMessage(role: 'user', text: trimmed, timestamp: DateTime.now()),
+    );
 
-    dev.log('[ChatService] ask: "${trimmed.substring(0, trimmed.length.clamp(0, 60))}"');
+    dev.log(
+      '[ChatService] ask: "${trimmed.substring(0, trimmed.length.clamp(0, 60))}"',
+    );
 
     ChatServiceAnswer answer;
     try {
@@ -79,20 +79,24 @@ class ChatService {
     } catch (e) {
       dev.log('[ChatService] error: $e');
       const errorText = 'Não consegui processar sua pergunta. Tente novamente.';
-      _history.add(ChatMessage(
-        role: 'assistant',
-        text: errorText,
-        timestamp: DateTime.now(),
-      ));
+      _history.add(
+        ChatMessage(
+          role: 'assistant',
+          text: errorText,
+          timestamp: DateTime.now(),
+        ),
+      );
       yield errorText;
       return;
     }
 
-    _history.add(ChatMessage(
-      role: 'assistant',
-      text: answer.text,
-      timestamp: DateTime.now(),
-    ));
+    _history.add(
+      ChatMessage(
+        role: 'assistant',
+        text: answer.text,
+        timestamp: DateTime.now(),
+      ),
+    );
 
     // Stream character by character for typewriter effect
     const chunkSize = 4;
@@ -134,6 +138,10 @@ class ChatService {
       _ => ChatAnswerSource.unknown,
     };
 
-    return ChatServiceAnswer(text: text, source: source, confidence: confidence);
+    return ChatServiceAnswer(
+      text: text,
+      source: source,
+      confidence: confidence,
+    );
   }
 }

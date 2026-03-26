@@ -19,10 +19,8 @@ Future<void> showAiChatSheet(
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     useSafeArea: true,
-    builder: (_) => _AiChatSheet(
-      chatService: chatService,
-      initialMessage: initialMessage,
-    ),
+    builder: (_) =>
+        _AiChatSheet(chatService: chatService, initialMessage: initialMessage),
   );
 }
 
@@ -76,26 +74,28 @@ class _AiChatSheetState extends State<_AiChatSheet> {
     _scrollToBottom();
 
     _streamSub?.cancel();
-    _streamSub = widget.chatService.sendMessage(trimmed).listen(
-      (chunk) {
-        if (!mounted) return;
-        setState(() => _streamingText += chunk);
-        _scrollToBottom();
-      },
-      onDone: () {
-        if (!mounted) return;
-        setState(() => _isStreaming = false);
-        _scrollToBottom();
-      },
-      onError: (_) {
-        if (!mounted) return;
-        final errorMsg = context.l10n.aiChatNetworkError;
-        setState(() {
-          _isStreaming = false;
-          _streamingText = errorMsg;
-        });
-      },
-    );
+    _streamSub = widget.chatService
+        .sendMessage(trimmed)
+        .listen(
+          (chunk) {
+            if (!mounted) return;
+            setState(() => _streamingText += chunk);
+            _scrollToBottom();
+          },
+          onDone: () {
+            if (!mounted) return;
+            setState(() => _isStreaming = false);
+            _scrollToBottom();
+          },
+          onError: (_) {
+            if (!mounted) return;
+            final errorMsg = context.l10n.aiChatNetworkError;
+            setState(() {
+              _isStreaming = false;
+              _streamingText = errorMsg;
+            });
+          },
+        );
   }
 
   void _scrollToBottom() {
@@ -221,7 +221,9 @@ class _AiChatSheetState extends State<_AiChatSheet> {
           // Input area
           Container(
             padding: EdgeInsets.fromLTRB(
-              16, 12, 8,
+              16,
+              12,
+              8,
               MediaQuery.of(context).padding.bottom + 12,
             ),
             decoration: BoxDecoration(
@@ -249,9 +251,8 @@ class _AiChatSheetState extends State<_AiChatSheet> {
                       style: Theme.of(context).textTheme.bodyMedium,
                       decoration: InputDecoration(
                         hintText: l10n.aiChatInputHint,
-                        hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSoftFor(context),
-                        ),
+                        hintStyle: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(color: AppColors.textSoftFor(context)),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -263,14 +264,10 @@ class _AiChatSheetState extends State<_AiChatSheet> {
                 ),
                 const SizedBox(width: 8),
                 Material(
-                  color: _isStreaming
-                      ? Colors.grey
-                      : const Color(0xFF0088FF),
+                  color: _isStreaming ? Colors.grey : const Color(0xFF0088FF),
                   borderRadius: BorderRadius.circular(20),
                   child: InkWell(
-                    onTap: _isStreaming
-                        ? null
-                        : () => _send(_controller.text),
+                    onTap: _isStreaming ? null : () => _send(_controller.text),
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
                       width: 40,
@@ -335,9 +332,9 @@ class _AiChatSheetState extends State<_AiChatSheet> {
           Center(
             child: Text(
               l10n.aiChatWelcomeTitle,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
           const SizedBox(height: 8),
@@ -413,10 +410,13 @@ class _AiChatSheetState extends State<_AiChatSheet> {
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      itemCount: allMessages.length + (showStreamingBubble ? 1 : 0) +
+      itemCount:
+          allMessages.length +
+          (showStreamingBubble ? 1 : 0) +
           (_isStreaming && _streamingText.isEmpty ? 1 : 0),
       itemBuilder: (context, index) {
-        if (_isStreaming && _streamingText.isEmpty &&
+        if (_isStreaming &&
+            _streamingText.isEmpty &&
             index == allMessages.length) {
           return _buildTypingIndicator(isDark);
         }
@@ -503,9 +503,7 @@ class _AiChatSheetState extends State<_AiChatSheet> {
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            _DotPulse(color: AppColors.textSoftFor(context)),
-          ],
+          children: [_DotPulse(color: AppColors.textSoftFor(context))],
         ),
       ),
     );

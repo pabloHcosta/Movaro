@@ -60,14 +60,20 @@ class _AssistantBottomSheetState extends State<AssistantBottomSheet> {
 
     final chips = switch (lang) {
       'pt' => ['Preciso de visto?', 'Melhor época para ir?', 'Como tirar CPF?'],
-      'es' => ['¿Necesito visa?', '¿Mejor época para ir?', '¿Cómo obtener el CPF?'],
+      'es' => [
+        '¿Necesito visa?',
+        '¿Mejor época para ir?',
+        '¿Cómo obtener el CPF?',
+      ],
       _ => ['Do I need a visa?', 'Best time to go?', 'How to get CPF?'],
     };
 
     return _SheetSurface(
       child: Padding(
         padding: EdgeInsets.fromLTRB(
-          14, 10, 14,
+          14,
+          10,
+          14,
           MediaQuery.of(context).padding.bottom + 10,
         ),
         child: Column(
@@ -156,7 +162,9 @@ class _SheetSurface extends StatelessWidget {
           child,
           // Top accent line
           Positioned(
-            top: 0, left: 0, right: 0,
+            top: 0,
+            left: 0,
+            right: 0,
             child: Container(
               height: 1,
               color: const Color(0xFF4FC3F7).withValues(alpha: 0.2),
@@ -210,9 +218,9 @@ class _QuickChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: const Color(0xFF4FC3F7),
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(color: const Color(0xFF4FC3F7)),
         ),
       ),
     );
@@ -247,9 +255,9 @@ class _InputRow extends StatelessWidget {
               controller: controller,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => onSend(),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.white),
               decoration: InputDecoration(
                 hintText: placeholder,
                 hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(

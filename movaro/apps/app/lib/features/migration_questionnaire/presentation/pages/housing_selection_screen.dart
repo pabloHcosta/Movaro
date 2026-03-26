@@ -377,8 +377,7 @@ class LongTermHousingScreen extends StatelessWidget {
           en: 'Medium-term · No deposit · For expats',
         ),
         provider: null,
-        customUrl: (city) =>
-            PreparationResourceLinks.buildFlatioSearch(city),
+        customUrl: (city) => PreparationResourceLinks.buildFlatioSearch(city),
       ),
       _LongTermPortal(
         name: 'Zap Imoveis',
@@ -1182,10 +1181,11 @@ class _LongTermPortalCard extends StatelessWidget {
                     children: [
                       Text(
                         portal.name,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: const Color(0xFFF0F6FC),
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: const Color(0xFFF0F6FC),
+                              fontWeight: FontWeight.w700,
+                            ),
                       ),
                       if (portal.isRecommended) ...[
                         const SizedBox(width: 6),
@@ -1195,7 +1195,9 @@ class _LongTermPortalCard extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1F6FEB).withValues(alpha: 0.15),
+                            color: const Color(
+                              0xFF1F6FEB,
+                            ).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(

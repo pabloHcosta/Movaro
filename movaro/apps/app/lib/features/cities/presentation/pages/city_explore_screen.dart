@@ -252,9 +252,7 @@ class _ExploreTabSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Color(0xFF1E2636), width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0xFF1E2636), width: 1)),
       ),
       child: Row(
         children: [
@@ -357,10 +355,7 @@ class _YouTubeTabIcon extends StatelessWidget {
         borderRadius: BorderRadius.circular(3),
       ),
       child: const Center(
-        child: CustomPaint(
-          size: Size(7, 8),
-          painter: _PlayIconPainter(),
-        ),
+        child: CustomPaint(size: Size(7, 8), painter: _PlayIconPainter()),
       ),
     );
   }
@@ -387,10 +382,7 @@ class _PlayIconPainter extends CustomPainter {
 }
 
 class _ExploreHeroSection extends StatelessWidget {
-  const _ExploreHeroSection({
-    required this.city,
-    required this.isPlanCity,
-  });
+  const _ExploreHeroSection({required this.city, required this.isPlanCity});
 
   final City city;
   final bool isPlanCity;
@@ -542,7 +534,10 @@ class _VideosTab extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            _FeaturedVideoCard(video: featured, onTap: () => onOpenVideo(featured)),
+            _FeaturedVideoCard(
+              video: featured,
+              onTap: () => onOpenVideo(featured),
+            ),
             if (extra.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text(
@@ -580,7 +575,10 @@ class _VideosTab extends StatelessWidget {
               children: [
                 for (final query in queries)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF0D2137),
                       borderRadius: BorderRadius.circular(6),
@@ -647,16 +645,16 @@ class _PhotosTab extends StatelessWidget {
         final previewPhotos = photos.take(5).toList(growable: false);
         return ListView(
           children: [
-            _PhotoPreviewGrid(
-              photos: previewPhotos,
-              allPhotos: photos,
-            ),
+            _PhotoPreviewGrid(photos: previewPhotos, allPhotos: photos),
             const SizedBox(height: 14),
             InkWell(
               onTap: () => _openGallery(context, photos, 0, city.name),
               borderRadius: BorderRadius.circular(10),
               child: Ink(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF111827),
                   borderRadius: BorderRadius.circular(10),
@@ -745,10 +743,7 @@ class _PhotosTab extends StatelessWidget {
 }
 
 class _FeaturedVideoCard extends StatelessWidget {
-  const _FeaturedVideoCard({
-    required this.video,
-    required this.onTap,
-  });
+  const _FeaturedVideoCard({required this.video, required this.onTap});
 
   final YouTubeVideo video;
   final VoidCallback onTap;
@@ -856,10 +851,11 @@ class _FeaturedVideoCard extends StatelessWidget {
                             _videoMeta(video),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.8),
-                              fontSize: 7.5,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                  fontSize: 7.5,
+                                ),
                           ),
                         ),
                       ],
@@ -876,10 +872,7 @@ class _FeaturedVideoCard extends StatelessWidget {
 }
 
 class _VideoRowCard extends StatelessWidget {
-  const _VideoRowCard({
-    required this.video,
-    required this.onTap,
-  });
+  const _VideoRowCard({required this.video, required this.onTap});
 
   final YouTubeVideo video;
   final VoidCallback onTap;
@@ -910,10 +903,8 @@ class _VideoRowCard extends StatelessWidget {
                       width: 80,
                       fit: BoxFit.cover,
                       httpHeaders: const {'User-Agent': 'Movaro/1.0'},
-                      placeholder: (_, _) => const SkeletonBox(
-                        height: 52,
-                        width: 80,
-                      ),
+                      placeholder: (_, _) =>
+                          const SkeletonBox(height: 52, width: 80),
                       errorWidget: (_, _, _) => const ColoredBox(
                         color: Color(0xFF0D1F38),
                         child: SizedBox(height: 52, width: 80),
@@ -961,10 +952,7 @@ class _VideoRowCard extends StatelessWidget {
 }
 
 class _PhotoPreviewGrid extends StatelessWidget {
-  const _PhotoPreviewGrid({
-    required this.photos,
-    required this.allPhotos,
-  });
+  const _PhotoPreviewGrid({required this.photos, required this.allPhotos});
 
   final List<CityPhotoItem> photos;
   final List<CityPhotoItem> allPhotos;
@@ -989,14 +977,21 @@ class _PhotoPreviewGrid extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    for (var index = 0; index < gridPhotos.length; index += 2) ...[
+                    for (
+                      var index = 0;
+                      index < gridPhotos.length;
+                      index += 2
+                    ) ...[
                       _PhotoTile(
                         item: gridPhotos[index],
                         height: 90,
-                        onTap: () =>
-                            _openGallery(context, photos.indexOf(gridPhotos[index])),
+                        onTap: () => _openGallery(
+                          context,
+                          photos.indexOf(gridPhotos[index]),
+                        ),
                       ),
-                      if (index + 2 < gridPhotos.length) const SizedBox(height: 5),
+                      if (index + 2 < gridPhotos.length)
+                        const SizedBox(height: 5),
                     ],
                   ],
                 ),
@@ -1005,14 +1000,21 @@ class _PhotoPreviewGrid extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    for (var index = 1; index < gridPhotos.length; index += 2) ...[
+                    for (
+                      var index = 1;
+                      index < gridPhotos.length;
+                      index += 2
+                    ) ...[
                       _PhotoTile(
                         item: gridPhotos[index],
                         height: 55,
-                        onTap: () =>
-                            _openGallery(context, photos.indexOf(gridPhotos[index])),
+                        onTap: () => _openGallery(
+                          context,
+                          photos.indexOf(gridPhotos[index]),
+                        ),
                       ),
-                      if (index + 2 < gridPhotos.length) const SizedBox(height: 5),
+                      if (index + 2 < gridPhotos.length)
+                        const SizedBox(height: 5),
                     ],
                   ],
                 ),
@@ -1070,10 +1072,8 @@ class _PhotoTile extends StatelessWidget {
                   imageUrl: item.url,
                   fit: BoxFit.cover,
                   httpHeaders: const {'User-Agent': 'Movaro/1.0'},
-                  placeholder: (_, _) => SizedBox(
-                    height: height,
-                    child: const SkeletonBox(),
-                  ),
+                  placeholder: (_, _) =>
+                      SizedBox(height: height, child: const SkeletonBox()),
                   errorWidget: (_, _, _) => const ColoredBox(
                     color: Color(0xFF163457),
                     child: SizedBox.expand(),
@@ -1174,7 +1174,10 @@ class _PhotoHeroTile extends StatelessWidget {
                 top: 8,
                 right: 8,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.75),
                     borderRadius: BorderRadius.circular(4),
@@ -1244,7 +1247,9 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final title = widget.title.isEmpty ? widget.photos[_currentIndex].sourceLabel : widget.title;
+    final title = widget.title.isEmpty
+        ? widget.photos[_currentIndex].sourceLabel
+        : widget.title;
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -1274,7 +1279,10 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
                 children: [
                   IconButton(
                     onPressed: () => Navigator.maybePop(context),
-                    icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                    icon: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: Colors.white,
+                    ),
                   ),
                   Expanded(
                     child: Text(
@@ -1336,9 +1344,9 @@ class _ErrorPanel extends StatelessWidget {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
           Text(
@@ -1350,10 +1358,7 @@ class _ErrorPanel extends StatelessWidget {
           ),
           if (actionLabel != null && onAction != null) ...[
             const SizedBox(height: 16),
-            FilledButton(
-              onPressed: onAction,
-              child: Text(actionLabel!),
-            ),
+            FilledButton(onPressed: onAction, child: Text(actionLabel!)),
           ],
         ],
       ),
@@ -1432,7 +1437,8 @@ class _YouTubeFallbackPanel extends StatelessWidget {
             children: [
               for (var index = 0; index < queries.take(3).length; index++) ...[
                 _FallbackQueryCard(query: queries[index]),
-                if (index != queries.take(3).length - 1) const SizedBox(height: 8),
+                if (index != queries.take(3).length - 1)
+                  const SizedBox(height: 8),
               ],
             ],
           ),
@@ -1497,10 +1503,9 @@ class _FallbackQueryCard extends StatelessWidget {
           Expanded(
             child: Text(
               query,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 9,
-                color: Colors.white,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontSize: 9, color: Colors.white),
             ),
           ),
         ],
@@ -1522,7 +1527,11 @@ class _SmallPlayBadge extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
       ),
-      child: const Icon(Icons.play_arrow_rounded, size: 12, color: Colors.white),
+      child: const Icon(
+        Icons.play_arrow_rounded,
+        size: 12,
+        color: Colors.white,
+      ),
     );
   }
 }

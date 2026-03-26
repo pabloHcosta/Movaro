@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';

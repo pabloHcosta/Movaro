@@ -317,10 +317,9 @@ class MigrationPlanGenerator {
     final top = ranked.take(3).toList();
 
     // ── RULE 2: lifestyle/remote → Florianópolis ─────────────────────────
-    final isLifestyle = archetypeKey.contains('remote') ||
-        priorities.any(
-          (p) => p == 'warm_climate_beach' || p == 'nature',
-        );
+    final isLifestyle =
+        archetypeKey.contains('remote') ||
+        priorities.any((p) => p == 'warm_climate_beach' || p == 'nature');
     if (isLifestyle) {
       final hasFloripa = top.any((c) => c.city.id == 'florianopolis');
       if (!hasFloripa) {
@@ -518,8 +517,7 @@ class MigrationPlanGenerator {
     // satisfaction than language adaptation alone (70/30 split).
     final community =
         ((_normalizeScore(city.movaroScores.popularForArgentinians) * 0.70 +
-                    _normalizeScore(city.movaroScores.languageAdaptation) *
-                        0.30))
+                _normalizeScore(city.movaroScores.languageAdaptation) * 0.30))
             .clamp(0, 1)
             .toDouble();
 
@@ -814,9 +812,9 @@ class MigrationPlanGenerator {
             .toDouble();
     final community =
         ((_normalizeScoreStatic(city.movaroScores.popularForArgentinians) *
-                        0.70 +
-                    _normalizeScoreStatic(city.movaroScores.languageAdaptation) *
-                        0.30))
+                    0.70 +
+                _normalizeScoreStatic(city.movaroScores.languageAdaptation) *
+                    0.30))
             .clamp(0, 1)
             .toDouble();
 

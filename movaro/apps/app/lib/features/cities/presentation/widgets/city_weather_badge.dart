@@ -44,9 +44,7 @@ class _CityWeatherBadgeState extends State<CityWeatherBadge> {
         final tint = _resolveTint(context, weather);
         final background = widget.compact
             ? _compactBackground(context, tint)
-            : tint.withValues(
-                alpha: AppColors.isDark(context) ? 0.16 : 0.12,
-              );
+            : tint.withValues(alpha: AppColors.isDark(context) ? 0.16 : 0.12);
         final icon = _resolveIcon(weather);
         final textTheme = Theme.of(context).textTheme;
 

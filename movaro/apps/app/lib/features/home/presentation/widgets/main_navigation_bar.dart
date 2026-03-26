@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_text_styles.dart';
-import 'package:movaro_app/core/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 
@@ -25,8 +25,9 @@ class MainNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasActiveDestination =
         migrationQuestionnaireController.generatedPlan?.isCityConfirmed == true;
-    final items =
-        hasActiveDestination ? _activeItems(context) : _emptyItems(context);
+    final items = hasActiveDestination
+        ? _activeItems(context)
+        : _emptyItems(context);
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return AnimatedSwitcher(
@@ -47,9 +48,7 @@ class MainNavigationBar extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xF20E1628),
                 borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.06),
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
               ),
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
               child: Row(
@@ -221,8 +220,7 @@ class _NavTab extends StatelessWidget {
                 label,
                 maxLines: 1,
                 style: context.textStyles.navLabel.copyWith(
-                  fontWeight:
-                      isActive ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                   color: isActive
                       ? Colors.white
                       : Colors.white.withValues(alpha: 0.4),

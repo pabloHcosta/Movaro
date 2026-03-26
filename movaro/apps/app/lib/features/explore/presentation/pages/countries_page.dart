@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/catalog/domain/entities/catalog_country.dart';
-import 'package:movaro_app/core/catalog/domain/repositories/catalog_repository.dart';
+import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart';
+import 'package:movaro_app/features/catalog/domain/repositories/catalog_repository.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -119,8 +119,9 @@ class _CountriesPageState extends State<CountriesPage> {
                           const SizedBox(height: 10),
                           Text(
                             l10n.explorePublicFeaturesDescription,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(color: textSoft),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyLarge?.copyWith(color: textSoft),
                           ),
                           const SizedBox(height: 18),
                           TextField(
@@ -203,9 +204,7 @@ class _CountriesPageState extends State<CountriesPage> {
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyMedium
-                                                ?.copyWith(
-                                                  color: textSoft,
-                                                ),
+                                                ?.copyWith(color: textSoft),
                                           ),
                                         ],
                                       ),

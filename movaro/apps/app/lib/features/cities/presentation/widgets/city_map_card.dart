@@ -40,10 +40,7 @@ class CityMapCard extends StatelessWidget {
           const SizedBox(height: 16),
           ClipRRect(
             borderRadius: const BorderRadius.all(Radius.circular(28)),
-            child: SizedBox(
-              height: 280,
-              child: CityInteractiveMap(city: city),
-            ),
+            child: SizedBox(height: 280, child: CityInteractiveMap(city: city)),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
@@ -57,9 +54,7 @@ class CityMapCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   city.stateName,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.textSoftFor(context),
                   ),
                 ),
@@ -108,10 +103,7 @@ class CityInteractiveMap extends StatelessWidget {
         ),
         RichAttributionWidget(
           attributions: [
-            TextSourceAttribution(
-              'OpenStreetMap contributors',
-              onTap: () {},
-            ),
+            TextSourceAttribution('OpenStreetMap contributors', onTap: () {}),
           ],
         ),
       ],

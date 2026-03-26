@@ -64,11 +64,7 @@ class PlanSummaryCard extends StatelessWidget {
           ),
           if (hasSupporting) ...[
             const SizedBox(height: 8),
-            ScoreBadge(
-              label: supporting!,
-              icon: icon,
-              tint: AppColors.primary,
-            ),
+            ScoreBadge(label: supporting!, icon: icon, tint: AppColors.primary),
           ],
         ],
       ),
@@ -115,15 +111,9 @@ class PlanNextActionCard extends StatelessWidget {
             runSpacing: 10,
             children: [
               if (eyebrow != null)
-                _HeroPill(
-                  label: eyebrow!,
-                  icon: Icons.auto_awesome_rounded,
-                ),
+                _HeroPill(label: eyebrow!, icon: Icons.auto_awesome_rounded),
               if (progressLabel != null)
-                _HeroPill(
-                  label: progressLabel!,
-                  icon: Icons.timeline_rounded,
-                ),
+                _HeroPill(label: progressLabel!, icon: Icons.timeline_rounded),
             ],
           ),
           if (eyebrow != null || progressLabel != null)

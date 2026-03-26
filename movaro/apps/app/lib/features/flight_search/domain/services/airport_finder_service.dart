@@ -26,22 +26,17 @@ class AirportFinderService {
     final scored = airports.map((a) {
       final dist = _haversineKm(latitude, longitude, a.latitude, a.longitude);
       return (airport: a, distanceKm: dist);
-    }).toList()
-      ..sort((x, y) => x.distanceKm.compareTo(y.distanceKm));
+    }).toList()..sort((x, y) => x.distanceKm.compareTo(y.distanceKm));
 
     return scored.take(maxResults).map((e) => e.airport).toList();
   }
 
   /// Haversine great-circle distance in kilometres.
-  double _haversineKm(
-    double lat1,
-    double lng1,
-    double lat2,
-    double lng2,
-  ) {
+  double _haversineKm(double lat1, double lng1, double lat2, double lng2) {
     final dLat = _toRad(lat2 - lat1);
     final dLng = _toRad(lng2 - lng1);
-    final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+    final a =
+        math.sin(dLat / 2) * math.sin(dLat / 2) +
         math.cos(_toRad(lat1)) *
             math.cos(_toRad(lat2)) *
             math.sin(dLng / 2) *

@@ -6,10 +6,7 @@ import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/localization/locale_preferences_store.dart';
 
 class LocaleController extends ChangeNotifier {
-  LocaleController({
-    Locale? initialLocale,
-    LocalePreferencesStore? store,
-  })
+  LocaleController({Locale? initialLocale, LocalePreferencesStore? store})
     : _store = store ?? LocalePreferencesStore(),
       _localeOverride = initialLocale == null
           ? null

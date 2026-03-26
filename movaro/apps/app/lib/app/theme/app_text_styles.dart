@@ -38,32 +38,27 @@ class AppTextStyles {
 
   // ── Hero ──────────────────────────────────────────────────
 
-  static TextStyle heroTitle(BuildContext context) =>
-      Theme.of(context).textTheme.headlineMedium!.copyWith(
-        fontWeight: FontWeight.w900,
-        letterSpacing: -1.0,
-        height: 1.15,
-      );
+  static TextStyle heroTitle(BuildContext context) => Theme.of(context)
+      .textTheme
+      .headlineMedium!
+      .copyWith(fontWeight: FontWeight.w900, letterSpacing: -1.0, height: 1.15);
 
   static TextStyle heroSubtitle(BuildContext context) =>
       Theme.of(context).textTheme.bodyMedium!;
 
   // ── Page / Section ────────────────────────────────────────
 
-  static TextStyle pageTitle(BuildContext context) =>
-      Theme.of(context).textTheme.titleLarge!.copyWith(
-        fontWeight: FontWeight.w800,
-      );
+  static TextStyle pageTitle(BuildContext context) => Theme.of(
+    context,
+  ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w800);
 
-  static TextStyle sectionTitle(BuildContext context) =>
-      Theme.of(context).textTheme.titleMedium!.copyWith(
-        fontWeight: FontWeight.w800,
-      );
+  static TextStyle sectionTitle(BuildContext context) => Theme.of(
+    context,
+  ).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w800);
 
-  static TextStyle itemTitle(BuildContext context) =>
-      Theme.of(context).textTheme.titleSmall!.copyWith(
-        fontWeight: FontWeight.w700,
-      );
+  static TextStyle itemTitle(BuildContext context) => Theme.of(
+    context,
+  ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w700);
 
   // ── Body ──────────────────────────────────────────────────
 
@@ -73,23 +68,20 @@ class AppTextStyles {
   // ── Labels ────────────────────────────────────────────────
 
   /// Uppercase section label (e.g. "PROGRESSO GERAL", "PLANO ATIVO")
-  static TextStyle sectionLabel(BuildContext context) =>
-      Theme.of(context).textTheme.labelMedium!.copyWith(
-        fontWeight: FontWeight.w700,
-        letterSpacing: 0.5,
-      );
+  static TextStyle sectionLabel(BuildContext context) => Theme.of(context)
+      .textTheme
+      .labelMedium!
+      .copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.5);
 
   /// Filled pill/badge label
-  static TextStyle badgeLabel(BuildContext context) =>
-      Theme.of(context).textTheme.labelLarge!.copyWith(
-        fontWeight: FontWeight.w800,
-      );
+  static TextStyle badgeLabel(BuildContext context) => Theme.of(
+    context,
+  ).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w800);
 
   /// Bottom navigation bar label
-  static TextStyle navLabel(BuildContext context) =>
-      Theme.of(context).textTheme.labelSmall!.copyWith(
-        fontWeight: FontWeight.w700,
-      );
+  static TextStyle navLabel(BuildContext context) => Theme.of(
+    context,
+  ).textTheme.labelSmall!.copyWith(fontWeight: FontWeight.w700);
 
   // ── Display numbers ───────────────────────────────────────
 
@@ -111,8 +103,7 @@ class AppTextStyles {
   static TextStyle tinyLabel(BuildContext context) => AppTypography.tinyLabel;
 
   /// 7.5px — icon-adjacent micro indicators
-  static TextStyle microLabel(BuildContext context) =>
-      AppTypography.microLabel;
+  static TextStyle microLabel(BuildContext context) => AppTypography.microLabel;
 }
 
 /// Convenience extension for ergonomic access via [BuildContext].

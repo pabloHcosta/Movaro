@@ -26,7 +26,7 @@ class ChatContextResult {
 /// receives real city data and guide phase items instead of an empty string.
 class ChatContextRemoteService {
   ChatContextRemoteService({required NetworkClient networkClient})
-      : _client = networkClient;
+    : _client = networkClient;
 
   final NetworkClient _client;
 
@@ -73,9 +73,11 @@ class ChatContextRemoteService {
   /// Converts a city name to a kebab-case ID as expected by the cities catalog.
   /// "São Paulo" → "sao-paulo", "Florianópolis" → "florianopolis"
   static String _toKebabCase(String name) {
-    const accents = 'àáâãäåæçèéêëìíîïðñòóôõöùúûüýÿ'
+    const accents =
+        'àáâãäåæçèéêëìíîïðñòóôõöùúûüýÿ'
         'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖÙÚÛÜÝŸ';
-    const normalized = 'aaaaaaaceeeeiiiidnoooooouuuuyy'
+    const normalized =
+        'aaaaaaaceeeeiiiidnoooooouuuuyy'
         'aaaaaaaceeeeiiiidnoooooouuuuyy';
 
     var result = name.toLowerCase();
