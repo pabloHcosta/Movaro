@@ -21,7 +21,6 @@ import 'package:movaro_app/features/migration_questionnaire/application/migratio
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/repositories/question_repository_impl.dart';
 
@@ -75,7 +74,6 @@ Future<AppDependencies> buildAppDependencies({
   await localeController.initialize();
   final themeController = ThemeController();
   await themeController.initialize();
-  await PlanNotificationService.instance.initialize();
 
   return AppDependencies(
     environment: environment,
