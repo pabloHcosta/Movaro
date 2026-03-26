@@ -219,6 +219,7 @@ class AppRouter {
         return _buildRoute(
           settings,
           DocumentationGuidePage(
+            environment: dependencies.environment,
             exchangeRatesService: dependencies.copilotExchangeRatesService,
             initialSection: initialSection,
             journeyContextController: dependencies.journeyContextController,

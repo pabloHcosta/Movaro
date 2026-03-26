@@ -25,6 +25,28 @@ class ChatServiceAnswer {
   final double confidence;
 }
 
+class ChatStarterPrompt {
+  const ChatStarterPrompt({
+    required this.key,
+    required this.label,
+    required this.message,
+  });
+
+  final String key;
+  final String label;
+  final String message;
+}
+
+class ChatStarterPrompts {
+  const ChatStarterPrompts({
+    required this.categories,
+    required this.chips,
+  });
+
+  final List<ChatStarterPrompt> categories;
+  final List<ChatStarterPrompt> chips;
+}
+
 /// Backend-mediated chat service.
 ///
 /// Calls `POST /v1/chat/ask` on the Movaro API. The backend orchestrator
@@ -41,6 +63,8 @@ class ChatService {
     required String locale,
     this.recommendedCityId,
     this.currentPhase,
+    this.migrationGoal,
+    this.planTimeline,
     this.completedItemIds = const [],
   }) : _client = networkClient,
        _originCountry = originCountry,
@@ -53,6 +77,8 @@ class ChatService {
   final String _locale;
   final String? recommendedCityId;
   final String? currentPhase;
+  final String? migrationGoal;
+  final String? planTimeline;
   final List<String> completedItemIds;
 
   final List<ChatMessage> _history = [];
@@ -117,6 +143,8 @@ class ChatService {
       'locale': _locale,
       if (recommendedCityId != null) 'recommendedCityId': recommendedCityId,
       if (currentPhase != null) 'currentPhase': currentPhase,
+      if (migrationGoal != null) 'migrationGoal': migrationGoal,
+      if (planTimeline != null) 'planTimeline': planTimeline,
       if (completedItemIds.isNotEmpty) 'completedItemIds': completedItemIds,
       if (_history.length > 1)
         'history': _history
@@ -142,6 +170,38 @@ class ChatService {
       text: text,
       source: source,
       confidence: confidence,
+    );
+  }
+
+  Future<ChatStarterPrompts> fetchStarterPrompts() async {
+    final data = await _client.postJsonMap('/v1/chat/prompts', {
+      'originCountry': _originCountry,
+      'destinationCountry': _destinationCountry,
+      'locale': _locale,
+    });
+
+    List<ChatStarterPrompt> parseItems(String key) {
+      final raw = data[key];
+      if (raw is! List) {
+        return const [];
+      }
+
+      return raw
+          .whereType<Map<String, dynamic>>()
+          .map(
+            (item) => ChatStarterPrompt(
+              key: item['key'] as String? ?? '',
+              label: item['label'] as String? ?? '',
+              message: item['message'] as String? ?? '',
+            ),
+          )
+          .where((item) => item.label.isNotEmpty && item.message.isNotEmpty)
+          .toList(growable: false);
+    }
+
+    return ChatStarterPrompts(
+      categories: parseItems('categories'),
+      chips: parseItems('chips'),
     );
   }
 }

@@ -46,6 +46,16 @@ export class AskChatDto {
   currentPhase?: string;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  migrationGoal?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  planTimeline?: string;
+
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   completedItemIds?: string[];

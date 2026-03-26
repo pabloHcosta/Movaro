@@ -2,8 +2,12 @@ import { Body, Controller, Post } from '@nestjs/common';
 
 import { ChatContextBuilderService } from '../application/services/chat-context-builder.service';
 import { OrchestratorService } from '../application/services/orchestrator.service';
+import { ChatPromptsService } from '../application/services/chat-prompts.service';
+import { GuideAnswersService } from '../application/services/guide-answers.service';
 import { AskChatDto } from './dto/ask-chat.dto';
 import { BuildChatContextDto } from './dto/build-chat-context.dto';
+import { ChatPromptsDto } from './dto/chat-prompts.dto';
+import { GuideAnswersDto } from './dto/guide-answers.dto';
 
 @Controller({
   path: 'chat',
@@ -13,6 +17,8 @@ export class ChatController {
   constructor(
     private readonly chatContextBuilderService: ChatContextBuilderService,
     private readonly orchestratorService: OrchestratorService,
+    private readonly chatPromptsService: ChatPromptsService,
+    private readonly guideAnswersService: GuideAnswersService,
   ) {}
 
   /**
@@ -40,5 +46,15 @@ export class ChatController {
   @Post('ask')
   ask(@Body() body: AskChatDto) {
     return this.orchestratorService.ask(body);
+  }
+
+  @Post('prompts')
+  prompts(@Body() body: ChatPromptsDto) {
+    return this.chatPromptsService.buildPrompts(body);
+  }
+
+  @Post('guide-answers')
+  guideAnswers(@Body() body: GuideAnswersDto) {
+    return this.guideAnswersService.list(body);
   }
 }

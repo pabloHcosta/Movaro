@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/core/config/api_keys.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart';
+import 'package:movaro_app/core/environment/app_environment.dart';
+import 'package:movaro_app/core/network/network_client.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/journey/journey_country_metadata.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
@@ -14,13 +15,12 @@ import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/explore/application/services/documentation_guide_preferences_store.dart';
+import 'package:movaro_app/features/explore/application/services/guide_answers_remote_service.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_decision_support_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_entry_cost_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_soft_landing_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/practical_cost_estimator.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
-import 'package:movaro_app/features/info/application/gemini_chat_service.dart';
-import 'package:movaro_app/features/info/presentation/widgets/ai_chat_sheet.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
 
@@ -35,6 +35,7 @@ enum DocumentationGuideSection {
 
 class DocumentationGuidePage extends StatefulWidget {
   const DocumentationGuidePage({
+    required this.environment,
     required this.exchangeRatesService,
     this.initialSection,
     this.journeyContextController,
@@ -45,6 +46,7 @@ class DocumentationGuidePage extends StatefulWidget {
     super.key,
   });
 
+  final AppEnvironment environment;
   final CopilotExchangeRatesService exchangeRatesService;
   final DocumentationGuideSection? initialSection;
   final JourneyContextController? journeyContextController;
@@ -74,7 +76,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
   bool _didTryAutoGuide = false;
   bool _showScrollHint = false;
   String? _selectedCountryId;
-  GeminiChatService? _chatService;
+  List<_GuideQuickAnswerMeta>? _remoteQuickAnswers;
 
   @override
   void initState() {
@@ -85,9 +87,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     _preferencesStore = DocumentationGuidePreferencesStore();
     _selectedSection = widget.initialSection;
     widget.journeyContextController?.initialize();
-    if (widget.showAsTab && ApiKeys.hasGeminiApiKey) {
-      _initChatService();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadRemoteGuideAnswers());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshScrollHint();
       if (widget.showAsTab) {
@@ -105,6 +105,45 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
       ..removeListener(_handleScroll)
       ..dispose();
     super.dispose();
+  }
+
+  Future<void> _loadRemoteGuideAnswers() async {
+    final locale = Localizations.localeOf(context).languageCode;
+    final destination =
+        widget.migrationQuestionnaireController?.generatedPlan?.destinationCountry ??
+        widget.journeyContextController?.selection.destination?.name ??
+        'brasil';
+    final origin =
+        widget.migrationQuestionnaireController?.generatedPlan?.originCountry ??
+        widget.journeyContextController?.selection.origin?.name;
+
+    try {
+      final service = GuideAnswersRemoteService(
+        client: NetworkClient(environment: widget.environment),
+      );
+      final items = await service.fetch(
+        destinationCountry: destination,
+        originCountry: origin,
+        locale: locale,
+      );
+      if (!mounted || items.isEmpty) {
+        return;
+      }
+
+      setState(() {
+        _remoteQuickAnswers = items
+            .map((item) => _GuideQuickAnswerMeta(
+                  section: _sectionFromApi(item.section),
+                  icon: _iconForSection(_sectionFromApi(item.section)),
+                  question: item.question,
+                  answer: item.answer,
+                  keywords: item.keywords,
+                ))
+            .toList(growable: false);
+      });
+    } catch (_) {
+      // Keep local fallback silently.
+    }
   }
 
   Future<void> _maybeShowGuide() async {
@@ -169,58 +208,8 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     );
   }
 
-  void _initChatService() {
-    final origin =
-        widget.journeyContextController?.selection.origin?.name ?? 'Argentina';
-    final destination =
-        widget.journeyContextController?.selection.destination?.name ??
-        'Brasil';
-
-    _chatService = GeminiChatService(apiKey: ApiKeys.geminiApiKey);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final l10n = context.l10n;
-      final answers = _guideQuickAnswers(context);
-      final buffer = StringBuffer();
-      for (final a in answers) {
-        buffer.writeln('Q: ${a.question}');
-        buffer.writeln('A: ${a.answer}');
-        buffer.writeln();
-      }
-      final locale = Localizations.localeOf(context).languageCode;
-      final plan = widget.migrationQuestionnaireController?.generatedPlan;
-      final journeyState = plan?.isCityConfirmed == true
-          ? 'copilot_active'
-          : plan != null
-          ? 'plan_generated'
-          : 'destination_selected';
-
-      _chatService!.initialize(
-        curatedContent: buffer.toString(),
-        originCountry: origin,
-        destinationCountry: destination,
-        locale: locale,
-        userContext: UserMigrationContext(
-          journeyState: journeyState,
-          migrationGoal: plan?.goal.isNotEmpty == true ? plan!.goal : null,
-          recommendedCity: plan?.recommendedCity?.name,
-          planTimeline: plan?.timeline.isNotEmpty == true
-              ? plan!.timeline
-              : null,
-        ),
-        errorMessages: ChatErrorMessages(
-          notInitialized: l10n.aiChatNotInitialized,
-          rateLimit: l10n.aiChatErrorRateLimit,
-          apiLimit: l10n.aiChatErrorApiLimit,
-          generic: l10n.aiChatErrorGeneric,
-        ),
-      );
-    });
-  }
-
   void _openAiChat() {
-    if (_chatService == null) return;
-    showAiChatSheet(context, chatService: _chatService!);
+    Navigator.pushNamed(context, AppRoutes.info);
   }
 
   @override
@@ -401,7 +390,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
 
     return Scaffold(
       extendBody: widget.showAsTab,
-      floatingActionButton: widget.showAsTab && _chatService != null
+      floatingActionButton: widget.showAsTab
           ? _AiChatFab(onTap: _openAiChat)
           : null,
       bottomNavigationBar:
@@ -868,6 +857,10 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
   }
 
   List<_GuideQuickAnswerMeta> _guideQuickAnswers(BuildContext context) {
+    if (_remoteQuickAnswers != null && _remoteQuickAnswers!.isNotEmpty) {
+      return _remoteQuickAnswers!;
+    }
+
     final l10n = context.l10n;
 
     return [
@@ -1046,6 +1039,29 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
         ],
       ),
     ];
+  }
+
+  DocumentationGuideSection _sectionFromApi(String section) {
+    return switch (section) {
+      'documents' => DocumentationGuideSection.documents,
+      'housing' => DocumentationGuideSection.housing,
+      'health' => DocumentationGuideSection.health,
+      'work' => DocumentationGuideSection.work,
+      'driving' => DocumentationGuideSection.driving,
+      'costs' => DocumentationGuideSection.costs,
+      _ => DocumentationGuideSection.documents,
+    };
+  }
+
+  IconData _iconForSection(DocumentationGuideSection section) {
+    return switch (section) {
+      DocumentationGuideSection.documents => Icons.badge_outlined,
+      DocumentationGuideSection.housing => Icons.home_work_outlined,
+      DocumentationGuideSection.health => Icons.health_and_safety_outlined,
+      DocumentationGuideSection.work => Icons.work_outline_rounded,
+      DocumentationGuideSection.driving => Icons.directions_car_outlined,
+      DocumentationGuideSection.costs => Icons.wallet_outlined,
+    };
   }
 }
 

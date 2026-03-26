@@ -2,19 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { CitiesCatalogService } from '../../../cities/application/services/cities-catalog.service';
 import { CityCardEntity } from '../../../cities/domain/entities/city-card.entity';
-import {
-  getAllItems,
-  getItemsByPhase,
-  GuideItem,
-  PHASE_ORDER,
-} from '../../data/argentina-brazil-guide.datasource';
 import { ChatContextEntity, CoverageLevel } from '../../domain/entities/chat-context.entity';
 import { BuildChatContextDto } from '../../presentation/dto/build-chat-context.dto';
-
-/** Supported corridors as normalised lowercase pairs. */
-const SUPPORTED_CORRIDORS: Array<{ origin: string; destination: string }> = [
-  { origin: 'argentina', destination: 'brasil' },
-];
+import {
+  corridorGuidanceProfiles,
+  CorridorGuidanceProfile,
+} from './resolvers/corridor-guidance-profiles';
 
 @Injectable()
 export class ChatContextBuilderService {
@@ -27,11 +20,12 @@ export class ChatContextBuilderService {
   async buildContext(dto: BuildChatContextDto): Promise<ChatContextEntity> {
     const origin = dto.originCountry.toLowerCase().trim();
     const destination = dto.destinationCountry.toLowerCase().trim();
+    const profile = this.resolveProfile(origin, destination);
 
-    const coverageLevel = this.resolveCoverageLevel(origin, destination);
+    const coverageLevel = this.resolveCoverageLevel(profile);
     const corridor = `${this.capitalise(origin)} → ${this.capitalise(destination)}`;
 
-    if (coverageLevel === 'unsupported') {
+    if (!profile || coverageLevel === 'unsupported') {
       return new ChatContextEntity('', 'unsupported', corridor);
     }
 
@@ -45,15 +39,24 @@ export class ChatContextBuilderService {
 
     // ── Current phase guide items ─────────────────────────────────────────
     if (dto.currentPhase) {
+      const normalizedCompletedItemIds = this.normalizeCompletedItemIds(
+        dto.completedItemIds ?? [],
+        profile,
+      );
       sections.push(
-        this.buildPhaseSection(dto.currentPhase, dto.completedItemIds ?? [], dto.locale),
+        this.buildPhaseSection(
+          profile,
+          dto.currentPhase,
+          normalizedCompletedItemIds,
+          dto.locale,
+        ),
       );
     }
 
     // ── Upcoming phase preview ────────────────────────────────────────────
-    const upcomingPhase = this.resolveUpcomingPhase(dto.currentPhase);
+    const upcomingPhase = this.resolveUpcomingPhase(profile, dto.currentPhase);
     if (upcomingPhase) {
-      sections.push(this.buildUpcomingPhaseSection(upcomingPhase, dto.locale));
+      sections.push(this.buildUpcomingPhaseSection(profile, upcomingPhase, dto.locale));
     }
 
     const appDataBlock = sections.join('\n\n');
@@ -67,7 +70,13 @@ export class ChatContextBuilderService {
     locale?: string,
   ): Promise<string | null> {
     try {
-      const city = await this.citiesCatalogService.getCityById(cityId);
+      const resolvedCityId = this.citiesCatalogService.resolveCityId(cityId);
+      if (!resolvedCityId) {
+        this.logger.warn(`City not found for context: ${cityId}`);
+        return null;
+      }
+
+      const city = await this.citiesCatalogService.getCityById(resolvedCityId);
       return this.formatCitySection(city, locale);
     } catch {
       this.logger.warn(`City not found for context: ${cityId}`);
@@ -176,12 +185,13 @@ export class ChatContextBuilderService {
   // ── Phase section ─────────────────────────────────────────────────────────
 
   private buildPhaseSection(
+    profile: CorridorGuidanceProfile,
     phase: string,
     completedItemIds: string[],
     locale?: string,
   ): string {
     const lang = locale ?? 'pt';
-    const items = getItemsByPhase(phase);
+    const items = profile.guideItems.filter((item) => item.phase === phase);
     const completedSet = new Set(completedItemIds);
 
     const pending = items.filter((i) => !completedSet.has(i.id));
@@ -223,7 +233,10 @@ export class ChatContextBuilderService {
     return lines.join('\n');
   }
 
-  private formatItem(item: GuideItem, completed: boolean): string {
+  private formatItem(
+    item: CorridorGuidanceProfile['guideItems'][number],
+    completed: boolean,
+  ): string {
     const status = completed ? '✓' : '○';
     const base = `${status} [${item.id}] ${item.title}: ${item.summary}`;
     return item.notes && !completed ? `${base}\n  → ${item.notes}` : base;
@@ -231,9 +244,13 @@ export class ChatContextBuilderService {
 
   // ── Upcoming phase preview ────────────────────────────────────────────────
 
-  private buildUpcomingPhaseSection(phase: string, locale?: string): string {
+  private buildUpcomingPhaseSection(
+    profile: CorridorGuidanceProfile,
+    phase: string,
+    locale?: string,
+  ): string {
     const lang = locale ?? 'pt';
-    const items = getItemsByPhase(phase);
+    const items = profile.guideItems.filter((item) => item.phase === phase);
     if (items.length === 0) return '';
 
     const phaseLabel = this.phaseDisplayName(phase, lang);
@@ -253,18 +270,47 @@ export class ChatContextBuilderService {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  private resolveCoverageLevel(origin: string, destination: string): CoverageLevel {
-    const match = SUPPORTED_CORRIDORS.find(
-      (c) => c.origin === origin && c.destination === destination,
-    );
-    return match ? 'full' : 'unsupported';
+  private resolveCoverageLevel(
+    profile: CorridorGuidanceProfile | null,
+  ): CoverageLevel {
+    return profile ? 'full' : 'unsupported';
   }
 
-  private resolveUpcomingPhase(currentPhase?: string): string | null {
+  private resolveUpcomingPhase(
+    profile: CorridorGuidanceProfile,
+    currentPhase?: string,
+  ): string | null {
     if (!currentPhase) return null;
-    const index = PHASE_ORDER.indexOf(currentPhase as (typeof PHASE_ORDER)[number]);
-    if (index === -1 || index >= PHASE_ORDER.length - 1) return null;
-    return PHASE_ORDER[index + 1];
+    const index = profile.phaseOrder.indexOf(currentPhase);
+    if (index === -1 || index >= profile.phaseOrder.length - 1) return null;
+    return profile.phaseOrder[index + 1] ?? null;
+  }
+
+  private resolveProfile(
+    origin: string,
+    destination: string,
+  ): CorridorGuidanceProfile | null {
+    return (
+      corridorGuidanceProfiles.find(
+        (profile) =>
+          profile.key === `${origin.toLowerCase().trim()}->${destination
+            .toLowerCase()
+            .trim()}`,
+      ) ?? null
+    );
+  }
+
+  private normalizeCompletedItemIds(
+    completedItemIds: string[],
+    profile: CorridorGuidanceProfile,
+  ): string[] {
+    if (!profile.completedItemAliases) {
+      return completedItemIds;
+    }
+
+    return completedItemIds.map(
+      (itemId) => profile.completedItemAliases?.[itemId] ?? itemId,
+    );
   }
 
   private phaseDisplayName(phase: string, lang: string): string {
@@ -284,6 +330,6 @@ export class ChatContextBuilderService {
 
   /** Returns all guide items for a full-catalog response (e.g. for testing). */
   getAllGuideItems() {
-    return getAllItems();
+    return corridorGuidanceProfiles.flatMap((profile) => profile.guideItems);
   }
 }

@@ -14,6 +14,7 @@ import 'package:movaro_app/features/home/presentation/widgets/main_navigation_ba
 import 'package:movaro_app/features/info/application/chat_service.dart';
 import 'package:movaro_app/features/info/application/gemini_chat_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
 
 enum _AssistantMode { conversation, guides }
@@ -21,7 +22,7 @@ enum _AssistantMode { conversation, guides }
 /// The Assistant tab page — replaces the old InfoTab (slot 3).
 ///
 /// Contains two modes via a [SegmentedButton]:
-/// - Conversation: Gemini-powered chat
+/// - Conversation: backend-mediated Movaro chat
 /// - Guias: the existing [DocumentationGuidePage] content (embedded)
 class AssistantPage extends StatefulWidget {
   const AssistantPage({
@@ -50,7 +51,11 @@ class AssistantPage extends StatefulWidget {
 class _AssistantPageState extends State<AssistantPage> {
   _AssistantMode _mode = _AssistantMode.conversation;
   ChatService? _chatService;
+  ChatStarterPrompts? _starterPrompts;
   bool _chatInitStarted = false;
+  bool _isChatInitializing = false;
+  final MigrationCopilotProgressStore _progressStore =
+      MigrationCopilotProgressStore();
 
   @override
   void didChangeDependencies() {
@@ -61,7 +66,8 @@ class _AssistantPageState extends State<AssistantPage> {
     }
   }
 
-  void _initChatService() {
+  Future<void> _initChatService() async {
+    setState(() => _isChatInitializing = true);
     final locale = Localizations.localeOf(context).languageCode;
     final plan = widget.migrationQuestionnaireController.generatedPlan;
     final originCountry = plan?.originCountry.isNotEmpty == true
@@ -73,37 +79,46 @@ class _AssistantPageState extends State<AssistantPage> {
               'brasil';
 
     try {
+      final progressSnapshot = plan == null
+          ? const MigrationCopilotProgressSnapshot()
+          : await _progressStore.read(plan);
+      final completedItemIds = progressSnapshot.getAllCompletedIds().toList()
+        ..sort();
+
       _chatService = ChatService(
         networkClient: NetworkClient(environment: widget.environment),
         originCountry: originCountry,
         destinationCountry: destinationCountry,
         locale: locale,
-        recommendedCityId: plan?.recommendedCity != null
-            ? _toKebabCase(plan!.recommendedCity!.name)
-            : null,
+        recommendedCityId: plan?.recommendedCity?.id,
+        currentPhase: _resolveCurrentPhase(progressSnapshot.activeItemId),
+        completedItemIds: completedItemIds,
+        migrationGoal: plan?.goal.isNotEmpty == true ? plan!.goal : null,
+        planTimeline: plan?.timeline.isNotEmpty == true ? plan!.timeline : null,
       );
+      _starterPrompts = await _chatService!.fetchStarterPrompts();
       dev.log('[AssistantPage] ChatService ready ✓');
     } catch (e) {
       dev.log('[AssistantPage] ChatService init failed: $e');
       _chatService = null;
+      _starterPrompts = null;
+    } finally {
+      if (mounted) {
+        setState(() => _isChatInitializing = false);
+      }
     }
   }
 
-  static String _toKebabCase(String name) {
-    const accents =
-        'àáâãäåæçèéêëìíîïðñòóôõöùúûüýÿ'
-        'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖÙÚÛÜÝŸ';
-    const normalized =
-        'aaaaaaaceeeeiiiidnoooooouuuuyy'
-        'aaaaaaaceeeeiiiidnoooooouuuuyy';
-    var result = name.toLowerCase();
-    for (var i = 0; i < accents.length; i++) {
-      result = result.replaceAll(accents[i], normalized[i]);
+  String? _resolveCurrentPhase(String? activeItemId) {
+    if (activeItemId == null || activeItemId.isEmpty) {
+      return null;
     }
-    return result
-        .replaceAll(RegExp(r'[^a-z0-9\s-]'), '')
-        .replaceAll(RegExp(r'\s+'), '-')
-        .trim();
+    if (activeItemId.startsWith('item_0_')) return 'preparation';
+    if (activeItemId.startsWith('item_1_')) return 'housing';
+    if (activeItemId.startsWith('item_2_')) return 'documents';
+    if (activeItemId.startsWith('item_3_')) return 'work';
+    if (activeItemId.startsWith('item_4_')) return 'arrival';
+    return null;
   }
 
   @override
@@ -139,11 +154,13 @@ class _AssistantPageState extends State<AssistantPage> {
                       ? _ConversationBody(
                           key: const ValueKey('conversation'),
                           chatService: _chatService,
-                          isInitializing: false,
+                          starterPrompts: _starterPrompts,
+                          isInitializing: _isChatInitializing,
                           initialMessage: widget.initialMessage,
                         )
                       : DocumentationGuidePage(
                           key: const ValueKey('guides'),
+                          environment: widget.environment,
                           embedded: true,
                           exchangeRatesService: widget.exchangeRatesService,
                           journeyContextController:
@@ -280,12 +297,14 @@ class _ModeSegmentedControl extends StatelessWidget {
 class _ConversationBody extends StatefulWidget {
   const _ConversationBody({
     required this.chatService,
+    required this.starterPrompts,
     required this.isInitializing,
     this.initialMessage,
     super.key,
   });
 
   final ChatService? chatService;
+  final ChatStarterPrompts? starterPrompts;
   final bool isInitializing;
   final String? initialMessage;
 
@@ -423,54 +442,8 @@ class _ConversationBodyState extends State<_ConversationBody> {
   }
 
   Widget _buildEmptyState(BuildContext context, dynamic l10n, bool isDark) {
-    final lang = Localizations.localeOf(context).languageCode;
-
-    final categories = [
-      (
-        icon: Icons.description_outlined,
-        label: l10n.homeAssistantCategoryDocuments as String,
-        message: switch (lang) {
-          'pt' =>
-            'Quais documentos preciso para migrar? Explique vistos e CPF.',
-          'es' => '¿Qué documentos necesito para migrar? Explica visas y CPF.',
-          _ => 'What documents do I need to migrate? Explain visas and CPF.',
-        },
-      ),
-      (
-        icon: Icons.account_balance_wallet_outlined,
-        label: l10n.homeAssistantCategoryCosts as String,
-        message: switch (lang) {
-          'pt' => 'Quanto custa se mudar? Me dê uma visão geral dos custos.',
-          'es' =>
-            '¿Cuánto cuesta mudarse? Dame una visión general de los costos.',
-          _ => 'How much does it cost to move? Give me a cost overview.',
-        },
-      ),
-      (
-        icon: Icons.explore_outlined,
-        label: l10n.homeAssistantCategoryActivities as String,
-        message: switch (lang) {
-          'pt' => 'O que devo saber sobre a vida na cidade destino?',
-          'es' => '¿Qué debo saber sobre la vida en la ciudad destino?',
-          _ => 'What should I know about life in the destination city?',
-        },
-      ),
-      (
-        icon: Icons.home_outlined,
-        label: l10n.homeAssistantCategoryStay as String,
-        message: switch (lang) {
-          'pt' => 'Como encontrar moradia no Brasil? Dicas para alugar.',
-          'es' => '¿Cómo encontrar vivienda en Brasil? Consejos para alquilar.',
-          _ => 'How to find housing in Brazil? Tips for renting.',
-        },
-      ),
-    ];
-
-    final chips = [
-      l10n.homeAssistantChipVisa as String,
-      l10n.homeAssistantChipBestTime as String,
-      l10n.aiChatSuggestCpf as String,
-    ];
+    final categories = widget.starterPrompts?.categories ?? const <ChatStarterPrompt>[];
+    final chips = widget.starterPrompts?.chips ?? const <ChatStarterPrompt>[];
 
     final isDark2 = isDark;
     return SingleChildScrollView(
@@ -489,7 +462,7 @@ class _ConversationBodyState extends State<_ConversationBody> {
             children: categories
                 .map(
                   (c) => _CategoryCard(
-                    icon: c.icon,
+                    icon: _categoryIcon(c.key),
                     label: c.label,
                     isDark: isDark2,
                     onTap: () => _send(c.message),
@@ -507,13 +480,26 @@ class _ConversationBodyState extends State<_ConversationBody> {
               itemCount: chips.length,
               separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (_, i) =>
-                  _QuickChip(label: chips[i], onTap: () => _send(chips[i])),
+                  _QuickChip(
+                    label: chips[i].label,
+                    onTap: () => _send(chips[i].message),
+                  ),
             ),
           ),
           const SizedBox(height: 16),
         ],
       ),
     );
+  }
+
+  IconData _categoryIcon(String key) {
+    return switch (key) {
+      'documents' => Icons.description_outlined,
+      'costs' => Icons.account_balance_wallet_outlined,
+      'activities' => Icons.explore_outlined,
+      'stay' => Icons.home_outlined,
+      _ => Icons.chat_bubble_outline,
+    };
   }
 
   Widget _buildMessages(

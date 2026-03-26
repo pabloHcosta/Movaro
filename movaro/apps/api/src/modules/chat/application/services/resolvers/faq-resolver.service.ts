@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
+import { AssistantKnowledgeService } from '../assistant-knowledge.service';
+
 export interface FaqResolverResult {
   found: boolean;
   confidence: number;
@@ -12,13 +14,23 @@ interface FaqEntry {
   answers: Partial<Record<'pt' | 'es' | 'en', string>>;
 }
 
-const FAQ_ENTRIES: FaqEntry[] = [
+export const STATIC_FAQ_ENTRIES: FaqEntry[] = [
   // ── Adaptação cultural ────────────────────────────────────────────────────
   {
     keywords: [
-      'adaptação', 'adaptacion', 'adaptation', 'adaptar', 'cultura',
-      'cultural', 'costumes', 'costumbres', 'customs', 'diferença cultural',
-      'diferencia cultural', 'viver no brasil', 'vivir en brasil',
+      'adaptação',
+      'adaptacion',
+      'adaptation',
+      'adaptar',
+      'cultura',
+      'cultural',
+      'costumes',
+      'costumbres',
+      'customs',
+      'diferença cultural',
+      'diferencia cultural',
+      'viver no brasil',
+      'vivir en brasil',
     ],
     answers: {
       pt: `A adaptação de argentinos no Brasil costuma ser tranquila — há muitas semelhanças culturais, mas alguns pontos merecem atenção:
@@ -50,9 +62,22 @@ const FAQ_ENTRIES: FaqEntry[] = [
   // ── Idioma / português ────────────────────────────────────────────────────
   {
     keywords: [
-      'idioma', 'língua', 'lingua', 'language', 'português', 'portugues',
-      'portuguese', 'aprender', 'aprende', 'learn', 'difícil', 'dificil',
-      'entender', 'comunicar', 'portuñol', 'falar',
+      'idioma',
+      'língua',
+      'lingua',
+      'language',
+      'português',
+      'portugues',
+      'portuguese',
+      'aprender',
+      'aprende',
+      'learn',
+      'difícil',
+      'dificil',
+      'entender',
+      'comunicar',
+      'portuñol',
+      'falar',
     ],
     answers: {
       pt: `**Aprender português para argentinos**
@@ -94,9 +119,24 @@ Dificultades comunes para argentinos:
   // ── Saúde / SUS / plano de saúde ─────────────────────────────────────────
   {
     keywords: [
-      'saúde', 'salud', 'health', 'sus', 'plano de saúde', 'plano saude',
-      'plan de salud', 'médico', 'medico', 'doctor', 'hospital', 'ubs',
-      'upa', 'pronto socorro', 'vacina', 'vacuna', 'vaccine', 'seguro saúde',
+      'saúde',
+      'salud',
+      'health',
+      'sus',
+      'plano de saúde',
+      'plano saude',
+      'plan de salud',
+      'médico',
+      'medico',
+      'doctor',
+      'hospital',
+      'ubs',
+      'upa',
+      'pronto socorro',
+      'vacina',
+      'vacuna',
+      'vaccine',
+      'seguro saúde',
     ],
     answers: {
       pt: `**Saúde no Brasil para imigrantes**
@@ -128,10 +168,28 @@ Dificultades comunes para argentinos:
   // ── Moradia / bairros / aluguel ───────────────────────────────────────────
   {
     keywords: [
-      'bairro', 'barrio', 'neighborhood', 'moradia', 'housing', 'vivienda',
-      'onde morar', 'dónde vivir', 'where to live', 'seguro', 'seguridad',
-      'airbnb', 'temporário', 'temporada', 'sublocação', 'quarto', 'cuarto',
-      'room', 'república', 'republica', 'flatmate', 'colega de quarto',
+      'bairro',
+      'barrio',
+      'neighborhood',
+      'moradia',
+      'housing',
+      'vivienda',
+      'onde morar',
+      'dónde vivir',
+      'where to live',
+      'seguro',
+      'seguridad',
+      'airbnb',
+      'temporário',
+      'temporada',
+      'sublocação',
+      'quarto',
+      'cuarto',
+      'room',
+      'república',
+      'republica',
+      'flatmate',
+      'colega de quarto',
     ],
     answers: {
       pt: `**Moradia no Brasil: primeiros passos**
@@ -177,9 +235,24 @@ Usá Airbnb, hostel o habitación compartida — no firmes contrato de largo pla
   // ── Transporte / mobilidade ───────────────────────────────────────────────
   {
     keywords: [
-      'transporte', 'transport', 'ônibus', 'onibus', 'bus', 'metro',
-      'metrô', 'uber', '99', 'taxi', 'bicicleta', 'bike', 'carro',
-      'car', 'automóvel', 'dirigir', 'drive', 'app de transporte',
+      'transporte',
+      'transport',
+      'ônibus',
+      'onibus',
+      'bus',
+      'metro',
+      'metrô',
+      'uber',
+      '99',
+      'taxi',
+      'bicicleta',
+      'bike',
+      'carro',
+      'car',
+      'automóvel',
+      'dirigir',
+      'drive',
+      'app de transporte',
     ],
     answers: {
       pt: `**Transporte no Brasil**
@@ -228,11 +301,32 @@ Usá Airbnb, hostel o habitación compartida — no firmes contrato de largo pla
   // ── Trabalho / emprego / CLT ──────────────────────────────────────────────
   {
     keywords: [
-      'trabalho', 'trabajo', 'work', 'emprego', 'empleo', 'job', 'clt',
-      'contrato', 'contratação', 'contratacion', 'salário minimo',
-      'salario minimo', 'minimum wage', 'freelance', 'autônomo', 'autonomo',
-      'mei', 'pj', 'nota fiscal', 'cnpj', 'entrevista', 'currículo',
-      'curriculo', 'curriculum', 'linkedin', 'mercado de trabalho',
+      'trabalho',
+      'trabajo',
+      'work',
+      'emprego',
+      'empleo',
+      'job',
+      'clt',
+      'contrato',
+      'contratação',
+      'contratacion',
+      'salário minimo',
+      'salario minimo',
+      'minimum wage',
+      'freelance',
+      'autônomo',
+      'autonomo',
+      'mei',
+      'pj',
+      'nota fiscal',
+      'cnpj',
+      'entrevista',
+      'currículo',
+      'curriculo',
+      'curriculum',
+      'linkedin',
+      'mercado de trabalho',
     ],
     answers: {
       pt: `**Trabalho no Brasil para argentinos**
@@ -278,10 +372,29 @@ Usá Airbnb, hostel o habitación compartida — no firmes contrato de largo pla
   // ── Educação / escola / filhos ────────────────────────────────────────────
   {
     keywords: [
-      'escola', 'escuela', 'school', 'educação', 'educacion', 'education',
-      'filho', 'filha', 'hijos', 'children', 'kids', 'creche', 'jardim',
-      'colégio', 'colegio', 'ensino', 'universidade', 'faculdade',
-      'vestibular', 'enem', 'bilíngue', 'bilingue', 'bilingual',
+      'escola',
+      'escuela',
+      'school',
+      'educação',
+      'educacion',
+      'education',
+      'filho',
+      'filha',
+      'hijos',
+      'children',
+      'kids',
+      'creche',
+      'jardim',
+      'colégio',
+      'colegio',
+      'ensino',
+      'universidade',
+      'faculdade',
+      'vestibular',
+      'enem',
+      'bilíngue',
+      'bilingue',
+      'bilingual',
     ],
     answers: {
       pt: `**Educação no Brasil para filhos de imigrantes**
@@ -313,12 +426,36 @@ Usá Airbnb, hostel o habitación compartida — no firmes contrato de largo pla
   // ── Banco / dinheiro / Pix ────────────────────────────────────────────────
   {
     keywords: [
-      'pix', 'ted', 'doc', 'transferência', 'transferencia', 'transfer',
-      'banco digital', 'banco', 'banco inter', 'nubank', 'inter', 'c6', 'itau', 'bradesco',
-      'fintech', 'cartão', 'tarjeta', 'card', 'débito', 'crédito',
-      'wise', 'remessa', 'remittance', 'enviar dinheiro',
-      'abrir conta', 'conta bancária', 'conta corrente', 'conta banco',
-      'conta digital', 'como abrir conta',
+      'pix',
+      'ted',
+      'doc',
+      'transferência',
+      'transferencia',
+      'transfer',
+      'banco digital',
+      'banco',
+      'banco inter',
+      'nubank',
+      'inter',
+      'c6',
+      'itau',
+      'bradesco',
+      'fintech',
+      'cartão',
+      'tarjeta',
+      'card',
+      'débito',
+      'crédito',
+      'wise',
+      'remessa',
+      'remittance',
+      'enviar dinheiro',
+      'abrir conta',
+      'conta bancária',
+      'conta corrente',
+      'conta banco',
+      'conta digital',
+      'como abrir conta',
     ],
     answers: {
       pt: `**Dinheiro e bancos no Brasil**
@@ -362,13 +499,41 @@ Usá Airbnb, hostel o habitación compartida — no firmes contrato de largo pla
 
 @Injectable()
 export class FaqResolverService {
-  resolve(message: string, locale: string = 'pt'): FaqResolverResult {
+  constructor(
+    private readonly assistantKnowledgeService: AssistantKnowledgeService,
+  ) {}
+
+  async resolve(
+    message: string,
+    locale: string = 'pt',
+    originCountry?: string,
+    destinationCountry?: string,
+  ): Promise<FaqResolverResult> {
+    const normalizedLocale = locale === 'es' || locale === 'en' ? locale : 'pt';
+    const corridorKey =
+      originCountry && destinationCountry
+        ? `${originCountry.toLowerCase().trim()}->${destinationCountry
+            .toLowerCase()
+            .trim()}`
+        : '';
+
+    if (corridorKey) {
+      const dbAnswer = await this.assistantKnowledgeService.resolveFaq(
+        message,
+        normalizedLocale,
+        corridorKey,
+      );
+      if (dbAnswer.found) {
+        return dbAnswer;
+      }
+    }
+
     const lower = message.toLowerCase();
 
     let bestEntry: FaqEntry | null = null;
     let bestScore = 0;
 
-    for (const entry of FAQ_ENTRIES) {
+    for (const entry of STATIC_FAQ_ENTRIES) {
       let score = 0;
       for (const kw of entry.keywords) {
         if (lower.includes(kw)) {
@@ -385,14 +550,14 @@ export class FaqResolverService {
       return { found: false, confidence: 0, answer: '' };
     }
 
-    const lang = (locale as 'pt' | 'es' | 'en');
+    const lang = normalizedLocale;
     const answer =
       bestEntry.answers[lang] ??
       bestEntry.answers['pt'] ??
       bestEntry.answers['es'] ??
       '';
 
-    const confidence = Math.min(0.90, 0.60 + bestScore * 0.35);
+    const confidence = Math.min(0.9, 0.6 + bestScore * 0.35);
 
     return { found: true, confidence, answer };
   }

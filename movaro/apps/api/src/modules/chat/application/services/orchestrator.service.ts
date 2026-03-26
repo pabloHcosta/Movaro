@@ -1,9 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+import { AssistantLanguageService } from './assistant-language.service';
 import { ChatContextBuilderService } from './chat-context-builder.service';
 import { GeminiFallbackService } from './gemini-fallback.service';
 import { ChatIntent, IntentDetectorService } from './intent-detector.service';
 import { CityResolverService } from './resolvers/city-resolver.service';
+import { CorridorGuidanceResolverService } from './resolvers/corridor-guidance-resolver.service';
 import { CostResolverService } from './resolvers/cost-resolver.service';
 import { DocResolverService } from './resolvers/doc-resolver.service';
 import { FaqResolverService } from './resolvers/faq-resolver.service';
@@ -35,8 +37,10 @@ export class OrchestratorService {
   private readonly cache = new Map<string, CacheEntry>();
 
   constructor(
+    private readonly assistantLanguageService: AssistantLanguageService,
     private readonly intentDetector: IntentDetectorService,
     private readonly cityResolver: CityResolverService,
+    private readonly corridorGuidanceResolver: CorridorGuidanceResolverService,
     private readonly costResolver: CostResolverService,
     private readonly docResolver: DocResolverService,
     private readonly faqResolver: FaqResolverService,
@@ -45,11 +49,24 @@ export class OrchestratorService {
   ) {}
 
   async ask(dto: AskChatDto): Promise<OrchestratorAnswer> {
-    const locale = dto.locale ?? 'pt';
     const { message, originCountry, destinationCountry } = dto;
+    const locale = await this.assistantLanguageService.detectResponseLocale(
+      message,
+      dto.locale,
+    );
 
     // ── Cache lookup ───────────────────────────────────────────────────────────
-    const cacheKey = this.makeCacheKey(message, locale);
+    const cacheKey = this.makeCacheKey(
+      message,
+      locale,
+      originCountry,
+      destinationCountry,
+      dto.recommendedCityId,
+      dto.currentPhase,
+      dto.migrationGoal,
+      dto.planTimeline,
+      dto.completedItemIds ?? [],
+    );
     const cached = this.getCached(cacheKey);
     if (cached) {
       this.logger.debug('[Orchestrator] cache hit ✓');
@@ -95,7 +112,12 @@ export class OrchestratorService {
       }
 
       case 'documents': {
-        const result = this.docResolver.resolve(message, locale);
+        const result = await this.docResolver.resolve(
+          message,
+          locale,
+          originCountry,
+          destinationCountry,
+        );
         if (result.confidence >= CONFIDENCE_THRESHOLD) {
           answer = result.summary;
           resolverConfidence = result.confidence;
@@ -107,9 +129,27 @@ export class OrchestratorService {
         break;
     }
 
+    // ── Deterministic corridor guidance for quick chat prompts ────────────────
+    if (!answer || resolverConfidence < CONFIDENCE_THRESHOLD) {
+      const corridorGuidance = await this.corridorGuidanceResolver.resolve(dto);
+      if (corridorGuidance.found &&
+          corridorGuidance.confidence >= CONFIDENCE_THRESHOLD) {
+        answer = corridorGuidance.answer;
+        resolverConfidence = corridorGuidance.confidence;
+        this.logger.debug(
+          `[Orchestrator] corridor guidance answered (confidence=${corridorGuidance.confidence.toFixed(2)})`,
+        );
+      }
+    }
+
     // ── FAQ resolver: curated answers for general/plan/unmatched intents ───────
     if (!answer || resolverConfidence < CONFIDENCE_THRESHOLD) {
-      const faq = this.faqResolver.resolve(message, locale);
+      const faq = await this.faqResolver.resolve(
+        message,
+        locale,
+        originCountry,
+        destinationCountry,
+      );
       if (faq.found && faq.confidence >= CONFIDENCE_THRESHOLD) {
         answer = faq.answer;
         resolverConfidence = faq.confidence;
@@ -143,6 +183,8 @@ export class OrchestratorService {
         recommendedCityId: dto.recommendedCityId,
         currentPhase: dto.currentPhase,
         completedItemIds: dto.completedItemIds,
+        migrationGoal: dto.migrationGoal,
+        planTimeline: dto.planTimeline,
       });
       appDataBlock = context.appDataBlock;
     } catch {
@@ -172,8 +214,28 @@ export class OrchestratorService {
 
   // ── Cache helpers ─────────────────────────────────────────────────────────
 
-  private makeCacheKey(message: string, locale: string): string {
-    return `${locale}:${message.toLowerCase().trim().replace(/\s+/g, ' ')}`;
+  private makeCacheKey(
+    message: string,
+    locale: string,
+    originCountry: string,
+    destinationCountry: string,
+    recommendedCityId?: string,
+    currentPhase?: string,
+    migrationGoal?: string,
+    planTimeline?: string,
+    completedItemIds: string[] = [],
+  ): string {
+    return [
+      locale,
+      originCountry.toLowerCase().trim(),
+      destinationCountry.toLowerCase().trim(),
+      recommendedCityId?.toLowerCase().trim() ?? '-',
+      currentPhase?.toLowerCase().trim() ?? '-',
+      migrationGoal?.toLowerCase().trim() ?? '-',
+      planTimeline?.toLowerCase().trim() ?? '-',
+      [...completedItemIds].sort().join(',') || '-',
+      message.toLowerCase().trim().replace(/\s+/g, ' '),
+    ].join(':');
   }
 
   private getCached(key: string): OrchestratorAnswer | null {

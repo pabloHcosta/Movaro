@@ -1810,9 +1810,45 @@ extension AppLocalizationsFormatting on AppLocalizations {
   // ── Preferred City Questionnaire Step ──────────────────────────────────
 
   String preferredCityQuestionTitle() => _localizedText(
-    pt: 'Você já tem alguma cidade em mente?',
-    es: '¿Ya tenés alguna ciudad en mente?',
-    en: 'Do you already have a city in mind?',
+    pt: 'Como voce quer comecar?',
+    es: 'Como queres empezar?',
+    en: 'How do you want to start?',
+  );
+
+  String preferredCityQuestionSubtitle() => _localizedText(
+    pt: 'Voce pode partir de uma cidade ou ver sugestoes baseadas no seu perfil',
+    es: 'Podes partir de una ciudad o ver sugerencias basadas en tu perfil',
+    en: 'You can start from a city or see suggestions based on your profile',
+  );
+
+  String preferredCityStartWithCityTitle() => _localizedText(
+    pt: 'Comecar com uma cidade',
+    es: 'Empezar con una ciudad',
+    en: 'Start with a city',
+  );
+
+  String preferredCityStartWithCitySubtitle() => _localizedText(
+    pt: 'Escolha um lugar para usar como base do seu plano',
+    es: 'Elegi un lugar para usar como base de tu plan',
+    en: 'Choose a place to use as the base of your plan',
+  );
+
+  String preferredCityChooseCityLabel() => _localizedText(
+    pt: 'Escolher cidade',
+    es: 'Elegir ciudad',
+    en: 'Choose city',
+  );
+
+  String preferredCitySuggestionsTitle() => _localizedText(
+    pt: 'Ver sugestoes para mim',
+    es: 'Ver sugerencias para mi',
+    en: 'See suggestions for me',
+  );
+
+  String preferredCitySuggestionsSubtitle() => _localizedText(
+    pt: 'A gente encontra boas opcoes com base no seu perfil',
+    es: 'Encontramos buenas opciones segun tu perfil',
+    en: 'We find good options based on your profile',
   );
 
   String preferredCityChooseOnMap() => _localizedText(

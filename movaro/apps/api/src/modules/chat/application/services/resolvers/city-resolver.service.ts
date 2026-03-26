@@ -24,8 +24,11 @@ export class CityResolverService {
       return { found: false, confidence: 0 };
     }
 
+    const resolvedCityId =
+      this.citiesCatalogService.resolveCityId(cityId) ?? cityId;
+
     try {
-      const city = await this.citiesCatalogService.getCityById(cityId);
+      const city = await this.citiesCatalogService.getCityById(resolvedCityId);
       return {
         found: true,
         confidence: 0.92,
@@ -35,7 +38,7 @@ export class CityResolverService {
     } catch {
       // City not found — try a broader search
       try {
-        const results = await this.citiesCatalogService.search(cityId);
+        const results = await this.citiesCatalogService.search(resolvedCityId);
         if (results.length > 0) {
           const city = results[0];
           return {

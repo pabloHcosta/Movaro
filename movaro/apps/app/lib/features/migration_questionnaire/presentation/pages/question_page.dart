@@ -441,7 +441,16 @@ class _QuestionPageState extends State<QuestionPage> {
                   height: 1.12,
                 ),
               ),
-              if (question.id == 'priorities') ...[
+              if (question.id == 'preferred_city') ...[
+                const SizedBox(height: 10),
+                Text(
+                  l10n.preferredCityQuestionSubtitle(),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.45,
+                  ),
+                ),
+              ] else if (question.id == 'priorities') ...[
                 const SizedBox(height: 10),
                 _SelectionStatusCard(
                   label: _selectionHelperLabel(context, question),
@@ -1020,48 +1029,27 @@ class _QuestionPageState extends State<QuestionPage> {
         answer != null &&
         answer != 'dont_know' &&
         answer != 'choose_on_map';
+    final isSuggestionsSelected = answer == 'dont_know';
 
     return SingleChildScrollView(
       controller: _optionsScrollController,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // If a city was already selected, show it prominently.
-          if (hasCitySelected) ...[
-            _SelectedPreferredCityCard(
-              city: selectedCity,
-              onChangeTap: () => _openPreferredCityPicker(question),
-            ),
-            const SizedBox(height: 16),
-            // "Skip / don't know" option below
-            _LargeOptionCard(
-              icon: Icons.explore_outlined,
-              label: l10n.preferredCityDontKnow(),
-              isSelected: false,
-              onTap: () {
-                controller.selectAnswer(question.id, 'dont_know');
-                controller.setPreferredCity(null);
-              },
-            ),
-          ] else ...[
-            // Default: two initial options
-            _LargeOptionCard(
-              icon: Icons.map_outlined,
-              label: l10n.preferredCityChooseOnMap(),
-              isSelected: false,
-              onTap: () => _openPreferredCityPicker(question),
-            ),
-            const SizedBox(height: 12),
-            _LargeOptionCard(
-              icon: Icons.explore_outlined,
-              label: l10n.preferredCityDontKnow(),
-              isSelected: answer == 'dont_know',
-              onTap: () {
-                controller.selectAnswer(question.id, 'dont_know');
-                controller.setPreferredCity(null);
-              },
-            ),
-          ],
+          _PreferredCityStartCard(
+            city: hasCitySelected ? selectedCity : null,
+            onChooseTap: () => _openPreferredCityPicker(question),
+          ),
+          const SizedBox(height: 12),
+          _SuggestionStartCard(
+            title: l10n.preferredCitySuggestionsTitle(),
+            subtitle: l10n.preferredCitySuggestionsSubtitle(),
+            isSelected: isSuggestionsSelected,
+            onTap: () {
+              controller.selectAnswer(question.id, 'dont_know');
+              controller.setPreferredCity(null);
+            },
+          ),
         ],
       ),
     );
@@ -1080,10 +1068,7 @@ class _QuestionPageState extends State<QuestionPage> {
       cities: cities,
       title: context.l10n.preferredCityQuestionTitle(),
       subtitle: context.l10n.cityPickerSearchHint(),
-      showSkipOption: true,
-      onSkip: () {
-        controller.selectAnswer(question.id, 'dont_know');
-      },
+      showSkipOption: false,
     );
 
     if (!mounted) return;
@@ -1164,6 +1149,10 @@ class _QuestionPageState extends State<QuestionPage> {
     final currentSection = _sectionLabel(context, question);
     final nextSection = _sectionLabel(context, nextQuestion);
     if (currentSection == nextSection) {
+      return null;
+    }
+
+    if (question.id == 'preferred_city') {
       return null;
     }
 
@@ -1452,6 +1441,234 @@ class _SelectedPreferredCityCard extends StatelessWidget {
   }
 }
 
+class _PreferredCityStartCard extends StatelessWidget {
+  const _PreferredCityStartCard({
+    required this.city,
+    required this.onChooseTap,
+  });
+
+  final City? city;
+  final VoidCallback onChooseTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isDark = AppColors.isDark(context);
+    final hasCity = city != null;
+
+    return FrostedPanel(
+      padding: const EdgeInsets.all(16),
+      borderRadius: BorderRadius.circular(24),
+      borderColor: hasCity
+          ? (isDark ? const Color(0xFF5BB6FF) : AppColors.primary)
+          : (isDark
+                ? Colors.white.withValues(alpha: 0.10)
+                : const Color(0x14071B3A)),
+      backgroundColor: hasCity
+          ? AppColors.tintedSurfaceFor(
+              context,
+              tint: AppColors.primary,
+              lightColor: const Color(0xFFEAF4FF),
+              darkAlpha: 0.28,
+              darkBase: const Color(0xFF162235),
+            )
+          : (isDark
+                ? const Color(0xFF131C29).withValues(alpha: 0.96)
+                : Colors.white.withValues(alpha: 0.96)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: hasCity
+                      ? (isDark ? const Color(0xFF4AA7FF) : AppColors.primary)
+                            .withValues(alpha: isDark ? 0.18 : 0.10)
+                      : (isDark
+                            ? Colors.white.withValues(alpha: 0.06)
+                            : const Color(0xFFF0F5FA)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
+                  Icons.location_city_rounded,
+                  color: hasCity
+                      ? (isDark ? const Color(0xFF76C3FF) : AppColors.primary)
+                      : AppColors.textSoftFor(context),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.preferredCityStartWithCityTitle(),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppColors.textPrimaryFor(context),
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.preferredCityStartWithCitySubtitle(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (hasCity)
+            _SelectedPreferredCityCard(city: city!, onChangeTap: onChooseTap)
+          else
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: onChooseTap,
+                icon: const Icon(Icons.search_rounded, size: 18),
+                label: Text(l10n.preferredCityChooseCityLabel()),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SuggestionStartCard extends StatelessWidget {
+  const _SuggestionStartCard({
+    required this.title,
+    required this.subtitle,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final cardBackground = isSelected
+        ? AppColors.tintedSurfaceFor(
+            context,
+            tint: AppColors.primary,
+            lightColor: const Color(0xFFEAF4FF),
+            darkAlpha: 0.28,
+            darkBase: const Color(0xFF162235),
+          )
+        : (isDark
+              ? const Color(0xFF131C29).withValues(alpha: 0.96)
+              : Colors.white.withValues(alpha: 0.96));
+    final cardBorder = isSelected
+        ? (isDark ? const Color(0xFF5BB6FF) : AppColors.primary)
+        : (isDark
+              ? Colors.white.withValues(alpha: 0.10)
+              : const Color(0x14071B3A));
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: FrostedPanel(
+          padding: const EdgeInsets.all(16),
+          borderRadius: BorderRadius.circular(24),
+          borderColor: cardBorder,
+          backgroundColor: cardBackground,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? (isDark ? const Color(0xFF4AA7FF) : AppColors.primary)
+                            .withValues(alpha: isDark ? 0.18 : 0.10)
+                      : (isDark
+                            ? Colors.white.withValues(alpha: 0.06)
+                            : const Color(0xFFF0F5FA)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
+                  Icons.explore_outlined,
+                  color: isSelected
+                      ? (isDark ? const Color(0xFF76C3FF) : AppColors.primary)
+                      : AppColors.textSoftFor(context),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppColors.textPrimaryFor(context),
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected
+                      ? (isDark ? const Color(0xFF4AA7FF) : AppColors.primary)
+                      : Colors.transparent,
+                  border: isSelected
+                      ? null
+                      : Border.all(
+                          color: (isDark ? Colors.white : AppColors.primary)
+                              .withValues(alpha: 0.3),
+                        ),
+                ),
+                child: isSelected
+                    ? const Icon(
+                        Icons.check_rounded,
+                        size: 15,
+                        color: Colors.white,
+                      )
+                    : null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ── Compact horizontal option row (~44px) ────────────────────────────────────
 class _CompactOptionRow extends StatelessWidget {
   const _CompactOptionRow({
@@ -1586,114 +1803,6 @@ class _PriorityChip extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LargeOptionCard extends StatelessWidget {
-  const _LargeOptionCard({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    final cardBackground = isSelected
-        ? AppColors.tintedSurfaceFor(
-            context,
-            tint: AppColors.primary,
-            lightColor: const Color(0xFFEAF4FF),
-            darkAlpha: 0.28,
-            darkBase: const Color(0xFF162235),
-          )
-        : (isDark
-              ? const Color(0xFF131C29).withValues(alpha: 0.96)
-              : Colors.white.withValues(alpha: 0.96));
-    final cardBorder = isSelected
-        ? (isDark ? const Color(0xFF5BB6FF) : AppColors.primary)
-        : (isDark
-              ? Colors.white.withValues(alpha: 0.10)
-              : const Color(0x14071B3A));
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        child: FrostedPanel(
-          padding: const EdgeInsets.all(16),
-          borderRadius: BorderRadius.circular(24),
-          borderColor: cardBorder,
-          backgroundColor: cardBackground,
-          child: Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? (isDark ? const Color(0xFF4AA7FF) : AppColors.primary)
-                            .withValues(alpha: isDark ? 0.18 : 0.10)
-                      : (isDark
-                            ? Colors.white.withValues(alpha: 0.06)
-                            : const Color(0xFFF0F5FA)),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  icon,
-                  color: isSelected
-                      ? (isDark ? const Color(0xFF76C3FF) : AppColors.primary)
-                      : AppColors.textSoftFor(context),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textPrimaryFor(context),
-                    fontWeight: FontWeight.w700,
-                    height: 1.2,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 160),
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isSelected
-                      ? (isDark ? const Color(0xFF4AA7FF) : AppColors.primary)
-                      : Colors.transparent,
-                  border: isSelected
-                      ? null
-                      : Border.all(
-                          color: (isDark ? Colors.white : AppColors.primary)
-                              .withValues(alpha: 0.3),
-                        ),
-                ),
-                child: isSelected
-                    ? const Icon(
-                        Icons.check_rounded,
-                        color: Colors.white,
-                        size: 14,
-                      )
-                    : null,
-              ),
-            ],
-          ),
         ),
       ),
     );

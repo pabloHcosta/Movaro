@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { AssistantKnowledgeService } from '../assistant-knowledge.service';
 import {
   ARGENTINA_BRAZIL_GUIDE_ITEMS,
   GuideItem,
@@ -18,7 +19,15 @@ const KEYWORD_TO_IDS: Array<{ keywords: string[]; ids: string[] }> = [
     ids: ['doc-01'],
   },
   {
-    keywords: ['residência', 'residencia', 'residency', 'mercosul', 'mercosur', 'vitem', 'visto'],
+    keywords: [
+      'residência',
+      'residencia',
+      'residency',
+      'mercosul',
+      'mercosur',
+      'vitem',
+      'visto',
+    ],
     ids: ['doc-02'],
   },
   {
@@ -42,7 +51,13 @@ const KEYWORD_TO_IDS: Array<{ keywords: string[]; ids: string[] }> = [
     ids: ['arr-03'],
   },
   {
-    keywords: ['conta bancária', 'conta banco', 'bank account', 'banco', 'bank'],
+    keywords: [
+      'conta bancária',
+      'conta banco',
+      'bank account',
+      'banco',
+      'bank',
+    ],
     ids: ['wor-01'],
   },
   {
@@ -50,15 +65,36 @@ const KEYWORD_TO_IDS: Array<{ keywords: string[]; ids: string[] }> = [
     ids: ['arr-02'],
   },
   {
-    keywords: ['moradia', 'housing', 'vivienda', 'aluguel', 'rent', 'alquiler', 'contrato'],
+    keywords: [
+      'moradia',
+      'housing',
+      'vivienda',
+      'aluguel',
+      'rent',
+      'alquiler',
+      'contrato',
+    ],
     ids: ['prep-03', 'hou-01', 'hou-03'],
   },
   {
-    keywords: ['orçamento', 'budget', 'presupuesto', 'dinheiro', 'grana', 'custos mudança'],
+    keywords: [
+      'orçamento',
+      'budget',
+      'presupuesto',
+      'dinheiro',
+      'grana',
+      'custos mudança',
+    ],
     ids: ['prep-02'],
   },
   {
-    keywords: ['documentos', 'documents', 'documentación', 'papelada', 'papeleria'],
+    keywords: [
+      'documentos',
+      'documents',
+      'documentación',
+      'papelada',
+      'papeleria',
+    ],
     ids: ['prep-04', 'doc-01', 'doc-02'],
   },
 ];
@@ -69,7 +105,49 @@ const ALL_ITEMS_BY_ID = new Map<string, GuideItem>(
 
 @Injectable()
 export class DocResolverService {
-  resolve(message: string, locale: string = 'pt'): DocResolverResult {
+  constructor(
+    private readonly assistantKnowledgeService: AssistantKnowledgeService,
+  ) {}
+
+  async resolve(
+    message: string,
+    locale: string = 'pt',
+    originCountry?: string,
+    destinationCountry?: string,
+  ): Promise<DocResolverResult> {
+    const corridorKey =
+      originCountry && destinationCountry
+        ? `${originCountry.toLowerCase().trim()}->${destinationCountry
+            .toLowerCase()
+            .trim()}`
+        : '';
+    const normalizedLocale = locale === 'es' || locale === 'en' ? locale : 'pt';
+
+    if (corridorKey) {
+      const dbItems = await this.assistantKnowledgeService.resolveDocuments(
+        message,
+        normalizedLocale,
+        corridorKey,
+      );
+
+      if (dbItems.length > 0) {
+        const items = dbItems.map((item) => ({
+          id: item.id,
+          phase: (item.phase ?? 'documents') as GuideItem['phase'],
+          title: item.title,
+          summary: item.summary,
+          notes: item.notes,
+        }));
+
+        const confidence = Math.min(0.92, 0.55 + items.length * 0.1);
+        return {
+          confidence,
+          items,
+          summary: this.buildSummary(items, normalizedLocale),
+        };
+      }
+    }
+
     const lower = message.toLowerCase();
     const matchedIds = new Set<string>();
 
@@ -89,7 +167,7 @@ export class DocResolverService {
     }
 
     const confidence = Math.min(0.92, 0.55 + items.length * 0.1);
-    const summary = this.buildSummary(items, locale);
+    const summary = this.buildSummary(items, normalizedLocale);
 
     return { confidence, items, summary };
   }

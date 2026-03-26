@@ -62,6 +62,51 @@ export class CitiesCatalogService {
     return city;
   }
 
+  resolveCityId(rawId: string): string | null {
+    const normalized = rawId.trim().toLowerCase();
+    if (!normalized) {
+      return null;
+    }
+
+    const metrics = this.cityMetricsRepository.getAll();
+    const exact = metrics.find((item) => item.id === normalized);
+    if (exact) {
+      return exact.id;
+    }
+
+    const aliasMatch = metrics.find((item) => {
+      const baseId = item.id.replace(/-[a-z]{2}$/i, '');
+      const nameSlug = item.name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+      return baseId === normalized || nameSlug === normalized;
+    });
+
+    if (aliasMatch) {
+      return aliasMatch.id;
+    }
+
+    const prefixMatch = metrics.find((item) => item.id.startsWith(`${normalized}-`));
+    return prefixMatch?.id ?? null;
+  }
+
+  getCityDisplayNameById(rawId: string): string | null {
+    const resolvedCityId = this.resolveCityId(rawId);
+    if (!resolvedCityId) {
+      return null;
+    }
+
+    const city = this.cityMetricsRepository
+      .getAll()
+      .find((item) => item.id === resolvedCityId);
+
+    return city?.displayName ?? city?.name ?? null;
+  }
+
   async getCityWeatherById(id: string): Promise<CurrentCityWeatherEntity> {
     const city = await this.getCityById(id);
     const currentWeather = await this.openMeteoWeatherService.getCurrentWeather(
