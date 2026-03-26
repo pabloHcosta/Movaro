@@ -55,7 +55,6 @@ class _QuestionPageState extends State<QuestionPage> {
   String? _scrollScopeKey;
   bool _showScrollHint = false;
   bool _didTryAutoHelp = false;
-  bool _locationPrecheckDone = false;
 
   MigrationQuestionnaireController get controller => widget.controller;
   LocationController get locationController => widget.locationController;
@@ -65,7 +64,7 @@ class _QuestionPageState extends State<QuestionPage> {
     super.initState();
     _optionsScrollController.addListener(_updateScrollHint);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(controller.initialize());
+      unawaited(controller.initializeForQuestionnaire());
       unawaited(_maybeShowHelp());
     });
   }
@@ -92,7 +91,7 @@ class _QuestionPageState extends State<QuestionPage> {
 
   ContextualHelpContent _helpContent(BuildContext context) {
     return ContextualHelpContent(
-      eyebrow: context.l10n.questionnairePageTitle,
+      eyebrow: context.l10n.questionnaireVariantPageTitle(),
       contextIcon: Icons.quiz_outlined,
       title: context.l10n.questionnaireGuideTitle(),
       body: context.l10n.questionnaireGuideBody(),
@@ -154,71 +153,48 @@ class _QuestionPageState extends State<QuestionPage> {
                         context.pageHorizontalPadding,
                         context.pageVerticalPadding,
                       ),
-                      child: !controller.hasSelectedVariant
-                          ? _buildVariantSelectionScreen(context)
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                AppGlassHeader(
-                                  title: l10n.questionnairePageTitle,
-                                  onBack: () => _handleExitFlow(context),
-                                  onHelp: _showHelp,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AppGlassHeader(
+                            title: l10n.questionnaireVariantPageTitle(),
+                            onBack: () => _handleExitFlow(context),
+                            onHelp: _showHelp,
+                          ),
+                          const SizedBox(height: 20),
+                          if (_showProcessingScreen)
+                            Expanded(
+                              child: _ProcessingState(
+                                title: l10n.questionnaireProcessingTitle,
+                              ),
+                            )
+                          else if (controller.isInitializing ||
+                              !controller.hasSelectedVariant)
+                            const Expanded(
+                              child: SingleChildScrollView(
+                                child: FormSkeleton(
+                                  fieldCount: 4,
+                                  compact: true,
                                 ),
-                                const SizedBox(height: 20),
-                                if (!_locationPrecheckDone &&
-                                    controller.selectedVariant ==
-                                        QuestionnaireVariant.strategic)
-                                  Expanded(
-                                    child: _LocationPrecheck(
-                                      locationController: locationController,
-                                      onComplete: (String? argentineOrigin) {
-                                        if (argentineOrigin != null) {
-                                          controller.selectAnswer(
-                                            'argentina_origin',
-                                            argentineOrigin,
-                                          );
-                                        }
-                                        setState(() {
-                                          _locationPrecheckDone = true;
-                                        });
-                                      },
-                                    ),
-                                  )
-                                else if (_showProcessingScreen)
-                                  Expanded(
-                                    child: _ProcessingState(
-                                      title: l10n.questionnaireProcessingTitle,
-                                    ),
-                                  )
-                                else if (controller.isInitializing)
-                                  const Expanded(
-                                    child: SingleChildScrollView(
-                                      child: FormSkeleton(
-                                        fieldCount: 4,
-                                        compact: true,
-                                      ),
-                                    ),
-                                  )
-                                else if (controller.isRefinePromptVisible)
-                                  Expanded(child: _buildRefinePrompt(context))
-                                else if (question != null)
-                                  Expanded(
-                                    child: _buildQuestionFlow(
-                                      context,
-                                      question,
-                                    ),
-                                  )
-                                else
-                                  const Expanded(
-                                    child: SingleChildScrollView(
-                                      child: FormSkeleton(
-                                        fieldCount: 4,
-                                        compact: true,
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                              ),
+                            )
+                          else if (controller.isRefinePromptVisible)
+                            Expanded(child: _buildRefinePrompt(context))
+                          else if (question != null)
+                            Expanded(
+                              child: _buildQuestionFlow(context, question),
+                            )
+                          else
+                            const Expanded(
+                              child: SingleChildScrollView(
+                                child: FormSkeleton(
+                                  fieldCount: 4,
+                                  compact: true,
+                                ),
+                              ),
                             ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -436,26 +412,6 @@ class _QuestionPageState extends State<QuestionPage> {
         secondaryLabel: null,
         primaryLabel: context.l10n.journeyDetectedManualAction,
       ),
-    );
-  }
-
-  Widget _buildVariantSelector(BuildContext context) {
-    _prepareScrollableScope('variant_selector');
-    return _VariantSelectorBody(
-      onSelect: (variant) => controller.selectVariant(variant),
-    );
-  }
-
-  Widget _buildVariantSelectionScreen(BuildContext context) {
-    return Column(
-      children: [
-        _QuestionnaireVariantAppBar(
-          title: context.l10n.questionnaireVariantPageTitle(),
-          onBack: () => _handleExitFlow(context),
-          onHelp: _showHelp,
-        ),
-        Expanded(child: _buildVariantSelector(context)),
-      ],
     );
   }
 
@@ -1395,528 +1351,6 @@ class _QuestionPageState extends State<QuestionPage> {
         _showScrollHint = nextValue;
       });
     }
-  }
-}
-
-class _QuestionnaireVariantAppBar extends StatelessWidget {
-  const _QuestionnaireVariantAppBar({
-    required this.title,
-    required this.onBack,
-    required this.onHelp,
-  });
-
-  final String title;
-  final VoidCallback onBack;
-  final VoidCallback onHelp;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-      child: Row(
-        children: [
-          _QuestionnaireVariantIconButton(
-            icon: Icons.chevron_left_rounded,
-            iconColor: const Color(0xFF8B949E),
-            onTap: onBack,
-          ),
-          Expanded(
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFFF0F6FC),
-              ),
-            ),
-          ),
-          _QuestionnaireVariantIconButton(
-            icon: Icons.help_outline_rounded,
-            iconColor: const Color(0xFF6B7280),
-            onTap: onHelp,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _QuestionnaireVariantIconButton extends StatelessWidget {
-  const _QuestionnaireVariantIconButton({
-    required this.icon,
-    required this.iconColor,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final Color iconColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: const Color(0xFF111827),
-          border: Border.all(color: const Color(0xFF1E2636)),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: iconColor, size: 20),
-      ),
-    );
-  }
-}
-
-// ─── Variant selector body (stateful — owns selection state) ──────────────────
-
-class _VariantSelectorBody extends StatefulWidget {
-  const _VariantSelectorBody({required this.onSelect});
-
-  final ValueChanged<QuestionnaireVariant> onSelect;
-
-  @override
-  State<_VariantSelectorBody> createState() => _VariantSelectorBodyState();
-}
-
-class _VariantSelectorBodyState extends State<_VariantSelectorBody> {
-  QuestionnaireVariant _selected = QuestionnaireVariant.lean;
-
-  void _pick(QuestionnaireVariant v) {
-    if (_selected == v) return;
-    HapticFeedback.selectionClick();
-    setState(() => _selected = v);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final cs = Theme.of(context).colorScheme;
-
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Section 1: what you'll get ───────────────────────────────────
-          _ResultOutcomeHeader(),
-          const SizedBox(height: 20),
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: cs.outline.withValues(alpha: 0.2),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            l10n.questionnaireVariantHowLabel(),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: cs.onSurface.withValues(alpha: 0.5),
-            ),
-          ),
-          const SizedBox(height: 14),
-          // ── Section 2: plan cards ────────────────────────────────────────
-          _VariantSelectionCard(
-            isSelected: _selected == QuestionnaireVariant.lean,
-            badge: l10n.questionnaireVariantLeanBadge(),
-            badgeIcon: Icons.bolt_rounded,
-            badgeColor: cs.primary,
-            badgeBackground: cs.primary.withValues(alpha: 0.15),
-            title: l10n.bmpVariantLeanTitle,
-            body: l10n.questionnaireVariantLeanDescription(),
-            timeValue: l10n.questionnaireVariantLeanTime(),
-            timeLabel: l10n.questionnaireVariantTimeLabel(),
-            questionValue: l10n.questionnaireVariantLeanQuestionCount(),
-            onTap: () => _pick(QuestionnaireVariant.lean),
-          ),
-          const SizedBox(height: 10),
-          _VariantSelectionCard(
-            isSelected: _selected == QuestionnaireVariant.strategic,
-            badge: l10n.questionnaireVariantStrategicBadge(),
-            badgeIcon: Icons.star_outline_rounded,
-            badgeColor: Colors.amber,
-            badgeBackground: Colors.amber.withValues(alpha: 0.15),
-            title: l10n.bmpVariantStrategicTitle,
-            body: l10n.questionnaireVariantStrategicDescription(),
-            timeValue: l10n.questionnaireVariantStrategicTime(),
-            timeLabel: l10n.questionnaireVariantTimeLabel(),
-            questionValue: l10n.questionnaireVariantStrategicQuestionCount(),
-            onTap: () => _pick(QuestionnaireVariant.strategic),
-          ),
-          const SizedBox(height: 24),
-          // ── Section 3: shared CTA ────────────────────────────────────────
-          _VariantCtaButton(
-            selected: _selected,
-            ctaLabel: l10n.questionnaireVariantCtaLabel(),
-            onTap: () {
-              HapticFeedback.mediumImpact();
-              widget.onSelect(_selected);
-            },
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Section 1: Result outcome header ─────────────────────────────────────────
-
-class _ResultOutcomeHeader extends StatelessWidget {
-  const _ResultOutcomeHeader();
-
-  InlineSpan _buildRichItem(BuildContext context, String full, String bold) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    final baseStyle = tt.bodyMedium?.copyWith(
-      color: cs.onSurface.withValues(alpha: 0.6),
-    );
-    final boldStyle = tt.bodyMedium?.copyWith(
-      color: cs.onSurface,
-      fontWeight: FontWeight.w600,
-    );
-    final parts = full.split(bold);
-    if (parts.length != 2) return TextSpan(text: full, style: baseStyle);
-    return TextSpan(
-      children: [
-        if (parts[0].isNotEmpty) TextSpan(text: parts[0], style: baseStyle),
-        TextSpan(text: bold, style: boldStyle),
-        if (parts[1].isNotEmpty) TextSpan(text: parts[1], style: baseStyle),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
-    final items = [
-      (
-        l10n.questionnaireVariantItem1Full(),
-        l10n.questionnaireVariantItem1Bold(),
-      ),
-      (
-        l10n.questionnaireVariantItem2Full(),
-        l10n.questionnaireVariantItem2Bold(),
-      ),
-      (
-        l10n.questionnaireVariantItem3Full(),
-        l10n.questionnaireVariantItem3Bold(),
-      ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.questionnaireVariantHeroTitle(),
-          style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 16),
-        ...items.map(
-          (item) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.check_circle_outline_rounded,
-                  color: cs.primary,
-                  size: 18,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: RichText(
-                    text: TextSpan(
-                      children: [_buildRichItem(context, item.$1, item.$2)],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─── Unified selection card (animated, theme-based) ───────────────────────────
-
-class _VariantSelectionCard extends StatelessWidget {
-  const _VariantSelectionCard({
-    required this.isSelected,
-    required this.badge,
-    required this.badgeIcon,
-    required this.badgeColor,
-    required this.badgeBackground,
-    required this.title,
-    required this.body,
-    required this.timeValue,
-    required this.timeLabel,
-    required this.questionValue,
-    required this.onTap,
-  });
-
-  final bool isSelected;
-  final String badge;
-  final IconData badgeIcon;
-  final Color badgeColor;
-  final Color badgeBackground;
-  final String title;
-  final String body;
-  final String timeValue;
-  final String timeLabel;
-  final String questionValue;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? cs.primary.withValues(alpha: 0.08)
-              : cs.surfaceContainerHighest,
-          border: isSelected
-              ? Border.all(color: cs.primary, width: 2)
-              : Border.all(color: cs.outline.withValues(alpha: 0.3)),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _QuestionnaireVariantBadge(
-                    backgroundColor: badgeBackground,
-                    borderColor: badgeColor.withValues(alpha: 0.35),
-                    icon: badgeIcon,
-                    color: badgeColor,
-                    label: badge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    title,
-                    style: tt.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    body,
-                    style: tt.bodySmall?.copyWith(
-                      color: cs.onSurface.withValues(alpha: 0.55),
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      _StatChip(
-                        icon: Icons.timer_outlined,
-                        value: timeValue,
-                        label: timeLabel,
-                      ),
-                      const SizedBox(width: 8),
-                      _StatChip(
-                        icon: Icons.help_outline_rounded,
-                        value: questionValue,
-                        label: '',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            _SelectionCircle(selected: isSelected),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _QuestionnaireVariantBadge extends StatelessWidget {
-  const _QuestionnaireVariantBadge({
-    required this.backgroundColor,
-    required this.borderColor,
-    required this.icon,
-    required this.color,
-    required this.label,
-  });
-
-  final Color backgroundColor;
-  final Color borderColor;
-  final IconData icon;
-  final Color color;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color, size: 12),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Selection circle indicator ───────────────────────────────────────────────
-
-class _SelectionCircle extends StatelessWidget {
-  const _SelectionCircle({required this.selected});
-
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      width: 22,
-      height: 22,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: selected ? cs.primary : Colors.transparent,
-        border: selected
-            ? null
-            : Border.all(color: cs.outline.withValues(alpha: 0.4), width: 2),
-      ),
-      child: selected
-          ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
-          : null,
-    );
-  }
-}
-
-// ─── Stat chip (theme-based replacement for old _QuestionnaireVariantStat) ────
-
-class _StatChip extends StatelessWidget {
-  const _StatChip({
-    required this.icon,
-    required this.value,
-    required this.label,
-  });
-
-  final IconData icon;
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: cs.onSurface.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: cs.onSurface.withValues(alpha: 0.55)),
-          const SizedBox(width: 5),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                value,
-                style: tt.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-              ),
-              if (label.isNotEmpty)
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: cs.onSurface.withValues(alpha: 0.45),
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Shared CTA button ────────────────────────────────────────────────────────
-
-class _VariantCtaButton extends StatelessWidget {
-  const _VariantCtaButton({
-    required this.selected,
-    required this.ctaLabel,
-    required this.onTap,
-  });
-
-  final QuestionnaireVariant selected;
-  final String ctaLabel;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: FilledButton(
-        onPressed: onTap,
-        style: FilledButton.styleFrom(
-          backgroundColor: cs.primary,
-          foregroundColor: cs.onPrimary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          minimumSize: const Size(double.infinity, 52),
-        ),
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          child: Text(
-            ctaLabel,
-            key: ValueKey(selected),
-            style: tt.labelLarge?.copyWith(
-              color: cs.onPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 

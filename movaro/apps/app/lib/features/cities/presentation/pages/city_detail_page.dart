@@ -22,6 +22,7 @@ import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
+import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
 import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
@@ -153,6 +154,27 @@ class _CityDetailPageState extends State<CityDetailPage> {
         final planContext = city == null
             ? null
             : _resolvePlanContext(context, city);
+        final plan = widget.migrationQuestionnaireController?.generatedPlan;
+        final savedLocation = widget.locationController.savedLocation;
+        final originCountryIso =
+            FlightRouteContextResolver.resolveOriginCountryIso(
+              savedCountryCode: savedLocation?.countryCode,
+              planOriginCountry: plan?.originCountry,
+            );
+        final originAirport = FlightRouteContextResolver.resolveOriginAirport(
+          savedLocation: savedLocation,
+          originCountryIso: originCountryIso,
+        );
+        final destinationAirport = city == null
+            ? null
+            : FlightRouteContextResolver.resolveDestinationAirport(
+                destinationCityName: city.name,
+                destinationCountryIso:
+                    FlightRouteContextResolver.resolveDestinationCountryIso(
+                      cityCountryCode: city.countryCode,
+                      planDestinationCountry: plan?.destinationCountry,
+                    ),
+              );
 
         return Scaffold(
           bottomNavigationBar: (widget.fromMigrationResult && city != null)
@@ -390,8 +412,9 @@ class _CityDetailPageState extends State<CityDetailPage> {
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 1160),
                             child: FlightSeasonalityCard(
-                              originCountryIso: 'AR',
-                              cityId: city.id,
+                              originCountryIso: originCountryIso,
+                              originIata: originAirport?.iataCode,
+                              destIata: destinationAirport?.iataCode,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -557,11 +580,19 @@ class _CityDetailPageState extends State<CityDetailPage> {
       return;
     }
 
-    // Pre-select this city as the user's preference before entering the
-    // questionnaire. The plan generator will attach it so the result reveal
-    // page can compare the algorithm recommendation against the user's choice.
-    widget.migrationQuestionnaireController?.setPreferredCity(city);
-    Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire);
+    final generated =
+        await widget.migrationQuestionnaireController?.generatePlanFromCity(
+          city,
+        ) ??
+        false;
+    if (!context.mounted || !generated) {
+      return;
+    }
+    await widget.migrationQuestionnaireController?.confirmPlanCity(city);
+    if (!context.mounted) {
+      return;
+    }
+    Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
   }
 
   Future<void> _openCityGoogleOverview(City city) async {

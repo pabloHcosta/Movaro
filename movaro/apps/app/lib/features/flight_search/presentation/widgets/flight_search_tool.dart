@@ -7,6 +7,7 @@ import 'package:movaro_app/features/flight_search/data/airport_database.dart';
 import 'package:movaro_app/features/flight_search/domain/models/airport.dart';
 import 'package:movaro_app/features/flight_search/domain/models/flight_search_params.dart';
 import 'package:movaro_app/features/flight_search/domain/services/airport_finder_service.dart';
+import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
 import 'package:movaro_app/features/flight_search/domain/services/flight_url_builder.dart';
 import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
@@ -64,33 +65,46 @@ class _FlightSearchToolState extends State<FlightSearchTool> {
 
   void _loadAirports() {
     final loc = widget.locationController.savedLocation;
+    final originCountryIso = FlightRouteContextResolver.normalizeCountryIso(
+      widget.originCountryIso,
+    );
+    final destinationCountryIso =
+        FlightRouteContextResolver.normalizeCountryIso(
+          widget.destinationCountryIso,
+        );
+
+    if (originCountryIso == null || destinationCountryIso == null) {
+      _suggestedOrigins = const [];
+      _destinationAirports = const [];
+      _selectedOrigin = null;
+      _selectedDestination = null;
+      return;
+    }
 
     // ── Origin airports (GPS-aware) ──────────────────────────────────────
     if (loc != null &&
-        loc.countryCode.toUpperCase() ==
-            widget.originCountryIso.toUpperCase()) {
+        FlightRouteContextResolver.normalizeCountryIso(loc.countryCode) ==
+            originCountryIso) {
       _suggestedOrigins = _finder.findNearest(
         latitude: loc.latitude,
         longitude: loc.longitude,
-        countryIso: widget.originCountryIso,
+        countryIso: originCountryIso,
         maxResults: 3,
       );
     } else {
       // GPS unavailable or user is outside origin country — show all airports.
-      _suggestedOrigins = AirportDatabase.forCountry(widget.originCountryIso);
+      _suggestedOrigins = AirportDatabase.forCountry(originCountryIso);
     }
 
     // Pre-select: nearest airport (or main hub if empty list)
     if (_suggestedOrigins.isNotEmpty) {
       _selectedOrigin = _suggestedOrigins.first;
     } else {
-      _selectedOrigin = AirportDatabase.mainHubFor(widget.originCountryIso);
+      _selectedOrigin = AirportDatabase.mainHubFor(originCountryIso);
     }
 
     // ── Destination airports ────────────────────────────────────────────
-    _destinationAirports = AirportDatabase.forCountry(
-      widget.destinationCountryIso,
-    );
+    _destinationAirports = AirportDatabase.forCountry(destinationCountryIso);
 
     // Pre-select: airport matching the plan city, or the main hub
     if (widget.destinationCityName != null &&
@@ -98,13 +112,11 @@ class _FlightSearchToolState extends State<FlightSearchTool> {
       _selectedDestination =
           AirportDatabase.forCityName(
             widget.destinationCityName!,
-            widget.destinationCountryIso,
+            destinationCountryIso,
           ) ??
-          AirportDatabase.mainHubFor(widget.destinationCountryIso);
+          AirportDatabase.mainHubFor(destinationCountryIso);
     } else {
-      _selectedDestination = AirportDatabase.mainHubFor(
-        widget.destinationCountryIso,
-      );
+      _selectedDestination = AirportDatabase.mainHubFor(destinationCountryIso);
     }
   }
 
@@ -155,6 +167,10 @@ class _FlightSearchToolState extends State<FlightSearchTool> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final destinationLabel =
+        widget.destinationCityName?.trim().isNotEmpty == true
+        ? widget.destinationCityName!.trim()
+        : l10n.flightDestinationFallback(widget.destinationCountryIso);
     final canSearch =
         _selectedOrigin != null &&
         _selectedDestination != null &&
@@ -172,9 +188,7 @@ class _FlightSearchToolState extends State<FlightSearchTool> {
           ),
           const SizedBox(height: 6),
           Text(
-            l10n.migrationPlanPrepFlightsPlannerBody(
-              widget.destinationCityName ?? l10n.questionOptionBrazil,
-            ),
+            l10n.flightPlannerBody(destinationLabel),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSoftFor(context),
               height: 1.45,
@@ -186,6 +200,7 @@ class _FlightSearchToolState extends State<FlightSearchTool> {
           if (_selectedDestination != null) ...[
             FlightSeasonalityCard(
               originCountryIso: widget.originCountryIso,
+              originIata: _selectedOrigin?.iataCode,
               destIata: _selectedDestination?.iataCode,
             ),
             const SizedBox(height: 20),

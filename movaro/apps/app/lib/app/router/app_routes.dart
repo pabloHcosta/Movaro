@@ -18,6 +18,7 @@ class AppRoutes {
   static const login = '/login';
   static const onboarding = '/onboarding';
   static const locationPermission = '/location/permission';
+  static const migrationStart = '/migration/start';
   static const migrationQuestionnaire = '/migration/questionnaire';
   static const migrationPlanResult = '/migration/result';
   static const migrationResultReveal = '/migration/result/reveal';
@@ -41,6 +42,7 @@ class AppRoutes {
     citiesSearch,
     countries,
     login,
+    migrationStart,
     migrationQuestionnaire,
     migrationPlanResult,
     migrationResultReveal,

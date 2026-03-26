@@ -245,10 +245,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeHeroNoPlanBody =>
-      'Answer the questionnaire and get a recommended city that fits your profile.';
+      'Answer a few quick questions and get a recommended city that fits your profile.';
 
   @override
-  String get homeHeroStepQuestionnaire => 'Answer questionnaire';
+  String get homeHeroStepQuestionnaire => 'Answer quick questions';
 
   @override
   String get homeHeroStepCity => 'Get ideal city';
@@ -470,7 +470,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Guests can answer a short flow and generate an initial migration plan before signing in.';
 
   @override
-  String get exploreQuestionnaireAction => 'Start questionnaire';
+  String get exploreQuestionnaireAction => 'Answer quick questions';
 
   @override
   String get exploreTrailsEyebrow => 'Three clear paths';
@@ -1540,10 +1540,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startNewPlanAction => 'Start a new plan';
 
   @override
-  String get questionnairePageTitle => 'Your first plan';
+  String get questionnairePageTitle => 'Answer a few quick questions';
 
   @override
-  String get questionnaireLoadingLabel => 'Preparing your questions';
+  String get questionnaireLoadingLabel => 'Preparing your quick questions';
 
   @override
   String get questionnaireSupportText =>
@@ -2937,7 +2937,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get publicHomePlanResetBody =>
-      'Your current plan will be removed from this device so you can answer the questionnaire again from the beginning.';
+      'Your current plan will be removed from this device so you can answer the quick questions again from the beginning.';
 
   @override
   String cityWeatherSummary(Object temperature) {
@@ -3454,7 +3454,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journeyEntryManualAction => 'Choose manually';
 
   @override
-  String get journeyEntryContinueAction => 'Continue to questionnaire';
+  String get journeyEntryContinueAction => 'Continue with quick questions';
 
   @override
   String journeyEntrySelectedDestination(Object destination) {
@@ -5109,7 +5109,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get migrationPlanResultUnavailableBody =>
-      'Try again to reopen your recommendation and continue from the questionnaire.';
+      'Try again to reopen your recommendation and continue from the quick questions.';
 
   @override
   String get migrationPlanResultBasedOnAnswersTitle => 'Based on your answers';
@@ -6392,7 +6392,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get migrationResultRevealEyebrow => 'Your recommended city';
 
   @override
-  String get migrationResultRevealRedoAction => 'Redo questionnaire';
+  String get migrationResultRevealRedoAction => 'Answer quick questions again';
 
   @override
   String migrationResultRevealCompatibilityLabel(int pct) {

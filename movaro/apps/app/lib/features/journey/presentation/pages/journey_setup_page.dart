@@ -383,7 +383,7 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
                                         ? () {
                                             Navigator.pushReplacementNamed(
                                               context,
-                                              AppRoutes.migrationQuestionnaire,
+                                              AppRoutes.migrationStart,
                                             );
                                           }
                                         : null,

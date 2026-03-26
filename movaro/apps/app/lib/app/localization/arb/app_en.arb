@@ -118,8 +118,8 @@
   "homeHeroOriginLabel": "Origin",
   "homeHeroDestinationLabel": "Destination",
   "homeHeroNoPlanTitle": "Your migration plan in 3 steps",
-  "homeHeroNoPlanBody": "Answer the questionnaire and get a recommended city that fits your profile.",
-  "homeHeroStepQuestionnaire": "Answer questionnaire",
+  "homeHeroNoPlanBody": "Answer a few quick questions and get a recommended city that fits your profile.",
+  "homeHeroStepQuestionnaire": "Answer quick questions",
   "homeHeroStepCity": "Get ideal city",
   "homeHeroStepGuide": "Execute with guide",
   "homeHeroStartAction": "Build my plan -> takes ~5 min",
@@ -193,7 +193,7 @@
   "exploreIntroAction": "Open introduction",
   "exploreChecklistTitle": "Your initial plan",
   "exploreChecklistDescription": "Guests can answer a short flow and generate an initial migration plan before signing in.",
-  "exploreQuestionnaireAction": "Start questionnaire",
+  "exploreQuestionnaireAction": "Answer quick questions",
   "exploreTrailsEyebrow": "Three clear paths",
   "exploreTrailsTitle": "Choose the kind of help you need right now",
   "exploreTrailsBody": "Instead of showing everything at once, the app now splits the experience into three tracks: decide the city, understand practical bureaucracy, and prepare the move.",
@@ -570,8 +570,8 @@
     }
   },
   "startNewPlanAction": "Start a new plan",
-  "questionnairePageTitle": "Your first plan",
-  "questionnaireLoadingLabel": "Preparing your questions",
+  "questionnairePageTitle": "Answer a few quick questions",
+  "questionnaireLoadingLabel": "Preparing your quick questions",
   "questionnaireSupportText": "It takes less than a minute. One question at a time.",
   "questionnaireSectionOrigin": "Origin",
   "questionnaireSectionBasicProfile": "Basic profile",
@@ -1198,7 +1198,7 @@
   "publicHomeJourneyResetBody": "Your current route is already saved on this device. If you restart it now, Movaro will open the route selection again so you can choose a different origin or destination.",
   "publicHomeJourneyResetConfirm": "Redo route",
   "publicHomePlanResetTitle": "Start another plan?",
-  "publicHomePlanResetBody": "Your current plan will be removed from this device so you can answer the questionnaire again from the beginning.",
+  "publicHomePlanResetBody": "Your current plan will be removed from this device so you can answer the quick questions again from the beginning.",
   "cityWeatherSummary": "{temperature}°C now",
   "@cityWeatherSummary": {
     "placeholders": {
@@ -1350,7 +1350,7 @@
   "journeyEntryManualTitle": "Choose manually",
   "journeyEntryManualBody": "Skip location, set origin and destination yourself, and keep full control over the route.",
   "journeyEntryManualAction": "Choose manually",
-  "journeyEntryContinueAction": "Continue to questionnaire",
+  "journeyEntryContinueAction": "Continue with quick questions",
   "journeyEntrySelectedDestination": "Destination selected: {destination}",
   "@journeyEntrySelectedDestination": {
     "placeholders": {
@@ -2030,7 +2030,7 @@
   "migrationPlanResultCompatibilityHelpTitle": "How compatibility works",
   "migrationPlanResultCompatibilityHelpBody": "Compatibility combines your priorities, timeline, and migration goal with the signals available for each city. It is a directional match to help you start with the strongest city first.",
   "migrationPlanResultUnavailableTitle": "We could not load your city result.",
-  "migrationPlanResultUnavailableBody": "Try again to reopen your recommendation and continue from the questionnaire.",
+  "migrationPlanResultUnavailableBody": "Try again to reopen your recommendation and continue from the quick questions.",
   "migrationPlanResultBasedOnAnswersTitle": "Based on your answers",
   "migrationPlanResultCityDataTitle": "City data",
   "migrationPlanResultOtherCitiesTitle": "Other compatible cities",
@@ -2554,7 +2554,7 @@
   "aiChatRetry": "The assistant is still loading. Please try again in a moment.",
   "aiChatNetworkError": "Connection error. Check your internet and try again.",
   "migrationResultRevealEyebrow": "Your recommended city",
-  "migrationResultRevealRedoAction": "Redo questionnaire",
+  "migrationResultRevealRedoAction": "Answer quick questions again",
   "migrationResultRevealCompatibilityLabel": "{pct}% compatible",
   "@migrationResultRevealCompatibilityLabel": {
     "placeholders": {

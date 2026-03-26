@@ -143,6 +143,8 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       _selectedVariant == QuestionnaireVariant.strategic;
 
   Future<void> initialize() async {
+    await _journeyContextController.initialize();
+    await _ensureInferredDestination();
     if (_isInitialized) {
       _syncJourneyAnswers();
       notifyListeners();
@@ -164,6 +166,15 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       notifyListeners();
     } finally {
       _setInitializing(false);
+    }
+  }
+
+  Future<void> initializeForQuestionnaire() async {
+    await initialize();
+    if (_selectedVariant == null) {
+      _selectedVariant = QuestionnaireVariant.strategic;
+      notifyListeners();
+      _persistDraft();
     }
   }
 
@@ -282,8 +293,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     return values.first;
   }
 
-  bool get canGoBack =>
-      _showRefinePrompt || _currentIndex > 0 || hasSelectedVariant;
+  bool get canGoBack => _showRefinePrompt || _currentIndex > 0;
 
   bool get canGoNext {
     final question = currentQuestion;
@@ -344,12 +354,6 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       _persistDraft();
       return;
     }
-
-    _selectedVariant = null;
-    _includeConstraints = false;
-    _isRefineResolved = false;
-    notifyListeners();
-    _persistDraft();
   }
 
   Future<bool> goNext() async {
@@ -425,6 +429,26 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> generatePlanFromCity(City city) async {
+    await initialize();
+    _preferredCity = city;
+    _selectedVariant = QuestionnaireVariant.lean;
+    _showRefinePrompt = false;
+    _isRefineResolved = true;
+    _includeConstraints = false;
+    _currentIndex = 0;
+    await _ensurePlanningContext(preferredCity: city);
+    _syncJourneyAnswers();
+    if (!_journeyContextController.isJourneyReadyForPlanning ||
+        answerFor('origin_country') == null ||
+        answerFor('destination_country') == null) {
+      notifyListeners();
+      return false;
+    }
+    notifyListeners();
+    return _generatePlan();
+  }
+
   Future<void> confirmPlanCity(City city) async {
     final plan = _generatedPlan;
     if (plan == null) {
@@ -486,6 +510,84 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     } finally {
       _setGeneratingPlan(false);
     }
+  }
+
+  Future<void> _ensureInferredDestination({City? preferredCity}) async {
+    final resolvedDestinationId =
+        _journeyContextController.destinationCountryId ??
+        _resolveDestinationCountryId(preferredCity) ??
+        _inferSingleDestinationCountryId();
+    if (resolvedDestinationId == null ||
+        resolvedDestinationId ==
+            _journeyContextController.destinationCountryId) {
+      return;
+    }
+
+    await _journeyContextController.setDestinationCountry(
+      resolvedDestinationId,
+    );
+  }
+
+  Future<void> _ensurePlanningContext({City? preferredCity}) async {
+    await _ensureInferredDestination(preferredCity: preferredCity);
+    final destinationCountryId = _journeyContextController.destinationCountryId;
+    if (destinationCountryId == null) {
+      return;
+    }
+
+    final resolvedOriginId =
+        _journeyContextController.originCountryId ??
+        _journeyContextController.detectedLocation?.countryId ??
+        _inferSingleOriginCountryId(destinationCountryId);
+    if (resolvedOriginId != null &&
+        resolvedOriginId != _journeyContextController.originCountryId) {
+      await _journeyContextController.setOriginCountry(resolvedOriginId);
+    }
+  }
+
+  String? _resolveDestinationCountryId(City? preferredCity) {
+    if (preferredCity == null) {
+      return null;
+    }
+
+    final normalizedCountryCode = preferredCity.countryCode.toLowerCase();
+    for (final country in _journeyContextController.countries) {
+      if (country.isoCode.toLowerCase() == normalizedCountryCode) {
+        return country.id;
+      }
+    }
+
+    return null;
+  }
+
+  String? _inferSingleDestinationCountryId() {
+    final availableDestinations = _journeyContextController
+        .availableDestinations
+        .where(_journeyContextController.canUseAsDestination)
+        .toList(growable: false);
+    if (availableDestinations.length != 1) {
+      return null;
+    }
+
+    return availableDestinations.first.id;
+  }
+
+  String? _inferSingleOriginCountryId(String destinationCountryId) {
+    final availableOrigins = _journeyContextController.availableOrigins
+        .where(
+          (country) =>
+              _journeyContextController.canUseAsOrigin(country) &&
+              _journeyContextController.isRouteSupported(
+                originCountryId: country.id,
+                destinationCountryId: destinationCountryId,
+              ),
+        )
+        .toList(growable: false);
+    if (availableOrigins.length != 1) {
+      return null;
+    }
+
+    return availableOrigins.first.id;
   }
 
   void _setAnswer(String questionId, List<String> values) {

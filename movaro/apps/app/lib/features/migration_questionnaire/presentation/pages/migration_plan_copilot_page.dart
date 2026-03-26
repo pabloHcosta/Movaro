@@ -16,6 +16,7 @@ import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
 import 'package:movaro_app/features/flight_search/presentation/widgets/flight_search_tool.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
@@ -546,13 +547,24 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
           ),
         );
       case GuideToolType.flight:
+        final originCountryIso =
+            FlightRouteContextResolver.resolveOriginCountryIso(
+              savedCountryCode:
+                  widget.locationController.savedLocation?.countryCode,
+              planOriginCountry: plan.originCountry,
+            );
+        final destinationCountryIso =
+            FlightRouteContextResolver.resolveDestinationCountryIso(
+              cityCountryCode: city?.countryCode,
+              planDestinationCountry: plan.destinationCountry,
+            );
         await _showPreparationSheet(
           context,
           title: item.title,
           child: FlightSearchTool(
             locationController: widget.locationController,
-            originCountryIso: plan.originCountry == 'argentina' ? 'AR' : 'AR',
-            destinationCountryIso: 'BR',
+            originCountryIso: originCountryIso,
+            destinationCountryIso: destinationCountryIso,
             destinationCityName: city?.name,
           ),
         );
@@ -966,7 +978,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     }
 
     if (choice == PlanResetChoice.rebuild) {
-      Navigator.pushReplacementNamed(context, AppRoutes.migrationQuestionnaire);
+      Navigator.pushReplacementNamed(context, AppRoutes.migrationStart);
       return;
     }
 
@@ -1385,12 +1397,7 @@ Future<void> _showPlanToolsSheet(
                   _ToolMenuCard(
                     icon: Icons.flight_takeoff_rounded,
                     tint: AppColors.caution,
-                    title: _localizedText(
-                      context,
-                      pt: 'Planejar meu voo para o Brasil',
-                      es: 'Planear mi vuelo a Brasil',
-                      en: 'Plan my flight to Brazil',
-                    ),
+                    title: context.l10n.flightPlannerTitle(),
                     body: _localizedText(
                       context,
                       pt: 'Escolha a data e veja opcoes de voo para ${city?.name ?? "sua cidade"}.',
@@ -1398,19 +1405,25 @@ Future<void> _showPlanToolsSheet(
                       en: 'Choose a date and see flight options to ${city?.name ?? "your city"}.',
                     ),
                     onTap: () {
+                      final originCountryIso =
+                          FlightRouteContextResolver.resolveOriginCountryIso(
+                            savedCountryCode:
+                                locationController.savedLocation?.countryCode,
+                            planOriginCountry: plan.originCountry,
+                          );
+                      final destinationCountryIso =
+                          FlightRouteContextResolver.resolveDestinationCountryIso(
+                            cityCountryCode: city?.countryCode,
+                            planDestinationCountry: plan.destinationCountry,
+                          );
                       Navigator.of(sheetContext).pop();
                       _showPreparationSheet(
                         context,
-                        title: _localizedText(
-                          context,
-                          pt: 'Planejar meu voo para o Brasil',
-                          es: 'Planear mi vuelo a Brasil',
-                          en: 'Plan my flight to Brazil',
-                        ),
+                        title: context.l10n.flightPlannerTitle(),
                         child: FlightSearchTool(
                           locationController: locationController,
-                          originCountryIso: 'AR',
-                          destinationCountryIso: 'BR',
+                          originCountryIso: originCountryIso,
+                          destinationCountryIso: destinationCountryIso,
                           destinationCityName: city?.name,
                         ),
                       );
@@ -3890,7 +3903,9 @@ class _FlightSearchPlannerCardState extends State<_FlightSearchPlannerCard> {
   }
 
   Future<void> _openGoogleFlights() async {
-    final destination = widget.destinationCityName ?? 'Brazil';
+    final destination = widget.destinationCityName?.trim().isNotEmpty == true
+        ? widget.destinationCityName!.trim()
+        : context.l10n.flightDestinationFallback('BR');
     final uri = PreparationResourceLinks.buildFlightsSearch(
       originCity: _originCity,
       destinationCity: destination,
@@ -3912,7 +3927,9 @@ class _FlightSearchPlannerCardState extends State<_FlightSearchPlannerCard> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final destination = widget.destinationCityName ?? l10n.questionOptionBrazil;
+    final destination = widget.destinationCityName?.trim().isNotEmpty == true
+        ? widget.destinationCityName!.trim()
+        : l10n.flightDestinationFallback('BR');
     final dateLabel = _departureDate == null
         ? l10n.migrationPlanPrepFlightsDatePlaceholder
         : MaterialLocalizations.of(context).formatMediumDate(_departureDate!);
@@ -3928,7 +3945,7 @@ class _FlightSearchPlannerCardState extends State<_FlightSearchPlannerCard> {
           ),
           const SizedBox(height: 10),
           Text(
-            l10n.migrationPlanPrepFlightsPlannerBody(destination),
+            l10n.flightPlannerBody(destination),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSoftFor(context),
               height: 1.45,

@@ -502,13 +502,13 @@ abstract class AppLocalizations {
   /// No description provided for @homeHeroNoPlanBody.
   ///
   /// In en, this message translates to:
-  /// **'Answer the questionnaire and get a recommended city that fits your profile.'**
+  /// **'Answer a few quick questions and get a recommended city that fits your profile.'**
   String get homeHeroNoPlanBody;
 
   /// No description provided for @homeHeroStepQuestionnaire.
   ///
   /// In en, this message translates to:
-  /// **'Answer questionnaire'**
+  /// **'Answer quick questions'**
   String get homeHeroStepQuestionnaire;
 
   /// No description provided for @homeHeroStepCity.
@@ -892,7 +892,7 @@ abstract class AppLocalizations {
   /// No description provided for @exploreQuestionnaireAction.
   ///
   /// In en, this message translates to:
-  /// **'Start questionnaire'**
+  /// **'Answer quick questions'**
   String get exploreQuestionnaireAction;
 
   /// No description provided for @exploreTrailsEyebrow.
@@ -2632,13 +2632,13 @@ abstract class AppLocalizations {
   /// No description provided for @questionnairePageTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your first plan'**
+  /// **'Answer a few quick questions'**
   String get questionnairePageTitle;
 
   /// No description provided for @questionnaireLoadingLabel.
   ///
   /// In en, this message translates to:
-  /// **'Preparing your questions'**
+  /// **'Preparing your quick questions'**
   String get questionnaireLoadingLabel;
 
   /// No description provided for @questionnaireSupportText.
@@ -5008,7 +5008,7 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomePlanResetBody.
   ///
   /// In en, this message translates to:
-  /// **'Your current plan will be removed from this device so you can answer the questionnaire again from the beginning.'**
+  /// **'Your current plan will be removed from this device so you can answer the quick questions again from the beginning.'**
   String get publicHomePlanResetBody;
 
   /// No description provided for @cityWeatherSummary.
@@ -5890,7 +5890,7 @@ abstract class AppLocalizations {
   /// No description provided for @journeyEntryContinueAction.
   ///
   /// In en, this message translates to:
-  /// **'Continue to questionnaire'**
+  /// **'Continue with quick questions'**
   String get journeyEntryContinueAction;
 
   /// No description provided for @journeyEntrySelectedDestination.
@@ -8578,7 +8578,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanResultUnavailableBody.
   ///
   /// In en, this message translates to:
-  /// **'Try again to reopen your recommendation and continue from the questionnaire.'**
+  /// **'Try again to reopen your recommendation and continue from the quick questions.'**
   String get migrationPlanResultUnavailableBody;
 
   /// No description provided for @migrationPlanResultBasedOnAnswersTitle.
@@ -10745,7 +10745,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationResultRevealRedoAction.
   ///
   /// In en, this message translates to:
-  /// **'Redo questionnaire'**
+  /// **'Answer quick questions again'**
   String get migrationResultRevealRedoAction;
 
   /// No description provided for @migrationResultRevealCompatibilityLabel.

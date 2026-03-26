@@ -130,7 +130,7 @@ class HomePage extends StatelessWidget {
                               FilledButton.icon(
                                 onPressed: () => Navigator.pushNamed(
                                   context,
-                                  AppRoutes.migrationQuestionnaire,
+                                  AppRoutes.migrationStart,
                                 ),
                                 icon: const Icon(Icons.auto_awesome_rounded),
                                 label: Text(l10n.startNewPlanAction),

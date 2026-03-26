@@ -255,7 +255,7 @@ class _ExplorePageState extends State<ExplorePage> {
     if (plan != null) {
       return AppRoutes.migrationPlanResult;
     }
-    return AppRoutes.migrationQuestionnaire;
+    return AppRoutes.migrationStart;
   }
 }
 

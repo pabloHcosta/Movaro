@@ -1541,10 +1541,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get startNewPlanAction => 'Montar novo plano';
 
   @override
-  String get questionnairePageTitle => 'Seu plano inicial';
+  String get questionnairePageTitle => 'Responder algumas perguntas rápidas';
 
   @override
-  String get questionnaireLoadingLabel => 'Preparando suas perguntas';
+  String get questionnaireLoadingLabel => 'Preparando suas perguntas rápidas';
 
   @override
   String get questionnaireSupportText =>
@@ -3465,7 +3465,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get journeyEntryManualAction => 'Choose manually';
 
   @override
-  String get journeyEntryContinueAction => 'Continue to questionnaire';
+  String get journeyEntryContinueAction => 'Continuar com perguntas rápidas';
 
   @override
   String journeyEntrySelectedDestination(Object destination) {

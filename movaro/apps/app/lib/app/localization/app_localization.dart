@@ -56,6 +56,41 @@ extension AppLocalizationsX on BuildContext {
 }
 
 extension AppLocalizationsFormatting on AppLocalizations {
+  String flightPlannerTitle() => _localizedText(
+    pt: 'Planejar meu voo',
+    es: 'Planear mi vuelo',
+    en: 'Plan my flight',
+  );
+
+  String flightPlannerBody(String destinationLabel) => _localizedText(
+    pt: 'Escolha a cidade de saida e a data que voce pretende viajar para abrir a busca pronta ate $destinationLabel.',
+    es: 'Elegi la ciudad de salida y la fecha en la que pensas viajar para abrir la busqueda lista hacia $destinationLabel.',
+    en: 'Choose the departure city and the date you expect to travel to open the search already prepared for $destinationLabel.',
+  );
+
+  String flightQuestionBody(String destinationLabel) => _localizedText(
+    pt: 'Abra uma busca externa de voos para comparar rotas ate $destinationLabel.',
+    es: 'Abri una busqueda externa de vuelos para comparar rutas hasta $destinationLabel.',
+    en: 'Open an external flight search to compare routes to $destinationLabel.',
+  );
+
+  String flightDestinationFallback(String destinationCountryIso) {
+    switch (destinationCountryIso.toUpperCase()) {
+      case 'AR':
+        return countryLabel('argentina');
+      case 'BR':
+        return countryLabel('brazil');
+      case 'UY':
+        return _localizedText(pt: 'Uruguai', es: 'Uruguay', en: 'Uruguay');
+      case 'CL':
+        return _localizedText(pt: 'Chile', es: 'Chile', en: 'Chile');
+      case 'PY':
+        return _localizedText(pt: 'Paraguai', es: 'Paraguay', en: 'Paraguay');
+      default:
+        return destinationCountryIso.toUpperCase();
+    }
+  }
+
   String questionTitle(String questionId) {
     switch (questionId) {
       case 'origin_country':
@@ -403,33 +438,33 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String locationPermissionSubtitle() => _localizedText(
-    pt: 'Com sua localização, ajustamos custos, documentos e recomendações.',
-    es: 'Con tu ubicación, ajustamos costos, documentos y recomendaciones.',
-    en: 'With your location, we can tailor costs, documents, and recommendations.',
+    pt: 'Usamos sua localização para sugerir sua origem e deixar custos, cidades e próximos passos mais certeiros para você.',
+    es: 'Usamos tu ubicación para sugerir tu origen y hacer más precisos los costos, las ciudades y los próximos pasos.',
+    en: 'We use your location to suggest your origin and make costs, cities, and next steps more accurate for you.',
   );
 
   String locationPermissionBenefitAutoOrigin() => _localizedText(
-    pt: 'Detectar seu país de origem automaticamente',
-    es: 'Detectar tu país de origen automáticamente',
-    en: 'Detect your origin country automatically',
+    pt: 'Preencher sua origem automaticamente',
+    es: 'Completar tu origen automáticamente',
+    en: 'Fill in your origin automatically',
   );
 
   String locationPermissionBenefitDistance() => _localizedText(
-    pt: 'Mostrar distâncias e contexto das cidades',
-    es: 'Mostrar distancias y contexto de las ciudades',
-    en: 'Show city distance and context',
+    pt: 'Mostrar cidades e contexto mais próximos da sua realidade',
+    es: 'Mostrar ciudades y contexto más cercanos a tu realidad',
+    en: 'Show cities and context that are closer to your reality',
   );
 
   String locationPermissionBenefitContent() => _localizedText(
-    pt: 'Personalizar o conteúdo para onde você está',
-    es: 'Personalizar el contenido según dónde estás',
-    en: 'Personalize content based on where you are',
+    pt: 'Organizar documentos, custos e recomendações com mais confiança',
+    es: 'Organizar documentos, costos y recomendaciones con más confianza',
+    en: 'Organize documents, costs, and recommendations with more confidence',
   );
 
   String locationPermissionAllowAction() => _localizedText(
-    pt: 'Continuar',
-    es: 'Continuar',
-    en: 'Continue',
+    pt: 'Permitir localização',
+    es: 'Permitir ubicación',
+    en: 'Allow location',
   );
 
   String locationPermissionLaterAction() =>
@@ -691,9 +726,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String questionnaireVariantPageTitle() => _localizedText(
-    pt: 'Seu plano inicial',
-    es: 'Tu plan inicial',
-    en: 'Your starter plan',
+    pt: 'Responder algumas perguntas rápidas',
+    es: 'Responder algunas preguntas rápidas',
+    en: 'Answer a few quick questions',
   );
 
   String questionnaireVariantEyebrow() =>
@@ -925,15 +960,15 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String questionnaireGuideTitle() => _localizedText(
-    pt: 'Responda uma etapa por vez',
-    es: 'Respondé una etapa por vez',
-    en: 'Answer one step at a time',
+    pt: 'Responda algumas perguntas rápidas',
+    es: 'Respondé algunas preguntas rápidas',
+    en: 'Answer a few quick questions',
   );
 
   String questionnaireGuideBody() => _localizedText(
-    pt: 'O questionario mantem a rota em contexto, salva seu progresso e so monta a recomendacao depois que origem e destino estiverem completos.',
-    es: 'El cuestionario mantiene la ruta en contexto, guarda tu progreso y solo arma la recomendacion despues de completar origen y destino.',
-    en: 'The questionnaire keeps the route in context, saves your progress, and builds the recommendation only after origin and destination are complete.',
+    pt: 'A gente usa essas respostas para organizar sua rota, salvar seu progresso e montar um plano claro para seguir.',
+    es: 'Usamos estas respuestas para ordenar tu ruta, guardar tu progreso y armar un plan claro para seguir.',
+    en: 'We use these answers to organize your route, save your progress, and build a clear plan to follow.',
   );
 
   String questionnaireGuideStepOneTitle() => _localizedText(
@@ -943,9 +978,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String questionnaireGuideStepOneBody() => _localizedText(
-    pt: 'Escolha o estilo do questionario e depois responda primeiro a etapa de origem.',
-    es: 'Elegí el estilo del cuestionario y despues respondé primero la etapa de origen.',
-    en: 'Choose the questionnaire style, then answer the origin step first.',
+    pt: 'Comece pela origem e responda o essencial primeiro.',
+    es: 'Empezá por el origen y respondé primero lo esencial.',
+    en: 'Start with your origin and answer the essentials first.',
   );
 
   String questionnaireGuideStepTwoTitle() => _localizedText(
@@ -970,6 +1005,75 @@ extension AppLocalizationsFormatting on AppLocalizations {
     pt: 'A etapa final cria a recomendacao e envia todo o contexto da jornada para a tela de resultado.',
     es: 'La etapa final crea la recomendacion y pasa todo el contexto del recorrido a la pantalla de resultado.',
     en: 'The final step creates the recommendation and passes the full journey context to the result screen.',
+  );
+
+  String migrationStartPageTitle() => _localizedText(
+    pt: 'Começar meu plano',
+    es: 'Empezar mi plan',
+    en: 'Start my plan',
+  );
+
+  String migrationStartHeroTitle() => _localizedText(
+    pt: 'How do you want to start?',
+    es: 'How do you want to start?',
+    en: 'How do you want to start?',
+  );
+
+  String migrationStartHeroBody() => _localizedText(
+    pt: 'Choose the option that fits you best.',
+    es: 'Choose the option that fits you best.',
+    en: 'Choose the option that fits you best.',
+  );
+
+  String migrationStartKnownCityTitle() => _localizedText(
+    pt: 'I already know my city',
+    es: 'I already know my city',
+    en: 'I already know my city',
+  );
+
+  String migrationStartKnownCitySubtitle() => _localizedText(
+    pt: 'Choose it and see what to do next',
+    es: 'Choose it and see what to do next',
+    en: 'Choose it and see what to do next',
+  );
+
+  String migrationStartKnownCityCta() => _localizedText(
+    pt: 'Escolher cidade',
+    es: 'Elegir ciudad',
+    en: 'Choose city',
+  );
+
+  String migrationStartDecidingTitle() => _localizedText(
+    pt: 'I’m still deciding',
+    es: 'I’m still deciding',
+    en: 'I’m still deciding',
+  );
+
+  String migrationStartDecidingSubtitle() => _localizedText(
+    pt: 'Answer a few quick questions',
+    es: 'Answer a few quick questions',
+    en: 'Answer a few quick questions',
+  );
+
+  String migrationStartDecidingCta() => _localizedText(
+    pt: 'Start questions',
+    es: 'Start questions',
+    en: 'Start questions',
+  );
+
+  String migrationStartConfirmCityAction() =>
+      _localizedText(pt: 'Ver meu plano', es: 'Ver mi plan', en: 'See my plan');
+
+  String migrationStartCityLoadError() => _localizedText(
+    pt: 'Nao foi possivel carregar as cidades agora.',
+    es: 'No pudimos cargar las ciudades ahora.',
+    en: 'We could not load cities right now.',
+  );
+
+  String migrationStartPlanError() => _localizedText(
+    pt: 'Nao foi possivel montar seu plano agora.',
+    es: 'No pudimos armar tu plan ahora.',
+    en: 'We could not build your plan right now.',
   );
 
   String questionnaireSelectionHelper(int maxSelections) => _localizedText(
@@ -1768,6 +1872,18 @@ extension AppLocalizationsFormatting on AppLocalizations {
     pt: 'Ver detalhes de $cityName',
     es: 'Ver detalles de $cityName',
     en: 'See details of $cityName',
+  );
+
+  String migrationResultSelectedCityTitle(String cityName) => _localizedText(
+    pt: 'Cidade que voce tinha em mente: $cityName',
+    es: 'Ciudad que tenías en mente: $cityName',
+    en: 'City you had in mind: $cityName',
+  );
+
+  String migrationResultSelectedCityBody() => _localizedText(
+    pt: 'Agora veja a cidade que faz mais sentido para o seu plano e abra os detalhes quando quiser.',
+    es: 'Ahora mirá la ciudad que más sentido tiene para tu plan y abrí los detalles cuando quieras.',
+    en: 'Now review the city that makes the most sense for your plan and open the details whenever you want.',
   );
 
   String antiAnchorStrength() =>

@@ -22,6 +22,7 @@ import 'package:movaro_app/features/migration_questionnaire/presentation/pages/m
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_result_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_save_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_result_reveal_page.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_start_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/question_page.dart';
 import 'package:movaro_app/app/presentation/pages/app_settings_page.dart';
 import 'package:movaro_app/app/presentation/pages/protected_placeholder_page.dart';
@@ -285,6 +286,15 @@ class AppRouter {
             controller: dependencies.migrationQuestionnaireController,
             locationController: dependencies.locationController,
             citiesController: dependencies.citiesController,
+          ),
+        );
+      case AppRoutes.migrationStart:
+        return _buildRoute(
+          settings,
+          MigrationStartPage(
+            controller: dependencies.migrationQuestionnaireController,
+            citiesController: dependencies.citiesController,
+            locationController: dependencies.locationController,
           ),
         );
       case AppRoutes.locationPermission:

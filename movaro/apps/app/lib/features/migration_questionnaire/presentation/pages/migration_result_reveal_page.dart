@@ -9,6 +9,7 @@ import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
+import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
 import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
@@ -84,7 +85,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
 
     await widget.controller.clearCurrentPlan();
     if (!mounted) return;
-    Navigator.pushReplacementNamed(context, AppRoutes.migrationQuestionnaire);
+    Navigator.pushReplacementNamed(context, AppRoutes.migrationStart);
   }
 
   Future<bool?> _showRedoConfirmationDialog() {
@@ -470,6 +471,19 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
         final hasPreferred = preferredCity != null;
         final preferredMatchesRecommended =
             hasPreferred && preferredCity.id == recommendedCity.id;
+        final destinationAirport =
+            FlightRouteContextResolver.resolveDestinationAirport(
+              destinationCityName: recommendedCity.name,
+              destinationCountryIso:
+                  FlightRouteContextResolver.resolveDestinationCountryIso(
+                    cityCountryCode: recommendedCity.countryCode,
+                    planDestinationCountry: plan.destinationCountry,
+                  ),
+            );
+        final originCountryIso =
+            FlightRouteContextResolver.resolveOriginCountryIso(
+              planOriginCountry: plan.originCountry,
+            );
 
         return Scaffold(
           body: FadeTransition(
@@ -487,13 +501,11 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                         child: ListView(
                           padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
                           children: [
-                            // ── Anti-anchoring: reinforcement ──
                             if (hasPreferred && preferredMatchesRecommended)
                               _AntiAnchorReinforcementBanner(
                                 cityName: recommendedCity.name,
                               ),
 
-                            // ── Anti-anchoring: comparison ──
                             if (hasPreferred && !preferredMatchesRecommended)
                               _AntiAnchorComparisonSection(
                                 preferredCity: preferredCity,
@@ -516,11 +528,8 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                             ),
                             const SizedBox(height: 12),
                             FlightPriceBadge(
-                              originCountryIso:
-                                  plan.originCountry == 'argentina'
-                                  ? 'AR'
-                                  : 'AR',
-                              cityId: recommendedCity.id,
+                              originCountryIso: originCountryIso,
+                              destIata: destinationAirport?.iataCode,
                             ),
                             if (reasons.isNotEmpty) ...[
                               const SizedBox(height: 16),
@@ -1306,8 +1315,6 @@ class _RevealSkeleton extends StatelessWidget {
   }
 }
 
-// ─── Anti-Anchoring: Reinforcement Banner ───────────────────────────────────
-
 class _AntiAnchorReinforcementBanner extends StatelessWidget {
   const _AntiAnchorReinforcementBanner({required this.cityName});
 
@@ -1363,8 +1370,6 @@ class _AntiAnchorReinforcementBanner extends StatelessWidget {
   }
 }
 
-// ─── Anti-Anchoring: Comparison Section ─────────────────────────────────────
-
 class _AntiAnchorComparisonSection extends StatelessWidget {
   const _AntiAnchorComparisonSection({
     required this.preferredCity,
@@ -1383,13 +1388,11 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
     final l10n = context.l10n;
     final textSoft = AppColors.textSoftFor(context);
 
-    // Build dimension comparisons.
     final prefDims = MigrationPlanGenerator.cityDimensionsPublic(preferredCity);
     final recDims = MigrationPlanGenerator.cityDimensionsPublic(
       recommendedCity,
     );
 
-    // Find key differences (where recommended beats preferred by >10 points).
     final strengths = <String>[];
     final attentionPoints = <String>[];
 
@@ -1410,7 +1413,6 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1454,10 +1456,7 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // Strengths of recommended city
           if (strengths.isNotEmpty) ...[
             Text(
               '${l10n.antiAnchorStrength()} · ${recommendedCity.name}',
@@ -1490,8 +1489,6 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
             ),
             const SizedBox(height: 12),
           ],
-
-          // Attention points (where preferred city does better)
           if (attentionPoints.isNotEmpty) ...[
             Text(
               '${l10n.antiAnchorAttention()} · ${recommendedCity.name}',
@@ -1524,8 +1521,6 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
             ),
             const SizedBox(height: 12),
           ],
-
-          // Dual CTA
           Row(
             children: [
               Expanded(

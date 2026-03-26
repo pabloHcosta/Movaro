@@ -1538,10 +1538,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get startNewPlanAction => 'Iniciar un nuevo plan';
 
   @override
-  String get questionnairePageTitle => 'Tu plan inicial';
+  String get questionnairePageTitle => 'Responder algunas preguntas rápidas';
 
   @override
-  String get questionnaireLoadingLabel => 'Preparando tus preguntas';
+  String get questionnaireLoadingLabel => 'Preparando tus preguntas rápidas';
 
   @override
   String get questionnaireSupportText =>
@@ -3464,7 +3464,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get journeyEntryManualAction => 'Choose manually';
 
   @override
-  String get journeyEntryContinueAction => 'Continue to questionnaire';
+  String get journeyEntryContinueAction => 'Continuar con preguntas rápidas';
 
   @override
   String journeyEntrySelectedDestination(Object destination) {

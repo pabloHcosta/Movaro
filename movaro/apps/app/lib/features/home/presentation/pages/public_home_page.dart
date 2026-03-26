@@ -314,7 +314,7 @@ class _PublicHomePageState extends State<PublicHomePage>
     if (!context.mounted) {
       return;
     }
-    Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire);
+    Navigator.pushNamed(context, AppRoutes.migrationStart);
   }
 
   void _openSettings() {
@@ -381,7 +381,7 @@ class _PublicHomePageState extends State<PublicHomePage>
     }
 
     if (choice == PlanResetChoice.rebuild) {
-      Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire);
+      Navigator.pushNamed(context, AppRoutes.migrationStart);
     }
   }
 

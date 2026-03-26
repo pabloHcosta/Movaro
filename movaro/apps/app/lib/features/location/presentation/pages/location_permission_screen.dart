@@ -12,10 +12,12 @@ class LocationPermissionScreenArgs {
   const LocationPermissionScreenArgs({
     this.continueRoute,
     this.returnToPrevious = false,
+    this.isRequired = false,
   });
 
   final String? continueRoute;
   final bool returnToPrevious;
+  final bool isRequired;
 }
 
 class LocationPermissionScreen extends StatelessWidget {
@@ -105,17 +107,20 @@ class LocationPermissionScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Center(
-                              child: TextButton(
-                                onPressed: locationController.isBusy
-                                    ? null
-                                    : () => _handleNotNow(context),
-                                child: Text(
-                                  context.l10n.locationPermissionLaterAction(),
+                            if (!args.isRequired) ...[
+                              const SizedBox(height: 8),
+                              Center(
+                                child: TextButton(
+                                  onPressed: locationController.isBusy
+                                      ? null
+                                      : () => _handleNotNow(context),
+                                  child: Text(
+                                    context.l10n
+                                        .locationPermissionLaterAction(),
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ],
                         ),
                       );
@@ -139,8 +144,11 @@ class LocationPermissionScreen extends StatelessWidget {
 
     switch (result.outcome) {
       case LocationPermissionOutcome.granted:
-      case LocationPermissionOutcome.denied:
         _continue(context);
+      case LocationPermissionOutcome.denied:
+        if (!args.isRequired) {
+          _continue(context);
+        }
       case LocationPermissionOutcome.permanentlyDenied:
         await showModalBottomSheet<void>(
           context: context,
@@ -180,7 +188,7 @@ class LocationPermissionScreen extends StatelessWidget {
             ),
           ),
         );
-        if (context.mounted) {
+        if (context.mounted && !args.isRequired) {
           _continue(context);
         }
     }

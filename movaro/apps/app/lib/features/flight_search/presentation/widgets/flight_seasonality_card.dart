@@ -3,15 +3,13 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
 
-// ── Data model ────────────────────────────────────────────────────────────────
-
 enum _PriceLevel { low, mid, high }
 
 class _RouteData {
   const _RouteData({
     required this.originIata,
     required this.destIata,
-    required this.months, // 12 elements, Jan–Dec
+    required this.months,
     required this.lowUsdMin,
     required this.lowUsdMax,
     this.seasonalWarning,
@@ -22,48 +20,48 @@ class _RouteData {
   final List<_PriceLevel> months;
   final int lowUsdMin;
   final int lowUsdMax;
-
-  /// Optional one-line warning shown below the chart (e.g. seasonal routes).
   final String? seasonalWarning;
 }
 
-// ── Main widget ───────────────────────────────────────────────────────────────
-
-/// Static flight-price seasonality chart for Buenos Aires → Brazilian cities.
-///
-/// Shows which months are cheapest based on historical data (no API).
-/// Includes a Skyscanner deep-link to browse live prices.
-class FlightSeasonalityCard extends StatelessWidget {
-  const FlightSeasonalityCard({
-    required this.originCountryIso,
-    this.cityId,
-    this.destIata,
-    super.key,
+class _DestinationSeasonalityProfile {
+  const _DestinationSeasonalityProfile({
+    required this.months,
+    required this.lowUsdMin,
+    required this.lowUsdMax,
+    this.seasonalWarning,
   });
 
-  /// ISO country code of the origin (e.g. 'AR').
-  final String originCountryIso;
+  final List<_PriceLevel> months;
+  final int lowUsdMin;
+  final int lowUsdMax;
+  final String? seasonalWarning;
+}
 
-  /// Movaro city ID (e.g. 'florianopolis-sc'). Used when [destIata] is null.
-  final String? cityId;
+class _OriginPriceAdjustment {
+  const _OriginPriceAdjustment({
+    required this.lowMinDelta,
+    required this.lowMaxDelta,
+  });
 
-  /// Explicit destination IATA code. Takes precedence over [cityId] lookup.
-  final String? destIata;
+  final int lowMinDelta;
+  final int lowMaxDelta;
+}
 
-  // ── Static data ─────────────────────────────────────────────────────────────
+class _FlightSeasonalityCatalog {
+  const _FlightSeasonalityCatalog._();
 
-  static const Map<String, String> _originHub = {
+  static const Map<String, String> originHub = {
     'AR': 'EZE',
     'CL': 'SCL',
     'UY': 'MVD',
     'PY': 'ASU',
   };
 
-  static const Map<String, String> _cityToIata = {
+  static const Map<String, String> cityToIata = {
     'florianopolis-sc': 'FLN',
-    'balneario-camboriu-sc': 'FLN',
-    'itajai-sc': 'FLN',
-    'joinville-sc': 'FLN',
+    'balneario-camboriu-sc': 'NVT',
+    'itajai-sc': 'NVT',
+    'joinville-sc': 'NVT',
     'blumenau-sc': 'NVT',
     'sao-paulo-sp': 'GRU',
     'curitiba-pr': 'CWB',
@@ -83,177 +81,7 @@ class FlightSeasonalityCard extends StatelessWidget {
     'belem-pa': 'BEL',
   };
 
-  // months list = Jan … Dec  (12 elements)
-  static final Map<String, _RouteData> _routes = {
-    'EZE:GRU': _RouteData(
-      originIata: 'EZE',
-      destIata: 'GRU',
-      months: [
-        _PriceLevel.high,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.mid,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.high,
-      ],
-      lowUsdMin: 133,
-      lowUsdMax: 160,
-    ),
-    'EZE:FLN': _RouteData(
-      originIata: 'EZE',
-      destIata: 'FLN',
-      months: [
-        _PriceLevel.high,
-        _PriceLevel.high,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.high,
-        _PriceLevel.high,
-        _PriceLevel.high,
-        _PriceLevel.high,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.high,
-      ],
-      lowUsdMin: 150,
-      lowUsdMax: 200,
-      seasonalWarning:
-          'Voo direto EZE→FLN apenas em mar–abr. '
-          'Outros meses: conexão via GRU (~5 h no total).',
-    ),
-    'EZE:CWB': _RouteData(
-      originIata: 'EZE',
-      destIata: 'CWB',
-      months: [
-        _PriceLevel.high,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.mid,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.high,
-      ],
-      lowUsdMin: 170,
-      lowUsdMax: 250,
-    ),
-    'EZE:GIG': _RouteData(
-      originIata: 'EZE',
-      destIata: 'GIG',
-      months: [
-        _PriceLevel.high,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.mid,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.high,
-      ],
-      lowUsdMin: 150,
-      lowUsdMax: 220,
-      seasonalWarning:
-          'Fev tem Carnaval no Rio: passagens chegam a \$500+. '
-          'Reserve com no mínimo 6 meses de antecedência se viajar nessa época.',
-    ),
-    'EZE:POA': _RouteData(
-      originIata: 'EZE',
-      destIata: 'POA',
-      months: [
-        _PriceLevel.high,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.mid,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.high,
-      ],
-      lowUsdMin: 140,
-      lowUsdMax: 190,
-    ),
-    'EZE:SSA': _RouteData(
-      originIata: 'EZE',
-      destIata: 'SSA',
-      months: [
-        _PriceLevel.high,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.mid,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.high,
-      ],
-      lowUsdMin: 200,
-      lowUsdMax: 280,
-    ),
-    'EZE:REC': _RouteData(
-      originIata: 'EZE',
-      destIata: 'REC',
-      months: [
-        _PriceLevel.high,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.mid,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.high,
-      ],
-      lowUsdMin: 210,
-      lowUsdMax: 290,
-    ),
-    'EZE:FOR': _RouteData(
-      originIata: 'EZE',
-      destIata: 'FOR',
-      months: [
-        _PriceLevel.high,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.mid,
-        _PriceLevel.high,
-        _PriceLevel.mid,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.low,
-        _PriceLevel.high,
-      ],
-      lowUsdMin: 210,
-      lowUsdMax: 300,
-    ),
-  };
-
-  static const _monthLabels = [
+  static const monthLabels = [
     'Jan',
     'Fev',
     'Mar',
@@ -268,48 +96,272 @@ class FlightSeasonalityCard extends StatelessWidget {
     'Dez',
   ];
 
-  // ── Helpers ─────────────────────────────────────────────────────────────────
+  static const _defaultMonths = [
+    _PriceLevel.high,
+    _PriceLevel.high,
+    _PriceLevel.mid,
+    _PriceLevel.low,
+    _PriceLevel.low,
+    _PriceLevel.mid,
+    _PriceLevel.high,
+    _PriceLevel.mid,
+    _PriceLevel.low,
+    _PriceLevel.low,
+    _PriceLevel.low,
+    _PriceLevel.high,
+  ];
 
-  String get _resolvedOriginIata =>
-      _originHub[originCountryIso.toUpperCase()] ?? 'EZE';
+  static const _coastalSouthMonths = [
+    _PriceLevel.high,
+    _PriceLevel.high,
+    _PriceLevel.low,
+    _PriceLevel.low,
+    _PriceLevel.mid,
+    _PriceLevel.mid,
+    _PriceLevel.high,
+    _PriceLevel.high,
+    _PriceLevel.low,
+    _PriceLevel.low,
+    _PriceLevel.low,
+    _PriceLevel.high,
+  ];
 
-  String get _resolvedDestIata {
+  static const _northeastMonths = [
+    _PriceLevel.high,
+    _PriceLevel.high,
+    _PriceLevel.mid,
+    _PriceLevel.low,
+    _PriceLevel.low,
+    _PriceLevel.mid,
+    _PriceLevel.mid,
+    _PriceLevel.mid,
+    _PriceLevel.low,
+    _PriceLevel.low,
+    _PriceLevel.low,
+    _PriceLevel.high,
+  ];
+
+  static const _northMonths = [
+    _PriceLevel.high,
+    _PriceLevel.high,
+    _PriceLevel.high,
+    _PriceLevel.mid,
+    _PriceLevel.low,
+    _PriceLevel.low,
+    _PriceLevel.mid,
+    _PriceLevel.mid,
+    _PriceLevel.low,
+    _PriceLevel.low,
+    _PriceLevel.mid,
+    _PriceLevel.high,
+  ];
+
+  static const Map<String, _DestinationSeasonalityProfile>
+  destinationProfiles = {
+    'GRU': _DestinationSeasonalityProfile(
+      months: _defaultMonths,
+      lowUsdMin: 133,
+      lowUsdMax: 160,
+    ),
+    'FLN': _DestinationSeasonalityProfile(
+      months: _coastalSouthMonths,
+      lowUsdMin: 150,
+      lowUsdMax: 200,
+      seasonalWarning:
+          'Floripa costuma ter menos voos diretos fora de mar-abr. Em outros meses, conexoes via SP ou POA sao comuns.',
+    ),
+    'NVT': _DestinationSeasonalityProfile(
+      months: _coastalSouthMonths,
+      lowUsdMin: 160,
+      lowUsdMax: 210,
+      seasonalWarning:
+          'Navegantes atende Balneario, Itajai e Blumenau. Em parte do ano, a melhor tarifa aparece com conexao curta em SP.',
+    ),
+    'CWB': _DestinationSeasonalityProfile(
+      months: _defaultMonths,
+      lowUsdMin: 170,
+      lowUsdMax: 250,
+    ),
+    'GIG': _DestinationSeasonalityProfile(
+      months: _defaultMonths,
+      lowUsdMin: 150,
+      lowUsdMax: 220,
+      seasonalWarning:
+          'Fev costuma concentrar alta forte no Rio por conta do Carnaval. Se essa janela fizer sentido, vale monitorar cedo.',
+    ),
+    'POA': _DestinationSeasonalityProfile(
+      months: _defaultMonths,
+      lowUsdMin: 140,
+      lowUsdMax: 190,
+    ),
+    'CNF': _DestinationSeasonalityProfile(
+      months: _defaultMonths,
+      lowUsdMin: 175,
+      lowUsdMax: 240,
+    ),
+    'SSA': _DestinationSeasonalityProfile(
+      months: _northeastMonths,
+      lowUsdMin: 200,
+      lowUsdMax: 280,
+    ),
+    'REC': _DestinationSeasonalityProfile(
+      months: _northeastMonths,
+      lowUsdMin: 210,
+      lowUsdMax: 290,
+    ),
+    'FOR': _DestinationSeasonalityProfile(
+      months: _northeastMonths,
+      lowUsdMin: 210,
+      lowUsdMax: 300,
+    ),
+    'NAT': _DestinationSeasonalityProfile(
+      months: _northeastMonths,
+      lowUsdMin: 220,
+      lowUsdMax: 310,
+    ),
+    'JPA': _DestinationSeasonalityProfile(
+      months: _northeastMonths,
+      lowUsdMin: 215,
+      lowUsdMax: 295,
+    ),
+    'AJU': _DestinationSeasonalityProfile(
+      months: _northeastMonths,
+      lowUsdMin: 205,
+      lowUsdMax: 285,
+    ),
+    'MCZ': _DestinationSeasonalityProfile(
+      months: _northeastMonths,
+      lowUsdMin: 215,
+      lowUsdMax: 300,
+    ),
+    'CGR': _DestinationSeasonalityProfile(
+      months: _defaultMonths,
+      lowUsdMin: 165,
+      lowUsdMax: 235,
+    ),
+    'MAO': _DestinationSeasonalityProfile(
+      months: _northMonths,
+      lowUsdMin: 260,
+      lowUsdMax: 360,
+      seasonalWarning:
+          'Manaus costuma variar mais por conexoes e oferta. Comparar alguns dias ao redor da data ajuda bastante.',
+    ),
+    'BEL': _DestinationSeasonalityProfile(
+      months: _northMonths,
+      lowUsdMin: 250,
+      lowUsdMax: 340,
+      seasonalWarning:
+          'Belem tende a oscilar bastante entre conexoes e horarios. Vale abrir a busca ao vivo com alguma flexibilidade.',
+    ),
+  };
+
+  static const Map<String, _OriginPriceAdjustment> originAdjustments = {
+    'EZE': _OriginPriceAdjustment(lowMinDelta: 0, lowMaxDelta: 0),
+    'AEP': _OriginPriceAdjustment(lowMinDelta: 5, lowMaxDelta: 10),
+    'COR': _OriginPriceAdjustment(lowMinDelta: 8, lowMaxDelta: 15),
+    'ROS': _OriginPriceAdjustment(lowMinDelta: 10, lowMaxDelta: 18),
+    'MDZ': _OriginPriceAdjustment(lowMinDelta: 12, lowMaxDelta: 20),
+    'NQN': _OriginPriceAdjustment(lowMinDelta: 18, lowMaxDelta: 26),
+    'MDQ': _OriginPriceAdjustment(lowMinDelta: 15, lowMaxDelta: 22),
+    'BRC': _OriginPriceAdjustment(lowMinDelta: 22, lowMaxDelta: 34),
+    'SLA': _OriginPriceAdjustment(lowMinDelta: 18, lowMaxDelta: 30),
+    'TUC': _OriginPriceAdjustment(lowMinDelta: 18, lowMaxDelta: 28),
+    'JUJ': _OriginPriceAdjustment(lowMinDelta: 22, lowMaxDelta: 34),
+    'PSS': _OriginPriceAdjustment(lowMinDelta: 14, lowMaxDelta: 24),
+    'RES': _OriginPriceAdjustment(lowMinDelta: 14, lowMaxDelta: 24),
+    'UAQ': _OriginPriceAdjustment(lowMinDelta: 18, lowMaxDelta: 28),
+    'REL': _OriginPriceAdjustment(lowMinDelta: 28, lowMaxDelta: 42),
+    'CRD': _OriginPriceAdjustment(lowMinDelta: 28, lowMaxDelta: 42),
+    'FTE': _OriginPriceAdjustment(lowMinDelta: 40, lowMaxDelta: 60),
+    'RGL': _OriginPriceAdjustment(lowMinDelta: 42, lowMaxDelta: 62),
+    'USH': _OriginPriceAdjustment(lowMinDelta: 48, lowMaxDelta: 70),
+    'SCL': _OriginPriceAdjustment(lowMinDelta: 10, lowMaxDelta: 20),
+    'MVD': _OriginPriceAdjustment(lowMinDelta: 8, lowMaxDelta: 18),
+    'ASU': _OriginPriceAdjustment(lowMinDelta: 10, lowMaxDelta: 20),
+  };
+
+  static _RouteData? resolveRoute({
+    required String? originIata,
+    required String? destIata,
+  }) {
+    if (originIata == null || destIata == null) {
+      return null;
+    }
+    final destinationProfile = destinationProfiles[destIata.toUpperCase()];
+    final originAdjustment = originAdjustments[originIata.toUpperCase()];
+    if (destinationProfile == null || originAdjustment == null) {
+      return null;
+    }
+    return _RouteData(
+      originIata: originIata.toUpperCase(),
+      destIata: destIata.toUpperCase(),
+      months: destinationProfile.months,
+      lowUsdMin: destinationProfile.lowUsdMin + originAdjustment.lowMinDelta,
+      lowUsdMax: destinationProfile.lowUsdMax + originAdjustment.lowMaxDelta,
+      seasonalWarning: destinationProfile.seasonalWarning,
+    );
+  }
+
+  static List<String> cheapMonths(_RouteData data) => [
+    for (var i = 0; i < data.months.length; i++)
+      if (data.months[i] == _PriceLevel.low) monthLabels[i],
+  ];
+}
+
+class FlightSeasonalityCard extends StatelessWidget {
+  const FlightSeasonalityCard({
+    required this.originCountryIso,
+    this.originIata,
+    this.cityId,
+    this.destIata,
+    super.key,
+  });
+
+  final String originCountryIso;
+  final String? originIata;
+  final String? cityId;
+  final String? destIata;
+
+  String? get _resolvedOriginIata {
+    if (originIata != null && originIata!.isNotEmpty) {
+      return originIata!.toUpperCase();
+    }
+    return _FlightSeasonalityCatalog.originHub[originCountryIso.toUpperCase()];
+  }
+
+  String? get _resolvedDestIata {
     if (destIata != null && destIata!.isNotEmpty) {
       return destIata!.toUpperCase();
     }
     if (cityId != null) {
-      return _cityToIata[cityId!] ?? 'GRU';
+      return _FlightSeasonalityCatalog.cityToIata[cityId!];
     }
-    return 'GRU';
+    return null;
   }
 
-  _RouteData? get _route {
-    final key = '$_resolvedOriginIata:$_resolvedDestIata';
-    return _routes[key] ?? _routes['$_resolvedOriginIata:GRU'];
-  }
-
-  List<String> _cheapMonths(_RouteData data) => [
-    for (var i = 0; i < 12; i++)
-      if (data.months[i] == _PriceLevel.low) _monthLabels[i],
-  ];
-
-  // ── Build ────────────────────────────────────────────────────────────────────
+  _RouteData? get _route => _FlightSeasonalityCatalog.resolveRoute(
+    originIata: _resolvedOriginIata,
+    destIata: _resolvedDestIata,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final data = _route;
-    if (data == null) return const SizedBox.shrink();
-
     final originIata = _resolvedOriginIata;
-    final dIata = _resolvedDestIata;
-    final cheap = _cheapMonths(data);
+    final destinationIata = _resolvedDestIata;
+    if (originIata == null || destinationIata == null) {
+      return const SizedBox.shrink();
+    }
+
+    final data = _route;
+    final cheapMonths = data == null
+        ? const <String>[]
+        : _FlightSeasonalityCatalog.cheapMonths(data);
 
     return FrostedPanel(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header ─────────────────────────────────────────────────────────
           Row(
             children: [
               const Icon(
@@ -319,61 +371,62 @@ class FlightSeasonalityCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Melhor época para voar',
+                'Melhor epoca para voar',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
-            '$originIata → $dIata · Faixas históricas (USD)',
+            '$originIata -> $destinationIata · Faixas historicas (USD)',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSoftFor(context),
             ),
           ),
           const SizedBox(height: 16),
-
-          // ── Bar chart ──────────────────────────────────────────────────────
-          _MonthBarChart(months: data.months),
-          const SizedBox(height: 12),
-
-          // ── Legend ─────────────────────────────────────────────────────────
-          _PriceLegend(lowMin: data.lowUsdMin, lowMax: data.lowUsdMax),
-          const SizedBox(height: 12),
-
-          // ── Cheapest months callout ─────────────────────────────────────────
-          if (cheap.isNotEmpty)
+          if (data != null) ...[
+            _MonthBarChart(months: data.months),
+            const SizedBox(height: 12),
+            _PriceLegend(lowMin: data.lowUsdMin, lowMax: data.lowUsdMax),
+            const SizedBox(height: 12),
+            if (cheapMonths.isNotEmpty)
+              _InfoCallout(
+                icon: Icons.savings_outlined,
+                color: AppColors.success,
+                text:
+                    'Mais barato: ${cheapMonths.join(', ')} · Ate 40% de economia',
+              ),
+            if (data.seasonalWarning != null) ...[
+              const SizedBox(height: 8),
+              _InfoCallout(
+                icon: Icons.info_outline_rounded,
+                color: AppColors.caution,
+                text: data.seasonalWarning!,
+              ),
+            ],
+          ] else
             _InfoCallout(
-              icon: Icons.savings_outlined,
-              color: AppColors.success,
-              text: 'Mais barato: ${cheap.join(', ')} · Até 40% de economia',
+              icon: Icons.insights_outlined,
+              color: AppColors.primary,
+              text:
+                  'Ainda nao temos historico suficiente para essa rota exata. Use a busca ao vivo abaixo para ver a combinacao real entre origem e destino.',
             ),
-
-          // ── Seasonal warning ──────────────────────────────────────────────
-          if (data.seasonalWarning != null) ...[
-            const SizedBox(height: 8),
-            _InfoCallout(
-              icon: Icons.info_outline_rounded,
-              color: AppColors.caution,
-              text: data.seasonalWarning!,
-            ),
-          ],
-
           const SizedBox(height: 14),
-
-          // ── CTA ─────────────────────────────────────────────────────────────
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => _openSkyscanner(context, originIata, dIata),
+              onPressed: () =>
+                  _openSkyscanner(context, originIata, destinationIata),
               icon: const Icon(Icons.open_in_new_rounded, size: 16),
-              label: Text('Ver preços ao vivo  $originIata → $dIata'),
+              label: Text(
+                'Ver precos ao vivo  $originIata -> $destinationIata',
+              ),
             ),
           ),
           const SizedBox(height: 6),
           Center(
             child: Text(
-              'Faixas históricas · Preços reais variam conforme a data',
+              'Faixas historicas · Precos reais variam conforme a data',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: AppColors.textSoftFor(context),
                 fontSize: 10,
@@ -394,15 +447,13 @@ class FlightSeasonalityCard extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => PreparationWebViewPage(
-          title: 'Passagens $origin → $dest',
+          title: 'Passagens $origin -> $dest',
           uri: uri,
         ),
       ),
     );
   }
 }
-
-// ── Month bar chart ───────────────────────────────────────────────────────────
 
 class _MonthBarChart extends StatelessWidget {
   const _MonthBarChart({required this.months});
@@ -431,9 +482,9 @@ class _MonthBarChart extends StatelessWidget {
   };
 
   double _barHeight(_PriceLevel level) => switch (level) {
-    _PriceLevel.low => 24.0,
-    _PriceLevel.mid => 40.0,
-    _PriceLevel.high => 54.0,
+    _PriceLevel.low => 22.0,
+    _PriceLevel.mid => 36.0,
+    _PriceLevel.high => 50.0,
   };
 
   @override
@@ -444,7 +495,6 @@ class _MonthBarChart extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(12, (i) {
           final level = months[i];
-          final color = _barColor(level);
           return Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 1.5),
@@ -454,17 +504,18 @@ class _MonthBarChart extends StatelessWidget {
                   Container(
                     height: _barHeight(level),
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.70),
+                      color: _barColor(level).withValues(alpha: 0.70),
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(4),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 2),
                   Text(
                     _labels[i],
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontSize: 9,
+                      fontSize: 8,
+                      height: 1,
                       color: AppColors.textSoftFor(context),
                     ),
                   ),
@@ -477,8 +528,6 @@ class _MonthBarChart extends StatelessWidget {
     );
   }
 }
-
-// ── Legend ────────────────────────────────────────────────────────────────────
 
 class _PriceLegend extends StatelessWidget {
   const _PriceLegend({required this.lowMin, required this.lowMax});
@@ -494,10 +543,10 @@ class _PriceLegend extends StatelessWidget {
       children: [
         _LegendDot(
           color: AppColors.success,
-          label: 'Barato (\$$lowMin–\$$lowMax)',
+          label: 'Barato (\$$lowMin-\$$lowMax)',
         ),
-        _LegendDot(color: AppColors.warning, label: 'Médio'),
-        _LegendDot(color: AppColors.danger, label: 'Caro'),
+        const _LegendDot(color: AppColors.warning, label: 'Medio'),
+        const _LegendDot(color: AppColors.danger, label: 'Caro'),
       ],
     );
   }
@@ -533,8 +582,6 @@ class _LegendDot extends StatelessWidget {
     );
   }
 }
-
-// ── Info callout (reusable) ───────────────────────────────────────────────────
 
 class _InfoCallout extends StatelessWidget {
   const _InfoCallout({
@@ -577,78 +624,49 @@ class _InfoCallout extends StatelessWidget {
   }
 }
 
-// ── Compact badge (used in result reveal page) ────────────────────────────────
-
-/// A small inline badge showing the price range and best months for a route.
-/// Intended for use in tight spaces like cards and result pages.
 class FlightPriceBadge extends StatelessWidget {
   const FlightPriceBadge({
     required this.originCountryIso,
+    this.originIata,
     this.cityId,
     this.destIata,
     super.key,
   });
 
   final String originCountryIso;
+  final String? originIata;
   final String? cityId;
   final String? destIata;
 
-  static const Map<String, String> _originHub = {
-    'AR': 'EZE',
-    'CL': 'SCL',
-    'UY': 'MVD',
-  };
+  String? get _resolvedOrigin {
+    if (originIata != null && originIata!.isNotEmpty) {
+      return originIata!.toUpperCase();
+    }
+    return _FlightSeasonalityCatalog.originHub[originCountryIso.toUpperCase()];
+  }
 
-  static const Map<String, String> _cityToIata = {
-    'florianopolis-sc': 'FLN',
-    'balneario-camboriu-sc': 'FLN',
-    'itajai-sc': 'FLN',
-    'joinville-sc': 'FLN',
-    'sao-paulo-sp': 'GRU',
-    'curitiba-pr': 'CWB',
-    'rio-de-janeiro-rj': 'GIG',
-    'armacao-dos-buzios-rj': 'GIG',
-    'porto-alegre-rs': 'POA',
-    'belo-horizonte-mg': 'CNF',
-    'salvador-ba': 'SSA',
-    'recife-pe': 'REC',
-    'fortaleza-ce': 'FOR',
-    'natal-rn': 'NAT',
-    'joao-pessoa-pb': 'JPA',
-    'aracaju-se': 'AJU',
-    'campo-grande-ms': 'CGR',
-  };
-
-  // Minimal route price data for badge display
-  static const Map<String, ({int min, int max, String best})> _badgeData = {
-    'EZE:GRU': (min: 133, max: 160, best: 'Abr, Mai, Nov'),
-    'EZE:FLN': (min: 150, max: 200, best: 'Mar, Abr, Set, Out'),
-    'EZE:CWB': (min: 170, max: 250, best: 'Abr, Mai, Nov'),
-    'EZE:GIG': (min: 150, max: 220, best: 'Abr, Mai, Set, Out'),
-    'EZE:POA': (min: 140, max: 190, best: 'Abr, Mai, Set, Nov'),
-    'EZE:SSA': (min: 200, max: 280, best: 'Abr, Mai, Out, Nov'),
-    'EZE:REC': (min: 210, max: 290, best: 'Abr, Mai, Out, Nov'),
-    'EZE:FOR': (min: 210, max: 300, best: 'Abr, Mai, Out, Nov'),
-  };
-
-  String get _resolvedOrigin =>
-      _originHub[originCountryIso.toUpperCase()] ?? 'EZE';
-
-  String get _resolvedDest {
+  String? get _resolvedDest {
     if (destIata != null && destIata!.isNotEmpty) {
       return destIata!.toUpperCase();
     }
     if (cityId != null) {
-      return _cityToIata[cityId!] ?? 'GRU';
+      return _FlightSeasonalityCatalog.cityToIata[cityId!];
     }
-    return 'GRU';
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final key = '$_resolvedOrigin:$_resolvedDest';
-    final data = _badgeData[key] ?? _badgeData['$_resolvedOrigin:GRU'];
-    if (data == null) return const SizedBox.shrink();
+    final route = _FlightSeasonalityCatalog.resolveRoute(
+      originIata: _resolvedOrigin,
+      destIata: _resolvedDest,
+    );
+    if (route == null) {
+      return const SizedBox.shrink();
+    }
+    final bestMonths = _FlightSeasonalityCatalog.cheapMonths(
+      route,
+    ).take(4).join(', ');
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -672,18 +690,18 @@ class FlightPriceBadge extends StatelessWidget {
                   color: AppColors.textSoftFor(context),
                 ),
                 children: [
-                  TextSpan(text: 'Passagem: '),
+                  const TextSpan(text: 'Passagem: '),
                   TextSpan(
-                    text: 'a partir de \$${data.min} USD',
+                    text: 'a partir de \$${route.lowUsdMin} USD',
                     style: const TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  TextSpan(text: '  ·  Mais barato: '),
+                  const TextSpan(text: '  ·  Mais barato: '),
                   TextSpan(
-                    text: data.best,
-                    style: TextStyle(
+                    text: bestMonths,
+                    style: const TextStyle(
                       color: AppColors.success,
                       fontWeight: FontWeight.w600,
                     ),

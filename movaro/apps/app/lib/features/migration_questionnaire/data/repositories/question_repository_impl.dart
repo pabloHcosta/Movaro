@@ -25,11 +25,15 @@ class QuestionRepositoryImpl implements QuestionRepository {
 
     final destinationCountryId = _journeyContextController.destinationCountryId;
     final selectedDestination = _journeyContextController.selectedDestination;
-    final effectiveDestination =
-        selectedDestination ??
-        countries.where((country) => country.id == 'brasil').firstOrNull;
+    final supportedDestinations = countries
+        .where(_journeyContextController.canUseAsDestination)
+        .toList(growable: false);
+    final inferredDestination = supportedDestinations.length == 1
+        ? supportedDestinations.first
+        : null;
+    final effectiveDestination = selectedDestination ?? inferredDestination;
     final effectiveDestinationId =
-        destinationCountryId ?? effectiveDestination?.id;
+        destinationCountryId ?? inferredDestination?.id;
     if (effectiveDestination == null ||
         effectiveDestinationId == null ||
         !_journeyContextController.canUseAsDestination(effectiveDestination)) {
