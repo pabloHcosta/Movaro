@@ -1015,6 +1015,78 @@ abstract class AppLocalizations {
   /// **'Journey: {origin} -> {destination}'**
   String exploreRouteLabel(Object origin, Object destination);
 
+  /// No description provided for @cityInsightsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover more about your new city'**
+  String get cityInsightsSectionTitle;
+
+  /// No description provided for @cityInsightsSectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Short, curated content to reinforce the decision, picture daily life, and learn something useful without leaving the plan context.'**
+  String get cityInsightsSectionBody;
+
+  /// No description provided for @cityInsightsShowMoreAction.
+  ///
+  /// In en, this message translates to:
+  /// **'See more'**
+  String get cityInsightsShowMoreAction;
+
+  /// No description provided for @cityInsightsRefreshAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get cityInsightsRefreshAction;
+
+  /// No description provided for @cityInsightsEmptyState.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no fresh city insights yet.'**
+  String get cityInsightsEmptyState;
+
+  /// No description provided for @cityInsightsExploreAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore city'**
+  String get cityInsightsExploreAction;
+
+  /// No description provided for @cityInsightsTypeLifestyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifestyle'**
+  String get cityInsightsTypeLifestyle;
+
+  /// No description provided for @cityInsightsTypeCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost'**
+  String get cityInsightsTypeCost;
+
+  /// No description provided for @cityInsightsTypeHousing.
+  ///
+  /// In en, this message translates to:
+  /// **'Housing'**
+  String get cityInsightsTypeHousing;
+
+  /// No description provided for @cityInsightsTypeWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get cityInsightsTypeWork;
+
+  /// No description provided for @cityInsightsTypePractical.
+  ///
+  /// In en, this message translates to:
+  /// **'Practical tip'**
+  String get cityInsightsTypePractical;
+
+  /// No description provided for @cityInsightsTypeMotivation.
+  ///
+  /// In en, this message translates to:
+  /// **'Motivation'**
+  String get cityInsightsTypeMotivation;
+
   /// No description provided for @exploreDestinationLabel.
   ///
   /// In en, this message translates to:

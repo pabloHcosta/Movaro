@@ -545,6 +545,43 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get cityInsightsSectionTitle => 'Discover more about your new city';
+
+  @override
+  String get cityInsightsSectionBody =>
+      'Short, curated content to reinforce the decision, picture daily life, and learn something useful without leaving the plan context.';
+
+  @override
+  String get cityInsightsShowMoreAction => 'See more';
+
+  @override
+  String get cityInsightsRefreshAction => 'Refresh';
+
+  @override
+  String get cityInsightsEmptyState => 'There are no fresh city insights yet.';
+
+  @override
+  String get cityInsightsExploreAction => 'Explore city';
+
+  @override
+  String get cityInsightsTypeLifestyle => 'Lifestyle';
+
+  @override
+  String get cityInsightsTypeCost => 'Cost';
+
+  @override
+  String get cityInsightsTypeHousing => 'Housing';
+
+  @override
+  String get cityInsightsTypeWork => 'Work';
+
+  @override
+  String get cityInsightsTypePractical => 'Practical tip';
+
+  @override
+  String get cityInsightsTypeMotivation => 'Motivation';
+
+  @override
   String exploreDestinationLabel(Object destination) {
     return 'Destination selected: $destination';
   }

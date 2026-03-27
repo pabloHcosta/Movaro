@@ -41,6 +41,7 @@ class AppRouter {
       return _buildRoute(
         const RouteSettings(name: AppRoutes.publicHome),
         PublicHomePage(
+          cityInsightsController: dependencies.cityInsightsController,
           journeyContextController: dependencies.journeyContextController,
           citiesController: dependencies.citiesController,
           migrationQuestionnaireController:
@@ -62,6 +63,7 @@ class AppRouter {
       return _buildRoute(
         const RouteSettings(name: AppRoutes.publicHome),
         PublicHomePage(
+          cityInsightsController: dependencies.cityInsightsController,
           journeyContextController: dependencies.journeyContextController,
           citiesController: dependencies.citiesController,
           migrationQuestionnaireController:
@@ -129,6 +131,7 @@ class AppRouter {
         return _buildRoute(
           settings,
           PublicHomePage(
+            cityInsightsController: dependencies.cityInsightsController,
             environment: dependencies.environment,
             journeyContextController: dependencies.journeyContextController,
             citiesController: dependencies.citiesController,
@@ -262,6 +265,7 @@ class AppRouter {
         return _buildRoute(
           const RouteSettings(name: AppRoutes.publicHome),
           PublicHomePage(
+            cityInsightsController: dependencies.cityInsightsController,
             environment: dependencies.environment,
             journeyContextController: dependencies.journeyContextController,
             citiesController: dependencies.citiesController,

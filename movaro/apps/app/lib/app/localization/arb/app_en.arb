@@ -220,6 +220,18 @@
       "destination": {}
     }
   },
+  "cityInsightsSectionTitle": "Discover more about your new city",
+  "cityInsightsSectionBody": "Short, curated content to reinforce the decision, picture daily life, and learn something useful without leaving the plan context.",
+  "cityInsightsShowMoreAction": "See more",
+  "cityInsightsRefreshAction": "Refresh",
+  "cityInsightsEmptyState": "There are no fresh city insights yet.",
+  "cityInsightsExploreAction": "Explore city",
+  "cityInsightsTypeLifestyle": "Lifestyle",
+  "cityInsightsTypeCost": "Cost",
+  "cityInsightsTypeHousing": "Housing",
+  "cityInsightsTypeWork": "Work",
+  "cityInsightsTypePractical": "Practical tip",
+  "cityInsightsTypeMotivation": "Motivation",
   "exploreDestinationLabel": "Destination selected: {destination}",
   "@exploreDestinationLabel": {
     "placeholders": {

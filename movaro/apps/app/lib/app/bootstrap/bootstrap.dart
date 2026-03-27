@@ -3,6 +3,9 @@ import 'package:movaro_app/app/app.dart';
 import 'package:movaro_app/app/bootstrap/app_dependencies.dart';
 import 'package:movaro_app/app/localization/locale_controller.dart';
 import 'package:movaro_app/app/theme/theme_controller.dart';
+import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
+import 'package:movaro_app/features/city_insights/data/datasources/city_insights_remote_data_source.dart';
+import 'package:movaro_app/features/city_insights/data/repositories/city_insight_repository_impl.dart';
 import 'package:movaro_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
 import 'package:movaro_app/features/catalog/data/repositories/catalog_repository_impl.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
@@ -52,6 +55,11 @@ Future<AppDependencies> buildAppDependencies({
   final citiesRepository = CitiesRepositoryImpl(
     remoteDataSource: CitiesRemoteDataSource(environment: environment),
   );
+  final cityInsightsController = CityInsightController(
+    repository: CityInsightRepositoryImpl(
+      remoteDataSource: CityInsightsRemoteDataSource(environment: environment),
+    ),
+  );
   final apiHealthService = ApiHealthService(environment: environment);
   final journeyContextController = JourneyContextController(
     catalogRepository: catalogRepository,
@@ -83,6 +91,7 @@ Future<AppDependencies> buildAppDependencies({
     environment: environment,
     authController: authController,
     catalogRepository: catalogRepository,
+    cityInsightsController: cityInsightsController,
     citiesController: citiesController,
     migrationQuestionnaireController: migrationQuestionnaireController,
     copilotExchangeRatesService: copilotExchangeRatesService,

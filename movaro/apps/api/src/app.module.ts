@@ -12,6 +12,7 @@ import { HttpDebugLoggerService } from './common/logging/http-debug-logger.servi
 import { TraceIdMiddleware } from './common/middleware/trace-id.middleware';
 import { SupabaseAdminService } from './common/supabase/supabase-admin.service';
 import { ChatModule } from './modules/chat/chat.module';
+import { CityInsightsModule } from './modules/city-insights/city-insights.module';
 import { CitiesModule } from './modules/cities/cities.module';
 import { HealthModule } from './modules/health/health.module';
 import { MigrationModule } from './modules/migration/migration.module';
@@ -28,6 +29,7 @@ import { ReferenceModule } from './modules/reference/reference.module';
     }),
     AppConfigModule,
     ChatModule,
+    CityInsightsModule,
     CitiesModule,
     HealthModule,
     MigrationModule,

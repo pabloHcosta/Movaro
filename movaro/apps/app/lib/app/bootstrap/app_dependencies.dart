@@ -1,5 +1,6 @@
 import 'package:movaro_app/app/localization/locale_controller.dart';
 import 'package:movaro_app/app/theme/theme_controller.dart';
+import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
 import 'package:movaro_app/features/catalog/domain/repositories/catalog_repository.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
@@ -15,6 +16,7 @@ class AppDependencies {
     required this.environment,
     required this.authController,
     required this.catalogRepository,
+    required this.cityInsightsController,
     required this.citiesController,
     required this.migrationQuestionnaireController,
     required this.copilotExchangeRatesService,
@@ -28,6 +30,7 @@ class AppDependencies {
   final AppEnvironment environment;
   final AuthController authController;
   final CatalogRepository catalogRepository;
+  final CityInsightController cityInsightsController;
   final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
   final CopilotExchangeRatesService copilotExchangeRatesService;

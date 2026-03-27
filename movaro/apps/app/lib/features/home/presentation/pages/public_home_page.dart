@@ -6,6 +6,8 @@ import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
+import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
+import 'package:movaro_app/features/city_insights/presentation/widgets/city_insights_section.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
@@ -18,7 +20,6 @@ import 'package:movaro_app/features/cities/presentation/widgets/city_image_backd
 import 'package:movaro_app/features/home/application/streak_service.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/home_visual_layout.dart';
-import 'package:movaro_app/features/home/presentation/widgets/assistant_bottom_sheet.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
@@ -31,6 +32,7 @@ import 'package:movaro_app/features/explore/presentation/pages/documentation_gui
 
 class PublicHomePage extends StatefulWidget {
   const PublicHomePage({
+    required this.cityInsightsController,
     required this.journeyContextController,
     required this.citiesController,
     required this.migrationQuestionnaireController,
@@ -39,6 +41,7 @@ class PublicHomePage extends StatefulWidget {
     super.key,
   });
 
+  final CityInsightController cityInsightsController;
   final JourneyContextController journeyContextController;
   final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
@@ -110,6 +113,7 @@ class _PublicHomePageState extends State<PublicHomePage>
           top: false,
           child: AnimatedBuilder(
             animation: Listenable.merge([
+              widget.cityInsightsController,
               widget.journeyContextController,
               widget.migrationQuestionnaireController,
               widget.citiesController,
@@ -124,15 +128,6 @@ class _PublicHomePageState extends State<PublicHomePage>
               final guideState = city == null || plan == null
                   ? null
                   : _buildGuideState(plan, _progressSnapshot);
-
-              // Scaffold(extendBody:true) sets the body's
-              // MediaQuery.padding.bottom = max(safeArea, navBarHeight),
-              // and SafeArea(bottom:true) consumes it. The Stack's bottom
-              // edge therefore aligns with the nav-bar's top — no manual
-              // offset is needed.
-              const sheetBottom = 0.0;
-              // Extra bottom padding so scroll content clears the sheet.
-              const sheetCollapsedH = 140.0;
 
               return Stack(
                 children: [
@@ -185,9 +180,13 @@ class _PublicHomePageState extends State<PublicHomePage>
                                       weather: widget.citiesController
                                           .weatherFor(city.id),
                                       guideState: guideState!,
+                                      cityInsightsController:
+                                          widget.cityInsightsController,
+                                      planGoal: plan!.goal,
+                                      planTimeline: plan.timeline,
+                                      recommendationReasons:
+                                          plan.cityRecommendationReasons,
                                       streakDays: _streakDays,
-                                      extraBottomPadding:
-                                          sheetBottom + sheetCollapsedH,
                                       onOpenSettings: _openSettings,
                                       onOpenGuide: _openGuide,
                                       onViewCurrentAction: () =>
@@ -217,15 +216,6 @@ class _PublicHomePageState extends State<PublicHomePage>
                       ),
                     ),
                   ),
-
-                  // Assistant entry strip — anchored above the floating nav bar.
-                  if (hasActivePlan)
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: sheetBottom,
-                      child: const AssistantBottomSheet(),
-                    ),
                 ],
               );
             },
@@ -267,6 +257,7 @@ class _PublicHomePageState extends State<PublicHomePage>
         _loadedWeatherCityId = null;
         _progressSnapshot = const MigrationCopilotProgressSnapshot();
       });
+      widget.cityInsightsController.clear();
       return;
     }
 
@@ -289,6 +280,15 @@ class _PublicHomePageState extends State<PublicHomePage>
       _loadedPlanKey = planKey;
       _progressSnapshot = snapshot;
     });
+
+    unawaited(
+      widget.cityInsightsController.load(
+        cityId: city.id,
+        goal: plan.goal,
+        timeline: plan.timeline,
+        locale: Localizations.localeOf(context).languageCode,
+      ),
+    );
   }
 
   Future<void> _maybePromptLocationPermission() async {
@@ -569,6 +569,10 @@ class _ActiveHomeState extends StatelessWidget {
     required this.city,
     required this.weather,
     required this.guideState,
+    required this.cityInsightsController,
+    required this.planGoal,
+    required this.planTimeline,
+    required this.recommendationReasons,
     required this.streakDays,
     required this.onOpenSettings,
     required this.onOpenGuide,
@@ -576,13 +580,16 @@ class _ActiveHomeState extends StatelessWidget {
     required this.onCompare,
     required this.onViewCity,
     required this.onNewPlan,
-    this.extraBottomPadding = 0,
     super.key,
   });
 
   final City city;
   final CityWeather? weather;
   final _HomeGuideState guideState;
+  final CityInsightController cityInsightsController;
+  final String planGoal;
+  final String planTimeline;
+  final List<String> recommendationReasons;
   final int streakDays;
   final VoidCallback onOpenSettings;
   final VoidCallback onOpenGuide;
@@ -590,13 +597,9 @@ class _ActiveHomeState extends StatelessWidget {
   final VoidCallback onCompare;
   final VoidCallback onViewCity;
   final VoidCallback onNewPlan;
-  final double extraBottomPadding;
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = _screenSizeOf(context);
-    final isLargeScreen = screenSize == _ScreenSize.large;
-
     final hero = _ActiveHero(
       city: city,
       weather: weather,
@@ -615,36 +618,29 @@ class _ActiveHomeState extends StatelessWidget {
       onViewCity: onViewCity,
       onNewPlan: onNewPlan,
     );
+    final insightsSection = CityInsightsSection(
+      controller: cityInsightsController,
+      city: city,
+      weather: weather,
+      goal: planGoal,
+      timeline: planTimeline,
+      recommendationReasons: recommendationReasons,
+    );
 
-    // ── Large screen: content fits without scroll. Cards sit at the top and
-    // a Spacer fills the gap above the overlaid AssistantBottomSheet.
-    if (isLargeScreen) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          hero,
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [progressCard, const SizedBox(height: 8), actionRow],
-            ),
-          ),
-          // Fills the remaining space so content floats above the sheet overlay.
-          const Spacer(),
-        ],
-      );
-    }
-
-    // ── Small / medium screen: keep scroll with bottom clearance for the sheet.
     return Column(
       children: [
         hero,
         Expanded(
           child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(12, 10, 12, 16 + extraBottomPadding),
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 16),
             child: Column(
-              children: [progressCard, const SizedBox(height: 8), actionRow],
+              children: [
+                progressCard,
+                const SizedBox(height: 8),
+                actionRow,
+                const SizedBox(height: 8),
+                insightsSection,
+              ],
             ),
           ),
         ),
@@ -672,7 +668,7 @@ class _ActiveHero extends StatelessWidget {
         : city.stateCode;
 
     return SizedBox(
-      height: MediaQuery.of(context).padding.top + 200,
+      height: MediaQuery.of(context).padding.top + 176,
       child: Stack(
         children: [
           Positioned.fill(child: _HeroCityImage(city: city)),
@@ -696,7 +692,7 @@ class _ActiveHero extends StatelessWidget {
             top: MediaQuery.of(context).padding.top + 8,
             left: 14,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 color: _badgeBackground(context),
@@ -735,7 +731,7 @@ class _ActiveHero extends StatelessWidget {
           Positioned(
             left: 14,
             right: 14,
-            bottom: 14,
+            bottom: 12,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -748,6 +744,7 @@ class _ActiveHero extends StatelessWidget {
                         city.name,
                         style: Theme.of(context).textTheme.headlineMedium
                             ?.copyWith(
+                              fontSize: 30,
                               fontWeight: FontWeight.w900,
                               letterSpacing: -0.6,
                               color: isDark
@@ -782,6 +779,7 @@ class _ActiveHero extends StatelessWidget {
                       ? '--'
                       : '${weather!.temperatureCelsius.round()}°C',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: isDark
                         ? Colors.white.withValues(alpha: 0.65)
@@ -831,19 +829,19 @@ class _MigrationProgressCard extends StatelessWidget {
 
     final screenSize = _screenSizeOf(context);
     final cardPadding = switch (screenSize) {
-      _ScreenSize.small => 10.0,
-      _ScreenSize.medium => 12.0,
-      _ScreenSize.large => 16.0,
+      _ScreenSize.small => 9.0,
+      _ScreenSize.medium => 11.0,
+      _ScreenSize.large => 13.0,
     };
     final dividerV = switch (screenSize) {
-      _ScreenSize.small => 6.0,
-      _ScreenSize.medium => 8.0,
-      _ScreenSize.large => 10.0,
-    };
-    final actionGap = switch (screenSize) {
-      _ScreenSize.small => 4.0,
+      _ScreenSize.small => 5.0,
       _ScreenSize.medium => 6.0,
       _ScreenSize.large => 8.0,
+    };
+    final actionGap = switch (screenSize) {
+      _ScreenSize.small => 3.0,
+      _ScreenSize.medium => 5.0,
+      _ScreenSize.large => 6.0,
     };
 
     return Container(
@@ -872,7 +870,7 @@ class _MigrationProgressCard extends StatelessWidget {
               if (streakDays > 0) _StreakBadge(days: streakDays),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
 
           // ── BLOCK 2: Journey list + Metrics ─────────────────────────
           Row(
@@ -884,9 +882,9 @@ class _MigrationProgressCard extends StatelessWidget {
               ),
               // Vertical divider
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: SizedBox(
-                  height: 80,
+                  height: 70,
                   child: VerticalDivider(
                     width: 1,
                     thickness: 1,
@@ -943,7 +941,7 @@ class _MigrationProgressCard extends StatelessWidget {
                   onTap: onOpenGuide,
                 ),
               ),
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
               _CardSecondaryButton(
                 label: context.l10n.homeJourneyViewAction,
                 onTap: onViewAction,
@@ -1004,7 +1002,7 @@ class _PhaseList extends StatelessWidget {
       children: [
         for (var i = 0; i < phases.length; i++) ...[
           _PhaseRow(phase: phases[i], status: _status(phases[i])),
-          if (i < phases.length - 1) const SizedBox(height: 4),
+          if (i < phases.length - 1) const SizedBox(height: 2),
         ],
       ],
     );
@@ -1072,7 +1070,7 @@ class _PhaseRow extends StatelessWidget {
 
     if (status == _PhaseStatus.current) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
         decoration: BoxDecoration(
           color: AppColors.primary.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(4),
@@ -1111,6 +1109,7 @@ class _MetricsColumn extends StatelessWidget {
           Text(
             '${state.progressPercent}%',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontSize: 24,
               fontWeight: FontWeight.w900,
               color: _accentText(context),
               height: 1.1,
@@ -1122,10 +1121,11 @@ class _MetricsColumn extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.35),
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             '${state.completedCount}/${state.totalItems}',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontSize: 18,
               fontWeight: FontWeight.w700,
               color: Colors.white,
               height: 1.1,
@@ -1154,9 +1154,9 @@ class _CardPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final verticalPadding = switch (_screenSizeOf(context)) {
-      _ScreenSize.small => 9.0,
-      _ScreenSize.medium => 11.0,
-      _ScreenSize.large => 14.0,
+      _ScreenSize.small => 8.0,
+      _ScreenSize.medium => 9.0,
+      _ScreenSize.large => 11.0,
     };
 
     return Material(
@@ -1190,9 +1190,9 @@ class _CardSecondaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final verticalPadding = switch (_screenSizeOf(context)) {
-      _ScreenSize.small => 9.0,
-      _ScreenSize.medium => 11.0,
-      _ScreenSize.large => 14.0,
+      _ScreenSize.small => 8.0,
+      _ScreenSize.medium => 9.0,
+      _ScreenSize.large => 11.0,
     };
     return Material(
       color: Colors.white.withValues(alpha: 0.08),
