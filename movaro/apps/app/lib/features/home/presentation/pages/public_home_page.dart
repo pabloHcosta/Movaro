@@ -7,7 +7,6 @@ import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
-import 'package:movaro_app/features/city_insights/presentation/widgets/city_insights_section.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
@@ -180,16 +179,12 @@ class _PublicHomePageState extends State<PublicHomePage>
                                       weather: widget.citiesController
                                           .weatherFor(city.id),
                                       guideState: guideState!,
-                                      cityInsightsController:
-                                          widget.cityInsightsController,
-                                      planGoal: plan!.goal,
-                                      planTimeline: plan.timeline,
-                                      recommendationReasons:
-                                          plan.cityRecommendationReasons,
                                       streakDays: _streakDays,
                                       onOpenSettings: _openSettings,
-                                      onViewAction: (item) =>
-                                          _showActionDetails(context, item),
+                                      onViewAction: (_) => Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.migrationPlanCopilot,
+                                      ),
                                       onCompare: () => _openComparison(city),
                                       onViewCity: () => Navigator.pushNamed(
                                         context,
@@ -376,81 +371,6 @@ class _PublicHomePageState extends State<PublicHomePage>
     }
   }
 
-  Future<void> _showActionDetails(
-    BuildContext context,
-    GuideActionItem? item,
-  ) async {
-    if (item == null) {
-      return;
-    }
-
-    final body = [
-      item.summaryText,
-      if (item.whyItMatters != null) item.whyItMatters!,
-      if (item.doneCriteria != null) item.doneCriteria!,
-      if (item.fullContent?.trim().isNotEmpty == true) item.fullContent!,
-    ].join('\n\n');
-
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Container(
-              decoration: BoxDecoration(
-                color: _cardBackground(sheetContext),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: _cardBorder(sheetContext)),
-              ),
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.title,
-                          style: Theme.of(sheetContext).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(sheetContext).pop(),
-                        icon: const Icon(Icons.close_rounded),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(sheetContext).size.height * 0.45,
-                    ),
-                    child: SingleChildScrollView(
-                      child: Text(
-                        body,
-                        style: Theme.of(sheetContext).textTheme.bodyMedium
-                            ?.copyWith(
-                              color: _secondaryText(sheetContext),
-                              height: 1.5,
-                            ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   _HomeGuideState _buildGuideState(
     MigrationPlan plan,
     MigrationCopilotProgressSnapshot snapshot,
@@ -559,10 +479,6 @@ class _ActiveHomeState extends StatelessWidget {
     required this.city,
     required this.weather,
     required this.guideState,
-    required this.cityInsightsController,
-    required this.planGoal,
-    required this.planTimeline,
-    required this.recommendationReasons,
     required this.streakDays,
     required this.onOpenSettings,
     required this.onViewAction,
@@ -575,10 +491,6 @@ class _ActiveHomeState extends StatelessWidget {
   final City city;
   final CityWeather? weather;
   final _HomeGuideState guideState;
-  final CityInsightController cityInsightsController;
-  final String planGoal;
-  final String planTimeline;
-  final List<String> recommendationReasons;
   final int streakDays;
   final VoidCallback onOpenSettings;
   final ValueChanged<GuideActionItem> onViewAction;
@@ -604,14 +516,6 @@ class _ActiveHomeState extends StatelessWidget {
       onViewCity: onViewCity,
       onNewPlan: onNewPlan,
     );
-    final insightsSection = CityInsightsSection(
-      controller: cityInsightsController,
-      city: city,
-      weather: weather,
-      goal: planGoal,
-      timeline: planTimeline,
-      recommendationReasons: recommendationReasons,
-    );
 
     return Column(
       children: [
@@ -623,15 +527,13 @@ class _ActiveHomeState extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 progressCard,
-                const SizedBox(height: 5),
+                const SizedBox(height: 8),
                 _NextActionsSection(
                   state: guideState,
                   onTap: onViewAction,
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 8),
                 actionRow,
-                const SizedBox(height: 5),
-                Expanded(child: insightsSection),
               ],
             ),
           ),
@@ -819,7 +721,25 @@ class _MigrationProgressCard extends StatelessWidget {
       _ScreenSize.large => 11.0,
     };
 
-    return Container(
+    // ── Section header (outside card) ────────────────────────────────────
+    final header = Row(
+      children: [
+        Expanded(
+          child: Text(
+            context.l10n.homeJourneyTitle,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              letterSpacing: 0.8,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        if (streakDays > 0) _StreakBadge(days: streakDays),
+      ],
+    );
+
+    // ── Card: phase list + metrics ────────────────────────────────────────
+    final card = Container(
       width: double.infinity,
       padding: EdgeInsets.all(cardPadding),
       decoration: BoxDecoration(
@@ -827,52 +747,38 @@ class _MigrationProgressCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: _progressBorder(context)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // ── BLOCK 1: Header ──────────────────────────────────────────
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  context.l10n.homeJourneyTitle,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.40),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-              if (streakDays > 0) _StreakBadge(days: streakDays),
-            ],
+          // Phase list
+          Expanded(
+            child: _PhaseList(state: state, phases: _phaseOrder),
           ),
-          const SizedBox(height: 5),
-
-          // ── BLOCK 2: Journey list + Metrics ─────────────────────────
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Phase list
-              Expanded(
-                child: _PhaseList(state: state, phases: _phaseOrder),
+          // Vertical divider
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: SizedBox(
+              height: 64,
+              child: VerticalDivider(
+                width: 1,
+                thickness: 1,
+                color: Colors.white.withValues(alpha: 0.08),
               ),
-              // Vertical divider
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: SizedBox(
-                  height: 60,
-                  child: VerticalDivider(
-                    width: 1,
-                    thickness: 1,
-                    color: Colors.white.withValues(alpha: 0.08),
-                  ),
-                ),
-              ),
-              // Metrics column
-              _MetricsColumn(state: state),
-            ],
+            ),
           ),
+          // Metrics column
+          _MetricsColumn(state: state),
         ],
       ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        header,
+        const SizedBox(height: 6),
+        card,
+      ],
     );
   }
 }
@@ -952,7 +858,7 @@ class _PhaseRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final label = _phaseLabel(context, phase);
 
-    final nameStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
+    final nameStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
       color: switch (status) {
         _PhaseStatus.completed => Colors.white.withValues(alpha: 0.45),
         _PhaseStatus.current => Colors.white,
@@ -971,14 +877,14 @@ class _PhaseRow extends StatelessWidget {
       ),
       _PhaseStatus.current => Text(
         context.l10n.homeJourneyCurrentPhaseMarker,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.w700,
         ),
       ),
       _PhaseStatus.future => Text(
         context.l10n.homeJourneyLockedPhaseMarker,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: Colors.white.withValues(alpha: 0.20),
         ),
       ),
@@ -1083,7 +989,7 @@ class _NextActionsSection extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 8),
         for (var i = 0; i < pendingItems.length; i++) ...[
           _NextActionItem(
             item: pendingItems[i],
@@ -1127,14 +1033,15 @@ class _NextActionItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: _cardBorder(context)),
           ),
-          child: SizedBox(
-            height: 36,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 11),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Left priority border
                 Container(
                   width: 3,
+                  height: double.infinity,
                   decoration: BoxDecoration(
                     color: borderColor,
                     borderRadius: const BorderRadius.only(
@@ -1143,44 +1050,44 @@ class _NextActionItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 // Title
                 Expanded(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      item.title,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: _primaryText(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  child: Text(
+                    item.title,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: _primaryText(context),
+                      fontWeight: FontWeight.w600,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(width: 8),
                 // Priority badge
-                Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 7,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: borderColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      badgeText,
-                      style: AppTypography.compactBadge.copyWith(
-                        color: borderColor,
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: borderColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    badgeText,
+                    style: AppTypography.compactBadge.copyWith(
+                      color: borderColor,
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: _secondaryText(context),
+                ),
+                const SizedBox(width: 6),
               ],
             ),
           ),
