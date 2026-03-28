@@ -29,7 +29,9 @@ import 'package:movaro_app/features/migration_questionnaire/domain/entities/migr
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
+import 'package:movaro_app/features/home/presentation/widgets/city_feed_widget.dart';
 import 'package:movaro_app/features/home/presentation/widgets/journey_stepper_widget.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
 
 class PublicHomePage extends StatefulWidget {
   const PublicHomePage({
@@ -585,6 +587,13 @@ class _ActiveHomeState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final stage = UserJourneyStageDetector.detect(
+      timeline: planTimeline,
+      completedSteps: guideState.completedCount,
+      totalSteps: guideState.totalItems,
+    );
+
     final hero = _ActiveHero(
       city: city,
       weather: weather,
@@ -642,7 +651,13 @@ class _ActiveHomeState extends StatelessWidget {
                     ),
                   ),
                 journeyStepper,
-                const SizedBox(height: 10),
+                const SizedBox(height: 14),
+                CityFeedWidget(
+                  cityCode: city.id,
+                  stage: stage,
+                  locale: locale,
+                ),
+                const SizedBox(height: 6),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: actionRow,
@@ -1179,10 +1194,8 @@ class _PreArrivalWarningBanner extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFFE8873A),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: const Color(0xFFE8873A),
                 ),
               ),
             ),
