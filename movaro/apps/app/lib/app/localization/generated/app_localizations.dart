@@ -11132,6 +11132,30 @@ abstract class AppLocalizations {
   /// **'items'**
   String get homeJourneyItemsLabel;
 
+  /// No description provided for @homeStepperProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} done'**
+  String homeStepperProgress(String done, String total);
+
+  /// No description provided for @homeStepperUrgent.
+  ///
+  /// In en, this message translates to:
+  /// **'URGENT'**
+  String get homeStepperUrgent;
+
+  /// No description provided for @homeStepperDoNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Do now'**
+  String get homeStepperDoNow;
+
+  /// No description provided for @homeStepperSeeMore.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {count} more'**
+  String homeStepperSeeMore(String count);
+
   /// No description provided for @homeActionCompare.
   ///
   /// In en, this message translates to:
