@@ -73,6 +73,9 @@ class _CityDetailPageState extends State<CityDetailPage> {
   City? _city;
   final ScrollController _scrollController = ScrollController();
   bool _showScrollHint = false;
+  final _mapSectionKey = GlobalKey();
+  final _flightsSectionKey = GlobalKey();
+  final _analysisSectionKey = GlobalKey();
 
   @override
   void initState() {
@@ -244,9 +247,10 @@ class _CityDetailPageState extends State<CityDetailPage> {
                           context.pageVerticalPadding + 96,
                         ),
                         children: [
+                          // ── Block 1: CTA Principal ──────────────────────
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _CitySummaryPanel(
+                            child: _CtaPrimaryRow(
                               city: city,
                               planContext: planContext,
                               onPrimaryAction: () =>
@@ -255,7 +259,37 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                   _handleCompareCity(context, city),
                             ),
                           ),
+                          const SizedBox(height: 12),
+
+                          // ── Block 2: Quick Summary ──────────────────────
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1160),
+                            child: _QuickSummaryCard(city: city),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // ── Block 3: Category List ──────────────────────
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1160),
+                            child: _CategoryListCard(city: city),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // ── Block 4: Secondary Actions ──────────────────
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1160),
+                            child: _SecondaryActionsRow(
+                              onPhotos: () => _openMediaExplore(city),
+                              onMap: () => _scrollToKey(_mapSectionKey),
+                              onFlights: () =>
+                                  _scrollToKey(_flightsSectionKey),
+                              onAnalysis: () =>
+                                  _scrollToKey(_analysisSectionKey),
+                            ),
+                          ),
                           const SizedBox(height: 16),
+
+                          // ── Location banner ─────────────────────────────
                           FutureBuilder<bool>(
                             future: widget.locationController
                                 .shouldShowInlineBanner(),
@@ -281,7 +315,10 @@ class _CityDetailPageState extends State<CityDetailPage> {
                             },
                           ),
                           const SizedBox(height: 16),
+
+                          // ── Map section ─────────────────────────────────
                           ConstrainedBox(
+                            key: _mapSectionKey,
                             constraints: const BoxConstraints(maxWidth: 1160),
                             child: _CityLocationPanel(
                               city: city,
@@ -299,32 +336,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _EssentialsGrid(
-                              city: city,
-                              primaryPriority: planContext?.primaryPriority,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _CompareCitiesStrip(
-                              city: city,
-                              onCompareAction: () =>
-                                  _handleCompareCity(context, city),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _CityExternalOverviewPanel(
-                              city: city,
-                              onOpenGoogleOverview: () =>
-                                  _openCityGoogleOverview(city),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
+
+                          // ── Decision Snapshot ───────────────────────────
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 1160),
                             child: _DecisionSnapshotPanel(
@@ -342,7 +355,10 @@ class _CityDetailPageState extends State<CityDetailPage> {
                             ),
                           ],
                           const SizedBox(height: 16),
+
+                          // ── Deep Dive (Analysis) ────────────────────────
                           ConstrainedBox(
+                            key: _analysisSectionKey,
                             constraints: const BoxConstraints(maxWidth: 1160),
                             child: Card(
                               child: ExpansionTile(
@@ -413,7 +429,10 @@ class _CityDetailPageState extends State<CityDetailPage> {
                             ),
                           ),
                           const SizedBox(height: 16),
+
+                          // ── Flights ─────────────────────────────────────
                           ConstrainedBox(
+                            key: _flightsSectionKey,
                             constraints: const BoxConstraints(maxWidth: 1160),
                             child: FlightSeasonalityCard(
                               originCountryIso: originCountryIso,
@@ -692,6 +711,32 @@ class _CityDetailPageState extends State<CityDetailPage> {
           .take(2)
           .map(context.l10n.constraintLabel)
           .toList(growable: false),
+    );
+  }
+
+  void _scrollToKey(GlobalKey key) {
+    final ctx = key.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(
+      ctx,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+      alignment: 0.1,
+    );
+  }
+
+  Future<void> _openMediaExplore(City city) async {
+    await precacheCityImage(context, city);
+    if (!mounted) return;
+    final isPlanCity =
+        widget.migrationQuestionnaireController?.generatedPlan?.recommendedCity
+            ?.id ==
+        city.id;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            CityExploreScreen(city: city, isPlanCity: isPlanCity),
+      ),
     );
   }
 
@@ -1286,19 +1331,6 @@ class _CityLocationPanel extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        _ExploreMediaCard(
-          onTap: () async {
-            await precacheCityImage(context, city);
-            if (!context.mounted) return;
-            await Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) =>
-                    CityExploreScreen(city: city, isPlanCity: isActivePlanCity),
-              ),
-            );
-          },
-        ),
       ],
     );
   }
@@ -1540,6 +1572,485 @@ class _CompareCitiesStrip extends StatelessWidget {
     );
   }
 }
+
+// ─── Score helper functions (shared by summary card + original panel) ─────────
+
+String _costLabelForCity(BuildContext context, City city) {
+  if (city.rentScore >= 70) return context.l10n.migrationPlanResultCostLower;
+  if (city.rentScore >= 45) return context.l10n.migrationPlanResultCostMedium;
+  return context.l10n.migrationPlanResultCostHigher;
+}
+
+Color _costColorForCity(City city) {
+  if (city.rentScore >= 70) return AppColors.success;
+  if (city.rentScore >= 45) return AppColors.warning;
+  return AppColors.danger;
+}
+
+String _qualityLabelForCity(BuildContext context, City city) {
+  final average =
+      ((city.idhmScore * 100).round() +
+          city.safetyScore +
+          city.spanishSupportScore) /
+      3;
+  if (average >= 72) return context.l10n.cityDetailQualityHigh;
+  if (average >= 56) return context.l10n.cityDetailQualityBalanced;
+  return context.l10n.cityDetailQualityDeveloping;
+}
+
+Color _qualityColorForCity(City city) {
+  final average =
+      ((city.idhmScore * 100).round() +
+          city.safetyScore +
+          city.spanishSupportScore) /
+      3;
+  if (average >= 72) return AppColors.success;
+  if (average >= 56) return AppColors.primary;
+  return AppColors.warning;
+}
+
+String _difficultyLabelForCity(BuildContext context, City city) {
+  final average =
+      (city.rentScore +
+          city.movaroScores.languageAdaptation +
+          city.movaroScores.workOpportunity) /
+      3;
+  if (average >= 68) return context.l10n.cityDetailDifficultyEasy;
+  if (average >= 52) return context.l10n.cityDetailDifficultyBalanced;
+  return context.l10n.cityDetailDifficultyChallenging;
+}
+
+Color _difficultyColorForCity(City city) {
+  final average =
+      (city.rentScore +
+          city.movaroScores.languageAdaptation +
+          city.movaroScores.workOpportunity) /
+      3;
+  if (average >= 68) return AppColors.success;
+  if (average >= 52) return AppColors.warning;
+  return AppColors.danger;
+}
+
+// ─── Block 1: CTA Principal ───────────────────────────────────────────────────
+
+class _CtaPrimaryRow extends StatelessWidget {
+  const _CtaPrimaryRow({
+    required this.city,
+    required this.planContext,
+    required this.onPrimaryAction,
+    required this.onCompareAction,
+  });
+
+  final City city;
+  final _PlanCityContext? planContext;
+  final VoidCallback onPrimaryAction;
+  final VoidCallback onCompareAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final primaryLabel = planContext?.isRecommended == true
+        ? context.l10n.migrationPlanChooseCityAction
+        : context.l10n.cityDetailAddToPlanAction;
+
+    return Row(
+      children: [
+        Expanded(
+          child: FilledButton.icon(
+            onPressed: onPrimaryAction,
+            icon: const Icon(Icons.check_circle_outline_rounded),
+            label: Text(primaryLabel),
+          ),
+        ),
+        const SizedBox(width: 10),
+        OutlinedButton.icon(
+          onPressed: onCompareAction,
+          icon: const Icon(Icons.compare_arrows_rounded),
+          label: Text(context.l10n.cityDetailCompareAction),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Block 2: Quick Summary ───────────────────────────────────────────────────
+
+class _QuickSummaryCard extends StatelessWidget {
+  const _QuickSummaryCard({required this.city});
+
+  final City city;
+
+  @override
+  Widget build(BuildContext context) {
+    return FrostedPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.cityDetailQuickSummaryTitle(),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _SummaryIndicator(
+                  label: context.l10n.cityDetailAffordabilityTitle,
+                  value: _costLabelForCity(context, city),
+                  color: _costColorForCity(city),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _SummaryIndicator(
+                  label: context.l10n.cityDetailQualityLabel,
+                  value: _qualityLabelForCity(context, city),
+                  color: _qualityColorForCity(city),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _SummaryIndicator(
+                  label: context.l10n.cityDetailDifficultyLabel,
+                  value: _difficultyLabelForCity(context, city),
+                  color: _difficultyColorForCity(city),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryIndicator extends StatelessWidget {
+  const _SummaryIndicator({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w700,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Block 3: Category List ───────────────────────────────────────────────────
+
+class _CategoryListCard extends StatelessWidget {
+  const _CategoryListCard({required this.city});
+
+  final City city;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = [
+      (
+        icon: Icons.home_work_outlined,
+        label: context.l10n.cityDetailAffordabilityTitle,
+        presentation: CityHousingViabilityPresenter.resolve(
+          context,
+          rentScore: city.rentScore,
+        ),
+        onTap: () => showCityMetricInsightSheet(
+          context,
+          city: city,
+          topic: CityMetricInsightTopic.housing,
+        ),
+      ),
+      (
+        icon: Icons.shield_outlined,
+        label: context.l10n.cityDetailSafetyLabel,
+        presentation: CityMetricPresentation.resolve(
+          context,
+          kind: CityMetricKind.safety,
+          value: city.safetyScore,
+        ),
+        onTap: () => showCityMetricInsightSheet(
+          context,
+          city: city,
+          topic: CityMetricInsightTopic.safety,
+        ),
+      ),
+      (
+        icon: Icons.work_outline_rounded,
+        label: context.l10n.cityDetailWorkLabel,
+        presentation: CityMetricPresentation.resolve(
+          context,
+          kind: CityMetricKind.work,
+          value: city.movaroScores.workOpportunity,
+        ),
+        onTap: () => showCityMetricInsightSheet(
+          context,
+          city: city,
+          topic: CityMetricInsightTopic.work,
+        ),
+      ),
+      (
+        icon: Icons.language_outlined,
+        label: context.l10n.cityDetailLanguageLabel,
+        presentation: CityMetricPresentation.resolve(
+          context,
+          kind: CityMetricKind.language,
+          value: city.movaroScores.languageAdaptation,
+        ),
+        onTap: () => showCityMetricInsightSheet(
+          context,
+          city: city,
+          topic: CityMetricInsightTopic.language,
+        ),
+      ),
+    ];
+
+    return FrostedPanel(
+      padding: EdgeInsets.zero,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          children: [
+            for (var i = 0; i < rows.length; i++) ...[
+              _CategoryRow(
+                icon: rows[i].icon,
+                label: rows[i].label,
+                presentation: rows[i].presentation,
+                onTap: rows[i].onTap,
+                isFirst: i == 0,
+                isLast: i == rows.length - 1,
+              ),
+              if (i < rows.length - 1)
+                Divider(
+                  height: 1,
+                  indent: 16,
+                  endIndent: 16,
+                  color: AppColors.borderFor(context),
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryRow extends StatelessWidget {
+  const _CategoryRow({
+    required this.icon,
+    required this.label,
+    required this.presentation,
+    required this.onTap,
+    this.isFirst = false,
+    this.isLast = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final dynamic presentation;
+  final VoidCallback onTap;
+  final bool isFirst;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final tint = presentation.tint as Color;
+    final headline = presentation.headline as String;
+
+    final topRadius = isFirst ? const Radius.circular(16) : Radius.zero;
+    final bottomRadius = isLast ? const Radius.circular(16) : Radius.zero;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.only(
+          topLeft: topRadius,
+          topRight: topRadius,
+          bottomLeft: bottomRadius,
+          bottomRight: bottomRadius,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: tint.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: tint, size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Text(
+                headline,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: tint,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 16,
+                color: AppColors.textSoftFor(context),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Block 4: Secondary Actions ───────────────────────────────────────────────
+
+class _SecondaryActionsRow extends StatelessWidget {
+  const _SecondaryActionsRow({
+    required this.onPhotos,
+    required this.onMap,
+    required this.onFlights,
+    required this.onAnalysis,
+  });
+
+  final VoidCallback onPhotos;
+  final VoidCallback onMap;
+  final VoidCallback onFlights;
+  final VoidCallback onAnalysis;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _SecondaryActionButton(
+            icon: Icons.photo_library_outlined,
+            label: context.l10n.cityDetailPhotosAction(),
+            onTap: onPhotos,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _SecondaryActionButton(
+            icon: Icons.map_outlined,
+            label: context.l10n.cityDetailMapAction(),
+            onTap: onMap,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _SecondaryActionButton(
+            icon: Icons.flight_outlined,
+            label: context.l10n.cityDetailFlightsAction(),
+            onTap: onFlights,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _SecondaryActionButton(
+            icon: Icons.analytics_outlined,
+            label: context.l10n.cityDetailAnalysisAction(),
+            onTap: onAnalysis,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SecondaryActionButton extends StatelessWidget {
+  const _SecondaryActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surfaceFor(context),
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.borderFor(context)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 20, color: AppColors.primary),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Legacy panels (kept for reference, no longer used in main ListView) ──────
 
 class _CitySummaryPanel extends StatelessWidget {
   const _CitySummaryPanel({

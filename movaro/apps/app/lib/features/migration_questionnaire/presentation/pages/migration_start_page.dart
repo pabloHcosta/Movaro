@@ -5,7 +5,6 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_picker_bottom_sheet.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
@@ -140,9 +139,9 @@ class _MigrationStartPageState extends State<MigrationStartPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final secondary = AppColors.secondary;
 
     return Scaffold(
       body: Stack(
@@ -160,81 +159,46 @@ class _MigrationStartPageState extends State<MigrationStartPage> {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 980),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AppGlassHeader(
                         title: context.l10n.migrationStartPageTitle(),
                         onBack: () => Navigator.maybePop(context),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 22),
+
+                      // ── Section title ────────────────────────────────
+                      Text(
+                        context.l10n.migrationStartHeroTitle(),
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          height: 1.05,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        context.l10n.migrationStartHeroBody(),
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: AppColors.textSoftFor(context),
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // ── Path cards ───────────────────────────────────
                       Expanded(
                         child: LayoutBuilder(
                           builder: (context, constraints) {
                             final isWide = constraints.maxWidth >= 760;
 
-                            return ListView(
-                              padding: EdgeInsets.zero,
-                              children: [
-                                _StartHeroPanel(
-                                  title: context.l10n.migrationStartHeroTitle(),
-                                  body: context.l10n.migrationStartHeroBody(),
-                                  primary: primary,
-                                  isDark: isDark,
-                                ),
-                                const SizedBox(height: 18),
-                                if (isWide)
-                                  IntrinsicHeight(
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        Expanded(
-                                          child: _StartPathCard(
-                                            icon: Icons.location_city_outlined,
-                                            title: context.l10n
-                                                .migrationStartKnownCityTitle(),
-                                            subtitle: context.l10n
-                                                .migrationStartKnownCitySubtitle(),
-                                            ctaLabel: context.l10n
-                                                .migrationStartKnownCityCta(),
-                                            isLoading: _isOpeningCityPicker,
-                                            onTap: _handleKnownCity,
-                                            accent: primary,
-                                            surfaceTint: primary.withValues(
-                                              alpha: isDark ? 0.16 : 0.10,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          child: _StartPathCard(
-                                            icon: Icons.alt_route_rounded,
-                                            title: context.l10n
-                                                .migrationStartDecidingTitle(),
-                                            subtitle: context.l10n
-                                                .migrationStartDecidingSubtitle(),
-                                            ctaLabel: context.l10n
-                                                .migrationStartDecidingCta(),
-                                            isLoading: _isStartingQuestions,
-                                            onTap: _handleDeciding,
-                                            accent: isDark
-                                                ? Colors.white
-                                                : theme.colorScheme.onSurface,
-                                            surfaceTint: isDark
-                                                ? Colors.white.withValues(
-                                                    alpha: 0.06,
-                                                  )
-                                                : Colors.black.withValues(
-                                                    alpha: 0.03,
-                                                  ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                else
-                                  Column(
-                                    children: [
-                                      _StartPathCard(
+                            if (isWide) {
+                              return IntrinsicHeight(
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Expanded(
+                                      child: _IllustrativePathCard(
                                         icon: Icons.location_city_outlined,
                                         title: context.l10n
                                             .migrationStartKnownCityTitle(),
@@ -245,13 +209,13 @@ class _MigrationStartPageState extends State<MigrationStartPage> {
                                         isLoading: _isOpeningCityPicker,
                                         onTap: _handleKnownCity,
                                         accent: primary,
-                                        surfaceTint: primary.withValues(
-                                          alpha: isDark ? 0.16 : 0.10,
-                                        ),
+                                        isPrimary: true,
                                       ),
-                                      const SizedBox(height: 14),
-                                      _StartPathCard(
-                                        icon: Icons.alt_route_rounded,
+                                    ),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: _IllustrativePathCard(
+                                        icon: Icons.auto_awesome_rounded,
                                         title: context.l10n
                                             .migrationStartDecidingTitle(),
                                         subtitle: context.l10n
@@ -260,22 +224,64 @@ class _MigrationStartPageState extends State<MigrationStartPage> {
                                             .migrationStartDecidingCta(),
                                         isLoading: _isStartingQuestions,
                                         onTap: _handleDeciding,
-                                        accent: isDark
-                                            ? Colors.white
-                                            : theme.colorScheme.onSurface,
-                                        surfaceTint: isDark
-                                            ? Colors.white.withValues(
-                                                alpha: 0.06,
-                                              )
-                                            : Colors.black.withValues(
-                                                alpha: 0.03,
-                                              ),
+                                        accent: secondary,
+                                        isPrimary: false,
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            return Column(
+                              children: [
+                                _IllustrativePathCard(
+                                  icon: Icons.location_city_outlined,
+                                  title: context.l10n
+                                      .migrationStartKnownCityTitle(),
+                                  subtitle: context.l10n
+                                      .migrationStartKnownCitySubtitle(),
+                                  ctaLabel: context.l10n
+                                      .migrationStartKnownCityCta(),
+                                  isLoading: _isOpeningCityPicker,
+                                  onTap: _handleKnownCity,
+                                  accent: primary,
+                                  isPrimary: true,
+                                ),
+                                const SizedBox(height: 14),
+                                _IllustrativePathCard(
+                                  icon: Icons.auto_awesome_rounded,
+                                  title: context.l10n
+                                      .migrationStartDecidingTitle(),
+                                  subtitle: context.l10n
+                                      .migrationStartDecidingSubtitle(),
+                                  ctaLabel: context.l10n
+                                      .migrationStartDecidingCta(),
+                                  isLoading: _isStartingQuestions,
+                                  onTap: _handleDeciding,
+                                  accent: secondary,
+                                  isPrimary: false,
+                                ),
+                                const Spacer(),
                               ],
                             );
                           },
+                        ),
+                      ),
+
+                      // ── Footer ───────────────────────────────────────
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Text(
+                          context.l10n.migrationStartFootnote(),
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color:
+                                AppColors.textSoftFor(context).withValues(
+                                  alpha: 0.55,
+                                ),
+                          ),
                         ),
                       ),
                     ],
@@ -290,66 +296,10 @@ class _MigrationStartPageState extends State<MigrationStartPage> {
   }
 }
 
-class _StartHeroPanel extends StatelessWidget {
-  const _StartHeroPanel({
-    required this.title,
-    required this.body,
-    required this.primary,
-    required this.isDark,
-  });
+// ─── Illustrative path card ───────────────────────────────────────────────────
 
-  final String title;
-  final String body;
-  final Color primary;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return FrostedPanel(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-      borderRadius: BorderRadius.circular(36),
-      backgroundColor: isDark
-          ? const Color(0xC0161D29)
-          : Colors.white.withValues(alpha: 0.72),
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          primary.withValues(alpha: isDark ? 0.24 : 0.12),
-          (isDark ? const Color(0xFF111827) : Colors.white).withValues(
-            alpha: isDark ? 0.82 : 0.56,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              height: 1.05,
-            ),
-          ),
-          const SizedBox(height: 10),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
-            child: Text(
-              body,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSoftFor(context),
-                height: 1.45,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StartPathCard extends StatelessWidget {
-  const _StartPathCard({
+class _IllustrativePathCard extends StatelessWidget {
+  const _IllustrativePathCard({
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -357,7 +307,7 @@ class _StartPathCard extends StatelessWidget {
     required this.isLoading,
     required this.onTap,
     required this.accent,
-    required this.surfaceTint,
+    required this.isPrimary,
   });
 
   final IconData icon;
@@ -367,83 +317,194 @@ class _StartPathCard extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onTap;
   final Color accent;
-  final Color surfaceTint;
+
+  /// True = solid primary button; False = outlined/tinted button.
+  final bool isPrimary;
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 240),
-      child: FrostedPanel(
-        padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
-        borderRadius: BorderRadius.circular(32),
-        backgroundColor: surfaceTint == Colors.transparent
-            ? AppColors.frostedBackgroundFor(context)
-            : AppColors.frostedBackgroundFor(context).withValues(alpha: 0.92),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [surfaceTint, AppColors.frostedBackgroundFor(context)],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    final theme = Theme.of(context);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isLoading ? null : onTap,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  accent.withValues(alpha: 0.12),
+                  accent.withValues(alpha: 0.05),
+                ],
+              ),
+              border: Border.all(
+                color: accent.withValues(alpha: 0.15),
+              ),
+            ),
+            child: Stack(
+              clipBehavior: Clip.hardEdge,
               children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Icon(icon, color: accent, size: 24),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      height: 1.1,
+                // ── Decorative circles ────────────────────────────────
+                Positioned(
+                  top: -24,
+                  right: -24,
+                  child: Container(
+                    width: 110,
+                    height: 110,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: accent.withValues(alpha: 0.06),
                     ),
+                  ),
+                ),
+                Positioned(
+                  top: 22,
+                  right: 22,
+                  child: Container(
+                    width: 62,
+                    height: 62,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: accent.withValues(alpha: 0.04),
+                    ),
+                  ),
+                ),
+
+                // ── Card content ──────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Icon + title row
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  accent,
+                                  accent.withValues(alpha: 0.75),
+                                ],
+                              ),
+                            ),
+                            child: Icon(icon, color: Colors.white, size: 26),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                height: 1.2,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Subtitle
+                      Text(
+                        subtitle,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSoftFor(context),
+                          height: 1.4,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 14),
+
+                      // CTA button
+                      SizedBox(
+                        width: double.infinity,
+                        child: _CtaButton(
+                          label: '→  $ctaLabel',
+                          accent: accent,
+                          isPrimary: isPrimary,
+                          isLoading: isLoading,
+                          onTap: onTap,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 14),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSoftFor(context),
-                height: 1.45,
-              ),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 18),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: isLoading ? null : onTap,
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(54),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── CTA button variants ──────────────────────────────────────────────────────
+
+class _CtaButton extends StatelessWidget {
+  const _CtaButton({
+    required this.label,
+    required this.accent,
+    required this.isPrimary,
+    required this.isLoading,
+    required this.onTap,
+  });
+
+  final String label;
+  final Color accent;
+  final bool isPrimary;
+  final bool isLoading;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final bgColor =
+        isPrimary ? accent : accent.withValues(alpha: 0.20);
+    final borderColor =
+        isPrimary ? Colors.transparent : accent.withValues(alpha: 0.40);
+    final textColor = isPrimary ? Colors.white : accent;
+
+    return Material(
+      color: bgColor,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: isLoading ? null : onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor),
+          ),
+          alignment: Alignment.center,
+          child: isLoading
+              ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: textColor,
+                  ),
+                )
+              : Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: textColor,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                icon: isLoading
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.arrow_forward_rounded, size: 18),
-                label: Text(ctaLabel),
-              ),
-            ),
-          ],
         ),
       ),
     );
