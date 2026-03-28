@@ -717,6 +717,9 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                               ),
                         ),
                         const SizedBox(height: 16),
+                        // ── CPF Unlock Chain Banner ──
+                        if (sheetItem.id == 'item_2_1_cpf')
+                          _CpfUnlockBanner(allItems: allItems),
                         // ── Urgency Signal Banner ──
                         if (sheetItem.urgencySignal != null) ...[
                           Container(

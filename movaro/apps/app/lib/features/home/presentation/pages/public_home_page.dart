@@ -31,6 +31,7 @@ import 'package:movaro_app/features/explore/presentation/pages/documentation_gui
 import 'package:movaro_app/features/home/presentation/widgets/city_feed_widget.dart';
 import 'package:movaro_app/features/home/presentation/widgets/journey_stepper_widget.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PublicHomePage extends StatefulWidget {
   const PublicHomePage({
@@ -520,6 +521,23 @@ class _ActiveHomeState extends StatelessWidget {
       totalSteps: guideState.totalItems,
     );
 
+    final pfItem = guideState.items.firstWhere(
+      (it) => it.id == 'item_2_2_residencia',
+      orElse: () => const GuideActionItem(
+        id: '',
+        title: '',
+        shortDescription: '',
+        type: GuideActionType.informative,
+        phase: GuidePhase.preparation,
+        orderIndex: 0,
+        isCompleted: true,
+      ),
+    );
+    final pfNotDone = pfItem.id.isNotEmpty && !pfItem.isCompleted;
+    final incompleteCritical = guideState.items
+        .where((it) => !it.isCompleted && it.preArrivalRequired)
+        .toList();
+
     final hero = _ActiveHero(
       city: city,
       weather: weather,
@@ -543,39 +561,69 @@ class _ActiveHomeState extends StatelessWidget {
       onNewPlan: onNewPlan,
     );
 
-    final incompleteCritical = guideState.items
-        .where((it) => !it.isCompleted && it.preArrivalRequired)
-        .toList();
+    // Stage-aware content layout
+    final bool isExplorer = stage == UserJourneyStage.explorer;
+    final bool isPlanner = stage == UserJourneyStage.planner;
+    final bool isExecutor = stage == UserJourneyStage.executor;
 
     return Column(
       children: [
         hero,
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(0, 6, 0, 6),
+            padding: const EdgeInsets.fromLTRB(0, 6, 0, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (incompleteCritical.isNotEmpty)
+                // ── EXECUTOR: PF nudge + pre-arrival warning (highest urgency) ──
+                if (isExecutor || isPlanner) ...[
+                  if (pfNotDone)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                      child: _PFAppointmentNudge(
+                        onTap: () => onViewAction(pfItem),
+                      ),
+                    ),
+                  if (incompleteCritical.isNotEmpty && !pfNotDone)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                      child: _PreArrivalWarningBanner(
+                        count: incompleteCritical.length,
+                        onTap: guideState.currentItem != null
+                            ? () => onViewAction(incompleteCritical.first)
+                            : null,
+                      ),
+                    ),
+                ],
+
+                // ── PLANNER: countdown chip ──
+                if (isPlanner && planTimeline != null)
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-                    child: _PreArrivalWarningBanner(
-                      count: incompleteCritical.length,
-                      onTap: guideState.currentItem != null
-                          ? () => onViewAction(
-                                incompleteCritical.first,
-                              )
-                          : null,
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                    child: _PlannerCountdownChip(timeline: planTimeline!),
+                  ),
+
+                // ── EXPLORER: affordability card instead of full stepper ──
+                if (isExplorer) ...[
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _ExplorerStageCard(
+                      city: city,
+                      onCreatePlan: onNewPlan,
                     ),
                   ),
-                journeyStepper,
+                ] else ...[
+                  journeyStepper,
+                ],
+
                 const SizedBox(height: 14),
                 CityFeedWidget(
                   cityCode: city.id,
                   stage: stage,
                   locale: locale,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: actionRow,
@@ -1065,6 +1113,373 @@ _ScreenSize _screenSizeOf(BuildContext context) {
   if (h < 850) return _ScreenSize.medium;
   return _ScreenSize.large;
 }
+
+// ─── PF Appointment Nudge ─────────────────────────────────────────────────────
+
+class _PFAppointmentNudge extends StatelessWidget {
+  const _PFAppointmentNudge({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2D0A0A),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF7A1F1F)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.assignment_late_rounded,
+              size: 18,
+              color: Color(0xFFE24B4A),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _localizedText(
+                      context,
+                      pt: 'Agende a Polícia Federal agora',
+                      es: 'Saca el turno de la Policía Federal ahora',
+                      en: 'Book your Federal Police appointment now',
+                    ),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: const Color(0xFFE24B4A),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    _localizedText(
+                      context,
+                      pt: 'Fila de 60–90 dias em SP e RJ. Agende pelo site antes de embarcar.',
+                      es: 'Cola de 60–90 días en SP y RJ. Saca el turno antes de viajar.',
+                      en: '60–90 day backlog in SP and RJ. Book online before you board.',
+                    ),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: const Color(0xFFD4716F),
+                      fontWeight: FontWeight.w400,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => launchUrl(
+                      Uri.parse('https://servicos.dpf.gov.br'),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE24B4A),
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      child: Text(
+                        _localizedText(
+                          context,
+                          pt: 'Agendar no site da PF →',
+                          es: 'Pedir turno en el sitio de la PF →',
+                          en: 'Book on PF website →',
+                        ),
+                        style: AppTypography.compactBadge.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _localizedText(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) =>
+      switch (Localizations.localeOf(context).languageCode) {
+        'pt' => pt,
+        'es' => es,
+        _ => en,
+      };
+}
+
+// ─── Planner Countdown Chip ───────────────────────────────────────────────────
+
+class _PlannerCountdownChip extends StatelessWidget {
+  const _PlannerCountdownChip({required this.timeline});
+
+  final String timeline;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final label = _timelineLabel(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E3A5F) : const Color(0xFFDBEAFE),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? const Color(0xFF3B7CC8) : const Color(0xFF93C5FD),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.schedule_rounded,
+            size: 13,
+            color: isDark ? const Color(0xFF90C4F8) : const Color(0xFF1D4ED8),
+          ),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: AppTypography.compactBadge.copyWith(
+              color:
+                  isDark ? const Color(0xFF90C4F8) : const Color(0xFF1D4ED8),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _timelineLabel(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return switch (timeline) {
+      'in_0_3m' => switch (locale) {
+          'pt' => 'Mudança em até 3 meses',
+          'es' => 'Mudanza en menos de 3 meses',
+          _ => 'Move within 3 months',
+        },
+      'in_3_6m' => switch (locale) {
+          'pt' => 'Mudança em 3–6 meses',
+          'es' => 'Mudanza en 3–6 meses',
+          _ => 'Move in 3–6 months',
+        },
+      'in_6_12m' => switch (locale) {
+          'pt' => 'Mudança em 6–12 meses',
+          'es' => 'Mudanza en 6–12 meses',
+          _ => 'Move in 6–12 months',
+        },
+      _ => switch (locale) {
+          'pt' => 'Ainda planejando',
+          'es' => 'Todavía planificando',
+          _ => 'Still planning',
+        },
+    };
+  }
+}
+
+// ─── Explorer Stage Card ──────────────────────────────────────────────────────
+
+class _ExplorerStageCard extends StatelessWidget {
+  const _ExplorerStageCard({required this.city, required this.onCreatePlan});
+
+  final City city;
+  final VoidCallback onCreatePlan;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0E1825) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _cardBorder(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF1E3A5F)
+                      : const Color(0xFFDBEAFE),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: Icon(
+                  Icons.explore_rounded,
+                  size: 16,
+                  color: isDark
+                      ? const Color(0xFF90C4F8)
+                      : const Color(0xFF2563EB),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  _localizedText(
+                    context,
+                    pt: 'Você está explorando ${city.name}',
+                    es: 'Estás explorando ${city.name}',
+                    en: 'You\'re exploring ${city.name}',
+                  ),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.textPrimaryFor(context),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _localizedText(
+              context,
+              pt: 'Antes de decidir, verifique se consegue se sustentar aqui.',
+              es: 'Antes de decidir, verifica si puedes sostenerte aquí.',
+              en: 'Before deciding, check if you can sustain yourself here.',
+            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _AffordabilityRow(context),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: onCreatePlan,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF3B7CC8),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Text(
+                _localizedText(
+                  context,
+                  pt: 'Criar meu plano de migração',
+                  es: 'Crear mi plan de migración',
+                  en: 'Create my migration plan',
+                ),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _AffordabilityRow(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    return Row(
+      children: [
+        _AffordabilityChip(
+          icon: Icons.home_outlined,
+          label: _localizedText(
+            context,
+            pt: 'Aluguel R\$1.800–3.500',
+            es: 'Alquiler R\$1.800–3.500',
+            en: 'Rent R\$1,800–3,500',
+          ),
+          isDark: isDark,
+        ),
+        const SizedBox(width: 6),
+        _AffordabilityChip(
+          icon: Icons.attach_money_rounded,
+          label: _localizedText(
+            context,
+            pt: 'Mín. R\$4.000/mês',
+            es: 'Mín. R\$4.000/mes',
+            en: 'Min. R\$4,000/mo',
+          ),
+          isDark: isDark,
+        ),
+      ],
+    );
+  }
+
+  static String _localizedText(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) =>
+      switch (Localizations.localeOf(context).languageCode) {
+        'pt' => pt,
+        'es' => es,
+        _ => en,
+      };
+}
+
+class _AffordabilityChip extends StatelessWidget {
+  const _AffordabilityChip({
+    required this.icon,
+    required this.label,
+    required this.isDark,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0A1525) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(7),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1A2840) : const Color(0xFFE2E8F0),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 11,
+            color: AppColors.textSoftFor(context),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: AppTypography.tinyLabel.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Pre-arrival Warning Banner ───────────────────────────────────────────────
 
 class _PreArrivalWarningBanner extends StatelessWidget {
   const _PreArrivalWarningBanner({
