@@ -616,6 +616,10 @@ class _ActiveHomeState extends StatelessWidget {
       recommendationReasons: recommendationReasons,
     );
 
+    final incompleteCritical = guideState.items
+        .where((it) => !it.isCompleted && it.preArrivalRequired)
+        .toList();
+
     return Column(
       children: [
         hero,
@@ -625,6 +629,18 @@ class _ActiveHomeState extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (incompleteCritical.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                    child: _PreArrivalWarningBanner(
+                      count: incompleteCritical.length,
+                      onTap: guideState.currentItem != null
+                          ? () => onViewAction(
+                                incompleteCritical.first,
+                              )
+                          : null,
+                    ),
+                  ),
                 journeyStepper,
                 const SizedBox(height: 10),
                 Padding(
@@ -1115,4 +1131,83 @@ _ScreenSize _screenSizeOf(BuildContext context) {
   if (h < 700) return _ScreenSize.small;
   if (h < 850) return _ScreenSize.medium;
   return _ScreenSize.large;
+}
+
+class _PreArrivalWarningBanner extends StatelessWidget {
+  const _PreArrivalWarningBanner({
+    required this.count,
+    this.onTap,
+  });
+
+  final int count;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = count == 1
+        ? _localizedText(
+            context,
+            pt: '1 etapa obrigatória antes de viajar',
+            es: '1 etapa obligatoria antes de viajar',
+            en: '1 required step before traveling',
+          )
+        : _localizedText(
+            context,
+            pt: '$count etapas obrigatórias antes de viajar',
+            es: '$count etapas obligatorias antes de viajar',
+            en: '$count required steps before traveling',
+          );
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2D1A08),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFF7A3A0A)),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.flight_takeoff_rounded,
+              size: 16,
+              color: Color(0xFFE8873A),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFE8873A),
+                ),
+              ),
+            ),
+            if (onTap != null)
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 12,
+                color: Color(0xFFE8873A),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _localizedText(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => pt,
+      'es' => es,
+      _ => en,
+    };
+  }
 }
