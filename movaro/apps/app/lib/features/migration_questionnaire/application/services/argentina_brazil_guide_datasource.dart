@@ -1791,7 +1791,7 @@ class ArgentinaBrazilGuideDataSource {
         type: GuideActionType.tool,
         toolType: GuideToolType.housing,
         phase: GuidePhase.work,
-        orderIndex: 11,
+        orderIndex: 12,
         isCompleted: false,
         icon: Icons.real_estate_agent_outlined,
         dependencies: <String>['item_2_1_cpf'],
@@ -1935,7 +1935,7 @@ class ArgentinaBrazilGuideDataSource {
         fullContent: null,
         type: GuideActionType.informative,
         phase: GuidePhase.work,
-        orderIndex: 12,
+        orderIndex: 11,
         isCompleted: false,
         icon: Icons.pix_outlined,
         dependencies: <String>['item_3_1_conta_bancaria'],
@@ -2248,7 +2248,7 @@ class ArgentinaBrazilGuideDataSource {
         fullContent: null,
         type: GuideActionType.external,
         phase: GuidePhase.arrival,
-        orderIndex: 14,
+        orderIndex: 15,
         isCompleted: false,
         icon: Icons.directions_car_outlined,
         dependencies: <String>['item_2_2_residencia'],
@@ -2462,7 +2462,7 @@ class ArgentinaBrazilGuideDataSource {
         fullContent: null,
         type: GuideActionType.checklist,
         phase: GuidePhase.arrival,
-        orderIndex: 15,
+        orderIndex: 16,
         isCompleted: false,
         icon: Icons.local_hospital_outlined,
         context: _t(
@@ -2666,7 +2666,7 @@ class ArgentinaBrazilGuideDataSource {
         fullContent: null,
         type: GuideActionType.external,
         phase: GuidePhase.arrival,
-        orderIndex: 16,
+        orderIndex: 17,
         isCompleted: false,
         icon: Icons.event_available_outlined,
         dependencies: <String>['item_2_2_residencia'],
@@ -2823,8 +2823,8 @@ class ArgentinaBrazilGuideDataSource {
         ),
         fullContent: null,
         type: GuideActionType.informative,
-        phase: GuidePhase.arrival,
-        orderIndex: 17,
+        phase: GuidePhase.work,
+        orderIndex: 14,
         isCompleted: false,
         icon: Icons.storefront_outlined,
         dependencies: <String>['item_2_1_cpf'],
@@ -3036,6 +3036,9 @@ class ArgentinaBrazilGuideDataSource {
     switch (goal) {
       case 'work':
       case 'find_job_br':
+        // Sequence: understand → docs prep → money → flight → arrive (SIM+housing)
+        // → CPF (urgent) → residency (PF) → work card → bank → Pix
+        // → define income → long-term rent (after job secured)
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
@@ -3043,16 +3046,21 @@ class ArgentinaBrazilGuideDataSource {
           'item_1_3_money',
           'item_0_4_flight',
           'item_1_1_chip',
+          'item_1_2_housing_temporary',
           'item_2_1_cpf',
           'item_2_2_residencia',
           'item_2_3_ctps',
           'item_3_1_conta_bancaria',
+          'item_3_3_pix',
           'item_3_4_trabalho',
           'item_3_2_aluguel_fixo',
         ];
       case 'remote_income':
       case 'remote_work':
       case 'entrepreneur':
+        // Sequence: understand → docs prep → money → flight → arrive (SIM+housing)
+        // → CPF → bank → Pix → MEI (formalize income fast) → residency
+        // → work definition → long-term rent
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
@@ -3060,13 +3068,18 @@ class ArgentinaBrazilGuideDataSource {
           'item_1_3_money',
           'item_0_4_flight',
           'item_1_1_chip',
+          'item_1_2_housing_temporary',
           'item_2_1_cpf',
           'item_3_1_conta_bancaria',
+          'item_3_3_pix',
           'item_4_4_mei',
+          'item_2_2_residencia',
           'item_3_4_trabalho',
           'item_3_2_aluguel_fixo',
         ];
       case 'study':
+        // Sequence: understand → docs prep → money → flight → arrive (SIM+housing)
+        // → CPF → residency → work card (for part-time work) → bank → Pix → rent
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
@@ -3074,15 +3087,20 @@ class ArgentinaBrazilGuideDataSource {
           'item_1_3_money',
           'item_0_4_flight',
           'item_1_1_chip',
+          'item_1_2_housing_temporary',
           'item_2_1_cpf',
           'item_2_2_residencia',
+          'item_2_3_ctps',
           'item_3_1_conta_bancaria',
+          'item_3_3_pix',
           'item_3_2_aluguel_fixo',
         ];
       case 'family_partner':
       case 'quality_of_life':
       case 'beach_life':
       case 'fresh_start':
+        // Sequence: understand → docs prep → money → flight → arrive (SIM+housing)
+        // → CPF → residency → bank → Pix → rent → health coverage
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
@@ -3094,6 +3112,7 @@ class ArgentinaBrazilGuideDataSource {
           'item_2_1_cpf',
           'item_2_2_residencia',
           'item_3_1_conta_bancaria',
+          'item_3_3_pix',
           'item_3_2_aluguel_fixo',
           'item_4_2_saude',
         ];
