@@ -7,7 +7,6 @@ import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
-import 'package:movaro_app/features/city_insights/presentation/widgets/city_insights_section.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
@@ -190,8 +189,10 @@ class _PublicHomePageState extends State<PublicHomePage>
                                       recommendationReasons:
                                           plan.cityRecommendationReasons,
                                       onOpenSettings: _openSettings,
-                                      onViewAction: (item) =>
-                                          _showActionDetails(context, item),
+                                      onViewAction: (_) => Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.migrationPlanCopilot,
+                                      ),
                                       onCompare: () => _openComparison(city),
                                       onViewCity: () => Navigator.pushNamed(
                                         context,
@@ -378,81 +379,6 @@ class _PublicHomePageState extends State<PublicHomePage>
     }
   }
 
-  Future<void> _showActionDetails(
-    BuildContext context,
-    GuideActionItem? item,
-  ) async {
-    if (item == null) {
-      return;
-    }
-
-    final body = [
-      item.summaryText,
-      if (item.whyItMatters != null) item.whyItMatters!,
-      if (item.doneCriteria != null) item.doneCriteria!,
-      if (item.fullContent?.trim().isNotEmpty == true) item.fullContent!,
-    ].join('\n\n');
-
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Container(
-              decoration: BoxDecoration(
-                color: _cardBackground(sheetContext),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: _cardBorder(sheetContext)),
-              ),
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.title,
-                          style: Theme.of(sheetContext).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(sheetContext).pop(),
-                        icon: const Icon(Icons.close_rounded),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(sheetContext).size.height * 0.45,
-                    ),
-                    child: SingleChildScrollView(
-                      child: Text(
-                        body,
-                        style: Theme.of(sheetContext).textTheme.bodyMedium
-                            ?.copyWith(
-                              color: _secondaryText(sheetContext),
-                              height: 1.5,
-                            ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   _HomeGuideState _buildGuideState(
     MigrationPlan plan,
     MigrationCopilotProgressSnapshot snapshot,
@@ -615,14 +541,6 @@ class _ActiveHomeState extends StatelessWidget {
       onCompare: onCompare,
       onViewCity: onViewCity,
       onNewPlan: onNewPlan,
-    );
-    final insightsSection = CityInsightsSection(
-      controller: cityInsightsController,
-      city: city,
-      weather: weather,
-      goal: planGoal,
-      timeline: planTimeline,
-      recommendationReasons: recommendationReasons,
     );
 
     final incompleteCritical = guideState.items
