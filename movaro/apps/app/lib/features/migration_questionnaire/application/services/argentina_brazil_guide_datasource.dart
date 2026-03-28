@@ -112,6 +112,14 @@ class ArgentinaBrazilGuideDataSource {
         ),
         estimatedEffort: GuideEstimatedEffort.fast,
         estimatedTimeLabel: _t(locale, pt: '2 min', es: '2 min', en: '2 min'),
+        preArrivalRequired: true,
+        urgencyLevel: GuideUrgencyLevel.urgent,
+        urgencySignal: _t(
+          locale,
+          pt: 'Leia isso antes de embarcar — o prazo começa no dia que você cruza a fronteira.',
+          es: 'Lee esto antes de embarcar — el plazo comienza el dia que cruzas la frontera.',
+          en: 'Read this before boarding — the clock starts the day you cross the border.',
+        ),
       ),
       GuideActionItem(
         id: 'item_0_2_antecedentes',
@@ -232,6 +240,29 @@ class ArgentinaBrazilGuideDataSource {
             isCompleted: false,
           ),
         ],
+        preArrivalRequired: true,
+        urgencyLevel: GuideUrgencyLevel.critical,
+        urgencySignal: _t(
+          locale,
+          pt: 'Peça AGORA — o certificado tem validade curta. Se você pedir tarde, vai vencer antes de usar.',
+          es: 'Pedilo AHORA — el certificado tiene validez corta. Si lo pides tarde, vencera antes de usarlo.',
+          en: 'Request NOW — the certificate has short validity. If you request too late, it will expire before you use it.',
+        ),
+        warningFlags: _list(
+          locale,
+          pt: [
+            'Validade de 90 dias: solicite próximo à data de embarque.',
+            'Resolva na Argentina — pedido após a viagem causa semanas de atraso.',
+          ],
+          es: [
+            'Validez de 90 dias: solicita cerca de la fecha de embarque.',
+            'Resolvelo en Argentina — pedirlo despues del viaje causa semanas de retraso.',
+          ],
+          en: [
+            'Valid for 90 days only — request close to your departure date.',
+            'Handle this in Argentina — requesting after the trip causes weeks of delay.',
+          ],
+        ),
       ),
       GuideActionItem(
         id: 'item_0_3_budget',
@@ -278,6 +309,14 @@ class ArgentinaBrazilGuideDataSource {
           pt: '15 min',
           es: '15 min',
           en: '15 min',
+        ),
+        preArrivalRequired: true,
+        urgencyLevel: GuideUrgencyLevel.watch,
+        urgencySignal: _t(
+          locale,
+          pt: 'Faça antes de viajar — chegada sem reserva calculada é a causa mais comum de crise no primeiro mês.',
+          es: 'Hazlo antes de viajar — llegar sin reserva calculada es la causa mas comun de crisis en el primer mes.',
+          en: 'Do this before traveling — arriving without a calculated buffer is the most common cause of crisis in month one.',
         ),
       ),
       GuideActionItem(
@@ -496,6 +535,29 @@ class ArgentinaBrazilGuideDataSource {
           es: '30 min',
           en: '30 min',
         ),
+        preArrivalRequired: true,
+        urgencyLevel: GuideUrgencyLevel.urgent,
+        urgencySignal: _t(
+          locale,
+          pt: 'Configure antes de embarcar — câmbio de aeroporto consome 30-50% do seu dinheiro.',
+          es: 'Configura antes de embarcar — el cambio del aeropuerto consume entre 30-50% de tu dinero.',
+          en: 'Set up before boarding — airport exchange burns 30-50% of your money.',
+        ),
+        warningFlags: _list(
+          locale,
+          pt: [
+            'Câmbio de aeroporto: taxas 30-50% piores que Wise ou cartão. Evite na chegada.',
+            'Não dependa de um único meio de pagamento — se travar, você fica sem acesso a dinheiro.',
+          ],
+          es: [
+            'Cambio del aeropuerto: tasas 30-50% peores que Wise o tarjeta. Evitalo a la llegada.',
+            'No dependas de un solo medio de pago — si falla, quedas sin acceso al dinero.',
+          ],
+          en: [
+            'Airport exchange: rates are 30-50% worse than Wise or card. Avoid it on arrival.',
+            'Do not rely on a single payment method — if it fails, you are left without money access.',
+          ],
+        ),
       ),
       GuideActionItem(
         id: 'item_0_4_flight',
@@ -582,6 +644,14 @@ class ArgentinaBrazilGuideDataSource {
           pt: '20 min',
           es: '20 min',
           en: '20 min',
+        ),
+        preArrivalRequired: true,
+        urgencyLevel: GuideUrgencyLevel.urgent,
+        urgencySignal: _t(
+          locale,
+          pt: 'Reserve voo e hospedagem antes de viajar — sem endereço confirmado você não consegue CPF no primeiro dia.',
+          es: 'Reserva vuelo y alojamiento antes de viajar — sin direccion confirmada no puedes tramitar el CPF el primer dia.',
+          en: 'Book flight and housing before leaving — without a confirmed address you cannot start CPF on day one.',
         ),
       ),
       GuideActionItem(
@@ -967,6 +1037,39 @@ class ArgentinaBrazilGuideDataSource {
           es: '1-2 dias',
           en: '1-2 days',
         ),
+        warningFlags: _list(
+          locale,
+          pt: [
+            'Golpe comum: fotos reais, proprietário falso, depósito exigido antes da visita. Nunca pague sem visitar.',
+            'Desconfie de preços muito abaixo do mercado — costumam ser armadilhas para migrantes.',
+            'Não assine nada sem ler: cláusulas abusivas em contratos de curto prazo são frequentes.',
+          ],
+          es: [
+            'Estafa comun: fotos reales, propietario falso, deposito exigido antes de visitar. Nunca pagues sin visitar.',
+            'Desconfia de precios muy por debajo del mercado — suelen ser trampas para migrantes.',
+            'No firmes nada sin leer: clausulas abusivas en contratos de corto plazo son frecuentes.',
+          ],
+          en: [
+            'Common scam: real photos, fake landlord, deposit demanded before visit. Never pay without visiting.',
+            'Beware of prices well below market — these are often traps targeting migrants.',
+            'Do not sign anything without reading it: abusive clauses in short-term contracts are common.',
+          ],
+        ),
+        communityTips: _list(
+          locale,
+          pt: [
+            '"Airbnb com desconto mensal foi a melhor opção — cobre endereço pro CPF e é fácil de cancelar."',
+            '"Procura grupos de argentinos no Brasil no Facebook — tem gente alugando quarto direto sem burocracia."',
+          ],
+          es: [
+            '"Airbnb con descuento mensual fue la mejor opcion — cubre direccion para el CPF y es facil de cancelar."',
+            '"Busca grupos de argentinos en Brasil en Facebook — hay gente alquilando habitacion directo sin burocracia."',
+          ],
+          en: [
+            '"Monthly Airbnb discount was the best option — covers address for CPF and is easy to cancel."',
+            '"Look for Argentine groups in Brazil on Facebook — people rent rooms directly without bureaucracy."',
+          ],
+        ),
       ),
       GuideActionItem(
         id: 'item_2_1_cpf',
@@ -1091,6 +1194,31 @@ class ArgentinaBrazilGuideDataSource {
             isCompleted: false,
           ),
         ],
+        urgencyLevel: GuideUrgencyLevel.urgent,
+        urgencySignal: _t(
+          locale,
+          pt: 'CPF destrava tudo: sem ele, não tem banco, não tem Pix, não tem aluguel. Faça no primeiro dia.',
+          es: 'El CPF destraba todo: sin el no hay banco, no hay Pix, no hay alquiler. Hazlo el primer dia.',
+          en: 'CPF unlocks everything: without it there is no bank, no Pix, no rental. Do it on day one.',
+        ),
+        communityTips: _list(
+          locale,
+          pt: [
+            '"Fui aos Correios com passaporte + comprovante do Airbnb. CPF saiu na hora, custou R\$7."',
+            '"Na Receita Federal é de graça mas fila maior. Correios cobram mas são mais rápidos."',
+            '"Com o número do CPF em mãos, já abre conta digital — não precisa esperar o cartão chegar."',
+          ],
+          es: [
+            '"Fui a los Correios con pasaporte + comprobante del Airbnb. El CPF salio al instante, costo R\$7."',
+            '"En la Receita Federal es gratis pero hay mas fila. Correios cobran pero son mas rapidos."',
+            '"Con el numero del CPF ya puedes abrir cuenta digital — no hace falta esperar la tarjeta."',
+          ],
+          en: [
+            '"I went to Correios with passport + Airbnb confirmation. CPF issued immediately, cost R\$7."',
+            '"Receita Federal is free but longer queue. Correios charges but is faster."',
+            '"With the CPF number in hand you can already open a digital account — no need to wait for the card."',
+          ],
+        ),
       ),
       GuideActionItem(
         id: 'item_2_2_residencia',
@@ -1227,6 +1355,46 @@ class ArgentinaBrazilGuideDataSource {
             isCompleted: false,
           ),
         ],
+        preArrivalRequired: true,
+        urgencyLevel: GuideUrgencyLevel.critical,
+        urgencySignal: _t(
+          locale,
+          pt: 'Agende pela internet AINDA NA ARGENTINA — muitas cidades têm fila de 60-90 dias na PF.',
+          es: 'Saca el turno por internet AUN EN ARGENTINA — muchas ciudades tienen cola de 60-90 dias en la PF.',
+          en: 'Book online WHILE STILL IN ARGENTINA — many cities have a 60-90 day backlog at the Federal Police.',
+        ),
+        survivalPhrases: [
+          SurvivalPhrase(
+            phrase: 'Tenho agendamento para hoje',
+            translation: _t(locale, pt: 'Ao chegar na Polícia Federal', es: 'Al llegar a la Policia Federal', en: 'When arriving at Federal Police'),
+          ),
+          SurvivalPhrase(
+            phrase: 'Quero solicitar minha residência pelo Acordo do Mercosul',
+            translation: _t(locale, pt: 'Para identificar a rota correta', es: 'Para identificar la via correcta', en: 'To identify the right process'),
+          ),
+          SurvivalPhrase(
+            phrase: 'Preciso do protocolo de residência',
+            translation: _t(locale, pt: 'Ao final do atendimento', es: 'Al final del turno', en: 'At the end of the appointment'),
+          ),
+        ],
+        communityTips: _list(
+          locale,
+          pt: [
+            '"Agendei pela internet ainda na Argentina — quando cheguei, a espera era de 2 meses para quem não agendou."',
+            '"Leve originais E cópias de tudo. Eles pedem cópia na maioria das vezes, mas o original confirma."',
+            '"O protocolo que você recebe já serve como documento — com ele dá pra abrir conta e alugar."',
+          ],
+          es: [
+            '"Saque el turno por internet todavia en Argentina — cuando llegue, la espera era de 2 meses para quienes no tenian turno."',
+            '"Lleva originales Y copias de todo. Piden copia la mayoria de las veces, pero el original confirma."',
+            '"El protocolo que recibes ya sirve como documento — con el puedes abrir cuenta y alquilar."',
+          ],
+          en: [
+            '"I booked online while still in Argentina — when I arrived, the wait was 2 months for those without appointments."',
+            '"Bring originals AND copies of everything. They usually ask for copies but the original confirms."',
+            '"The protocol you receive already works as a document — with it you can open an account and rent."',
+          ],
+        ),
       ),
       GuideActionItem(
         id: 'item_2_3_ctps',
@@ -1431,21 +1599,21 @@ class ArgentinaBrazilGuideDataSource {
           GuideDecisionOption(
             title: _t(
               locale,
-              pt: 'Banco digital',
-              es: 'Banco digital',
-              en: 'Digital bank',
+              pt: 'C6 Bank ou Inter (recomendado para estrangeiros)',
+              es: 'C6 Bank o Inter (recomendado para extranjeros)',
+              en: 'C6 Bank or Inter (recommended for foreigners)',
             ),
             description: _t(
               locale,
-              pt: 'Melhor caminho para abrir rápido usando CPF e app.',
-              es: 'El mejor camino para abrir rapido usando CPF y app.',
-              en: 'The best path to open fast using CPF and an app.',
+              pt: 'Aceitam DNI/passaporte estrangeiro mais facilmente que a maioria dos digitais.',
+              es: 'Aceptan DNI/pasaporte extranjero mas facilmente que la mayoria de los digitales.',
+              en: 'Accept foreign ID/passport more easily than most digital banks.',
             ),
             pros: _list(
               locale,
-              pt: ['Processo simples', 'Baixo atrito inicial'],
-              es: ['Proceso simple', 'Baja friccion inicial'],
-              en: ['Simple process', 'Low initial friction'],
+              pt: ['Menor rejeição para estrangeiros', 'Processo 100% pelo app'],
+              es: ['Menor rechazo para extranjeros', 'Proceso 100% por app'],
+              en: ['Lower rejection rate for foreigners', '100% app process'],
             ),
             cons: _list(
               locale,
@@ -1520,9 +1688,9 @@ class ArgentinaBrazilGuideDataSource {
             id: 'bank_1',
             title: _t(
               locale,
-              pt: 'Escolher banco digital (Nubank, Inter ou C6)',
-              es: 'Elegir banco digital (Nubank, Inter o C6)',
-              en: 'Choose a digital bank (Nubank, Inter, or C6)',
+              pt: 'Escolher banco digital (C6 Bank ou Inter — melhor para estrangeiros)',
+              es: 'Elegir banco digital (C6 Bank o Inter — mejor para extranjeros)',
+              en: 'Choose a digital bank (C6 Bank or Inter — best for foreigners)',
             ),
             isCompleted: false,
           ),
@@ -1547,6 +1715,63 @@ class ArgentinaBrazilGuideDataSource {
             isCompleted: false,
           ),
         ],
+        urgencyLevel: GuideUrgencyLevel.watch,
+        urgencySignal: _t(
+          locale,
+          pt: 'Nubank rejeita muitos estrangeiros sem histórico no Brasil — comece por C6 Bank ou Inter.',
+          es: 'Nubank rechaza a muchos extranjeros sin historial en Brasil — empieza por C6 Bank o Inter.',
+          en: 'Nubank rejects many foreigners with no Brazilian credit history — start with C6 Bank or Inter.',
+        ),
+        warningFlags: _list(
+          locale,
+          pt: [
+            'Nubank: rejeita frequentemente estrangeiros sem histórico no Brasil. Não é o melhor primeiro banco.',
+            'Se a conta for reprovada, tente outro banco — cada pedido não prejudica o próximo.',
+            'Não use conta de terceiros para receber pagamentos — gera problemas legais e fiscais.',
+          ],
+          es: [
+            'Nubank: rechaza frecuentemente a extranjeros sin historial en Brasil. No es el mejor primer banco.',
+            'Si la cuenta es rechazada, intenta con otro banco — cada solicitud no perjudica la siguiente.',
+            'No uses la cuenta de un tercero para cobrar pagos — genera problemas legales y fiscales.',
+          ],
+          en: [
+            'Nubank: frequently rejects foreigners with no Brazilian history. Not the best first bank.',
+            'If rejected, try another bank — each application does not hurt the next one.',
+            'Do not use a third party\'s account to receive payments — this creates legal and tax issues.',
+          ],
+        ),
+        survivalPhrases: [
+          SurvivalPhrase(
+            phrase: 'Quero abrir uma conta corrente',
+            translation: _t(locale, pt: 'Ao chegar no banco ou app', es: 'Al llegar al banco o app', en: 'When opening an account'),
+          ),
+          SurvivalPhrase(
+            phrase: 'Quais documentos são necessários?',
+            translation: _t(locale, pt: 'Para confirmar o que levar', es: 'Para confirmar qué llevar', en: 'To confirm what to bring'),
+          ),
+          SurvivalPhrase(
+            phrase: 'Preciso cadastrar minha chave Pix',
+            translation: _t(locale, pt: 'Depois de aprovado', es: 'Despues de la aprobacion', en: 'After account approval'),
+          ),
+        ],
+        communityTips: _list(
+          locale,
+          pt: [
+            '"C6 Bank aprovou minha conta com CPF + passaporte argentino na hora. Nubank pediu comprovante de renda que eu não tinha."',
+            '"Se o primeiro banco rejeitar, tente outro — cada solicitação não afeta a próxima."',
+            '"Bradesco presencial costuma ser mais flexível para estrangeiros do que os digitais."',
+          ],
+          es: [
+            '"C6 Bank aprobó mi cuenta con CPF + pasaporte argentino de inmediato. Nubank pedia comprobante de ingresos que no tenia."',
+            '"Si el primer banco rechaza, prueba otro — cada solicitud no afecta la siguiente."',
+            '"Bradesco presencial suele ser mas flexible para extranjeros que los digitales."',
+          ],
+          en: [
+            '"C6 Bank approved my account with CPF + Argentine passport right away. Nubank asked for income proof I didn\'t have."',
+            '"If the first bank rejects you, try another — each application does not affect the next."',
+            '"In-branch Bradesco tends to be more flexible for foreigners than digital banks."',
+          ],
+        ),
       ),
       GuideActionItem(
         id: 'item_3_2_aluguel_fixo',
@@ -1627,6 +1852,70 @@ class ArgentinaBrazilGuideDataSource {
           pt: '1-4 semanas',
           es: '1-4 semanas',
           en: '1-4 weeks',
+        ),
+        urgencyLevel: GuideUrgencyLevel.watch,
+        urgencySignal: _t(
+          locale,
+          pt: 'Fiador é exigido na maioria dos imóveis — descubra sua opção de garantia antes de visitar.',
+          es: 'El garante es exigido en la mayoria de los inmuebles — descubre tu opcion de garantia antes de visitar.',
+          en: 'A guarantor is required for most rentals — find out your guarantee option before viewing properties.',
+        ),
+        warningFlags: _list(
+          locale,
+          pt: [
+            'Fiador: exige brasileiro com imóvel próprio quitado. Sem fiador, busque imóveis com seguro-fiança ou título de capitalização.',
+            'Golpe do falso anúncio: pedem depósito antecipado por foto bonita. Nunca pague sem visitar.',
+            'Pressão para fechar rápido ("outro interessado") é sinal de alerta — tome seu tempo.',
+            'Exigências ilegais: peça de comprovante de renda acima de 3x o aluguel é abusiva.',
+          ],
+          es: [
+            'Garante: exige un brasileiro con inmueble propio libre de hipoteca. Sin garante, busca inmuebles con seguro-fianza o titulo de capitalizacion.',
+            'Estafa del falso anuncio: piden deposito anticipado por foto bonita. Nunca pagues sin visitar.',
+            'Presion para cerrar rapido ("hay otro interesado") es senal de alerta — toma tu tiempo.',
+            'Exigencias ilegales: pedir comprobante de ingresos mayor a 3x el alquiler es abusivo.',
+          ],
+          en: [
+            'Guarantor: requires a Brazilian with a fully-owned property. Without one, look for insurance-based or capitalization guarantee options.',
+            'Fake listing scam: deposit demanded before visit based on nice photos. Never pay without visiting.',
+            'Pressure to close fast ("another buyer interested") is a red flag — take your time.',
+            'Illegal demands: requiring proof of income over 3x the rent is abusive and often illegal.',
+          ],
+        ),
+        survivalPhrases: [
+          SurvivalPhrase(
+            phrase: 'Quero alugar este imóvel',
+            translation: _t(locale, pt: 'Ao visitar o imóvel', es: 'Al visitar el inmueble', en: 'When visiting the property'),
+          ),
+          SurvivalPhrase(
+            phrase: 'Qual é o valor do aluguel e do condomínio?',
+            translation: _t(locale, pt: 'Para entender o custo total', es: 'Para entender el costo total', en: 'To understand total cost'),
+          ),
+          SurvivalPhrase(
+            phrase: 'Vocês aceitam seguro-fiança no lugar de fiador?',
+            translation: _t(locale, pt: 'Para resolver sem fiador brasileiro', es: 'Para resolver sin garante brasileno', en: 'If you have no Brazilian guarantor'),
+          ),
+          SurvivalPhrase(
+            phrase: 'Posso ver o contrato antes de assinar?',
+            translation: _t(locale, pt: 'Sempre peça antes de comprometer', es: 'Siempre pide antes de comprometerte', en: 'Always ask before committing'),
+          ),
+        ],
+        communityTips: _list(
+          locale,
+          pt: [
+            '"Achei apartamento pelo QuintoAndar sem fiador — eles aceitam seguro-fiança e o processo é 100% online."',
+            '"Facebook Marketplace tem bastante quarto e kitnet direto com proprietário, sem imobiliária."',
+            '"Peça sempre a versão digital do contrato para traduzir com IA antes de assinar."',
+          ],
+          es: [
+            '"Encontre departamento por QuintoAndar sin garante — aceptan seguro-fianza y el proceso es 100% online."',
+            '"Facebook Marketplace tiene bastante habitacion y estudio directo con propietario, sin inmobiliaria."',
+            '"Pide siempre la version digital del contrato para traducirlo con IA antes de firmar."',
+          ],
+          en: [
+            '"I found an apartment through QuintoAndar without a guarantor — they accept rental insurance and the process is 100% online."',
+            '"Facebook Marketplace has plenty of rooms and studios direct from owners, no agency."',
+            '"Always ask for the digital version of the lease to translate it with AI before signing."',
+          ],
         ),
       ),
       GuideActionItem(
@@ -1919,6 +2208,27 @@ class ArgentinaBrazilGuideDataSource {
           pt: '30-60 min',
           es: '30-60 min',
           en: '30-60 min',
+        ),
+        communityTips: _list(
+          locale,
+          pt: [
+            '"UX Designer: R\$4.000–9.000. Desenvolvedor: R\$5.000–15.000. Salário médio geral em SP/RJ: R\$3.500–6.000."',
+            '"Workana e 99Freelas aceitam estrangeiros com CPF — ótimo pra começar freelancer antes do emprego fixo."',
+            '"Se você trabalha remotamente para empresa argentina, pode precisar declarar renda nos dois países. MEI simplifica isso."',
+            '"LinkedIn Brasil funciona muito bem. Perfil em português aumenta muito o retorno."',
+          ],
+          es: [
+            '"UX Designer: R\$4.000–9.000. Desarrollador: R\$5.000–15.000. Salario promedio general en SP/RJ: R\$3.500–6.000."',
+            '"Workana y 99Freelas aceptan extranjeros con CPF — genial para empezar freelance antes del trabajo fijo."',
+            '"Si trabajas remotamente para empresa argentina, puede que tengas que declarar ingresos en los dos paises. MEI simplifica eso."',
+            '"LinkedIn Brasil funciona muy bien. Perfil en portugues aumenta mucho la respuesta."',
+          ],
+          en: [
+            '"UX Designer: R\$4,000–9,000. Developer: R\$5,000–15,000. Average salary in SP/RJ: R\$3,500–6,000."',
+            '"Workana and 99Freelas accept foreigners with CPF — great for freelancing before landing a full-time role."',
+            '"If you work remotely for an Argentine company, you may need to declare income in both countries. MEI simplifies this."',
+            '"Brazilian LinkedIn works very well. A Portuguese profile significantly increases response rate."',
+          ],
         ),
       ),
       GuideActionItem(
@@ -2569,6 +2879,24 @@ class ArgentinaBrazilGuideDataSource {
           pt: '10 min',
           es: '10 min',
           en: '10 min',
+        ),
+        communityTips: _list(
+          locale,
+          pt: [
+            '"Abri MEI em 10 minutos pelo site gov.br. Precisei só do CPF e de um endereço de correspondência."',
+            '"MEI permite faturar até R\$81.000/ano com impostos fixos baixos — ótimo para freelancer e nômade."',
+            '"Se você recebe da Argentina, o MEI permite emitir nota fiscal em reais e regularizar a renda facilmente."',
+          ],
+          es: [
+            '"Abre el MEI en 10 minutos por el sitio gov.br. Solo necesite CPF y una direccion de correspondencia."',
+            '"MEI permite facturar hasta R\$81.000/ano con impuestos fijos bajos — genial para freelancer y nomada."',
+            '"Si cobras desde Argentina, el MEI permite emitir factura en reales y regularizar los ingresos facilmente."',
+          ],
+          en: [
+            '"I opened my MEI in 10 minutes on gov.br. Just needed CPF and a mailing address."',
+            '"MEI allows billing up to R\$81,000/year with low fixed taxes — great for freelancers and nomads."',
+            '"If you receive payment from Argentina, MEI lets you issue invoices in BRL and easily regularize income."',
+          ],
         ),
       ),
     ];
