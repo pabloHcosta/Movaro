@@ -813,82 +813,20 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // ── Warning Flags ──
-                                if (sheetItem.hasWarningFlags) ...[
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF2D0A0A),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: const Color(0xFF7A1F1F),
-                                      ),
+                                // ── Community Tips (reassurance first) ──
+                                if (sheetItem.hasCommunityTips)
+                                  _GuideExpandableSection(
+                                    title: _localizedText(
+                                      sheetContext,
+                                      pt: '💬 Dica de quem já fez isso',
+                                      es: '💬 Consejo de quien ya lo hizo',
+                                      en: '💬 Tip from someone who did this',
                                     ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.gpp_bad_rounded,
-                                              size: 14,
-                                              color: Color(0xFFE24B4A),
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              _localizedText(
-                                                sheetContext,
-                                                pt: 'Alertas importantes',
-                                                es: 'Alertas importantes',
-                                                en: 'Important warnings',
-                                              ),
-                                              style: const TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
-                                                color: Color(0xFFE24B4A),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        for (final flag
-                                            in sheetItem.warningFlags!) ...[
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              const Padding(
-                                                padding: EdgeInsets.only(
-                                                  top: 5,
-                                                  right: 6,
-                                                ),
-                                                child: Icon(
-                                                  Icons.circle,
-                                                  size: 5,
-                                                  color: Color(0xFFE24B4A),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Text(
-                                                  flag,
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                    color: Color(0xFFD4716F),
-                                                    height: 1.4,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                        ],
-                                      ],
+                                    initiallyExpanded: true,
+                                    child: _GuideCommunityTipsContent(
+                                      item: sheetItem,
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
-                                ],
                                 if (sheetItem.hasLocationAwareOptions)
                                   _GuideExecutionBlock(
                                     item: sheetItem,
@@ -984,20 +922,6 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                           ),
                                     ),
                                   ),
-                                // ── Community Tips ──
-                                if (sheetItem.hasCommunityTips)
-                                  _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: '💬 Dica de quem já fez isso',
-                                      es: '💬 Consejo de quien ya lo hizo',
-                                      en: '💬 Tip from someone who did this',
-                                    ),
-                                    initiallyExpanded: true,
-                                    child: _GuideCommunityTipsContent(
-                                      item: sheetItem,
-                                    ),
-                                  ),
                                 // ── Survival Phrases ──
                                 if (sheetItem.hasSurvivalPhrases)
                                   _GuideExpandableSection(
@@ -1012,6 +936,82 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                       item: sheetItem,
                                     ),
                                   ),
+                                // ── Warning Flags (protective, after reassurance) ──
+                                if (sheetItem.hasWarningFlags) ...[
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF2D0A0A),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: const Color(0xFF7A1F1F),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.gpp_bad_rounded,
+                                              size: 14,
+                                              color: Color(0xFFE24B4A),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              _localizedText(
+                                                sheetContext,
+                                                pt: 'Alertas importantes',
+                                                es: 'Alertas importantes',
+                                                en: 'Important warnings',
+                                              ),
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700,
+                                                color: Color(0xFFE24B4A),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        for (final flag
+                                            in sheetItem.warningFlags!) ...[
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Padding(
+                                                padding: EdgeInsets.only(
+                                                  top: 5,
+                                                  right: 6,
+                                                ),
+                                                child: Icon(
+                                                  Icons.circle,
+                                                  size: 5,
+                                                  color: Color(0xFFE24B4A),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: Text(
+                                                  flag,
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Color(0xFFD4716F),
+                                                    height: 1.4,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
                                 if (sheetItem.doneCriteria != null)
                                   _GuideExpandableSection(
                                     title: _localizedText(
