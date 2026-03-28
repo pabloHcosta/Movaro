@@ -25,8 +25,8 @@ class JourneyStepperWidget extends StatelessWidget {
 
   static const _phases = [
     GuidePhase.preparation,
-    GuidePhase.documents,
     GuidePhase.housing,
+    GuidePhase.documents,
     GuidePhase.work,
     GuidePhase.arrival,
   ];
