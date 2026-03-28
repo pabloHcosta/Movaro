@@ -2644,6 +2644,27 @@
   "homeJourneyPhaseArrival": "Chegada",
   "homeJourneyDoneLabel": "feito",
   "homeJourneyItemsLabel": "itens",
+  "homeStepperProgress": "{done} de {total} feitos",
+  "@homeStepperProgress": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "homeStepperUrgent": "URGENTE",
+  "homeStepperDoNow": "Fazer agora",
+  "homeStepperSeeMore": "+ {count} mais",
+  "@homeStepperSeeMore": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "homeActionCompare": "Comparar",
   "homeActionViewCity": "Ver cidade",
   "homeActionNewPlan": "Novo plano",

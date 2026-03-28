@@ -29,6 +29,7 @@ import 'package:movaro_app/features/migration_questionnaire/domain/entities/migr
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
+import 'package:movaro_app/features/home/presentation/widgets/journey_stepper_widget.dart';
 
 class PublicHomePage extends StatefulWidget {
   const PublicHomePage({
@@ -59,7 +60,6 @@ class _PublicHomePageState extends State<PublicHomePage>
   final StreakService _streakService = StreakService();
   MigrationCopilotProgressSnapshot _progressSnapshot =
       const MigrationCopilotProgressSnapshot();
-  int _streakDays = 0;
   String? _loadedPlanKey;
   String? _loadedWeatherCityId;
   bool _didTryPromptLocation = false;
@@ -179,14 +179,14 @@ class _PublicHomePageState extends State<PublicHomePage>
                                       city: city,
                                       weather: widget.citiesController
                                           .weatherFor(city.id),
+                                      plan: plan!,
                                       guideState: guideState!,
                                       cityInsightsController:
                                           widget.cityInsightsController,
-                                      planGoal: plan!.goal,
+                                      planGoal: plan.goal,
                                       planTimeline: plan.timeline,
                                       recommendationReasons:
                                           plan.cityRecommendationReasons,
-                                      streakDays: _streakDays,
                                       onOpenSettings: _openSettings,
                                       onViewAction: (item) =>
                                           _showActionDetails(context, item),
@@ -510,9 +510,7 @@ class _PublicHomePageState extends State<PublicHomePage>
   }
 
   Future<void> _recordStreak() async {
-    final days = await _streakService.recordActivity();
-    if (!mounted) return;
-    setState(() => _streakDays = days);
+    await _streakService.recordActivity();
   }
 
   /// Force-refreshes the progress snapshot from disk (e.g. after returning
@@ -522,13 +520,12 @@ class _PublicHomePageState extends State<PublicHomePage>
     if (plan == null) return;
 
     // Record activity — user was actively using the guide.
-    final days = await _streakService.recordActivity();
+    await _streakService.recordActivity();
     final snapshot = await _progressStore.read(plan);
     if (!mounted) return;
 
     setState(() {
       _progressSnapshot = snapshot;
-      _streakDays = days;
     });
   }
 
@@ -558,12 +555,12 @@ class _ActiveHomeState extends StatelessWidget {
   const _ActiveHomeState({
     required this.city,
     required this.weather,
+    required this.plan,
     required this.guideState,
     required this.cityInsightsController,
     required this.planGoal,
     required this.planTimeline,
     required this.recommendationReasons,
-    required this.streakDays,
     required this.onOpenSettings,
     required this.onViewAction,
     required this.onCompare,
@@ -574,12 +571,12 @@ class _ActiveHomeState extends StatelessWidget {
 
   final City city;
   final CityWeather? weather;
+  final MigrationPlan plan;
   final _HomeGuideState guideState;
   final CityInsightController cityInsightsController;
   final String planGoal;
   final String planTimeline;
   final List<String> recommendationReasons;
-  final int streakDays;
   final VoidCallback onOpenSettings;
   final ValueChanged<GuideActionItem> onViewAction;
   final VoidCallback onCompare;
@@ -594,9 +591,15 @@ class _ActiveHomeState extends StatelessWidget {
       onOpenSettings: onOpenSettings,
     );
 
-    final progressCard = _MigrationProgressCard(
-      state: guideState,
-      streakDays: streakDays,
+    final journeyStepper = JourneyStepperWidget(
+      plan: plan,
+      allItems: guideState.items,
+      onTapActiveTask: guideState.currentItem != null
+          ? () => onViewAction(guideState.currentItem!)
+          : null,
+      onTapSeeMore: guideState.currentItem != null
+          ? () => onViewAction(guideState.currentItem!)
+          : null,
     );
 
     final actionRow = _SecondaryActionRow(
@@ -617,21 +620,22 @@ class _ActiveHomeState extends StatelessWidget {
       children: [
         hero,
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(0, 6, 0, 6),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                progressCard,
-                const SizedBox(height: 5),
-                _NextActionsSection(
-                  state: guideState,
-                  onTap: onViewAction,
+                journeyStepper,
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: actionRow,
                 ),
                 const SizedBox(height: 5),
-                actionRow,
-                const SizedBox(height: 5),
-                Expanded(child: insightsSection),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: insightsSection,
+                ),
               ],
             ),
           ),
@@ -782,409 +786,6 @@ class _ActiveHero extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ─── Unified migration progress + next-action card ────────────────────────────
-//
-// Replaces the old _ProgressCard + _NextActionCard pair.
-// Only rendered when the plan is active (progress > 0 or guide started).
-
-class _MigrationProgressCard extends StatelessWidget {
-  const _MigrationProgressCard({
-    required this.state,
-    required this.streakDays,
-  });
-
-  final _HomeGuideState state;
-  final int streakDays;
-
-  // Canonical display order for the 5 phases.
-  static const _phaseOrder = [
-    GuidePhase.preparation,
-    GuidePhase.documents,
-    GuidePhase.housing,
-    GuidePhase.work,
-    GuidePhase.arrival,
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final screenSize = _screenSizeOf(context);
-    final cardPadding = switch (screenSize) {
-      _ScreenSize.small => 7.0,
-      _ScreenSize.medium => 9.0,
-      _ScreenSize.large => 11.0,
-    };
-
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(cardPadding),
-      decoration: BoxDecoration(
-        color: _cardBackground(context),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _progressBorder(context)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── BLOCK 1: Header ──────────────────────────────────────────
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  context.l10n.homeJourneyTitle,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.40),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-              if (streakDays > 0) _StreakBadge(days: streakDays),
-            ],
-          ),
-          const SizedBox(height: 5),
-
-          // ── BLOCK 2: Journey list + Metrics ─────────────────────────
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Phase list
-              Expanded(
-                child: _PhaseList(state: state, phases: _phaseOrder),
-              ),
-              // Vertical divider
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: SizedBox(
-                  height: 60,
-                  child: VerticalDivider(
-                    width: 1,
-                    thickness: 1,
-                    color: Colors.white.withValues(alpha: 0.08),
-                  ),
-                ),
-              ),
-              // Metrics column
-              _MetricsColumn(state: state),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Streak badge ──────────────────────────────────────────────────────────────
-
-class _StreakBadge extends StatelessWidget {
-  const _StreakBadge({required this.days});
-
-  final int days;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = days == 1
-        ? context.l10n.homeJourneyActiveDaySingle
-        : context.l10n.homeJourneyActiveDayPlural;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.30)),
-      ),
-      child: Text(
-        '🔥 $days $label',
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: _accentText(context),
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Phase list (Block 2, left column) ─────────────────────────────────────────
-
-enum _PhaseStatus { completed, current, future }
-
-class _PhaseList extends StatelessWidget {
-  const _PhaseList({required this.state, required this.phases});
-
-  final _HomeGuideState state;
-  final List<GuidePhase> phases;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var i = 0; i < phases.length; i++) ...[
-          _PhaseRow(phase: phases[i], status: _status(phases[i])),
-          if (i < phases.length - 1) const SizedBox(height: 1),
-        ],
-      ],
-    );
-  }
-
-  _PhaseStatus _status(GuidePhase phase) {
-    final phaseItems = state.items.where((it) => it.phase == phase).toList();
-    if (phaseItems.isEmpty) return _PhaseStatus.future;
-    if (phaseItems.every((it) => state.completedIds.contains(it.id))) {
-      return _PhaseStatus.completed;
-    }
-    if (state.currentItem?.phase == phase) return _PhaseStatus.current;
-    return _PhaseStatus.future;
-  }
-}
-
-class _PhaseRow extends StatelessWidget {
-  const _PhaseRow({required this.phase, required this.status});
-
-  final GuidePhase phase;
-  final _PhaseStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = _phaseLabel(context, phase);
-
-    final nameStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
-      color: switch (status) {
-        _PhaseStatus.completed => Colors.white.withValues(alpha: 0.45),
-        _PhaseStatus.current => Colors.white,
-        _PhaseStatus.future => Colors.white.withValues(alpha: 0.25),
-      },
-      fontWeight: status == _PhaseStatus.current
-          ? FontWeight.w700
-          : FontWeight.w400,
-    );
-
-    final Widget indicator = switch (status) {
-      _PhaseStatus.completed => Icon(
-        Icons.check_rounded,
-        size: 13,
-        color: _accentText(context),
-      ),
-      _PhaseStatus.current => Text(
-        context.l10n.homeJourneyCurrentPhaseMarker,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-      _PhaseStatus.future => Text(
-        context.l10n.homeJourneyLockedPhaseMarker,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: Colors.white.withValues(alpha: 0.20),
-        ),
-      ),
-    };
-
-    final rowContent = Row(
-      children: [
-        Expanded(child: Text(label, style: nameStyle)),
-        indicator,
-      ],
-    );
-
-    if (status == _PhaseStatus.current) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-        decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: rowContent,
-      );
-    }
-    return rowContent;
-  }
-
-  String _phaseLabel(BuildContext context, GuidePhase phase) => switch (phase) {
-    GuidePhase.preparation => context.l10n.homeJourneyPhasePreparation,
-    GuidePhase.documents => context.l10n.homeJourneyPhaseDocuments,
-    GuidePhase.housing => context.l10n.homeJourneyPhaseHousing,
-    GuidePhase.work => context.l10n.homeJourneyPhaseWork,
-    GuidePhase.arrival => context.l10n.homeJourneyPhaseArrival,
-  };
-}
-
-// ─── Metrics column (Block 2, right column) ────────────────────────────────────
-
-class _MetricsColumn extends StatelessWidget {
-  const _MetricsColumn({required this.state});
-
-  final _HomeGuideState state;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '${state.completedCount}',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontSize: 26,
-              fontWeight: FontWeight.w900,
-              color: _accentText(context),
-              height: 1.1,
-            ),
-          ),
-          Text(
-            'de ${state.totalItems} ítems',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Colors.white.withValues(alpha: 0.40),
-              letterSpacing: 0.1,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Próximas Acciones section ─────────────────────────────────────────────────
-
-class _NextActionsSection extends StatelessWidget {
-  const _NextActionsSection({
-    required this.state,
-    required this.onTap,
-  });
-
-  final _HomeGuideState state;
-  final ValueChanged<GuideActionItem> onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final pendingItems = state.items
-        .where((it) => !it.isCompleted)
-        .take(3)
-        .toList(growable: false);
-
-    if (pendingItems.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          'PRÓXIMAS ACCIONES',
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: AppColors.textSoftFor(context),
-            letterSpacing: 0.8,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 5),
-        for (var i = 0; i < pendingItems.length; i++) ...[
-          _NextActionItem(
-            item: pendingItems[i],
-            priorityIndex: i,
-            onTap: () => onTap(pendingItems[i]),
-          ),
-          if (i < pendingItems.length - 1) const SizedBox(height: 4),
-        ],
-      ],
-    );
-  }
-}
-
-class _NextActionItem extends StatelessWidget {
-  const _NextActionItem({
-    required this.item,
-    required this.priorityIndex,
-    required this.onTap,
-  });
-
-  final GuideActionItem item;
-  final int priorityIndex;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final (borderColor, badgeText) = switch (priorityIndex) {
-      0 => (AppColors.danger, 'URGENTE'),
-      1 => (AppColors.warning, 'Próximo paso'),
-      _ => (AppColors.primary, 'Pendiente'),
-    };
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: _cardBackground(context),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: _cardBorder(context)),
-          ),
-          child: SizedBox(
-            height: 36,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Left priority border
-                Container(
-                  width: 3,
-                  decoration: BoxDecoration(
-                    color: borderColor,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(9),
-                      bottomLeft: Radius.circular(9),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                // Title
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      item.title,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: _primaryText(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // Priority badge
-                Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 7,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: borderColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      badgeText,
-                      style: AppTypography.compactBadge.copyWith(
-                        color: borderColor,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -1478,10 +1079,6 @@ Color _cardBackground(BuildContext context) =>
 Color _cardBorder(BuildContext context) => AppColors.isDark(context)
     ? Colors.white.withValues(alpha: 0.08)
     : Colors.black.withValues(alpha: 0.08);
-
-Color _progressBorder(BuildContext context) => AppColors.isDark(context)
-    ? const Color(0x2E0EA5E9)
-    : const Color(0x330EA5E9);
 
 Color _primaryText(BuildContext context) =>
     AppColors.isDark(context) ? Colors.white : const Color(0xFF0A0F1E);

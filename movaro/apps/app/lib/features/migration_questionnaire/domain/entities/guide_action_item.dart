@@ -117,6 +117,7 @@ class GuideActionItem {
   final String id;
   final String title;
   final String shortDescription;
+  @Deprecated('Use steps, decisionOptions, and structured fields instead')
   final String? fullContent;
   final GuideActionType type;
   final String? externalUrl;

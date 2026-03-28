@@ -38,7 +38,6 @@ import 'package:movaro_app/features/migration_questionnaire/presentation/pages/p
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/housing_selection_screen.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/arrival_execution_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/landing_budget_estimator_section.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/guide_content_renderer.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_document_readiness_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_readiness_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
@@ -718,6 +717,55 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                               ),
                         ),
                         const SizedBox(height: 16),
+                        // ── Primary Action Button (action-first) ──
+                        if (sheetItem.resolvedPrimaryActionType !=
+                                GuidePrimaryActionType.none &&
+                            sheetItem.resolvedPrimaryActionType !=
+                                GuidePrimaryActionType.checklist) ...[
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton.icon(
+                              onPressed: handlePrimaryAction,
+                              icon: Icon(
+                                actionOpened
+                                    ? Icons.refresh_rounded
+                                    : Icons.open_in_new_rounded,
+                                size: 18,
+                              ),
+                              label: Text(
+                                actionOpened
+                                    ? _localizedText(
+                                        sheetContext,
+                                        pt: 'Abrir novamente',
+                                        es: 'Abrir de nuevo',
+                                        en: 'Open again',
+                                      )
+                                    : (sheetItem.primaryActionLabel ??
+                                          _localizedText(
+                                            sheetContext,
+                                            pt: 'Abrir ação principal',
+                                            es: 'Abrir accion principal',
+                                            en: 'Open primary action',
+                                          )),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                        // ── Checklist (interactive, drives completion) ──
+                        if (sheetItem.hasChecklist) ...[
+                          for (final subItem
+                              in sheetItem.checklistItems!) ...[
+                            CheckboxListTile(
+                              value: subItem.isCompleted,
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(subItem.title),
+                              onChanged: (_) =>
+                                  handleChecklistToggle(subItem),
+                            ),
+                          ],
+                          const SizedBox(height: 6),
+                        ],
                         Flexible(
                           fit: FlexFit.loose,
                           child: SingleChildScrollView(
@@ -734,8 +782,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                         ),
                                   ),
                                 if (sheetItem.hasDecisionOptions ||
-                                    sheetItem.hasSteps ||
-                                    sheetItem.fullContent != null)
+                                    sheetItem.hasSteps)
                                   _GuideExpandableSection(
                                     title: _localizedText(
                                       sheetContext,
@@ -753,41 +800,51 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                           ),
                                     ),
                                   ),
-                                if (sheetItem.hasRequirements)
+                                // ── Details: Requirements + Cost + Time ──
+                                if (sheetItem.hasRequirements ||
+                                    sheetItem.costInfo != null ||
+                                    sheetItem.estimatedTime != null)
                                   _GuideExpandableSection(
                                     title: _localizedText(
                                       sheetContext,
-                                      pt: 'Requisitos',
-                                      es: 'Requisitos',
-                                      en: 'Requirements',
+                                      pt: 'Detalhes',
+                                      es: 'Detalles',
+                                      en: 'Details',
                                     ),
-                                    initiallyExpanded: true,
-                                    child: _GuideRequirementsContent(
-                                      item: sheetItem,
-                                    ),
-                                  ),
-                                if (sheetItem.costInfo != null)
-                                  _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: 'Custo',
-                                      es: 'Costo',
-                                      en: 'Cost',
-                                    ),
-                                    child: _GuideSimpleInfoContent(
-                                      text: sheetItem.costInfo!,
-                                    ),
-                                  ),
-                                if (sheetItem.estimatedTime != null)
-                                  _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: 'Tempo',
-                                      es: 'Tiempo',
-                                      en: 'Time',
-                                    ),
-                                    child: _GuideSimpleInfoContent(
-                                      text: sheetItem.estimatedTime!,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        if (sheetItem.hasRequirements)
+                                          _GuideRequirementsContent(
+                                            item: sheetItem,
+                                          ),
+                                        if (sheetItem.costInfo != null) ...[
+                                          const SizedBox(height: 8),
+                                          _GuideDetailRow(
+                                            label: _localizedText(
+                                              sheetContext,
+                                              pt: 'Custo',
+                                              es: 'Costo',
+                                              en: 'Cost',
+                                            ),
+                                            value: sheetItem.costInfo!,
+                                          ),
+                                        ],
+                                        if (sheetItem.estimatedTime !=
+                                            null) ...[
+                                          const SizedBox(height: 4),
+                                          _GuideDetailRow(
+                                            label: _localizedText(
+                                              sheetContext,
+                                              pt: 'Tempo',
+                                              es: 'Tiempo',
+                                              en: 'Time',
+                                            ),
+                                            value: sheetItem.estimatedTime!,
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                   ),
                                 if (sheetItem.hasTips ||
@@ -800,6 +857,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                       es: 'Consejos y alertas',
                                       en: 'Tips and warnings',
                                     ),
+                                    initiallyExpanded: false,
                                     child: _GuideTipsContent(
                                       item: sheetItem,
                                       onLinkTap: (url, label) =>
@@ -822,52 +880,11 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                       item: sheetItem,
                                     ),
                                   ),
-                                if (sheetItem.hasChecklist) ...[
-                                  const SizedBox(height: 14),
-                                  for (final subItem
-                                      in sheetItem.checklistItems!) ...[
-                                    CheckboxListTile(
-                                      value: subItem.isCompleted,
-                                      contentPadding: EdgeInsets.zero,
-                                      title: Text(subItem.title),
-                                      onChanged: (_) =>
-                                          handleChecklistToggle(subItem),
-                                    ),
-                                  ],
-                                ],
                               ],
                             ),
                           ),
                         ),
                         const SizedBox(height: 14),
-                        if (sheetItem.resolvedPrimaryActionType !=
-                                GuidePrimaryActionType.none &&
-                            sheetItem.resolvedPrimaryActionType !=
-                                GuidePrimaryActionType.checklist) ...[
-                          SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton(
-                              onPressed: handlePrimaryAction,
-                              child: Text(
-                                actionOpened
-                                    ? _localizedText(
-                                        sheetContext,
-                                        pt: 'Abrir novamente',
-                                        es: 'Abrir de nuevo',
-                                        en: 'Open again',
-                                      )
-                                    : (sheetItem.primaryActionLabel ??
-                                          _localizedText(
-                                            sheetContext,
-                                            pt: 'Abrir ação principal',
-                                            es: 'Abrir accion principal',
-                                            en: 'Open primary action',
-                                          )),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                        ],
                         SizedBox(
                           width: double.infinity,
                           child: FilledButton(
@@ -2854,9 +2871,7 @@ class _GuideDominantActionCard extends StatelessWidget {
                   _GuideExecutionBlock(item: item!, onLinkTap: onLinkTap),
                 ],
                 if (showExpandedContent) ...[
-                  if (item!.hasDecisionOptions ||
-                      item!.hasSteps ||
-                      item!.fullContent != null)
+                  if (item!.hasDecisionOptions || item!.hasSteps)
                     _GuideExpandableSection(
                       title: _localizedText(
                         context,
@@ -2870,6 +2885,48 @@ class _GuideDominantActionCard extends StatelessWidget {
                         onLinkTap: onLinkTap,
                       ),
                     ),
+                  if (item!.hasRequirements ||
+                      item!.costInfo != null ||
+                      item!.estimatedTime != null)
+                    _GuideExpandableSection(
+                      title: _localizedText(
+                        context,
+                        pt: 'Detalhes',
+                        es: 'Detalles',
+                        en: 'Details',
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (item!.hasRequirements)
+                            _GuideRequirementsContent(item: item!),
+                          if (item!.costInfo != null) ...[
+                            const SizedBox(height: 8),
+                            _GuideDetailRow(
+                              label: _localizedText(
+                                context,
+                                pt: 'Custo',
+                                es: 'Costo',
+                                en: 'Cost',
+                              ),
+                              value: item!.costInfo!,
+                            ),
+                          ],
+                          if (item!.estimatedTime != null) ...[
+                            const SizedBox(height: 4),
+                            _GuideDetailRow(
+                              label: _localizedText(
+                                context,
+                                pt: 'Tempo',
+                                es: 'Tiempo',
+                                en: 'Time',
+                              ),
+                              value: item!.estimatedTime!,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   if (item!.hasTips ||
                       item!.blockingReason != null ||
                       item!.hasSupportLinks)
@@ -2880,41 +2937,10 @@ class _GuideDominantActionCard extends StatelessWidget {
                         es: 'Consejos y alertas',
                         en: 'Tips and warnings',
                       ),
+                      initiallyExpanded: false,
                       child: _GuideTipsContent(
                         item: item!,
                         onLinkTap: onLinkTap,
-                      ),
-                    ),
-                  if (item!.hasRequirements)
-                    _GuideExpandableSection(
-                      title: _localizedText(
-                        context,
-                        pt: 'Requisitos',
-                        es: 'Requisitos',
-                        en: 'Requirements',
-                      ),
-                      child: _GuideRequirementsContent(item: item!),
-                    ),
-                  if (item!.costInfo != null)
-                    _GuideExpandableSection(
-                      title: _localizedText(
-                        context,
-                        pt: 'Custo',
-                        es: 'Costo',
-                        en: 'Cost',
-                      ),
-                      child: _GuideSimpleInfoContent(text: item!.costInfo!),
-                    ),
-                  if (item!.estimatedTime != null)
-                    _GuideExpandableSection(
-                      title: _localizedText(
-                        context,
-                        pt: 'Tempo',
-                        es: 'Tiempo',
-                        en: 'Time',
-                      ),
-                      child: _GuideSimpleInfoContent(
-                        text: item!.estimatedTime!,
                       ),
                     ),
                   if (item!.doneCriteria != null)
@@ -3182,11 +3208,22 @@ class _GuideExecutionContent extends StatelessWidget {
         ],
         if (!item.hasSteps &&
             !item.hasDecisionOptions &&
-            item.fullContent != null)
-          GuideContentRenderer(
-            content: item.fullContent!,
-            onLinkTap: onLinkTap,
-          ),
+            item.externalOfficialLinks != null)
+          for (final link in item.externalOfficialLinks!)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: GestureDetector(
+                onTap: () => onLinkTap(link.url, link.label),
+                child: Text(
+                  link.label,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
       ],
     );
   }
@@ -3377,16 +3414,33 @@ class _GuideRequirementsContent extends StatelessWidget {
   }
 }
 
-class _GuideSimpleInfoContent extends StatelessWidget {
-  const _GuideSimpleInfoContent({required this.text});
+class _GuideDetailRow extends StatelessWidget {
+  const _GuideDetailRow({required this.label, required this.value});
 
-  final String text;
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.45),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$label: ',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            height: 1.45,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              height: 1.45,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
