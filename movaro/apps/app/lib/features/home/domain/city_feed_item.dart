@@ -21,6 +21,7 @@ class CityFeedItem {
     this.actionUrl,
     this.cityCodes = const <String>[],
     this.stages = const <UserJourneyStage>[],
+    this.updatedAt,
   });
 
   final String id;
@@ -43,6 +44,9 @@ class CityFeedItem {
 
   /// Journey stages this item is relevant for. Empty = all stages.
   final List<UserJourneyStage> stages;
+
+  /// Optional curation date shown on cost-sensitive cards, e.g. "Mar/2025".
+  final String? updatedAt;
 
   bool isRelevantFor({required String? cityCode, required UserJourneyStage stage}) {
     final cityMatch = cityCodes.isEmpty || (cityCode != null && cityCodes.contains(cityCode));

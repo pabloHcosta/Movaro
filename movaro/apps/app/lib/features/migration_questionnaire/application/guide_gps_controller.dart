@@ -227,6 +227,7 @@ class GuideGpsController extends ChangeNotifier {
   Future<void> _handlePostCompletion(GuideActionItem item) async {
     await PlanNotificationService.instance.cancelPlanReminders();
     if (item.id == 'item_2_2_residencia') {
+      await PlanNotificationService.instance.cancelPFReminder();
       _applyResidenceDeadlineBadge();
       final completedAt = _completedAtById[item.id];
       if (completedAt != null) {

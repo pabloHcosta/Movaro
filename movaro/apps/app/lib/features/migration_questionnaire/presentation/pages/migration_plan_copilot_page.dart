@@ -585,6 +585,13 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                 sheetItem.checklistItems?.every((sub) => sub.isCompleted) ??
                 false;
             final canComplete = !sheetItem.hasChecklist || allChecklistDone;
+            final checklistCompletedCount = sheetItem.checklistItems
+                    ?.where((sub) => sub.isCompleted)
+                    .length ??
+                0;
+            final isInProgress = sheetItem.hasChecklist &&
+                checklistCompletedCount > 0 &&
+                !sheetItem.isCompleted;
 
             Future<void> handlePrimaryAction() async {
               switch (sheetItem.resolvedPrimaryActionType) {
@@ -719,7 +726,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                         const SizedBox(height: 16),
                         // ── CPF Unlock Chain Banner ──
                         if (sheetItem.id == 'item_2_1_cpf')
-                          _CpfUnlockBanner(allItems: allItems),
+                          _CpfUnlockBanner(allItems: controller.items),
                         // ── Urgency Signal Banner ──
                         if (sheetItem.urgencySignal != null) ...[
                           Container(
@@ -816,6 +823,11 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // ── Companion quick reference (in-progress) ──
+                                if (isInProgress &&
+                                    (sheetItem.hasSurvivalPhrases ||
+                                        sheetItem.hasRequirements))
+                                  _QuickReferenceCard(item: sheetItem),
                                 // ── Community Tips (reassurance first) ──
                                 if (sheetItem.hasCommunityTips)
                                   _GuideExpandableSection(
@@ -842,12 +854,19 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                 if (sheetItem.hasDecisionOptions ||
                                     sheetItem.hasSteps)
                                   _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: 'Como fazer',
-                                      es: 'Como hacerlo',
-                                      en: 'How to do it',
-                                    ),
+                                    title: isInProgress
+                                        ? _localizedText(
+                                            sheetContext,
+                                            pt: '▶ Em andamento — próximos passos',
+                                            es: '▶ En progreso — próximos pasos',
+                                            en: '▶ In progress — next steps',
+                                          )
+                                        : _localizedText(
+                                            sheetContext,
+                                            pt: 'Como fazer',
+                                            es: 'Como hacerlo',
+                                            en: 'How to do it',
+                                          ),
                                     initiallyExpanded: true,
                                     child: _GuideExecutionContent(
                                       item: sheetItem,
@@ -6151,6 +6170,297 @@ class _InlineActionTag extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Icon(Icons.arrow_forward_rounded, size: 14, color: tint),
+    );
+  }
+}
+
+// ─── Companion Quick Reference Card ──────────────────────────────────────────
+
+class _QuickReferenceCard extends StatefulWidget {
+  const _QuickReferenceCard({required this.item});
+
+  final GuideActionItem item;
+
+  @override
+  State<_QuickReferenceCard> createState() => _QuickReferenceCardState();
+}
+
+class _QuickReferenceCardState extends State<_QuickReferenceCard> {
+  bool _expanded = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final item = widget.item;
+    final locale = Localizations.localeOf(context).languageCode;
+
+    final firstPhrase = item.survivalPhrases?.firstOrNull;
+    final firstReqs = (item.requirements ?? const []).take(2).toList();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF0F1E35) : const Color(0xFFF0F7FF),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDark ? const Color(0xFF1A3060) : const Color(0xFFBFDBFE),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: () => setState(() => _expanded = !_expanded),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.flash_on_rounded,
+                      size: 14,
+                      color: Color(0xFF3B7CC8),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        _headerLabel(locale),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF3B7CC8),
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      _expanded
+                          ? Icons.expand_less_rounded
+                          : Icons.expand_more_rounded,
+                      size: 16,
+                      color: const Color(0xFF3B7CC8),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (_expanded) ...[
+              const Divider(height: 1, thickness: 0.5),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (firstPhrase != null) ...[
+                      _RefRow(
+                        icon: Icons.record_voice_over_rounded,
+                        label: _sayLabel(locale),
+                        value: firstPhrase.phrase,
+                        isDark: isDark,
+                      ),
+                      if (firstReqs.isNotEmpty) const SizedBox(height: 8),
+                    ],
+                    if (firstReqs.isNotEmpty)
+                      _RefRow(
+                        icon: Icons.inventory_2_outlined,
+                        label: _bringLabel(locale),
+                        value: firstReqs.join(' · '),
+                        isDark: isDark,
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _headerLabel(String locale) => switch (locale) {
+        'pt' => 'Referência rápida — você está executando agora',
+        'es' => 'Referencia rapida — estas ejecutando ahora',
+        _ => 'Quick reference — you\'re executing now',
+      };
+
+  String _sayLabel(String locale) => switch (locale) {
+        'pt' => 'O que dizer',
+        'es' => 'Que decir',
+        _ => 'What to say',
+      };
+
+  String _bringLabel(String locale) => switch (locale) {
+        'pt' => 'O que levar',
+        'es' => 'Que llevar',
+        _ => 'What to bring',
+      };
+}
+
+class _RefRow extends StatelessWidget {
+  const _RefRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.isDark,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 13, color: const Color(0xFF3B7CC8)),
+        const SizedBox(width: 6),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: TextStyle(
+                fontSize: 11,
+                height: 1.4,
+                color: AppColors.textSoftFor(context),
+              ),
+              children: [
+                TextSpan(
+                  text: '$label: ',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                TextSpan(text: value),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── CPF Chain Unlock Banner ──────────────────────────────────────────────────
+
+class _CpfUnlockBanner extends StatelessWidget {
+  const _CpfUnlockBanner({required this.allItems});
+
+  final List<GuideActionItem> allItems;
+
+  static const _kUnlockColor = Color(0xFF16A34A);
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final unlocked = allItems
+        .where((it) => it.dependencies.contains('item_2_1_cpf') && !it.isCompleted)
+        .toList();
+
+    if (unlocked.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: isDark
+              ? const Color(0xFF0F2D18)
+              : const Color(0xFFF0FDF4),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isDark
+                ? const Color(0xFF1D6A35)
+                : const Color(0xFFBBF7D0),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.lock_open_rounded,
+                  size: 14,
+                  color: _kUnlockColor,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _unlockLabel(context, unlocked.length),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: _kUnlockColor,
+                    height: 1,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 5,
+              children: unlocked.map((it) => _UnlockChip(item: it, isDark: isDark)).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _unlockLabel(BuildContext context, int count) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return switch (locale) {
+      'pt' => 'Este passo desbloqueia $count próximos passos:',
+      'es' => 'Este paso desbloquea $count próximos pasos:',
+      _ => 'This step unlocks $count next steps:',
+    };
+  }
+}
+
+class _UnlockChip extends StatelessWidget {
+  const _UnlockChip({required this.item, required this.isDark});
+
+  final GuideActionItem item;
+  final bool isDark;
+
+  static String _emoji(GuideActionType type) => switch (type) {
+        GuideActionType.informative => '📋',
+        GuideActionType.external => '🔗',
+        GuideActionType.tool => '🛠',
+        GuideActionType.checklist => '✅',
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFF0A2015)
+            : const Color(0xFFDCFCE7),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _emoji(item.type),
+            style: const TextStyle(fontSize: 10, height: 1),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            item.title,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: isDark
+                  ? const Color(0xFF4ADE80)
+                  : const Color(0xFF15803D),
+              height: 1,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/features/home/application/city_budget_data.dart' show CityBudget, CityBudgetData, CostRange;
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/landing_budget_estimator.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
@@ -29,6 +31,10 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
         ? l10n.landingBudgetSectionTitle
         : l10n.landingBudgetSectionTitleWithCity(estimate.cityContext!);
 
+    final cityBudget = CityBudgetData.forCity(
+      plan.recommendedCity?.id ?? plan.preferredCity?.id,
+    );
+
     return FrostedPanel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,6 +48,10 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
               height: 1.45,
             ),
           ),
+          if (cityBudget != null) ...[
+            const SizedBox(height: 18),
+            _CityRealCostSection(budget: cityBudget),
+          ],
           const SizedBox(height: 18),
           if (exchangeRates != null) ...[
             Container(
@@ -295,6 +305,202 @@ class _ScenarioCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─── Real city cost breakdown ─────────────────────────────────────────────────
+
+class _CityRealCostSection extends StatelessWidget {
+  const _CityRealCostSection({required this.budget});
+
+  final CityBudget budget;
+
+  static const _kAccent = Color(0xFF3B7CC8);
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final locale = Localizations.localeOf(context).languageCode;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0D1829) : const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1A2840) : const Color(0xFFE2E8F0),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.location_city_rounded, size: 14, color: _kAccent),
+              const SizedBox(width: 6),
+              Text(
+                _sectionTitle(locale, budget.cityLabel),
+                style: AppTypography.compactBadge.copyWith(
+                  color: _kAccent,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _CostRow(
+            label: _label(locale, pt: 'Aluguel 1 quarto', es: 'Alquiler 1 amb.', en: '1-bed rent'),
+            range: budget.rent,
+            maxVal: 4000,
+            isDark: isDark,
+          ),
+          const SizedBox(height: 6),
+          _CostRow(
+            label: _label(locale, pt: 'Alimentação', es: 'Comida', en: 'Food'),
+            range: budget.food,
+            maxVal: 2500,
+            isDark: isDark,
+          ),
+          const SizedBox(height: 6),
+          _CostRow(
+            label: _label(locale, pt: 'Transporte', es: 'Transporte', en: 'Transport'),
+            range: budget.transport,
+            maxVal: 600,
+            isDark: isDark,
+          ),
+          const SizedBox(height: 6),
+          _CostRow(
+            label: _label(locale, pt: 'Utilidades', es: 'Servicios', en: 'Utilities'),
+            range: budget.utilities,
+            maxVal: 400,
+            isDark: isDark,
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _totalLabel(locale),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimaryFor(context),
+                  ),
+                ),
+              ),
+              Text(
+                'R\$${_fmt(budget.leanTotal)}–${_fmt(budget.comfortableTotal)}/mês',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: _kAccent,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _sourceNote(locale, budget.updatedAt),
+            style: AppTypography.tinyLabel.copyWith(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.28)
+                  : const Color(0xFF94A3B8),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _sectionTitle(String locale, String cityLabel) => switch (locale) {
+        'pt' => 'Custos reais em $cityLabel',
+        'es' => 'Costos reales en $cityLabel',
+        _ => 'Real costs in $cityLabel',
+      };
+
+  String _totalLabel(String locale) => switch (locale) {
+        'pt' => 'Total estimado solo',
+        'es' => 'Total estimado solo',
+        _ => 'Estimated total alone',
+      };
+
+  String _sourceNote(String locale, String date) => switch (locale) {
+        'pt' => 'Dados curados $date · Valores aproximados',
+        'es' => 'Datos curados $date · Valores aproximados',
+        _ => 'Curated data $date · Approximate values',
+      };
+
+  String _label(
+    String locale, {
+    required String pt,
+    required String es,
+    required String en,
+  }) =>
+      switch (locale) {
+        'pt' => pt,
+        'es' => es,
+        _ => en,
+      };
+
+  static String _fmt(int v) {
+    if (v >= 1000) {
+      final thousands = v ~/ 1000;
+      final remainder = (v % 1000) ~/ 100;
+      return remainder == 0 ? '${thousands}k' : '$thousands.${remainder}k';
+    }
+    return '$v';
+  }
+}
+
+class _CostRow extends StatelessWidget {
+  const _CostRow({
+    required this.label,
+    required this.range,
+    required this.maxVal,
+    required this.isDark,
+  });
+
+  final String label;
+  final CostRange range;
+  final int maxVal;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final fraction = (range.max / maxVal).clamp(0.0, 1.0);
+
+    return Row(
+      children: [
+        SizedBox(
+          width: 90,
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: fraction,
+              minHeight: 5,
+              backgroundColor: isDark
+                  ? const Color(0xFF1A2840)
+                  : const Color(0xFFE2E8F0),
+              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF3B7CC8)),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          'R\$${range.min}–${range.max}',
+          style: AppTypography.compactBadge.copyWith(
+            color: AppColors.textPrimaryFor(context),
+          ),
+        ),
+      ],
     );
   }
 }
