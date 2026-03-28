@@ -134,6 +134,89 @@ class PlanNotificationService {
     await _notifications.cancel(id: 1003);
   }
 
+  /// Fires 1 day after plan creation to remind users to schedule their
+  /// Polícia Federal appointment (queues of 60–90 days in SP and RJ).
+  Future<void> schedulePFAppointmentReminder(MigrationPlan plan) async {
+    await initialize();
+    final cityName =
+        plan.recommendedCity?.name ?? plan.preferredCity?.name ?? '';
+    final hasMajorCity = cityName.contains('São Paulo') ||
+        cityName.contains('Rio') ||
+        cityName.contains('Florianópolis');
+
+    await _scheduleNotification(
+      id: 1201,
+      title: _text(
+        pt: 'Agende a Polícia Federal agora',
+        es: 'Agenda la Policía Federal ahora',
+        en: 'Schedule the Federal Police appointment now',
+      ),
+      body: hasMajorCity
+          ? _text(
+              pt: 'Filas de 60–90 dias em $cityName. Quanto antes você agendar, melhor.',
+              es: 'Filas de 60–90 días en $cityName. Cuanto antes agendes, mejor.',
+              en: 'Queues of 60–90 days in $cityName. The sooner you schedule, the better.',
+            )
+          : _text(
+              pt: 'Agendar cedo evita filas longas. Não deixe para depois.',
+              es: 'Agendar temprano evita largas filas. No lo dejes para después.',
+              en: 'Scheduling early avoids long queues. Do not leave it for later.',
+            ),
+      scheduledDate: DateTime.now().add(const Duration(days: 1)),
+    );
+  }
+
+  /// Cancels the PF appointment reminder (call when item_2_2_residencia
+  /// is marked as complete).
+  Future<void> cancelPFReminder() async {
+    await initialize();
+    await _notifications.cancel(id: 1201);
+  }
+
+  /// Fires after 7 days of inactivity to re-engage the user.
+  /// [lastActivityDate] is the date of the last recorded app interaction.
+  Future<void> scheduleReEngagementReminder(DateTime lastActivityDate) async {
+    await initialize();
+    final scheduledDate = lastActivityDate.add(const Duration(days: 7));
+    if (!scheduledDate.isAfter(DateTime.now())) return;
+
+    await _scheduleNotification(
+      id: 1202,
+      title: _text(
+        pt: 'Você está no caminho certo',
+        es: 'Estás en el camino correcto',
+        en: 'You are on the right path',
+      ),
+      body: _text(
+        pt: 'Seu próximo passo te espera. Cada avanço pequeno muda tudo.',
+        es: 'Tu próximo paso te espera. Cada pequeño avance cambia todo.',
+        en: 'Your next step is waiting. Every small advance changes everything.',
+      ),
+      scheduledDate: scheduledDate,
+    );
+  }
+
+  /// Schedules a weekly city content notification for active users.
+  Future<void> scheduleCityContentReminder(String cityLabel) async {
+    await initialize();
+    await _notifications.cancel(id: 1203);
+
+    await _scheduleNotification(
+      id: 1203,
+      title: _text(
+        pt: 'Nova dica para $cityLabel',
+        es: 'Nuevo consejo para $cityLabel',
+        en: 'New tip for $cityLabel',
+      ),
+      body: _text(
+        pt: 'Confira o que acontece na cidade que você escolheu.',
+        es: 'Mira qué pasa en la ciudad que elegiste.',
+        en: 'See what is happening in the city you chose.',
+      ),
+      scheduledDate: DateTime.now().add(const Duration(days: 7)),
+    );
+  }
+
   Future<void> scheduleResidenceDeadlineReminder({
     required DateTime deadlineDate,
     required DateTime scheduledDate,

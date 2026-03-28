@@ -679,10 +679,10 @@ class _ActiveHomeState extends StatelessWidget {
                 ],
 
                 // ── PLANNER: countdown chip ──
-                if (isPlanner && planTimeline != null)
+                if (isPlanner)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                    child: _PlannerCountdownChip(timeline: planTimeline!),
+                    child: _PlannerCountdownChip(timeline: planTimeline),
                   ),
 
                 // ── EXPLORER: affordability card instead of full stepper ──
@@ -705,6 +705,23 @@ class _ActiveHomeState extends StatelessWidget {
                   stage: stage,
                   locale: locale,
                 ),
+                // ── Budget quick-access for explorer/planner ──
+                if (isExplorer || isPlanner) ...[
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _BudgetQuickAccessCard(
+                      locale: locale,
+                      onTap: () {
+                        final budgetItem = guideState.items.firstWhere(
+                          (it) => it.id == 'item_0_3_budget',
+                          orElse: () => guideState.items.first,
+                        );
+                        onViewAction(budgetItem);
+                      },
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1445,7 +1462,7 @@ class _ExplorerStageCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _AffordabilityRow(context),
+          _affordabilityRow(context),
           const SizedBox(height: 12),
           GestureDetector(
             onTap: onCreatePlan,
@@ -1476,7 +1493,7 @@ class _ExplorerStageCard extends StatelessWidget {
     );
   }
 
-  Widget _AffordabilityRow(BuildContext context) {
+  Widget _affordabilityRow(BuildContext context) {
     final isDark = AppColors.isDark(context);
     return Row(
       children: [
@@ -1638,4 +1655,92 @@ class _PreArrivalWarningBanner extends StatelessWidget {
       _ => en,
     };
   }
+}
+
+// ─── Budget Quick-Access Card ─────────────────────────────────────────────────
+
+class _BudgetQuickAccessCard extends StatelessWidget {
+  const _BudgetQuickAccessCard({
+    required this.locale,
+    required this.onTap,
+  });
+
+  final String locale;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF0D1829) : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDark ? const Color(0xFF1A2840) : const Color(0xFFE2E8F0),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF1E3A5F)
+                    : const Color(0xFFDBEAFE),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.calculate_outlined,
+                size: 18,
+                color: Color(0xFF3B7CC8),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _title(locale),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimaryFor(context),
+                    ),
+                  ),
+                  Text(
+                    _subtitle(locale),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: isDark
+                  ? const Color(0xFF3B7CC8)
+                  : const Color(0xFF2563EB),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _title(String locale) => switch (locale) {
+        'pt' => 'Calcule seu orçamento',
+        'es' => 'Calcula tu presupuesto',
+        _ => 'Calculate your budget',
+      };
+
+  String _subtitle(String locale) => switch (locale) {
+        'pt' => 'Quanto você precisa para os primeiros 30–90 dias',
+        'es' => 'Cuanto necesitas para los primeros 30–90 dias',
+        _ => 'How much you need for the first 30–90 days',
+      };
 }

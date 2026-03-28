@@ -141,6 +141,20 @@ class _FeedCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            if (item.updatedAt != null) ...[
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  item.updatedAt!,
+                  style: AppTypography.tinyLabel.copyWith(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.20)
+                        : const Color(0xFFCBD5E1),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

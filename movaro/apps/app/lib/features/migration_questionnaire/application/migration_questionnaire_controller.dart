@@ -465,6 +465,9 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       await PlanNotificationService.instance.scheduleOnboardingSequence(
         _generatedPlan!,
       );
+      await PlanNotificationService.instance.schedulePFAppointmentReminder(
+        _generatedPlan!,
+      );
     }
   }
 

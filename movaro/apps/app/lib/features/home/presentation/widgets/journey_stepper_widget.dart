@@ -67,6 +67,12 @@ class JourneyStepperWidget extends StatelessWidget {
         currentPhaseItems.where((it) => !it.isCompleted).firstOrNull;
     final remainingInPhase =
         currentPhaseItems.where((it) => !it.isCompleted).length;
+    final cpfUnlockCount = allItems
+        .where(
+          (it) =>
+              it.dependencies.contains('item_2_1_cpf') && !it.isCompleted,
+        )
+        .length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,6 +156,8 @@ class JourneyStepperWidget extends StatelessWidget {
             item: activeTask,
             remainingCount: remainingInPhase - 1,
             isDark: isDark,
+            cpfUnlockCount:
+                activeTask.id == 'item_2_1_cpf' ? cpfUnlockCount : 0,
             onTapActiveTask: onTapActiveTask,
             onTapSeeMore: onTapSeeMore,
           ),
@@ -310,6 +318,7 @@ class _ActiveTaskCard extends StatelessWidget {
     required this.item,
     required this.remainingCount,
     required this.isDark,
+    required this.cpfUnlockCount,
     this.onTapActiveTask,
     this.onTapSeeMore,
   });
@@ -317,6 +326,7 @@ class _ActiveTaskCard extends StatelessWidget {
   final GuideActionItem item;
   final int remainingCount;
   final bool isDark;
+  final int cpfUnlockCount;
   final VoidCallback? onTapActiveTask;
   final VoidCallback? onTapSeeMore;
 
@@ -422,6 +432,35 @@ class _ActiveTaskCard extends StatelessWidget {
               ),
             ],
           ),
+          // CPF unlock pill
+          if (cpfUnlockCount > 0) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF0F2D18)
+                        : const Color(0xFFDCFCE7),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    '✦ Desbloqueia $cpfUnlockCount passos',
+                    style: AppTypography.tinyLabel.copyWith(
+                      color: isDark
+                          ? const Color(0xFF4ADE80)
+                          : const Color(0xFF15803D),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 8),
           // Action buttons
           Row(

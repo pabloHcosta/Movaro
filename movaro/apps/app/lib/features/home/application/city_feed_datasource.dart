@@ -49,6 +49,7 @@ class CityFeedDatasource {
         en: 'Studio: R\$1,200–2,200 · 1-bed apartment: R\$2,000–3,500 · Shared room: R\$800–1,400. Centro and Zona Sul offer best value.',
       ),
       cityCodes: const ['sao-paulo', 'sp'],
+      updatedAt: 'Mar/2025',
     ),
 
     CityFeedItem(
@@ -68,6 +69,7 @@ class CityFeedDatasource {
         en: 'Studio rental: R\$1,800–3,200 (cheaper inland). Food: R\$1,200–2,000/month. Transport: R\$200–400. Estimated solo: R\$4,000–6,500/month.',
       ),
       cityCodes: const ['florianopolis', 'floripa'],
+      updatedAt: 'Mar/2025',
     ),
 
     CityFeedItem(
@@ -87,6 +89,7 @@ class CityFeedDatasource {
         en: 'Studio: R\$1,200–2,000 · Água Verde and Portão neighborhoods offer best value. Cost of living ~20% lower than SP with high quality of life.',
       ),
       cityCodes: const ['curitiba'],
+      updatedAt: 'Mar/2025',
     ),
 
     CityFeedItem(
@@ -106,6 +109,7 @@ class CityFeedDatasource {
         en: 'Botafogo, Flamengo, Laranjeiras: R\$1,800–3,500 for 1 bed. Avoid Zona Norte initially — harder logistics for newcomers. Barra and Recreio offer more space for less.',
       ),
       cityCodes: const ['rio-de-janeiro', 'rj'],
+      updatedAt: 'Mar/2025',
     ),
 
     CityFeedItem(
@@ -125,6 +129,7 @@ class CityFeedDatasource {
         en: '1-bed rental: R\$1,400–2,400 · Moinhos de Vento and Bom Fim are most popular with migrants. Estimated total: R\$3,500–5,500/month.',
       ),
       cityCodes: const ['porto-alegre'],
+      updatedAt: 'Mar/2025',
     ),
 
     // ── SALARY INTELLIGENCE ─────────────────────────────────────────────────
