@@ -17,6 +17,7 @@ import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
+import 'package:movaro_app/features/home/application/city_budget_data.dart';
 import 'package:movaro_app/features/home/application/streak_service.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/home_visual_layout.dart';
@@ -657,26 +658,26 @@ class _ActiveHomeState extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── EXECUTOR: PF nudge + pre-arrival warning (highest urgency) ──
-                if (isExecutor || isPlanner) ...[
-                  if (pfNotDone)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-                      child: _PFAppointmentNudge(
-                        onTap: () => onViewAction(pfItem),
-                      ),
+                // ── EXECUTOR/PLANNER: PF nudge (highest urgency) ──
+                if ((isExecutor || isPlanner) && pfNotDone)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                    child: _PFAppointmentNudge(
+                      onTap: () => onViewAction(pfItem),
                     ),
-                  if (incompleteCritical.isNotEmpty && !pfNotDone)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-                      child: _PreArrivalWarningBanner(
-                        count: incompleteCritical.length,
-                        onTap: guideState.currentItem != null
-                            ? () => onViewAction(incompleteCritical.first)
-                            : null,
-                      ),
+                  ),
+
+                // ── EXECUTOR: pre-arrival warning (shown alongside PF nudge) ──
+                if (isExecutor && incompleteCritical.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(16, pfNotDone ? 6 : 6, 16, 0),
+                    child: _PreArrivalWarningBanner(
+                      count: incompleteCritical.length,
+                      onTap: guideState.currentItem != null
+                          ? () => onViewAction(incompleteCritical.first)
+                          : null,
                     ),
-                ],
+                  ),
 
                 // ── PLANNER: countdown chip ──
                 if (isPlanner)
@@ -692,6 +693,7 @@ class _ActiveHomeState extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: _ExplorerStageCard(
                       city: city,
+                      cityBudget: CityBudgetData.forCity(city.id),
                       onCreatePlan: onNewPlan,
                     ),
                   ),
@@ -1222,15 +1224,18 @@ class _PFAppointmentNudge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF2D0A0A),
+          color: isDark ? const Color(0xFF2D0A0A) : const Color(0xFFFFF1F2),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF7A1F1F)),
+          border: Border.all(
+            color: isDark ? const Color(0xFF7A1F1F) : const Color(0xFFFECACA),
+          ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1266,13 +1271,16 @@ class _PFAppointmentNudge extends StatelessWidget {
                       en: '60–90 day backlog in SP and RJ. Book online before you board.',
                     ),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: const Color(0xFFD4716F),
+                      color: isDark
+                          ? const Color(0xFFD4716F)
+                          : const Color(0xFFB91C1C),
                       fontWeight: FontWeight.w400,
                       height: 1.4,
                     ),
                   ),
                   const SizedBox(height: 8),
                   GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => launchUrl(
                       Uri.parse('https://servicos.dpf.gov.br'),
                       mode: LaunchMode.externalApplication,
@@ -1393,9 +1401,14 @@ class _PlannerCountdownChip extends StatelessWidget {
 // ─── Explorer Stage Card ──────────────────────────────────────────────────────
 
 class _ExplorerStageCard extends StatelessWidget {
-  const _ExplorerStageCard({required this.city, required this.onCreatePlan});
+  const _ExplorerStageCard({
+    required this.city,
+    required this.onCreatePlan,
+    this.cityBudget,
+  });
 
   final City city;
+  final CityBudget? cityBudget;
   final VoidCallback onCreatePlan;
 
   @override
@@ -1495,15 +1508,24 @@ class _ExplorerStageCard extends StatelessWidget {
 
   Widget _affordabilityRow(BuildContext context) {
     final isDark = AppColors.isDark(context);
+    final budget = cityBudget;
+
+    final rentLabel = budget != null
+        ? 'R\$${budget.rent.min}–${budget.rent.max}'
+        : 'R\$1.800–3.500';
+    final totalLabel = budget != null
+        ? 'R\$${budget.leanTotal}–${budget.comfortableTotal}'
+        : 'R\$4.000–6.000';
+
     return Row(
       children: [
         _AffordabilityChip(
           icon: Icons.home_outlined,
           label: _localizedText(
             context,
-            pt: 'Aluguel R\$1.800–3.500',
-            es: 'Alquiler R\$1.800–3.500',
-            en: 'Rent R\$1,800–3,500',
+            pt: 'Aluguel $rentLabel',
+            es: 'Alquiler $rentLabel',
+            en: 'Rent $rentLabel',
           ),
           isDark: isDark,
         ),
@@ -1512,9 +1534,9 @@ class _ExplorerStageCard extends StatelessWidget {
           icon: Icons.attach_money_rounded,
           label: _localizedText(
             context,
-            pt: 'Mín. R\$4.000/mês',
-            es: 'Mín. R\$4.000/mes',
-            en: 'Min. R\$4,000/mo',
+            pt: 'Total $totalLabel/mês',
+            es: 'Total $totalLabel/mes',
+            en: 'Total $totalLabel/mo',
           ),
           isDark: isDark,
         ),
