@@ -7,6 +7,7 @@ import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
+import 'package:movaro_app/features/city_insights/presentation/widgets/city_insights_section.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
@@ -560,6 +561,14 @@ class _ActiveHomeState extends StatelessWidget {
       onCompare: onCompare,
       onViewCity: onViewCity,
       onNewPlan: onNewPlan,
+    );
+    final insightsSection = CityInsightsSection(
+      controller: cityInsightsController,
+      city: city,
+      weather: weather,
+      goal: planGoal,
+      timeline: planTimeline,
+      recommendationReasons: recommendationReasons,
     );
 
     // Stage-aware content layout
