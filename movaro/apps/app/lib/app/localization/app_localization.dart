@@ -1076,6 +1076,12 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'We could not build your plan right now.',
   );
 
+  String migrationStartFootnote() => _localizedText(
+    pt: 'Você pode mudar seu plano a qualquer momento',
+    es: 'Podés cambiar tu plan en cualquier momento',
+    en: 'You can always change your plan later',
+  );
+
   String questionnaireSelectionHelper(int maxSelections) => _localizedText(
     pt: 'Selecione ate $maxSelections',
     es: 'Elegi hasta $maxSelections',
@@ -1411,6 +1417,24 @@ extension AppLocalizationsFormatting on AppLocalizations {
     es: 'Conocé la ciudad antes de decidir',
     en: 'Get to know the city before deciding',
   );
+
+  String cityDetailQuickSummaryTitle() => _localizedText(
+    pt: 'Resumo rápido',
+    es: 'Resumen rápido',
+    en: 'Quick summary',
+  );
+
+  String cityDetailPhotosAction() =>
+      _localizedText(pt: 'Fotos', es: 'Fotos', en: 'Photos');
+
+  String cityDetailMapAction() =>
+      _localizedText(pt: 'Mapa', es: 'Mapa', en: 'Map');
+
+  String cityDetailFlightsAction() =>
+      _localizedText(pt: 'Voos', es: 'Vuelos', en: 'Flights');
+
+  String cityDetailAnalysisAction() =>
+      _localizedText(pt: 'Análise', es: 'Análisis', en: 'Analysis');
 
   String cityExploreTabVideos() =>
       _localizedText(pt: 'Videos', es: 'Videos', en: 'Videos');
