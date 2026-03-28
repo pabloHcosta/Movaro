@@ -320,6 +320,228 @@ class ArgentinaBrazilGuideDataSource {
         ),
       ),
       GuideActionItem(
+        id: 'item_0_5_mercado_trabalho',
+        title: _t(
+          locale,
+          pt: 'Pesquise o mercado de trabalho na sua área',
+          es: 'Investiga el mercado laboral en tu area',
+          en: 'Research the job market in your field',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'Entender o que seu perfil vale no Brasil antes de sair evita surpresas ruins e ajuda a calcular quanto você precisa para se sustentar.',
+          es: 'Entender cuanto vale tu perfil en Brasil antes de salir evita malas sorpresas y ayuda a calcular cuanto necesitas para sostenerte.',
+          en: 'Knowing what your profile is worth in Brazil before leaving prevents bad surprises and helps you estimate how much you need to sustain yourself.',
+        ),
+        fullContent: null,
+        type: GuideActionType.informative,
+        phase: GuidePhase.preparation,
+        orderIndex: 3,
+        isCompleted: false,
+        icon: Icons.work_outline_rounded,
+        context: _t(
+          locale,
+          pt: 'O mercado de trabalho brasileiro tem dinâmicas e faixas salariais bem diferentes da Argentina. Entender isso antes de chegar te dá uma vantagem real no planejamento.',
+          es: 'El mercado laboral brasileno tiene dinamicas y rangos salariales muy diferentes a los de Argentina. Entender esto antes de llegar te da una ventaja real en la planificacion.',
+          en: 'The Brazilian job market has very different dynamics and salary ranges from Argentina. Understanding this before arriving gives you a real advantage in planning.',
+        ),
+        whyItMatters: _t(
+          locale,
+          pt: 'Salário esperado, plataformas certas e como funciona CLT vs PJ no Brasil determinam sua estratégia de renda desde o dia 1. Saber disso antes de sair te poupa semanas de ajuste.',
+          es: 'El salario esperado, las plataformas correctas y como funciona CLT vs PJ en Brasil determinan tu estrategia de ingresos desde el dia 1. Saberlo antes de salir te ahorra semanas de ajuste.',
+          en: 'Expected salary, the right platforms, and how CLT vs PJ works in Brazil determine your income strategy from day one. Knowing this before leaving saves you weeks of adjustment.',
+        ),
+        primaryActionLabel: _t(
+          locale,
+          pt: 'Ver vagas no Brasil',
+          es: 'Ver vacantes en Brasil',
+          en: 'Browse jobs in Brazil',
+        ),
+        primaryActionType: GuidePrimaryActionType.external,
+        primaryActionTarget:
+            PreparationResourceLinks.officialJobsPortal.toString(),
+        steps: _list(
+          locale,
+          pt: [
+            'Pesquise vagas na sua área no LinkedIn Brasil, Catho e VAGAS.com.',
+            'Anote os salários médios anunciados — costumam ser CLT, já com encargos.',
+            'Compare com o custo de vida da cidade que você escolheu.',
+            'Entenda se seu perfil se encaixa melhor como CLT, PJ, freelancer ou MEI.',
+            'Converta os valores para pesos argentinos para ter uma referência concreta.',
+          ],
+          es: [
+            'Busca vacantes en tu area en LinkedIn Brasil, Catho y VAGAS.com.',
+            'Anota los salarios promedio anunciados — suelen ser CLT, con cargas incluidas.',
+            'Comparalos con el costo de vida de la ciudad que elegiste.',
+            'Entiende si tu perfil encaja mejor como CLT, PJ, freelancer o MEI.',
+            'Convierte los valores a pesos argentinos para tener una referencia concreta.',
+          ],
+          en: [
+            'Search for openings in your field on LinkedIn Brasil, Catho, and VAGAS.com.',
+            'Note the average advertised salaries — they are usually CLT, with deductions already included.',
+            'Compare them against the cost of living in your chosen city.',
+            'Determine whether your profile fits better as CLT, PJ, freelancer, or MEI.',
+            'Convert the figures to Argentine pesos for a concrete reference.',
+          ],
+        ),
+        doneCriteria: _t(
+          locale,
+          pt: 'Você conhece os salários médios na sua área, entende as diferenças entre CLT/PJ/freelance e tem clareza se dá para se sustentar na cidade escolhida.',
+          es: 'Conoces los salarios promedio en tu area, entiendes las diferencias entre CLT/PJ/freelance y tienes claridad si puedes sostenerte en la ciudad elegida.',
+          en: 'You know the average salaries in your field, understand the differences between CLT/PJ/freelance, and have clarity on whether you can sustain yourself in your chosen city.',
+        ),
+        tips: _list(
+          locale,
+          pt: [
+            'O dólar vale ~R\$5,80. Para converter: salário em R\$ ÷ 5,80 × câmbio do dólar no ARS.',
+            'Salários CLT anunciados já incluem FGTS e encargos — o líquido é o valor anunciado mesmo.',
+            'LinkedIn Brasil é muito mais ativo que na Argentina — perfil em português aumenta muito o retorno.',
+            'Para trabalho remoto mantendo cliente argentino: MEI simplifica a regularização da renda.',
+          ],
+          es: [
+            'El dolar vale ~R\$5,80. Para convertir: salario en R\$ ÷ 5,80 × tipo de cambio del dolar en ARS.',
+            'Los salarios CLT anunciados ya incluyen FGTS y cargas — el neto es el valor anunciado.',
+            'LinkedIn Brasil es mucho mas activo que en Argentina — perfil en portugues aumenta mucho el retorno.',
+            'Para trabajo remoto manteniendo cliente argentino: MEI simplifica la regularizacion del ingreso.',
+          ],
+          en: [
+            'The dollar is ~R\$5.80. To convert: salary in R\$ ÷ 5.80 × ARS dollar rate.',
+            'Advertised CLT salaries already include FGTS and deductions — the net is the advertised figure.',
+            'LinkedIn Brasil is far more active than in Argentina — a Portuguese profile significantly increases response rate.',
+            'For remote work keeping an Argentine client: MEI simplifies income regularization.',
+          ],
+        ),
+        communityTips: _list(
+          locale,
+          pt: [
+            '"Designer UX: R\$4.000–9.000/mês. Dev full stack: R\$6.000–18.000. Médico: R\$8.000–20.000. Professor universitário: R\$4.000–9.000. Engenheiro: R\$6.000–15.000."',
+            '"Workana e 99Freelas aceitam estrangeiros com CPF — ótimo para começar freelancer antes de ter CTPS ou emprego fixo."',
+            '"Catho funciona muito bem para vagas formais CLT, especialmente para quem está começando e quer retorno rápido."',
+            '"R\$5.000/mês em São Paulo cobre o básico com folga mínima. Em Curitiba ou Floripa, o mesmo valor já dá conforto real."',
+          ],
+          es: [
+            '"Diseñador UX: R\$4.000–9.000/mes. Dev full stack: R\$6.000–18.000. Medico: R\$8.000–20.000. Profesor universitario: R\$4.000–9.000. Ingeniero: R\$6.000–15.000."',
+            '"Workana y 99Freelas aceptan extranjeros con CPF — ideal para empezar freelance antes de tener CTPS o trabajo fijo."',
+            '"Catho funciona muy bien para vacantes formales CLT, especialmente para quien empieza y quiere respuesta rapida."',
+            '"R\$5.000/mes en Sao Paulo cubre lo basico con margen minimo. En Curitiba o Floripa, el mismo valor ya da comodidad real."',
+          ],
+          en: [
+            '"UX Designer: R\$4,000–9,000/month. Full stack dev: R\$6,000–18,000. Doctor: R\$8,000–20,000. University professor: R\$4,000–9,000. Engineer: R\$6,000–15,000."',
+            '"Workana and 99Freelas accept foreigners with CPF — great for starting freelance before having CTPS or a permanent job."',
+            '"Catho works very well for formal CLT roles, especially for those just starting who want fast responses."',
+            '"R\$5,000/month in São Paulo covers the basics with minimal margin. In Curitiba or Floripa, the same amount provides real comfort."',
+          ],
+        ),
+        preArrivalRequired: true,
+        estimatedEffort: GuideEstimatedEffort.fast,
+        estimatedTimeLabel: _t(locale, pt: '30 min', es: '30 min', en: '30 min'),
+      ),
+      GuideActionItem(
+        id: 'item_0_6_saude_entender',
+        title: _t(
+          locale,
+          pt: 'Entenda o sistema de saúde antes de chegar',
+          es: 'Entiende el sistema de salud antes de llegar',
+          en: 'Understand the health system before you arrive',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'Chegar sem saber onde ir em uma emergência, quanto custa um plano ou o que o SUS cobre é um risco desnecessário.',
+          es: 'Llegar sin saber adonde ir en una emergencia, cuanto cuesta un plan o que cubre el SUS es un riesgo innecesario.',
+          en: 'Arriving without knowing where to go in an emergency, how much a plan costs, or what SUS covers is an unnecessary risk.',
+        ),
+        fullContent: null,
+        type: GuideActionType.informative,
+        phase: GuidePhase.preparation,
+        orderIndex: 4,
+        isCompleted: false,
+        icon: Icons.health_and_safety_outlined,
+        context: _t(
+          locale,
+          pt: 'O Brasil tem sistema público de saúde universal (SUS) — gratuito e acessível com CPF. Entender como funciona antes de chegar te poupa tempo e ansiedade no momento de maior instabilidade.',
+          es: 'Brasil tiene un sistema de salud publico universal (SUS) — gratuito y accesible con CPF. Entender como funciona antes de llegar te ahorra tiempo y ansiedad en el momento de mayor inestabilidad.',
+          en: 'Brazil has a universal public health system (SUS) — free and accessible with a CPF. Understanding how it works before arriving saves you time and anxiety during the most unstable period.',
+        ),
+        whyItMatters: _t(
+          locale,
+          pt: 'Uma emergência médica sem saber onde ir ou sem cobertura pode custar caro em dinheiro, tempo e estresse no pior momento possível da mudança.',
+          es: 'Una emergencia medica sin saber adonde ir o sin cobertura puede costar caro en dinero, tiempo y estres en el peor momento posible de la mudanza.',
+          en: 'A medical emergency without knowing where to go or without coverage can cost a lot in money, time, and stress at the worst possible moment of the move.',
+        ),
+        steps: _list(
+          locale,
+          pt: [
+            'Entenda que o SUS é universal e gratuito — qualquer pessoa com CPF pode usar.',
+            'Saiba a diferença entre UBS (consultas de rotina), UPA (urgência 24h) e Hospital (emergência).',
+            'Pesquise o custo de planos privados básicos na sua cidade: geralmente R\$150–400/mês.',
+            'Se tiver condição crônica ou uso de medicamento contínuo, leve estoque dos primeiros 60 dias da Argentina.',
+            'Verifique se seus medicamentos habituais têm equivalente no Brasil — o nome comercial pode ser diferente.',
+          ],
+          es: [
+            'Entiende que el SUS es universal y gratuito — cualquier persona con CPF puede usarlo.',
+            'Conoce la diferencia entre UBS (consultas de rutina), UPA (urgencias 24h) y Hospital (emergencias).',
+            'Investiga el costo de planes privados basicos en tu ciudad: generalmente R\$150–400/mes.',
+            'Si tienes condicion cronica o uso de medicamento continuo, lleva stock de los primeros 60 dias desde Argentina.',
+            'Verifica si tus medicamentos habituales tienen equivalente en Brasil — el nombre comercial puede ser diferente.',
+          ],
+          en: [
+            'Understand that SUS is universal and free — anyone with a CPF can use it.',
+            'Know the difference between UBS (routine appointments), UPA (24h urgent care), and Hospital (emergencies).',
+            'Research the cost of basic private plans in your city: typically R\$150–400/month.',
+            'If you have a chronic condition or ongoing medication, bring a 60-day supply from Argentina.',
+            'Check whether your regular medications have equivalents in Brazil — the brand name may be different.',
+          ],
+        ),
+        doneCriteria: _t(
+          locale,
+          pt: 'Você entende como funciona o SUS, sabe a diferença entre UBS/UPA/Hospital, conhece os custos de plano privado e tem um plano claro para os primeiros dias.',
+          es: 'Entiendes como funciona el SUS, conoces la diferencia entre UBS/UPA/Hospital, los costos de plan privado y tienes un plan claro para los primeros dias.',
+          en: 'You understand how SUS works, know the difference between UBS/UPA/Hospital, know what private plans cost, and have a clear plan for the first days.',
+        ),
+        tips: _list(
+          locale,
+          pt: [
+            'Para urgências nos primeiros dias (antes do Cartão SUS), vá à UPA — é gratuito mesmo sem documentação completa.',
+            'Planos básicos: Amil One, SulAmérica Especial, Hapvida custam entre R\$150–300/mês para adultos.',
+            'O Cartão SUS (CNS) se faz na UBS com CPF — mas isso só pode ser feito depois de chegar no Brasil.',
+          ],
+          es: [
+            'Para urgencias en los primeros dias (antes de la Tarjeta SUS), ve a la UPA — es gratis incluso sin documentacion completa.',
+            'Planes basicos: Amil One, SulAmerica Especial, Hapvida cuestan entre R\$150–300/mes para adultos.',
+            'La Tarjeta SUS (CNS) se hace en la UBS con CPF — pero eso solo se puede hacer despues de llegar a Brasil.',
+          ],
+          en: [
+            'For emergencies in the first days (before your SUS card), go to the UPA — it is free even without complete documentation.',
+            'Basic plans: Amil One, SulAmérica Especial, Hapvida cost R\$150–300/month for adults.',
+            'The SUS card (CNS) is obtained at the UBS with your CPF — but that can only be done after arriving in Brazil.',
+          ],
+        ),
+        communityTips: _list(
+          locale,
+          pt: [
+            '"Fui à UPA no primeiro dia sem cartão SUS e fui atendido normalmente. O sistema funciona mesmo sem documentação completa."',
+            '"Plano de R\$200/mês me deu acesso a médico em 24h. Valeu muito nos primeiros 3 meses antes de ter estabilidade."',
+            '"Trouxe meus remédios da Argentina — o nome comercial era diferente aqui e perdi uma semana procurando equivalente sem saber o nome genérico."',
+            '"O SUS cobre TUDO, mas para consultas com especialista a fila pode ser longa. Plano privado básico vale para quem tem renda."',
+          ],
+          es: [
+            '"Fui a la UPA el primer dia sin tarjeta SUS y me atendieron normalmente. El sistema funciona incluso sin documentacion completa."',
+            '"Un plan de R\$200/mes me dio acceso a medico en 24h. Valio mucho en los primeros 3 meses antes de tener estabilidad."',
+            '"Traje mis medicamentos de Argentina — el nombre comercial era diferente aca y pase una semana buscando equivalente sin saber el nombre generico."',
+            '"El SUS cubre TODO, pero para consultas con especialista la cola puede ser larga. Plan privado basico vale para quien tiene ingresos."',
+          ],
+          en: [
+            '"I went to the UPA on the first day without a SUS card and was seen normally. The system works even without complete documentation."',
+            '"A R\$200/month plan gave me access to a doctor within 24h. Very worth it in the first 3 months before having stability."',
+            '"I brought my medications from Argentina — the brand name was different here and I spent a week searching for the equivalent without knowing the generic name."',
+            '"SUS covers EVERYTHING, but for specialist appointments the queue can be long. A basic private plan is worth it for those with income."',
+          ],
+        ),
+        preArrivalRequired: true,
+        estimatedEffort: GuideEstimatedEffort.fast,
+        estimatedTimeLabel: _t(locale, pt: '20 min', es: '20 min', en: '20 min'),
+      ),
+      GuideActionItem(
         id: 'item_1_3_money',
         title: _t(
           locale,
@@ -2449,15 +2671,15 @@ class ArgentinaBrazilGuideDataSource {
         id: 'item_4_2_saude',
         title: _t(
           locale,
-          pt: 'Entenda sua cobertura de saúde no Brasil',
-          es: 'Entiende tu cobertura de salud en Brasil',
-          en: 'Understand your health coverage in Brazil',
+          pt: 'Tire seu Cartão SUS e defina sua cobertura',
+          es: 'Saca tu Tarjeta SUS y define tu cobertura',
+          en: 'Get your SUS card and set up your health coverage',
         ),
         shortDescription: _t(
           locale,
-          pt: 'Saúde não precisa esperar uma emergência. Defina cedo como você vai se atender.',
-          es: 'La salud no tiene que esperar a una emergencia. Define temprano como te vas a atender.',
-          en: 'Health should not wait for an emergency. Decide early how you will get care.',
+          pt: 'Com CPF em mãos, o Cartão SUS sai em qualquer UBS em 15 minutos. Agora você escolhe o plano definitivo.',
+          es: 'Con el CPF en mano, la Tarjeta SUS sale en cualquier UBS en 15 minutos. Ahora eliges la cobertura definitiva.',
+          en: 'With your CPF in hand, the SUS card is issued at any UBS in 15 minutes. Now you choose your definitive coverage.',
         ),
         fullContent: null,
         type: GuideActionType.checklist,
@@ -3036,13 +3258,15 @@ class ArgentinaBrazilGuideDataSource {
     switch (goal) {
       case 'work':
       case 'find_job_br':
-        // Sequence: understand → docs prep → money → flight → arrive (SIM+housing)
-        // → CPF (urgent) → residency (PF) → work card → bank → Pix
-        // → define income → long-term rent (after job secured)
+        // Sequence: understand rules → research job market → understand health
+        // → budget → money → flight → arrive (SIM+housing)
+        // → CPF → residency → work card → bank → Pix → execute income path → long-term rent
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
           'item_0_3_budget',
+          'item_0_5_mercado_trabalho',  // research BEFORE leaving
+          'item_0_6_saude_entender',    // understand health BEFORE leaving
           'item_1_3_money',
           'item_0_4_flight',
           'item_1_1_chip',
@@ -3054,17 +3278,21 @@ class ArgentinaBrazilGuideDataSource {
           'item_3_3_pix',
           'item_3_4_trabalho',
           'item_3_2_aluguel_fixo',
+          'item_4_2_saude',             // get SUS card AFTER arriving
         ];
       case 'remote_income':
       case 'remote_work':
       case 'entrepreneur':
-        // Sequence: understand → docs prep → money → flight → arrive (SIM+housing)
+        // Sequence: understand rules → research income model → understand health
+        // → budget → money → flight → arrive (SIM+housing)
         // → CPF → bank → Pix → MEI (formalize income fast) → residency
         // → work definition → long-term rent
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
           'item_0_3_budget',
+          'item_0_5_mercado_trabalho',  // research BEFORE leaving
+          'item_0_6_saude_entender',    // understand health BEFORE leaving
           'item_1_3_money',
           'item_0_4_flight',
           'item_1_1_chip',
@@ -3076,14 +3304,18 @@ class ArgentinaBrazilGuideDataSource {
           'item_2_2_residencia',
           'item_3_4_trabalho',
           'item_3_2_aluguel_fixo',
+          'item_4_2_saude',             // get SUS card AFTER arriving
         ];
       case 'study':
-        // Sequence: understand → docs prep → money → flight → arrive (SIM+housing)
-        // → CPF → residency → work card (for part-time work) → bank → Pix → rent
+        // Sequence: understand rules → research job market (part-time context) → understand health
+        // → budget → money → flight → arrive (SIM+housing)
+        // → CPF → residency → work card → bank → Pix → rent
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
           'item_0_3_budget',
+          'item_0_5_mercado_trabalho',  // understand part-time/internship market
+          'item_0_6_saude_entender',    // understand health BEFORE leaving
           'item_1_3_money',
           'item_0_4_flight',
           'item_1_1_chip',
@@ -3094,17 +3326,21 @@ class ArgentinaBrazilGuideDataSource {
           'item_3_1_conta_bancaria',
           'item_3_3_pix',
           'item_3_2_aluguel_fixo',
+          'item_4_2_saude',             // get SUS card AFTER arriving
         ];
       case 'family_partner':
       case 'quality_of_life':
       case 'beach_life':
       case 'fresh_start':
-        // Sequence: understand → docs prep → money → flight → arrive (SIM+housing)
-        // → CPF → residency → bank → Pix → rent → health coverage
+        // Sequence: understand rules → research local economy → understand health
+        // → budget → money → flight → arrive (SIM+housing)
+        // → CPF → residency → bank → Pix → rent → get SUS card
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
           'item_0_3_budget',
+          'item_0_5_mercado_trabalho',  // understand local economy before deciding
+          'item_0_6_saude_entender',    // understand health BEFORE leaving
           'item_1_3_money',
           'item_0_4_flight',
           'item_1_1_chip',
@@ -3114,7 +3350,7 @@ class ArgentinaBrazilGuideDataSource {
           'item_3_1_conta_bancaria',
           'item_3_3_pix',
           'item_3_2_aluguel_fixo',
-          'item_4_2_saude',
+          'item_4_2_saude',             // get SUS card AFTER arriving
         ];
       default:
         return const [];
@@ -3594,6 +3830,48 @@ class ArgentinaBrazilGuideDataSource {
           GuideSupportLink(
             label: 'Portal do Empreendedor',
             url: 'https://www.gov.br/empresas-e-negocios/pt-br/empreendedor',
+          ),
+        ],
+      ),
+      'item_0_5_mercado_trabalho' => item.copyWith(
+        costInfo: _t(
+          locale,
+          pt: 'Gratuito — apenas tempo de pesquisa.',
+          es: 'Gratis — solo tiempo de investigacion.',
+          en: 'Free — research time only.',
+        ),
+        executionModes: const [GuideExecutionMode.online],
+        externalOfficialLinks: [
+          GuideSupportLink(
+            label: 'LinkedIn Brasil',
+            url: 'https://www.linkedin.com/jobs',
+          ),
+          GuideSupportLink(
+            label: 'Catho',
+            url: 'https://www.catho.com.br',
+          ),
+          GuideSupportLink(
+            label: 'VAGAS.com',
+            url: PreparationResourceLinks.officialJobsPortal.toString(),
+          ),
+        ],
+      ),
+      'item_0_6_saude_entender' => item.copyWith(
+        costInfo: _t(
+          locale,
+          pt: 'Gratuito — pesquisa informacional.',
+          es: 'Gratis — investigacion informacional.',
+          en: 'Free — informational research.',
+        ),
+        executionModes: const [GuideExecutionMode.online],
+        externalOfficialLinks: [
+          GuideSupportLink(
+            label: 'SUS',
+            url: PreparationResourceLinks.susPortal.toString(),
+          ),
+          GuideSupportLink(
+            label: 'ANS',
+            url: PreparationResourceLinks.ansPortal.toString(),
           ),
         ],
       ),
