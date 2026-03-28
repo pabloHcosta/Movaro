@@ -592,6 +592,7 @@ class _CityInsightsSectionState extends State<CityInsightsSection> {
           ),
         ],
       ),
+      clipBehavior: Clip.hardEdge,
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

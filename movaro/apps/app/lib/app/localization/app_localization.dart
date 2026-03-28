@@ -1831,6 +1831,42 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'No cities found',
   );
 
+  String citySelectorTapToSelect() => _localizedText(
+    pt: 'Toque no nome da cidade no mapa',
+    es: 'Toca el nombre de la ciudad en el mapa',
+    en: 'Tap the city name on the map',
+  );
+
+  String citySelectorRegionAll() =>
+      _localizedText(pt: 'Todas', es: 'Todas', en: 'All');
+
+  String citySelectorRegionSouthSE() => _localizedText(
+    pt: 'Sul / Sudeste',
+    es: 'Sur / Sudeste',
+    en: 'South / SE',
+  );
+
+  String citySelectorRegionNE() => _localizedText(
+    pt: 'Nordeste',
+    es: 'Nordeste',
+    en: 'Northeast',
+  );
+
+  String citySelectorRegionCW() => _localizedText(
+    pt: 'Centro-Oeste',
+    es: 'Centro-Oeste',
+    en: 'Central-West',
+  );
+
+  String citySelectorRegionNorth() =>
+      _localizedText(pt: 'Norte', es: 'Norte', en: 'North');
+
+  String citySelectorNoSelection() => _localizedText(
+    pt: 'Selecione uma cidade',
+    es: 'Selecciona una ciudad',
+    en: 'Select a city',
+  );
+
   // ── Preferred City Questionnaire Step ──────────────────────────────────
 
   String preferredCityQuestionTitle() => _localizedText(

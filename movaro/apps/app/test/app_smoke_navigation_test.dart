@@ -22,6 +22,10 @@ import 'package:movaro_app/features/auth/application/auth_controller.dart';
 import 'package:movaro_app/features/auth/data/datasources/fake_auth_data_source.dart';
 import 'package:movaro_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
+import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
+import 'package:movaro_app/features/city_insights/domain/entities/city_insight_entity.dart';
+import 'package:movaro_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
+import 'package:movaro_app/features/city_insights/domain/repositories/city_insight_repository.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
@@ -296,6 +300,9 @@ class _AppTestHarness {
       ),
     );
     final apiHealthService = ApiHealthService(environment: environment);
+    final cityInsightsController = CityInsightController(
+      repository: _FakeCityInsightRepository(),
+    );
     final localeController = LocaleController();
     localeController.setLocale(const Locale('pt'));
     final themeController = ThemeController();
@@ -322,6 +329,7 @@ class _AppTestHarness {
         migrationQuestionnaireController: migrationQuestionnaireController,
         copilotExchangeRatesService: copilotExchangeRatesService,
         apiHealthService: apiHealthService,
+        cityInsightsController: cityInsightsController,
         journeyContextController: journeyContextController,
         locationController: locationController,
         localeController: localeController,
@@ -491,6 +499,26 @@ class _InMemoryQuestionnaireFlowDraftStore extends QuestionnaireFlowDraftStore {
   Future<void> clear() async {
     _snapshot = null;
   }
+}
+
+class _FakeCityInsightRepository implements CityInsightRepository {
+  @override
+  Future<List<CityInsightEntity>> getCityInsights({
+    required String cityId,
+    String? goal,
+    String? timeline,
+    String locale = 'pt',
+    bool forceRefresh = false,
+  }) async => const [];
+
+  @override
+  Future<List<CityInsightExplorePlaceEntity>> getExplorePlaces({
+    required String cityId,
+    required CityInsightTheme theme,
+    String locale = 'pt',
+    String? seedPlace,
+    bool forceRefresh = false,
+  }) async => const [];
 }
 
 class _FakeCopilotExchangeRatesService extends CopilotExchangeRatesService {
