@@ -12,6 +12,33 @@ enum GuideEstimatedEffort { fast, medium, longer }
 
 enum GuideExecutionMode { online, inPerson }
 
+/// Urgency level for guide items — drives visual indicators.
+enum GuideUrgencyLevel {
+  /// Normal flow — no urgency.
+  normal,
+
+  /// Attention recommended — doing this late adds friction.
+  watch,
+
+  /// Time-sensitive — delays cause real problems.
+  urgent,
+
+  /// Must act now — missing this causes migration failure.
+  critical,
+}
+
+/// A key phrase to say in Portuguese, with a localized translation/context.
+/// Used for the "Como falar isso em português" survival language layer.
+class SurvivalPhrase {
+  const SurvivalPhrase({required this.phrase, this.translation});
+
+  /// The actual Portuguese phrase to say (always in PT).
+  final String phrase;
+
+  /// Localized explanation or context for when/why to use it.
+  final String? translation;
+}
+
 class GuideDecisionOption {
   const GuideDecisionOption({
     required this.title,
@@ -112,11 +139,18 @@ class GuideActionItem {
     this.executionModes,
     this.mapLinks,
     this.externalOfficialLinks,
+    this.urgencyLevel,
+    this.urgencySignal,
+    this.preArrivalRequired = false,
+    this.warningFlags,
+    this.survivalPhrases,
+    this.communityTips,
   });
 
   final String id;
   final String title;
   final String shortDescription;
+  @Deprecated('Use steps, decisionOptions, and structured fields instead')
   final String? fullContent;
   final GuideActionType type;
   final String? externalUrl;
@@ -149,6 +183,36 @@ class GuideActionItem {
   final List<GuideExecutionMode>? executionModes;
   final List<GuideSupportLink>? mapLinks;
   final List<GuideSupportLink>? externalOfficialLinks;
+
+  /// Urgency level drives visual indicators (badge color, warning banner).
+  final GuideUrgencyLevel? urgencyLevel;
+
+  /// One-line urgency message shown prominently in the execution sheet.
+  /// Example: "Book the PF appointment before arriving — 60-day backlog expected."
+  final String? urgencySignal;
+
+  /// True when this step must be completed before arriving in Brazil.
+  /// Drives the "Pre-arrival" section in the copilot and home warnings.
+  final bool preArrivalRequired;
+
+  /// Red-flag warnings (scam protection, real-world failure modes).
+  /// Displayed as a distinct warning section in the execution sheet.
+  final List<String>? warningFlags;
+
+  /// Key Portuguese phrases to use in real interactions (rental office, bank,
+  /// hospital). Drives the "Como falar isso em português" survival layer.
+  final List<SurvivalPhrase>? survivalPhrases;
+
+  /// Curated first-person tips from real migration cases.
+  /// Drives the "Dica de quem já fez isso" community layer.
+  final List<String>? communityTips;
+
+  bool get hasWarningFlags =>
+      warningFlags != null && warningFlags!.isNotEmpty;
+  bool get hasSurvivalPhrases =>
+      survivalPhrases != null && survivalPhrases!.isNotEmpty;
+  bool get hasCommunityTips =>
+      communityTips != null && communityTips!.isNotEmpty;
 
   bool get hasChecklist => checklistItems != null && checklistItems!.isNotEmpty;
   bool get hasSteps => steps != null && steps!.isNotEmpty;
@@ -227,6 +291,12 @@ class GuideActionItem {
     List<GuideExecutionMode>? executionModes,
     List<GuideSupportLink>? mapLinks,
     List<GuideSupportLink>? externalOfficialLinks,
+    GuideUrgencyLevel? urgencyLevel,
+    String? urgencySignal,
+    bool? preArrivalRequired,
+    List<String>? warningFlags,
+    List<SurvivalPhrase>? survivalPhrases,
+    List<String>? communityTips,
   }) {
     return GuideActionItem(
       id: id ?? this.id,
@@ -265,6 +335,12 @@ class GuideActionItem {
       mapLinks: mapLinks ?? this.mapLinks,
       externalOfficialLinks:
           externalOfficialLinks ?? this.externalOfficialLinks,
+      urgencyLevel: urgencyLevel ?? this.urgencyLevel,
+      urgencySignal: urgencySignal ?? this.urgencySignal,
+      preArrivalRequired: preArrivalRequired ?? this.preArrivalRequired,
+      warningFlags: warningFlags ?? this.warningFlags,
+      survivalPhrases: survivalPhrases ?? this.survivalPhrases,
+      communityTips: communityTips ?? this.communityTips,
     );
   }
 }

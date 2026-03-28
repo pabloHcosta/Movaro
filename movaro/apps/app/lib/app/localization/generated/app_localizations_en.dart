@@ -6602,6 +6602,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeJourneyItemsLabel => 'items';
 
   @override
+  String homeStepperProgress(String done, String total) {
+    return '$done of $total done';
+  }
+
+  @override
+  String get homeStepperUrgent => 'URGENT';
+
+  @override
+  String get homeStepperDoNow => 'Do now';
+
+  @override
+  String homeStepperSeeMore(String count) {
+    return '+ $count more';
+  }
+
+  @override
   String get homeActionCompare => 'Compare';
 
   @override

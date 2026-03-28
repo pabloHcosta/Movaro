@@ -38,7 +38,6 @@ import 'package:movaro_app/features/migration_questionnaire/presentation/pages/p
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/housing_selection_screen.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/arrival_execution_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/landing_budget_estimator_section.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/guide_content_renderer.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_document_readiness_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_readiness_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
@@ -718,137 +717,63 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                               ),
                         ),
                         const SizedBox(height: 16),
-                        Flexible(
-                          fit: FlexFit.loose,
-                          child: SingleChildScrollView(
-                            child: Column(
+                        // ── Urgency Signal Banner ──
+                        if (sheetItem.urgencySignal != null) ...[
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _urgencyBannerColor(sheetItem.urgencyLevel),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (sheetItem.hasLocationAwareOptions)
-                                  _GuideExecutionBlock(
-                                    item: sheetItem,
-                                    onLinkTap: (url, label) =>
-                                        _openExternalPreparationLink(
-                                          title: label,
-                                          uri: Uri.parse(url),
-                                        ),
+                                Icon(
+                                  Icons.warning_amber_rounded,
+                                  size: 16,
+                                  color: _urgencyTextColor(
+                                    sheetItem.urgencyLevel,
                                   ),
-                                if (sheetItem.hasDecisionOptions ||
-                                    sheetItem.hasSteps ||
-                                    sheetItem.fullContent != null)
-                                  _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: 'Como fazer',
-                                      es: 'Como hacerlo',
-                                      en: 'How to do it',
-                                    ),
-                                    initiallyExpanded: true,
-                                    child: _GuideExecutionContent(
-                                      item: sheetItem,
-                                      onLinkTap: (url, label) =>
-                                          _openExternalPreparationLink(
-                                            title: label,
-                                            uri: Uri.parse(url),
-                                          ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    sheetItem.urgencySignal!,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: _urgencyTextColor(
+                                        sheetItem.urgencyLevel,
+                                      ),
+                                      height: 1.4,
                                     ),
                                   ),
-                                if (sheetItem.hasRequirements)
-                                  _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: 'Requisitos',
-                                      es: 'Requisitos',
-                                      en: 'Requirements',
-                                    ),
-                                    initiallyExpanded: true,
-                                    child: _GuideRequirementsContent(
-                                      item: sheetItem,
-                                    ),
-                                  ),
-                                if (sheetItem.costInfo != null)
-                                  _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: 'Custo',
-                                      es: 'Costo',
-                                      en: 'Cost',
-                                    ),
-                                    child: _GuideSimpleInfoContent(
-                                      text: sheetItem.costInfo!,
-                                    ),
-                                  ),
-                                if (sheetItem.estimatedTime != null)
-                                  _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: 'Tempo',
-                                      es: 'Tiempo',
-                                      en: 'Time',
-                                    ),
-                                    child: _GuideSimpleInfoContent(
-                                      text: sheetItem.estimatedTime!,
-                                    ),
-                                  ),
-                                if (sheetItem.hasTips ||
-                                    sheetItem.blockingReason != null ||
-                                    sheetItem.hasSupportLinks)
-                                  _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: 'Conselhos e alertas',
-                                      es: 'Consejos y alertas',
-                                      en: 'Tips and warnings',
-                                    ),
-                                    child: _GuideTipsContent(
-                                      item: sheetItem,
-                                      onLinkTap: (url, label) =>
-                                          _openExternalPreparationLink(
-                                            title: label,
-                                            uri: Uri.parse(url),
-                                          ),
-                                    ),
-                                  ),
-                                if (sheetItem.doneCriteria != null)
-                                  _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: 'Quando considerar concluído',
-                                      es: 'Cuando considerarlo terminado',
-                                      en: 'When to mark it done',
-                                    ),
-                                    initiallyExpanded: true,
-                                    child: _GuideDoneCriteriaContent(
-                                      item: sheetItem,
-                                    ),
-                                  ),
-                                if (sheetItem.hasChecklist) ...[
-                                  const SizedBox(height: 14),
-                                  for (final subItem
-                                      in sheetItem.checklistItems!) ...[
-                                    CheckboxListTile(
-                                      value: subItem.isCompleted,
-                                      contentPadding: EdgeInsets.zero,
-                                      title: Text(subItem.title),
-                                      onChanged: (_) =>
-                                          handleChecklistToggle(subItem),
-                                    ),
-                                  ],
-                                ],
+                                ),
                               ],
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 14),
+                          const SizedBox(height: 12),
+                        ],
+                        // ── Primary Action Button (action-first) ──
                         if (sheetItem.resolvedPrimaryActionType !=
                                 GuidePrimaryActionType.none &&
                             sheetItem.resolvedPrimaryActionType !=
                                 GuidePrimaryActionType.checklist) ...[
                           SizedBox(
                             width: double.infinity,
-                            child: OutlinedButton(
+                            child: FilledButton.icon(
                               onPressed: handlePrimaryAction,
-                              child: Text(
+                              icon: Icon(
+                                actionOpened
+                                    ? Icons.refresh_rounded
+                                    : Icons.open_in_new_rounded,
+                                size: 18,
+                              ),
+                              label: Text(
                                 actionOpened
                                     ? _localizedText(
                                         sheetContext,
@@ -868,6 +793,243 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                           ),
                           const SizedBox(height: 10),
                         ],
+                        // ── Checklist (interactive, drives completion) ──
+                        if (sheetItem.hasChecklist) ...[
+                          for (final subItem
+                              in sheetItem.checklistItems!) ...[
+                            CheckboxListTile(
+                              value: subItem.isCompleted,
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(subItem.title),
+                              onChanged: (_) =>
+                                  handleChecklistToggle(subItem),
+                            ),
+                          ],
+                          const SizedBox(height: 6),
+                        ],
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // ── Community Tips (reassurance first) ──
+                                if (sheetItem.hasCommunityTips)
+                                  _GuideExpandableSection(
+                                    title: _localizedText(
+                                      sheetContext,
+                                      pt: '💬 Dica de quem já fez isso',
+                                      es: '💬 Consejo de quien ya lo hizo',
+                                      en: '💬 Tip from someone who did this',
+                                    ),
+                                    initiallyExpanded: true,
+                                    child: _GuideCommunityTipsContent(
+                                      item: sheetItem,
+                                    ),
+                                  ),
+                                if (sheetItem.hasLocationAwareOptions)
+                                  _GuideExecutionBlock(
+                                    item: sheetItem,
+                                    onLinkTap: (url, label) =>
+                                        _openExternalPreparationLink(
+                                          title: label,
+                                          uri: Uri.parse(url),
+                                        ),
+                                  ),
+                                if (sheetItem.hasDecisionOptions ||
+                                    sheetItem.hasSteps)
+                                  _GuideExpandableSection(
+                                    title: _localizedText(
+                                      sheetContext,
+                                      pt: 'Como fazer',
+                                      es: 'Como hacerlo',
+                                      en: 'How to do it',
+                                    ),
+                                    initiallyExpanded: true,
+                                    child: _GuideExecutionContent(
+                                      item: sheetItem,
+                                      onLinkTap: (url, label) =>
+                                          _openExternalPreparationLink(
+                                            title: label,
+                                            uri: Uri.parse(url),
+                                          ),
+                                    ),
+                                  ),
+                                // ── Details: Requirements + Cost + Time ──
+                                if (sheetItem.hasRequirements ||
+                                    sheetItem.costInfo != null ||
+                                    sheetItem.estimatedTime != null)
+                                  _GuideExpandableSection(
+                                    title: _localizedText(
+                                      sheetContext,
+                                      pt: 'Detalhes',
+                                      es: 'Detalles',
+                                      en: 'Details',
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        if (sheetItem.hasRequirements)
+                                          _GuideRequirementsContent(
+                                            item: sheetItem,
+                                          ),
+                                        if (sheetItem.costInfo != null) ...[
+                                          const SizedBox(height: 8),
+                                          _GuideDetailRow(
+                                            label: _localizedText(
+                                              sheetContext,
+                                              pt: 'Custo',
+                                              es: 'Costo',
+                                              en: 'Cost',
+                                            ),
+                                            value: sheetItem.costInfo!,
+                                          ),
+                                        ],
+                                        if (sheetItem.estimatedTime !=
+                                            null) ...[
+                                          const SizedBox(height: 4),
+                                          _GuideDetailRow(
+                                            label: _localizedText(
+                                              sheetContext,
+                                              pt: 'Tempo',
+                                              es: 'Tiempo',
+                                              en: 'Time',
+                                            ),
+                                            value: sheetItem.estimatedTime!,
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                if (sheetItem.hasTips ||
+                                    sheetItem.blockingReason != null ||
+                                    sheetItem.hasSupportLinks)
+                                  _GuideExpandableSection(
+                                    title: _localizedText(
+                                      sheetContext,
+                                      pt: 'Conselhos e alertas',
+                                      es: 'Consejos y alertas',
+                                      en: 'Tips and warnings',
+                                    ),
+                                    initiallyExpanded: false,
+                                    child: _GuideTipsContent(
+                                      item: sheetItem,
+                                      onLinkTap: (url, label) =>
+                                          _openExternalPreparationLink(
+                                            title: label,
+                                            uri: Uri.parse(url),
+                                          ),
+                                    ),
+                                  ),
+                                // ── Survival Phrases ──
+                                if (sheetItem.hasSurvivalPhrases)
+                                  _GuideExpandableSection(
+                                    title: _localizedText(
+                                      sheetContext,
+                                      pt: '🇧🇷 Como falar isso em português',
+                                      es: '🇧🇷 Como decirlo en portugues',
+                                      en: '🇧🇷 How to say it in Portuguese',
+                                    ),
+                                    initiallyExpanded: false,
+                                    child: _GuideSurvivalPhrasesContent(
+                                      item: sheetItem,
+                                    ),
+                                  ),
+                                // ── Warning Flags (protective, after reassurance) ──
+                                if (sheetItem.hasWarningFlags) ...[
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF2D0A0A),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: const Color(0xFF7A1F1F),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.gpp_bad_rounded,
+                                              size: 14,
+                                              color: Color(0xFFE24B4A),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              _localizedText(
+                                                sheetContext,
+                                                pt: 'Alertas importantes',
+                                                es: 'Alertas importantes',
+                                                en: 'Important warnings',
+                                              ),
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700,
+                                                color: Color(0xFFE24B4A),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        for (final flag
+                                            in sheetItem.warningFlags!) ...[
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Padding(
+                                                padding: EdgeInsets.only(
+                                                  top: 5,
+                                                  right: 6,
+                                                ),
+                                                child: Icon(
+                                                  Icons.circle,
+                                                  size: 5,
+                                                  color: Color(0xFFE24B4A),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: Text(
+                                                  flag,
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Color(0xFFD4716F),
+                                                    height: 1.4,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+                                if (sheetItem.doneCriteria != null)
+                                  _GuideExpandableSection(
+                                    title: _localizedText(
+                                      sheetContext,
+                                      pt: 'Quando considerar concluído',
+                                      es: 'Cuando considerarlo terminado',
+                                      en: 'When to mark it done',
+                                    ),
+                                    initiallyExpanded: true,
+                                    child: _GuideDoneCriteriaContent(
+                                      item: sheetItem,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
                         SizedBox(
                           width: double.infinity,
                           child: FilledButton(
@@ -2753,6 +2915,22 @@ class _GuideDominantActionCard extends StatelessWidget {
                           item!.estimatedEffort!,
                         ),
                       ),
+                    if (item!.preArrivalRequired)
+                      _GuideUrgencyChip(
+                        label: _localizedText(
+                          context,
+                          pt: '✈ Antes de viajar',
+                          es: '✈ Antes de viajar',
+                          en: '✈ Before traveling',
+                        ),
+                        color: const Color(0xFF3B7CC8),
+                      ),
+                    if (item!.urgencyLevel != null &&
+                        item!.urgencyLevel != GuideUrgencyLevel.normal)
+                      _GuideUrgencyChip(
+                        label: _urgencyLabel(context, item!.urgencyLevel!),
+                        color: _urgencyTextColor(item!.urgencyLevel),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 14),
@@ -2854,9 +3032,7 @@ class _GuideDominantActionCard extends StatelessWidget {
                   _GuideExecutionBlock(item: item!, onLinkTap: onLinkTap),
                 ],
                 if (showExpandedContent) ...[
-                  if (item!.hasDecisionOptions ||
-                      item!.hasSteps ||
-                      item!.fullContent != null)
+                  if (item!.hasDecisionOptions || item!.hasSteps)
                     _GuideExpandableSection(
                       title: _localizedText(
                         context,
@@ -2870,6 +3046,48 @@ class _GuideDominantActionCard extends StatelessWidget {
                         onLinkTap: onLinkTap,
                       ),
                     ),
+                  if (item!.hasRequirements ||
+                      item!.costInfo != null ||
+                      item!.estimatedTime != null)
+                    _GuideExpandableSection(
+                      title: _localizedText(
+                        context,
+                        pt: 'Detalhes',
+                        es: 'Detalles',
+                        en: 'Details',
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (item!.hasRequirements)
+                            _GuideRequirementsContent(item: item!),
+                          if (item!.costInfo != null) ...[
+                            const SizedBox(height: 8),
+                            _GuideDetailRow(
+                              label: _localizedText(
+                                context,
+                                pt: 'Custo',
+                                es: 'Costo',
+                                en: 'Cost',
+                              ),
+                              value: item!.costInfo!,
+                            ),
+                          ],
+                          if (item!.estimatedTime != null) ...[
+                            const SizedBox(height: 4),
+                            _GuideDetailRow(
+                              label: _localizedText(
+                                context,
+                                pt: 'Tempo',
+                                es: 'Tiempo',
+                                en: 'Time',
+                              ),
+                              value: item!.estimatedTime!,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   if (item!.hasTips ||
                       item!.blockingReason != null ||
                       item!.hasSupportLinks)
@@ -2880,42 +3098,33 @@ class _GuideDominantActionCard extends StatelessWidget {
                         es: 'Consejos y alertas',
                         en: 'Tips and warnings',
                       ),
+                      initiallyExpanded: false,
                       child: _GuideTipsContent(
                         item: item!,
                         onLinkTap: onLinkTap,
                       ),
                     ),
-                  if (item!.hasRequirements)
+                  if (item!.hasCommunityTips)
                     _GuideExpandableSection(
                       title: _localizedText(
                         context,
-                        pt: 'Requisitos',
-                        es: 'Requisitos',
-                        en: 'Requirements',
+                        pt: '💬 Dica de quem já fez isso',
+                        es: '💬 Consejo de quien ya lo hizo',
+                        en: '💬 Tip from someone who did this',
                       ),
-                      child: _GuideRequirementsContent(item: item!),
+                      initiallyExpanded: true,
+                      child: _GuideCommunityTipsContent(item: item!),
                     ),
-                  if (item!.costInfo != null)
+                  if (item!.hasSurvivalPhrases)
                     _GuideExpandableSection(
                       title: _localizedText(
                         context,
-                        pt: 'Custo',
-                        es: 'Costo',
-                        en: 'Cost',
+                        pt: '🇧🇷 Como falar isso em português',
+                        es: '🇧🇷 Como decirlo en portugues',
+                        en: '🇧🇷 How to say it in Portuguese',
                       ),
-                      child: _GuideSimpleInfoContent(text: item!.costInfo!),
-                    ),
-                  if (item!.estimatedTime != null)
-                    _GuideExpandableSection(
-                      title: _localizedText(
-                        context,
-                        pt: 'Tempo',
-                        es: 'Tiempo',
-                        en: 'Time',
-                      ),
-                      child: _GuideSimpleInfoContent(
-                        text: item!.estimatedTime!,
-                      ),
+                      initiallyExpanded: false,
+                      child: _GuideSurvivalPhrasesContent(item: item!),
                     ),
                   if (item!.doneCriteria != null)
                     _GuideExpandableSection(
@@ -3175,6 +3384,13 @@ class _GuideExecutionContent extends StatelessWidget {
         ],
         if (item.hasDecisionOptions) ...[
           if (item.hasSteps) const SizedBox(height: 14),
+          // Bank Intelligence: show recommended option prominently
+          if (item.decisionOptions!.any((o) => o.recommended)) ...[
+            _GuideBestOptionBanner(
+              option: item.decisionOptions!.firstWhere((o) => o.recommended),
+            ),
+            const SizedBox(height: 10),
+          ],
           for (final option in item.decisionOptions!) ...[
             _GuideDecisionOptionCard(option: option),
             const SizedBox(height: 10),
@@ -3182,11 +3398,22 @@ class _GuideExecutionContent extends StatelessWidget {
         ],
         if (!item.hasSteps &&
             !item.hasDecisionOptions &&
-            item.fullContent != null)
-          GuideContentRenderer(
-            content: item.fullContent!,
-            onLinkTap: onLinkTap,
-          ),
+            item.externalOfficialLinks != null)
+          for (final link in item.externalOfficialLinks!)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: GestureDetector(
+                onTap: () => onLinkTap(link.url, link.label),
+                child: Text(
+                  link.label,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
       ],
     );
   }
@@ -3377,16 +3604,33 @@ class _GuideRequirementsContent extends StatelessWidget {
   }
 }
 
-class _GuideSimpleInfoContent extends StatelessWidget {
-  const _GuideSimpleInfoContent({required this.text});
+class _GuideDetailRow extends StatelessWidget {
+  const _GuideDetailRow({required this.label, required this.value});
 
-  final String text;
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.45),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$label: ',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            height: 1.45,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              height: 1.45,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -3484,6 +3728,180 @@ class _GuideDoneCriteriaContent extends StatelessWidget {
           height: 1.45,
         ),
       ),
+    );
+  }
+}
+
+// ─── Bank Intelligence: "Melhor opção para você" banner ──────────────────────
+
+class _GuideBestOptionBanner extends StatelessWidget {
+  const _GuideBestOptionBanner({required this.option});
+
+  final GuideDecisionOption option;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.28),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.star_rounded, size: 16, color: Color(0xFF3B7CC8)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _localizedText(
+                    context,
+                    pt: 'Melhor opção para você',
+                    es: 'Mejor opcion para ti',
+                    en: 'Best option for you',
+                  ),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF3B7CC8),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  option.title,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (option.pros.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    option.pros.take(2).map((p) => '✓ $p').join('  '),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Community Tips content ──────────────────────────────────────────────────
+
+class _GuideCommunityTipsContent extends StatelessWidget {
+  const _GuideCommunityTipsContent({required this.item});
+
+  final GuideActionItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final tip in item.communityTips!) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceMutedFor(context),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.borderFor(context)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Text('👤', style: TextStyle(fontSize: 11)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    tip,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      height: 1.45,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+}
+
+// ─── Survival Phrases content ─────────────────────────────────────────────────
+
+class _GuideSurvivalPhrasesContent extends StatelessWidget {
+  const _GuideSurvivalPhrasesContent({required this.item});
+
+  final GuideActionItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final phrase in item.survivalPhrases!) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0A1525),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFF1A2840)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '"${phrase.phrase}"',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF90C4F8),
+                    height: 1.4,
+                  ),
+                ),
+                if (phrase.translation != null) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    phrase.translation!,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+        ],
+      ],
     );
   }
 }
@@ -3842,6 +4260,74 @@ class _GuideMenuAction extends StatelessWidget {
   }
 }
 
+class _GuideUrgencyChip extends StatelessWidget {
+  const _GuideUrgencyChip({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.32)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
+class _GuideItemSubtitle extends StatelessWidget {
+  const _GuideItemSubtitle({required this.item, required BuildContext context});
+
+  final GuideActionItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final parts = <String>[];
+    if (item.preArrivalRequired) {
+      parts.add(
+        _localizedText(
+          context,
+          pt: '✈ Antes de viajar',
+          es: '✈ Antes de viajar',
+          en: '✈ Before traveling',
+        ),
+      );
+    }
+    if (item.urgencyLevel != null &&
+        item.urgencyLevel != GuideUrgencyLevel.normal) {
+      parts.add(_urgencyLabel(context, item.urgencyLevel!));
+    }
+    final typeLabel = item.badgeLabel ?? _guideActionTypeLabel(context, item);
+    if (parts.isEmpty) {
+      return Text(typeLabel, maxLines: 1, overflow: TextOverflow.ellipsis);
+    }
+    return Text(
+      '${parts.join(' · ')}  $typeLabel',
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        color: item.urgencyLevel == GuideUrgencyLevel.critical
+            ? const Color(0xFFE24B4A)
+            : item.urgencyLevel == GuideUrgencyLevel.urgent
+            ? const Color(0xFFE8873A)
+            : null,
+      ),
+    );
+  }
+}
+
 class _GuidePlanGroup extends StatelessWidget {
   const _GuidePlanGroup({
     required this.phaseLabel,
@@ -3901,11 +4387,7 @@ class _GuidePlanGroup extends StatelessWidget {
                     : null,
               ),
             ),
-            subtitle: Text(
-              item.badgeLabel ?? _guideActionTypeLabel(context, item),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            subtitle: _GuideItemSubtitle(item: item, context: context),
             onTap: completedIds.contains(item.id)
                 ? null
                 : !isUnlocked(item)
@@ -5525,6 +6007,43 @@ String _localizedText(
     _ => en,
   };
 }
+
+String _urgencyLabel(BuildContext context, GuideUrgencyLevel level) =>
+    switch (level) {
+      GuideUrgencyLevel.critical => _localizedText(
+        context,
+        pt: '🔴 Crítico',
+        es: '🔴 Critico',
+        en: '🔴 Critical',
+      ),
+      GuideUrgencyLevel.urgent => _localizedText(
+        context,
+        pt: '🟠 Urgente',
+        es: '🟠 Urgente',
+        en: '🟠 Urgent',
+      ),
+      GuideUrgencyLevel.watch => _localizedText(
+        context,
+        pt: '🟡 Atenção',
+        es: '🟡 Atencion',
+        en: '🟡 Watch',
+      ),
+      GuideUrgencyLevel.normal => '',
+    };
+
+Color _urgencyBannerColor(GuideUrgencyLevel? level) => switch (level) {
+      GuideUrgencyLevel.critical => const Color(0xFF2D0A0A),
+      GuideUrgencyLevel.urgent => const Color(0xFF2D1A08),
+      GuideUrgencyLevel.watch => const Color(0xFF1A1E08),
+      _ => const Color(0xFF0D1829),
+    };
+
+Color _urgencyTextColor(GuideUrgencyLevel? level) => switch (level) {
+      GuideUrgencyLevel.critical => const Color(0xFFE24B4A),
+      GuideUrgencyLevel.urgent => const Color(0xFFE8873A),
+      GuideUrgencyLevel.watch => const Color(0xFFD4C84A),
+      _ => const Color(0xFF90C4F8),
+    };
 
 class _InfoGuideCard extends StatelessWidget {
   const _InfoGuideCard({

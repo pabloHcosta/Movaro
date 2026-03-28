@@ -181,6 +181,32 @@ class PreparationResourceLinks {
     };
   }
 
+  static final Uri susPortal = Uri.parse(
+    'https://www.gov.br/saude/pt-br/composicao/sas/cartao-nacional-de-saude',
+  );
+
+  static final Uri ansPortal = Uri.parse(
+    'https://www.gov.br/ans/pt-br',
+  );
+
+  static Uri buildDetranMapSearch(City city) {
+    final query = Uri.encodeComponent('DETRAN ${city.name}');
+    return Uri.parse('https://www.google.com/maps/search/$query');
+  }
+
+  static Uri buildUpaMapSearch(City city) {
+    final query = Uri.encodeComponent('UPA ${city.name}');
+    return Uri.parse('https://www.google.com/maps/search/$query');
+  }
+
+  static final Uri pfPortal = Uri.parse(
+    'https://www.gov.br/pf/pt-br/assuntos/imigracao',
+  );
+
+  static final Uri pfScheduling = Uri.parse(
+    'https://www.gov.br/pf/pt-br/assuntos/imigracao/agendamento',
+  );
+
   static String _slugify(String value) {
     const accents = {
       'á': 'a',
