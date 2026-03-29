@@ -1662,10 +1662,12 @@ class _CtaPrimaryRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        OutlinedButton.icon(
-          onPressed: onCompareAction,
-          icon: const Icon(Icons.compare_arrows_rounded),
-          label: Text(context.l10n.cityDetailCompareAction),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: onCompareAction,
+            icon: const Icon(Icons.compare_arrows_rounded),
+            label: Text(context.l10n.cityDetailCompareAction),
+          ),
         ),
       ],
     );
@@ -1754,8 +1756,7 @@ class _SummaryIndicator extends StatelessWidget {
               color: AppColors.textSoftFor(context),
               fontWeight: FontWeight.w600,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
           ),
           const SizedBox(height: 4),
           Text(
