@@ -980,28 +980,33 @@ class _ActionChip extends StatelessWidget {
       return Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: BorderRadius.circular(10),
           onTap: onTap,
           child: Ink(
-            padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
             decoration: BoxDecoration(
-              color: AppColors.isDark(context)
-                  ? const Color(0xFF0E1825)
-                  : const Color(0xFFF0F4FA),
-              borderRadius: BorderRadius.circular(9),
-              border: Border.all(color: _cardBorder(context)),
+              color: AppColors.surfaceMutedFor(context),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.borderFor(context),
+                width: 0.5,
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 13, color: _accentText(context)),
+                Icon(icon, size: 14, color: AppColors.textSoftFor(context)),
                 const SizedBox(width: 5),
-                Text(
-                  label,
-                  style: AppTypography.tinyLabel.copyWith(
-                    color: _tertiaryText(context),
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppColors.textPrimaryFor(context),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],

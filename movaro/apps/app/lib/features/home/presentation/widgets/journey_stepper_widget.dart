@@ -112,44 +112,53 @@ class JourneyStepperWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        // ── Part 2: Horizontal stepper ────────────────────────────────
+        // ── Part 2a: Circles + connectors row ────────────────────────
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               for (int i = 0; i < _phases.length; i++) ...[
                 Expanded(
                   flex: 2,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _PhaseNode(
-                        phase: _phases[i],
-                        status: _phaseStatus(_phases[i], currentPhase),
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: 3),
-                      _PhaseLabel(
-                        phase: _phases[i],
-                        isCurrent: _phases[i] == currentPhase,
-                        isDark: isDark,
-                      ),
-                    ],
+                  child: Center(
+                    child: _PhaseNode(
+                      phase: _phases[i],
+                      status: _phaseStatus(_phases[i], currentPhase),
+                      isDark: isDark,
+                    ),
                   ),
                 ),
                 if (i < _phases.length - 1)
                   Expanded(
                     flex: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: _PhaseConnector(
-                        isDone: _phaseStatus(_phases[i], currentPhase) ==
-                            _PhaseNodeStatus.done,
-                        isDark: isDark,
-                      ),
+                    child: _PhaseConnector(
+                      isDone: _phaseStatus(_phases[i], currentPhase) ==
+                          _PhaseNodeStatus.done,
+                      isDark: isDark,
                     ),
                   ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 5),
+        // ── Part 2b: Labels row — centered under each circle ─────────
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              for (int i = 0; i < _phases.length; i++) ...[
+                Expanded(
+                  flex: 2,
+                  child: _PhaseLabel(
+                    phase: _phases[i],
+                    isCurrent: _phases[i] == currentPhase,
+                    isDark: isDark,
+                  ),
+                ),
+                if (i < _phases.length - 1)
+                  const Expanded(flex: 1, child: SizedBox.shrink()),
               ],
             ],
           ),
@@ -228,8 +237,8 @@ class _PhaseNode extends StatelessWidget {
     };
 
     return Container(
-      width: 26,
-      height: 26,
+      width: 28,
+      height: 28,
       decoration: BoxDecoration(
         color: bg,
         shape: BoxShape.circle,
@@ -272,28 +281,40 @@ class _PhaseLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      _label(context),
-      style: AppTypography.tinyLabel.copyWith(
+      _shortLabel(context),
+      style: AppTypography.compactLabel.copyWith(
         color: isCurrent
-            ? (isDark ? const Color(0xFF90C4F8) : const Color(0xFF2563EB))
-            : (isDark
-                  ? Colors.white.withValues(alpha: 0.30)
-                  : const Color(0xFF94A3B8)),
-        fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w400,
+            ? (isDark
+                  ? AppColors.primary.withValues(alpha: 0.9)
+                  : AppColors.primary)
+            : AppColors.textSoftFor(context),
+        fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w600,
       ),
       textAlign: TextAlign.center,
-      maxLines: 2,
+      maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
   }
 
-  String _label(BuildContext context) => switch (phase) {
-        GuidePhase.preparation => context.l10n.homeJourneyPhasePreparation,
-        GuidePhase.documents => context.l10n.homeJourneyPhaseDocuments,
-        GuidePhase.housing => context.l10n.homeJourneyPhaseHousing,
-        GuidePhase.work => context.l10n.homeJourneyPhaseWork,
-        GuidePhase.arrival => context.l10n.homeJourneyPhaseArrival,
-      };
+  /// Abbreviated labels guaranteed to fit on one line regardless of locale.
+  String _shortLabel(BuildContext context) {
+    final lang = Localizations.localeOf(context).languageCode;
+    return switch (phase) {
+      GuidePhase.preparation => 'Prep.',
+      GuidePhase.housing => switch (lang) {
+        'pt' => 'Mor.',
+        'es' => 'Viv.',
+        _ => 'Hous.',
+      },
+      GuidePhase.documents => 'Docs.',
+      GuidePhase.work => lang == 'en' ? 'Work' : 'Trab.',
+      GuidePhase.arrival => switch (lang) {
+        'pt' => 'Cheg.',
+        'es' => 'Lleg.',
+        _ => 'Arriv.',
+      },
+    };
+  }
 }
 
 // ─── Phase connector (horizontal line between nodes) ──────────────────────────
