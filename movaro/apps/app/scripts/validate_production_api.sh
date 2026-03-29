@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ENV_FILE="$ROOT_DIR/.env.production.json"
+ENV_FILE="${ENV_FILE_OVERRIDE:-$ROOT_DIR/.env.production.json}"
 
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "Production env file not found: $ENV_FILE" >&2

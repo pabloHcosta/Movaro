@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ENV_FILE="$ROOT_DIR/.env.production.json"
+ENV_FILE="${ENV_FILE_OVERRIDE:-$ROOT_DIR/.env.production.json}"
 API_SOURCE_OVERRIDE="${API_SOURCE:-}"
 BUILD_MODE="${BUILD_MODE:-release}"
 
@@ -69,7 +69,7 @@ FLUTTER_ARGS=(
   "--$BUILD_MODE"
   "--target"
   "lib/main_production.dart"
-  "--dart-define-from-file=.env.production.json"
+  "--dart-define-from-file=$ENV_FILE"
 )
 
 if [[ -n "$API_SOURCE_OVERRIDE" ]]; then
