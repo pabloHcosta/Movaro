@@ -11,8 +11,12 @@ import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
 import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
+import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 /// Shown immediately after the questionnaire completes.
 ///
@@ -554,6 +558,11 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                                 onTap: (city) => _openCityDetail(city),
                               ),
                             ],
+                            const SizedBox(height: 16),
+                            _GuidePreviewSection(
+                              plan: plan,
+                              cityName: recommendedCity.name,
+                            ),
                           ],
                         ),
                       ),
@@ -1168,6 +1177,350 @@ class _FooterCtaState extends State<_FooterCta> {
                 color: AppColors.textSoftFor(context),
                 fontSize: 13,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Guide Preview ────────────────────────────────────────────────────────────
+
+/// Shows a teaser of the guided migration plan — one item per phase — to give
+/// the user a sense of what awaits after they confirm the city.
+class _GuidePreviewSection extends StatelessWidget {
+  const _GuidePreviewSection({
+    required this.plan,
+    required this.cityName,
+  });
+
+  final MigrationPlan plan;
+  final String cityName;
+
+  // Accent colors keyed to each phase.
+  static const _phaseColor = {
+    GuidePhase.preparation: Color(0xFF4F46E5),
+    GuidePhase.housing: Color(0xFF0891B2),
+    GuidePhase.documents: Color(0xFF2563EB),
+    GuidePhase.work: Color(0xFF16A34A),
+    GuidePhase.arrival: Color(0xFFEA580C),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final allItems = ArgentinaBrazilGuideDataSource.build(
+      plan,
+      localeCode: locale,
+    );
+
+    // Pick the first item from each phase (preserves natural order).
+    final Map<GuidePhase, GuideActionItem> byPhase = {};
+    for (final item in allItems) {
+      byPhase.putIfAbsent(item.phase, () => item);
+    }
+    final preview = GuidePhase.values
+        .where(byPhase.containsKey)
+        .map((p) => byPhase[p]!)
+        .toList(growable: false);
+
+    if (preview.isEmpty) return const SizedBox.shrink();
+
+    final isDark = AppColors.isDark(context);
+    final headerLabel = switch (locale) {
+      'pt' => 'SEU PLANO DE MIGRAÇÃO',
+      'es' => 'TU PLAN DE MIGRACIÓN',
+      _ => 'YOUR MIGRATION PLAN',
+    };
+    final footerHint = switch (locale) {
+      'pt' =>
+        'O guia completo fica disponível ao confirmar a cidade.',
+      'es' =>
+        'La guía completa estará disponible al confirmar la ciudad.',
+      _ =>
+        'The full guide becomes available once you confirm your city.',
+    };
+    final stepCountLabel = switch (locale) {
+      'pt' => '${allItems.length} passos',
+      'es' => '${allItems.length} pasos',
+      _ => '${allItems.length} steps',
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section header row
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 10),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  headerLabel,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    letterSpacing: 0.6,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.25)
+                        : const Color(0x590A0F1E),
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  stepCountLabel,
+                  style: AppTypography.compactBadge.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Preview items
+        ...preview.indexed.map((entry) {
+          final (index, item) = entry;
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: index < preview.length - 1 ? 8 : 0,
+            ),
+            child: _GuidePreviewItem(
+              item: item,
+              phaseColor: _phaseColor[item.phase] ?? AppColors.primary,
+              index: index + 1,
+            ),
+          );
+        }),
+
+        // Footer hint
+        Padding(
+          padding: const EdgeInsets.only(top: 12, left: 4),
+          child: Row(
+            children: [
+              Icon(
+                Icons.lock_outline_rounded,
+                size: 12,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.25)
+                    : const Color(0x590A0F1E),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  footerHint,
+                  style: AppTypography.tinyLabel.copyWith(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.25)
+                        : const Color(0x590A0F1E),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A single compact row card representing one guide step.
+class _GuidePreviewItem extends StatelessWidget {
+  const _GuidePreviewItem({
+    required this.item,
+    required this.phaseColor,
+    required this.index,
+  });
+
+  final GuideActionItem item;
+  final Color phaseColor;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final locale = Localizations.localeOf(context).languageCode;
+
+    final phaseLabel = switch (item.phase) {
+      GuidePhase.preparation => switch (locale) {
+          'pt' => 'Preparação',
+          'es' => 'Preparación',
+          _ => 'Preparation',
+        },
+      GuidePhase.housing => switch (locale) {
+          'pt' => 'Moradia',
+          'es' => 'Vivienda',
+          _ => 'Housing',
+        },
+      GuidePhase.documents => switch (locale) {
+          'pt' => 'Documentos',
+          'es' => 'Documentos',
+          _ => 'Documents',
+        },
+      GuidePhase.work => switch (locale) {
+          'pt' => 'Trabalho',
+          'es' => 'Trabajo',
+          _ => 'Work',
+        },
+      GuidePhase.arrival => switch (locale) {
+          'pt' => 'Chegada',
+          'es' => 'Llegada',
+          _ => 'Arrival',
+        },
+    };
+
+    final effortLabel = switch (item.estimatedEffort) {
+      GuideEstimatedEffort.fast => switch (locale) {
+          'pt' => '< 1h',
+          'es' => '< 1h',
+          _ => '< 1h',
+        },
+      GuideEstimatedEffort.medium => switch (locale) {
+          'pt' => '1–3h',
+          'es' => '1–3h',
+          _ => '1–3h',
+        },
+      GuideEstimatedEffort.longer => switch (locale) {
+          'pt' => '3h+',
+          'es' => '3h+',
+          _ => '3h+',
+        },
+      null => null,
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceFor(context),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderFor(context)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Step number circle
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: phaseColor.withValues(alpha: isDark ? 0.18 : 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                '$index',
+                style: AppTypography.compactBadge.copyWith(
+                  color: phaseColor,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title
+                Text(
+                  item.title,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimaryFor(context),
+                    height: 1.3,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 5),
+                // Meta row: phase pill + effort + pre-arrival flag
+                Wrap(
+                  spacing: 5,
+                  runSpacing: 4,
+                  children: [
+                    // Phase pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: phaseColor.withValues(
+                          alpha: isDark ? 0.18 : 0.10,
+                        ),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        phaseLabel,
+                        style: AppTypography.compactBadge.copyWith(
+                          color: phaseColor,
+                        ),
+                      ),
+                    ),
+                    // Effort badge
+                    if (effortLabel != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.07)
+                              : Colors.black.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Text(
+                          effortLabel,
+                          style: AppTypography.compactBadge.copyWith(
+                            color: AppColors.textSoftFor(context),
+                          ),
+                        ),
+                      ),
+                    // Pre-arrival flag
+                    if (item.preArrivalRequired)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.flight_takeoff_rounded,
+                              size: 9,
+                              color: AppColors.warning,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              switch (locale) {
+                                'pt' => 'Antes de viajar',
+                                'es' => 'Antes de viajar',
+                                _ => 'Before flying',
+                              },
+                              style: AppTypography.compactBadge.copyWith(
+                                color: AppColors.warning,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
