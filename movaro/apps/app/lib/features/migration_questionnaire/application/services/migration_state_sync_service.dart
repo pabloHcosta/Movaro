@@ -37,13 +37,15 @@ class MigrationStateSyncService implements MigrationSyncScheduler {
 
   Timer? _syncTimer;
   bool _isSyncing = false;
+  bool _isAuthUnavailable = false;
+  bool _hasLoggedAuthUnavailable = false;
 
   bool get _isAvailable => _enabled;
   SupabaseClient get _client => Supabase.instance.client;
 
   @override
   void scheduleSync() {
-    if (!_isAvailable) {
+    if (!_isAvailable || _isAuthUnavailable) {
       return;
     }
 
@@ -54,7 +56,7 @@ class MigrationStateSyncService implements MigrationSyncScheduler {
   }
 
   Future<void> restoreIfNeeded() async {
-    if (!_isAvailable) {
+    if (!_isAvailable || _isAuthUnavailable) {
       return;
     }
 
@@ -95,7 +97,7 @@ class MigrationStateSyncService implements MigrationSyncScheduler {
   }
 
   Future<void> syncNow() async {
-    if (!_isAvailable || _isSyncing) {
+    if (!_isAvailable || _isSyncing || _isAuthUnavailable) {
       return;
     }
 
@@ -143,7 +145,21 @@ class MigrationStateSyncService implements MigrationSyncScheduler {
       return;
     }
 
-    await _client.auth.signInAnonymously();
+    try {
+      await _client.auth.signInAnonymously();
+    } on AuthApiException catch (error) {
+      if (error.code == 'anonymous_provider_disabled') {
+        _isAuthUnavailable = true;
+        if (!_hasLoggedAuthUnavailable) {
+          _hasLoggedAuthUnavailable = true;
+          debugPrint(
+            'MigrationStateSyncService disabled: Supabase anonymous sign-ins are disabled for this project.',
+          );
+        }
+        return;
+      }
+      rethrow;
+    }
   }
 
   Future<bool> _hasMeaningfulLocalData() async {

@@ -2385,32 +2385,32 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cityDetailCompareSavedAction => 'Saved to compare';
 
   @override
-  String get cityDetailQualityLabel => 'Quality of life';
+  String get cityDetailQualityLabel => 'Calidad de vida';
 
   @override
   String get cityDetailQualitySupporting =>
-      'A quick read based on HDI, safety, and language adaptation for arrival.';
+      'Basado en IDH, seguridad y adaptación al idioma.';
 
   @override
-  String get cityDetailQualityHigh => 'Stronger';
+  String get cityDetailQualityHigh => 'Sólida';
 
   @override
-  String get cityDetailQualityBalanced => 'Balanced';
+  String get cityDetailQualityBalanced => 'Equilibrada';
 
   @override
-  String get cityDetailQualityDeveloping => 'Needs validation';
+  String get cityDetailQualityDeveloping => 'En desarrollo';
 
   @override
-  String get cityDetailDifficultyLabel => 'Difficulty';
+  String get cityDetailDifficultyLabel => 'Dificultad';
 
   @override
-  String get cityDetailDifficultyEasy => 'Lighter move';
+  String get cityDetailDifficultyEasy => 'Fácil';
 
   @override
-  String get cityDetailDifficultyBalanced => 'Moderate move';
+  String get cityDetailDifficultyBalanced => 'Moderada';
 
   @override
-  String get cityDetailDifficultyChallenging => 'More demanding move';
+  String get cityDetailDifficultyChallenging => 'Exigente';
 
   @override
   String get cityDetailSettleInTitle => 'Adaptación y comunidad';

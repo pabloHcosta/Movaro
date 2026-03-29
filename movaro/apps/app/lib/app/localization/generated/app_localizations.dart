@@ -4072,7 +4072,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityDetailQualityDeveloping.
   ///
   /// In en, this message translates to:
-  /// **'Needs validation'**
+  /// **'Growing'**
   String get cityDetailQualityDeveloping;
 
   /// No description provided for @cityDetailDifficultyLabel.
@@ -4084,19 +4084,19 @@ abstract class AppLocalizations {
   /// No description provided for @cityDetailDifficultyEasy.
   ///
   /// In en, this message translates to:
-  /// **'Lighter move'**
+  /// **'Easy'**
   String get cityDetailDifficultyEasy;
 
   /// No description provided for @cityDetailDifficultyBalanced.
   ///
   /// In en, this message translates to:
-  /// **'Moderate move'**
+  /// **'Moderate'**
   String get cityDetailDifficultyBalanced;
 
   /// No description provided for @cityDetailDifficultyChallenging.
   ///
   /// In en, this message translates to:
-  /// **'More demanding move'**
+  /// **'Demanding'**
   String get cityDetailDifficultyChallenging;
 
   /// No description provided for @cityDetailSettleInTitle.

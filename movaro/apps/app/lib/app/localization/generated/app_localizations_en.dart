@@ -2391,19 +2391,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cityDetailQualityBalanced => 'Balanced';
 
   @override
-  String get cityDetailQualityDeveloping => 'Needs validation';
+  String get cityDetailQualityDeveloping => 'Growing';
 
   @override
   String get cityDetailDifficultyLabel => 'Difficulty';
 
   @override
-  String get cityDetailDifficultyEasy => 'Lighter move';
+  String get cityDetailDifficultyEasy => 'Easy';
 
   @override
-  String get cityDetailDifficultyBalanced => 'Moderate move';
+  String get cityDetailDifficultyBalanced => 'Moderate';
 
   @override
-  String get cityDetailDifficultyChallenging => 'More demanding move';
+  String get cityDetailDifficultyChallenging => 'Demanding';
 
   @override
   String get cityDetailSettleInTitle => 'Adaptation and community';
