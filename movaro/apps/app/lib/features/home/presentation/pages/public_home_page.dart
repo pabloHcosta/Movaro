@@ -542,23 +542,24 @@ class _ActiveHomeState extends StatelessWidget {
         final heroH = topPad + heroContent;
 
         // ── Feed card height ──────────────────────────────────────────
-        // Sum of all other fixed-height sections (estimated):
-        //   primary card wrapper (8 top gap + ~162 card)  : 170
-        //   SizedBox(6) after hero                        :   6
-        //   JourneyStepperWidget                          : 106
-        //   Padding(5) + compact SecondaryActionRow       :  43
-        //   CityFeed section label + bottom padding       :  26
-        const kFixed = 170.0 + 6.0 + 106.0 + 43.0 + 26.0; // ≈ 351 pt
+        // Measured heights of every fixed-height section (from render tree):
+        //   primary card wrapper (8 top padding + ~156 card)  : 165
+        //   SizedBox(6) between primary card and stepper       :   6
+        //   JourneyStepperWidget (showTaskCard: false)         :  68
+        //   Padding(5) + compact SecondaryActionRow            :  40
+        //   CityFeed section label + bottom padding            :  22
+        const kFixed = 165.0 + 6.0 + 68.0 + 40.0 + 22.0; // = 301 pt
 
-        // rawRemaining = space left for feed cards + gap above section.
+        // rawRemaining = space available for the feed card + gap above it.
         final rawRemaining = avail - heroH - kFixed;
 
-        // Feed card clamped: minimum 148 pt (3 body lines visible),
-        // maximum 178 pt (comfortable on Pro Max).
-        final feedCardH = rawRemaining.clamp(148.0, 178.0);
+        // Reserve at least 6 pt for the gap; feed card gets the rest.
+        // Lower minimum (110 pt) prevents overflow on compact available
+        // heights (e.g. when the location banner is visible on a Pro Max).
+        final feedCardH = (rawRemaining - 6.0).clamp(110.0, 178.0);
 
-        // Any leftover space becomes the gap before the Para Ti section.
-        final paraGap = (rawRemaining - feedCardH).clamp(6.0, 30.0);
+        // Remainder becomes the breathing gap — guaranteed no overflow.
+        final paraGap = (rawRemaining - feedCardH).clamp(4.0, 30.0);
 
         // ── Typography scale ──────────────────────────────────────────
         // Enable slightly larger text on phones with avail > 760 pt
