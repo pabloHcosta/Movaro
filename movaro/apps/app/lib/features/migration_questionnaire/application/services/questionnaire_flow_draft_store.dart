@@ -1,7 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:movaro_app/core/storage/versioned_json_file_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/answer.dart';
 
 typedef QuestionnaireFlowDirectoryProvider = Future<Directory> Function();
@@ -33,17 +34,7 @@ class QuestionnaireFlowDraftStore {
 
   Future<QuestionnaireFlowDraftSnapshot?> read() async {
     try {
-      final file = await _file();
-      if (!file.existsSync()) {
-        return null;
-      }
-
-      final raw = await file.readAsString();
-      if (raw.trim().isEmpty) {
-        return null;
-      }
-
-      final decoded = jsonDecode(raw);
+      final decoded = await exportState();
       if (decoded is! Map<String, dynamic>) {
         return null;
       }
@@ -61,6 +52,16 @@ class QuestionnaireFlowDraftStore {
     }
   }
 
+  Future<Map<String, dynamic>?> exportState() async {
+    try {
+      final file = await _file();
+      final decoded = await VersionedJsonFileStore.read(file);
+      return decoded is Map<String, dynamic> ? decoded : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> write({
     required List<Answer> answers,
     required int currentIndex,
@@ -70,32 +71,45 @@ class QuestionnaireFlowDraftStore {
     required bool includeConstraints,
   }) async {
     final file = await _file();
-    await file.parent.create(recursive: true);
-    await file.writeAsString(
-      jsonEncode(<String, dynamic>{
-        'answers': answers
-            .map(
-              (answer) => <String, dynamic>{
-                'questionId': answer.questionId,
-                'values': answer.values,
-              },
-            )
-            .toList(growable: false),
-        'currentIndex': currentIndex,
-        'selectedVariantId': selectedVariantId,
-        'showRefinePrompt': showRefinePrompt,
-        'isRefineResolved': isRefineResolved,
-        'includeConstraints': includeConstraints,
-        'updatedAt': DateTime.now().toIso8601String(),
-      }),
-    );
+    await VersionedJsonFileStore.write(file, <String, dynamic>{
+      'answers': answers
+          .map(
+            (answer) => <String, dynamic>{
+              'questionId': answer.questionId,
+              'values': answer.values,
+            },
+          )
+          .toList(growable: false),
+      'currentIndex': currentIndex,
+      'selectedVariantId': selectedVariantId,
+      'showRefinePrompt': showRefinePrompt,
+      'isRefineResolved': isRefineResolved,
+      'includeConstraints': includeConstraints,
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+    MigrationStateSyncCoordinator.scheduleSync();
   }
 
   Future<void> clear() async {
     final file = await _file();
-    if (file.existsSync()) {
-      await file.delete();
+    await VersionedJsonFileStore.delete(file);
+    MigrationStateSyncCoordinator.scheduleSync();
+  }
+
+  Future<void> importState(Map<String, dynamic>? value) async {
+    if (value == null || value.isEmpty) {
+      await clear();
+      return;
     }
+
+    final file = await _file();
+    await VersionedJsonFileStore.write(file, value);
+    MigrationStateSyncCoordinator.scheduleSync();
+  }
+
+  Future<bool> hasLocalData() async {
+    final value = await exportState();
+    return value != null && value.isNotEmpty;
   }
 
   List<Answer> _readAnswers(Object? rawValue) {

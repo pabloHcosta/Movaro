@@ -1,7 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:movaro_app/core/storage/versioned_json_file_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/models/migration_plan_model.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/repositories/migration_plan_repository.dart';
@@ -31,14 +32,13 @@ class LocalMigrationPlanRepository implements MigrationPlanRepository {
   Future<void> savePlan(MigrationPlan plan) async {
     final state = await _readState();
     final nextSavedPlans = [...state.savedPlans];
-    final encodedPlan = jsonEncode(
-      MigrationPlanModel.fromEntity(plan).toJson(),
-    );
+    final encodedPlan = MigrationPlanModel.fromEntity(plan).toJson();
 
     nextSavedPlans.removeWhere(
-      (savedPlan) =>
-          jsonEncode(MigrationPlanModel.fromEntity(savedPlan).toJson()) ==
-          encodedPlan,
+      (savedPlan) => _jsonEquals(
+        MigrationPlanModel.fromEntity(savedPlan).toJson(),
+        encodedPlan,
+      ),
     );
     nextSavedPlans.insert(0, plan);
 
@@ -56,19 +56,37 @@ class LocalMigrationPlanRepository implements MigrationPlanRepository {
     return List<MigrationPlan>.unmodifiable(state.savedPlans);
   }
 
-  Future<_MigrationPlansState> _readState() async {
+  Future<Map<String, dynamic>?> exportState() async {
     try {
       final file = await _file();
-      if (!file.existsSync()) {
-        return const _MigrationPlansState();
-      }
+      final decoded = await VersionedJsonFileStore.read(file);
+      return decoded is Map<String, dynamic> ? decoded : null;
+    } catch (_) {
+      return null;
+    }
+  }
 
-      final raw = await file.readAsString();
-      if (raw.trim().isEmpty) {
-        return const _MigrationPlansState();
-      }
+  Future<void> importState(Map<String, dynamic>? value) async {
+    if (value == null || value.isEmpty) {
+      final file = await _file();
+      await VersionedJsonFileStore.delete(file);
+      MigrationStateSyncCoordinator.scheduleSync();
+      return;
+    }
 
-      final decoded = jsonDecode(raw);
+    final file = await _file();
+    await VersionedJsonFileStore.write(file, value);
+    MigrationStateSyncCoordinator.scheduleSync();
+  }
+
+  Future<bool> hasLocalData() async {
+    final state = await _readState();
+    return state.currentPlan != null || state.savedPlans.isNotEmpty;
+  }
+
+  Future<_MigrationPlansState> _readState() async {
+    try {
+      final decoded = await exportState();
       if (decoded is! Map<String, dynamic>) {
         return const _MigrationPlansState();
       }
@@ -95,17 +113,15 @@ class LocalMigrationPlanRepository implements MigrationPlanRepository {
 
   Future<void> _writeState(_MigrationPlansState state) async {
     final file = await _file();
-    await file.parent.create(recursive: true);
-    await file.writeAsString(
-      jsonEncode({
-        'currentPlan': state.currentPlan == null
-            ? null
-            : MigrationPlanModel.fromEntity(state.currentPlan!).toJson(),
-        'savedPlans': state.savedPlans
-            .map((plan) => MigrationPlanModel.fromEntity(plan).toJson())
-            .toList(),
-      }),
-    );
+    await VersionedJsonFileStore.write(file, {
+      'currentPlan': state.currentPlan == null
+          ? null
+          : MigrationPlanModel.fromEntity(state.currentPlan!).toJson(),
+      'savedPlans': state.savedPlans
+          .map((plan) => MigrationPlanModel.fromEntity(plan).toJson())
+          .toList(),
+    });
+    MigrationStateSyncCoordinator.scheduleSync();
   }
 
   Future<File> _file() async {
@@ -134,3 +150,37 @@ class _MigrationPlansState {
 }
 
 const Object _sentinel = Object();
+
+bool _jsonEquals(Map<String, dynamic> left, Map<String, dynamic> right) {
+  if (left.length != right.length) {
+    return false;
+  }
+
+  for (final entry in left.entries) {
+    if (!_jsonValueEquals(entry.value, right[entry.key])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool _jsonValueEquals(Object? left, Object? right) {
+  if (left is Map<String, dynamic> && right is Map<String, dynamic>) {
+    return _jsonEquals(left, right);
+  }
+
+  if (left is List && right is List) {
+    if (left.length != right.length) {
+      return false;
+    }
+    for (var index = 0; index < left.length; index += 1) {
+      if (!_jsonValueEquals(left[index], right[index])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return left == right;
+}

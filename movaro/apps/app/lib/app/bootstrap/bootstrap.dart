@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/app.dart';
 import 'package:movaro_app/app/bootstrap/app_dependencies.dart';
@@ -11,6 +13,7 @@ import 'package:movaro_app/features/catalog/data/repositories/catalog_repository
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/environment/app_flavor.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/journey/journey_preferences_store.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/core/network/api_health_service.dart';
 import 'package:movaro_app/core/supabase/supabase_bootstrap.dart';
@@ -22,8 +25,12 @@ import 'package:movaro_app/features/cities/data/datasources/cities_remote_data_s
 import 'package:movaro_app/features/cities/data/repositories/cities_repository_impl.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/repositories/question_repository_impl.dart';
 
@@ -61,8 +68,23 @@ Future<AppDependencies> buildAppDependencies({
     ),
   );
   final apiHealthService = ApiHealthService(environment: environment);
+  final journeyPreferencesStore = JourneyPreferencesStore();
+  final migrationPlanRepository = LocalMigrationPlanRepository();
+  final flowDraftStore = QuestionnaireFlowDraftStore();
+  final copilotProgressStore = MigrationCopilotProgressStore();
+  final migrationStateSyncService = MigrationStateSyncService(
+    enabled: environment.hasSupabaseClientConfig,
+    migrationPlanRepository: migrationPlanRepository,
+    flowDraftStore: flowDraftStore,
+    journeyPreferencesStore: journeyPreferencesStore,
+    copilotProgressStore: copilotProgressStore,
+  );
+  MigrationStateSyncCoordinator.register(migrationStateSyncService);
+  await migrationStateSyncService.restoreIfNeeded();
+  unawaited(migrationStateSyncService.syncNow());
   final journeyContextController = JourneyContextController(
     catalogRepository: catalogRepository,
+    store: journeyPreferencesStore,
   );
   final locationController = LocationController(
     journeyContextController: journeyContextController,
@@ -73,9 +95,10 @@ Future<AppDependencies> buildAppDependencies({
       catalogRepository: catalogRepository,
       journeyContextController: journeyContextController,
     ),
-    migrationPlanRepository: LocalMigrationPlanRepository(),
+    migrationPlanRepository: migrationPlanRepository,
     planGenerator: MigrationPlanGenerator(citiesRepository: citiesRepository),
     journeyContextController: journeyContextController,
+    flowDraftStore: flowDraftStore,
   );
   final copilotExchangeRatesService = CopilotExchangeRatesService(
     remoteDataSource: CopilotExchangeRatesRemoteDataSource(

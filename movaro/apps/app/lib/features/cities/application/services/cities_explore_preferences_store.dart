@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:movaro_app/core/storage/versioned_json_file_store.dart';
 
 typedef CitiesExploreDirectoryProvider = Future<Directory> Function();
 
@@ -24,16 +24,7 @@ class CitiesExplorePreferencesStore {
   Future<Map<String, dynamic>> _read() async {
     try {
       final file = await _file();
-      if (!file.existsSync()) {
-        return const <String, dynamic>{};
-      }
-
-      final raw = await file.readAsString();
-      if (raw.trim().isEmpty) {
-        return const <String, dynamic>{};
-      }
-
-      final decoded = jsonDecode(raw);
+      final decoded = await VersionedJsonFileStore.read(file);
       return decoded is Map<String, dynamic>
           ? decoded
           : const <String, dynamic>{};
@@ -44,8 +35,7 @@ class CitiesExplorePreferencesStore {
 
   Future<void> _write(Map<String, dynamic> value) async {
     final file = await _file();
-    await file.parent.create(recursive: true);
-    await file.writeAsString(jsonEncode(value));
+    await VersionedJsonFileStore.write(file, value);
   }
 
   Future<File> _file() async {

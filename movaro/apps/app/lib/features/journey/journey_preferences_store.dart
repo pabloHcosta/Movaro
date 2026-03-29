@@ -1,7 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:movaro_app/core/storage/versioned_json_file_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
 
 typedef JourneyDirectoryProvider = Future<Directory> Function();
 
@@ -14,16 +15,7 @@ class JourneyPreferencesStore {
   Future<Map<String, dynamic>> read() async {
     try {
       final file = await _file();
-      if (!file.existsSync()) {
-        return const <String, dynamic>{};
-      }
-
-      final raw = await file.readAsString();
-      if (raw.trim().isEmpty) {
-        return const <String, dynamic>{};
-      }
-
-      final decoded = jsonDecode(raw);
+      final decoded = await VersionedJsonFileStore.read(file);
       return decoded is Map<String, dynamic>
           ? decoded
           : const <String, dynamic>{};
@@ -34,8 +26,19 @@ class JourneyPreferencesStore {
 
   Future<void> write(Map<String, dynamic> value) async {
     final file = await _file();
-    await file.parent.create(recursive: true);
-    await file.writeAsString(jsonEncode(value));
+    await VersionedJsonFileStore.write(file, value);
+    MigrationStateSyncCoordinator.scheduleSync();
+  }
+
+  Future<void> clear() async {
+    final file = await _file();
+    await VersionedJsonFileStore.delete(file);
+    MigrationStateSyncCoordinator.scheduleSync();
+  }
+
+  Future<bool> hasLocalData() async {
+    final value = await read();
+    return value.isNotEmpty;
   }
 
   Future<File> _file() async {
