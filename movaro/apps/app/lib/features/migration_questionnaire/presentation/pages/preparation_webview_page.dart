@@ -29,6 +29,13 @@ class _PreparationWebViewPageState extends State<PreparationWebViewPage> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      // Spoof a standard mobile Chrome UA so CDN/WAF security layers
+      // (e.g. Cloudflare on Claro, TIM, Vivo) don't reject the request.
+      ..setUserAgent(
+        'Mozilla/5.0 (Linux; Android 13; Pixel 7) '
+        'AppleWebKit/537.36 (KHTML, like Gecko) '
+        'Chrome/124.0.0.0 Mobile Safari/537.36',
+      )
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (value) {

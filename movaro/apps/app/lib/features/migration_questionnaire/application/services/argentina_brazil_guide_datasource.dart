@@ -1482,7 +1482,8 @@ class ArgentinaBrazilGuideDataSource {
           en: 'Book Federal Police appointment',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget: 'https://servicos.dpf.gov.br',
+        primaryActionTarget:
+            PreparationResourceLinks.pfScheduling.toString(),
         steps: _list(
           locale,
           pt: [
@@ -4020,7 +4021,8 @@ class ArgentinaBrazilGuideDataSource {
         address: city,
         distanceKm: inDestination ? _distanceKm(plan, currentLocation) : null,
         mapUrl: _mapSearchUrl('Polícia Federal imigração $city'),
-        officialUrl: 'https://servicos.dpf.gov.br',
+        officialUrl:
+            PreparationResourceLinks.pfScheduling.toString(),
         officialLabel: 'PF',
       ),
     ];

@@ -1295,7 +1295,9 @@ class _PFAppointmentNudge extends StatelessWidget {
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () => launchUrl(
-                      Uri.parse('https://servicos.dpf.gov.br'),
+                      Uri.parse(
+                        'https://www.gov.br/pf/pt-br/assuntos/imigracao/agendamento',
+                      ),
                       mode: LaunchMode.externalApplication,
                     ),
                     child: Container(

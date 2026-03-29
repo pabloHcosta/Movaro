@@ -8,7 +8,7 @@ class PreparationResourceLinks {
   const PreparationResourceLinks._();
 
   static final Uri officialJobsPortal = Uri.parse(
-    'https://servicos.mte.gov.br/spme-v2/#/login',
+    'https://www.vagas.com.br',
   );
 
   static final Uri publicUniversitiesCatalog = Uri.parse(
