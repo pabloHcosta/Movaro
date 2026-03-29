@@ -14,15 +14,17 @@ class CityFeedWidget extends StatelessWidget {
     required this.cityCode,
     required this.stage,
     required this.locale,
-    this.cardHeight = 148.0,
+    this.cardHeight = 152.0,
     super.key,
   });
 
   final String? cityCode;
   final UserJourneyStage stage;
   final String locale;
-  /// Height of the scrollable card row. Defaults to 148. Pass a smaller value
-  /// (e.g. 118) for the no-scroll Focus Mode layout.
+  /// Height of the scrollable card row.
+  /// Defaults to 152 pt — enough to show 3 body lines without clipping.
+  /// The Focus Mode layout passes a screen-derived value computed by
+  /// LayoutBuilder (typically 148–178 pt depending on device).
   final double cardHeight;
 
   @override
@@ -132,16 +134,17 @@ class _FeedCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 4),
-            // Body
-            Expanded(
+            // Body — Flexible so it grows with available card height but
+            // never pushes the timestamp off-screen.
+            Flexible(
               child: Text(
                 item.body,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  height: 1.4,
+                  height: 1.45,
                   fontWeight: FontWeight.w400,
                   color: AppColors.textSoftFor(context),
                 ),
-                maxLines: 3,
+                maxLines: 5,
                 overflow: TextOverflow.ellipsis,
               ),
             ),

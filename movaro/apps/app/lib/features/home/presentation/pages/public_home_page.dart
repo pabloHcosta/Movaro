@@ -522,62 +522,107 @@ class _ActiveHomeState extends StatelessWidget {
       totalSteps: guideState.totalItems,
     );
     final isDark = AppColors.isDark(context);
+    final topPad = MediaQuery.of(context).padding.top;
 
-    // Focus Mode — no-scroll layout sized for iPhone 11 (375×812pt)
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 1. City header (fills to top of screen including status bar)
-        _ActiveHero(
-          city: city,
-          weather: weather,
-          onOpenSettings: onOpenSettings,
-        ),
+    // ── Adaptive Focus Mode layout ────────────────────────────────────────
+    // LayoutBuilder gives the actual height available to this widget
+    // (= screen height − nav bar − location banner if visible).
+    // All section heights are derived from this, so the layout fills
+    // the screen on any device — small (SE) to large (Pro Max).
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final avail = constraints.maxHeight;
 
-        // 2. Primary action card — the single current guide step
-        if (guideState.currentItem != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: _PrimaryActionCard(
-              item: guideState.currentItem!,
-              phaseName: guideState.phaseName(context),
-              isDark: isDark,
-              onTap: () => onViewAction(guideState.currentItem!),
+        // ── Hero ──────────────────────────────────────────────────────
+        // Content portion below status bar scales linearly from 130 pt
+        // (compact) up to 195 pt (large screen), centered around the
+        // iPhone 11 baseline of 156 pt at ~765 pt available height.
+        final heroContent =
+            (130.0 + (avail - 580.0) * 0.20).clamp(130.0, 195.0);
+        final heroH = topPad + heroContent;
+
+        // ── Feed card height ──────────────────────────────────────────
+        // Sum of all other fixed-height sections (estimated):
+        //   primary card wrapper (8 top gap + ~162 card)  : 170
+        //   SizedBox(6) after hero                        :   6
+        //   JourneyStepperWidget                          : 106
+        //   Padding(5) + compact SecondaryActionRow       :  43
+        //   CityFeed section label + bottom padding       :  26
+        const kFixed = 170.0 + 6.0 + 106.0 + 43.0 + 26.0; // ≈ 351 pt
+
+        // rawRemaining = space left for feed cards + gap above section.
+        final rawRemaining = avail - heroH - kFixed;
+
+        // Feed card clamped: minimum 148 pt (3 body lines visible),
+        // maximum 178 pt (comfortable on Pro Max).
+        final feedCardH = rawRemaining.clamp(148.0, 178.0);
+
+        // Any leftover space becomes the gap before the Para Ti section.
+        final paraGap = (rawRemaining - feedCardH).clamp(6.0, 30.0);
+
+        // ── Typography scale ──────────────────────────────────────────
+        // Enable slightly larger text on phones with avail > 760 pt
+        // (iPhone 11 / 14 Pro and above).
+        final bigScreen = avail > 760;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. City header — height grows with screen size
+            _ActiveHero(
+              city: city,
+              weather: weather,
+              height: heroH,
+              onOpenSettings: onOpenSettings,
             ),
-          ),
 
-        // 3. Tu Jornada — compact phase stepper + quick-action chips
-        const SizedBox(height: 6),
-        JourneyStepperWidget(
-          plan: plan,
-          allItems: guideState.items,
-          showTaskCard: false,
-          onTapActiveTask: guideState.currentItem != null
-              ? () => onViewAction(guideState.currentItem!)
-              : null,
-          onTapSeeMore: guideState.currentItem != null
-              ? () => onViewAction(guideState.currentItem!)
-              : null,
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 5, 16, 0),
-          child: _SecondaryActionRow(
-            onCompare: onCompare,
-            onViewCity: onViewCity,
-            onNewPlan: onNewPlan,
-            compact: true,
-          ),
-        ),
+            // 2. Primary action card — the single current guide step
+            if (guideState.currentItem != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: _PrimaryActionCard(
+                  item: guideState.currentItem!,
+                  phaseName: guideState.phaseName(context),
+                  isDark: isDark,
+                  bigScreen: bigScreen,
+                  onTap: () => onViewAction(guideState.currentItem!),
+                ),
+              ),
 
-        // 4. Para Ti — compact horizontal card carousel
-        const SizedBox(height: 10),
-        CityFeedWidget(
-          cityCode: city.id,
-          stage: stage,
-          locale: locale,
-          cardHeight: 118.0,
-        ),
-      ],
+            // 3. Tu Jornada — compact phase stepper + quick-action chips
+            const SizedBox(height: 6),
+            JourneyStepperWidget(
+              plan: plan,
+              allItems: guideState.items,
+              showTaskCard: false,
+              onTapActiveTask: guideState.currentItem != null
+                  ? () => onViewAction(guideState.currentItem!)
+                  : null,
+              onTapSeeMore: guideState.currentItem != null
+                  ? () => onViewAction(guideState.currentItem!)
+                  : null,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 5, 16, 0),
+              child: _SecondaryActionRow(
+                onCompare: onCompare,
+                onViewCity: onViewCity,
+                onNewPlan: onNewPlan,
+                compact: true,
+              ),
+            ),
+
+            // 4. Para Ti — horizontal card carousel (height fills screen)
+            SizedBox(height: paraGap),
+            CityFeedWidget(
+              cityCode: city.id,
+              stage: stage,
+              locale: locale,
+              cardHeight: feedCardH,
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -594,12 +639,15 @@ class _PrimaryActionCard extends StatelessWidget {
     required this.phaseName,
     required this.isDark,
     required this.onTap,
+    this.bigScreen = false,
   });
 
   final GuideActionItem item;
   final String phaseName;
   final bool isDark;
   final VoidCallback? onTap;
+  /// When true, slightly increases title and body font sizes for taller screens.
+  final bool bigScreen;
 
   static String _localizedText(
     BuildContext context, {
@@ -662,11 +710,11 @@ class _PrimaryActionCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 9),
-          // Title — ~15sp, prominent
+          // Title — scales from 15 to 16 sp on tall screens
           Text(
             item.title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontSize: 15,
+              fontSize: bigScreen ? 16 : 15,
               fontWeight: FontWeight.w800,
               color: _primaryText(context),
               height: 1.25,
@@ -676,15 +724,16 @@ class _PrimaryActionCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
-          // Short description — 2 lines max, muted
+          // Short description — up to 3 lines on tall screens
           Text(
             item.shortDescription,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontSize: bigScreen ? 12.5 : null,
               color: _secondaryText(context),
-              height: 1.4,
+              height: bigScreen ? 1.5 : 1.4,
               fontWeight: FontWeight.w400,
             ),
-            maxLines: 2,
+            maxLines: bigScreen ? 3 : 2,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 11),
@@ -723,11 +772,14 @@ class _ActiveHero extends StatelessWidget {
   const _ActiveHero({
     required this.city,
     required this.weather,
+    required this.height,
     required this.onOpenSettings,
   });
 
   final City city;
   final CityWeather? weather;
+  /// Total hero height in logical pixels, including the top safe-area inset.
+  final double height;
   final VoidCallback onOpenSettings;
 
   @override
@@ -738,7 +790,7 @@ class _ActiveHero extends StatelessWidget {
         : city.stateCode;
 
     return SizedBox(
-      height: MediaQuery.of(context).padding.top + 156,
+      height: height,
       child: Stack(
         children: [
           Positioned.fill(child: _HeroCityImage(city: city)),
