@@ -14,12 +14,16 @@ class CityFeedWidget extends StatelessWidget {
     required this.cityCode,
     required this.stage,
     required this.locale,
+    this.cardHeight = 148.0,
     super.key,
   });
 
   final String? cityCode;
   final UserJourneyStage stage;
   final String locale;
+  /// Height of the scrollable card row. Defaults to 148. Pass a smaller value
+  /// (e.g. 118) for the no-scroll Focus Mode layout.
+  final double cardHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +53,7 @@ class CityFeedWidget extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 148,
+          height: cardHeight,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -83,7 +87,7 @@ class _FeedCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => _showExpandedCard(context),
       child: Container(
-        width: 230,
+        width: 240,
         padding: const EdgeInsets.all(13),
         decoration: BoxDecoration(
           color: AppColors.surfaceFor(context),

@@ -7,7 +7,6 @@ import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
-import 'package:movaro_app/features/city_insights/presentation/widgets/city_insights_section.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
@@ -522,150 +521,200 @@ class _ActiveHomeState extends StatelessWidget {
       completedSteps: guideState.completedCount,
       totalSteps: guideState.totalItems,
     );
+    final isDark = AppColors.isDark(context);
 
-    final pfItem = guideState.items.firstWhere(
-      (it) => it.id == 'item_2_2_residencia',
-      orElse: () => const GuideActionItem(
-        id: '',
-        title: '',
-        shortDescription: '',
-        type: GuideActionType.informative,
-        phase: GuidePhase.preparation,
-        orderIndex: 0,
-        isCompleted: true,
-      ),
-    );
-    final pfNotDone = pfItem.id.isNotEmpty && !pfItem.isCompleted;
-    final incompleteCritical = guideState.items
-        .where((it) => !it.isCompleted && it.preArrivalRequired)
-        .toList();
-
-    final hero = _ActiveHero(
-      city: city,
-      weather: weather,
-      onOpenSettings: onOpenSettings,
-    );
-
-    final journeyStepper = JourneyStepperWidget(
-      plan: plan,
-      allItems: guideState.items,
-      onTapActiveTask: guideState.currentItem != null
-          ? () => onViewAction(guideState.currentItem!)
-          : null,
-      onTapSeeMore: guideState.currentItem != null
-          ? () => onViewAction(guideState.currentItem!)
-          : null,
-    );
-
-    final actionRow = _SecondaryActionRow(
-      onCompare: onCompare,
-      onViewCity: onViewCity,
-      onNewPlan: onNewPlan,
-    );
-    final insightsSection = CityInsightsSection(
-      controller: cityInsightsController,
-      city: city,
-      weather: weather,
-      goal: planGoal,
-      timeline: planTimeline,
-      recommendationReasons: recommendationReasons,
-    );
-
-    // Stage-aware content layout
-    final bool isExplorer = stage == UserJourneyStage.explorer;
-    final bool isPlanner = stage == UserJourneyStage.planner;
-    final bool isExecutor = stage == UserJourneyStage.executor;
-
+    // Focus Mode — no-scroll layout sized for iPhone 11 (375×812pt)
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        hero,
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(0, 6, 0, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── EXECUTOR/PLANNER: PF nudge (highest urgency) ──
-                if ((isExecutor || isPlanner) && pfNotDone)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-                    child: _PFAppointmentNudge(
-                      onTap: () => onViewAction(pfItem),
-                    ),
-                  ),
+        // 1. City header (fills to top of screen including status bar)
+        _ActiveHero(
+          city: city,
+          weather: weather,
+          onOpenSettings: onOpenSettings,
+        ),
 
-                // ── EXECUTOR: pre-arrival warning (shown alongside PF nudge) ──
-                if (isExecutor && incompleteCritical.isNotEmpty)
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(16, pfNotDone ? 6 : 6, 16, 0),
-                    child: _PreArrivalWarningBanner(
-                      count: incompleteCritical.length,
-                      onTap: guideState.currentItem != null
-                          ? () => onViewAction(incompleteCritical.first)
-                          : null,
-                    ),
-                  ),
-
-                // ── PLANNER: countdown chip ──
-                if (isPlanner)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                    child: _PlannerCountdownChip(timeline: planTimeline),
-                  ),
-
-                // ── EXPLORER: affordability card instead of full stepper ──
-                if (isExplorer) ...[
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _ExplorerStageCard(
-                      city: city,
-                      cityBudget: CityBudgetData.forCity(city.id),
-                      onCreatePlan: onNewPlan,
-                    ),
-                  ),
-                ] else ...[
-                  journeyStepper,
-                ],
-
-                const SizedBox(height: 14),
-                CityFeedWidget(
-                  cityCode: city.id,
-                  stage: stage,
-                  locale: locale,
-                ),
-                // ── Budget quick-access for explorer/planner ──
-                if (isExplorer || isPlanner) ...[
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _BudgetQuickAccessCard(
-                      locale: locale,
-                      onTap: () {
-                        final budgetItem = guideState.items.firstWhere(
-                          (it) => it.id == 'item_0_3_budget',
-                          orElse: () => guideState.items.first,
-                        );
-                        onViewAction(budgetItem);
-                      },
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: actionRow,
-                ),
-                const SizedBox(height: 5),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: insightsSection,
-                ),
-              ],
+        // 2. Primary action card — the single current guide step
+        if (guideState.currentItem != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: _PrimaryActionCard(
+              item: guideState.currentItem!,
+              phaseName: guideState.phaseName(context),
+              isDark: isDark,
+              onTap: () => onViewAction(guideState.currentItem!),
             ),
           ),
+
+        // 3. Tu Jornada — compact phase stepper + quick-action chips
+        const SizedBox(height: 6),
+        JourneyStepperWidget(
+          plan: plan,
+          allItems: guideState.items,
+          showTaskCard: false,
+          onTapActiveTask: guideState.currentItem != null
+              ? () => onViewAction(guideState.currentItem!)
+              : null,
+          onTapSeeMore: guideState.currentItem != null
+              ? () => onViewAction(guideState.currentItem!)
+              : null,
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 5, 16, 0),
+          child: _SecondaryActionRow(
+            onCompare: onCompare,
+            onViewCity: onViewCity,
+            onNewPlan: onNewPlan,
+            compact: true,
+          ),
+        ),
+
+        // 4. Para Ti — compact horizontal card carousel
+        const SizedBox(height: 10),
+        CityFeedWidget(
+          cityCode: city.id,
+          stage: stage,
+          locale: locale,
+          cardHeight: 118.0,
         ),
       ],
+    );
+  }
+}
+
+// ─── Primary Action Card ──────────────────────────────────────────────────────
+//
+// Displays the single current guide step as a prominent card with a phase-tag
+// pill, large title, short description, and a full-width CTA button.
+// Used by the Focus Mode no-scroll layout.
+
+class _PrimaryActionCard extends StatelessWidget {
+  const _PrimaryActionCard({
+    required this.item,
+    required this.phaseName,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  final GuideActionItem item;
+  final String phaseName;
+  final bool isDark;
+  final VoidCallback? onTap;
+
+  static String _localizedText(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) =>
+      switch (Localizations.localeOf(context).languageCode) {
+        'pt' => pt,
+        'es' => es,
+        _ => en,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final phaseTag = item.preArrivalRequired
+        ? _localizedText(
+            context,
+            pt: '✈ Antes de viajar',
+            es: '✈ Antes de viajar',
+            en: '✈ Before traveling',
+          )
+        : phaseName;
+    final tagColor = item.preArrivalRequired
+        ? const Color(0xFFE24B4A)
+        : _accentText(context);
+    final tagBg = item.preArrivalRequired
+        ? (isDark ? const Color(0xFF3D1010) : const Color(0xFFFFF1F2))
+        : _badgeBackground(context);
+    final tagBorder = item.preArrivalRequired
+        ? const Color(0xFFE24B4A).withValues(alpha: 0.35)
+        : _badgeBorder(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0E1825) : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _cardBorder(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Phase tag pill
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: tagBg,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: tagBorder),
+            ),
+            child: Text(
+              phaseTag,
+              style: AppTypography.tinyLabel.copyWith(
+                fontWeight: FontWeight.w700,
+                color: tagColor,
+              ),
+            ),
+          ),
+          const SizedBox(height: 9),
+          // Title — ~15sp, prominent
+          Text(
+            item.title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: _primaryText(context),
+              height: 1.25,
+              letterSpacing: -0.2,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          // Short description — 2 lines max, muted
+          Text(
+            item.shortDescription,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: _secondaryText(context),
+              height: 1.4,
+              fontWeight: FontWeight.w400,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 11),
+          // Full-width CTA button
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 9),
+              decoration: BoxDecoration(
+                color: const Color(0xFF3B7CC8),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Text(
+                _localizedText(
+                  context,
+                  pt: 'Fazer agora',
+                  es: 'Hacer ahora',
+                  en: 'Do it now',
+                ),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -696,15 +745,15 @@ class _ActiveHero extends StatelessWidget {
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    isDark ? const Color(0x33090C12) : const Color(0x26F0F6FC),
-                    isDark ? const Color(0x8C090C12) : const Color(0x99F0F6FC),
-                    isDark ? const Color(0xFF07090E) : const Color(0xFFF4F6FA),
+                    Colors.transparent,
+                    Color(0x55000000),
+                    Color(0xCC000000),
                   ],
-                  stops: const [0, 0.55, 1],
+                  stops: [0.0, 0.45, 1.0],
                 ),
               ),
             ),
@@ -768,17 +817,13 @@ class _ActiveHero extends StatelessWidget {
                               fontSize: 30,
                               fontWeight: FontWeight.w900,
                               letterSpacing: -0.6,
-                              color: isDark
-                                  ? Colors.white
-                                  : _primaryText(context),
-                              shadows: isDark
-                                  ? const [
-                                      Shadow(
-                                        blurRadius: 12,
-                                        color: Color(0x80000000),
-                                      ),
-                                    ]
-                                  : null,
+                              color: Colors.white,
+                              shadows: const [
+                                Shadow(
+                                  blurRadius: 8,
+                                  color: Color(0x80000000),
+                                ),
+                              ],
                             ),
                       ),
                       const SizedBox(height: 2),
@@ -786,9 +831,7 @@ class _ActiveHero extends StatelessWidget {
                         '$stateLabel, ${context.l10n.countryLabel('brazil')}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.55)
-                              : _secondaryText(context),
+                          color: Colors.white.withValues(alpha: 0.65),
                         ),
                       ),
                     ],
@@ -802,9 +845,7 @@ class _ActiveHero extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.65)
-                        : _secondaryText(context),
+                    color: Colors.white.withValues(alpha: 0.75),
                   ),
                 ),
               ],
@@ -821,11 +862,15 @@ class _SecondaryActionRow extends StatelessWidget {
     required this.onCompare,
     required this.onViewCity,
     required this.onNewPlan,
+    this.compact = false,
   });
 
   final VoidCallback onCompare;
   final VoidCallback onViewCity;
   final VoidCallback onNewPlan;
+  /// When true renders compact horizontal icon+label chips instead of vertical
+  /// icon-over-label chips. Used by the Focus Mode layout.
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -836,6 +881,7 @@ class _SecondaryActionRow extends StatelessWidget {
             icon: Icons.compare_arrows_rounded,
             label: context.l10n.homeActionCompare,
             onTap: onCompare,
+            compact: compact,
           ),
         ),
         const SizedBox(width: 7),
@@ -844,6 +890,7 @@ class _SecondaryActionRow extends StatelessWidget {
             icon: Icons.location_city_outlined,
             label: context.l10n.homeActionViewCity,
             onTap: onViewCity,
+            compact: compact,
           ),
         ),
         const SizedBox(width: 7),
@@ -852,6 +899,7 @@ class _SecondaryActionRow extends StatelessWidget {
             icon: Icons.restart_alt_rounded,
             label: context.l10n.homeActionNewPlan,
             onTap: onNewPlan,
+            compact: compact,
           ),
         ),
       ],
@@ -864,14 +912,52 @@ class _ActionChip extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.compact = false,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  /// Compact mode renders a horizontal Row(icon, label) chip with reduced
+  /// padding — fits in the Focus Mode "Tu Jornada" quick-actions row.
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
+    if (compact) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(9),
+          onTap: onTap,
+          child: Ink(
+            padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
+            decoration: BoxDecoration(
+              color: AppColors.isDark(context)
+                  ? const Color(0xFF0E1825)
+                  : const Color(0xFFF0F4FA),
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(color: _cardBorder(context)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 13, color: _accentText(context)),
+                const SizedBox(width: 5),
+                Text(
+                  label,
+                  style: AppTypography.tinyLabel.copyWith(
+                    color: _tertiaryText(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     final sz = _screenSizeOf(context);
     final containerSize = switch (sz) {
       _ScreenSize.small => 26.0,

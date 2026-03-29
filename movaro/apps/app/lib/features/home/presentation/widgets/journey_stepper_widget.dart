@@ -15,6 +15,7 @@ class JourneyStepperWidget extends StatelessWidget {
     required this.allItems,
     this.onTapActiveTask,
     this.onTapSeeMore,
+    this.showTaskCard = true,
     super.key,
   });
 
@@ -22,6 +23,9 @@ class JourneyStepperWidget extends StatelessWidget {
   final List<GuideActionItem> allItems;
   final VoidCallback? onTapActiveTask;
   final VoidCallback? onTapSeeMore;
+  /// When false the active-task card is omitted — used by the Focus Mode
+  /// layout where the card is rendered separately as a primary action card.
+  final bool showTaskCard;
 
   static const _phases = [
     GuidePhase.preparation,
@@ -151,7 +155,7 @@ class JourneyStepperWidget extends StatelessWidget {
           ),
         ),
         // ── Part 3: Active task card ──────────────────────────────────
-        if (activeTask != null)
+        if (showTaskCard && activeTask != null)
           _ActiveTaskCard(
             item: activeTask,
             remainingCount: remainingInPhase - 1,
