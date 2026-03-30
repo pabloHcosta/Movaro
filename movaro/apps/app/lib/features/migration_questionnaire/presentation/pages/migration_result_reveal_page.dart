@@ -440,6 +440,24 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
     _ => Icons.tune_rounded,
   };
 
+  void _showCityComparisonSheet(
+    BuildContext context,
+    MigrationPlan plan,
+    City recommendedCity,
+    List<City> alternatives,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _CityComparisonSheet(
+        plan: plan,
+        recommendedCity: recommendedCity,
+        alternatives: alternatives,
+      ),
+    );
+  }
+
   // ── Build ───────────────────────────────────────────────────────────────────
 
   @override
@@ -543,6 +561,8 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               originCountryIso: originCountryIso,
                               destIata: destinationAirport?.iataCode,
                             ),
+                            const SizedBox(height: 16),
+                            _TimelineContextBar(plan: plan),
                             if (reasons.isNotEmpty) ...[
                               const SizedBox(height: 16),
                               _WhyCitySection(
@@ -555,7 +575,17 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               _AlternativesSection(
                                 cities: alternatives,
                                 confidence: plan.confidence,
+                                recommendedCity: recommendedCity,
                                 onTap: (city) => _openCityDetail(city),
+                              ),
+                              const SizedBox(height: 8),
+                              _CompareCitiesCta(
+                                onTap: () => _showCityComparisonSheet(
+                                  context,
+                                  plan,
+                                  recommendedCity,
+                                  alternatives,
+                                ),
                               ),
                             ],
                             const SizedBox(height: 16),
@@ -795,17 +825,21 @@ class _AlternativesSection extends StatelessWidget {
   const _AlternativesSection({
     required this.cities,
     required this.confidence,
+    required this.recommendedCity,
     required this.onTap,
   });
 
   final List<City> cities;
   final double confidence;
+  final City recommendedCity;
   final void Function(City) onTap;
 
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final l10n = context.l10n;
+    final recDims = MigrationPlanGenerator.cityDimensionsPublic(recommendedCity);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -821,11 +855,30 @@ class _AlternativesSection extends StatelessWidget {
         ...cities.take(2).indexed.map((entry) {
           final (index, city) = entry;
           final imageUrl = cityImageUrlFor(city.id);
-          // Alternatives receive a lower compatibility estimate:
-          // 2nd city = ~85% of top; 3rd city = ~70% of top
           final altPct = ((confidence * (index == 0 ? 0.85 : 0.70)) * 100)
               .round()
               .clamp(0, 100);
+
+          // Compute dimension diff chips
+          final altDims = MigrationPlanGenerator.cityDimensionsPublic(city);
+          // Biggest advantage of alt over recommended
+          String? altWinsDim;
+          double altWinsDelta = 0;
+          // Biggest advantage of recommended over alt
+          String? recWinsDim;
+          double recWinsDelta = 0;
+          for (final key in recDims.keys) {
+            final rec = recDims[key] ?? 0;
+            final alt = altDims[key] ?? 0;
+            final delta = alt - rec;
+            if (delta > altWinsDelta) {
+              altWinsDelta = delta;
+              altWinsDim = key;
+            } else if (-delta > recWinsDelta) {
+              recWinsDelta = -delta;
+              recWinsDim = key;
+            }
+          }
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
@@ -839,57 +892,87 @@ class _AlternativesSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: Padding(
                   padding: const EdgeInsets.all(14),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // City thumbnail
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: SizedBox(
-                          width: 52,
-                          height: 52,
-                          child: imageUrl != null
-                              ? CachedNetworkImage(
-                                  imageUrl: imageUrl,
-                                  fit: BoxFit.cover,
-                                  errorWidget: (_, _, _) =>
-                                      _AltCityPlaceholder(city: city),
-                                )
-                              : _AltCityPlaceholder(city: city),
-                        ),
+                      Row(
+                        children: [
+                          // City thumbnail
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: SizedBox(
+                              width: 48,
+                              height: 48,
+                              child: imageUrl != null
+                                  ? CachedNetworkImage(
+                                      imageUrl: imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorWidget: (_, _, _) =>
+                                          _AltCityPlaceholder(city: city),
+                                    )
+                                  : _AltCityPlaceholder(city: city),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  city.name,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(fontWeight: FontWeight.w700),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${city.stateName} · ${city.stateCode}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: AppColors.textSoftFor(context),
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          _StarRow(
+                            stars: _pctToStars(altPct),
+                            size: 13,
+                            color: AppColors.warning,
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 13,
+                            color: AppColors.textSoftFor(context),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      // Diff chips row
+                      if (altWinsDim != null || recWinsDim != null) ...[
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
                           children: [
-                            Text(
-                              city.name,
-                              style: Theme.of(context).textTheme.titleSmall
-                                  ?.copyWith(fontWeight: FontWeight.w700),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${city.stateName} · ${city.stateCode}',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: AppColors.textSoftFor(context),
-                                  ),
-                            ),
+                            if (altWinsDim != null)
+                              _DiffChip(
+                                label: _dimensionLabel(context, altWinsDim),
+                                wins: true,
+                                cityName: city.name,
+                              ),
+                            if (recWinsDim != null)
+                              _DiffChip(
+                                label: _dimensionLabel(context, recWinsDim),
+                                wins: false,
+                                cityName: recommendedCity.name,
+                              ),
                           ],
                         ),
-                      ),
-                      // Compatibility mini-stars
-                      _StarRow(
-                        stars: _pctToStars(altPct),
-                        size: 14,
-                        color: AppColors.warning,
-                      ),
-                      const SizedBox(width: 6),
-                      Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: 14,
-                        color: AppColors.textSoftFor(context),
-                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -900,6 +983,902 @@ class _AlternativesSection extends StatelessWidget {
       ],
     );
   }
+}
+
+// ─── Dimension helpers ────────────────────────────────────────────────────────
+
+String _dimensionLabel(BuildContext context, String key) {
+  final locale = Localizations.localeOf(context).languageCode;
+  return switch (key) {
+    'affordability' => switch (locale) {
+        'pt' => 'Custo de vida',
+        'es' => 'Costo de vida',
+        _ => 'Cost of living',
+      },
+    'job_market' => switch (locale) {
+        'pt' => 'Mercado de trabalho',
+        'es' => 'Mercado laboral',
+        _ => 'Job market',
+      },
+    'safety' => switch (locale) {
+        'pt' => 'Segurança',
+        'es' => 'Seguridad',
+        _ => 'Safety',
+      },
+    'climate_warmth' => switch (locale) {
+        'pt' => 'Clima',
+        'es' => 'Clima',
+        _ => 'Climate',
+      },
+    'transit_infra' => switch (locale) {
+        'pt' => 'Infraestrutura',
+        'es' => 'Infraestructura',
+        _ => 'Infrastructure',
+      },
+    'nature' => switch (locale) {
+        'pt' => 'Natureza',
+        'es' => 'Naturaleza',
+        _ => 'Nature',
+      },
+    'community' => switch (locale) {
+        'pt' => 'Comunidade AR',
+        'es' => 'Comunidad AR',
+        _ => 'AR Community',
+      },
+    _ => key,
+  };
+}
+
+IconData _dimensionIcon(String key) => switch (key) {
+      'affordability' => Icons.account_balance_wallet_outlined,
+      'job_market' => Icons.work_outline_rounded,
+      'safety' => Icons.shield_outlined,
+      'climate_warmth' => Icons.wb_sunny_outlined,
+      'transit_infra' => Icons.directions_transit_outlined,
+      'nature' => Icons.park_outlined,
+      'community' => Icons.people_outline_rounded,
+      _ => Icons.tune_rounded,
+    };
+
+// ─── Timeline context bar ─────────────────────────────────────────────────────
+
+/// Compact bar showing the user's declared timeline and how many guide steps
+/// must be completed before boarding.
+class _TimelineContextBar extends StatelessWidget {
+  const _TimelineContextBar({required this.plan});
+
+  final MigrationPlan plan;
+
+  static (String label, Color color) _timelineInfo(
+    String timeline,
+    String locale,
+  ) =>
+      switch (timeline) {
+        'in_0_3m' => (
+          switch (locale) {
+            'pt' => '0–3 meses · urgente',
+            'es' => '0–3 meses · urgente',
+            _ => '0–3 months · urgent',
+          },
+          AppColors.danger,
+        ),
+        'in_3_6m' => (
+          switch (locale) {
+            'pt' => '3–6 meses',
+            'es' => '3–6 meses',
+            _ => '3–6 months',
+          },
+          AppColors.caution,
+        ),
+        'in_6_12m' => (
+          switch (locale) {
+            'pt' => '6–12 meses',
+            'es' => '6–12 meses',
+            _ => '6–12 months',
+          },
+          AppColors.success,
+        ),
+        'just_exploring' || 'depends' => (
+          switch (locale) {
+            'pt' => 'Apenas explorando',
+            'es' => 'Solo explorando',
+            _ => 'Just exploring',
+          },
+          AppColors.primary,
+        ),
+        _ => (
+          switch (locale) {
+            'pt' => 'Mais de 1 ano',
+            'es' => 'Más de 1 año',
+            _ => 'Over 1 year',
+          },
+          AppColors.success,
+        ),
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final isDark = AppColors.isDark(context);
+    final (timelineLabel, color) = _timelineInfo(plan.timeline, locale);
+
+    final guideItems = ArgentinaBrazilGuideDataSource.build(
+      plan,
+      localeCode: locale,
+    );
+    final preArrivalCount = guideItems.where((i) => i.preArrivalRequired).length;
+
+    final preArrivalText = switch (locale) {
+      'pt' => '$preArrivalCount etapas antes de embarcar',
+      'es' => '$preArrivalCount pasos antes de embarcar',
+      _ => '$preArrivalCount steps before you board',
+    };
+    final timelinePrefix = switch (locale) {
+      'pt' => 'Prazo:',
+      'es' => 'Plazo:',
+      _ => 'Timeline:',
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.10 : 0.06),
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(
+          color: color.withValues(alpha: isDark ? 0.24 : 0.16),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.schedule_rounded, size: 16, color: color),
+          const SizedBox(width: 10),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.4,
+                ),
+                children: [
+                  TextSpan(
+                    text: '$timelinePrefix ',
+                  ),
+                  TextSpan(
+                    text: timelineLabel,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    ),
+                  ),
+                  const TextSpan(text: ' · '),
+                  TextSpan(text: preArrivalText),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Compare cities CTA ───────────────────────────────────────────────────────
+
+class _CompareCitiesCta extends StatelessWidget {
+  const _CompareCitiesCta({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final label = switch (locale) {
+      'pt' => 'Entender por que esta cidade ganhou →',
+      'es' => 'Entender por qué ganó esta ciudad →',
+      _ => 'Understand why this city won →',
+    };
+
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: onTap,
+        icon: const Icon(Icons.compare_arrows_rounded, size: 16),
+        label: Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 11),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Diff chip ────────────────────────────────────────────────────────────────
+
+/// Shows a single dimension where a city wins (green) or loses (orange).
+class _DiffChip extends StatelessWidget {
+  const _DiffChip({
+    required this.label,
+    required this.wins,
+    required this.cityName,
+  });
+
+  final String label;
+  final bool wins; // true = this city wins on this dimension
+  final String cityName;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final color = wins ? AppColors.success : AppColors.caution;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.16 : 0.10),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            wins ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+            size: 10,
+            color: color,
+          ),
+          const SizedBox(width: 3),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── City Comparison Sheet ────────────────────────────────────────────────────
+
+class _CityComparisonSheet extends StatefulWidget {
+  const _CityComparisonSheet({
+    required this.plan,
+    required this.recommendedCity,
+    required this.alternatives,
+  });
+
+  final MigrationPlan plan;
+  final City recommendedCity;
+  final List<City> alternatives;
+
+  @override
+  State<_CityComparisonSheet> createState() => _CityComparisonSheetState();
+}
+
+class _CityComparisonSheetState extends State<_CityComparisonSheet> {
+  int _selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final isDark = AppColors.isDark(context);
+    final alternatives = widget.alternatives.take(2).toList(growable: false);
+    if (alternatives.isEmpty) return const SizedBox.shrink();
+
+    final compareCity =
+        alternatives[_selectedIndex.clamp(0, alternatives.length - 1)];
+    final recDims =
+        MigrationPlanGenerator.cityDimensionsPublic(widget.recommendedCity);
+    final altDims = MigrationPlanGenerator.cityDimensionsPublic(compareCity);
+
+    // Sort by absolute delta — most decisive dimensions first
+    final keys = recDims.keys.toList();
+    keys.sort((a, b) {
+      final da = ((recDims[a] ?? 0) - (altDims[a] ?? 0)).abs();
+      final db = ((recDims[b] ?? 0) - (altDims[b] ?? 0)).abs();
+      return db.compareTo(da);
+    });
+
+    // Overall average score gap
+    final recAvg =
+        recDims.values.fold(0.0, (s, v) => s + v) / recDims.length;
+    final altAvg =
+        altDims.values.fold(0.0, (s, v) => s + v) / altDims.length;
+    final gapPct = ((recAvg - altAvg) * 100).round().abs();
+    final recWinsOverall = recAvg >= altAvg;
+
+    final titleText = switch (locale) {
+      'pt' => 'Comparar cidades',
+      'es' => 'Comparar ciudades',
+      _ => 'Compare cities',
+    };
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceFor(context),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.borderFor(context)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.82,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Header ──────────────────────────────────────────────────
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        titleText,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: AppColors.textSoftFor(context),
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints:
+                          const BoxConstraints(minWidth: 32, minHeight: 32),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // ── City tabs (when >1 alternative) ─────────────────────────
+                if (alternatives.length > 1) ...[
+                  Row(
+                    children: alternatives.indexed.map((entry) {
+                      final (i, city) = entry;
+                      final selected = i == _selectedIndex;
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          right: i < alternatives.length - 1 ? 8 : 0,
+                        ),
+                        child: GestureDetector(
+                          onTap: () => setState(() => _selectedIndex = i),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? AppColors.primary
+                                      .withValues(alpha: isDark ? 0.18 : 0.10)
+                                  : AppColors.surfaceMutedFor(context),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: selected
+                                    ? AppColors.primary
+                                        .withValues(alpha: 0.40)
+                                    : AppColors.borderFor(context),
+                              ),
+                            ),
+                            child: Text(
+                              city.name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium
+                                  ?.copyWith(
+                                    fontWeight: selected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                    color: selected
+                                        ? AppColors.primary
+                                        : AppColors.textSoftFor(context),
+                                  ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 14),
+                ],
+
+                // ── Score gap banner ─────────────────────────────────────────
+                _ScoreGapBanner(
+                  recommendedCity: widget.recommendedCity,
+                  compareCity: compareCity,
+                  gapPct: gapPct,
+                  recWins: recWinsOverall,
+                  locale: locale,
+                ),
+                const SizedBox(height: 14),
+
+                // ── Legend ───────────────────────────────────────────────────
+                Row(
+                  children: [
+                    _LegendDot(color: AppColors.primary),
+                    const SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        widget.recommendedCity.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    _LegendDot(color: AppColors.caution),
+                    const SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        compareCity.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.caution,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // ── Dimension bars ────────────────────────────────────────────
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ...keys.map(
+                          (key) => Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: _DimensionComparisonRow(
+                              label: _dimensionLabel(context, key),
+                              icon: _dimensionIcon(key),
+                              recScore: recDims[key] ?? 0,
+                              altScore: altDims[key] ?? 0,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        _ArchetypeContextRow(
+                          archetypeKey: widget.plan.archetypeKey,
+                          selectedPriorities: widget.plan.selectedPriorities,
+                          locale: locale,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Score gap banner ─────────────────────────────────────────────────────────
+
+class _ScoreGapBanner extends StatelessWidget {
+  const _ScoreGapBanner({
+    required this.recommendedCity,
+    required this.compareCity,
+    required this.gapPct,
+    required this.recWins,
+    required this.locale,
+  });
+
+  final City recommendedCity;
+  final City compareCity;
+  final int gapPct;
+  final bool recWins;
+  final String locale;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final winner = recWins ? recommendedCity.name : compareCity.name;
+
+    final gapLabel = switch (gapPct) {
+      <= 3 => switch (locale) {
+          'pt' => 'empate técnico',
+          'es' => 'empate técnico',
+          _ => 'statistical tie',
+        },
+      <= 8 => switch (locale) {
+          'pt' => 'diferença leve',
+          'es' => 'diferencia leve',
+          _ => 'slight edge',
+        },
+      <= 15 => switch (locale) {
+          'pt' => 'vantagem clara',
+          'es' => 'ventaja clara',
+          _ => 'clear advantage',
+        },
+      _ => switch (locale) {
+          'pt' => 'vantagem decisiva',
+          'es' => 'ventaja decisiva',
+          _ => 'decisive advantage',
+        },
+    };
+
+    final bodyText = switch (locale) {
+      'pt' =>
+        '$winner tem $gapPct pt a mais no índice geral — $gapLabel.',
+      'es' =>
+        '$winner tiene $gapPct pt más en el índice general — $gapLabel.',
+      _ =>
+        '$winner scores $gapPct pt higher overall — $gapLabel.',
+    };
+
+    final color = recWins ? AppColors.primary : AppColors.caution;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.12 : 0.07),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withValues(alpha: isDark ? 0.28 : 0.18),
+        ),
+      ),
+      child: Text(
+        bodyText,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: AppColors.textPrimaryFor(context),
+          height: 1.4,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Dimension comparison row ─────────────────────────────────────────────────
+
+class _DimensionComparisonRow extends StatelessWidget {
+  const _DimensionComparisonRow({
+    required this.label,
+    required this.icon,
+    required this.recScore,
+    required this.altScore,
+  });
+
+  final String label;
+  final IconData icon;
+  final double recScore; // 0–1
+  final double altScore; // 0–1
+
+  @override
+  Widget build(BuildContext context) {
+    final recWins = recScore >= altScore;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 13, color: AppColors.textSoftFor(context)),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        _BarRow(
+          score: recScore,
+          color: AppColors.primary,
+          wins: recWins,
+        ),
+        const SizedBox(height: 3),
+        _BarRow(
+          score: altScore,
+          color: AppColors.caution,
+          wins: !recWins,
+        ),
+      ],
+    );
+  }
+}
+
+class _BarRow extends StatelessWidget {
+  const _BarRow({
+    required this.score,
+    required this.color,
+    required this.wins,
+  });
+
+  final double score;
+  final Color color;
+  final bool wins;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final effectiveColor = wins ? color : color.withValues(alpha: 0.40);
+
+    return Row(
+      children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: score.clamp(0.0, 1.0),
+              minHeight: 6,
+              backgroundColor: isDark
+                  ? Colors.white.withValues(alpha: 0.06)
+                  : Colors.black.withValues(alpha: 0.06),
+              valueColor: AlwaysStoppedAnimation<Color>(effectiveColor),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 30,
+          child: Text(
+            '${(score * 100).round()}',
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: wins ? FontWeight.w700 : FontWeight.w400,
+              color: wins ? color : AppColors.textSoftFor(context),
+            ),
+          ),
+        ),
+        const SizedBox(width: 3),
+        SizedBox(
+          width: 14,
+          child: wins
+              ? Icon(Icons.check_rounded, size: 12, color: color)
+              : null,
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Archetype context row ────────────────────────────────────────────────────
+
+class _ArchetypeContextRow extends StatelessWidget {
+  const _ArchetypeContextRow({
+    required this.archetypeKey,
+    required this.selectedPriorities,
+    required this.locale,
+  });
+
+  final String? archetypeKey;
+  final List<String> selectedPriorities;
+  final String locale;
+
+  String _archetypeExplanation() {
+    final key = archetypeKey ?? '';
+    if (locale == 'pt') {
+      return switch (key) {
+        'job_hunter' || 'job_hunter_searching' =>
+          'Para buscadores de emprego, mercado de trabalho pesou mais na decisão.',
+        'job_hunter_with_offer' =>
+          'Você já tem oferta — foco em infraestrutura e custo de vida.',
+        'remote_worker' || 'remote_stable' =>
+          'Para trabalho remoto, custo de vida, natureza e segurança pesaram mais.',
+        'student' =>
+          'Para estudantes, qualidade acadêmica e custo de vida foram priorizados.',
+        'family_move' =>
+          'Para família, segurança e comunidade argentina pesaram mais.',
+        'fresh_start' =>
+          'Para recomeço, custo de vida e segurança foram os fatores decisivos.',
+        _ =>
+          'A pontuação reflete um equilíbrio entre custo, oportunidades e qualidade de vida.',
+      };
+    } else if (locale == 'es') {
+      return switch (key) {
+        'job_hunter' || 'job_hunter_searching' =>
+          'Para buscadores de empleo, el mercado laboral pesó más en la decisión.',
+        'job_hunter_with_offer' =>
+          'Ya tenés oferta — foco en infraestructura y costo de vida.',
+        'remote_worker' || 'remote_stable' =>
+          'Para trabajo remoto, costo de vida, naturaleza y seguridad pesaron más.',
+        'student' =>
+          'Para estudiantes, calidad académica y costo de vida fueron priorizados.',
+        'family_move' =>
+          'Para familia, seguridad y comunidad argentina pesaron más.',
+        'fresh_start' =>
+          'Para nuevo comienzo, costo de vida y seguridad fueron decisivos.',
+        _ =>
+          'El puntaje refleja un equilibrio entre costo, oportunidades y calidad de vida.',
+      };
+    } else {
+      return switch (key) {
+        'job_hunter' || 'job_hunter_searching' =>
+          'For job seekers, the job market dimension carried the most weight.',
+        'job_hunter_with_offer' =>
+          'You have an offer — infrastructure and cost of living drove the score.',
+        'remote_worker' || 'remote_stable' =>
+          'For remote workers, cost, nature, and safety were the main factors.',
+        'student' =>
+          'For students, academic quality and affordability were prioritized.',
+        'family_move' =>
+          'For families, safety and Argentine community carried the most weight.',
+        'fresh_start' =>
+          'For fresh starts, cost of living and safety were decisive.',
+        _ =>
+          'The score balances cost, opportunities, and quality of life.',
+      };
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final explanation = _archetypeExplanation();
+
+    final priorityPrefix = switch (locale) {
+      'pt' => 'Suas prioridades:',
+      'es' => 'Tus prioridades:',
+      _ => 'Your priorities:',
+    };
+
+    final priorityLabels = selectedPriorities
+        .where((p) => p != 'balanced_unsure')
+        .map(
+          (p) => switch (p) {
+            'low_cost' => switch (locale) {
+                'pt' => 'Custo baixo',
+                'es' => 'Bajo costo',
+                _ => 'Low cost',
+              },
+            'job_opportunities' => switch (locale) {
+                'pt' => 'Emprego',
+                'es' => 'Empleo',
+                _ => 'Jobs',
+              },
+            'safety' => switch (locale) {
+                'pt' => 'Segurança',
+                'es' => 'Seguridad',
+                _ => 'Safety',
+              },
+            'warm_climate_beach' => switch (locale) {
+                'pt' => 'Praia/clima',
+                'es' => 'Playa/clima',
+                _ => 'Beach/climate',
+              },
+            'transit_infra' => switch (locale) {
+                'pt' => 'Transporte',
+                'es' => 'Transporte',
+                _ => 'Transit',
+              },
+            'nature' => switch (locale) {
+                'pt' => 'Natureza',
+                'es' => 'Naturaleza',
+                _ => 'Nature',
+              },
+            'community' => switch (locale) {
+                'pt' => 'Comunidade AR',
+                'es' => 'Comunidad AR',
+                _ => 'AR Community',
+              },
+            'close_to_argentina' => switch (locale) {
+                'pt' => 'Próximo à AR',
+                'es' => 'Cerca de AR',
+                _ => 'Near Argentina',
+              },
+            _ => p,
+          },
+        )
+        .toList();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.04)
+            : Colors.black.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.info_outline_rounded,
+                size: 13,
+                color: AppColors.textSoftFor(context),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  explanation,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (priorityLabels.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              priorityPrefix,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Wrap(
+              spacing: 5,
+              runSpacing: 4,
+              children: priorityLabels
+                  .map(
+                    (label) => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary
+                            .withValues(alpha: isDark ? 0.14 : 0.08),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Legend dot ───────────────────────────────────────────────────────────────
+
+class _LegendDot extends StatelessWidget {
+  const _LegendDot({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      );
 }
 
 class _AltCityPlaceholder extends StatelessWidget {
