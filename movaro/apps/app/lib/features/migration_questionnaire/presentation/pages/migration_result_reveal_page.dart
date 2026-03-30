@@ -1233,13 +1233,10 @@ class _GuidePreviewSection extends StatelessWidget {
       'es' => 'TU PLAN DE MIGRACIÓN',
       _ => 'YOUR MIGRATION PLAN',
     };
-    final footerHint = switch (locale) {
-      'pt' =>
-        'O guia completo fica disponível ao confirmar a cidade.',
-      'es' =>
-        'La guía completa estará disponible al confirmar la ciudad.',
-      _ =>
-        'The full guide becomes available once you confirm your city.',
+    final browseCtaLabel = switch (locale) {
+      'pt' => 'Explorar o guia completo →',
+      'es' => 'Explorar la guía completa →',
+      _ => 'Explore the full guide →',
     };
     final stepCountLabel = switch (locale) {
       'pt' => '${allItems.length} passos',
@@ -1301,30 +1298,23 @@ class _GuidePreviewSection extends StatelessWidget {
           );
         }),
 
-        // Footer hint
+        // Browse CTA — opens copilot in preview mode
         Padding(
-          padding: const EdgeInsets.only(top: 12, left: 4),
-          child: Row(
-            children: [
-              Icon(
-                Icons.lock_outline_rounded,
-                size: 12,
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.25)
-                    : const Color(0x590A0F1E),
+          padding: const EdgeInsets.only(top: 10),
+          child: SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () =>
+                  Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot),
+              icon: const Icon(Icons.menu_book_rounded, size: 16),
+              label: Text(
+                browseCtaLabel,
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-              const SizedBox(width: 5),
-              Expanded(
-                child: Text(
-                  footerHint,
-                  style: AppTypography.tinyLabel.copyWith(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.25)
-                        : const Color(0x590A0F1E),
-                  ),
-                ),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
-            ],
+            ),
           ),
         ),
       ],

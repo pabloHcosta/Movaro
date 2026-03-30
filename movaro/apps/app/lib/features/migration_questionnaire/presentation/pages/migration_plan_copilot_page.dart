@@ -491,6 +491,15 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     await _showExecutionSheet(controller, item, plan, city);
   }
 
+  /// Confirms the city and transitions the copilot from preview to execution
+  /// mode. Called from the preview banner and from the execution sheet when
+  /// the user is browsing in read-only mode.
+  Future<void> _confirmCity(City city) async {
+    await widget.controller.confirmPlanCity(city);
+    if (!mounted) return;
+    setState(() {}); // triggers rebuild — hasConfirmedCity is now true
+  }
+
   Future<void> _openToolForItem(
     GuideActionItem item,
     MigrationPlan plan,
@@ -569,8 +578,9 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     GuideGpsController controller,
     GuideActionItem item,
     MigrationPlan plan,
-    City? city,
-  ) {
+    City? city, {
+    bool isPreview = false,
+  }) {
     var sheetItem = item;
     var actionOpened = false;
 
@@ -768,8 +778,9 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                           ),
                           const SizedBox(height: 12),
                         ],
-                        // ── Primary Action Button (action-first) ──
-                        if (sheetItem.resolvedPrimaryActionType !=
+                        // ── Primary Action Button (action-first, hidden in preview) ──
+                        if (!isPreview &&
+                            sheetItem.resolvedPrimaryActionType !=
                                 GuidePrimaryActionType.none &&
                             sheetItem.resolvedPrimaryActionType !=
                                 GuidePrimaryActionType.checklist) ...[
@@ -803,7 +814,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                           ),
                           const SizedBox(height: 10),
                         ],
-                        // ── Checklist (interactive, drives completion) ──
+                        // ── Checklist (interactive in execution, read-only in preview) ──
                         if (sheetItem.hasChecklist) ...[
                           for (final subItem
                               in sheetItem.checklistItems!) ...[
@@ -811,8 +822,9 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                               value: subItem.isCompleted,
                               contentPadding: EdgeInsets.zero,
                               title: Text(subItem.title),
-                              onChanged: (_) =>
-                                  handleChecklistToggle(subItem),
+                              onChanged: isPreview
+                                  ? null
+                                  : (_) => handleChecklistToggle(subItem),
                             ),
                           ],
                           const SizedBox(height: 6),
@@ -1052,27 +1064,53 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton(
-                            onPressed: canComplete ? handleComplete : null,
-                            child: Text(
-                              canComplete
-                                  ? _localizedText(
-                                      sheetContext,
-                                      pt: 'Concluir etapa',
-                                      es: 'Completar etapa',
-                                      en: 'Complete step',
-                                    )
-                                  : _localizedText(
-                                      sheetContext,
-                                      pt: 'Conclua o checklist para continuar',
-                                      es: 'Completa el checklist para continuar',
-                                      en: 'Finish the checklist to continue',
-                                    ),
+                        if (isPreview && city != null)
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton.icon(
+                              onPressed: () async {
+                                Navigator.of(sheetContext).pop();
+                                await _confirmCity(city);
+                              },
+                              icon: const Icon(
+                                Icons.check_circle_rounded,
+                                size: 18,
+                              ),
+                              label: Text(
+                                _localizedText(
+                                  sheetContext,
+                                  pt: 'Confirmar ${city.name} e começar',
+                                  es: 'Confirmar ${city.name} y comenzar',
+                                  en: 'Confirm ${city.name} and start',
+                                ),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton(
+                              onPressed: canComplete ? handleComplete : null,
+                              child: Text(
+                                canComplete
+                                    ? _localizedText(
+                                        sheetContext,
+                                        pt: 'Concluir etapa',
+                                        es: 'Completar etapa',
+                                        en: 'Complete step',
+                                      )
+                                    : _localizedText(
+                                        sheetContext,
+                                        pt: 'Conclua o checklist para continuar',
+                                        es: 'Completa el checklist para continuar',
+                                        en: 'Finish the checklist to continue',
+                                      ),
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -1188,16 +1226,29 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (!hasConfirmedCity)
-                              _PreparationNeedsCityState(
-                                onOpenPlanResult: () {
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    AppRoutes.migrationPlanResult,
-                                  );
-                                },
-                              )
-                            else ...[
+                            if (!hasConfirmedCity) ...[
+                              // Preview mode — full guide visible, execution locked.
+                              // Confirm CTA activates execution mode in-place.
+                              _GuidePreviewBanner(
+                                cityName: city?.name ?? '',
+                                totalItems: actionItems.length,
+                                onConfirm: city != null
+                                    ? () => _confirmCity(city)
+                                    : null,
+                              ),
+                              const SizedBox(height: 12),
+                              _GuideAllItemsList(
+                                items: gpsController.items,
+                                onSelectItem: (item) => _showExecutionSheet(
+                                  gpsController,
+                                  item,
+                                  plan,
+                                  city,
+                                  isPreview: true,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                            ] else ...[
                               _GuideContextBand(controller: gpsController),
                               const SizedBox(height: 12),
                               _GuideUnifiedProgressBar(
@@ -2621,47 +2672,326 @@ class _MacroStageCard extends StatelessWidget {
   }
 }
 
-class _PreparationNeedsCityState extends StatelessWidget {
-  const _PreparationNeedsCityState({required this.onOpenPlanResult});
+// ─── Guide preview mode widgets ───────────────────────────────────────────────
 
-  final VoidCallback onOpenPlanResult;
+/// Sticky banner shown when the guide is in preview (city not yet confirmed).
+/// Communicates the mode clearly and offers a direct confirm CTA.
+class _GuidePreviewBanner extends StatelessWidget {
+  const _GuidePreviewBanner({
+    required this.cityName,
+    required this.totalItems,
+    required this.onConfirm,
+  });
+
+  final String cityName;
+  final int totalItems;
+  final VoidCallback? onConfirm;
 
   @override
   Widget build(BuildContext context) {
-    return FrostedPanel(
-      padding: const EdgeInsets.all(22),
+    final isDark = AppColors.isDark(context);
+    final accentColor = AppColors.primary;
+    final locale = Localizations.localeOf(context).languageCode;
+
+    final title = switch (locale) {
+      'pt' => cityName.isNotEmpty
+          ? 'Visualizando o plano para $cityName'
+          : 'Visualizando o plano de migração',
+      'es' => cityName.isNotEmpty
+          ? 'Visualizando el plan para $cityName'
+          : 'Visualizando el plan de migración',
+      _ => cityName.isNotEmpty
+          ? 'Previewing the plan for $cityName'
+          : 'Previewing your migration plan',
+    };
+    final body = switch (locale) {
+      'pt' =>
+        'Explore os $totalItems passos antes de confirmar. Nenhuma ação será executada no modo de visualização.',
+      'es' =>
+        'Explora los $totalItems pasos antes de confirmar. Ninguna acción se ejecutará en modo vista previa.',
+      _ =>
+        'Explore all $totalItems steps before committing. No actions will run in preview mode.',
+    };
+    final ctaLabel = switch (locale) {
+      'pt' =>
+        cityName.isNotEmpty ? 'Confirmar $cityName' : 'Confirmar cidade',
+      'es' =>
+        cityName.isNotEmpty ? 'Confirmar $cityName' : 'Confirmar ciudad',
+      _ =>
+        cityName.isNotEmpty ? 'Confirm $cityName' : 'Confirm city',
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: accentColor.withValues(alpha: isDark ? 0.12 : 0.07),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: accentColor.withValues(alpha: isDark ? 0.30 : 0.20),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InsightCard(
-            title: _localizedText(
-              context,
-              pt: 'Escolha sua cidade para continuar',
-              es: 'Elegi tu ciudad para continuar',
-              en: 'Choose your city to continue',
-            ),
-            body: _localizedText(
-              context,
-              pt: 'Voce precisa escolher a cidade do seu plano antes de acessar o guia completo. Volte ao resultado e confirme a cidade recomendada.',
-              es: 'Necesitas elegir la ciudad de tu plan antes de entrar a la guia completa. Volve al resultado y confirma la ciudad recomendada.',
-              en: 'You need to choose your plan city before accessing the full guide. Go back to the result and confirm the recommended city.',
-            ),
-            icon: Icons.location_city_outlined,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: isDark ? 0.20 : 0.12),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: Icon(
+                  Icons.preview_rounded,
+                  size: 16,
+                  color: accentColor,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimaryFor(context),
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      body,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: onOpenPlanResult,
-            icon: const Icon(Icons.location_city_outlined),
-            label: Text(
-              _localizedText(
-                context,
-                pt: 'Ver cidades recomendadas ->',
-                es: 'Ver ciudades recomendadas ->',
-                en: 'See recommended cities ->',
+          if (onConfirm != null) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: onConfirm,
+                icon: const Icon(Icons.check_circle_rounded, size: 17),
+                label: Text(
+                  ctaLabel,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
               ),
             ),
-          ),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+/// Groups all guide items by phase and renders them as tappable rows.
+/// Used when the guide is in preview mode (city not yet confirmed).
+class _GuideAllItemsList extends StatelessWidget {
+  const _GuideAllItemsList({
+    required this.items,
+    required this.onSelectItem,
+  });
+
+  final List<GuideActionItem> items;
+  final void Function(GuideActionItem item) onSelectItem;
+
+  // Phase accent colors — matches _GuidePreviewSection in result page.
+  static const _phaseColor = {
+    GuidePhase.preparation: Color(0xFF4F46E5),
+    GuidePhase.housing: Color(0xFF0891B2),
+    GuidePhase.documents: Color(0xFF2563EB),
+    GuidePhase.work: Color(0xFF16A34A),
+    GuidePhase.arrival: Color(0xFFEA580C),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) return const SizedBox.shrink();
+
+    // Group items by phase while preserving phase order.
+    final Map<GuidePhase, List<GuideActionItem>> grouped = {};
+    for (final phase in GuidePhase.values) {
+      final phaseItems = items.where((i) => i.phase == phase).toList();
+      if (phaseItems.isNotEmpty) grouped[phase] = phaseItems;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: grouped.entries.expand<Widget>((entry) {
+        final phase = entry.key;
+        final phaseItems = entry.value;
+        final color = _phaseColor[phase] ?? AppColors.primary;
+        final phaseLabel = _phaseLabel(context, phase);
+
+        return [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8, top: 4),
+            child: Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Text(
+                  phaseLabel.toUpperCase(),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '${phaseItems.length}',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ...phaseItems.indexed.map((entry) {
+            final (index, item) = entry;
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: index < phaseItems.length - 1 ? 6 : 16,
+              ),
+              child: _PreviewItemTile(
+                item: item,
+                phaseColor: color,
+                onTap: () => onSelectItem(item),
+              ),
+            );
+          }),
+        ];
+      }).toList(),
+    );
+  }
+
+  String _phaseLabel(BuildContext context, GuidePhase phase) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return switch (phase) {
+      GuidePhase.preparation => switch (locale) {
+          'pt' => 'Preparação',
+          'es' => 'Preparación',
+          _ => 'Preparation',
+        },
+      GuidePhase.housing => switch (locale) {
+          'pt' => 'Moradia',
+          'es' => 'Vivienda',
+          _ => 'Housing',
+        },
+      GuidePhase.documents => switch (locale) {
+          'pt' => 'Documentos',
+          'es' => 'Documentos',
+          _ => 'Documents',
+        },
+      GuidePhase.work => switch (locale) {
+          'pt' => 'Trabalho',
+          'es' => 'Trabajo',
+          _ => 'Work',
+        },
+      GuidePhase.arrival => switch (locale) {
+          'pt' => 'Chegada',
+          'es' => 'Llegada',
+          _ => 'Arrival',
+        },
+    };
+  }
+}
+
+/// Compact tappable row for a single guide item in the preview list.
+class _PreviewItemTile extends StatelessWidget {
+  const _PreviewItemTile({
+    required this.item,
+    required this.phaseColor,
+    required this.onTap,
+  });
+
+  final GuideActionItem item;
+  final Color phaseColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(13),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceMutedFor(context),
+            borderRadius: BorderRadius.circular(13),
+            border: Border.all(color: AppColors.borderFor(context)),
+          ),
+          child: Row(
+            children: [
+              // Phase dot
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: phaseColor.withValues(alpha: isDark ? 0.80 : 0.70),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 10),
+              // Icon (if present)
+              if (item.icon != null) ...[
+                Icon(item.icon, size: 16, color: AppColors.textSoftFor(context)),
+                const SizedBox(width: 8),
+              ],
+              Expanded(
+                child: Text(
+                  item.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimaryFor(context),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              // Pre-arrival badge
+              if (item.preArrivalRequired) ...[
+                Icon(
+                  Icons.flight_takeoff_rounded,
+                  size: 13,
+                  color: AppColors.warning,
+                ),
+                const SizedBox(width: 6),
+              ],
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 12,
+                color: AppColors.textSoftFor(context),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

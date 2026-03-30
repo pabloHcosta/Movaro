@@ -338,11 +338,11 @@ class AppRouter {
           ),
         );
       case AppRoutes.migrationPlanCopilot:
-        if (dependencies
-                .migrationQuestionnaireController
-                .generatedPlan
-                ?.isCityConfirmed !=
-            true) {
+        // No city-confirmed gate: copilot opens in preview mode when the city
+        // hasn't been confirmed yet, letting the user read the full guide
+        // before committing.
+        if (dependencies.migrationQuestionnaireController.generatedPlan ==
+            null) {
           return _buildRoute(
             const RouteSettings(name: AppRoutes.migrationResultReveal),
             MigrationResultRevealPage(
