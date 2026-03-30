@@ -2948,5 +2948,18 @@
   },
   "copilotButtonCompleteStep": "Completar esta etapa",
   "copilotButtonOpenTool": "Abrir herramienta",
-  "copilotButtonComplete": "Completar"
+  "copilotButtonComplete": "Completar",
+
+  "citySeasonalityTitle": "Estacionalidad",
+  "citySeasonalityHighSeverityLabel": "Temporada alta intensa — atención especial",
+  "citySeasonalityMediumSeverityLabel": "Estacionalidad moderada — planifica con anticipación",
+  "citySeasonalityShowDetails": "Ver impactos en vivienda y trabajo",
+  "citySeasonalityHideDetails": "Ocultar detalles",
+  "citySeasonalityHousingTitle": "Vivienda en temporada",
+  "citySeasonalityJobsTitle": "Mercado laboral",
+  "citySeasonalityPopulationPrefix": "población",
+  "citySeasonalityHighAdvice": "Consejo: planifica llegar fuera de la temporada alta (may–oct). Tendrás muchas más opciones de alquiler a largo plazo y precios razonables. Si necesitas llegar en temporada alta, reserva alojamiento con al menos 3 meses de anticipación.",
+  "citySeasonalityMediumAdvice": "Consejo: prefiere firmar contratos de larga duración antes de la temporada alta. Esto garantiza estabilidad de precio incluso cuando la demanda turística aumenta.",
+  "citySeasonalityCardBadgeHigh": "Temporada alta",
+  "citySeasonalityCardBadgeMedium": "Estacionalidad"
 }

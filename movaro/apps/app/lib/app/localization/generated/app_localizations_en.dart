@@ -7206,4 +7206,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get copilotButtonComplete => 'Complete';
+
+  @override
+  String get citySeasonalityTitle => 'Seasonality';
+
+  @override
+  String get citySeasonalityHighSeverityLabel =>
+      'Intense peak season — plan carefully';
+
+  @override
+  String get citySeasonalityMediumSeverityLabel =>
+      'Moderate seasonality — plan ahead';
+
+  @override
+  String get citySeasonalityShowDetails => 'See housing & work impacts';
+
+  @override
+  String get citySeasonalityHideDetails => 'Hide details';
+
+  @override
+  String get citySeasonalityHousingTitle => 'Housing during peak season';
+
+  @override
+  String get citySeasonalityJobsTitle => 'Job market';
+
+  @override
+  String get citySeasonalityPopulationPrefix => 'population';
+
+  @override
+  String get citySeasonalityHighAdvice =>
+      'Tip: plan to arrive outside peak season (May–Oct). You\'ll find far more long-term rental options at reasonable prices. If you must arrive in peak season, book accommodation at least 3 months in advance.';
+
+  @override
+  String get citySeasonalityMediumAdvice =>
+      'Tip: sign a long-term lease before the peak season starts. This locks in a stable price even when tourist demand rises.';
+
+  @override
+  String get citySeasonalityCardBadgeHigh => 'Peak season';
+
+  @override
+  String get citySeasonalityCardBadgeMedium => 'Seasonal';
 }

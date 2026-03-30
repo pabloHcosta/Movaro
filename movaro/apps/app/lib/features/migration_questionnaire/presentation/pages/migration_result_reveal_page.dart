@@ -7,6 +7,7 @@ import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
+import 'package:movaro_app/features/cities/application/services/city_seasonality_conflict_service.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
@@ -576,6 +577,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                                 cities: alternatives,
                                 confidence: plan.confidence,
                                 recommendedCity: recommendedCity,
+                                planTimeline: plan.timeline,
                                 onTap: (city) => _openCityDetail(city),
                               ),
                               const SizedBox(height: 8),
@@ -827,6 +829,7 @@ class _AlternativesSection extends StatelessWidget {
     required this.confidence,
     required this.recommendedCity,
     required this.onTap,
+    this.planTimeline,
   });
 
   final List<City> cities;
@@ -834,11 +837,16 @@ class _AlternativesSection extends StatelessWidget {
   final City recommendedCity;
   final void Function(City) onTap;
 
+  /// When provided, each alternative city is checked for a seasonality
+  /// conflict with the user's planned arrival window.
+  final String? planTimeline;
+
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final l10n = context.l10n;
     final recDims = MigrationPlanGenerator.cityDimensionsPublic(recommendedCity);
+    final locale = Localizations.localeOf(context).languageCode;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -858,6 +866,14 @@ class _AlternativesSection extends StatelessWidget {
           final altPct = ((confidence * (index == 0 ? 0.85 : 0.70)) * 100)
               .round()
               .clamp(0, 100);
+
+          // Seasonality conflict check
+          final seasonConflict = planTimeline != null
+              ? CitySeasonalityConflictService.evaluate(
+                  city: city,
+                  timeline: planTimeline,
+                )
+              : null;
 
           // Compute dimension diff chips
           final altDims = MigrationPlanGenerator.cityDimensionsPublic(city);
@@ -951,8 +967,10 @@ class _AlternativesSection extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // Diff chips row
-                      if (altWinsDim != null || recWinsDim != null) ...[
+                      // Diff chips row + seasonality conflict chip
+                      if (altWinsDim != null ||
+                          recWinsDim != null ||
+                          (seasonConflict?.hasConflict == true)) ...[
                         const SizedBox(height: 8),
                         Wrap(
                           spacing: 6,
@@ -970,6 +988,12 @@ class _AlternativesSection extends StatelessWidget {
                                 wins: false,
                                 cityName: recommendedCity.name,
                               ),
+                            if (seasonConflict?.hasConflict == true)
+                              _SeasonalityConflictChip(
+                                conflict: seasonConflict!,
+                                locale: locale,
+                                isDark: isDark,
+                              ),
                           ],
                         ),
                       ],
@@ -981,6 +1005,49 @@ class _AlternativesSection extends StatelessWidget {
           );
         }),
       ],
+    );
+  }
+}
+
+// ─── Seasonality conflict chip ────────────────────────────────────────────────
+
+class _SeasonalityConflictChip extends StatelessWidget {
+  const _SeasonalityConflictChip({
+    required this.conflict,
+    required this.locale,
+    required this.isDark,
+  });
+
+  final SeasonalityConflict conflict;
+  final String locale;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final isCritical = conflict.level == SeasonalityConflictLevel.critical;
+    final color = isCritical ? AppColors.danger : AppColors.caution;
+    final label = conflict.overlapLabel(locale);
+    final chipLabel = switch (locale) {
+      'pt' => isCritical ? '⚠ Alta temporada ($label)' : 'Temporada ($label)',
+      'es' => isCritical ? '⚠ Temporada alta ($label)' : 'Temporada ($label)',
+      _ => isCritical ? '⚠ Peak season ($label)' : 'Season ($label)',
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.22 : 0.10),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: isDark ? 0.45 : 0.35)),
+      ),
+      child: Text(
+        chipLabel,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 10,
+            ),
+      ),
     );
   }
 }

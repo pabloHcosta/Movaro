@@ -2948,5 +2948,18 @@
   },
   "copilotButtonCompleteStep": "Concluir esta etapa",
   "copilotButtonOpenTool": "Abrir ferramenta",
-  "copilotButtonComplete": "Concluir"
+  "copilotButtonComplete": "Concluir",
+
+  "citySeasonalityTitle": "Sazonalidade",
+  "citySeasonalityHighSeverityLabel": "Alta temporada intensa — atenção redobrada",
+  "citySeasonalityMediumSeverityLabel": "Sazonalidade moderada — planeje com antecedência",
+  "citySeasonalityShowDetails": "Ver impactos em moradia e trabalho",
+  "citySeasonalityHideDetails": "Ocultar detalhes",
+  "citySeasonalityHousingTitle": "Moradia na temporada",
+  "citySeasonalityJobsTitle": "Mercado de trabalho",
+  "citySeasonalityPopulationPrefix": "população",
+  "citySeasonalityHighAdvice": "Dica: planeje chegar fora da alta temporada (mai–out). Você terá muito mais opções de moradia de longo prazo e preços razoáveis. Se precisar chegar na alta, reserve moradia com pelo menos 3 meses de antecedência.",
+  "citySeasonalityMediumAdvice": "Dica: prefira assinar contratos de longa duração antes da temporada alta. Isso garante estabilidade de preço mesmo quando a demanda turística aumenta.",
+  "citySeasonalityCardBadgeHigh": "Alta temporada",
+  "citySeasonalityCardBadgeMedium": "Sazonalidade"
 }

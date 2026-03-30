@@ -2948,5 +2948,18 @@
   },
   "copilotButtonCompleteStep": "Complete this step",
   "copilotButtonOpenTool": "Open tool",
-  "copilotButtonComplete": "Complete"
+  "copilotButtonComplete": "Complete",
+
+  "citySeasonalityTitle": "Seasonality",
+  "citySeasonalityHighSeverityLabel": "Intense peak season — plan carefully",
+  "citySeasonalityMediumSeverityLabel": "Moderate seasonality — plan ahead",
+  "citySeasonalityShowDetails": "See housing & work impacts",
+  "citySeasonalityHideDetails": "Hide details",
+  "citySeasonalityHousingTitle": "Housing during peak season",
+  "citySeasonalityJobsTitle": "Job market",
+  "citySeasonalityPopulationPrefix": "population",
+  "citySeasonalityHighAdvice": "Tip: plan to arrive outside peak season (May–Oct). You'll find far more long-term rental options at reasonable prices. If you must arrive in peak season, book accommodation at least 3 months in advance.",
+  "citySeasonalityMediumAdvice": "Tip: sign a long-term lease before the peak season starts. This locks in a stable price even when tourist demand rises.",
+  "citySeasonalityCardBadgeHigh": "Peak season",
+  "citySeasonalityCardBadgeMedium": "Seasonal"
 }

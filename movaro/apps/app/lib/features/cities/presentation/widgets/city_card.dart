@@ -3,6 +3,7 @@ import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
+import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
@@ -36,6 +37,7 @@ class CityCard extends StatelessWidget {
       rentScore: city.rentScore,
     );
     final isCoastal = CityCoastalProfile.isCoastal(city);
+    final seasonality = CitySeasonalityProfile.of(city);
     final isDark = AppColors.isDark(context);
     final cardBorder = isDark
         ? Colors.white.withValues(alpha: 0.08)
@@ -170,6 +172,17 @@ class CityCard extends StatelessWidget {
                             ),
                           ),
                         if (isCoastal) const SizedBox(width: 8),
+                        if (seasonality != null) ...[
+                          _SeasonalityBadge(
+                            severity: seasonality.severity,
+                            isDark: isDark,
+                            label: seasonality.severity ==
+                                    CitySeasonalitySeverity.high
+                                ? context.l10n.citySeasonalityCardBadgeHigh
+                                : context.l10n.citySeasonalityCardBadgeMedium,
+                          ),
+                          const SizedBox(width: 8),
+                        ],
                         Expanded(
                           child: Align(
                             alignment: Alignment.centerRight,
@@ -778,6 +791,56 @@ class _MetricGroupSection extends StatelessWidget {
             ),
             if (index != items.length - 1) const SizedBox(height: 8),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Seasonality badge ─────────────────────────────────────────────────────────
+
+class _SeasonalityBadge extends StatelessWidget {
+  const _SeasonalityBadge({
+    required this.severity,
+    required this.isDark,
+    required this.label,
+  });
+
+  final CitySeasonalitySeverity severity;
+  final bool isDark;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final isHigh = severity == CitySeasonalitySeverity.high;
+    final color = isHigh ? AppColors.danger : AppColors.caution;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.28 : 0.14),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: isDark ? 0.5 : 0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isHigh
+                ? Icons.warning_amber_rounded
+                : Icons.info_outline_rounded,
+            size: 11,
+            color: color,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 10,
+                ),
+          ),
         ],
       ),
     );

@@ -13,6 +13,7 @@ import 'package:movaro_app/features/location/presentation/pages/location_permiss
 import 'package:movaro_app/features/location/presentation/widgets/location_banner_widget.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
+import 'package:movaro_app/features/cities/application/services/city_seasonality_conflict_service.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
@@ -590,7 +591,13 @@ class _ActiveHomeState extends StatelessWidget {
                 ),
               ),
 
-            // 3. Tu Jornada — compact phase stepper + quick-action chips
+            // 3. Seasonality conflict warning (only for critical timing)
+            _SeasonalityConflictBanner(
+              city: city,
+              planTimeline: planTimeline,
+            ),
+
+            // 4. Tu Jornada — compact phase stepper + quick-action chips
             const SizedBox(height: 6),
             JourneyStepperWidget(
               plan: plan,
@@ -1668,6 +1675,114 @@ class _AffordabilityChip extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Seasonality Conflict Banner ──────────────────────────────────────────────
+//
+// Shown on the home screen between the primary action card and the journey
+// stepper when the user's planned arrival months overlap with their confirmed
+// city's peak tourist season.
+//
+// Only renders for CRITICAL conflicts (2+ overlap months, high-severity city).
+// Caution-level conflicts are less alarming and are surfaced in the city detail
+// page instead.
+
+class _SeasonalityConflictBanner extends StatelessWidget {
+  const _SeasonalityConflictBanner({
+    required this.city,
+    required this.planTimeline,
+    super.key,
+  });
+
+  final City city;
+  final String planTimeline;
+
+  static String _localizedText(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) =>
+      switch (Localizations.localeOf(context).languageCode) {
+        'pt' => pt,
+        'es' => es,
+        _ => en,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final conflict = CitySeasonalityConflictService.evaluate(
+      city: city,
+      timeline: planTimeline,
+    );
+
+    // Only surface critical conflicts on the home screen
+    if (conflict == null ||
+        conflict.level != SeasonalityConflictLevel.critical) {
+      return const SizedBox.shrink();
+    }
+
+    final locale = Localizations.localeOf(context).languageCode;
+    final overlapLabel = conflict.overlapLabel(locale);
+    final headline = _localizedText(
+      context,
+      pt: '⚠ Chegada na alta temporada — $overlapLabel',
+      es: '⚠ Llegada en temporada alta — $overlapLabel',
+      en: '⚠ Arrival during peak season — $overlapLabel',
+    );
+    final body = _localizedText(
+      context,
+      pt: 'Garanta moradia antes de embarcar. Preços explodem na alta temporada.',
+      es: 'Asegura vivienda antes de embarcar. Los precios explotan en temporada alta.',
+      en: 'Secure housing before you travel. Prices spike during peak season.',
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF3D0A0A),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFFD32F2F)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.warning_amber_rounded,
+              size: 16,
+              color: Color(0xFFFF5252),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    headline,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: const Color(0xFFFF5252),
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    body,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: const Color(0xFFFF8A80),
+                          fontSize: 11,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

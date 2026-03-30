@@ -12181,6 +12181,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Complete'**
   String get copilotButtonComplete;
+
+  /// No description provided for @citySeasonalityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Seasonality'**
+  String get citySeasonalityTitle;
+
+  /// No description provided for @citySeasonalityHighSeverityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Intense peak season — plan carefully'**
+  String get citySeasonalityHighSeverityLabel;
+
+  /// No description provided for @citySeasonalityMediumSeverityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate seasonality — plan ahead'**
+  String get citySeasonalityMediumSeverityLabel;
+
+  /// No description provided for @citySeasonalityShowDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'See housing & work impacts'**
+  String get citySeasonalityShowDetails;
+
+  /// No description provided for @citySeasonalityHideDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide details'**
+  String get citySeasonalityHideDetails;
+
+  /// No description provided for @citySeasonalityHousingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Housing during peak season'**
+  String get citySeasonalityHousingTitle;
+
+  /// No description provided for @citySeasonalityJobsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Job market'**
+  String get citySeasonalityJobsTitle;
+
+  /// No description provided for @citySeasonalityPopulationPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'population'**
+  String get citySeasonalityPopulationPrefix;
+
+  /// No description provided for @citySeasonalityHighAdvice.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: plan to arrive outside peak season (May–Oct). You\'ll find far more long-term rental options at reasonable prices. If you must arrive in peak season, book accommodation at least 3 months in advance.'**
+  String get citySeasonalityHighAdvice;
+
+  /// No description provided for @citySeasonalityMediumAdvice.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: sign a long-term lease before the peak season starts. This locks in a stable price even when tourist demand rises.'**
+  String get citySeasonalityMediumAdvice;
+
+  /// No description provided for @citySeasonalityCardBadgeHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Peak season'**
+  String get citySeasonalityCardBadgeHigh;
+
+  /// No description provided for @citySeasonalityCardBadgeMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Seasonal'**
+  String get citySeasonalityCardBadgeMedium;
 }
 
 class _AppLocalizationsDelegate

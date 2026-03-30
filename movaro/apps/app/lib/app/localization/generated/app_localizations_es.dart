@@ -7236,4 +7236,44 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get copilotButtonComplete => 'Completar';
+
+  @override
+  String get citySeasonalityTitle => 'Estacionalidad';
+
+  @override
+  String get citySeasonalityHighSeverityLabel =>
+      'Temporada alta intensa — atención especial';
+
+  @override
+  String get citySeasonalityMediumSeverityLabel =>
+      'Estacionalidad moderada — planifica con anticipación';
+
+  @override
+  String get citySeasonalityShowDetails => 'Ver impactos en vivienda y trabajo';
+
+  @override
+  String get citySeasonalityHideDetails => 'Ocultar detalles';
+
+  @override
+  String get citySeasonalityHousingTitle => 'Vivienda en temporada';
+
+  @override
+  String get citySeasonalityJobsTitle => 'Mercado laboral';
+
+  @override
+  String get citySeasonalityPopulationPrefix => 'población';
+
+  @override
+  String get citySeasonalityHighAdvice =>
+      'Consejo: planifica llegar fuera de la temporada alta (may–oct). Tendrás muchas más opciones de alquiler a largo plazo y precios razonables. Si necesitas llegar en temporada alta, reserva alojamiento con al menos 3 meses de anticipación.';
+
+  @override
+  String get citySeasonalityMediumAdvice =>
+      'Consejo: prefiere firmar contratos de larga duración antes de la temporada alta. Esto garantiza estabilidad de precio incluso cuando la demanda turística aumenta.';
+
+  @override
+  String get citySeasonalityCardBadgeHigh => 'Temporada alta';
+
+  @override
+  String get citySeasonalityCardBadgeMedium => 'Estacionalidad';
 }

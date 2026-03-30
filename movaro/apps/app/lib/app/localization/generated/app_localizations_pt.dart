@@ -7236,4 +7236,44 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get copilotButtonComplete => 'Concluir';
+
+  @override
+  String get citySeasonalityTitle => 'Sazonalidade';
+
+  @override
+  String get citySeasonalityHighSeverityLabel =>
+      'Alta temporada intensa — atenção redobrada';
+
+  @override
+  String get citySeasonalityMediumSeverityLabel =>
+      'Sazonalidade moderada — planeje com antecedência';
+
+  @override
+  String get citySeasonalityShowDetails => 'Ver impactos em moradia e trabalho';
+
+  @override
+  String get citySeasonalityHideDetails => 'Ocultar detalhes';
+
+  @override
+  String get citySeasonalityHousingTitle => 'Moradia na temporada';
+
+  @override
+  String get citySeasonalityJobsTitle => 'Mercado de trabalho';
+
+  @override
+  String get citySeasonalityPopulationPrefix => 'população';
+
+  @override
+  String get citySeasonalityHighAdvice =>
+      'Dica: planeje chegar fora da alta temporada (mai–out). Você terá muito mais opções de moradia de longo prazo e preços razoáveis. Se precisar chegar na alta, reserve moradia com pelo menos 3 meses de antecedência.';
+
+  @override
+  String get citySeasonalityMediumAdvice =>
+      'Dica: prefira assinar contratos de longa duração antes da temporada alta. Isso garante estabilidade de preço mesmo quando a demanda turística aumenta.';
+
+  @override
+  String get citySeasonalityCardBadgeHigh => 'Alta temporada';
+
+  @override
+  String get citySeasonalityCardBadgeMedium => 'Sazonalidade';
 }

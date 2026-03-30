@@ -25,6 +25,8 @@ import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
 import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
+import 'package:movaro_app/features/cities/application/services/city_seasonality_conflict_service.dart';
+import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_map_card.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
@@ -32,6 +34,7 @@ import 'package:movaro_app/features/cities/presentation/widgets/city_metric_insi
 import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_public_opinion_section.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_seasonality_section.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_snapshot_tile.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_sources_section.dart';
 import 'package:movaro_app/features/cities/presentation/pages/city_explore_screen.dart';
@@ -345,6 +348,29 @@ class _CityDetailPageState extends State<CityDetailPage> {
                               planContext: planContext,
                             ),
                           ),
+
+                          // ── Seasonality Alert ────────────────────────────
+                          if (CitySeasonalityProfile.hasSeason(city)) ...[
+                            const SizedBox(height: 16),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 1160),
+                              child: Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: CitySeasonalitySection(
+                                    city: city,
+                                    locale: localeName.startsWith('pt')
+                                        ? 'pt'
+                                        : localeName.startsWith('es')
+                                            ? 'es'
+                                            : 'en',
+                                    planTimeline: plan?.timeline,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+
                           if (city.publicOpinion != null) ...[
                             const SizedBox(height: 16),
                             ConstrainedBox(
@@ -745,6 +771,20 @@ class _CityDetailPageState extends State<CityDetailPage> {
     City city,
     MigrationPlan plan,
   ) {
+    // ── Seasonality conflict takes highest priority ────────────────────────
+    // If the user is arriving during peak season in a HIGH-severity city,
+    // that is the single most important watchout — housing availability will
+    // be severely impacted.
+    final conflict = CitySeasonalityConflictService.evaluate(
+      city: city,
+      timeline: plan.timeline,
+    );
+    if (conflict != null &&
+        conflict.level == SeasonalityConflictLevel.critical) {
+      final locale = Localizations.localeOf(context).languageCode;
+      return conflict.conflictMessage(locale);
+    }
+
     if (plan.selectedPriorities.contains('low_cost') && city.rentScore < 55) {
       return CityHousingViabilityPresenter.resolve(
         context,
