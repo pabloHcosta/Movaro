@@ -104,6 +104,10 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
             controller.catalogError == null &&
             (controller.isLoadingCatalog || hasQuery || _quickFilter != null);
 
+        final favoriteCities = widget.citiesController.favoriteCities;
+        final canDecide = favoriteCities.length >= 2 &&
+            widget.migrationQuestionnaireController != null;
+
         return Scaffold(
           extendBody: true,
           body: Stack(
@@ -300,6 +304,21 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                   ],
                 ),
               ),
+              // Sticky "decide" bar — appears once user has ≥2 favorites
+              if (canDecide)
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: MediaQuery.of(context).padding.bottom + 72,
+                  child: _FavoritesDecideBar(
+                    favoriteCount: favoriteCities.length,
+                    cityNames: favoriteCities.map((c) => c.name).toList(),
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      AppRoutes.migrationQuestionnaire,
+                    ),
+                  ),
+                ),
             ],
           ),
           bottomNavigationBar:
@@ -1435,5 +1454,98 @@ class _CitySemanticSearch {
     }
 
     return score;
+  }
+}
+
+// ─── Sticky favorites-decide bar ─────────────────────────────────────────────
+
+/// Floats above the nav bar when the user has ≥2 favorites.
+/// One tap bridges exploration directly into the decision questionnaire.
+class _FavoritesDecideBar extends StatelessWidget {
+  const _FavoritesDecideBar({
+    required this.favoriteCount,
+    required this.cityNames,
+    required this.onTap,
+  });
+
+  final int favoriteCount;
+  final List<String> cityNames;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final isDark = AppColors.isDark(context);
+
+    final namesLabel = cityNames.take(2).join(' · ') +
+        (cityNames.length > 2 ? ' +${cityNames.length - 2}' : '');
+
+    final label = switch (locale) {
+      'pt' => '$namesLabel · Decidir agora',
+      'es' => '$namesLabel · Decidir ahora',
+      _ => '$namesLabel · Decide now',
+    };
+
+    return Material(
+      elevation: 8,
+      shadowColor: Colors.black.withValues(alpha: 0.25),
+      borderRadius: BorderRadius.circular(16),
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF0F1D30) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.30),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.12),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: Icon(
+                  Icons.favorite_rounded,
+                  size: 14,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimaryFor(context),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.arrow_forward_rounded,
+                size: 16,
+                color: AppColors.primary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

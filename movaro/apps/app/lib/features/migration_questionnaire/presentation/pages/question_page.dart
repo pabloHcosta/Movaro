@@ -161,7 +161,25 @@ class _QuestionPageState extends State<QuestionPage> {
                             onBack: () => _handleExitFlow(context),
                             onHelp: _showHelp,
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
+                          // Context bridge: show when user arrived from
+                          // favorites/explore (≥2 favorites present)
+                          AnimatedBuilder(
+                            animation: widget.citiesController,
+                            builder: (context, child) {
+                              final favorites =
+                                  widget.citiesController.favoriteCities;
+                              if (favorites.length < 2) {
+                                return const SizedBox(height: 4);
+                              }
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _FavoritesContextBanner(
+                                  favorites: favorites,
+                                ),
+                              );
+                            },
+                          ),
                           if (_showProcessingScreen)
                             Expanded(
                               child: _ProcessingState(
@@ -3093,5 +3111,64 @@ class _LocationPrecheckState extends State<_LocationPrecheck> {
     // Dismiss current and go to manual picker by simulating a permanent deny
     await widget.locationController.deferPermission();
     if (mounted) setState(() {});
+  }
+}
+
+// ─── Favorites context banner ─────────────────────────────────────────────────
+
+/// Shown at the top of the questionnaire when the user has ≥2 favorites.
+/// Communicates that the answers will be used to compare known cities —
+/// reduces the sense of answering "blind" questions with no visible outcome.
+class _FavoritesContextBanner extends StatelessWidget {
+  const _FavoritesContextBanner({required this.favorites});
+
+  final List<City> favorites;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final isDark = AppColors.isDark(context);
+
+    final cityNames = favorites.map((c) => c.name).join(' · ');
+    final body = switch (locale) {
+      'pt' =>
+        'Suas respostas vão comparar $cityNames e encontrar a melhor para você.',
+      'es' =>
+        'Tus respuestas van a comparar $cityNames y encontrar la mejor para vos.',
+      _ =>
+        'Your answers will compare $cityNames and find the best match for you.',
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: isDark ? 0.10 : 0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: isDark ? 0.24 : 0.14),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.favorite_rounded,
+            size: 14,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              body,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textPrimaryFor(context),
+                height: 1.4,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

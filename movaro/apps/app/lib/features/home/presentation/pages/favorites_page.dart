@@ -87,6 +87,19 @@ class FavoritesPage extends StatelessWidget {
                                 activePlanCityId: activePlanCityId,
                               ),
                             ),
+                            const SizedBox(height: 12),
+                            // Bridge: explore → decide
+                            if (migrationQuestionnaireController
+                                    .generatedPlan
+                                    ?.isCityConfirmed !=
+                                true)
+                              _DecideFromFavoritesCard(
+                                favorites: favorites,
+                                onDecide: () => Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.migrationQuestionnaire,
+                                ),
+                              ),
                             const SizedBox(height: 16),
                           ],
                           for (final city in favorites) ...[
@@ -819,6 +832,116 @@ class _FavoriteCityAlert {
     }
 
     return null;
+  }
+}
+
+// ─── Bridge: Discover → Decide ───────────────────────────────────────────────
+
+/// Shown when the user has ≥2 favorites and no confirmed plan.
+/// Directly connects the exploration phase to the decision questionnaire
+/// without requiring the user to navigate back to home.
+class _DecideFromFavoritesCard extends StatelessWidget {
+  const _DecideFromFavoritesCard({
+    required this.favorites,
+    required this.onDecide,
+  });
+
+  final List<City> favorites;
+  final VoidCallback onDecide;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final isDark = AppColors.isDark(context);
+
+    final title = switch (locale) {
+      'pt' => 'Qual dessas é certa para você?',
+      'es' => '¿Cuál de estas es la indicada para vos?',
+      _ => 'Which of these is right for you?',
+    };
+    final body = switch (locale) {
+      'pt' =>
+        'Responda 5 perguntas e receba uma recomendação personalizada entre suas cidades favoritas.',
+      'es' =>
+        'Respondé 5 preguntas y recibí una recomendación personalizada entre tus ciudades favoritas.',
+      _ =>
+        'Answer 5 questions and get a personalised recommendation from your saved cities.',
+    };
+    final ctaLabel = switch (locale) {
+      'pt' => 'Encontrar minha cidade →',
+      'es' => 'Encontrar mi ciudad →',
+      _ => 'Find my city →',
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: isDark ? 0.10 : 0.06),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: isDark ? 0.28 : 0.16),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // City mini-chips
+          Wrap(
+            spacing: 6,
+            runSpacing: 4,
+            children: favorites.map((city) {
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary
+                      .withValues(alpha: isDark ? 0.18 : 0.10),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  city.name,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimaryFor(context),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            body,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: onDecide,
+              icon: const Icon(Icons.explore_rounded, size: 17),
+              label: Text(
+                ctaLabel,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 13),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
