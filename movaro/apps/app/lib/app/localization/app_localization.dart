@@ -1522,8 +1522,156 @@ extension AppLocalizationsFormatting on AppLocalizations {
   String cityDetailFlightsAction() =>
       _localizedText(pt: 'Voos', es: 'Vuelos', en: 'Flights');
 
+  String cityDetailCostAction() =>
+      _localizedText(pt: 'Custo', es: 'Costo', en: 'Cost');
+
+  String cityDetailSeasonalityAction() =>
+      _localizedText(pt: 'Sazonal.', es: 'Temporada', en: 'Season');
+
   String cityDetailAnalysisAction() =>
       _localizedText(pt: 'Análise', es: 'Análisis', en: 'Analysis');
+
+  String cityDetailArrivalViabilityTitle() => _localizedText(
+    pt: 'Viabilidade de chegada',
+    es: 'Viabilidad de llegada',
+    en: 'Arrival viability',
+  );
+
+  String cityDetailArrivalViabilityBody() => _localizedText(
+    pt: 'Antes de decidir, veja quanto essa cidade costuma exigir no começo e onde vale focar primeiro.',
+    es: 'Antes de decidir, mirá cuánto suele exigir esta ciudad al llegar y dónde conviene enfocarte primero.',
+    en: 'Before deciding, check what this city usually demands at the start and where it makes sense to focus first.',
+  );
+
+  String cityDetailArrivalReserveLabel() =>
+      _localizedText(pt: 'Reserva base', es: 'Reserva base', en: 'Base reserve');
+
+  String cityDetailArrivalReserveSupporting(int months) => _localizedText(
+    pt: 'Estimativa derivada do custo atual da cidade para cerca de $months meses de chegada.',
+    es: 'Estimación derivada del costo actual de la ciudad para cerca de $months meses de llegada.',
+    en: 'Estimate derived from the city current cost for roughly $months months of arrival.',
+  );
+
+  String cityDetailArrivalReserveBasis(String cityName) => _localizedText(
+    pt: 'Base usada: custo mensal sem aluguel + 1 quarto em $cityName, multiplicado por uma reserva inicial.',
+    es: 'Base usada: costo mensual sin alquiler + 1 ambiente en $cityName, multiplicado por una reserva inicial.',
+    en: 'Base used: monthly cost excluding rent + 1-bedroom in $cityName, multiplied by an initial reserve window.',
+  );
+
+  String cityDetailArrivalReserveFallback() =>
+      _localizedText(pt: 'Ver custo', es: 'Ver costo', en: 'See cost');
+
+  String cityDetailArrivalReserveSupportingNoData() => _localizedText(
+    pt: 'Abra o bloco de custo para ver a leitura mais prática dessa cidade.',
+    es: 'Abrí el bloque de costo para ver la lectura más práctica de esta ciudad.',
+    en: 'Open the cost block to see the more practical read for this city.',
+  );
+
+  String cityDetailArrivalPressureLabel() =>
+      _localizedText(pt: 'Pressão inicial', es: 'Presión inicial', en: 'Entry pressure');
+
+  String cityDetailArrivalPressureBasis(
+    String housing,
+    String language,
+    String safety,
+    String seasonality,
+  ) => _localizedText(
+    pt: 'Base usada: moradia $housing, idioma $language, segurança $safety, sazonalidade $seasonality.',
+    es: 'Base usada: vivienda $housing, idioma $language, seguridad $safety, temporada $seasonality.',
+    en: 'Base used: housing $housing, language $language, safety $safety, seasonality $seasonality.',
+  );
+
+  String cityDetailArrivalSeasonalityBasisActive() =>
+      _localizedText(pt: 'ativa', es: 'activa', en: 'active');
+
+  String cityDetailArrivalSeasonalityBasisStable() =>
+      _localizedText(pt: 'estável', es: 'estable', en: 'stable');
+
+  String cityDetailArrivalPressureLow() =>
+      _localizedText(pt: 'Baixa', es: 'Baja', en: 'Low');
+
+  String cityDetailArrivalPressureMedium() =>
+      _localizedText(pt: 'Média', es: 'Media', en: 'Medium');
+
+  String cityDetailArrivalPressureHigh() =>
+      _localizedText(pt: 'Alta', es: 'Alta', en: 'High');
+
+  String cityDetailArrivalPressureLowBody() => _localizedText(
+    pt: 'A cidade parece mais administrável para começar, com menos fricção combinada entre moradia, idioma e rotina.',
+    es: 'La ciudad parece más manejable para empezar, con menos fricción combinada entre vivienda, idioma y rutina.',
+    en: 'The city looks more manageable to start, with less combined friction across housing, language, and routine.',
+  );
+
+  String cityDetailArrivalPressureMediumBody() => _localizedText(
+    pt: 'Dá para começar bem, mas vale entrar com reserva e validar bairro, custo real e ritmo da rotina.',
+    es: 'Se puede empezar bien, pero conviene entrar con reserva y validar barrio, costo real y ritmo de rutina.',
+    en: 'You can start well here, but it is worth arriving with some reserve and validating neighborhood, real costs, and routine pace.',
+  );
+
+  String cityDetailArrivalPressureSeasonalBody() => _localizedText(
+    pt: 'A entrada pode pesar mais se você chegar em época alta. Vale olhar moradia e temporada antes de decidir.',
+    es: 'La llegada puede pesar más si caés en temporada alta. Conviene mirar vivienda y temporada antes de decidir.',
+    en: 'Getting started may weigh more if you arrive in peak season. It is worth checking housing and seasonality before deciding.',
+  );
+
+  String cityDetailArrivalPressureHighBody() => _localizedText(
+    pt: 'Essa cidade tende a exigir mais coordenação logo na chegada. Moradia, custo ou adaptação merecem validação extra.',
+    es: 'Esta ciudad tiende a exigir más coordinación al llegar. Vivienda, costo o adaptación merecen validación extra.',
+    en: 'This city tends to require more coordination at the start. Housing, cost, or adaptation deserve extra validation.',
+  );
+
+  String cityDetailArrivalFirstFocusLabel() =>
+      _localizedText(pt: 'Primeiro foco', es: 'Primer foco', en: 'First focus');
+
+  String cityDetailArrivalFocusBasis(String headline, String value) =>
+      _localizedText(
+        pt: 'Dado usado: $headline ($value).',
+        es: 'Dato usado: $headline ($value).',
+        en: 'Data used: $headline ($value).',
+      );
+
+  String cityDetailArrivalSourceLabel(String source) =>
+      _localizedText(
+        pt: 'Fonte: $source',
+        es: 'Fuente: $source',
+        en: 'Source: $source',
+      );
+
+  String cityDetailArrivalFocusHousing() =>
+      _localizedText(pt: 'Moradia', es: 'Vivienda', en: 'Housing');
+
+  String cityDetailArrivalFocusLanguage() =>
+      _localizedText(pt: 'Idioma', es: 'Idioma', en: 'Language');
+
+  String cityDetailArrivalFocusWork() =>
+      _localizedText(pt: 'Renda', es: 'Ingresos', en: 'Income');
+
+  String cityDetailArrivalFocusSafety() =>
+      _localizedText(pt: 'Bairro e rotina', es: 'Barrio y rutina', en: 'Neighborhood & routine');
+
+  String cityDetailArrivalFocusHousingBody() => _localizedText(
+    pt: 'Vale validar aluguel, garantia, entrada e bairro antes de assumir compromisso maior.',
+    es: 'Conviene validar alquiler, garantía, costo de entrada y barrio antes de asumir un compromiso mayor.',
+    en: 'It is worth validating rent, guarantees, entry costs, and neighborhood before taking on a larger commitment.',
+  );
+
+  String cityDetailArrivalFocusLanguageBody() => _localizedText(
+    pt: 'A adaptação com o português pode pesar mais no começo. Rotina, atendimento e busca por moradia pedem mais atenção.',
+    es: 'La adaptación con el portugués puede pesar más al principio. Rutina, atención y búsqueda de vivienda piden más cuidado.',
+    en: 'Adapting to Portuguese may weigh more at the start. Routine, services, and housing search will need more attention.',
+  );
+
+  String cityDetailArrivalFocusWorkBody() => _localizedText(
+    pt: 'Antes de escolher, vale confirmar se sua forma de renda combina com o ritmo e as oportunidades dessa cidade.',
+    es: 'Antes de elegir, conviene confirmar si tu forma de ingresos encaja con el ritmo y las oportunidades de esta ciudad.',
+    en: 'Before choosing, it is worth confirming whether your income path matches the pace and opportunities of this city.',
+  );
+
+  String cityDetailArrivalFocusSafetyBody() => _localizedText(
+    pt: 'Aqui faz diferença validar bairro, deslocamento e rotina real antes de definir a base da mudança.',
+    es: 'Acá hace diferencia validar barrio, traslados y rutina real antes de definir la base de la mudanza.',
+    en: 'Here it makes a difference to validate neighborhood, commute, and real routine before locking the base of the move.',
+  );
 
   String cityExploreTabVideos() =>
       _localizedText(pt: 'Videos', es: 'Videos', en: 'Videos');

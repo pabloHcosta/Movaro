@@ -51,7 +51,7 @@ class CityCostOfLivingCard extends StatelessWidget {
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
@@ -81,12 +81,12 @@ class CityCostOfLivingCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           GridView.count(
             crossAxisCount: 2,
             crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-            childAspectRatio: 1.75,
+            mainAxisSpacing: 6,
+            childAspectRatio: 2.35,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             children: [
@@ -161,7 +161,7 @@ class _CostPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: tone.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(20),
@@ -177,7 +177,7 @@ class _CostPill extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           DefaultTextStyle(
             style: Theme.of(
               context,
@@ -210,14 +210,14 @@ class _CostMetaChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.surfaceMutedFor(context),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.borderFor(context)),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -227,7 +227,7 @@ class _CostMetaChip extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           DefaultTextStyle(
             style: Theme.of(
               context,

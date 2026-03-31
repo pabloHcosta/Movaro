@@ -32,7 +32,7 @@ class AppGlassHeader extends StatelessWidget {
     return SizedBox(
       height: _height,
       child: FrostedPanel(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         borderRadius: BorderRadius.circular(999),
         backgroundColor: isDark
             ? const Color(0xB3141B26)
@@ -48,10 +48,12 @@ class AppGlassHeader extends StatelessWidget {
                 child: _HeaderActionSlot(
                   child: onBack == null
                       ? null
-                      : _HeaderIconButton(
-                          onPressed: onBack,
-                          icon: Icons.arrow_back_ios_new_rounded,
-                          visualOffset: const Offset(1, 0),
+                      : Transform.translate(
+                          offset: const Offset(-2, 0),
+                          child: _HeaderIconButton(
+                            onPressed: onBack,
+                            icon: Icons.arrow_back_rounded,
+                          ),
                         ),
                 ),
               ),
@@ -90,9 +92,9 @@ class AppGlassHeader extends StatelessWidget {
 
 double _headerSideWidthFor(BuildContext context) {
   final width = MediaQuery.sizeOf(context).width;
-  if (width < 380) return 80;
-  if (width < 430) return 92;
-  return 120;
+  if (width < 380) return 72;
+  if (width < 430) return 84;
+  return 104;
 }
 
 class _HeaderActionSlot extends StatelessWidget {
@@ -115,12 +117,10 @@ class _HeaderIconButton extends StatelessWidget {
   const _HeaderIconButton({
     required this.onPressed,
     required this.icon,
-    this.visualOffset = Offset.zero,
   });
 
   final VoidCallback? onPressed;
   final IconData icon;
-  final Offset visualOffset;
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +130,7 @@ class _HeaderIconButton extends StatelessWidget {
       constraints: const BoxConstraints.tightFor(width: 44, height: 44),
       splashRadius: 22,
       iconSize: 20,
-      icon: Transform.translate(offset: visualOffset, child: Icon(icon)),
+      icon: Icon(icon),
     );
   }
 }

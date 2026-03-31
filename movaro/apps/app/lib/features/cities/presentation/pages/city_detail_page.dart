@@ -21,6 +21,7 @@ import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/error_state_widget.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
@@ -82,8 +83,12 @@ class _CityDetailPageState extends State<CityDetailPage> {
   final ScrollController _scrollController = ScrollController();
   bool _showScrollHint = false;
   late Future<bool> _locationBannerFuture;
+  final ExpansibleController _analysisTileController =
+      ExpansibleController();
   final _mapSectionKey = GlobalKey();
+  final _costSectionKey = GlobalKey();
   final _flightsSectionKey = GlobalKey();
+  final _seasonalitySectionKey = GlobalKey();
   final _analysisSectionKey = GlobalKey();
 
   @override
@@ -208,6 +213,15 @@ class _CityDetailPageState extends State<CityDetailPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _openAnalysisSection() async {
+    _analysisTileController.expand();
+    await Future<void>.delayed(const Duration(milliseconds: 160));
+    if (!mounted) {
+      return;
+    }
+    _scrollToKey(_analysisSectionKey);
   }
 
   @override
@@ -340,9 +354,42 @@ class _CityDetailPageState extends State<CityDetailPage> {
                             child: _QuickSummaryCard(city: city),
                           ),
                           const SizedBox(height: 12),
+
+                          // ── Block 3: Category List ──────────────────────
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1160),
+                            child: _CategoryListCard(city: city),
+                          ),
+                          const SizedBox(height: 12),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1160),
+                            child: _ArrivalViabilityCard(
+                              city: city,
+                              budget: CityBudgetData.forCity(city.id),
+                              preferredCountryId: plan?.originCountry,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // ── Block 4: Secondary Actions ──────────────────
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1160),
+                            child: _SecondaryActionsRow(
+                              onPhotos: () => _openMediaExplore(city),
+                              onMap: () => _scrollToKey(_mapSectionKey),
+                              onCost: () => _scrollToKey(_costSectionKey),
+                              onFlights: () => _scrollToKey(_flightsSectionKey),
+                              onSeasonality: () =>
+                                  _scrollToKey(_seasonalitySectionKey),
+                              onAnalysis: _openAnalysisSection,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
                           if (CityBudgetData.forCity(city.id) case final budget?)
                             ...[
                               ConstrainedBox(
+                                key: _costSectionKey,
                                 constraints: const BoxConstraints(
                                   maxWidth: 1160,
                                 ),
@@ -353,25 +400,6 @@ class _CityDetailPageState extends State<CityDetailPage> {
                               ),
                               const SizedBox(height: 12),
                             ],
-
-                          // ── Block 3: Category List ──────────────────────
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _CategoryListCard(city: city),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // ── Block 4: Secondary Actions ──────────────────
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _SecondaryActionsRow(
-                              onPhotos: () => _openMediaExplore(city),
-                              onMap: () => _scrollToKey(_mapSectionKey),
-                              onFlights: () => _scrollToKey(_flightsSectionKey),
-                              onAnalysis: () =>
-                                  _scrollToKey(_analysisSectionKey),
-                            ),
-                          ),
                           const SizedBox(height: 16),
 
                           // ── Location banner ─────────────────────────────
@@ -437,19 +465,11 @@ class _CityDetailPageState extends State<CityDetailPage> {
                           ),
                           const SizedBox(height: 16),
 
-                          // ── Decision Snapshot ───────────────────────────
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _DecisionSnapshotPanel(
-                              city: city,
-                              planContext: planContext,
-                            ),
-                          ),
-
                           // ── Seasonality Alert ────────────────────────────
                           if (CitySeasonalityProfile.hasSeason(city)) ...[
                             const SizedBox(height: 16),
                             ConstrainedBox(
+                              key: _seasonalitySectionKey,
                               constraints: const BoxConstraints(maxWidth: 1160),
                               child: Card(
                                 child: Padding(
@@ -485,6 +505,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
                             constraints: const BoxConstraints(maxWidth: 1160),
                             child: Card(
                               child: ExpansionTile(
+                                controller: _analysisTileController,
                                 tilePadding: const EdgeInsets.symmetric(
                                   horizontal: 20,
                                   vertical: 6,
@@ -549,6 +570,16 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                   ),
                                 ],
                               ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // ── Decision Snapshot ───────────────────────────
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1160),
+                            child: _DecisionSnapshotPanel(
+                              city: city,
+                              planContext: planContext,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -1022,7 +1053,7 @@ class _MigrationResultBarState extends State<_MigrationResultBar> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Iniciar plano em ${widget.city.name}?',
+                  context.l10n.migrationResultRevealStartCta(widget.city.name),
                   style: Theme.of(
                     context,
                   ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
@@ -1030,7 +1061,9 @@ class _MigrationResultBarState extends State<_MigrationResultBar> {
                 if (compatibilityPct != null) ...[
                   const SizedBox(height: 2),
                   Text(
-                    '$compatibilityPct% compatível',
+                    context.l10n.migrationResultRevealCompatibilityLabel(
+                      compatibilityPct,
+                    ),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSoftFor(context),
                     ),
@@ -2447,57 +2480,423 @@ class _CategoryRow extends StatelessWidget {
   }
 }
 
+class _ArrivalViabilityCard extends StatelessWidget {
+  const _ArrivalViabilityCard({
+    required this.city,
+    required this.budget,
+    required this.preferredCountryId,
+  });
+
+  final City city;
+  final CityBudget? budget;
+  final String? preferredCountryId;
+
+  @override
+  Widget build(BuildContext context) {
+    final pressure = _entryPressure(context);
+    final pressureWhy = _entryPressureWhy(context);
+    final firstFocus = _firstFocus(context);
+    final firstFocusBody = _firstFocusBody(context);
+    final reserveMonths = city.rentScore >= 70 ? 2 : 3;
+    final reserveAmount = budget == null
+        ? null
+        : budget!.fairLivingTotal * reserveMonths;
+
+    return FrostedPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.cityDetailArrivalViabilityTitle(),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.l10n.cityDetailArrivalViabilityBody(),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: _ArrivalInfoTile(
+                    icon: Icons.savings_outlined,
+                    label: context.l10n.cityDetailArrivalReserveLabel(),
+                    value: reserveAmount == null
+                        ? context.l10n.cityDetailArrivalReserveFallback()
+                        : null,
+                    tint: AppColors.primary,
+                    amountInBrl: reserveAmount,
+                    preferredCountryId: preferredCountryId,
+                    supporting: reserveAmount == null
+                        ? context.l10n.cityDetailArrivalReserveSupportingNoData()
+                        : context.l10n.cityDetailArrivalReserveSupporting(
+                            reserveMonths,
+                          ),
+                    basis: budget == null
+                        ? null
+                        : context.l10n.cityDetailArrivalReserveBasis(
+                            budget!.cityLabel,
+                          ),
+                    source: budget == null
+                        ? null
+                        : '${budget!.sourceLabel} · ${budget!.updatedAt}',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _ArrivalInfoTile(
+                    icon: Icons.warning_amber_rounded,
+                    label: context.l10n.cityDetailArrivalPressureLabel(),
+                    value: pressure.$1,
+                    tint: pressure.$2,
+                    supporting: pressure.$3,
+                    basis: pressureWhy,
+                    source: city.sources.curatedMetrics.provider,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          _ArrivalInfoTile(
+            icon: Icons.flag_outlined,
+            label: context.l10n.cityDetailArrivalFirstFocusLabel(),
+            value: firstFocus.$1,
+            tint: firstFocus.$2,
+            supporting: firstFocusBody,
+            basis: _firstFocusBasis(context),
+            source: _firstFocusSource(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  (String, Color, String) _entryPressure(BuildContext context) {
+    final base = (city.rentScore + city.movaroScores.languageAdaptation + city.safetyScore) / 3;
+    final hasSeasonality = CitySeasonalityProfile.hasSeason(city);
+
+    if (base >= 68 && !hasSeasonality) {
+      return (
+        context.l10n.cityDetailArrivalPressureLow(),
+        AppColors.success,
+        context.l10n.cityDetailArrivalPressureLowBody(),
+      );
+    }
+    if (base >= 54) {
+      return (
+        context.l10n.cityDetailArrivalPressureMedium(),
+        AppColors.warning,
+        hasSeasonality
+            ? context.l10n.cityDetailArrivalPressureSeasonalBody()
+            : context.l10n.cityDetailArrivalPressureMediumBody(),
+      );
+    }
+    return (
+      context.l10n.cityDetailArrivalPressureHigh(),
+      AppColors.danger,
+      context.l10n.cityDetailArrivalPressureHighBody(),
+    );
+  }
+
+  String _entryPressureWhy(BuildContext context) {
+    final housing = CityHousingViabilityPresenter.resolve(
+      context,
+      rentScore: city.rentScore,
+    ).headline;
+    final language = CityMetricPresentation.resolve(
+      context,
+      kind: CityMetricKind.language,
+      value: city.movaroScores.languageAdaptation,
+    ).headline;
+    final safety = CityMetricPresentation.resolve(
+      context,
+      kind: CityMetricKind.safety,
+      value: city.safetyScore,
+    ).headline;
+    final seasonality = CitySeasonalityProfile.hasSeason(city)
+        ? context.l10n.cityDetailArrivalSeasonalityBasisActive()
+        : context.l10n.cityDetailArrivalSeasonalityBasisStable();
+
+    return context.l10n.cityDetailArrivalPressureBasis(
+      housing,
+      language,
+      safety,
+      seasonality,
+    );
+  }
+
+  (String, Color) _firstFocus(BuildContext context) {
+    final entries = <String, ({int score, Color tint})>{
+      context.l10n.cityDetailArrivalFocusHousing(): (
+        score: city.rentScore,
+        tint: AppColors.warning,
+      ),
+      context.l10n.cityDetailArrivalFocusLanguage(): (
+        score: city.movaroScores.languageAdaptation,
+        tint: AppColors.primary,
+      ),
+      context.l10n.cityDetailArrivalFocusWork(): (
+        score: city.movaroScores.workOpportunity,
+        tint: AppColors.success,
+      ),
+      context.l10n.cityDetailArrivalFocusSafety(): (
+        score: city.safetyScore,
+        tint: AppColors.danger,
+      ),
+    }.entries.toList()
+      ..sort((a, b) => a.value.score.compareTo(b.value.score));
+
+    return (entries.first.key, entries.first.value.tint);
+  }
+
+  String _firstFocusBody(BuildContext context) {
+    final focus = _firstFocus(context).$1;
+    if (focus == context.l10n.cityDetailArrivalFocusHousing()) {
+      return context.l10n.cityDetailArrivalFocusHousingBody();
+    }
+    if (focus == context.l10n.cityDetailArrivalFocusLanguage()) {
+      return context.l10n.cityDetailArrivalFocusLanguageBody();
+    }
+    if (focus == context.l10n.cityDetailArrivalFocusWork()) {
+      return context.l10n.cityDetailArrivalFocusWorkBody();
+    }
+    return context.l10n.cityDetailArrivalFocusSafetyBody();
+  }
+
+  String _firstFocusBasis(BuildContext context) {
+    final focus = _firstFocus(context).$1;
+    if (focus == context.l10n.cityDetailArrivalFocusHousing()) {
+      final housing = CityHousingViabilityPresenter.resolve(
+        context,
+        rentScore: city.rentScore,
+      );
+      return context.l10n.cityDetailArrivalFocusBasis(
+        housing.headline,
+        '${city.rentScore}/100',
+      );
+    }
+    if (focus == context.l10n.cityDetailArrivalFocusLanguage()) {
+      final language = CityMetricPresentation.resolve(
+        context,
+        kind: CityMetricKind.language,
+        value: city.movaroScores.languageAdaptation,
+      );
+      return context.l10n.cityDetailArrivalFocusBasis(
+        language.headline,
+        '${city.movaroScores.languageAdaptation}/100',
+      );
+    }
+    if (focus == context.l10n.cityDetailArrivalFocusWork()) {
+      return context.l10n.cityDetailArrivalFocusBasis(
+        _unemploymentHeadline(context, city.unemploymentRate),
+        '${city.unemploymentRate.toStringAsFixed(1)}%',
+      );
+    }
+    final safety = CityMetricPresentation.resolve(
+      context,
+      kind: CityMetricKind.safety,
+      value: city.safetyScore,
+    );
+    return context.l10n.cityDetailArrivalFocusBasis(
+      safety.headline,
+      '${city.safetyScore}/100',
+    );
+  }
+
+  String _firstFocusSource(BuildContext context) {
+    final focus = _firstFocus(context).$1;
+    if (focus == context.l10n.cityDetailArrivalFocusWork()) {
+      return 'IBGE · ${city.sources.curatedMetrics.provider}';
+    }
+    if (focus == context.l10n.cityDetailArrivalFocusSafety()) {
+      return 'Atlas da Violencia · ${city.sources.curatedMetrics.provider}';
+    }
+    return city.sources.curatedMetrics.provider;
+  }
+}
+
+class _ArrivalInfoTile extends StatelessWidget {
+  const _ArrivalInfoTile({
+    required this.icon,
+    required this.label,
+    required this.tint,
+    required this.supporting,
+    this.value,
+    this.amountInBrl,
+    this.preferredCountryId,
+    this.basis,
+    this.source,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color tint;
+  final String supporting;
+  final String? value;
+  final int? amountInBrl;
+  final String? preferredCountryId;
+  final String? basis;
+  final String? source;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMutedFor(context),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.borderFor(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: tint),
+          const SizedBox(height: 10),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          if (amountInBrl != null)
+            DefaultTextStyle(
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w800),
+              child: MultiCurrencyAmount(
+                amountInBrl: amountInBrl!,
+                exchangeRates: null,
+                preferredCountryId: preferredCountryId,
+                compact: true,
+              ),
+            )
+          else
+            Text(
+              value!,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: tint,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          const SizedBox(height: 8),
+          Text(
+            supporting,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.35,
+            ),
+          ),
+          if (basis != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              basis!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.35,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+          if (source != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              context.l10n.cityDetailArrivalSourceLabel(source!),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 // ─── Block 4: Secondary Actions ───────────────────────────────────────────────
 
 class _SecondaryActionsRow extends StatelessWidget {
   const _SecondaryActionsRow({
     required this.onPhotos,
     required this.onMap,
+    required this.onCost,
     required this.onFlights,
+    required this.onSeasonality,
     required this.onAnalysis,
   });
 
   final VoidCallback onPhotos;
   final VoidCallback onMap;
+  final VoidCallback onCost;
   final VoidCallback onFlights;
+  final VoidCallback onSeasonality;
   final VoidCallback onAnalysis;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _SecondaryActionButton(
-            icon: Icons.photo_library_outlined,
-            label: context.l10n.cityDetailPhotosAction(),
-            onTap: onPhotos,
-          ),
+    final actions = [
+      (
+        icon: Icons.photo_library_outlined,
+        label: context.l10n.cityDetailPhotosAction(),
+        onTap: onPhotos,
+      ),
+      (
+        icon: Icons.map_outlined,
+        label: context.l10n.cityDetailMapAction(),
+        onTap: onMap,
+      ),
+      (
+        icon: Icons.payments_outlined,
+        label: context.l10n.cityDetailCostAction(),
+        onTap: onCost,
+      ),
+      (
+        icon: Icons.flight_outlined,
+        label: context.l10n.cityDetailFlightsAction(),
+        onTap: onFlights,
+      ),
+      (
+        icon: Icons.wb_sunny_outlined,
+        label: context.l10n.cityDetailSeasonalityAction(),
+        onTap: onSeasonality,
+      ),
+      (
+        icon: Icons.analytics_outlined,
+        label: context.l10n.cityDetailAnalysisAction(),
+        onTap: onAnalysis,
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) => GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: actions.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: 1.45,
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _SecondaryActionButton(
-            icon: Icons.map_outlined,
-            label: context.l10n.cityDetailMapAction(),
-            onTap: onMap,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _SecondaryActionButton(
-            icon: Icons.flight_outlined,
-            label: context.l10n.cityDetailFlightsAction(),
-            onTap: onFlights,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _SecondaryActionButton(
-            icon: Icons.analytics_outlined,
-            label: context.l10n.cityDetailAnalysisAction(),
-            onTap: onAnalysis,
-          ),
-        ),
-      ],
+        itemBuilder: (context, index) {
+          final action = actions[index];
+          return _SecondaryActionButton(
+            icon: action.icon,
+            label: action.label,
+            onTap: action.onTap,
+          );
+        },
+      ),
     );
   }
 }
@@ -2522,15 +2921,16 @@ class _SecondaryActionButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: AppColors.borderFor(context)),
           ),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 20, color: AppColors.primary),
+              Icon(icon, size: 18, color: AppColors.primary),
               const SizedBox(height: 4),
               Text(
                 label,
