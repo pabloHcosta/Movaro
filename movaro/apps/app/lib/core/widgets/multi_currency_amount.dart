@@ -218,15 +218,16 @@ class _MultiCurrencyAmountState extends State<MultiCurrencyAmount> {
         InkWell(
           borderRadius: BorderRadius.circular(999),
           onTap: () => setState(() => _isExpanded = !_isExpanded),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               _AmountChip(
                 label: selected.label,
                 compact: widget.compact,
                 selected: true,
               ),
-              const SizedBox(width: 6),
               Icon(
                 _isExpanded
                     ? Icons.keyboard_arrow_up_rounded

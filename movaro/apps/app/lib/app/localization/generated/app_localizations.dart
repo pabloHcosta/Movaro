@@ -1411,6 +1411,24 @@ abstract class AppLocalizations {
   /// **'Manual country'**
   String get documentationGuideManualCountryLabel;
 
+  /// No description provided for @documentationGuideCountryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Guide country'**
+  String get documentationGuideCountryLabel;
+
+  /// No description provided for @documentationGuideCountryBodyFromPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'You are browsing practical content for {country} based on your plan destination.'**
+  String documentationGuideCountryBodyFromPlan(Object country);
+
+  /// No description provided for @documentationGuideCountryBodyManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the country you want to review. For now, you are viewing practical content for {country}.'**
+  String documentationGuideCountryBodyManual(Object country);
+
   /// No description provided for @documentationSearchResultsCount.
   ///
   /// In en, this message translates to:
@@ -3706,13 +3724,13 @@ abstract class AppLocalizations {
   /// No description provided for @citiesSearchHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Find a city in the initial catalog'**
+  /// **'Validate a city before committing to a plan'**
   String get citiesSearchHeadline;
 
   /// No description provided for @citiesSearchDescription.
   ///
   /// In en, this message translates to:
-  /// **'Search by name or browse the current Movaro list.'**
+  /// **'Search by name, compare alternatives, and open the details to understand cost, fit, and next steps.'**
   String get citiesSearchDescription;
 
   /// No description provided for @citiesSearchHint.
@@ -3724,7 +3742,7 @@ abstract class AppLocalizations {
   /// No description provided for @citiesSearchFieldLabel.
   ///
   /// In en, this message translates to:
-  /// **'City name'**
+  /// **'Which city do you want to validate?'**
   String get citiesSearchFieldLabel;
 
   /// No description provided for @citiesSearchHelper.
@@ -4228,7 +4246,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityDetailLanguageLabel.
   ///
   /// In en, this message translates to:
-  /// **'Language adaptation'**
+  /// **'Ease with Portuguese'**
   String get cityDetailLanguageLabel;
 
   /// No description provided for @cityDetailWorkLabel.
@@ -4573,6 +4591,18 @@ abstract class AppLocalizations {
   /// **'Move guide'**
   String get mainNavCopilot;
 
+  /// No description provided for @mainNavDecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore'**
+  String get mainNavDecision;
+
+  /// No description provided for @mainNavExecution.
+  ///
+  /// In en, this message translates to:
+  /// **'Execution'**
+  String get mainNavExecution;
+
   /// No description provided for @mainNavExplore.
   ///
   /// In en, this message translates to:
@@ -4632,6 +4662,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Favorites'**
   String get favoritesPageTitle;
+
+  /// No description provided for @stageClarityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clarity'**
+  String get stageClarityTitle;
+
+  /// No description provided for @stageClarityBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand your starting point and choose the best path to begin.'**
+  String get stageClarityBody;
+
+  /// No description provided for @stageClarityAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one path below'**
+  String get stageClarityAction;
+
+  /// No description provided for @stageDecisionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision'**
+  String get stageDecisionTitle;
+
+  /// No description provided for @stageDecisionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Get an initial recommendation and validate the city that makes the most sense now.'**
+  String get stageDecisionBody;
+
+  /// No description provided for @stageDecisionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer and move to the result'**
+  String get stageDecisionAction;
+
+  /// No description provided for @stageExecutionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Execution'**
+  String get stageExecutionTitle;
+
+  /// No description provided for @stageExecutionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the chosen city into concrete next steps.'**
+  String get stageExecutionBody;
+
+  /// No description provided for @stageExecutionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with the recommended action'**
+  String get stageExecutionAction;
 
   /// No description provided for @favoritesPageCount.
   ///
@@ -5296,7 +5380,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricCostLowHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Lower cost'**
+  /// **'Low'**
   String get cityMetricCostLowHeadline;
 
   /// No description provided for @cityMetricCostLowSupporting.
@@ -5308,7 +5392,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricCostMediumHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Moderate cost'**
+  /// **'Balanced'**
   String get cityMetricCostMediumHeadline;
 
   /// No description provided for @cityMetricCostMediumSupporting.
@@ -5320,7 +5404,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricCostHighHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Higher cost'**
+  /// **'High'**
   String get cityMetricCostHighHeadline;
 
   /// No description provided for @cityMetricCostHighSupporting.
@@ -5332,7 +5416,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricSafetyHighHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Higher safety'**
+  /// **'High'**
   String get cityMetricSafetyHighHeadline;
 
   /// No description provided for @cityMetricSafetyHighSupporting.
@@ -5344,7 +5428,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricSafetyMediumHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Moderate safety'**
+  /// **'Balanced'**
   String get cityMetricSafetyMediumHeadline;
 
   /// No description provided for @cityMetricSafetyMediumSupporting.
@@ -5356,7 +5440,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricSafetyLowHeadline.
   ///
   /// In en, this message translates to:
-  /// **'More caution'**
+  /// **'Low'**
   String get cityMetricSafetyLowHeadline;
 
   /// No description provided for @cityMetricSafetyLowSupporting.
@@ -5368,7 +5452,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricLanguageEasyHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Easier adaptation'**
+  /// **'Easy'**
   String get cityMetricLanguageEasyHeadline;
 
   /// No description provided for @cityMetricLanguageEasySupporting.
@@ -5380,7 +5464,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricLanguageMediumHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Moderate adaptation'**
+  /// **'Medium'**
   String get cityMetricLanguageMediumHeadline;
 
   /// No description provided for @cityMetricLanguageMediumSupporting.
@@ -5392,7 +5476,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricLanguageHardHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Harder adaptation'**
+  /// **'Hard'**
   String get cityMetricLanguageHardHeadline;
 
   /// No description provided for @cityMetricLanguageHardSupporting.
@@ -5404,7 +5488,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricWorkStrongHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Stronger market'**
+  /// **'Strong'**
   String get cityMetricWorkStrongHeadline;
 
   /// No description provided for @cityMetricWorkStrongSupporting.
@@ -5416,7 +5500,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricWorkMediumHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Moderate market'**
+  /// **'Balanced'**
   String get cityMetricWorkMediumHeadline;
 
   /// No description provided for @cityMetricWorkMediumSupporting.
@@ -5428,7 +5512,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricWorkLowHeadline.
   ///
   /// In en, this message translates to:
-  /// **'More limited market'**
+  /// **'Limited'**
   String get cityMetricWorkLowHeadline;
 
   /// No description provided for @cityMetricWorkLowSupporting.
@@ -5976,6 +6060,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We\'ll collect your origin in the first question before plan generation.'**
   String get journeyEntryOriginPending;
+
+  /// No description provided for @journeySetupFlowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'If there is only one route available right now, Movaro fills it in for you. If there is more than one option, you choose it manually.'**
+  String get journeySetupFlowHint;
+
+  /// No description provided for @journeySetupManualChangeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change origin and destination later without restarting the app.'**
+  String get journeySetupManualChangeHint;
+
+  /// No description provided for @journeySetupDetectedOriginHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We detected {country} as an origin suggestion. You can confirm it or change it manually.'**
+  String journeySetupDetectedOriginHint(Object country);
+
+  /// No description provided for @journeySetupOriginAssistHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your location only if you want an origin suggestion. Manual selection stays available.'**
+  String get journeySetupOriginAssistHint;
 
   /// No description provided for @journeyLocationPanelTitle.
   ///
@@ -10814,6 +10922,12 @@ abstract class AppLocalizations {
   /// **'Your recommended city'**
   String get migrationResultRevealEyebrow;
 
+  /// No description provided for @migrationResultRevealHeaderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendation'**
+  String get migrationResultRevealHeaderTitle;
+
   /// No description provided for @migrationResultRevealRedoAction.
   ///
   /// In en, this message translates to:
@@ -10850,6 +10964,24 @@ abstract class AppLocalizations {
   /// **'View city details'**
   String get migrationResultRevealExploreCity;
 
+  /// No description provided for @migrationResultRevealCompareCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare with alternatives'**
+  String get migrationResultRevealCompareCta;
+
+  /// No description provided for @migrationResultRevealStartPreparationCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Start preparation with {city}'**
+  String migrationResultRevealStartPreparationCta(String city);
+
+  /// No description provided for @migrationResultRevealRefineAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Make this recommendation more precise'**
+  String get migrationResultRevealRefineAction;
+
   /// No description provided for @homeVisualTitlePrefix.
   ///
   /// In en, this message translates to:
@@ -10873,6 +11005,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can start even if you have not decided everything yet.'**
   String get homeVisualSupportLine;
+
+  /// No description provided for @homeEntryTitlePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose '**
+  String get homeEntryTitlePrefix;
+
+  /// No description provided for @homeEntryTitleHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'how to start'**
+  String get homeEntryTitleHighlight;
+
+  /// No description provided for @homeEntrySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get an initial direction in a few minutes or validate a city you are already considering before moving into execution mode.'**
+  String get homeEntrySubtitle;
+
+  /// No description provided for @homeEntrySupportLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial direction in about 2 minutes'**
+  String get homeEntrySupportLine;
+
+  /// No description provided for @homeEntryDiscoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I want to discover my best city'**
+  String get homeEntryDiscoverTitle;
+
+  /// No description provided for @homeEntryDiscoverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer a few questions and get an initial direction with a recommended city, alternatives, and next steps.'**
+  String get homeEntryDiscoverBody;
+
+  /// No description provided for @homeEntryDiscoverBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Fastest path'**
+  String get homeEntryDiscoverBadge;
+
+  /// No description provided for @homeEntryDiscoverAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Get my initial direction'**
+  String get homeEntryDiscoverAction;
+
+  /// No description provided for @homeEntryKnownCityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I already have a city in mind'**
+  String get homeEntryKnownCityTitle;
+
+  /// No description provided for @homeEntryKnownCityBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for the city, compare alternatives, and validate cost, fit, and next steps before committing to a full plan.'**
+  String get homeEntryKnownCityBody;
+
+  /// No description provided for @homeEntryKnownCityBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'No questionnaire required'**
+  String get homeEntryKnownCityBadge;
+
+  /// No description provided for @homeEntryKnownCityAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate a city'**
+  String get homeEntryKnownCityAction;
+
+  /// No description provided for @homeEntryShortcutsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Useful shortcuts'**
+  String get homeEntryShortcutsTitle;
+
+  /// No description provided for @homeEntryExploreCitiesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore cities'**
+  String get homeEntryExploreCitiesAction;
 
   /// No description provided for @homeVisualCostsAction.
   ///
@@ -10981,6 +11197,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'📋 Guides'**
   String get assistantModeGuides;
+
+  /// No description provided for @assistantQuickTopicsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick topics'**
+  String get assistantQuickTopicsTitle;
+
+  /// No description provided for @assistantQuickQuestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick questions'**
+  String get assistantQuickQuestionsTitle;
+
+  /// No description provided for @assistantOpenGuidesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open guide'**
+  String get assistantOpenGuidesAction;
+
+  /// No description provided for @assistantContextChatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with context'**
+  String get assistantContextChatTitle;
+
+  /// No description provided for @assistantContextChatBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask short questions about the {origin} → {destination} route. The assistant is best at documents, costs, housing, and next steps.'**
+  String assistantContextChatBody(Object origin, Object destination);
+
+  /// No description provided for @assistantContextGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guides by country'**
+  String get assistantContextGuideTitle;
+
+  /// No description provided for @assistantContextGuideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the country you want to review and open the right topic-based content to unblock your next step in {destination}.'**
+  String assistantContextGuideBody(Object destination);
+
+  /// No description provided for @assistantStartCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with the real question'**
+  String get assistantStartCardTitle;
+
+  /// No description provided for @assistantStartCardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can ask directly about the {origin} → {destination} route or open the guide to browse documents, housing, work, and costs.'**
+  String assistantStartCardBody(Object origin, Object destination);
 
   /// No description provided for @planResetManageAction.
   ///

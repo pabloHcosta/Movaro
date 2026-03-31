@@ -8,9 +8,8 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/journey/presentation/pages/journey_setup_page.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
-import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
-import 'package:movaro_app/features/location/presentation/widgets/location_banner_widget.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_seasonality_conflict_service.dart';
@@ -23,10 +22,11 @@ import 'package:movaro_app/features/home/presentation/pages/city_comparison_scre
 import 'package:movaro_app/features/home/presentation/home_visual_layout.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
@@ -66,7 +66,6 @@ class _PublicHomePageState extends State<PublicHomePage>
       const MigrationCopilotProgressSnapshot();
   String? _loadedPlanKey;
   String? _loadedWeatherCityId;
-  bool _didTryPromptLocation = false;
 
   @override
   void initState() {
@@ -79,7 +78,6 @@ class _PublicHomePageState extends State<PublicHomePage>
     widget.citiesController.addListener(_handleControllerUpdate);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_syncPlanState());
-      unawaited(_maybePromptLocationPermission());
       unawaited(_recordStreak());
     });
   }
@@ -140,33 +138,6 @@ class _PublicHomePageState extends State<PublicHomePage>
                       constraints: BoxConstraints(maxWidth: maxWidth),
                       child: Column(
                         children: [
-                          FutureBuilder<bool>(
-                            future: widget.locationController
-                                .shouldShowInlineBanner(),
-                            builder: (context, snapshot) {
-                              if (snapshot.data != true) {
-                                return const SizedBox.shrink();
-                              }
-                              return Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  12,
-                                  8,
-                                  12,
-                                  0,
-                                ),
-                                child: LocationBannerWidget(
-                                  onActivate: () => Navigator.pushNamed(
-                                    context,
-                                    AppRoutes.locationPermission,
-                                    arguments:
-                                        const LocationPermissionScreenArgs(
-                                          returnToPrevious: true,
-                                        ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
                           Expanded(
                             child: AnimatedSwitcher(
                               duration: const Duration(milliseconds: 500),
@@ -206,10 +177,27 @@ class _PublicHomePageState extends State<PublicHomePage>
                                     )
                                   : _EmptyHomeState(
                                       key: const ValueKey('empty-home'),
-                                      onActionTap: (index) =>
-                                          _handleEmptyStateAction(
+                                      onDiscoverDirectionTap: () =>
+                                          _startPlanFlow(context),
+                                      onKnownCityTap: () =>
+                                          _startKnownCityFlow(context),
+                                      onExploreCitiesTap: () =>
+                                          Navigator.pushNamed(
                                             context,
-                                            index,
+                                            AppRoutes.cities,
+                                          ),
+                                      onOpenCostsTap: () => Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.documentationTopic,
+                                        arguments:
+                                            DocumentationGuideSection.costs,
+                                      ),
+                                      onOpenDocumentsTap: () =>
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.documentationGuide,
+                                            arguments: DocumentationGuideSection
+                                                .documents,
                                           ),
                                     ),
                             ),
@@ -293,56 +281,70 @@ class _PublicHomePageState extends State<PublicHomePage>
     );
   }
 
-  Future<void> _maybePromptLocationPermission() async {
-    if (_didTryPromptLocation || !mounted) {
-      return;
-    }
-    _didTryPromptLocation = true;
-
-    await widget.locationController.initialize();
-    final shouldAsk = await widget.locationController.shouldRequestAgain();
-    if (!mounted || !shouldAsk) {
-      return;
-    }
-
-    await Navigator.pushNamed(
-      context,
-      AppRoutes.locationPermission,
-      arguments: const LocationPermissionScreenArgs(returnToPrevious: true),
-    );
-  }
-
   Future<void> _startPlanFlow(BuildContext context) async {
-    await widget.migrationQuestionnaireController.initialize();
+    await widget.migrationQuestionnaireController.initializeForQuestionnaire(
+      variant: QuestionnaireVariant.lean,
+    );
     if (!context.mounted) {
       return;
     }
-    Navigator.pushNamed(context, AppRoutes.migrationStart);
+    Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire);
+  }
+
+  Future<void> _startKnownCityFlow(BuildContext context) async {
+    await widget.journeyContextController.initialize();
+    final journey = widget.journeyContextController;
+
+    if (journey.isJourneyReadyForPlanning) {
+      if (!context.mounted) {
+        return;
+      }
+      Navigator.pushNamed(context, AppRoutes.citiesSearch);
+      return;
+    }
+
+    final destinations = journey.availableDestinations
+        .where((country) => country.coverage.canPlanAsDestination)
+        .toList(growable: false);
+    final origins = journey.availableOrigins
+        .where((country) => country.coverage.canPlanAsOrigin)
+        .toList(growable: false);
+
+    if (destinations.length == 1) {
+      final destination = destinations.first;
+      final compatibleOrigins = origins
+          .where(
+            (origin) => origin.coverage.supportsDestination(destination.id),
+          )
+          .toList(growable: false);
+
+      if (compatibleOrigins.length == 1) {
+        await journey.completeJourney(
+          originCountryId: compatibleOrigins.first.id,
+          destinationCountryId: destination.id,
+        );
+        if (!context.mounted) {
+          return;
+        }
+        Navigator.pushNamed(context, AppRoutes.citiesSearch);
+        return;
+      }
+    }
+
+    if (!context.mounted) {
+      return;
+    }
+    Navigator.pushNamed(
+      context,
+      AppRoutes.journeySetup,
+      arguments: const JourneySetupPageArgs(
+        continueRoute: AppRoutes.citiesSearch,
+      ),
+    );
   }
 
   void _openSettings() {
     Navigator.pushNamed(context, AppRoutes.settings);
-  }
-
-  Future<void> _handleEmptyStateAction(BuildContext context, int index) async {
-    switch (index) {
-      case 0:
-        await Navigator.pushNamed(
-          context,
-          AppRoutes.documentationGuide,
-          arguments: DocumentationGuideSection.costs,
-        );
-      case 1:
-        await Navigator.pushNamed(
-          context,
-          AppRoutes.documentationGuide,
-          arguments: DocumentationGuideSection.documents,
-        );
-      case 2:
-        await Navigator.pushNamed(context, AppRoutes.cities);
-      case 3:
-        await _startPlanFlow(context);
-    }
   }
 
   void _openComparison(City city) {
@@ -378,7 +380,7 @@ class _PublicHomePageState extends State<PublicHomePage>
     }
 
     if (choice == PlanResetChoice.rebuild) {
-      Navigator.pushNamed(context, AppRoutes.migrationStart);
+      Navigator.pushNamed(context, AppRoutes.publicHome);
     }
   }
 
@@ -388,16 +390,13 @@ class _PublicHomePageState extends State<PublicHomePage>
   ) {
     final completedIds = snapshot.getAllCompletedIds();
     final items =
-        ArgentinaBrazilGuideDataSource.build(
-              plan,
-              currentLocation: widget.locationController.savedLocation,
-              localeCode: Localizations.localeOf(context).languageCode,
-            )
-            .map(
-              (item) =>
-                  item.copyWith(isCompleted: completedIds.contains(item.id)),
-            )
-            .toList(growable: false)
+        MigrationGuideRegistry.build(
+            l10n: context.l10n,
+            plan: plan,
+            currentLocation: widget.locationController.savedLocation,
+            localeCode: Localizations.localeOf(context).languageCode,
+            completedIds: completedIds,
+          ).toList(growable: false)
           ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
 
     GuideActionItem? currentItem;
@@ -472,13 +471,30 @@ class _PublicHomePageState extends State<PublicHomePage>
 }
 
 class _EmptyHomeState extends StatelessWidget {
-  const _EmptyHomeState({required this.onActionTap, super.key});
+  const _EmptyHomeState({
+    required this.onDiscoverDirectionTap,
+    required this.onKnownCityTap,
+    required this.onExploreCitiesTap,
+    required this.onOpenCostsTap,
+    required this.onOpenDocumentsTap,
+    super.key,
+  });
 
-  final ValueChanged<int> onActionTap;
+  final VoidCallback onDiscoverDirectionTap;
+  final VoidCallback onKnownCityTap;
+  final VoidCallback onExploreCitiesTap;
+  final VoidCallback onOpenCostsTap;
+  final VoidCallback onOpenDocumentsTap;
 
   @override
   Widget build(BuildContext context) {
-    return HomeVisualLayout(onActionTap: onActionTap);
+    return HomeVisualLayout(
+      onDiscoverDirectionTap: onDiscoverDirectionTap,
+      onKnownCityTap: onKnownCityTap,
+      onExploreCitiesTap: onExploreCitiesTap,
+      onOpenCostsTap: onOpenCostsTap,
+      onOpenDocumentsTap: onOpenDocumentsTap,
+    );
   }
 }
 
@@ -538,8 +554,10 @@ class _ActiveHomeState extends StatelessWidget {
         // Content portion below status bar scales linearly from 130 pt
         // (compact) up to 195 pt (large screen), centered around the
         // iPhone 11 baseline of 156 pt at ~765 pt available height.
-        final heroContent =
-            (130.0 + (avail - 580.0) * 0.20).clamp(130.0, 195.0);
+        final heroContent = (130.0 + (avail - 580.0) * 0.20).clamp(
+          130.0,
+          195.0,
+        );
         final heroH = topPad + heroContent;
 
         // ── Feed card height ──────────────────────────────────────────
@@ -592,10 +610,7 @@ class _ActiveHomeState extends StatelessWidget {
               ),
 
             // 3. Seasonality conflict warning (only for critical timing)
-            _SeasonalityConflictBanner(
-              city: city,
-              planTimeline: planTimeline,
-            ),
+            _SeasonalityConflictBanner(city: city, planTimeline: planTimeline),
 
             // 4. Tu Jornada — compact phase stepper + quick-action chips
             const SizedBox(height: 6),
@@ -654,6 +669,7 @@ class _PrimaryActionCard extends StatelessWidget {
   final String phaseName;
   final bool isDark;
   final VoidCallback? onTap;
+
   /// When true, slightly increases title and body font sizes for taller screens.
   final bool bigScreen;
 
@@ -662,12 +678,11 @@ class _PrimaryActionCard extends StatelessWidget {
     required String pt,
     required String es,
     required String en,
-  }) =>
-      switch (Localizations.localeOf(context).languageCode) {
-        'pt' => pt,
-        'es' => es,
-        _ => en,
-      };
+  }) => switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -786,6 +801,7 @@ class _ActiveHero extends StatelessWidget {
 
   final City city;
   final CityWeather? weather;
+
   /// Total hero height in logical pixels, including the top safe-area inset.
   final double height;
   final VoidCallback onOpenSettings;
@@ -843,7 +859,7 @@ class _ActiveHero extends StatelessWidget {
                   ),
                   const SizedBox(width: 5),
                   Text(
-                    context.l10n.homeActivePlanBadge,
+                    context.l10n.stageExecutionTitle,
                     style: AppTypography.compactBadge.copyWith(
                       fontWeight: FontWeight.w800,
                       color: _accentText(context),
@@ -879,16 +895,13 @@ class _ActiveHero extends StatelessWidget {
                               letterSpacing: -0.6,
                               color: Colors.white,
                               shadows: const [
-                                Shadow(
-                                  blurRadius: 8,
-                                  color: Color(0x80000000),
-                                ),
+                                Shadow(blurRadius: 8, color: Color(0x80000000)),
                               ],
                             ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '$stateLabel, ${context.l10n.countryLabel('brazil')}',
+                        '$stateLabel, ${context.l10n.countryLabel(city.countryCode)}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: Colors.white.withValues(alpha: 0.65),
@@ -928,6 +941,7 @@ class _SecondaryActionRow extends StatelessWidget {
   final VoidCallback onCompare;
   final VoidCallback onViewCity;
   final VoidCallback onNewPlan;
+
   /// When true renders compact horizontal icon+label chips instead of vertical
   /// icon-over-label chips. Used by the Focus Mode layout.
   final bool compact;
@@ -978,6 +992,7 @@ class _ActionChip extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+
   /// Compact mode renders a horizontal Row(icon, label) chip with reduced
   /// padding — fits in the Focus Mode "Tu Jornada" quick-actions row.
   final bool compact;
@@ -1401,12 +1416,11 @@ class _PFAppointmentNudge extends StatelessWidget {
     required String pt,
     required String es,
     required String en,
-  }) =>
-      switch (Localizations.localeOf(context).languageCode) {
-        'pt' => pt,
-        'es' => es,
-        _ => en,
-      };
+  }) => switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 }
 
 // ─── Planner Countdown Chip ───────────────────────────────────────────────────
@@ -1442,8 +1456,7 @@ class _PlannerCountdownChip extends StatelessWidget {
           Text(
             label,
             style: AppTypography.compactBadge.copyWith(
-              color:
-                  isDark ? const Color(0xFF90C4F8) : const Color(0xFF1D4ED8),
+              color: isDark ? const Color(0xFF90C4F8) : const Color(0xFF1D4ED8),
             ),
           ),
         ],
@@ -1455,25 +1468,25 @@ class _PlannerCountdownChip extends StatelessWidget {
     final locale = Localizations.localeOf(context).languageCode;
     return switch (timeline) {
       'in_0_3m' => switch (locale) {
-          'pt' => 'Mudança em até 3 meses',
-          'es' => 'Mudanza en menos de 3 meses',
-          _ => 'Move within 3 months',
-        },
+        'pt' => 'Mudança em até 3 meses',
+        'es' => 'Mudanza en menos de 3 meses',
+        _ => 'Move within 3 months',
+      },
       'in_3_6m' => switch (locale) {
-          'pt' => 'Mudança em 3–6 meses',
-          'es' => 'Mudanza en 3–6 meses',
-          _ => 'Move in 3–6 months',
-        },
+        'pt' => 'Mudança em 3–6 meses',
+        'es' => 'Mudanza en 3–6 meses',
+        _ => 'Move in 3–6 months',
+      },
       'in_6_12m' => switch (locale) {
-          'pt' => 'Mudança em 6–12 meses',
-          'es' => 'Mudanza en 6–12 meses',
-          _ => 'Move in 6–12 months',
-        },
+        'pt' => 'Mudança em 6–12 meses',
+        'es' => 'Mudanza en 6–12 meses',
+        _ => 'Move in 6–12 months',
+      },
       _ => switch (locale) {
-          'pt' => 'Ainda planejando',
-          'es' => 'Todavía planificando',
-          _ => 'Still planning',
-        },
+        'pt' => 'Ainda planejando',
+        'es' => 'Todavía planificando',
+        _ => 'Still planning',
+      },
     };
   }
 }
@@ -1591,10 +1604,10 @@ class _ExplorerStageCard extends StatelessWidget {
     final budget = cityBudget;
 
     final rentLabel = budget != null
-        ? 'R\$${budget.rent.min}–${budget.rent.max}'
+        ? 'R\$${budget.cheaperRent}–${budget.pricierRent}'
         : 'R\$1.800–3.500';
     final totalLabel = budget != null
-        ? 'R\$${budget.leanTotal}–${budget.comfortableTotal}'
+        ? 'R\$${budget.fairLivingTotal}–${budget.wellLivingTotal}'
         : 'R\$4.000–6.000';
 
     return Row(
@@ -1614,9 +1627,9 @@ class _ExplorerStageCard extends StatelessWidget {
           icon: Icons.attach_money_rounded,
           label: _localizedText(
             context,
-            pt: 'Total $totalLabel/mês',
-            es: 'Total $totalLabel/mes',
-            en: 'Total $totalLabel/mo',
+            pt: 'Viver justo/bem $totalLabel',
+            es: 'Vivir justo/bien $totalLabel',
+            en: 'Live fair/well $totalLabel',
           ),
           isDark: isDark,
         ),
@@ -1629,12 +1642,11 @@ class _ExplorerStageCard extends StatelessWidget {
     required String pt,
     required String es,
     required String en,
-  }) =>
-      switch (Localizations.localeOf(context).languageCode) {
-        'pt' => pt,
-        'es' => es,
-        _ => en,
-      };
+  }) => switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 }
 
 class _AffordabilityChip extends StatelessWidget {
@@ -1662,11 +1674,7 @@ class _AffordabilityChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 11,
-            color: AppColors.textSoftFor(context),
-          ),
+          Icon(icon, size: 11, color: AppColors.textSoftFor(context)),
           const SizedBox(width: 4),
           Text(
             label,
@@ -1705,12 +1713,11 @@ class _SeasonalityConflictBanner extends StatelessWidget {
     required String pt,
     required String es,
     required String en,
-  }) =>
-      switch (Localizations.localeOf(context).languageCode) {
-        'pt' => pt,
-        'es' => es,
-        _ => en,
-      };
+  }) => switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -1766,17 +1773,17 @@ class _SeasonalityConflictBanner extends StatelessWidget {
                   Text(
                     headline,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: const Color(0xFFFF5252),
-                          fontWeight: FontWeight.w700,
-                        ),
+                      color: const Color(0xFFFF5252),
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     body,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: const Color(0xFFFF8A80),
-                          fontSize: 11,
-                        ),
+                      color: const Color(0xFFFF8A80),
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
@@ -1791,10 +1798,7 @@ class _SeasonalityConflictBanner extends StatelessWidget {
 // ─── Pre-arrival Warning Banner ───────────────────────────────────────────────
 
 class _PreArrivalWarningBanner extends StatelessWidget {
-  const _PreArrivalWarningBanner({
-    required this.count,
-    this.onTap,
-  });
+  const _PreArrivalWarningBanner({required this.count, this.onTap});
 
   final int count;
   final VoidCallback? onTap;
@@ -1870,10 +1874,7 @@ class _PreArrivalWarningBanner extends StatelessWidget {
 // ─── Budget Quick-Access Card ─────────────────────────────────────────────────
 
 class _BudgetQuickAccessCard extends StatelessWidget {
-  const _BudgetQuickAccessCard({
-    required this.locale,
-    required this.onTap,
-  });
+  const _BudgetQuickAccessCard({required this.locale, required this.onTap});
 
   final String locale;
   final VoidCallback onTap;
@@ -1932,9 +1933,7 @@ class _BudgetQuickAccessCard extends StatelessWidget {
             Icon(
               Icons.arrow_forward_ios_rounded,
               size: 14,
-              color: isDark
-                  ? const Color(0xFF3B7CC8)
-                  : const Color(0xFF2563EB),
+              color: isDark ? const Color(0xFF3B7CC8) : const Color(0xFF2563EB),
             ),
           ],
         ),
@@ -1943,14 +1942,14 @@ class _BudgetQuickAccessCard extends StatelessWidget {
   }
 
   String _title(String locale) => switch (locale) {
-        'pt' => 'Calcule seu orçamento',
-        'es' => 'Calcula tu presupuesto',
-        _ => 'Calculate your budget',
-      };
+    'pt' => 'Calcule seu orçamento',
+    'es' => 'Calcula tu presupuesto',
+    _ => 'Calculate your budget',
+  };
 
   String _subtitle(String locale) => switch (locale) {
-        'pt' => 'Quanto você precisa para os primeiros 30–90 dias',
-        'es' => 'Cuanto necesitas para los primeros 30–90 dias',
-        _ => 'How much you need for the first 30–90 days',
-      };
+    'pt' => 'Quanto você precisa para os primeiros 30–90 dias',
+    'es' => 'Cuanto necesitas para los primeros 30–90 dias',
+    _ => 'How much you need for the first 30–90 days',
+  };
 }

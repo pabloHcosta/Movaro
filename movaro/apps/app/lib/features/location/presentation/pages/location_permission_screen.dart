@@ -144,10 +144,10 @@ class LocationPermissionScreen extends StatelessWidget {
 
     switch (result.outcome) {
       case LocationPermissionOutcome.granted:
-        _continue(context);
+        _continue(context, granted: true);
       case LocationPermissionOutcome.denied:
         if (!args.isRequired) {
-          _continue(context);
+          _continue(context, granted: false);
         }
       case LocationPermissionOutcome.permanentlyDenied:
         await showModalBottomSheet<void>(
@@ -189,7 +189,7 @@ class LocationPermissionScreen extends StatelessWidget {
           ),
         );
         if (context.mounted && !args.isRequired) {
-          _continue(context);
+          _continue(context, granted: false);
         }
     }
   }
@@ -197,13 +197,13 @@ class LocationPermissionScreen extends StatelessWidget {
   Future<void> _handleNotNow(BuildContext context) async {
     await locationController.deferPermission();
     if (context.mounted) {
-      _continue(context);
+      _continue(context, granted: false);
     }
   }
 
-  void _continue(BuildContext context) {
+  void _continue(BuildContext context, {required bool granted}) {
     if (args.returnToPrevious) {
-      Navigator.maybePop(context, true);
+      Navigator.maybePop(context, granted);
       return;
     }
 

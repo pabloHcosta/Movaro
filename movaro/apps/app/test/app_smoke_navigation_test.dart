@@ -77,7 +77,9 @@ void main() {
       await _pumpScreen(tester);
 
       expect(find.text('Plano'), findsNothing);
-      expect(find.text('Montar meu plano'), findsOneWidget);
+      expect(find.text('Receber minha direção inicial'), findsOneWidget);
+      expect(find.text('Já tenho uma cidade em mente'), findsOneWidget);
+      expect(find.text('Atalhos úteis'), findsOneWidget);
 
       await tester.pumpWidget(harness.buildApp(initialRoute: AppRoutes.cities));
       await _pumpScreen(tester);
@@ -95,7 +97,96 @@ void main() {
     },
   );
 
-  testWidgets('move guide route guard and confirmed flow both work', (
+  testWidgets('public home discover action opens the lean questionnaire', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      harness.buildApp(initialRoute: AppRoutes.publicHome),
+    );
+    await _pumpScreen(tester);
+
+    final discoverAction = find.text('Receber minha direção inicial');
+    await tester.ensureVisible(discoverAction);
+    await tester.tap(discoverAction);
+    await _pumpScreen(tester);
+
+    expect(find.text('O que você busca no Brasil agora?'), findsOneWidget);
+    expect(find.textContaining('1 de 3'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('public home known-city action opens city search', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      harness.buildApp(initialRoute: AppRoutes.publicHome),
+    );
+    await _pumpScreen(tester);
+
+    final knownCityAction = find.text('Validar uma cidade');
+    await tester.ensureVisible(knownCityAction);
+    await tester.tap(knownCityAction);
+    await _pumpScreen(tester);
+
+    expect(find.text('Buscar cidades'), findsOneWidget);
+    expect(
+      find.text('Valide uma cidade antes de assumir um plano'),
+      findsOneWidget,
+    );
+    expect(find.text('Qual cidade você quer validar?'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('city search resolves human-friendly aliases in autocomplete', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      harness.buildApp(initialRoute: AppRoutes.publicHome),
+    );
+    await _pumpScreen(tester);
+
+    final knownCityAction = find.text('Validar uma cidade');
+    await tester.ensureVisible(knownCityAction);
+    await tester.tap(knownCityAction);
+    await _pumpScreen(tester);
+
+    await tester.enterText(find.byType(TextField).first, 'poa');
+    await tester.pump();
+    await _pumpScreen(tester);
+
+    expect(find.text('Porto Alegre'), findsWidgets);
+    expect(find.textContaining('cidades encontradas'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('copilot redirects to result reveal until city is confirmed', (
     tester,
   ) async {
     await harness.generateLeanPlan();
@@ -105,8 +196,18 @@ void main() {
     );
     await _pumpScreen(tester);
 
-    expect(find.text('Seu plano inicial'), findsOneWidget);
-    expect(find.text('Escolha da cidade'), findsOneWidget);
+    expect(find.text('Ver detalhes da cidade'), findsOneWidget);
+    expect(find.text('Comparar com alternativas'), findsOneWidget);
+    expect(find.textContaining('Começar preparação com'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('confirmed city turns public home into execution home', (
+    tester,
+  ) async {
+    await harness.generateLeanPlan();
 
     final city = harness
         .migrationQuestionnaireController
@@ -115,14 +216,13 @@ void main() {
     await harness.migrationQuestionnaireController.confirmPlanCity(city);
 
     await tester.pumpWidget(
-      harness.buildApp(initialRoute: AppRoutes.migrationPlanCopilot),
+      harness.buildApp(initialRoute: AppRoutes.publicHome),
     );
     await _pumpScreen(tester);
 
-    expect(find.text('Guia da mudança'), findsWidgets);
-    expect(find.text('Documentos e residência'), findsOneWidget);
-    expect(find.text('Guia'), findsOneWidget);
     expect(find.text('Plano'), findsOneWidget);
+    expect(find.text('Excluir ou refazer'), findsOneWidget);
+    expect(find.text('Documentos e residência'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
@@ -208,7 +308,8 @@ void main() {
     await tester.tap(find.text('Refazer plano'));
     await _pumpScreen(tester);
 
-    expect(find.text('Seu plano inicial'), findsOneWidget);
+    expect(find.text('Receber minha direção inicial'), findsOneWidget);
+    expect(find.text('Já tenho uma cidade em mente'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
@@ -366,19 +467,12 @@ class _AppTestHarness {
 
   Future<void> generateLeanPlan() async {
     migrationQuestionnaireController.selectVariant(QuestionnaireVariant.lean);
+    migrationQuestionnaireController.selectAnswer('intent', 'remote_income');
     await migrationQuestionnaireController.goNext();
-    if (migrationQuestionnaireController.currentQuestion?.id ==
-        'preferred_city') {
-      await migrationQuestionnaireController.goNext();
-    }
     migrationQuestionnaireController.selectAnswer('timeline', 'in_3_6m');
     await migrationQuestionnaireController.goNext();
     migrationQuestionnaireController.toggleAnswer('priorities', 'low_cost');
     migrationQuestionnaireController.toggleAnswer('priorities', 'safety');
-    await migrationQuestionnaireController.goNext();
-    migrationQuestionnaireController.selectAnswer('funding', 'remote_income');
-    await migrationQuestionnaireController.goNext();
-    migrationQuestionnaireController.selectAnswer('intent', 'remote_income');
     await migrationQuestionnaireController.goNext();
   }
 

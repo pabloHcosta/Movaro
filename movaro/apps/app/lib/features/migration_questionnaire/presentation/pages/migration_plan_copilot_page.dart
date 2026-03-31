@@ -11,6 +11,7 @@ import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/core/widgets/journey_stage_banner.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
@@ -22,9 +23,9 @@ import 'package:movaro_app/features/explore/presentation/pages/documentation_gui
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/guide_gps_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/arrival_execution_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/document_checklist_adapter.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
@@ -311,25 +312,19 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     BuildContext context,
     MigrationPlan plan,
   ) {
-    if (ArgentinaBrazilGuideDataSource.isArgentinaToBrazil(
-      plan.originCountry,
-      plan.destinationCountry,
-    )) {
-      final completedIds = <String>{
-        ..._readinessCompletedIds,
-        ..._documentCompletedIds,
-        ..._arrivalCompletedIds,
-      };
-      return ArgentinaBrazilGuideDataSource.build(
-            plan,
-            currentLocation: widget.locationController.savedLocation,
-            localeCode: Localizations.localeOf(context).languageCode,
-          )
-          .map(
-            (item) =>
-                item.copyWith(isCompleted: completedIds.contains(item.id)),
-          )
-          .toList(growable: false);
+    final completedIds = <String>{
+      ..._readinessCompletedIds,
+      ..._documentCompletedIds,
+      ..._arrivalCompletedIds,
+    };
+    if (MigrationGuideRegistry.supportsPlan(plan)) {
+      return MigrationGuideRegistry.build(
+        l10n: context.l10n,
+        plan: plan,
+        currentLocation: widget.locationController.savedLocation,
+        localeCode: Localizations.localeOf(context).languageCode,
+        completedIds: completedIds,
+      );
     }
 
     final l10n = context.l10n;
@@ -595,11 +590,13 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                 sheetItem.checklistItems?.every((sub) => sub.isCompleted) ??
                 false;
             final canComplete = !sheetItem.hasChecklist || allChecklistDone;
-            final checklistCompletedCount = sheetItem.checklistItems
+            final checklistCompletedCount =
+                sheetItem.checklistItems
                     ?.where((sub) => sub.isCompleted)
                     .length ??
                 0;
-            final isInProgress = sheetItem.hasChecklist &&
+            final isInProgress =
+                sheetItem.hasChecklist &&
                 checklistCompletedCount > 0 &&
                 !sheetItem.isCompleted;
 
@@ -746,7 +743,9 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                               vertical: 10,
                             ),
                             decoration: BoxDecoration(
-                              color: _urgencyBannerColor(sheetItem.urgencyLevel),
+                              color: _urgencyBannerColor(
+                                sheetItem.urgencyLevel,
+                              ),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Row(
@@ -816,8 +815,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                         ],
                         // ── Checklist (interactive in execution, read-only in preview) ──
                         if (sheetItem.hasChecklist) ...[
-                          for (final subItem
-                              in sheetItem.checklistItems!) ...[
+                          for (final subItem in sheetItem.checklistItems!) ...[
                             CheckboxListTile(
                               value: subItem.isCompleted,
                               contentPadding: EdgeInsets.zero,
@@ -1226,6 +1224,24 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            JourneyStageBanner(
+                              title: hasConfirmedCity
+                                  ? l10n.stageExecutionTitle
+                                  : l10n.stageDecisionTitle,
+                              body: hasConfirmedCity
+                                  ? l10n.stageExecutionBody
+                                  : l10n.stageDecisionBody,
+                              action: hasConfirmedCity
+                                  ? l10n.stageExecutionAction
+                                  : l10n.stageDecisionAction,
+                              icon: hasConfirmedCity
+                                  ? Icons.route_rounded
+                                  : Icons.explore_rounded,
+                              accent: hasConfirmedCity
+                                  ? const Color(0xFF0A9B6E)
+                                  : Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(height: 12),
                             if (!hasConfirmedCity) ...[
                               // Preview mode — full guide visible, execution locked.
                               // Confirm CTA activates execution mode in-place.
@@ -1521,7 +1537,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     }
 
     if (choice == PlanResetChoice.rebuild) {
-      Navigator.pushReplacementNamed(context, AppRoutes.migrationStart);
+      Navigator.pushReplacementNamed(context, AppRoutes.publicHome);
       return;
     }
 
@@ -2694,15 +2710,18 @@ class _GuidePreviewBanner extends StatelessWidget {
     final locale = Localizations.localeOf(context).languageCode;
 
     final title = switch (locale) {
-      'pt' => cityName.isNotEmpty
-          ? 'Visualizando o plano para $cityName'
-          : 'Visualizando o plano de migração',
-      'es' => cityName.isNotEmpty
-          ? 'Visualizando el plan para $cityName'
-          : 'Visualizando el plan de migración',
-      _ => cityName.isNotEmpty
-          ? 'Previewing the plan for $cityName'
-          : 'Previewing your migration plan',
+      'pt' =>
+        cityName.isNotEmpty
+            ? 'Visualizando o plano para $cityName'
+            : 'Visualizando o plano de migração',
+      'es' =>
+        cityName.isNotEmpty
+            ? 'Visualizando el plan para $cityName'
+            : 'Visualizando el plan de migración',
+      _ =>
+        cityName.isNotEmpty
+            ? 'Previewing the plan for $cityName'
+            : 'Previewing your migration plan',
     };
     final body = switch (locale) {
       'pt' =>
@@ -2713,12 +2732,9 @@ class _GuidePreviewBanner extends StatelessWidget {
         'Explore all $totalItems steps before committing. No actions will run in preview mode.',
     };
     final ctaLabel = switch (locale) {
-      'pt' =>
-        cityName.isNotEmpty ? 'Confirmar $cityName' : 'Confirmar cidade',
-      'es' =>
-        cityName.isNotEmpty ? 'Confirmar $cityName' : 'Confirmar ciudad',
-      _ =>
-        cityName.isNotEmpty ? 'Confirm $cityName' : 'Confirm city',
+      'pt' => cityName.isNotEmpty ? 'Confirmar $cityName' : 'Confirmar cidade',
+      'es' => cityName.isNotEmpty ? 'Confirmar $cityName' : 'Confirmar ciudad',
+      _ => cityName.isNotEmpty ? 'Confirm $cityName' : 'Confirm city',
     };
 
     return Container(
@@ -2799,10 +2815,7 @@ class _GuidePreviewBanner extends StatelessWidget {
 /// Groups all guide items by phase and renders them as tappable rows.
 /// Used when the guide is in preview mode (city not yet confirmed).
 class _GuideAllItemsList extends StatelessWidget {
-  const _GuideAllItemsList({
-    required this.items,
-    required this.onSelectItem,
-  });
+  const _GuideAllItemsList({required this.items, required this.onSelectItem});
 
   final List<GuideActionItem> items;
   final void Function(GuideActionItem item) onSelectItem;
@@ -2890,30 +2903,30 @@ class _GuideAllItemsList extends StatelessWidget {
     final locale = Localizations.localeOf(context).languageCode;
     return switch (phase) {
       GuidePhase.preparation => switch (locale) {
-          'pt' => 'Preparação',
-          'es' => 'Preparación',
-          _ => 'Preparation',
-        },
+        'pt' => 'Preparação',
+        'es' => 'Preparación',
+        _ => 'Preparation',
+      },
       GuidePhase.housing => switch (locale) {
-          'pt' => 'Moradia',
-          'es' => 'Vivienda',
-          _ => 'Housing',
-        },
+        'pt' => 'Moradia',
+        'es' => 'Vivienda',
+        _ => 'Housing',
+      },
       GuidePhase.documents => switch (locale) {
-          'pt' => 'Documentos',
-          'es' => 'Documentos',
-          _ => 'Documents',
-        },
+        'pt' => 'Documentos',
+        'es' => 'Documentos',
+        _ => 'Documents',
+      },
       GuidePhase.work => switch (locale) {
-          'pt' => 'Trabalho',
-          'es' => 'Trabajo',
-          _ => 'Work',
-        },
+        'pt' => 'Trabalho',
+        'es' => 'Trabajo',
+        _ => 'Work',
+      },
       GuidePhase.arrival => switch (locale) {
-          'pt' => 'Chegada',
-          'es' => 'Llegada',
-          _ => 'Arrival',
-        },
+        'pt' => 'Chegada',
+        'es' => 'Llegada',
+        _ => 'Arrival',
+      },
     };
   }
 }
@@ -2960,7 +2973,11 @@ class _PreviewItemTile extends StatelessWidget {
               const SizedBox(width: 10),
               // Icon (if present)
               if (item.icon != null) ...[
-                Icon(item.icon, size: 16, color: AppColors.textSoftFor(context)),
+                Icon(
+                  item.icon,
+                  size: 16,
+                  color: AppColors.textSoftFor(context),
+                ),
                 const SizedBox(width: 8),
               ],
               Expanded(
@@ -3977,9 +3994,9 @@ class _GuideDetailRow extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              height: 1.45,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(height: 1.45),
           ),
         ),
       ],
@@ -4129,9 +4146,9 @@ class _GuideBestOptionBanner extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   option.title,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 if (option.pros.isNotEmpty) ...[
                   const SizedBox(height: 4),
@@ -6384,18 +6401,18 @@ String _urgencyLabel(BuildContext context, GuideUrgencyLevel level) =>
     };
 
 Color _urgencyBannerColor(GuideUrgencyLevel? level) => switch (level) {
-      GuideUrgencyLevel.critical => const Color(0xFF2D0A0A),
-      GuideUrgencyLevel.urgent => const Color(0xFF2D1A08),
-      GuideUrgencyLevel.watch => const Color(0xFF1A1E08),
-      _ => const Color(0xFF0D1829),
-    };
+  GuideUrgencyLevel.critical => const Color(0xFF2D0A0A),
+  GuideUrgencyLevel.urgent => const Color(0xFF2D1A08),
+  GuideUrgencyLevel.watch => const Color(0xFF1A1E08),
+  _ => const Color(0xFF0D1829),
+};
 
 Color _urgencyTextColor(GuideUrgencyLevel? level) => switch (level) {
-      GuideUrgencyLevel.critical => const Color(0xFFE24B4A),
-      GuideUrgencyLevel.urgent => const Color(0xFFE8873A),
-      GuideUrgencyLevel.watch => const Color(0xFFD4C84A),
-      _ => const Color(0xFF90C4F8),
-    };
+  GuideUrgencyLevel.critical => const Color(0xFFE24B4A),
+  GuideUrgencyLevel.urgent => const Color(0xFFE8873A),
+  GuideUrgencyLevel.watch => const Color(0xFFD4C84A),
+  _ => const Color(0xFF90C4F8),
+};
 
 class _InfoGuideCard extends StatelessWidget {
   const _InfoGuideCard({
@@ -6608,22 +6625,22 @@ class _QuickReferenceCardState extends State<_QuickReferenceCard> {
   }
 
   String _headerLabel(String locale) => switch (locale) {
-        'pt' => 'Referência rápida — você está executando agora',
-        'es' => 'Referencia rapida — estas ejecutando ahora',
-        _ => 'Quick reference — you\'re executing now',
-      };
+    'pt' => 'Referência rápida — você está executando agora',
+    'es' => 'Referencia rapida — estas ejecutando ahora',
+    _ => 'Quick reference — you\'re executing now',
+  };
 
   String _sayLabel(String locale) => switch (locale) {
-        'pt' => 'O que dizer',
-        'es' => 'Que decir',
-        _ => 'What to say',
-      };
+    'pt' => 'O que dizer',
+    'es' => 'Que decir',
+    _ => 'What to say',
+  };
 
   String _bringLabel(String locale) => switch (locale) {
-        'pt' => 'O que levar',
-        'es' => 'Que llevar',
-        _ => 'What to bring',
-      };
+    'pt' => 'O que levar',
+    'es' => 'Que llevar',
+    _ => 'What to bring',
+  };
 }
 
 class _RefRow extends StatelessWidget {
@@ -6682,7 +6699,9 @@ class _CpfUnlockBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final unlocked = allItems
-        .where((it) => it.dependencies.contains('item_2_1_cpf') && !it.isCompleted)
+        .where(
+          (it) => it.dependencies.contains('item_2_1_cpf') && !it.isCompleted,
+        )
         .toList();
 
     if (unlocked.isEmpty) return const SizedBox.shrink();
@@ -6693,14 +6712,10 @@ class _CpfUnlockBanner extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isDark
-              ? const Color(0xFF0F2D18)
-              : const Color(0xFFF0FDF4),
+          color: isDark ? const Color(0xFF0F2D18) : const Color(0xFFF0FDF4),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isDark
-                ? const Color(0xFF1D6A35)
-                : const Color(0xFFBBF7D0),
+            color: isDark ? const Color(0xFF1D6A35) : const Color(0xFFBBF7D0),
           ),
         ),
         child: Column(
@@ -6708,11 +6723,7 @@ class _CpfUnlockBanner extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.lock_open_rounded,
-                  size: 14,
-                  color: _kUnlockColor,
-                ),
+                Icon(Icons.lock_open_rounded, size: 14, color: _kUnlockColor),
                 const SizedBox(width: 6),
                 Text(
                   _unlockLabel(context, unlocked.length),
@@ -6729,7 +6740,9 @@ class _CpfUnlockBanner extends StatelessWidget {
             Wrap(
               spacing: 6,
               runSpacing: 5,
-              children: unlocked.map((it) => _UnlockChip(item: it, isDark: isDark)).toList(),
+              children: unlocked
+                  .map((it) => _UnlockChip(item: it, isDark: isDark))
+                  .toList(),
             ),
           ],
         ),
@@ -6754,20 +6767,18 @@ class _UnlockChip extends StatelessWidget {
   final bool isDark;
 
   static String _emoji(GuideActionType type) => switch (type) {
-        GuideActionType.informative => '📋',
-        GuideActionType.external => '🔗',
-        GuideActionType.tool => '🛠',
-        GuideActionType.checklist => '✅',
-      };
+    GuideActionType.informative => '📋',
+    GuideActionType.external => '🔗',
+    GuideActionType.tool => '🛠',
+    GuideActionType.checklist => '✅',
+  };
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
       decoration: BoxDecoration(
-        color: isDark
-            ? const Color(0xFF0A2015)
-            : const Color(0xFFDCFCE7),
+        color: isDark ? const Color(0xFF0A2015) : const Color(0xFFDCFCE7),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -6783,9 +6794,7 @@ class _UnlockChip extends StatelessWidget {
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: isDark
-                  ? const Color(0xFF4ADE80)
-                  : const Color(0xFF15803D),
+              color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF15803D),
               height: 1,
             ),
           ),

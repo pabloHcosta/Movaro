@@ -15,6 +15,7 @@ import 'package:movaro_app/core/widgets/empty_state_widget.dart';
 import 'package:movaro_app/core/widgets/error_state_widget.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/core/widgets/journey_stage_banner.dart';
 import 'package:movaro_app/core/widgets/loading_state_widget.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
@@ -24,6 +25,7 @@ import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_arrival_profile_ranker.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_card.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_picker_bottom_sheet.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_search_matcher.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 
@@ -32,12 +34,14 @@ class CitiesExplorePage extends StatefulWidget {
     required this.citiesController,
     this.journeyContextController,
     this.migrationQuestionnaireController,
+    this.entryMode = CitiesExploreEntryMode.explore,
     super.key,
   });
 
   final CitiesController citiesController;
   final JourneyContextController? journeyContextController;
   final MigrationQuestionnaireController? migrationQuestionnaireController;
+  final CitiesExploreEntryMode entryMode;
 
   @override
   State<CitiesExplorePage> createState() => _CitiesExplorePageState();
@@ -59,10 +63,10 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
     super.initState();
     _searchController = TextEditingController();
     _scrollController = ScrollController()..addListener(_handleScroll);
-    widget.citiesController.loadExplore();
-    widget.citiesController.loadCatalog();
-    widget.citiesController.loadMethodology();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.citiesController.loadExplore();
+      widget.citiesController.loadCatalog();
+      widget.citiesController.loadMethodology();
       _maybeShowHelp();
     });
   }
@@ -79,6 +83,8 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isValidationMode =
+        widget.entryMode == CitiesExploreEntryMode.validation;
     return AnimatedBuilder(
       animation: widget.citiesController,
       builder: (context, _) {
@@ -124,7 +130,9 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                   ),
                   children: [
                     AppGlassHeader(
-                      title: l10n.citiesExploreTitle,
+                      title: isValidationMode
+                          ? l10n.citiesSearchTitle
+                          : l10n.citiesExploreTitle,
                       onBack: () => Navigator.canPop(context)
                           ? Navigator.maybePop(context)
                           : Navigator.pushNamedAndRemoveUntil(
@@ -137,7 +145,7 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                     const SizedBox(height: 16),
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 1120),
-                      child: FrostedPanel(
+                        child: FrostedPanel(
                         padding: const EdgeInsets.all(24),
                         gradient: LinearGradient(
                           colors: [
@@ -160,9 +168,24 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            if (isValidationMode) ...[
+                              Text(
+                                l10n.citiesSearchHeadline,
+                                style: Theme.of(context).textTheme.headlineSmall
+                                    ?.copyWith(color: AppColors.textPrimaryFor(context)),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                l10n.citiesSearchDescription,
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(color: textSoft),
+                              ),
+                              const SizedBox(height: 14),
+                            ],
                             _CitiesSearchField(
                               controller: _searchController,
                               hintText: l10n.citiesSearchHint,
+                              labelText: l10n.citiesSearchFieldLabel,
                               onChanged: _handleSearchChanged,
                               onSubmitted: (_) =>
                                   _handlePrimarySearchAction(suggestions),
@@ -202,6 +225,18 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                         ),
                       ),
                     ),
+                    if (isValidationMode) ...[
+                      const SizedBox(height: 16),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1120),
+                        child: JourneyStageBanner(
+                          title: l10n.validateCityBannerTitle(),
+                          body: l10n.validateCityBannerBody(),
+                          action: l10n.validateCityBannerAction(),
+                          icon: Icons.location_searching_rounded,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     if (!shouldShowResults)
                       ConstrainedBox(
@@ -504,19 +539,34 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
     }
 
     final semanticSearch = _CitySemanticSearch(query);
-    final ranked = List<City>.from(controller.searchResults)
-      ..sort(
-        (left, right) =>
-            semanticSearch.score(right).compareTo(semanticSearch.score(left)),
-      );
-    return ranked.take(5).toList();
+    final source = controller.catalog.isNotEmpty
+        ? List<City>.from(controller.catalog)
+        : List<City>.from(controller.searchResults);
+    final ranked =
+        source
+            .map(
+              (city) => (
+                city: city,
+                score:
+                    semanticSearch.score(city) +
+                    CitySearchMatcher.score(query, city.name, city.stateName),
+              ),
+            )
+            .where((entry) => entry.score > 0)
+            .toList()
+          ..sort((left, right) => right.score.compareTo(left.score));
+    return ranked.map((entry) => entry.city).take(5).toList();
   }
 
   List<City> _visibleCities(CitiesController controller) {
     final query = _normalizeSearch(_searchController.text);
     final semanticSearch = _CitySemanticSearch(query);
     final source = query.isNotEmpty
-        ? List<City>.from(controller.searchResults)
+        ? List<City>.from(
+            controller.catalog.isNotEmpty
+                ? controller.catalog
+                : controller.searchResults,
+          )
         : _quickFilter != null
         ? List<City>.from(controller.catalog)
         : <City>[];
@@ -532,7 +582,14 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
 
     final ranked =
         filtered
-            .map((city) => (city: city, score: semanticSearch.score(city)))
+            .map(
+              (city) => (
+                city: city,
+                score:
+                    semanticSearch.score(city) +
+                    CitySearchMatcher.score(query, city.name, city.stateName),
+              ),
+            )
             .where((entry) => entry.score > 0)
             .toList()
           ..sort((left, right) => right.score.compareTo(left.score));
@@ -702,14 +759,24 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
   void _openCityDetail(City city) {
     widget.citiesController.prefetchCityDetail(city.id);
     widget.citiesController.prefetchMethodology();
-    Navigator.pushNamed(context, AppRoutes.cityDetail(city.id));
+    Navigator.pushNamed(
+      context,
+      AppRoutes.cityDetail(city.id),
+      arguments: {
+        if (widget.entryMode == CitiesExploreEntryMode.validation)
+          'validationFlow': true,
+      },
+    );
   }
 }
+
+enum CitiesExploreEntryMode { explore, validation }
 
 class _CitiesSearchField extends StatelessWidget {
   const _CitiesSearchField({
     required this.controller,
     required this.hintText,
+    required this.labelText,
     required this.onChanged,
     required this.onSubmitted,
     required this.onClear,
@@ -717,6 +784,7 @@ class _CitiesSearchField extends StatelessWidget {
 
   final TextEditingController controller;
   final String hintText;
+  final String labelText;
   final ValueChanged<String> onChanged;
   final ValueChanged<String> onSubmitted;
   final VoidCallback? onClear;
@@ -730,6 +798,7 @@ class _CitiesSearchField extends StatelessWidget {
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
         hintText: hintText,
+        labelText: labelText,
         prefixIcon: const Icon(Icons.search_rounded),
         suffixIcon: onClear == null
             ? null

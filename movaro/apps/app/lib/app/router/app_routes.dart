@@ -42,6 +42,7 @@ class AppRoutes {
     citiesSearch,
     countries,
     login,
+    locationPermission,
     migrationStart,
     migrationQuestionnaire,
     migrationPlanResult,
@@ -51,7 +52,6 @@ class AppRoutes {
 
   static const privatePaths = <String>{
     onboarding,
-    locationPermission,
     authenticatedHome,
     communityCreate,
     migrationSave,

@@ -255,20 +255,25 @@ extension AppLocalizationsFormatting on AppLocalizations {
 
   String countryLabel(String value) {
     switch (value) {
+      case 'AR':
       case 'argentina':
       case 'Argentina':
         return questionOptionArgentina;
+      case 'BR':
       case 'brazil':
       case 'Brasil':
         return questionOptionBrazil;
+      case 'CL':
       case 'chile':
       case 'Chile':
         return questionOptionChile;
+      case 'UY':
       case 'uruguai':
       case 'Uruguai':
       case 'uruguay':
       case 'Uruguay':
         return questionOptionUruguay;
+      case 'PY':
       case 'paraguai':
       case 'Paraguai':
       case 'paraguay':
@@ -971,6 +976,42 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'We use these answers to organize your route, save your progress, and build a clear plan to follow.',
   );
 
+  String discoverFlowBannerTitle() => _localizedText(
+    pt: 'Descoberta guiada',
+    es: 'Descubrimiento guiado',
+    en: 'Guided discovery',
+  );
+
+  String discoverFlowBannerBody() => _localizedText(
+    pt: 'Responda poucas perguntas para receber uma direção inicial com cidade recomendada, alternativas e próximos passos.',
+    es: 'Respondé pocas preguntas para recibir una dirección inicial con ciudad recomendada, alternativas y próximos pasos.',
+    en: 'Answer a few questions to get an initial direction with a recommended city, alternatives, and next steps.',
+  );
+
+  String discoverFlowBannerAction() => _localizedText(
+    pt: 'Você compara com calma depois de receber a primeira direção.',
+    es: 'Comparás con calma después de recibir la primera dirección.',
+    en: 'You can compare calmly after you get the first direction.',
+  );
+
+  String validateCityBannerTitle() => _localizedText(
+    pt: 'Validação de cidade',
+    es: 'Validación de ciudad',
+    en: 'City validation',
+  );
+
+  String validateCityBannerBody() => _localizedText(
+    pt: 'Busque uma cidade, abra os detalhes e compare custo, encaixe e próximos passos antes de escolher.',
+    es: 'Buscá una ciudad, abrí los detalles y compará costo, encaje y próximos pasos antes de elegir.',
+    en: 'Search for a city, open the details, and compare cost, fit, and next steps before choosing.',
+  );
+
+  String validateCityBannerAction() => _localizedText(
+    pt: 'Se fizer sentido, você confirma a cidade depois.',
+    es: 'Si tiene sentido, confirmás la ciudad después.',
+    en: 'If it makes sense, you confirm the city after that.',
+  );
+
   String questionnaireGuideStepOneTitle() => _localizedText(
     pt: 'Confirme a base',
     es: 'Confirmá la base',
@@ -1430,6 +1471,54 @@ extension AppLocalizationsFormatting on AppLocalizations {
   String cityDetailMapAction() =>
       _localizedText(pt: 'Mapa', es: 'Mapa', en: 'Map');
 
+  String cityDetailMapOpenSheetLabel() => _localizedText(
+    pt: 'Toque para ampliar',
+    es: 'Tocá para ampliar',
+    en: 'Tap to expand',
+  );
+
+  String cityDetailMapSheetTitle(String cityName) => _localizedText(
+    pt: 'Mapa de $cityName',
+    es: 'Mapa de $cityName',
+    en: 'Map of $cityName',
+  );
+
+  String cityDetailMapSheetBody() => _localizedText(
+    pt: 'Veja a cidade com mais espaço, aproxime o mapa e compare a distância da sua origem.',
+    es: 'Mirá la ciudad con más espacio, acercá el mapa y compará la distancia desde tu origen.',
+    en: 'See the city with more room, zoom in, and compare the distance from your origin.',
+  );
+
+  String cityDetailMapCurrentLocationLabel() => _localizedText(
+    pt: 'Sua localização',
+    es: 'Tu ubicación',
+    en: 'Your location',
+  );
+
+  String cityDetailMapSheetDestinationLabel() => _localizedText(
+    pt: 'Destino',
+    es: 'Destino',
+    en: 'Destination',
+  );
+
+  String cityDetailMapSheetOriginLabel() => _localizedText(
+    pt: 'Origem',
+    es: 'Origen',
+    en: 'Origin',
+  );
+
+  String cityDetailMapOriginMissingLabel() => _localizedText(
+    pt: 'Ative a localização para ver a distância',
+    es: 'Activá la ubicación para ver la distancia',
+    en: 'Turn on location to see the distance',
+  );
+
+  String cityDetailMapUnknownDistanceLabel() => _localizedText(
+    pt: 'Indisponível',
+    es: 'No disponible',
+    en: 'Unavailable',
+  );
+
   String cityDetailFlightsAction() =>
       _localizedText(pt: 'Voos', es: 'Vuelos', en: 'Flights');
 
@@ -1846,11 +1935,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'South / SE',
   );
 
-  String citySelectorRegionNE() => _localizedText(
-    pt: 'Nordeste',
-    es: 'Nordeste',
-    en: 'Northeast',
-  );
+  String citySelectorRegionNE() =>
+      _localizedText(pt: 'Nordeste', es: 'Nordeste', en: 'Northeast');
 
   String citySelectorRegionCW() => _localizedText(
     pt: 'Centro-Oeste',

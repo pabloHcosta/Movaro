@@ -24,7 +24,7 @@ import 'package:movaro_app/features/migration_questionnaire/domain/entities/ques
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('MigrationQuestionnaireController strategic flow', () {
+  group('MigrationQuestionnaireController flow variants', () {
     late Directory tempDirectory;
     late JourneyContextController journeyContextController;
     late MigrationQuestionnaireController controller;
@@ -66,7 +66,6 @@ void main() {
       );
 
       await controller.initialize();
-      controller.selectVariant(QuestionnaireVariant.strategic);
     });
 
     tearDown(() async {
@@ -75,73 +74,65 @@ void main() {
       }
     });
 
-    test('inserts travel group and keeps capital question conditional', () {
+    test('lean flow keeps only the 3 core questions', () {
+      controller.selectVariant(QuestionnaireVariant.lean);
+
       expect(controller.activeQuestions.map((question) => question.id), [
-        'origin_country',
-        'preferred_city',
-        'timeline',
-        'travel_group',
-        'work_arrangement',
-        'priorities',
-        'constraints',
-        'funding',
         'intent',
+        'timeline',
+        'priorities',
+      ]);
+    });
+
+    test(
+      'strategic refinement starts from funding after core answers',
+      () async {
+        controller.selectVariant(QuestionnaireVariant.lean);
+        controller.selectAnswer('intent', 'explore_unsure');
+        controller.selectAnswer('timeline', 'just_exploring');
+        controller.setAnswerValues('priorities', ['balanced_unsure']);
+
+        await controller.beginStrategicRefinement();
+
+        expect(controller.activeQuestions.map((question) => question.id), [
+          'intent',
+          'timeline',
+          'priorities',
+          'funding',
+        ]);
+        expect(controller.currentQuestion?.id, 'funding');
+      },
+    );
+
+    test('strategic flow keeps capital question conditional', () {
+      controller.selectVariant(QuestionnaireVariant.strategic);
+
+      expect(controller.activeQuestions.map((question) => question.id), [
+        'intent',
+        'timeline',
+        'priorities',
+        'funding',
       ]);
 
       controller.selectAnswer('funding', 'savings');
 
       expect(controller.activeQuestions.map((question) => question.id), [
-        'origin_country',
-        'preferred_city',
+        'intent',
         'timeline',
-        'travel_group',
-        'work_arrangement',
         'priorities',
-        'constraints',
         'funding',
         'available_capital',
-        'intent',
       ]);
 
       controller.selectAnswer('funding', 'job_offer');
 
       expect(controller.activeQuestions.map((question) => question.id), [
-        'origin_country',
-        'preferred_city',
-        'timeline',
-        'travel_group',
-        'work_arrangement',
-        'priorities',
-        'constraints',
-        'funding',
         'intent',
+        'timeline',
+        'priorities',
+        'funding',
       ]);
     });
-
-    test(
-      'family with kids requires children count before continuing',
-      () async {
-        expect(controller.currentQuestion?.id, 'origin_country');
-        await controller.goNext();
-        expect(controller.currentQuestion?.id, 'preferred_city');
-
-        await controller.goNext();
-        expect(controller.currentQuestion?.id, 'timeline');
-
-        controller.selectAnswer('timeline', 'in_3_6m');
-        await controller.goNext();
-        expect(controller.currentQuestion?.id, 'travel_group');
-
-        controller.selectAnswer('travel_group', 'family_kids');
-        expect(controller.canGoNext, isFalse);
-
-        controller.selectAnswer('travel_group_children_count', '3+');
-        expect(controller.canGoNext, isTrue);
-
-        controller.selectAnswer('travel_group', 'partner');
-        expect(controller.answerFor('travel_group_children_count'), isNull);
-      },
-    );
   });
 }
 

@@ -62,6 +62,21 @@ class _AssistantPageState extends State<AssistantPage> {
   final MigrationCopilotProgressStore _progressStore =
       MigrationCopilotProgressStore();
 
+  String get _resolvedOriginCountry {
+    final plan = widget.migrationQuestionnaireController.generatedPlan;
+    return plan?.originCountry.isNotEmpty == true
+        ? plan!.originCountry
+        : widget.journeyContextController.selection.origin?.name ?? 'argentina';
+  }
+
+  String get _resolvedDestinationCountry {
+    final plan = widget.migrationQuestionnaireController.generatedPlan;
+    return plan?.destinationCountry.isNotEmpty == true
+        ? plan!.destinationCountry
+        : widget.journeyContextController.selection.destination?.name ??
+              'brasil';
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -75,13 +90,8 @@ class _AssistantPageState extends State<AssistantPage> {
     setState(() => _isChatInitializing = true);
     final locale = Localizations.localeOf(context).languageCode;
     final plan = widget.migrationQuestionnaireController.generatedPlan;
-    final originCountry = plan?.originCountry.isNotEmpty == true
-        ? plan!.originCountry
-        : widget.journeyContextController.selection.origin?.name ?? 'argentina';
-    final destinationCountry = plan?.destinationCountry.isNotEmpty == true
-        ? plan!.destinationCountry
-        : widget.journeyContextController.selection.destination?.name ??
-              'brasil';
+    final originCountry = _resolvedOriginCountry;
+    final destinationCountry = _resolvedDestinationCountry;
 
     try {
       final progressSnapshot = plan == null
@@ -254,6 +264,20 @@ class _AssistantPageState extends State<AssistantPage> {
                   onChanged: (m) => setState(() => _mode = m),
                 ),
                 const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _AssistantContextCard(
+                    mode: _mode,
+                    originCountry: _resolvedOriginCountry,
+                    destinationCountry: _resolvedDestinationCountry,
+                    hasPlan:
+                        widget.migrationQuestionnaireController.generatedPlan !=
+                        null,
+                    onOpenGuides: () =>
+                        setState(() => _mode = _AssistantMode.guides),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 Expanded(
                   child: IndexedStack(
                     index: _mode == _AssistantMode.conversation ? 0 : 1,
@@ -264,6 +288,10 @@ class _AssistantPageState extends State<AssistantPage> {
                         starterPrompts: _starterPrompts,
                         isInitializing: _isChatInitializing,
                         initialMessage: widget.initialMessage,
+                        originCountry: _resolvedOriginCountry,
+                        destinationCountry: _resolvedDestinationCountry,
+                        onOpenGuides: () =>
+                            setState(() => _mode = _AssistantMode.guides),
                       ),
                       DocumentationGuidePage(
                         key: const ValueKey('guides'),
@@ -337,6 +365,9 @@ class _ConversationBody extends StatefulWidget {
     required this.chatService,
     required this.starterPrompts,
     required this.isInitializing,
+    required this.originCountry,
+    required this.destinationCountry,
+    required this.onOpenGuides,
     this.initialMessage,
     super.key,
   });
@@ -344,6 +375,9 @@ class _ConversationBody extends StatefulWidget {
   final ChatService? chatService;
   final ChatStarterPrompts? starterPrompts;
   final bool isInitializing;
+  final String originCountry;
+  final String destinationCountry;
+  final VoidCallback onOpenGuides;
   final String? initialMessage;
 
   @override
@@ -483,6 +517,8 @@ class _ConversationBodyState extends State<_ConversationBody> {
     final categories =
         widget.starterPrompts?.categories ?? const <ChatStarterPrompt>[];
     final chips = widget.starterPrompts?.chips ?? const <ChatStarterPrompt>[];
+    final compactCategories = categories.take(4).toList(growable: false);
+    final compactChips = chips.take(4).toList(growable: false);
 
     final isDark2 = isDark;
     return SingleChildScrollView(
@@ -490,40 +526,65 @@ class _ConversationBodyState extends State<_ConversationBody> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 2x2 grid
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 2.0,
-            children: categories
-                .map(
-                  (c) => _CategoryCard(
-                    icon: _categoryIcon(c.key),
-                    label: c.label,
-                    isDark: isDark2,
-                    onTap: () => _send(c.message),
-                  ),
-                )
-                .toList(),
+          _ConversationRoutePanel(
+            originCountry: widget.originCountry,
+            destinationCountry: widget.destinationCountry,
+            onOpenGuides: widget.onOpenGuides,
           ),
           const SizedBox(height: 16),
-
-          // Quick chips
-          SizedBox(
-            height: 36,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: chips.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (_, i) => _QuickChip(
-                label: chips[i].label,
-                onTap: () => _send(chips[i].message),
+          if (compactCategories.isNotEmpty) ...[
+            Text(
+              l10n.assistantQuickTopicsTitle,
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: compactCategories
+                  .map(
+                    (c) => _CategoryCard(
+                      icon: _categoryIcon(c.key),
+                      label: c.label,
+                      isDark: isDark2,
+                      compact: true,
+                      onTap: () => _send(c.message),
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (compactChips.isNotEmpty) ...[
+            Text(
+              l10n.assistantQuickQuestionsTitle,
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: compactChips
+                  .map(
+                    (chip) => _QuickChip(
+                      label: chip.label,
+                      onTap: () => _send(chip.message),
+                    ),
+                  )
+                  .toList(),
+              ),
+            ],
+          if (compactCategories.isEmpty && compactChips.isEmpty)
+            Text(
+              l10n.aiChatInputHint,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSoftFor(context),
               ),
             ),
-          ),
           const SizedBox(height: 16),
         ],
       ),
@@ -755,12 +816,14 @@ class _CategoryCard extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.isDark,
+    this.compact = false,
     required this.onTap,
   });
 
   final IconData icon;
   final String label;
   final bool isDark;
+  final bool compact;
   final VoidCallback onTap;
 
   @override
@@ -774,7 +837,10 @@ class _CategoryCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 12 : 14,
+            vertical: compact ? 10 : 12,
+          ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
@@ -783,21 +849,25 @@ class _CategoryCard extends StatelessWidget {
                   : Colors.black.withValues(alpha: 0.08),
             ),
           ),
-          child: Row(
-            children: [
-              Icon(icon, size: 20, color: const Color(0xFF0088FF)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: compact ? 0 : 120),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: compact ? 18 : 20, color: const Color(0xFF0088FF)),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: compact ? 1 : 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -834,6 +904,172 @@ class _QuickChip extends StatelessWidget {
               context,
             ).textTheme.labelSmall?.copyWith(color: cs.primary),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AssistantContextCard extends StatelessWidget {
+  const _AssistantContextCard({
+    required this.mode,
+    required this.originCountry,
+    required this.destinationCountry,
+    required this.hasPlan,
+    required this.onOpenGuides,
+  });
+
+  final _AssistantMode mode;
+  final String originCountry;
+  final String destinationCountry;
+  final bool hasPlan;
+  final VoidCallback onOpenGuides;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isConversation = mode == _AssistantMode.conversation;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMutedFor(context),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderFor(context)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              isConversation ? Icons.chat_bubble_outline_rounded : Icons.map_outlined,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isConversation
+                      ? l10n.assistantContextChatTitle
+                      : l10n.assistantContextGuideTitle,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isConversation
+                      ? l10n.assistantContextChatBody(
+                          originCountry,
+                          destinationCountry,
+                        )
+                      : l10n.assistantContextGuideBody(destinationCountry),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (isConversation)
+            TextButton(
+              onPressed: onOpenGuides,
+              child: Text(l10n.assistantOpenGuidesAction),
+            )
+          else
+            _ModeStatusPill(
+              label: hasPlan
+                  ? l10n.documentationGuideUsingPlanLabel
+                  : l10n.documentationGuideManualCountryLabel,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ConversationRoutePanel extends StatelessWidget {
+  const _ConversationRoutePanel({
+    required this.originCountry,
+    required this.destinationCountry,
+    required this.onOpenGuides,
+  });
+
+  final String originCountry;
+  final String destinationCountry;
+  final VoidCallback onOpenGuides;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMutedFor(context),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderFor(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.assistantStartCardTitle,
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.assistantStartCardBody(originCountry, destinationCountry),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              onPressed: onOpenGuides,
+              icon: const Icon(Icons.description_outlined, size: 18),
+              label: Text(l10n.assistantOpenGuidesAction),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ModeStatusPill extends StatelessWidget {
+  const _ModeStatusPill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: AppColors.primary,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );

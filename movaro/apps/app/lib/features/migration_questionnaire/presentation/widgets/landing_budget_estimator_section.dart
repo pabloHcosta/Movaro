@@ -5,7 +5,8 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/home/application/city_budget_data.dart' show CityBudget, CityBudgetData, CostRange;
+import 'package:movaro_app/features/home/application/city_budget_data.dart'
+    show CityBudget, CityBudgetData;
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/landing_budget_estimator.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
@@ -50,7 +51,11 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
           ),
           if (cityBudget != null) ...[
             const SizedBox(height: 18),
-            _CityRealCostSection(budget: cityBudget),
+            _CityRealCostSection(
+              budget: cityBudget,
+              exchangeRates: exchangeRates,
+              preferredCountryId: preferredCountryId,
+            ),
           ],
           const SizedBox(height: 18),
           if (exchangeRates != null) ...[
@@ -312,9 +317,15 @@ class _ScenarioCard extends StatelessWidget {
 // ─── Real city cost breakdown ─────────────────────────────────────────────────
 
 class _CityRealCostSection extends StatelessWidget {
-  const _CityRealCostSection({required this.budget});
+  const _CityRealCostSection({
+    required this.budget,
+    required this.exchangeRates,
+    required this.preferredCountryId,
+  });
 
   final CityBudget budget;
+  final CopilotExchangeRates? exchangeRates;
+  final String? preferredCountryId;
 
   static const _kAccent = Color(0xFF3B7CC8);
 
@@ -337,7 +348,11 @@ class _CityRealCostSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.location_city_rounded, size: 14, color: _kAccent),
+              const Icon(
+                Icons.location_city_rounded,
+                size: 14,
+                color: _kAccent,
+              ),
               const SizedBox(width: 6),
               Text(
                 _sectionTitle(locale, budget.cityLabel),
@@ -349,32 +364,79 @@ class _CityRealCostSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          _CostRow(
-            label: _label(locale, pt: 'Aluguel 1 quarto', es: 'Alquiler 1 amb.', en: '1-bed rent'),
-            range: budget.rent,
-            maxVal: 4000,
-            isDark: isDark,
+          _ValueRow(
+            label: _label(
+              locale,
+              pt: 'Sem aluguel',
+              es: 'Sin alquiler',
+              en: 'Excl. rent',
+            ),
+            value: MultiCurrencyAmount.formatPreferredCurrency(
+              context: context,
+              amountInBrl: budget.singlePersonExcludingRent,
+              exchangeRates: exchangeRates,
+              preferredCountryId: preferredCountryId,
+            ),
           ),
           const SizedBox(height: 6),
-          _CostRow(
-            label: _label(locale, pt: 'Alimentação', es: 'Comida', en: 'Food'),
-            range: budget.food,
-            maxVal: 2500,
-            isDark: isDark,
+          _ValueRow(
+            label: _label(
+              locale,
+              pt: '1 quarto fora do centro',
+              es: '1 amb. fuera del centro',
+              en: '1-bed outside centre',
+            ),
+            value: MultiCurrencyAmount.formatPreferredCurrency(
+              context: context,
+              amountInBrl: budget.oneBedroomOutsideCentre,
+              exchangeRates: exchangeRates,
+              preferredCountryId: preferredCountryId,
+            ),
           ),
           const SizedBox(height: 6),
-          _CostRow(
-            label: _label(locale, pt: 'Transporte', es: 'Transporte', en: 'Transport'),
-            range: budget.transport,
-            maxVal: 600,
-            isDark: isDark,
+          _ValueRow(
+            label: _label(
+              locale,
+              pt: '1 quarto no centro',
+              es: '1 amb. en el centro',
+              en: '1-bed city centre',
+            ),
+            value: MultiCurrencyAmount.formatPreferredCurrency(
+              context: context,
+              amountInBrl: budget.oneBedroomCityCentre,
+              exchangeRates: exchangeRates,
+              preferredCountryId: preferredCountryId,
+            ),
           ),
           const SizedBox(height: 6),
-          _CostRow(
-            label: _label(locale, pt: 'Utilidades', es: 'Servicios', en: 'Utilities'),
-            range: budget.utilities,
-            maxVal: 400,
-            isDark: isDark,
+          _ValueRow(
+            label: _label(
+              locale,
+              pt: 'Passe mensal',
+              es: 'Pase mensual',
+              en: 'Monthly pass',
+            ),
+            value: MultiCurrencyAmount.formatPreferredCurrency(
+              context: context,
+              amountInBrl: budget.monthlyTransportPass,
+              exchangeRates: exchangeRates,
+              preferredCountryId: preferredCountryId,
+            ),
+          ),
+          const SizedBox(height: 6),
+          _ValueRow(
+            label: _label(
+              locale,
+              pt: 'Utilidades',
+              es: 'Servicios',
+              en: 'Utilities',
+            ),
+            value: MultiCurrencyAmount.formatPreferredCurrency(
+              context: context,
+              amountInBrl: budget.utilities,
+              exchangeRates: exchangeRates,
+              preferredCountryId: preferredCountryId,
+            ),
           ),
           const SizedBox(height: 10),
           Row(
@@ -389,7 +451,7 @@ class _CityRealCostSection extends StatelessWidget {
                 ),
               ),
               Text(
-                'R\$${_fmt(budget.leanTotal)}–${_fmt(budget.comfortableTotal)}/mês',
+                '${MultiCurrencyAmount.formatPreferredCurrency(context: context, amountInBrl: budget.fairLivingTotal, exchangeRates: exchangeRates, preferredCountryId: preferredCountryId)}–${MultiCurrencyAmount.formatPreferredCurrency(context: context, amountInBrl: budget.wellLivingTotal, exchangeRates: exchangeRates, preferredCountryId: preferredCountryId)}',
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: _kAccent,
@@ -399,7 +461,7 @@ class _CityRealCostSection extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            _sourceNote(locale, budget.updatedAt),
+            _sourceNote(locale, budget.sourceLabel, budget.updatedAt),
             style: AppTypography.tinyLabel.copyWith(
               color: isDark
                   ? Colors.white.withValues(alpha: 0.28)
@@ -412,21 +474,22 @@ class _CityRealCostSection extends StatelessWidget {
   }
 
   String _sectionTitle(String locale, String cityLabel) => switch (locale) {
-        'pt' => 'Custos reais em $cityLabel',
-        'es' => 'Costos reales en $cityLabel',
-        _ => 'Real costs in $cityLabel',
-      };
+    'pt' => 'Custos reais em $cityLabel',
+    'es' => 'Costos reales en $cityLabel',
+    _ => 'Real costs in $cityLabel',
+  };
 
   String _totalLabel(String locale) => switch (locale) {
-        'pt' => 'Total estimado solo',
-        'es' => 'Total estimado solo',
-        _ => 'Estimated total alone',
-      };
+    'pt' => 'Viver justo → viver bem',
+    'es' => 'Vivir justo → vivir bien',
+    _ => 'Live fair → live well',
+  };
 
-  String _sourceNote(String locale, String date) => switch (locale) {
-        'pt' => 'Dados curados $date · Valores aproximados',
-        'es' => 'Datos curados $date · Valores aproximados',
-        _ => 'Curated data $date · Approximate values',
+  String _sourceNote(String locale, String source, String date) =>
+      switch (locale) {
+        'pt' => 'Fonte: $source · atualizado em $date',
+        'es' => 'Fuente: $source · actualizado en $date',
+        _ => 'Source: $source · updated $date',
       };
 
   String _label(
@@ -434,44 +497,24 @@ class _CityRealCostSection extends StatelessWidget {
     required String pt,
     required String es,
     required String en,
-  }) =>
-      switch (locale) {
-        'pt' => pt,
-        'es' => es,
-        _ => en,
-      };
-
-  static String _fmt(int v) {
-    if (v >= 1000) {
-      final thousands = v ~/ 1000;
-      final remainder = (v % 1000) ~/ 100;
-      return remainder == 0 ? '${thousands}k' : '$thousands.${remainder}k';
-    }
-    return '$v';
-  }
+  }) => switch (locale) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 }
 
-class _CostRow extends StatelessWidget {
-  const _CostRow({
-    required this.label,
-    required this.range,
-    required this.maxVal,
-    required this.isDark,
-  });
+class _ValueRow extends StatelessWidget {
+  const _ValueRow({required this.label, required this.value});
 
   final String label;
-  final CostRange range;
-  final int maxVal;
-  final bool isDark;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
-    final fraction = (range.max / maxVal).clamp(0.0, 1.0);
-
     return Row(
       children: [
-        SizedBox(
-          width: 90,
+        Expanded(
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -480,22 +523,8 @@ class _CostRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: fraction,
-              minHeight: 5,
-              backgroundColor: isDark
-                  ? const Color(0xFF1A2840)
-                  : const Color(0xFFE2E8F0),
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF3B7CC8)),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
         Text(
-          'R\$${range.min}–${range.max}',
+          value,
           style: AppTypography.compactBadge.copyWith(
             color: AppColors.textPrimaryFor(context),
           ),

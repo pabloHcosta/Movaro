@@ -24,48 +24,36 @@ class MainNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasActiveDestination =
-        migrationQuestionnaireController.generatedPlan?.isCityConfirmed == true;
-    final items = hasActiveDestination
-        ? _activeItems(context)
-        : _emptyItems(context);
+    final items = _items(context);
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      switchInCurve: Curves.easeInOut,
-      switchOutCurve: Curves.easeInOut,
-      transitionBuilder: (child, animation) =>
-          FadeTransition(opacity: animation, child: child),
-      child: Container(
-        key: ValueKey<bool>(hasActiveDestination),
-        color: Colors.transparent,
-        padding: EdgeInsets.fromLTRB(16, 8, 16, bottomPadding + 14),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xF20E1628),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-              child: Row(
-                children: [
-                  for (final item in items)
-                    Expanded(
-                      child: _NavTab(
-                        label: item.label,
-                        icon: item.icon,
-                        activeIcon: item.activeIcon,
-                        isActive: currentIndex == item.slot,
-                        onTap: () => _handleTap(context, item.slot),
-                      ),
+    return Container(
+      color: Colors.transparent,
+      padding: EdgeInsets.fromLTRB(16, 8, 16, bottomPadding + 14),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xF20E1628),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            child: Row(
+              children: [
+                for (final item in items)
+                  Expanded(
+                    child: _NavTab(
+                      label: item.label,
+                      icon: item.icon,
+                      activeIcon: item.activeIcon,
+                      isActive: currentIndex == item.slot,
+                      onTap: () => _handleTap(context, item.slot),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           ),
         ),
@@ -73,67 +61,61 @@ class MainNavigationBar extends StatelessWidget {
     );
   }
 
-  List<_NavItemData> _emptyItems(BuildContext context) => [
-    _NavItemData(
-      slot: 0,
-      label: context.l10n.mainNavHome,
-      icon: Icons.home_outlined,
-      activeIcon: Icons.home,
-    ),
-    _NavItemData(
-      slot: 1,
-      label: context.l10n.mainNavExplore,
-      icon: Icons.explore_outlined,
-      activeIcon: Icons.explore,
-    ),
-    _NavItemData(
-      slot: 4,
-      label: context.l10n.favoritesPageTitle,
-      icon: Icons.favorite_outline,
-      activeIcon: Icons.favorite,
-    ),
-  ];
+  List<_NavItemData> _items(BuildContext context) {
+    final hasPlan = migrationQuestionnaireController.generatedPlan != null;
 
-  List<_NavItemData> _activeItems(BuildContext context) => [
-    _NavItemData(
-      slot: 0,
-      label: context.l10n.mainNavHome,
-      icon: Icons.home_outlined,
-      activeIcon: Icons.home,
-    ),
-    _NavItemData(
-      slot: 1,
-      label: context.l10n.mainNavExplore,
-      icon: Icons.explore_outlined,
-      activeIcon: Icons.explore,
-    ),
-    _NavItemData(
-      slot: 2,
-      label: context.l10n.mainNavCopilot,
-      icon: Icons.route_outlined,
-      activeIcon: Icons.route,
-    ),
-    _NavItemData(
-      slot: 3,
-      label: context.l10n.aiChatTitle,
-      icon: Icons.auto_awesome_outlined,
-      activeIcon: Icons.auto_awesome,
-    ),
-    _NavItemData(
-      slot: 4,
-      label: context.l10n.favoritesPageTitle,
-      icon: Icons.favorite_outline,
-      activeIcon: Icons.favorite,
-    ),
-  ];
+    return [
+      _NavItemData(
+        slot: 0,
+        label: context.l10n.mainNavHome,
+        icon: Icons.home_outlined,
+        activeIcon: Icons.home,
+      ),
+      _NavItemData(
+        slot: 1,
+        label: context.l10n.mainNavDecision,
+        icon: Icons.explore_outlined,
+        activeIcon: Icons.explore,
+      ),
+      if (hasPlan)
+        _NavItemData(
+          slot: 2,
+          label: context.l10n.mainNavExecution,
+          icon: Icons.route_outlined,
+          activeIcon: Icons.route,
+        ),
+      _NavItemData(
+        slot: 3,
+        label: context.l10n.aiChatTitle,
+        icon: Icons.auto_awesome_outlined,
+        activeIcon: Icons.auto_awesome,
+      ),
+      _NavItemData(
+        slot: 4,
+        label: context.l10n.favoritesPageTitle,
+        icon: Icons.favorite_outline,
+        activeIcon: Icons.favorite,
+      ),
+    ];
+  }
 
   void _handleTap(BuildContext context, int slot) {
     if (slot == currentIndex) return;
 
+    final plan = migrationQuestionnaireController.generatedPlan;
+    if (slot == 2 && plan == null) {
+      return;
+    }
+    final hasConfirmedCity = plan?.isCityConfirmed == true;
     final route = switch (slot) {
       0 => AppRoutes.publicHome,
       1 => AppRoutes.explore,
-      2 => AppRoutes.migrationPlanCopilot,
+      2 =>
+        hasConfirmedCity
+            ? AppRoutes.migrationPlanCopilot
+            : (plan != null
+                  ? AppRoutes.migrationResultReveal
+                  : AppRoutes.migrationQuestionnaire),
       3 => AppRoutes.info,
       _ => AppRoutes.favorites,
     };

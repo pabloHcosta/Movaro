@@ -322,6 +322,19 @@
   "documentationGuideCountryPendingBody": "Movaro currently has practical guide coverage for Brazil. Choose Brazil to continue browsing the available guidance.",
   "documentationGuideUsingPlanLabel": "From your plan",
   "documentationGuideManualCountryLabel": "Manual country",
+  "documentationGuideCountryLabel": "Guide country",
+  "documentationGuideCountryBodyFromPlan": "You are browsing practical content for {country} based on your plan destination.",
+  "@documentationGuideCountryBodyFromPlan": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "documentationGuideCountryBodyManual": "Choose the country you want to review. For now, you are viewing practical content for {country}.",
+  "@documentationGuideCountryBodyManual": {
+    "placeholders": {
+      "country": {}
+    }
+  },
   "documentationSearchResultsCount": "{count} items found",
   "@documentationSearchResultsCount": {
     "placeholders": {
@@ -843,10 +856,10 @@
   "citiesExploreEmptyTitle": "We are still expanding this catalog",
   "citiesExploreEmptyDescription": "City suggestions will appear here as the Movaro catalog grows.",
   "citiesSearchTitle": "Search cities",
-  "citiesSearchHeadline": "Find a city in the initial catalog",
-  "citiesSearchDescription": "Search by name or browse the current Movaro list.",
+  "citiesSearchHeadline": "Validate a city before committing to a plan",
+  "citiesSearchDescription": "Search by name, compare alternatives, and open the details to understand cost, fit, and next steps.",
   "citiesSearchHint": "Search city",
-  "citiesSearchFieldLabel": "City name",
+  "citiesSearchFieldLabel": "Which city do you want to validate?",
   "citiesSearchHelper": "Type to search cities by name and tap autocomplete.",
   "citiesQuickChoicesTitle": "Quick choices",
   "citiesQuickChoicesBody": "Use a slice to narrow the list faster or go by map if location is your starting point.",
@@ -970,7 +983,7 @@
   "cityDetailRentLabel": "Rent",
   "cityDetailSafetyLabel": "Safety",
   "cityDetailPopularityLabel": "Popularity among Argentinians",
-  "cityDetailLanguageLabel": "Language adaptation",
+  "cityDetailLanguageLabel": "Ease with Portuguese",
   "cityDetailWorkLabel": "Job market",
   "cityDetailIdhmLabel": "HDI",
   "cityDetailIdhmOfficialNote": "official Atlas of Human Development data",
@@ -1083,6 +1096,8 @@
   "mainNavHome": "Home",
   "mainNavFavorites": "Favorites",
   "mainNavCopilot": "Move guide",
+  "mainNavDecision": "Explore",
+  "mainNavExecution": "Execution",
   "mainNavExplore": "Explore",
   "mainNavPlan": "Plan",
   "mainNavProfile": "Profile",
@@ -1093,6 +1108,15 @@
   "favoritesEmptyBody": "When you favorite cities, they stay here together so you can track details, weather, and comparison faster.",
   "favoritesEmptyHint": "Explore cities, save the strongest ones, and come back here whenever you want to resume.",
   "favoritesPageTitle": "Favorites",
+  "stageClarityTitle": "Clarity",
+  "stageClarityBody": "Understand your starting point and choose the best path to begin.",
+  "stageClarityAction": "Choose one path below",
+  "stageDecisionTitle": "Decision",
+  "stageDecisionBody": "Get an initial recommendation and validate the city that makes the most sense now.",
+  "stageDecisionAction": "Answer and move to the result",
+  "stageExecutionTitle": "Execution",
+  "stageExecutionBody": "Turn the chosen city into concrete next steps.",
+  "stageExecutionAction": "Start with the recommended action",
   "favoritesPageCount": "{current} of {total}",
   "@favoritesPageCount": {
     "placeholders": {
@@ -1251,29 +1275,29 @@
   "cityMetricBadgePositive": "Favorable read",
   "cityMetricBadgeNeutral": "Needs balance",
   "cityMetricBadgeAttention": "Needs extra attention",
-  "cityMetricCostLowHeadline": "Lower cost",
+  "cityMetricCostLowHeadline": "Low",
   "cityMetricCostLowSupporting": "Lighter on your day-to-day budget.",
-  "cityMetricCostMediumHeadline": "Moderate cost",
+  "cityMetricCostMediumHeadline": "Balanced",
   "cityMetricCostMediumSupporting": "A reasonable balance between routine costs and infrastructure.",
-  "cityMetricCostHighHeadline": "Higher cost",
+  "cityMetricCostHighHeadline": "High",
   "cityMetricCostHighSupporting": "It will require more care with rent and monthly expenses.",
-  "cityMetricSafetyHighHeadline": "Higher safety",
+  "cityMetricSafetyHighHeadline": "High",
   "cityMetricSafetyHighSupporting": "A more comfortable read for daily life at the start.",
-  "cityMetricSafetyMediumHeadline": "Moderate safety",
+  "cityMetricSafetyMediumHeadline": "Balanced",
   "cityMetricSafetyMediumSupporting": "It depends more on neighborhood and local context.",
-  "cityMetricSafetyLowHeadline": "More caution",
+  "cityMetricSafetyLowHeadline": "Low",
   "cityMetricSafetyLowSupporting": "It deserves more validation before treating it as an easy move.",
-  "cityMetricLanguageEasyHeadline": "Easier adaptation",
+  "cityMetricLanguageEasyHeadline": "Easy",
   "cityMetricLanguageEasySupporting": "Usually friendlier if you arrive speaking Spanish.",
-  "cityMetricLanguageMediumHeadline": "Moderate adaptation",
+  "cityMetricLanguageMediumHeadline": "Medium",
   "cityMetricLanguageMediumSupporting": "Basic Portuguese still helps a lot in daily life.",
-  "cityMetricLanguageHardHeadline": "Harder adaptation",
+  "cityMetricLanguageHardHeadline": "Hard",
   "cityMetricLanguageHardSupporting": "Language tends to matter more in day-to-day integration.",
-  "cityMetricWorkStrongHeadline": "Stronger market",
+  "cityMetricWorkStrongHeadline": "Strong",
   "cityMetricWorkStrongSupporting": "A more favorable city if you are looking for opportunities.",
-  "cityMetricWorkMediumHeadline": "Moderate market",
+  "cityMetricWorkMediumHeadline": "Balanced",
   "cityMetricWorkMediumSupporting": "It can work well, but it depends more on your profile.",
-  "cityMetricWorkLowHeadline": "More limited market",
+  "cityMetricWorkLowHeadline": "Limited",
   "cityMetricWorkLowSupporting": "It requires more strategy if quick work is your priority.",
   "cityIdhmVeryHigh": "Very high development",
   "cityIdhmVeryHighSupporting": "Among the strongest municipal levels in the official indicator.",
@@ -1370,6 +1394,15 @@
     }
   },
   "journeyEntryOriginPending": "We'll collect your origin in the first question before plan generation.",
+  "journeySetupFlowHint": "If there is only one route available right now, Movaro fills it in for you. If there is more than one option, you choose it manually.",
+  "journeySetupManualChangeHint": "You can change origin and destination later without restarting the app.",
+  "journeySetupDetectedOriginHint": "We detected {country} as an origin suggestion. You can confirm it or change it manually.",
+  "@journeySetupDetectedOriginHint": {
+    "placeholders": {
+      "country": {}
+    }
+  },
+  "journeySetupOriginAssistHint": "Use your location only if you want an origin suggestion. Manual selection stays available.",
   "journeyLocationPanelTitle": "Location can save one step, but it never decides for you",
   "journeyLocationPanelBody": "If you allow location, Movaro tries to detect your current country and suggests it as origin. You can reject the suggestion and choose manually instead.",
   "journeyLocationFallbackTitle": "Location did not resolve a usable country",
@@ -2566,6 +2599,7 @@
   "aiChatRetry": "The assistant is still loading. Please try again in a moment.",
   "aiChatNetworkError": "Connection error. Check your internet and try again.",
   "migrationResultRevealEyebrow": "Your recommended city",
+  "migrationResultRevealHeaderTitle": "Recommendation",
   "migrationResultRevealRedoAction": "Answer quick questions again",
   "migrationResultRevealCompatibilityLabel": "{pct}% compatible",
   "@migrationResultRevealCompatibilityLabel": {
@@ -2587,10 +2621,32 @@
     }
   },
   "migrationResultRevealExploreCity": "View city details",
+  "migrationResultRevealCompareCta": "Compare with alternatives",
+  "migrationResultRevealStartPreparationCta": "Start preparation with {city}",
+  "@migrationResultRevealStartPreparationCta": {
+    "placeholders": {
+      "city": { "type": "String" }
+    }
+  },
+  "migrationResultRevealRefineAction": "Make this recommendation more precise",
   "homeVisualTitlePrefix": "Thinking about living in ",
   "homeVisualTitleHighlight": "another country?",
   "homeVisualSubtitle": "We help you understand what to do, what it may cost, and where to start.",
   "homeVisualSupportLine": "You can start even if you have not decided everything yet.",
+  "homeEntryTitlePrefix": "Choose ",
+  "homeEntryTitleHighlight": "how to start",
+  "homeEntrySubtitle": "Get an initial direction in a few minutes or validate a city you are already considering before moving into execution mode.",
+  "homeEntrySupportLine": "Initial direction in about 2 minutes",
+  "homeEntryDiscoverTitle": "I want to discover my best city",
+  "homeEntryDiscoverBody": "Answer a few questions and get an initial direction with a recommended city, alternatives, and next steps.",
+  "homeEntryDiscoverBadge": "Fastest path",
+  "homeEntryDiscoverAction": "Get my initial direction",
+  "homeEntryKnownCityTitle": "I already have a city in mind",
+  "homeEntryKnownCityBody": "Search for the city, compare alternatives, and validate cost, fit, and next steps before committing to a full plan.",
+  "homeEntryKnownCityBadge": "No questionnaire required",
+  "homeEntryKnownCityAction": "Validate a city",
+  "homeEntryShortcutsTitle": "Useful shortcuts",
+  "homeEntryExploreCitiesAction": "Explore cities",
   "homeVisualCostsAction": "See what it may cost",
   "homeVisualDocumentsAction": "Understand documents",
   "homeVisualStartAction": "Find where to start",
@@ -2609,6 +2665,32 @@
   "assistantEntryQuickCpf": "How to get CPF?",
   "assistantModeConversation": "💬 Chat",
   "assistantModeGuides": "📋 Guides",
+  "assistantQuickTopicsTitle": "Quick topics",
+  "assistantQuickQuestionsTitle": "Quick questions",
+  "assistantOpenGuidesAction": "Open guide",
+  "assistantContextChatTitle": "Chat with context",
+  "assistantContextChatBody": "Ask short questions about the {origin} → {destination} route. The assistant is best at documents, costs, housing, and next steps.",
+  "@assistantContextChatBody": {
+    "placeholders": {
+      "origin": {},
+      "destination": {}
+    }
+  },
+  "assistantContextGuideTitle": "Guides by country",
+  "assistantContextGuideBody": "Choose the country you want to review and open the right topic-based content to unblock your next step in {destination}.",
+  "@assistantContextGuideBody": {
+    "placeholders": {
+      "destination": {}
+    }
+  },
+  "assistantStartCardTitle": "Start with the real question",
+  "assistantStartCardBody": "You can ask directly about the {origin} → {destination} route or open the guide to browse documents, housing, work, and costs.",
+  "@assistantStartCardBody": {
+    "placeholders": {
+      "origin": {},
+      "destination": {}
+    }
+  },
   "planResetManageAction": "Start a new plan",
   "planResetManageBody": "If you want to restart, you can clear your current progress and build a new plan from the beginning.",
   "planResetDialogBody": "You will restart the questionnaire and choose a new city. This cannot be undone.",

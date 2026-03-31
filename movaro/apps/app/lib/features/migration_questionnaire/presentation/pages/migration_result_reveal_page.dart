@@ -4,7 +4,9 @@ import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
+import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/core/widgets/journey_stage_banner.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
 import 'package:movaro_app/features/cities/application/services/city_seasonality_conflict_service.dart';
@@ -14,7 +16,7 @@ import 'package:movaro_app/features/flight_search/domain/services/flight_route_c
 import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
@@ -86,188 +88,57 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
     );
   }
 
-  Future<void> _confirmAndRedo() async {
-    final confirmed = await _showRedoConfirmationDialog();
-    if (confirmed != true || !mounted) return;
-
-    await widget.controller.clearCurrentPlan();
-    if (!mounted) return;
-    Navigator.pushReplacementNamed(context, AppRoutes.migrationStart);
+  Future<void> _compareAlternatives(
+    City recommendedCity,
+    List<City> alternatives,
+  ) async {
+    _showCityComparisonSheet(
+      context,
+      widget.controller.generatedPlan!,
+      recommendedCity,
+      alternatives,
+    );
   }
 
-  Future<bool?> _showRedoConfirmationDialog() {
-    final l10n = context.l10n;
+  Future<void> _startPreparation(City city) async {
+    await widget.controller.confirmPlanCity(city);
+    if (!mounted) {
+      return;
+    }
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      AppRoutes.publicHome,
+      (route) => false,
+    );
+  }
 
-    return showDialog<bool>(
+  Future<void> _goHomeWithConfirmation() async {
+    final shouldLeave = await showDialog<bool>(
       context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF111827),
-              border: Border.all(color: const Color(0xFF1E2636)),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.6),
-                  blurRadius: 48,
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Icon
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0C1A2E),
-                          border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                          ),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Icon(
-                          Icons.refresh_rounded,
-                          color: AppColors.primary,
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      // Title
-                      Text(
-                        l10n.redoQuestionnaireDialogTitle(),
-                        style: Theme.of(dialogContext).textTheme.titleLarge
-                            ?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFFF0F6FC),
-                            ),
-                      ),
-                      const SizedBox(height: 6),
-                      // Body
-                      Text(
-                        l10n.redoQuestionnaireDialogBody(),
-                        style: Theme.of(dialogContext).textTheme.bodyLarge
-                            ?.copyWith(
-                              color: const Color(0xFF6B7280),
-                              height: 1.5,
-                            ),
-                      ),
-                      const SizedBox(height: 10),
-                      // Warning callout
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppColors.warning.withValues(alpha: 0.08),
-                          border: Border.all(
-                            color: AppColors.warning.withValues(alpha: 0.2),
-                          ),
-                          borderRadius: BorderRadius.circular(9),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline_rounded,
-                              color: AppColors.warning,
-                              size: 13,
-                            ),
-                            const SizedBox(width: 7),
-                            Expanded(
-                              child: Text(
-                                l10n.redoQuestionnaireDialogWarning(),
-                                style: Theme.of(dialogContext)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: AppColors.warning,
-                                      height: 1.4,
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(height: 1, color: const Color(0xFF0D1117)),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-                  child: Column(
-                    children: [
-                      // Confirm button
-                      GestureDetector(
-                        onTap: () => Navigator.of(dialogContext).pop(true),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 13),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1F6FEB),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.refresh_rounded,
-                                color: Colors.white,
-                                size: 14,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                l10n.redoQuestionnaireDialogConfirm(),
-                                style: Theme.of(dialogContext)
-                                    .textTheme
-                                    .labelLarge
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Cancel button
-                      GestureDetector(
-                        onTap: () => Navigator.of(dialogContext).pop(false),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 11),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1C2128),
-                            border: Border.all(color: const Color(0xFF2D333B)),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            l10n.redoQuestionnaireDialogCancel(),
-                            textAlign: TextAlign.center,
-                            style: Theme.of(dialogContext).textTheme.bodyLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF6B7280),
-                                ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.bmpExitDialogTitle),
+        content: Text(context.l10n.bmpExitDialogBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(context.l10n.commonBackAction),
           ),
-        );
-      },
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(context.l10n.bmpExitDialogLeave),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted || shouldLeave != true) {
+      return;
+    }
+
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      AppRoutes.publicHome,
+      (route) => false,
     );
   }
 
@@ -511,7 +382,6 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
             FlightRouteContextResolver.resolveOriginCountryIso(
               planOriginCountry: plan.originCountry,
             );
-
         return Scaffold(
           body: FadeTransition(
             opacity: _fadeIn,
@@ -530,8 +400,15 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                       Expanded(
                         child: ListView(
                           controller: _scrollController,
-                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
+                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 224),
                           children: [
+                            JourneyStageBanner(
+                              title: context.l10n.stageDecisionTitle,
+                              body: context.l10n.stageDecisionBody,
+                              action: context.l10n.stageDecisionAction,
+                              icon: Icons.explore_rounded,
+                            ),
+                            const SizedBox(height: 16),
                             if (hasPreferred && preferredMatchesRecommended)
                               _AntiAnchorReinforcementBanner(
                                 cityName: recommendedCity.name,
@@ -580,15 +457,6 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                                 planTimeline: plan.timeline,
                                 onTap: (city) => _openCityDetail(city),
                               ),
-                              const SizedBox(height: 8),
-                              _CompareCitiesCta(
-                                onTap: () => _showCityComparisonSheet(
-                                  context,
-                                  plan,
-                                  recommendedCity,
-                                  alternatives,
-                                ),
-                              ),
                             ],
                             const SizedBox(height: 16),
                             _GuidePreviewSection(
@@ -607,8 +475,21 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                     bottom: 0,
                     child: _FooterCta(
                       city: recommendedCity,
+                      hasAlternatives: alternatives.isNotEmpty,
                       onViewDetails: () => _openCityDetail(recommendedCity),
-                      onRedo: _confirmAndRedo,
+                      onCompare: () =>
+                          _compareAlternatives(recommendedCity, alternatives),
+                      onStartPreparation: () =>
+                          _startPreparation(recommendedCity),
+                    ),
+                  ),
+                  SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      child: AppGlassHeader(
+                        title: context.l10n.migrationResultRevealHeaderTitle,
+                        onBack: _goHomeWithConfirmation,
+                      ),
                     ),
                   ),
                 ],
@@ -845,7 +726,9 @@ class _AlternativesSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final l10n = context.l10n;
-    final recDims = MigrationPlanGenerator.cityDimensionsPublic(recommendedCity);
+    final recDims = MigrationPlanGenerator.cityDimensionsPublic(
+      recommendedCity,
+    );
     final locale = Localizations.localeOf(context).languageCode;
 
     return Column(
@@ -936,17 +819,13 @@ class _AlternativesSection extends StatelessWidget {
                               children: [
                                 Text(
                                   city.name,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
+                                  style: Theme.of(context).textTheme.titleSmall
                                       ?.copyWith(fontWeight: FontWeight.w700),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   '${city.stateName} · ${city.stateCode}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: AppColors.textSoftFor(context),
                                       ),
@@ -1038,15 +917,17 @@ class _SeasonalityConflictChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withValues(alpha: isDark ? 0.22 : 0.10),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: isDark ? 0.45 : 0.35)),
+        border: Border.all(
+          color: color.withValues(alpha: isDark ? 0.45 : 0.35),
+        ),
       ),
       child: Text(
         chipLabel,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w700,
-              fontSize: 10,
-            ),
+          color: color,
+          fontWeight: FontWeight.w700,
+          fontSize: 10,
+        ),
       ),
     );
   }
@@ -1058,54 +939,54 @@ String _dimensionLabel(BuildContext context, String key) {
   final locale = Localizations.localeOf(context).languageCode;
   return switch (key) {
     'affordability' => switch (locale) {
-        'pt' => 'Custo de vida',
-        'es' => 'Costo de vida',
-        _ => 'Cost of living',
-      },
+      'pt' => 'Custo de vida',
+      'es' => 'Costo de vida',
+      _ => 'Cost of living',
+    },
     'job_market' => switch (locale) {
-        'pt' => 'Mercado de trabalho',
-        'es' => 'Mercado laboral',
-        _ => 'Job market',
-      },
+      'pt' => 'Mercado de trabalho',
+      'es' => 'Mercado laboral',
+      _ => 'Job market',
+    },
     'safety' => switch (locale) {
-        'pt' => 'Segurança',
-        'es' => 'Seguridad',
-        _ => 'Safety',
-      },
+      'pt' => 'Segurança',
+      'es' => 'Seguridad',
+      _ => 'Safety',
+    },
     'climate_warmth' => switch (locale) {
-        'pt' => 'Clima',
-        'es' => 'Clima',
-        _ => 'Climate',
-      },
+      'pt' => 'Clima',
+      'es' => 'Clima',
+      _ => 'Climate',
+    },
     'transit_infra' => switch (locale) {
-        'pt' => 'Infraestrutura',
-        'es' => 'Infraestructura',
-        _ => 'Infrastructure',
-      },
+      'pt' => 'Infraestrutura',
+      'es' => 'Infraestructura',
+      _ => 'Infrastructure',
+    },
     'nature' => switch (locale) {
-        'pt' => 'Natureza',
-        'es' => 'Naturaleza',
-        _ => 'Nature',
-      },
+      'pt' => 'Natureza',
+      'es' => 'Naturaleza',
+      _ => 'Nature',
+    },
     'community' => switch (locale) {
-        'pt' => 'Comunidade AR',
-        'es' => 'Comunidad AR',
-        _ => 'AR Community',
-      },
+      'pt' => 'Comunidade AR',
+      'es' => 'Comunidad AR',
+      _ => 'AR Community',
+    },
     _ => key,
   };
 }
 
 IconData _dimensionIcon(String key) => switch (key) {
-      'affordability' => Icons.account_balance_wallet_outlined,
-      'job_market' => Icons.work_outline_rounded,
-      'safety' => Icons.shield_outlined,
-      'climate_warmth' => Icons.wb_sunny_outlined,
-      'transit_infra' => Icons.directions_transit_outlined,
-      'nature' => Icons.park_outlined,
-      'community' => Icons.people_outline_rounded,
-      _ => Icons.tune_rounded,
-    };
+  'affordability' => Icons.account_balance_wallet_outlined,
+  'job_market' => Icons.work_outline_rounded,
+  'safety' => Icons.shield_outlined,
+  'climate_warmth' => Icons.wb_sunny_outlined,
+  'transit_infra' => Icons.directions_transit_outlined,
+  'nature' => Icons.park_outlined,
+  'community' => Icons.people_outline_rounded,
+  _ => Icons.tune_rounded,
+};
 
 // ─── Timeline context bar ─────────────────────────────────────────────────────
 
@@ -1119,49 +1000,48 @@ class _TimelineContextBar extends StatelessWidget {
   static (String label, Color color) _timelineInfo(
     String timeline,
     String locale,
-  ) =>
-      switch (timeline) {
-        'in_0_3m' => (
-          switch (locale) {
-            'pt' => '0–3 meses · urgente',
-            'es' => '0–3 meses · urgente',
-            _ => '0–3 months · urgent',
-          },
-          AppColors.danger,
-        ),
-        'in_3_6m' => (
-          switch (locale) {
-            'pt' => '3–6 meses',
-            'es' => '3–6 meses',
-            _ => '3–6 months',
-          },
-          AppColors.caution,
-        ),
-        'in_6_12m' => (
-          switch (locale) {
-            'pt' => '6–12 meses',
-            'es' => '6–12 meses',
-            _ => '6–12 months',
-          },
-          AppColors.success,
-        ),
-        'just_exploring' || 'depends' => (
-          switch (locale) {
-            'pt' => 'Apenas explorando',
-            'es' => 'Solo explorando',
-            _ => 'Just exploring',
-          },
-          AppColors.primary,
-        ),
-        _ => (
-          switch (locale) {
-            'pt' => 'Mais de 1 ano',
-            'es' => 'Más de 1 año',
-            _ => 'Over 1 year',
-          },
-          AppColors.success,
-        ),
-      };
+  ) => switch (timeline) {
+    'in_0_3m' => (
+      switch (locale) {
+        'pt' => '0–3 meses · urgente',
+        'es' => '0–3 meses · urgente',
+        _ => '0–3 months · urgent',
+      },
+      AppColors.danger,
+    ),
+    'in_3_6m' => (
+      switch (locale) {
+        'pt' => '3–6 meses',
+        'es' => '3–6 meses',
+        _ => '3–6 months',
+      },
+      AppColors.caution,
+    ),
+    'in_6_12m' => (
+      switch (locale) {
+        'pt' => '6–12 meses',
+        'es' => '6–12 meses',
+        _ => '6–12 months',
+      },
+      AppColors.success,
+    ),
+    'just_exploring' || 'depends' => (
+      switch (locale) {
+        'pt' => 'Apenas explorando',
+        'es' => 'Solo explorando',
+        _ => 'Just exploring',
+      },
+      AppColors.primary,
+    ),
+    _ => (
+      switch (locale) {
+        'pt' => 'Mais de 1 ano',
+        'es' => 'Más de 1 año',
+        _ => 'Over 1 year',
+      },
+      AppColors.success,
+    ),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -1169,11 +1049,14 @@ class _TimelineContextBar extends StatelessWidget {
     final isDark = AppColors.isDark(context);
     final (timelineLabel, color) = _timelineInfo(plan.timeline, locale);
 
-    final guideItems = ArgentinaBrazilGuideDataSource.build(
-      plan,
+    final guideItems = MigrationGuideRegistry.build(
+      l10n: context.l10n,
+      plan: plan,
       localeCode: locale,
     );
-    final preArrivalCount = guideItems.where((i) => i.preArrivalRequired).length;
+    final preArrivalCount = guideItems
+        .where((i) => i.preArrivalRequired)
+        .length;
 
     final preArrivalText = switch (locale) {
       'pt' => '$preArrivalCount etapas antes de embarcar',
@@ -1207,15 +1090,10 @@ class _TimelineContextBar extends StatelessWidget {
                   height: 1.4,
                 ),
                 children: [
-                  TextSpan(
-                    text: '$timelinePrefix ',
-                  ),
+                  TextSpan(text: '$timelinePrefix '),
                   TextSpan(
                     text: timelineLabel,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: color,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w700, color: color),
                   ),
                   const TextSpan(text: ' · '),
                   TextSpan(text: preArrivalText),
@@ -1224,39 +1102,6 @@ class _TimelineContextBar extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ─── Compare cities CTA ───────────────────────────────────────────────────────
-
-class _CompareCitiesCta extends StatelessWidget {
-  const _CompareCitiesCta({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).languageCode;
-    final label = switch (locale) {
-      'pt' => 'Entender por que esta cidade ganhou →',
-      'es' => 'Entender por qué ganó esta ciudad →',
-      _ => 'Understand why this city won →',
-    };
-
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: onTap,
-        icon: const Icon(Icons.compare_arrows_rounded, size: 16),
-        label: Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 11),
-        ),
       ),
     );
   }
@@ -1339,8 +1184,9 @@ class _CityComparisonSheetState extends State<_CityComparisonSheet> {
 
     final compareCity =
         alternatives[_selectedIndex.clamp(0, alternatives.length - 1)];
-    final recDims =
-        MigrationPlanGenerator.cityDimensionsPublic(widget.recommendedCity);
+    final recDims = MigrationPlanGenerator.cityDimensionsPublic(
+      widget.recommendedCity,
+    );
     final altDims = MigrationPlanGenerator.cityDimensionsPublic(compareCity);
 
     // Sort by absolute delta — most decisive dimensions first
@@ -1352,10 +1198,8 @@ class _CityComparisonSheetState extends State<_CityComparisonSheet> {
     });
 
     // Overall average score gap
-    final recAvg =
-        recDims.values.fold(0.0, (s, v) => s + v) / recDims.length;
-    final altAvg =
-        altDims.values.fold(0.0, (s, v) => s + v) / altDims.length;
+    final recAvg = recDims.values.fold(0.0, (s, v) => s + v) / recDims.length;
+    final altAvg = altDims.values.fold(0.0, (s, v) => s + v) / altDims.length;
     final gapPct = ((recAvg - altAvg) * 100).round().abs();
     final recWinsOverall = recAvg >= altAvg;
 
@@ -1390,9 +1234,7 @@ class _CityComparisonSheetState extends State<_CityComparisonSheet> {
                     Expanded(
                       child: Text(
                         titleText,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
+                        style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w800),
                       ),
                     ),
@@ -1403,8 +1245,10 @@ class _CityComparisonSheetState extends State<_CityComparisonSheet> {
                         color: AppColors.textSoftFor(context),
                       ),
                       padding: EdgeInsets.zero,
-                      constraints:
-                          const BoxConstraints(minWidth: 32, minHeight: 32),
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
                     ),
                   ],
                 ),
@@ -1429,22 +1273,20 @@ class _CityComparisonSheetState extends State<_CityComparisonSheet> {
                             ),
                             decoration: BoxDecoration(
                               color: selected
-                                  ? AppColors.primary
-                                      .withValues(alpha: isDark ? 0.18 : 0.10)
+                                  ? AppColors.primary.withValues(
+                                      alpha: isDark ? 0.18 : 0.10,
+                                    )
                                   : AppColors.surfaceMutedFor(context),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
                                 color: selected
-                                    ? AppColors.primary
-                                        .withValues(alpha: 0.40)
+                                    ? AppColors.primary.withValues(alpha: 0.40)
                                     : AppColors.borderFor(context),
                               ),
                             ),
                             child: Text(
                               city.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium
+                              style: Theme.of(context).textTheme.labelMedium
                                   ?.copyWith(
                                     fontWeight: selected
                                         ? FontWeight.w700
@@ -1567,34 +1409,31 @@ class _ScoreGapBanner extends StatelessWidget {
 
     final gapLabel = switch (gapPct) {
       <= 3 => switch (locale) {
-          'pt' => 'empate técnico',
-          'es' => 'empate técnico',
-          _ => 'statistical tie',
-        },
+        'pt' => 'empate técnico',
+        'es' => 'empate técnico',
+        _ => 'statistical tie',
+      },
       <= 8 => switch (locale) {
-          'pt' => 'diferença leve',
-          'es' => 'diferencia leve',
-          _ => 'slight edge',
-        },
+        'pt' => 'diferença leve',
+        'es' => 'diferencia leve',
+        _ => 'slight edge',
+      },
       <= 15 => switch (locale) {
-          'pt' => 'vantagem clara',
-          'es' => 'ventaja clara',
-          _ => 'clear advantage',
-        },
+        'pt' => 'vantagem clara',
+        'es' => 'ventaja clara',
+        _ => 'clear advantage',
+      },
       _ => switch (locale) {
-          'pt' => 'vantagem decisiva',
-          'es' => 'ventaja decisiva',
-          _ => 'decisive advantage',
-        },
+        'pt' => 'vantagem decisiva',
+        'es' => 'ventaja decisiva',
+        _ => 'decisive advantage',
+      },
     };
 
     final bodyText = switch (locale) {
-      'pt' =>
-        '$winner tem $gapPct pt a mais no índice geral — $gapLabel.',
-      'es' =>
-        '$winner tiene $gapPct pt más en el índice general — $gapLabel.',
-      _ =>
-        '$winner scores $gapPct pt higher overall — $gapLabel.',
+      'pt' => '$winner tem $gapPct pt a mais no índice geral — $gapLabel.',
+      'es' => '$winner tiene $gapPct pt más en el índice general — $gapLabel.',
+      _ => '$winner scores $gapPct pt higher overall — $gapLabel.',
     };
 
     final color = recWins ? AppColors.primary : AppColors.caution;
@@ -1657,28 +1496,16 @@ class _DimensionComparisonRow extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 4),
-        _BarRow(
-          score: recScore,
-          color: AppColors.primary,
-          wins: recWins,
-        ),
+        _BarRow(score: recScore, color: AppColors.primary, wins: recWins),
         const SizedBox(height: 3),
-        _BarRow(
-          score: altScore,
-          color: AppColors.caution,
-          wins: !recWins,
-        ),
+        _BarRow(score: altScore, color: AppColors.caution, wins: !recWins),
       ],
     );
   }
 }
 
 class _BarRow extends StatelessWidget {
-  const _BarRow({
-    required this.score,
-    required this.color,
-    required this.wins,
-  });
+  const _BarRow({required this.score, required this.color, required this.wins});
 
   final double score;
   final Color color;
@@ -1792,8 +1619,7 @@ class _ArchetypeContextRow extends StatelessWidget {
           'For families, safety and Argentine community carried the most weight.',
         'fresh_start' =>
           'For fresh starts, cost of living and safety were decisive.',
-        _ =>
-          'The score balances cost, opportunities, and quality of life.',
+        _ => 'The score balances cost, opportunities, and quality of life.',
       };
     }
   }
@@ -1814,45 +1640,45 @@ class _ArchetypeContextRow extends StatelessWidget {
         .map(
           (p) => switch (p) {
             'low_cost' => switch (locale) {
-                'pt' => 'Custo baixo',
-                'es' => 'Bajo costo',
-                _ => 'Low cost',
-              },
+              'pt' => 'Custo baixo',
+              'es' => 'Bajo costo',
+              _ => 'Low cost',
+            },
             'job_opportunities' => switch (locale) {
-                'pt' => 'Emprego',
-                'es' => 'Empleo',
-                _ => 'Jobs',
-              },
+              'pt' => 'Emprego',
+              'es' => 'Empleo',
+              _ => 'Jobs',
+            },
             'safety' => switch (locale) {
-                'pt' => 'Segurança',
-                'es' => 'Seguridad',
-                _ => 'Safety',
-              },
+              'pt' => 'Segurança',
+              'es' => 'Seguridad',
+              _ => 'Safety',
+            },
             'warm_climate_beach' => switch (locale) {
-                'pt' => 'Praia/clima',
-                'es' => 'Playa/clima',
-                _ => 'Beach/climate',
-              },
+              'pt' => 'Praia/clima',
+              'es' => 'Playa/clima',
+              _ => 'Beach/climate',
+            },
             'transit_infra' => switch (locale) {
-                'pt' => 'Transporte',
-                'es' => 'Transporte',
-                _ => 'Transit',
-              },
+              'pt' => 'Transporte',
+              'es' => 'Transporte',
+              _ => 'Transit',
+            },
             'nature' => switch (locale) {
-                'pt' => 'Natureza',
-                'es' => 'Naturaleza',
-                _ => 'Nature',
-              },
+              'pt' => 'Natureza',
+              'es' => 'Naturaleza',
+              _ => 'Nature',
+            },
             'community' => switch (locale) {
-                'pt' => 'Comunidade AR',
-                'es' => 'Comunidad AR',
-                _ => 'AR Community',
-              },
+              'pt' => 'Comunidade AR',
+              'es' => 'Comunidad AR',
+              _ => 'AR Community',
+            },
             'close_to_argentina' => switch (locale) {
-                'pt' => 'Próximo à AR',
-                'es' => 'Cerca de AR',
-                _ => 'Near Argentina',
-              },
+              'pt' => 'Próximo à AR',
+              'es' => 'Cerca de AR',
+              _ => 'Near Argentina',
+            },
             _ => p,
           },
         )
@@ -1910,8 +1736,9 @@ class _ArchetypeContextRow extends StatelessWidget {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary
-                            .withValues(alpha: isDark ? 0.14 : 0.08),
+                        color: AppColors.primary.withValues(
+                          alpha: isDark ? 0.14 : 0.08,
+                        ),
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: Text(
@@ -1942,10 +1769,10 @@ class _LegendDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        width: 8,
-        height: 8,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      );
+    width: 8,
+    height: 8,
+    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+  );
 }
 
 class _AltCityPlaceholder extends StatelessWidget {
@@ -2135,28 +1962,54 @@ class _HowStarsWorkExplanation extends StatelessWidget {
 class _FooterCta extends StatefulWidget {
   const _FooterCta({
     required this.city,
+    required this.hasAlternatives,
     required this.onViewDetails,
-    required this.onRedo,
+    required this.onCompare,
+    required this.onStartPreparation,
   });
 
   final City city;
+  final bool hasAlternatives;
   final Future<void> Function() onViewDetails;
-  final VoidCallback onRedo;
+  final Future<void> Function() onCompare;
+  final Future<void> Function() onStartPreparation;
 
   @override
   State<_FooterCta> createState() => _FooterCtaState();
 }
 
 class _FooterCtaState extends State<_FooterCta> {
-  bool _loading = false;
+  bool _isOpeningDetails = false;
+  bool _isComparing = false;
+  bool _isStartingPreparation = false;
 
   Future<void> _handleViewDetails() async {
-    if (_loading) return;
-    setState(() => _loading = true);
+    if (_isOpeningDetails) return;
+    setState(() => _isOpeningDetails = true);
     try {
       await widget.onViewDetails();
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _isOpeningDetails = false);
+    }
+  }
+
+  Future<void> _handleCompare() async {
+    if (_isComparing) return;
+    setState(() => _isComparing = true);
+    try {
+      await widget.onCompare();
+    } finally {
+      if (mounted) setState(() => _isComparing = false);
+    }
+  }
+
+  Future<void> _handleStartPreparation() async {
+    if (_isStartingPreparation) return;
+    setState(() => _isStartingPreparation = true);
+    try {
+      await widget.onStartPreparation();
+    } finally {
+      if (mounted) setState(() => _isStartingPreparation = false);
     }
   }
 
@@ -2190,14 +2043,16 @@ class _FooterCtaState extends State<_FooterCta> {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: _loading ? null : _handleViewDetails,
+              onPressed: _isStartingPreparation
+                  ? null
+                  : _handleStartPreparation,
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: _loading
+              child: _isStartingPreparation
                   ? const SizedBox(
                       width: 20,
                       height: 20,
@@ -2207,23 +2062,64 @@ class _FooterCtaState extends State<_FooterCta> {
                       ),
                     )
                   : Text(
-                      l10n.migrationResultRevealViewDetailsCta(
+                      l10n.migrationResultRevealStartPreparationCta(
                         widget.city.name,
                       ),
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
             ),
           ),
-          const SizedBox(height: 6),
-          TextButton(
-            onPressed: widget.onRedo,
-            child: Text(
-              l10n.migrationResultRevealRedoAction,
-              style: TextStyle(
-                color: AppColors.textSoftFor(context),
-                fontSize: 13,
+          const SizedBox(height: 10),
+          Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _isOpeningDetails ? null : _handleViewDetails,
+                  icon: _isOpeningDetails
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.location_city_outlined, size: 16),
+                  label: Text(
+                    l10n.migrationResultRevealExploreCity,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: widget.hasAlternatives && !_isComparing
+                      ? _handleCompare
+                      : null,
+                  icon: _isComparing
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.compare_arrows_rounded, size: 16),
+                  label: Text(
+                    l10n.migrationResultRevealCompareCta,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -2236,10 +2132,7 @@ class _FooterCtaState extends State<_FooterCta> {
 /// Shows a teaser of the guided migration plan — one item per phase — to give
 /// the user a sense of what awaits after they confirm the city.
 class _GuidePreviewSection extends StatelessWidget {
-  const _GuidePreviewSection({
-    required this.plan,
-    required this.cityName,
-  });
+  const _GuidePreviewSection({required this.plan, required this.cityName});
 
   final MigrationPlan plan;
   final String cityName;
@@ -2256,8 +2149,9 @@ class _GuidePreviewSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).languageCode;
-    final allItems = ArgentinaBrazilGuideDataSource.build(
-      plan,
+    final allItems = MigrationGuideRegistry.build(
+      l10n: context.l10n,
+      plan: plan,
       localeCode: locale,
     );
 
@@ -2278,11 +2172,6 @@ class _GuidePreviewSection extends StatelessWidget {
       'pt' => 'SEU PLANO DE MIGRAÇÃO',
       'es' => 'TU PLAN DE MIGRACIÓN',
       _ => 'YOUR MIGRATION PLAN',
-    };
-    final browseCtaLabel = switch (locale) {
-      'pt' => 'Explorar o guia completo →',
-      'es' => 'Explorar la guía completa →',
-      _ => 'Explore the full guide →',
     };
     final stepCountLabel = switch (locale) {
       'pt' => '${allItems.length} passos',
@@ -2310,10 +2199,7 @@ class _GuidePreviewSection extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 3,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
@@ -2343,26 +2229,6 @@ class _GuidePreviewSection extends StatelessWidget {
             ),
           );
         }),
-
-        // Browse CTA — opens copilot in preview mode
-        Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () =>
-                  Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot),
-              icon: const Icon(Icons.menu_book_rounded, size: 16),
-              label: Text(
-                browseCtaLabel,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -2387,48 +2253,48 @@ class _GuidePreviewItem extends StatelessWidget {
 
     final phaseLabel = switch (item.phase) {
       GuidePhase.preparation => switch (locale) {
-          'pt' => 'Preparação',
-          'es' => 'Preparación',
-          _ => 'Preparation',
-        },
+        'pt' => 'Preparação',
+        'es' => 'Preparación',
+        _ => 'Preparation',
+      },
       GuidePhase.housing => switch (locale) {
-          'pt' => 'Moradia',
-          'es' => 'Vivienda',
-          _ => 'Housing',
-        },
+        'pt' => 'Moradia',
+        'es' => 'Vivienda',
+        _ => 'Housing',
+      },
       GuidePhase.documents => switch (locale) {
-          'pt' => 'Documentos',
-          'es' => 'Documentos',
-          _ => 'Documents',
-        },
+        'pt' => 'Documentos',
+        'es' => 'Documentos',
+        _ => 'Documents',
+      },
       GuidePhase.work => switch (locale) {
-          'pt' => 'Trabalho',
-          'es' => 'Trabajo',
-          _ => 'Work',
-        },
+        'pt' => 'Trabalho',
+        'es' => 'Trabajo',
+        _ => 'Work',
+      },
       GuidePhase.arrival => switch (locale) {
-          'pt' => 'Chegada',
-          'es' => 'Llegada',
-          _ => 'Arrival',
-        },
+        'pt' => 'Chegada',
+        'es' => 'Llegada',
+        _ => 'Arrival',
+      },
     };
 
     final effortLabel = switch (item.estimatedEffort) {
       GuideEstimatedEffort.fast => switch (locale) {
-          'pt' => '< 1h',
-          'es' => '< 1h',
-          _ => '< 1h',
-        },
+        'pt' => '< 1h',
+        'es' => '< 1h',
+        _ => '< 1h',
+      },
       GuideEstimatedEffort.medium => switch (locale) {
-          'pt' => '1–3h',
-          'es' => '1–3h',
-          _ => '1–3h',
-        },
+        'pt' => '1–3h',
+        'es' => '1–3h',
+        _ => '1–3h',
+      },
       GuideEstimatedEffort.longer => switch (locale) {
-          'pt' => '3h+',
-          'es' => '3h+',
-          _ => '3h+',
-        },
+        'pt' => '3h+',
+        'es' => '3h+',
+        _ => '3h+',
+      },
       null => null,
     };
 

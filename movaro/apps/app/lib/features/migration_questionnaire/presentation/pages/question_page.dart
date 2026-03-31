@@ -54,7 +54,6 @@ class _QuestionPageState extends State<QuestionPage> {
   final ScrollController _optionsScrollController = ScrollController();
   String? _scrollScopeKey;
   bool _showScrollHint = false;
-  bool _didTryAutoHelp = false;
 
   MigrationQuestionnaireController get controller => widget.controller;
   LocationController get locationController => widget.locationController;
@@ -65,20 +64,7 @@ class _QuestionPageState extends State<QuestionPage> {
     _optionsScrollController.addListener(_updateScrollHint);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(controller.initializeForQuestionnaire());
-      unawaited(_maybeShowHelp());
     });
-  }
-
-  Future<void> _maybeShowHelp() async {
-    if (_didTryAutoHelp) {
-      return;
-    }
-    _didTryAutoHelp = true;
-    await maybeShowContextualHelpGuide(
-      context,
-      preferenceKey: _helpPreferenceKey,
-      content: _helpContent(context),
-    );
   }
 
   Future<void> _showHelp() {
@@ -435,7 +421,7 @@ class _QuestionPageState extends State<QuestionPage> {
 
   Widget _buildQuestionFlow(BuildContext context, Question question) {
     final l10n = context.l10n;
-    const showPrimaryAction = true;
+    final showPrimaryAction = !_shouldAutoAdvance(question);
     _prepareScrollableScope(question.id);
 
     return Column(
@@ -445,6 +431,12 @@ class _QuestionPageState extends State<QuestionPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _QuestionStageBanner(
+                title: l10n.discoverFlowBannerTitle(),
+                body: l10n.discoverFlowBannerBody(),
+                action: l10n.discoverFlowBannerAction(),
+              ),
+              const SizedBox(height: 14),
               QuestionProgressIndicator(
                 currentStep: controller.currentStepForProgress,
                 totalSteps: controller.totalStepsForProgress,
@@ -459,16 +451,7 @@ class _QuestionPageState extends State<QuestionPage> {
                   height: 1.12,
                 ),
               ),
-              if (question.id == 'preferred_city') ...[
-                const SizedBox(height: 10),
-                Text(
-                  l10n.preferredCityQuestionSubtitle(),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSoftFor(context),
-                    height: 1.45,
-                  ),
-                ),
-              ] else if (question.id == 'priorities') ...[
+              if (question.id == 'priorities') ...[
                 const SizedBox(height: 10),
                 _SelectionStatusCard(
                   label: _selectionHelperLabel(context, question),
@@ -485,17 +468,6 @@ class _QuestionPageState extends State<QuestionPage> {
                 _QuestionSubnote(
                   label: _selectionHelperLabel(context, question),
                 ),
-              ] else if (question.id == 'funding') ...[
-                const SizedBox(height: 10),
-                _QuestionSubnote(label: _compactHintLabel(context, question)),
-              ] else if (_sectionTransitionHint(context, question)
-                  case final hint?) ...[
-                const SizedBox(height: 10),
-                _QuestionSubnote(label: hint),
-              ] else if (question.id == 'intent' ||
-                  question.id == 'timeline') ...[
-                const SizedBox(height: 10),
-                _QuestionSubnote(label: l10n.bmpScrollHint),
               ],
             ],
           ),
@@ -1017,6 +989,14 @@ class _QuestionPageState extends State<QuestionPage> {
   String _selectionCounterSuffix(BuildContext context) =>
       context.l10n.questionSelectionCounterSelected;
 
+  bool _shouldAutoAdvance(Question question) {
+    if (question.type != 'single_card' && question.type != 'single_chip') {
+      return false;
+    }
+
+    return question.id != 'preferred_city' && question.id != 'travel_group';
+  }
+
   Future<void> _handleSingleSelect(Question question, Option option) async {
     setState(() {
       _inlineHint = null;
@@ -1029,6 +1009,7 @@ class _QuestionPageState extends State<QuestionPage> {
     }
 
     controller.selectAnswer(question.id, option.value);
+    await _advanceAfterSelection(question);
   }
 
   Widget _buildPreferredCityOptions(BuildContext context, Question question) {
@@ -1105,6 +1086,40 @@ class _QuestionPageState extends State<QuestionPage> {
     controller.selectAnswer('travel_group_children_count', value);
   }
 
+  Future<void> _advanceAfterSelection(Question question) async {
+    if (!_shouldAutoAdvance(question) ||
+        !controller.canGoNext ||
+        controller.isGeneratingPlan) {
+      return;
+    }
+
+    final shouldShowProcessing = controller.isLastQuestion;
+    if (shouldShowProcessing) {
+      setState(() {
+        _showProcessingScreen = true;
+      });
+    }
+
+    final completed = await controller.goNext();
+    if (!mounted) {
+      return;
+    }
+
+    if (!completed) {
+      setState(() {
+        _showProcessingScreen = false;
+      });
+      return;
+    }
+
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.pushReplacementNamed(context, AppRoutes.migrationResultReveal);
+  }
+
   void _handleMultiSelect(Question question, Option option) {
     final changed = controller.toggleAnswer(question.id, option.value);
     if (changed) {
@@ -1119,57 +1134,6 @@ class _QuestionPageState extends State<QuestionPage> {
     });
   }
 
-  String _supportTextForQuestion(BuildContext context, Question question) {
-    switch (question.id) {
-      case 'origin_country':
-        return context.l10n.journeyEntryOriginPending;
-      default:
-        return context.l10n.questionnaireSupportText;
-    }
-  }
-
-  String _sectionLabel(BuildContext context, Question question) {
-    switch (question.id) {
-      case 'origin_country':
-        return context.l10n.questionnaireSectionOrigin;
-      case 'preferred_city':
-        return context.l10n.questionnaireSectionPreferences;
-      case 'timeline':
-      case 'travel_group':
-        return context.l10n.questionnaireSectionBasicProfile;
-      case 'priorities':
-      case 'constraints':
-        return context.l10n.questionnaireSectionPreferences;
-      case 'funding':
-      case 'available_capital':
-        return context.l10n.questionnaireSectionFinancial;
-      case 'intent':
-        return context.l10n.questionnaireSectionGoal;
-      default:
-        return _supportTextForQuestion(context, question);
-    }
-  }
-
-  String? _sectionTransitionHint(BuildContext context, Question question) {
-    final nextIndex = controller.currentIndex + 1;
-    if (nextIndex >= controller.totalStepsForProgress) {
-      return context.l10n.questionnaireReadyForPlan;
-    }
-
-    final nextQuestion = controller.activeQuestions[nextIndex];
-    final currentSection = _sectionLabel(context, question);
-    final nextSection = _sectionLabel(context, nextQuestion);
-    if (currentSection == nextSection) {
-      return null;
-    }
-
-    if (question.id == 'preferred_city') {
-      return null;
-    }
-
-    return context.l10n.questionnaireNextSection(nextSection);
-  }
-
   String _selectionHelperLabel(BuildContext context, Question question) {
     return context.l10n.questionnaireSelectionHelper(question.maxSelections);
   }
@@ -1181,11 +1145,6 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   String _selectionCounterLabel(int selected, int total) => '$selected/$total';
-
-  String _compactHintLabel(BuildContext context, Question question) {
-    return context.l10n.questionnaireCompactHint(question.id);
-  }
-
   String _displayOptionLabel(
     BuildContext context,
     String questionId,
@@ -1351,6 +1310,59 @@ class _QuestionPageState extends State<QuestionPage> {
         _showScrollHint = nextValue;
       });
     }
+  }
+}
+
+class _QuestionStageBanner extends StatelessWidget {
+  const _QuestionStageBanner({
+    required this.title,
+    required this.body,
+    required this.action,
+  });
+
+  final String title;
+  final String body;
+  final String action;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: scheme.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: scheme.primary.withValues(alpha: 0.16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: scheme.primary,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            body,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(height: 1.35),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            action,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -2883,6 +2895,7 @@ class _QuestionLocationDialog extends StatelessWidget {
     );
   }
 }
+
 // ── Location pre-check screen (shown before step 1 in strategic flow) ─────────
 //
 // Case A: GPS already granted + city detected → confirmation
@@ -3151,11 +3164,7 @@ class _FavoritesContextBanner extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.favorite_rounded,
-            size: 14,
-            color: AppColors.primary,
-          ),
+          Icon(Icons.favorite_rounded, size: 14, color: AppColors.primary),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

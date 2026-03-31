@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
@@ -10,6 +11,7 @@ import 'package:movaro_app/features/cities/presentation/widgets/city_housing_via
 import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_score_badge.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_weather_badge.dart';
+import 'package:movaro_app/features/home/application/city_budget_data.dart';
 
 class CityCard extends StatelessWidget {
   const CityCard({
@@ -31,7 +33,7 @@ class CityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final idhm = CityIdhmPresentation.resolve(context, value: city.idhmScore);
+    final budget = CityBudgetData.forCity(city.id);
     final housing = CityHousingViabilityPresenter.resolve(
       context,
       rentScore: city.rentScore,
@@ -235,7 +237,8 @@ class CityCard extends StatelessWidget {
                   const SizedBox(height: 14),
                   _CardSnapshotPanel(
                     city: city,
-                    idhm: idhm,
+                    budget: budget,
+                    seasonality: seasonality,
                     housing: housing,
                     panelText: panelText,
                     panelSoftText: panelSoftText,
@@ -265,6 +268,15 @@ class CityCard extends StatelessWidget {
                       tint: AppColors.danger,
                       items: attentionMetrics,
                     ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: onTap,
+                      icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                      label: Text(context.l10n.favoritesOpenDetailsAction),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -341,7 +353,8 @@ double _normalizeCityRating(int rawScore) {
 class _CardSnapshotPanel extends StatelessWidget {
   const _CardSnapshotPanel({
     required this.city,
-    required this.idhm,
+    required this.budget,
+    required this.seasonality,
     required this.housing,
     required this.panelText,
     required this.panelSoftText,
@@ -350,7 +363,8 @@ class _CardSnapshotPanel extends StatelessWidget {
   });
 
   final City city;
-  final CityIdhmPresentation idhm;
+  final CityBudget? budget;
+  final CitySeasonalityData? seasonality;
   final CityHousingViabilityPresentation housing;
   final Color panelText;
   final Color panelSoftText;
@@ -359,8 +373,11 @@ class _CardSnapshotPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reasons = city.recommendationReasons.take(2).toList(growable: false);
-    final popularityTint = _popularityTint(city.argentinaPopularityScore);
+    final communityTint = _communityTint(city.argentinaPopularityScore);
+    final seasonalityPresentation = _seasonalityPresentation(
+      context,
+      seasonality,
+    );
 
     return Container(
       width: double.infinity,
@@ -387,37 +404,39 @@ class _CardSnapshotPanel extends StatelessWidget {
               children: [
                 Expanded(
                   child: _SnapshotFactTile(
-                    label:
-                        '${context.l10n.cityDetailIdhmLabel} ${city.idhmReferenceYear}',
-                    headline: idhm.headline,
-                    supporting: idhm.supporting,
-                    tint: idhm.tint,
-                    background: idhm.background,
-                    border: idhm.border,
-                    icon: Icons.public_rounded,
+                    label: context.l10n.cityDetailAffordabilityTitle,
+                    headline: _budgetHeadline(context, budget, city),
+                    supporting: _budgetSupporting(context, budget),
+                    tint: _budgetTint(context, budget),
+                    background: _budgetBackground(context, city, budget),
+                    border: _budgetTint(context, budget).withValues(
+                      alpha: AppColors.isDark(context) ? 0.24 : 0.18,
+                    ),
+                    icon: Icons.payments_outlined,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: _SnapshotFactTile(
-                    label: context.l10n.cityDetailPopularityLabel,
-                    headline: _popularityHeadline(
+                    label: context.l10n.cityDetailCommunityTitle,
+                    headline: _communityHeadline(
                       context,
                       city.argentinaPopularityScore,
                     ),
-                    supporting: _popularitySupporting(
+                    supporting: _communitySupporting(
                       context,
                       city.argentinaPopularityScore,
                     ),
-                    tint: popularityTint,
-                    background: _popularityBackground(
+                    tint: communityTint,
+                    background: AppColors.tintedSurfaceFor(
                       context,
-                      city.argentinaPopularityScore,
+                      tint: communityTint,
+                      lightColor: const Color(0xFFEEF5FF),
                     ),
-                    border: popularityTint.withValues(
+                    border: communityTint.withValues(
                       alpha: AppColors.isDark(context) ? 0.24 : 0.20,
                     ),
-                    icon: Icons.favorite_border_rounded,
+                    icon: Icons.people_outline_rounded,
                   ),
                 ),
               ],
@@ -431,29 +450,34 @@ class _CardSnapshotPanel extends StatelessWidget {
             background: housing.background,
             icon: Icons.house_siding_outlined,
           ),
-          if (reasons.isNotEmpty) ...[
+          if (seasonalityPresentation != null) ...[
             const SizedBox(height: 10),
-            Text(
-              context.l10n.cityDetailReasonsTitle,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: panelText,
-                fontWeight: FontWeight.w800,
-              ),
+            _SnapshotSupportBlock(
+              title: seasonalityPresentation.headline,
+              body: seasonalityPresentation.supporting,
+              tint: seasonalityPresentation.tint,
+              background: seasonalityPresentation.background,
+              icon: Icons.flight_takeoff_rounded,
             ),
-            const SizedBox(height: 8),
-            for (var index = 0; index < reasons.length; index++) ...[
-              _SnapshotReasonRow(
-                text: context.l10n.recommendationReasonLabel(reasons[index]),
-                textColor: panelText,
-                softTextColor: panelSoftText,
-              ),
-              if (index != reasons.length - 1) const SizedBox(height: 6),
-            ],
           ],
         ],
       ),
     );
   }
+}
+
+class _SeasonalityCardPresentation {
+  const _SeasonalityCardPresentation({
+    required this.headline,
+    required this.supporting,
+    required this.tint,
+    required this.background,
+  });
+
+  final String headline;
+  final String supporting;
+  final Color tint;
+  final Color background;
 }
 
 class _GlassPill extends StatelessWidget {
@@ -629,85 +653,121 @@ class _SnapshotSupportBlock extends StatelessWidget {
   }
 }
 
-class _SnapshotReasonRow extends StatelessWidget {
-  const _SnapshotReasonRow({
-    required this.text,
-    required this.textColor,
-    required this.softTextColor,
-  });
-
-  final String text;
-  final Color textColor;
-  final Color softTextColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Icon(
-            Icons.check_circle_rounded,
-            size: 16,
-            color: AppColors.success,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: softTextColor, height: 1.3),
-          ),
-        ),
-      ],
-    );
+String _budgetHeadline(
+  BuildContext context,
+  CityBudget? budget,
+  City city,
+) {
+  if (budget != null) {
+    return _formatBrl(context, budget.fairLivingTotal);
   }
+
+  return CityMetricPresentation.resolve(
+    context,
+    kind: CityMetricKind.cost,
+    value: city.movaroScores.economical,
+  ).headline;
 }
 
-String _popularityHeadline(BuildContext context, int score) {
-  if (score >= 80) {
-    return context.l10n.citySnapshotPopularityHigh;
+String _budgetSupporting(BuildContext context, CityBudget? budget) {
+  if (budget == null) {
+    return context.l10n.cityMetricCostMediumSupporting;
   }
-  if (score >= 60) {
-    return context.l10n.citySnapshotPopularityMedium;
-  }
-  return context.l10n.citySnapshotPopularityLow;
+
+  return '${context.l10n.landingBudgetBalancedTitle}: '
+      '${_formatBrl(context, budget.fairLivingTotal)}–${_formatBrl(context, budget.wellLivingTotal)}';
 }
 
-String _popularitySupporting(BuildContext context, int score) {
-  if (score >= 80) {
-    return context.l10n.citySnapshotPopularityHighSupporting;
-  }
-  if (score >= 60) {
-    return context.l10n.citySnapshotPopularityMediumSupporting;
-  }
-  return context.l10n.citySnapshotPopularityLowSupporting;
-}
-
-Color _popularityTint(int score) {
-  if (score >= 80) {
-    return AppColors.success;
-  }
-  if (score >= 60) {
+Color _budgetTint(BuildContext context, CityBudget? budget) {
+  if (budget == null) {
     return AppColors.warning;
   }
-  return AppColors.caution;
+  if (budget.fairLivingTotal <= 4700) return AppColors.success;
+  if (budget.fairLivingTotal <= 5900) return AppColors.warning;
+  return AppColors.danger;
 }
 
-Color _popularityBackground(BuildContext context, int score) {
-  final tint = _popularityTint(score);
+Color _budgetBackground(BuildContext context, City city, CityBudget? budget) {
+  final tint = _budgetTint(context, budget);
   return AppColors.tintedSurfaceFor(
     context,
     tint: tint,
-    lightColor: score >= 80
-        ? const Color(0xFFF1F8F3)
-        : score >= 60
-        ? const Color(0xFFFFF8E7)
-        : const Color(0xFFFFF1E8),
+    lightColor: switch (tint) {
+      AppColors.success => const Color(0xFFF1F8F3),
+      AppColors.warning => const Color(0xFFFFF8E7),
+      _ => const Color(0xFFFDEEE8),
+    },
   );
+}
+
+String _communityHeadline(BuildContext context, int score) {
+  if (score >= 72) return context.l10n.cityComparisonCommunityLarge;
+  if (score >= 52) return context.l10n.cityComparisonCommunityMedium;
+  return context.l10n.cityComparisonCommunitySmall;
+}
+
+String _communitySupporting(BuildContext context, int score) {
+  if (score >= 72) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'es' => 'Más presencia hispanohablante y red de apoyo.',
+      'en' => 'More Spanish-speaking presence and support network.',
+      _ => 'Mais presença hispanohablante e rede de apoio.',
+    };
+  }
+  if (score >= 52) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'es' => 'Hay referencias y algo de comunidad, pero no es dominante.',
+      'en' => 'There are references and some community, but it is not dominant.',
+      _ => 'Há referências e alguma comunidade, mas não é dominante.',
+    };
+  }
+  return switch (Localizations.localeOf(context).languageCode) {
+    'es' => 'Conviene contar menos con comunidad y más con adaptación propia.',
+    'en' => 'Expect to rely less on community and more on your own adaptation.',
+    _ => 'Vale contar menos com comunidade e mais com adaptação própria.',
+  };
+}
+
+Color _communityTint(int score) {
+  if (score >= 72) return AppColors.success;
+  if (score >= 52) return AppColors.primary;
+  return AppColors.warning;
+}
+
+_SeasonalityCardPresentation? _seasonalityPresentation(
+  BuildContext context,
+  CitySeasonalityData? seasonality,
+) {
+  if (seasonality == null) {
+    return null;
+  }
+
+  final isHigh = seasonality.severity == CitySeasonalitySeverity.high;
+  final tint = isHigh ? AppColors.warning : AppColors.primary;
+  return _SeasonalityCardPresentation(
+    headline: isHigh
+        ? context.l10n.citySeasonalityCardBadgeHigh
+        : context.l10n.citySeasonalityCardBadgeMedium,
+    supporting: seasonality.visitorsLabel(
+      Localizations.localeOf(context).languageCode,
+    ),
+    tint: tint,
+    background: AppColors.tintedSurfaceFor(
+      context,
+      tint: tint,
+      lightColor: isHigh ? const Color(0xFFFFF8E7) : const Color(0xFFEEF5FF),
+    ),
+  );
+}
+
+String _formatBrl(BuildContext context, num amount) {
+  final locale = Localizations.localeOf(context).toString();
+  return NumberFormat.currency(
+    locale: locale,
+    name: 'BRL',
+    symbol: 'R\$',
+    decimalDigits: 0,
+  ).format(amount);
 }
 
 enum _MetricTone { positive, neutral, attention }

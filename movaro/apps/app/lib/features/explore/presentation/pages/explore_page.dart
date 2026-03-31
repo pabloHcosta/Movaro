@@ -253,9 +253,9 @@ class _ExplorePageState extends State<ExplorePage> {
       return AppRoutes.migrationPlanCopilot;
     }
     if (plan != null) {
-      return AppRoutes.migrationPlanResult;
+      return AppRoutes.migrationResultReveal;
     }
-    return AppRoutes.migrationStart;
+    return AppRoutes.publicHome;
   }
 }
 

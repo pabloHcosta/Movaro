@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
@@ -15,6 +16,7 @@ import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/utils/number_formatters.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/city_cost_of_living_card.dart';
 import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/error_state_widget.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
@@ -39,6 +41,7 @@ import 'package:movaro_app/features/cities/presentation/widgets/city_snapshot_ti
 import 'package:movaro_app/features/cities/presentation/widgets/city_sources_section.dart';
 import 'package:movaro_app/features/cities/presentation/pages/city_explore_screen.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
+import 'package:movaro_app/features/home/application/city_budget_data.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
@@ -53,6 +56,7 @@ class CityDetailPage extends StatefulWidget {
     this.migrationQuestionnaireController,
     this.selectForPlan = false,
     this.fromMigrationResult = false,
+    this.validationFlow = false,
     super.key,
   });
 
@@ -66,6 +70,7 @@ class CityDetailPage extends StatefulWidget {
   /// an alternative city. A compact confirmation bar is shown at the bottom so
   /// they can start the plan with this city without digging through the UI.
   final bool fromMigrationResult;
+  final bool validationFlow;
 
   @override
   State<CityDetailPage> createState() => _CityDetailPageState();
@@ -76,6 +81,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
   City? _city;
   final ScrollController _scrollController = ScrollController();
   bool _showScrollHint = false;
+  late Future<bool> _locationBannerFuture;
   final _mapSectionKey = GlobalKey();
   final _flightsSectionKey = GlobalKey();
   final _analysisSectionKey = GlobalKey();
@@ -83,16 +89,29 @@ class _CityDetailPageState extends State<CityDetailPage> {
   @override
   void initState() {
     super.initState();
+    _locationBannerFuture = widget.locationController.shouldShowInlineBanner();
+    widget.locationController.addListener(_handleLocationChanged);
     _scrollController.addListener(_handleScroll);
     _load();
   }
 
   @override
   void dispose() {
+    widget.locationController.removeListener(_handleLocationChanged);
     _scrollController
       ..removeListener(_handleScroll)
       ..dispose();
     super.dispose();
+  }
+
+  void _handleLocationChanged() {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _locationBannerFuture = widget.locationController.shouldShowInlineBanner();
+    });
   }
 
   Future<void> _load() async {
@@ -147,6 +166,47 @@ class _CityDetailPageState extends State<CityDetailPage> {
           body: context.l10n.cityDetailGuideStepThreeBody(),
         ),
       ],
+    );
+  }
+
+  DetectedLocation? _resolvedDetectedLocation() {
+    final journeyDetected =
+        widget.migrationQuestionnaireController
+            ?.journeyContextController
+            .detectedLocation;
+    if (journeyDetected?.latitude != null && journeyDetected?.longitude != null) {
+      return journeyDetected;
+    }
+
+    final saved = widget.locationController.savedLocation;
+    if (saved == null) {
+      return journeyDetected;
+    }
+
+    return DetectedLocation(
+      countryName: saved.countryName,
+      countryId: saved.countryCode,
+      city: saved.cityName,
+      region: saved.stateName,
+      latitude: saved.latitude,
+      longitude: saved.longitude,
+      detectedAt: null,
+    );
+  }
+
+  Future<void> _openCityMapSheet(City city) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FractionallySizedBox(
+        heightFactor: 0.9,
+        child: _CityMapBottomSheet(
+          city: city,
+          detectedLocation: _resolvedDetectedLocation(),
+        ),
+      ),
     );
   }
 
@@ -250,12 +310,22 @@ class _CityDetailPageState extends State<CityDetailPage> {
                           context.pageVerticalPadding + 96,
                         ),
                         children: [
+                          if (widget.validationFlow && planContext == null) ...[
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 1160),
+                              child: FrostedPanel(
+                                child: _ValidationFlowBanner(city: city),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
                           // ── Block 1: CTA Principal ──────────────────────
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 1160),
                             child: _CtaPrimaryRow(
                               city: city,
                               planContext: planContext,
+                              validationFlow: widget.validationFlow,
                               onPrimaryAction: () =>
                                   _handlePrimaryPlanAction(context, city),
                               onCompareAction: () =>
@@ -270,6 +340,19 @@ class _CityDetailPageState extends State<CityDetailPage> {
                             child: _QuickSummaryCard(city: city),
                           ),
                           const SizedBox(height: 12),
+                          if (CityBudgetData.forCity(city.id) case final budget?)
+                            ...[
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 1160,
+                                ),
+                                child: CityCostOfLivingCard(
+                                  budget: budget,
+                                  preferredCountryId: plan?.originCountry,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
 
                           // ── Block 3: Category List ──────────────────────
                           ConstrainedBox(
@@ -284,8 +367,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
                             child: _SecondaryActionsRow(
                               onPhotos: () => _openMediaExplore(city),
                               onMap: () => _scrollToKey(_mapSectionKey),
-                              onFlights: () =>
-                                  _scrollToKey(_flightsSectionKey),
+                              onFlights: () => _scrollToKey(_flightsSectionKey),
                               onAnalysis: () =>
                                   _scrollToKey(_analysisSectionKey),
                             ),
@@ -294,8 +376,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
 
                           // ── Location banner ─────────────────────────────
                           FutureBuilder<bool>(
-                            future: widget.locationController
-                                .shouldShowInlineBanner(),
+                            future: _locationBannerFuture,
                             builder: (context, snapshot) {
                               if (snapshot.data != true) {
                                 return const SizedBox.shrink();
@@ -305,14 +386,32 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                   maxWidth: 1160,
                                 ),
                                 child: LocationBannerWidget(
-                                  onActivate: () => Navigator.pushNamed(
-                                    context,
-                                    AppRoutes.locationPermission,
-                                    arguments:
-                                        const LocationPermissionScreenArgs(
-                                          returnToPrevious: true,
-                                        ),
-                                  ),
+                                  onActivate: () async {
+                                    final granted = await Navigator.pushNamed(
+                                      context,
+                                      AppRoutes.locationPermission,
+                                      arguments:
+                                          const LocationPermissionScreenArgs(
+                                            returnToPrevious: true,
+                                          ),
+                                    );
+
+                                    if (!mounted) {
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      _locationBannerFuture = widget
+                                          .locationController
+                                          .shouldShowInlineBanner();
+                                    });
+
+                                    if (granted == true &&
+                                        widget.locationController.savedLocation !=
+                                            null) {
+                                      await _load();
+                                    }
+                                  },
                                 ),
                               );
                             },
@@ -325,10 +424,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
                             constraints: const BoxConstraints(maxWidth: 1160),
                             child: _CityLocationPanel(
                               city: city,
-                              detectedLocation: widget
-                                  .migrationQuestionnaireController
-                                  ?.journeyContextController
-                                  .detectedLocation,
+                              detectedLocation: _resolvedDetectedLocation(),
                               isActivePlanCity:
                                   widget
                                       .migrationQuestionnaireController
@@ -336,6 +432,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                       ?.recommendedCity
                                       ?.id ==
                                   city.id,
+                              onOpenMap: () => _openCityMapSheet(city),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -362,8 +459,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                     locale: localeName.startsWith('pt')
                                         ? 'pt'
                                         : localeName.startsWith('es')
-                                            ? 'es'
-                                            : 'en',
+                                        ? 'es'
+                                        : 'en',
                                     planTimeline: plan?.timeline,
                                   ),
                                 ),
@@ -621,7 +718,11 @@ class _CityDetailPageState extends State<CityDetailPage> {
     final isConfirmedCity =
         plan?.isCityConfirmed == true && plan?.recommendedCity?.id == city.id;
     if (isConfirmedCity) {
-      Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.publicHome,
+        (route) => false,
+      );
       return;
     }
 
@@ -651,7 +752,11 @@ class _CityDetailPageState extends State<CityDetailPage> {
         if (!context.mounted) {
           return;
         }
-        Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.publicHome,
+          (route) => false,
+        );
         return;
       }
 
@@ -659,7 +764,11 @@ class _CityDetailPageState extends State<CityDetailPage> {
       if (!context.mounted) {
         return;
       }
-      Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.publicHome,
+        (route) => false,
+      );
       return;
     }
 
@@ -675,7 +784,11 @@ class _CityDetailPageState extends State<CityDetailPage> {
     if (!context.mounted) {
       return;
     }
-    Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      AppRoutes.publicHome,
+      (route) => false,
+    );
   }
 
   Future<void> _openCityGoogleOverview(City city) async {
@@ -755,13 +868,15 @@ class _CityDetailPageState extends State<CityDetailPage> {
     await precacheCityImage(context, city);
     if (!mounted) return;
     final isPlanCity =
-        widget.migrationQuestionnaireController?.generatedPlan?.recommendedCity
+        widget
+            .migrationQuestionnaireController
+            ?.generatedPlan
+            ?.recommendedCity
             ?.id ==
         city.id;
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            CityExploreScreen(city: city, isPlanCity: isPlanCity),
+        builder: (_) => CityExploreScreen(city: city, isPlanCity: isPlanCity),
       ),
     );
   }
@@ -850,8 +965,8 @@ class _MigrationResultBarState extends State<_MigrationResultBar> {
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(
         context,
-        AppRoutes.migrationPlanCopilot,
-        (route) => route.settings.name == AppRoutes.publicHome,
+        AppRoutes.publicHome,
+        (route) => false,
       );
     } finally {
       if (mounted) setState(() => _isConfirming = false);
@@ -1230,11 +1345,13 @@ class _CityLocationPanel extends StatelessWidget {
     required this.city,
     this.detectedLocation,
     this.isActivePlanCity = false,
+    required this.onOpenMap,
   });
 
   final City city;
   final DetectedLocation? detectedLocation;
   final bool isActivePlanCity;
+  final VoidCallback onOpenMap;
 
   @override
   Widget build(BuildContext context) {
@@ -1248,126 +1365,135 @@ class _CityLocationPanel extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: SizedBox(
-            height: 200,
-            child: Stack(
-              children: [
-                Positioned.fill(child: CityInteractiveMap(city: city)),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    height: 90,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.82),
-                        ],
-                        stops: const [0.2, 1.0],
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  right: 10,
-                  child: Wrap(
-                    spacing: 5,
-                    runSpacing: 5,
-                    children: [
-                      if (region != null && region.isNotEmpty)
-                        _MapBadge(
-                          label:
-                              '📍 ${context.l10n.cityDetailMapRegionLabel} ${_titleCase(region)}',
-                        ),
-                      if (distanceKm != null)
-                        _MapBadge(
-                          label: context.l10n.cityDetailMapDistanceBadge(
-                            NumberFormat.decimalPattern(
-                              Localizations.localeOf(context).toString(),
-                            ).format(distanceKm),
-                            originCityName,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onOpenMap,
+              child: SizedBox(
+                height: 200,
+                child: Stack(
+                  children: [
+                    Positioned.fill(child: CityInteractiveMap(city: city)),
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        height: 90,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withValues(alpha: 0.82),
+                            ],
+                            stops: const [0.2, 1.0],
                           ),
                         ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  left: 12,
-                  bottom: 10,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        city.name,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              letterSpacing: -0.3,
+                      ),
+                    ),
+                    Positioned(
+                      top: 10,
+                      left: 10,
+                      right: 10,
+                      child: Wrap(
+                        spacing: 5,
+                        runSpacing: 5,
+                        children: [
+                          if (region != null && region.isNotEmpty)
+                            _MapBadge(
+                              label:
+                                  '📍 ${context.l10n.cityDetailMapRegionLabel} ${_titleCase(region)}',
                             ),
+                          if (distanceKm != null)
+                            _MapBadge(
+                              label: context.l10n.cityDetailMapDistanceBadge(
+                                NumberFormat.decimalPattern(
+                                  Localizations.localeOf(context).toString(),
+                                ).format(distanceKm),
+                                originCityName,
+                              ),
+                            ),
+                          _MapBadge(
+                            label: context.l10n.cityDetailMapOpenSheetLabel(),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${city.stateName} · ${context.l10n.cityDetailMapCountryLabel()}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontSize: 9,
-                          color: Colors.white.withValues(alpha: 0.65),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (distanceKm != null)
-                  Positioned(
-                    right: 12,
-                    bottom: 10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.55),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.15),
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                    ),
+                    Positioned(
+                      left: 12,
+                      bottom: 10,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            context.l10n.cityDetailMapDistanceMiniLabel(),
-                            style: Theme.of(context).textTheme.labelSmall
+                            city.name,
+                            style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(
-                                  fontSize: 7,
-                                  color: Colors.white38,
-                                  letterSpacing: 0.5,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  letterSpacing: -0.3,
                                 ),
                           ),
+                          const SizedBox(height: 2),
                           Text(
-                            '${NumberFormat.decimalPattern(Localizations.localeOf(context).toString()).format(distanceKm)} km',
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  fontSize: 9,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                            '${city.stateName} · ${context.l10n.cityDetailMapCountryLabel()}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontSize: 9,
+                              color: Colors.white.withValues(alpha: 0.65),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-              ],
+                    if (distanceKm != null)
+                      Positioned(
+                        right: 12,
+                        bottom: 10,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.55),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.15),
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                context.l10n.cityDetailMapDistanceMiniLabel(),
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(
+                                      fontSize: 7,
+                                      color: Colors.white38,
+                                      letterSpacing: 0.5,
+                                    ),
+                              ),
+                              Text(
+                                '${NumberFormat.decimalPattern(Localizations.localeOf(context).toString()).format(distanceKm)} km',
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(
+                                      fontSize: 9,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -1401,6 +1527,297 @@ class _CityLocationPanel extends StatelessWidget {
           return '${part[0].toUpperCase()}${part.substring(1).toLowerCase()}';
         })
         .join(' ');
+  }
+}
+
+class _CityMapBottomSheet extends StatefulWidget {
+  const _CityMapBottomSheet({required this.city, this.detectedLocation});
+
+  final City city;
+  final DetectedLocation? detectedLocation;
+
+  @override
+  State<_CityMapBottomSheet> createState() => _CityMapBottomSheetState();
+}
+
+class _CityMapBottomSheetState extends State<_CityMapBottomSheet> {
+  late final MapController _mapController;
+
+  @override
+  void initState() {
+    super.initState();
+    _mapController = MapController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _fitMap();
+    });
+  }
+
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
+
+  void _fitMap() {
+    final userPoint = _userPoint;
+    final cityPoint = LatLng(widget.city.latitude, widget.city.longitude);
+    if (userPoint == null) {
+      _mapController.move(cityPoint, 9.5);
+      return;
+    }
+
+    _mapController.fitCamera(
+      CameraFit.coordinates(
+        coordinates: [userPoint, cityPoint],
+        padding: const EdgeInsets.fromLTRB(52, 72, 52, 140),
+      ),
+    );
+  }
+
+  LatLng? get _userPoint {
+    final lat = widget.detectedLocation?.latitude;
+    final lng = widget.detectedLocation?.longitude;
+    if (lat == null || lng == null) {
+      return null;
+    }
+    return LatLng(lat, lng);
+  }
+
+  int? get _distanceKm {
+    final userPoint = _userPoint;
+    if (userPoint == null) {
+      return null;
+    }
+    return const Distance().as(
+      LengthUnit.Kilometer,
+      userPoint,
+      LatLng(widget.city.latitude, widget.city.longitude),
+    ).round();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cityPoint = LatLng(widget.city.latitude, widget.city.longitude);
+    final userPoint = _userPoint;
+    final originName = widget.detectedLocation?.city?.trim().isNotEmpty == true
+        ? widget.detectedLocation!.city!
+        : context.l10n.cityDetailMapCurrentLocationLabel();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+      child: FrostedPanel(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 42,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.26),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              context.l10n.cityDetailMapSheetTitle(widget.city.name),
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.l10n.cityDetailMapSheetBody(),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSoftFor(context),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _MapBadge(
+                  label:
+                      '📍 ${widget.city.stateName} · ${context.l10n.cityDetailMapCountryLabel()}',
+                ),
+                if (_distanceKm != null)
+                  _MapBadge(
+                    label: context.l10n.cityDetailMapDistanceBadge(
+                      NumberFormat.decimalPattern(
+                        Localizations.localeOf(context).toString(),
+                      ).format(_distanceKm),
+                      originName,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: SizedBox(
+                height: 360,
+                child: FlutterMap(
+                  mapController: _mapController,
+                  options: MapOptions(
+                    initialCenter: cityPoint,
+                    initialZoom: 9.5,
+                    minZoom: 3,
+                    maxZoom: 18,
+                    interactionOptions: const InteractionOptions(
+                      flags: InteractiveFlag.all,
+                    ),
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'com.movaro.app',
+                    ),
+                    if (userPoint != null)
+                      PolylineLayer(
+                        polylines: [
+                          Polyline(
+                            points: [userPoint, cityPoint],
+                            color: AppColors.primary.withValues(alpha: 0.7),
+                            strokeWidth: 4,
+                          ),
+                        ],
+                      ),
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: cityPoint,
+                          width: 48,
+                          height: 48,
+                          child: const _BottomSheetCityMapMarker(),
+                        ),
+                        if (userPoint != null)
+                          Marker(
+                            point: userPoint,
+                            width: 20,
+                            height: 20,
+                            child: const _BottomSheetUserMapMarker(),
+                          ),
+                      ],
+                    ),
+                    RichAttributionWidget(
+                      attributions: [
+                        TextSourceAttribution(
+                          'OpenStreetMap contributors',
+                          onTap: () {},
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _MapInfoTile(
+                    label: context.l10n.cityDetailMapSheetDestinationLabel(),
+                    value: widget.city.name,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _MapInfoTile(
+                    label: context.l10n.cityDetailMapDistanceMiniLabel(),
+                    value: _distanceKm == null
+                        ? context.l10n.cityDetailMapUnknownDistanceLabel()
+                        : '${NumberFormat.decimalPattern(Localizations.localeOf(context).toString()).format(_distanceKm)} km',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _MapInfoTile(
+              label: context.l10n.cityDetailMapSheetOriginLabel(),
+              value: userPoint == null ? context.l10n.cityDetailMapOriginMissingLabel() : originName,
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MapInfoTile extends StatelessWidget {
+  const _MapInfoTile({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMutedFor(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BottomSheetCityMapMarker extends StatelessWidget {
+  const _BottomSheetCityMapMarker();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 3),
+        boxShadow: const [
+          BoxShadow(color: Color(0x330071E3), blurRadius: 16, spreadRadius: 2),
+        ],
+      ),
+      child: const Icon(Icons.location_on, color: Colors.white, size: 22),
+    );
+  }
+}
+
+class _BottomSheetUserMapMarker extends StatelessWidget {
+  const _BottomSheetUserMapMarker();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF16324F),
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2.5),
+        boxShadow: const [
+          BoxShadow(color: Color(0x1F000000), blurRadius: 10, spreadRadius: 1),
+        ],
+      ),
+    );
   }
 }
 
@@ -1677,18 +2094,22 @@ class _CtaPrimaryRow extends StatelessWidget {
   const _CtaPrimaryRow({
     required this.city,
     required this.planContext,
+    required this.validationFlow,
     required this.onPrimaryAction,
     required this.onCompareAction,
   });
 
   final City city;
   final _PlanCityContext? planContext;
+  final bool validationFlow;
   final VoidCallback onPrimaryAction;
   final VoidCallback onCompareAction;
 
   @override
   Widget build(BuildContext context) {
     final primaryLabel = planContext?.isRecommended == true
+        ? context.l10n.migrationPlanChooseCityAction
+        : validationFlow
         ? context.l10n.migrationPlanChooseCityAction
         : context.l10n.cityDetailAddToPlanAction;
 
@@ -1707,6 +2128,43 @@ class _CtaPrimaryRow extends StatelessWidget {
             onPressed: onCompareAction,
             icon: const Icon(Icons.compare_arrows_rounded),
             label: Text(context.l10n.cityDetailCompareAction),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ValidationFlowBanner extends StatelessWidget {
+  const _ValidationFlowBanner({required this.city});
+
+  final City city;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.l10n.validateCityBannerTitle().toUpperCase(),
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: scheme.primary,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          context.l10n.validateCityBannerBody(),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.35),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          context.l10n.cityDetailDecisionSnapshotPlanSubtitle(city.name),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppColors.textSoftFor(context),
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -1963,9 +2421,9 @@ class _CategoryRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
               Text(
@@ -2076,9 +2534,9 @@ class _SecondaryActionButton extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

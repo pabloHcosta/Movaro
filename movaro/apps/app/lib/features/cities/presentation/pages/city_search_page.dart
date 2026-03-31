@@ -9,6 +9,7 @@ import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/core/widgets/empty_state_widget.dart';
 import 'package:movaro_app/core/widgets/error_state_widget.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/core/widgets/journey_stage_banner.dart';
 import 'package:movaro_app/core/widgets/loading_state_widget.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
@@ -16,6 +17,7 @@ import 'package:movaro_app/features/cities/application/services/city_coastal_pro
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_arrival_profile_ranker.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_card.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_search_matcher.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/methodology_info_banner.dart';
 
 class CitySearchPage extends StatefulWidget {
@@ -29,20 +31,25 @@ class CitySearchPage extends StatefulWidget {
 
 class _CitySearchPageState extends State<CitySearchPage> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _resultsKey = GlobalKey();
   _CityQuickFilter _quickFilter = _CityQuickFilter.all;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_handleSearchInputChange);
-    widget.citiesController.loadCatalog();
-    widget.citiesController.loadMethodology();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.citiesController.loadCatalog();
+      widget.citiesController.loadMethodology();
+    });
   }
 
   @override
   void dispose() {
     _searchController.removeListener(_handleSearchInputChange);
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -89,6 +96,7 @@ class _CitySearchPageState extends State<CitySearchPage> {
         final l10n = context.l10n;
         final hasSearchQuery = _searchController.text.isNotEmpty;
         final visibleCities = _visibleCities(controller);
+        final suggestions = _autocompleteSuggestions(controller);
         final isCatalogBootstrapping =
             controller.catalog.isEmpty && controller.catalogError == null;
 
@@ -98,6 +106,7 @@ class _CitySearchPageState extends State<CitySearchPage> {
               const AmbientBackground(),
               SafeArea(
                 child: ListView(
+                  controller: _scrollController,
                   padding: EdgeInsets.fromLTRB(
                     context.pageHorizontalPadding,
                     context.pageVerticalPadding,
@@ -156,37 +165,50 @@ class _CitySearchPageState extends State<CitySearchPage> {
                               decoration: InputDecoration(
                                 hintText: l10n.citiesSearchHint,
                                 labelText: l10n.citiesSearchFieldLabel,
-                                suffixIcon: IconButton(
-                                  onPressed: () {
-                                    FocusScope.of(context).unfocus();
-                                    setState(() {});
-                                  },
-                                  icon: const Icon(Icons.search_rounded),
-                                ),
+                                prefixIcon: const Icon(Icons.search_rounded),
+                                suffixIcon: hasSearchQuery
+                                    ? IconButton(
+                                        onPressed: _clearSearch,
+                                        icon: const Icon(Icons.close_rounded),
+                                      )
+                                    : IconButton(
+                                        onPressed: () {
+                                          FocusScope.of(context).unfocus();
+                                          _handlePrimarySearchAction(
+                                            suggestions,
+                                          );
+                                        },
+                                        icon: const Icon(Icons.search_rounded),
+                                      ),
                               ),
                               onSubmitted: (_) {
                                 FocusScope.of(context).unfocus();
-                                setState(() {});
+                                _handlePrimarySearchAction(suggestions);
                               },
                             ),
+                            if (hasSearchQuery && suggestions.isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              _CityAutocompletePanel(
+                                title: l10n.citiesSearchResultsCount(
+                                  suggestions.length,
+                                ),
+                                subtitle: l10n.citiesSearchResultsHint,
+                                cities: suggestions,
+                                onTapCity: _openCityDetail,
+                              ),
+                            ],
                             const SizedBox(height: 16),
-                            Wrap(
-                              spacing: 10,
-                              runSpacing: 10,
-                              children: [
-                                for (final filter in _CityQuickFilter.values)
-                                  ChoiceChip(
-                                    label: Text(
-                                      _quickFilterLabel(l10n, filter),
-                                    ),
-                                    selected: _quickFilter == filter,
-                                    onSelected: (_) {
-                                      setState(() {
-                                        _quickFilter = filter;
-                                      });
-                                    },
-                                  ),
-                              ],
+                            _CityQuickFilterRail(
+                              filters: _CityQuickFilter.values
+                                  .where(
+                                    (filter) => filter != _CityQuickFilter.all,
+                                  )
+                                  .toList(),
+                              selectedFilter: _quickFilter,
+                              labelBuilder: (filter) =>
+                                  _quickFilterLabel(l10n, filter),
+                              onSelected: _handleQuickFilterSelection,
+                              clearLabel: l10n.citiesFilterClear,
                             ),
                           ],
                         ),
@@ -197,6 +219,16 @@ class _CitySearchPageState extends State<CitySearchPage> {
                       constraints: const BoxConstraints(maxWidth: 1040),
                       child: MethodologyInfoBanner(
                         message: l10n.citiesMethodologyNote,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1040),
+                      child: JourneyStageBanner(
+                        title: l10n.validateCityBannerTitle(),
+                        body: l10n.validateCityBannerBody(),
+                        action: l10n.validateCityBannerAction(),
+                        icon: Icons.location_searching_rounded,
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -255,30 +287,41 @@ class _CitySearchPageState extends State<CitySearchPage> {
                       )
                     else
                       AnimatedStateSwitcher(
-                        child: ConstrainedBox(
+                        child: KeyedSubtree(
                           key: ValueKey(
                             '${hasSearchQuery}_${visibleCities.length}',
                           ),
-                          constraints: const BoxConstraints(maxWidth: 1040),
-                          child: Column(
-                            children: [
-                              for (final city in visibleCities) ...[
-                                CityCard(
-                                  city: city,
-                                  highlightLabel: _highlightLabel(
-                                    l10n,
-                                    _quickFilter,
+                          child: ConstrainedBox(
+                            key: _resultsKey,
+                            constraints: const BoxConstraints(maxWidth: 1040),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _ResultsHeader(
+                                  title: l10n.citiesResultsTitle,
+                                  body: l10n.citiesResultsBody(
+                                    visibleCities.length,
                                   ),
-                                  citiesController: widget.citiesController,
-                                  isFavorite: widget.citiesController
-                                      .isFavorite(city.id),
-                                  onFavoriteToggle: () =>
-                                      _toggleFavoriteCity(city),
-                                  onTap: () => _openCityDetail(city),
                                 ),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 16),
+                                for (final city in visibleCities) ...[
+                                  CityCard(
+                                    city: city,
+                                    highlightLabel: _highlightLabel(
+                                      l10n,
+                                      _quickFilter,
+                                    ),
+                                    citiesController: widget.citiesController,
+                                    isFavorite: widget.citiesController
+                                        .isFavorite(city.id),
+                                    onFavoriteToggle: () =>
+                                        _toggleFavoriteCity(city),
+                                    onTap: () => _openCityDetail(city),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
                         ),
                       ),
@@ -439,6 +482,38 @@ class _CitySearchPageState extends State<CitySearchPage> {
     }
   }
 
+  List<City> _autocompleteSuggestions(CitiesController controller) {
+    final normalizedQuery = _normalizeSearch(_searchController.text);
+    if (normalizedQuery.isEmpty) {
+      return const [];
+    }
+
+    final semanticSearch = _CitySemanticSearch(normalizedQuery);
+    final ranked = List<City>.from(controller.catalog)
+        .map(
+          (city) => (
+            city: city,
+            score: semanticSearch.score(city) +
+                CitySearchMatcher.score(
+                  normalizedQuery,
+                  city.name,
+                  city.stateName,
+                ) +
+                (_startsWithQuery(city, normalizedQuery) ? 12 : 0),
+          ),
+        )
+        .where((entry) => entry.score > 0)
+        .toList()
+      ..sort((left, right) => right.score.compareTo(left.score));
+    return ranked.map((entry) => entry.city).take(5).toList();
+  }
+
+  bool _startsWithQuery(City city, String query) {
+    final normalizedName = _normalizeSearch(city.name);
+    return normalizedName.startsWith(query) ||
+        _normalizeSearch(city.stateName).startsWith(query);
+  }
+
   String _quickFilterLabel(dynamic l10n, _CityQuickFilter filter) {
     switch (filter) {
       case _CityQuickFilter.all:
@@ -504,10 +579,50 @@ class _CitySearchPageState extends State<CitySearchPage> {
     }
   }
 
+  void _handlePrimarySearchAction(List<City> suggestions) {
+    if (suggestions.isNotEmpty) {
+      _openCityDetail(suggestions.first);
+      return;
+    }
+
+    _scrollToResults();
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    FocusScope.of(context).unfocus();
+    setState(() {});
+  }
+
+  void _handleQuickFilterSelection(_CityQuickFilter? filter) {
+    setState(() {
+      _quickFilter = filter ?? _CityQuickFilter.all;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToResults());
+  }
+
+  void _scrollToResults() {
+    final resultsContext = _resultsKey.currentContext;
+    if (resultsContext == null) {
+      return;
+    }
+
+    Scrollable.ensureVisible(
+      resultsContext,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+      alignment: 0.08,
+    );
+  }
+
   void _openCityDetail(City city) {
     widget.citiesController.prefetchCityDetail(city.id);
     widget.citiesController.prefetchMethodology();
-    Navigator.pushNamed(context, AppRoutes.cityDetail(city.id));
+    Navigator.pushNamed(
+      context,
+      AppRoutes.cityDetail(city.id),
+      arguments: const {'validationFlow': true},
+    );
   }
 
   void _goBackToCities() {
@@ -517,6 +632,242 @@ class _CitySearchPageState extends State<CitySearchPage> {
     }
 
     Navigator.pushNamed(context, AppRoutes.cities);
+  }
+}
+
+class _CityAutocompletePanel extends StatelessWidget {
+  const _CityAutocompletePanel({
+    required this.title,
+    required this.subtitle,
+    required this.cities,
+    required this.onTapCity,
+  });
+
+  final String title;
+  final String subtitle;
+  final List<City> cities;
+  final ValueChanged<City> onTapCity;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : AppColors.surfaceFor(context),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.10)
+              : AppColors.borderFor(context),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
+          ),
+          if (cities.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            for (var index = 0; index < cities.length; index++) ...[
+              _AutocompleteCityTile(
+                city: cities[index],
+                onTap: () => onTapCity(cities[index]),
+              ),
+              if (index != cities.length - 1) const SizedBox(height: 8),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _AutocompleteCityTile extends StatelessWidget {
+  const _AutocompleteCityTile({required this.city, required this.onTap});
+
+  final City city;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.06),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          child: Row(
+            children: [
+              const Icon(Icons.location_city_rounded, size: 18),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      city.name,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${city.stateName} (${city.stateCode})',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                context.l10n.documentationOpenTopicAction,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CityQuickFilterRail extends StatelessWidget {
+  const _CityQuickFilterRail({
+    required this.filters,
+    required this.selectedFilter,
+    required this.labelBuilder,
+    required this.onSelected,
+    required this.clearLabel,
+  });
+
+  final List<_CityQuickFilter> filters;
+  final _CityQuickFilter selectedFilter;
+  final String Function(_CityQuickFilter filter) labelBuilder;
+  final ValueChanged<_CityQuickFilter?> onSelected;
+  final String clearLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 42,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: filters.length + 1,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return _QuickFilterChip(
+              label: clearLabel,
+              selected: selectedFilter == _CityQuickFilter.all,
+              icon: Icons.apps_rounded,
+              onTap: () => onSelected(null),
+            );
+          }
+
+          final filter = filters[index - 1];
+          return _QuickFilterChip(
+            label: labelBuilder(filter),
+            selected: selectedFilter == filter,
+            onTap: () => onSelected(filter),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _QuickFilterChip extends StatelessWidget {
+  const _QuickFilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.icon,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected
+          ? AppColors.primary
+          : Colors.white.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(
+                  icon,
+                  size: 16,
+                  color: selected ? Colors.white : AppColors.textPrimary,
+                ),
+                const SizedBox(width: 8),
+              ],
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: selected
+                      ? Colors.white
+                      : AppColors.textPrimaryFor(context),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ResultsHeader extends StatelessWidget {
+  const _ResultsHeader({required this.title, required this.body});
+
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return FrostedPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Text(
+            body,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -766,6 +1117,8 @@ class _CitySemanticSearch {
     );
 
     var total = 0;
+
+    total += CitySearchMatcher.score(query, city.name, city.stateName);
 
     if (haystack.contains(query)) {
       total += 120;

@@ -13,6 +13,7 @@ import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/core/widgets/journey_stage_banner.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/explore/application/services/documentation_guide_preferences_store.dart';
 import 'package:movaro_app/features/explore/application/services/guide_answers_remote_service.dart';
@@ -23,6 +24,7 @@ import 'package:movaro_app/features/explore/presentation/widgets/practical_cost_
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 
 enum DocumentationGuideSection {
   documents,
@@ -234,7 +236,15 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     final availableCountries = _availableGuideCountries(context);
     final selectedCountry = _selectedGuideCountry(context, availableCountries);
     final hasActivePlan = _hasActivePlan;
-    final hasGuideData = _normalizeCountryId(selectedCountry.id) == 'brasil';
+    final hasGuideData = MigrationGuideRegistry.supportsDestination(
+      selectedCountry.id,
+    );
+    final isExecutionStage =
+        widget
+            .migrationQuestionnaireController
+            ?.generatedPlan
+            ?.isCityConfirmed ==
+        true;
 
     final bodyWidget = Stack(
       children: [
@@ -265,6 +275,26 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                               : _showGuideModal,
                         ),
                       if (!widget.embedded) const SizedBox(height: 20),
+                      if (!widget.embedded) ...[
+                        JourneyStageBanner(
+                          title: isExecutionStage
+                              ? l10n.stageExecutionTitle
+                              : l10n.stageDecisionTitle,
+                          body: isExecutionStage
+                              ? l10n.stageExecutionBody
+                              : l10n.stageDecisionBody,
+                          action: isExecutionStage
+                              ? l10n.stageExecutionAction
+                              : l10n.stageDecisionAction,
+                          icon: isExecutionStage
+                              ? Icons.route_rounded
+                              : Icons.explore_rounded,
+                          accent: isExecutionStage
+                              ? const Color(0xFF0A9B6E)
+                              : Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                       FrostedPanel(
                         padding: const EdgeInsets.all(24),
                         child: Column(
@@ -277,6 +307,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                                 selectedCountry,
                               ),
                               hasActivePlan: hasActivePlan,
+                              hasGuideData: hasGuideData,
                               onTapCountry: () => _showCountryPicker(
                                 context,
                                 availableCountries,
@@ -402,7 +433,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
               widget.journeyContextController != null &&
               widget.migrationQuestionnaireController != null
           ? MainNavigationBar(
-              currentIndex: 3,
+              currentIndex: isExecutionStage ? 2 : 1,
               journeyContextController: widget.journeyContextController!,
               citiesController: widget.citiesController!,
               migrationQuestionnaireController:
@@ -566,13 +597,15 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     if (selectable.isNotEmpty) {
       return selectable;
     }
-    return [
-      CatalogCountry(
-        id: 'brasil',
-        name: context.l10n.questionOptionBrazil,
-        isoCode: 'BR',
-      ),
-    ];
+    return MigrationGuideRegistry.defaultSupportedDestinations
+        .map(
+          (countryId) => CatalogCountry(
+            id: countryId,
+            name: context.l10n.countryLabel(countryId),
+            isoCode: countryId == 'brasil' ? 'BR' : countryId.toUpperCase(),
+          ),
+        )
+        .toList(growable: false);
   }
 
   CatalogCountry _selectedGuideCountry(
@@ -580,17 +613,17 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     List<CatalogCountry> countries,
   ) {
     final preferredId =
-        _normalizeCountryId(_selectedCountryId) ??
-        _normalizeCountryId(
+        MigrationGuideRegistry.normalizeCountryId(_selectedCountryId) ??
+        MigrationGuideRegistry.normalizeCountryId(
           widget.journeyContextController?.destinationCountryId,
         ) ??
-        _normalizeCountryId(
+        MigrationGuideRegistry.normalizeCountryId(
           widget
               .migrationQuestionnaireController
               ?.generatedPlan
               ?.destinationCountry,
         ) ??
-        'brasil';
+        countries.first.id;
 
     for (final country in countries) {
       if (country.id == preferredId) {
@@ -600,21 +633,10 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     return countries.first;
   }
 
-  String? _normalizeCountryId(String? raw) {
-    if (raw == null) {
-      return null;
-    }
-    final normalized = raw.toLowerCase().trim();
-    return switch (normalized) {
-      'brazil' || 'brasil' => 'brasil',
-      'argentina' => 'argentina',
-      _ => normalized,
-    };
-  }
-
   String _localizedCountryName(BuildContext context, CatalogCountry country) {
     final l10n = context.l10n;
-    final normalizedId = _normalizeCountryId(country.id) ?? country.id;
+    final normalizedId =
+        MigrationGuideRegistry.normalizeCountryId(country.id) ?? country.id;
 
     return switch (normalizedId) {
       'argentina' => l10n.questionOptionArgentina,
@@ -1717,33 +1739,59 @@ class _GuideCountryBar extends StatelessWidget {
     required this.selectedCountry,
     required this.selectedCountryLabel,
     required this.hasActivePlan,
+    required this.hasGuideData,
     required this.onTapCountry,
   });
 
   final CatalogCountry selectedCountry;
   final String selectedCountryLabel;
   final bool hasActivePlan;
+  final bool hasGuideData;
   final VoidCallback onTapCountry;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onTapCountry,
-            icon: Text(
-              selectedCountry.flagEmoji,
-              style: const TextStyle(fontSize: 18),
-            ),
-            label: Text(selectedCountryLabel),
+        Text(
+          l10n.documentationGuideCountryLabel,
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          hasActivePlan
+              ? l10n.documentationGuideCountryBodyFromPlan(selectedCountryLabel)
+              : l10n.documentationGuideCountryBodyManual(selectedCountryLabel),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppColors.textSoftFor(context),
+            height: 1.35,
           ),
         ),
-        const SizedBox(width: 12),
-        _GuideStatusChip(
-          label: hasActivePlan
-              ? context.l10n.documentationGuideUsingPlanLabel
-              : context.l10n.documentationGuideManualCountryLabel,
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: onTapCountry,
+                icon: Text(
+                  selectedCountry.flagEmoji,
+                  style: const TextStyle(fontSize: 18),
+                ),
+                label: Text(selectedCountryLabel),
+              ),
+            ),
+            const SizedBox(width: 12),
+            _GuideStatusChip(
+              label: hasActivePlan
+                  ? l10n.documentationGuideUsingPlanLabel
+                  : l10n.documentationGuideManualCountryLabel,
+              highlighted: hasGuideData,
+            ),
+          ],
         ),
       ],
     );
@@ -1751,23 +1799,30 @@ class _GuideCountryBar extends StatelessWidget {
 }
 
 class _GuideStatusChip extends StatelessWidget {
-  const _GuideStatusChip({required this.label});
+  const _GuideStatusChip({required this.label, this.highlighted = true});
 
   final String label;
+  final bool highlighted;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.10),
+        color: highlighted
+            ? AppColors.primary.withValues(alpha: 0.10)
+            : AppColors.warning.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.14)),
+        border: Border.all(
+          color: highlighted
+              ? AppColors.primary.withValues(alpha: 0.14)
+              : AppColors.warning.withValues(alpha: 0.18),
+        ),
       ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: AppColors.primary,
+          color: highlighted ? AppColors.primary : AppColors.warning,
           fontWeight: FontWeight.w800,
         ),
       ),

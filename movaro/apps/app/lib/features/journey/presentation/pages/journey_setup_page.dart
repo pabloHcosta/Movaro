@@ -19,17 +19,25 @@ import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/movaro_logo.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 
+class JourneySetupPageArgs {
+  const JourneySetupPageArgs({this.continueRoute});
+
+  final String? continueRoute;
+}
+
 class JourneySetupPage extends StatefulWidget {
   const JourneySetupPage({
     required this.catalogRepository,
     required this.journeyContextController,
     required this.locationController,
+    this.args = const JourneySetupPageArgs(),
     super.key,
   });
 
   final CatalogRepository catalogRepository;
   final JourneyContextController journeyContextController;
   final LocationController locationController;
+  final JourneySetupPageArgs args;
 
   @override
   State<JourneySetupPage> createState() => _JourneySetupPageState();
@@ -93,7 +101,10 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
       _originId = origin.id;
       _destinationId = destination.id;
     });
-    Navigator.pushReplacementNamed(context, AppRoutes.publicHome);
+    Navigator.pushReplacementNamed(
+      context,
+      widget.args.continueRoute ?? AppRoutes.publicHome,
+    );
   }
 
   Future<void> _maybeShowHelp() async {
@@ -228,6 +239,8 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
                                 _IntroHero(
                                   selectedDestination: selectedDestination,
                                   selectedOrigin: selectedOrigin,
+                                  detectedLocation:
+                                      controller.detectedLocation,
                                 ),
                                 const SizedBox(height: 16),
                                 _SelectorPanel(
@@ -383,7 +396,8 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
                                         ? () {
                                             Navigator.pushReplacementNamed(
                                               context,
-                                              AppRoutes.migrationStart,
+                                              widget.args.continueRoute ??
+                                                  AppRoutes.publicHome,
                                             );
                                           }
                                         : null,
@@ -456,10 +470,12 @@ class _IntroHero extends StatelessWidget {
   const _IntroHero({
     required this.selectedDestination,
     required this.selectedOrigin,
+    required this.detectedLocation,
   });
 
   final CatalogCountry? selectedDestination;
   final CatalogCountry? selectedOrigin;
+  final DetectedLocation? detectedLocation;
 
   @override
   Widget build(BuildContext context) {
@@ -475,6 +491,14 @@ class _IntroHero extends StatelessWidget {
           Text(
             l10n.journeyEntryDynamicTitle,
             style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.journeySetupFlowHint,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.35,
+            ),
           ),
           const SizedBox(height: 14),
           Wrap(
@@ -496,6 +520,15 @@ class _IntroHero extends StatelessWidget {
                     : '${l10n.journeyOriginSectionTitle}: ${selectedOrigin!.name}',
               ),
             ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            detectedLocation == null
+                ? l10n.journeySetupManualChangeHint
+                : l10n.journeySetupDetectedOriginHint(detectedLocation!.countryName),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
           ),
         ],
       ),
@@ -558,6 +591,14 @@ class _OriginAssistSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          context.l10n.journeySetupOriginAssistHint,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppColors.textSoftFor(context),
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: 10),
         Wrap(
           spacing: 10,
           runSpacing: 10,

@@ -4,21 +4,17 @@ import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
 
 class IntroPage extends StatefulWidget {
   const IntroPage({
     required this.journeyContextController,
-    required this.locationController,
     this.isFirstLaunch = false,
     super.key,
   });
 
   final bool isFirstLaunch;
   final JourneyContextController journeyContextController;
-  final LocationController locationController;
 
   @override
   State<IntroPage> createState() => _IntroPageState();
@@ -27,7 +23,6 @@ class IntroPage extends StatefulWidget {
 class _IntroPageState extends State<IntroPage> {
   late final PageController _pageController = PageController();
   int _currentPage = 0;
-  bool _isResolvingLocation = false;
 
   @override
   void dispose() {
@@ -51,85 +46,15 @@ class _IntroPageState extends State<IntroPage> {
   }
 
   Future<void> _handlePrimaryAction() async {
-    final slide = _slidesFor(context)[_currentPage];
-    if (!slide.isLocationStep) {
-      if (_currentPage == _slidesFor(context).length - 1) {
-        await _finish(context);
-        return;
-      }
-
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 320),
-        curve: Curves.easeOutCubic,
-      );
+    if (_currentPage == _slidesFor(context).length - 1) {
+      await _finish(context);
       return;
     }
 
-    setState(() {
-      _isResolvingLocation = true;
-    });
-
-    final result = await widget.locationController
-        .requestPermissionAndCapture();
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _isResolvingLocation = false;
-    });
-
-    if (result.outcome == LocationPermissionOutcome.permanentlyDenied) {
-      await showModalBottomSheet<void>(
-        context: context,
-        backgroundColor: Colors.transparent,
-        builder: (sheetContext) => Padding(
-          padding: const EdgeInsets.all(16),
-          child: FrostedPanel(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.locationSettingsTitle(),
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  context.l10n.locationSettingsBody(),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: () async {
-                      await widget.locationController.openAppSettings();
-                      if (sheetContext.mounted) {
-                        Navigator.pop(sheetContext);
-                      }
-                    },
-                    child: Text(context.l10n.locationOpenSettingsAction()),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (mounted) {
-      await _finish(context);
-    }
-  }
-
-  Future<void> _handleSecondaryAction() async {
-    await widget.locationController.deferPermission();
-    if (mounted) {
-      await _finish(context);
-    }
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   @override
@@ -180,10 +105,7 @@ class _IntroPageState extends State<IntroPage> {
                               currentPage: _currentPage,
                               totalPages: slides.length,
                               isCompact: isCompact,
-                              isBusy:
-                                  _isResolvingLocation &&
-                                  slide.isLocationStep &&
-                                  index == _currentPage,
+                              isBusy: false,
                               onDotTap: (page) {
                                 _pageController.animateToPage(
                                   page,
@@ -192,9 +114,7 @@ class _IntroPageState extends State<IntroPage> {
                                 );
                               },
                               onPrimaryAction: _handlePrimaryAction,
-                              onSecondaryAction: slide.isLocationStep
-                                  ? _handleSecondaryAction
-                                  : null,
+                              onSecondaryAction: null,
                             );
                           },
                         ),
@@ -230,14 +150,6 @@ class _IntroPageState extends State<IntroPage> {
         description: l10n.introRedesignGuideDescription(),
         primaryLabel: l10n.commonNextAction(),
         illustration: _guideSvg(context),
-      ),
-      _IntroSlideData(
-        title: l10n.introRedesignLocationTitle(),
-        description: l10n.introRedesignLocationDescription(),
-        primaryLabel: l10n.locationPermissionAllowAction(),
-        secondaryLabel: l10n.locationPermissionLaterAction(),
-        illustration: _locationSvg(context),
-        isLocationStep: true,
       ),
     ];
   }
@@ -335,33 +247,6 @@ class _IntroPageState extends State<IntroPage> {
             .replaceAll('+ 3 itens aguardando...', '+ 3 items waiting...'),
     };
   }
-
-  String _locationSvg(BuildContext context) {
-    final language = Localizations.localeOf(context).languageCode;
-    return switch (language) {
-      'pt' => _introLocationSvg,
-      'es' =>
-        _introLocationSvg
-            .replaceAll(
-              'País de origem detectado automaticamente',
-              'País de origen detectado automáticamente',
-            )
-            .replaceAll(
-              'Moeda e conteúdo na sua língua',
-              'Moneda y contenido en tu idioma',
-            ),
-      _ =>
-        _introLocationSvg
-            .replaceAll(
-              'País de origem detectado automaticamente',
-              'Origin country detected automatically',
-            )
-            .replaceAll(
-              'Moeda e conteúdo na sua língua',
-              'Currency and content in your language',
-            ),
-    };
-  }
 }
 
 class _IntroSlideData {
@@ -371,7 +256,6 @@ class _IntroSlideData {
     required this.primaryLabel,
     required this.illustration,
     this.secondaryLabel,
-    this.isLocationStep = false,
   });
 
   final String title;
@@ -379,7 +263,6 @@ class _IntroSlideData {
   final String primaryLabel;
   final String? secondaryLabel;
   final String illustration;
-  final bool isLocationStep;
 }
 
 class _IntroTopBar extends StatelessWidget {

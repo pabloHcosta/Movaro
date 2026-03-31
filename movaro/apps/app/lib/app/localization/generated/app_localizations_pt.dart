@@ -785,6 +785,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get documentationGuideManualCountryLabel => 'País manual';
 
   @override
+  String get documentationGuideCountryLabel => 'País da documentação';
+
+  @override
+  String documentationGuideCountryBodyFromPlan(Object country) {
+    return 'Você está consultando o conteúdo prático de $country com base no destino do seu plano.';
+  }
+
+  @override
+  String documentationGuideCountryBodyManual(Object country) {
+    return 'Escolha o país que você quer consultar. Por enquanto você está vendo o conteúdo prático de $country.';
+  }
+
+  @override
   String documentationSearchResultsCount(int count) {
     return '$count itens encontrados';
   }
@@ -2194,17 +2207,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get citiesSearchTitle => 'Buscar cidades';
 
   @override
-  String get citiesSearchHeadline => 'Encontre uma cidade no catálogo inicial';
+  String get citiesSearchHeadline =>
+      'Valide uma cidade antes de assumir um plano';
 
   @override
   String get citiesSearchDescription =>
-      'Busque por nome ou explore a lista atual do Movaro.';
+      'Busque por nome, compare alternativas e abra os detalhes para entender custo, encaixe e próximos passos.';
 
   @override
   String get citiesSearchHint => 'Buscar cidade';
 
   @override
-  String get citiesSearchFieldLabel => 'Nome da cidade';
+  String get citiesSearchFieldLabel => 'Qual cidade você quer validar?';
 
   @override
   String get citiesSearchHelper =>
@@ -2484,7 +2498,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cityDetailPopularityLabel => 'Popularidade entre argentinos';
 
   @override
-  String get cityDetailLanguageLabel => 'Adaptação ao idioma';
+  String get cityDetailLanguageLabel => 'Facilidade com o português';
 
   @override
   String get cityDetailWorkLabel => 'Mercado de trabalho';
@@ -2700,6 +2714,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get mainNavCopilot => 'Guia';
 
   @override
+  String get mainNavDecision => 'Explorar';
+
+  @override
+  String get mainNavExecution => 'Execução';
+
+  @override
   String get mainNavExplore => 'Explore';
 
   @override
@@ -2733,6 +2753,36 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get favoritesPageTitle => 'Favoritos';
+
+  @override
+  String get stageClarityTitle => 'Clareza';
+
+  @override
+  String get stageClarityBody =>
+      'Entenda seu ponto de partida e escolha o melhor caminho para começar.';
+
+  @override
+  String get stageClarityAction => 'Escolha um caminho abaixo';
+
+  @override
+  String get stageDecisionTitle => 'Decisão';
+
+  @override
+  String get stageDecisionBody =>
+      'Receba uma recomendação inicial e valide a cidade que faz mais sentido agora.';
+
+  @override
+  String get stageDecisionAction => 'Responda e avance para o resultado';
+
+  @override
+  String get stageExecutionTitle => 'Execução';
+
+  @override
+  String get stageExecutionBody =>
+      'Transforme a cidade escolhida em próximos passos concretos.';
+
+  @override
+  String get stageExecutionAction => 'Comece pela ação recomendada';
 
   @override
   String favoritesPageCount(Object current, Object total) {
@@ -3118,84 +3168,84 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cityMetricBadgeAttention => 'Exige mais atenção';
 
   @override
-  String get cityMetricCostLowHeadline => 'Baixo custo';
+  String get cityMetricCostLowHeadline => 'Baixo';
 
   @override
   String get cityMetricCostLowSupporting =>
       'Mais leve para o orçamento do dia a dia.';
 
   @override
-  String get cityMetricCostMediumHeadline => 'Custo moderado';
+  String get cityMetricCostMediumHeadline => 'Equilibrado';
 
   @override
   String get cityMetricCostMediumSupporting =>
       'Equilíbrio razoável entre rotina e infraestrutura.';
 
   @override
-  String get cityMetricCostHighHeadline => 'Custo alto';
+  String get cityMetricCostHighHeadline => 'Alto';
 
   @override
   String get cityMetricCostHighSupporting =>
       'Vai exigir mais cuidado com aluguel e gastos mensais.';
 
   @override
-  String get cityMetricSafetyHighHeadline => 'Segurança alta';
+  String get cityMetricSafetyHighHeadline => 'Alta';
 
   @override
   String get cityMetricSafetyHighSupporting =>
       'Leitura mais confortável para a rotina inicial.';
 
   @override
-  String get cityMetricSafetyMediumHeadline => 'Segurança moderada';
+  String get cityMetricSafetyMediumHeadline => 'Equilibrada';
 
   @override
   String get cityMetricSafetyMediumSupporting =>
       'Depende mais do bairro e do contexto local.';
 
   @override
-  String get cityMetricSafetyLowHeadline => 'Mais cautela';
+  String get cityMetricSafetyLowHeadline => 'Baixa';
 
   @override
   String get cityMetricSafetyLowSupporting =>
       'Vale validar melhor a cidade antes de tratá-la como uma mudança simples.';
 
   @override
-  String get cityMetricLanguageEasyHeadline => 'Adaptação fácil';
+  String get cityMetricLanguageEasyHeadline => 'Fácil';
 
   @override
   String get cityMetricLanguageEasySupporting =>
       'Tende a ser mais amigável para quem chega falando espanhol.';
 
   @override
-  String get cityMetricLanguageMediumHeadline => 'Adaptação moderada';
+  String get cityMetricLanguageMediumHeadline => 'Média';
 
   @override
   String get cityMetricLanguageMediumSupporting =>
       'Uma base de português ajuda bastante na rotina.';
 
   @override
-  String get cityMetricLanguageHardHeadline => 'Adaptação mais difícil';
+  String get cityMetricLanguageHardHeadline => 'Difícil';
 
   @override
   String get cityMetricLanguageHardSupporting =>
       'O idioma tende a pesar mais na integração do dia a dia.';
 
   @override
-  String get cityMetricWorkStrongHeadline => 'Mercado forte';
+  String get cityMetricWorkStrongHeadline => 'Forte';
 
   @override
   String get cityMetricWorkStrongSupporting =>
       'Cidade com leitura mais favorável para buscar oportunidades.';
 
   @override
-  String get cityMetricWorkMediumHeadline => 'Mercado moderado';
+  String get cityMetricWorkMediumHeadline => 'Equilibrado';
 
   @override
   String get cityMetricWorkMediumSupporting =>
       'Pode funcionar bem, mas depende mais do seu perfil.';
 
   @override
-  String get cityMetricWorkLowHeadline => 'Mercado mais limitado';
+  String get cityMetricWorkLowHeadline => 'Limitado';
 
   @override
   String get cityMetricWorkLowSupporting =>
@@ -3513,6 +3563,23 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get journeyEntryOriginPending =>
       'Vamos coletar sua origem na primeira pergunta antes de gerar o plano.';
+
+  @override
+  String get journeySetupFlowHint =>
+      'Se houver só uma rota disponível agora, o Movaro preenche isso para você. Se houver mais de uma opção, você escolhe manualmente.';
+
+  @override
+  String get journeySetupManualChangeHint =>
+      'Você pode alterar origem e destino depois, sem reiniciar o app.';
+
+  @override
+  String journeySetupDetectedOriginHint(Object country) {
+    return 'Detectamos $country como sugestão de origem. Você pode confirmar ou trocar manualmente.';
+  }
+
+  @override
+  String get journeySetupOriginAssistHint =>
+      'Use sua localização só se quiser uma sugestão de origem. A escolha manual continua disponível.';
 
   @override
   String get journeyLocationPanelTitle =>
@@ -6456,6 +6523,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get migrationResultRevealEyebrow => 'Sua cidade recomendada';
 
   @override
+  String get migrationResultRevealHeaderTitle => 'Recomendação';
+
+  @override
   String get migrationResultRevealRedoAction => 'Refazer questionário';
 
   @override
@@ -6480,6 +6550,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get migrationResultRevealExploreCity => 'Ver detalhes da cidade';
 
   @override
+  String get migrationResultRevealCompareCta => 'Comparar com alternativas';
+
+  @override
+  String migrationResultRevealStartPreparationCta(String city) {
+    return 'Começar preparação com $city';
+  }
+
+  @override
+  String get migrationResultRevealRefineAction =>
+      'Deixar recomendação mais precisa';
+
+  @override
   String get homeVisualTitlePrefix => 'Pensando em viver em ';
 
   @override
@@ -6492,6 +6574,51 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get homeVisualSupportLine =>
       'Você pode começar mesmo sem ter tudo decidido.';
+
+  @override
+  String get homeEntryTitlePrefix => 'Escolha ';
+
+  @override
+  String get homeEntryTitleHighlight => 'como quer começar';
+
+  @override
+  String get homeEntrySubtitle =>
+      'Receba uma direção inicial em poucos minutos ou valide uma cidade que você já está considerando antes de entrar no modo execução.';
+
+  @override
+  String get homeEntrySupportLine => 'Direção inicial em cerca de 2 minutos';
+
+  @override
+  String get homeEntryDiscoverTitle => 'Quero descobrir minha melhor cidade';
+
+  @override
+  String get homeEntryDiscoverBody =>
+      'Responda poucas perguntas e receba uma direção inicial com cidade recomendada, alternativas e próximos passos.';
+
+  @override
+  String get homeEntryDiscoverBadge => 'Caminho mais rápido';
+
+  @override
+  String get homeEntryDiscoverAction => 'Receber minha direção inicial';
+
+  @override
+  String get homeEntryKnownCityTitle => 'Já tenho uma cidade em mente';
+
+  @override
+  String get homeEntryKnownCityBody =>
+      'Busque a cidade, compare alternativas e valide custo, encaixe e próximos passos antes de assumir um plano completo.';
+
+  @override
+  String get homeEntryKnownCityBadge => 'Sem questionário obrigatório';
+
+  @override
+  String get homeEntryKnownCityAction => 'Validar uma cidade';
+
+  @override
+  String get homeEntryShortcutsTitle => 'Atalhos úteis';
+
+  @override
+  String get homeEntryExploreCitiesAction => 'Explorar cidades';
 
   @override
   String get homeVisualCostsAction => 'Ver quanto pode custar';
@@ -6546,6 +6673,39 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get assistantModeGuides => '📋 Guias';
+
+  @override
+  String get assistantQuickTopicsTitle => 'Temas rápidos';
+
+  @override
+  String get assistantQuickQuestionsTitle => 'Perguntas rápidas';
+
+  @override
+  String get assistantOpenGuidesAction => 'Abrir guia';
+
+  @override
+  String get assistantContextChatTitle => 'Chat com contexto';
+
+  @override
+  String assistantContextChatBody(Object origin, Object destination) {
+    return 'Faça perguntas curtas sobre a rota $origin → $destination. O assistente responde melhor sobre documentos, custos, moradia e próximos passos.';
+  }
+
+  @override
+  String get assistantContextGuideTitle => 'Guias por país';
+
+  @override
+  String assistantContextGuideBody(Object destination) {
+    return 'Escolha o país que quer consultar e abra o conteúdo certo por tema para destravar seu próximo passo em $destination.';
+  }
+
+  @override
+  String get assistantStartCardTitle => 'Comece pela sua dúvida real';
+
+  @override
+  String assistantStartCardBody(Object origin, Object destination) {
+    return 'Você pode perguntar direto sobre a rota $origin → $destination ou abrir o guia para navegar por documentos, moradia, trabalho e custos.';
+  }
 
   @override
   String get planResetManageAction => 'Começar um novo plano';

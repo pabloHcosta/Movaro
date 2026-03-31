@@ -82,8 +82,24 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       return const [];
     }
 
-    return _questions
-        .where((question) => question.variants.contains(variant))
+    final orderedQuestionIds = switch (variant) {
+      QuestionnaireVariant.lean => const ['intent', 'timeline', 'priorities'],
+      QuestionnaireVariant.strategic => const [
+        'intent',
+        'timeline',
+        'priorities',
+        'funding',
+        'constraints',
+      ],
+    };
+
+    final questionById = {
+      for (final question in _questions) question.id: question,
+    };
+
+    return orderedQuestionIds
+        .map((questionId) => questionById[questionId])
+        .whereType<Question>()
         .toList(growable: false);
   }
 
@@ -97,15 +113,22 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   }
 
   List<Question> get _activeQuestions {
-    return coreQuestions
-        .where((question) {
-          if (question.id != 'available_capital') {
-            return true;
-          }
+    final activeQuestions = <Question>[];
+    for (final question in coreQuestions) {
+      if (question.id == 'constraints' && !_includeConstraints) {
+        continue;
+      }
+      activeQuestions.add(question);
+      if (question.id == 'funding' &&
+          capitalAwareFundingOptions.contains(answerFor('funding'))) {
+        final capitalQuestion = _questionById('available_capital');
+        if (capitalQuestion != null) {
+          activeQuestions.add(capitalQuestion);
+        }
+      }
+    }
 
-          return capitalAwareFundingOptions.contains(answerFor('funding'));
-        })
-        .toList(growable: false);
+    return activeQuestions;
   }
 
   Question? get currentQuestion {
@@ -169,13 +192,23 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     }
   }
 
-  Future<void> initializeForQuestionnaire() async {
+  Future<void> initializeForQuestionnaire({
+    QuestionnaireVariant variant = QuestionnaireVariant.lean,
+  }) async {
     await initialize();
-    if (_selectedVariant == null) {
-      _selectedVariant = QuestionnaireVariant.strategic;
-      notifyListeners();
-      _persistDraft();
+    await _ensurePlanningContext(preferredCity: _preferredCity);
+    _syncJourneyAnswers();
+    if (_selectedVariant != variant) {
+      _selectedVariant = variant;
     }
+    _showRefinePrompt = false;
+    _isRefineResolved = variant == QuestionnaireVariant.lean;
+    _includeConstraints =
+        variant == QuestionnaireVariant.strategic &&
+        answerFor('constraints') != null;
+    _currentIndex = _firstUnansweredQuestionIndex();
+    notifyListeners();
+    _persistDraft();
   }
 
   Future<void> resetFlow() async {
@@ -208,14 +241,15 @@ class MigrationQuestionnaireController extends ChangeNotifier {
 
   void selectVariant(QuestionnaireVariant variant) {
     _selectedVariant = variant;
-    _currentIndex = 0;
+    _currentIndex = _firstUnansweredQuestionIndex();
     _showRefinePrompt = false;
-    _isRefineResolved = false;
-    _includeConstraints = false;
+    _isRefineResolved = variant == QuestionnaireVariant.lean;
+    _includeConstraints =
+        variant == QuestionnaireVariant.strategic &&
+        answerFor('constraints') != null;
     if (variant == QuestionnaireVariant.lean) {
       _removeAnswer('constraints');
-      _removeAnswer('travel_group');
-      _removeAnswer('travel_group_children_count');
+      _removeAnswer('funding');
       _removeAnswer('available_capital');
     }
     notifyListeners();
@@ -374,6 +408,20 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     notifyListeners();
     _persistDraft();
     return false;
+  }
+
+  Future<void> beginStrategicRefinement() async {
+    await initializeForQuestionnaire(variant: QuestionnaireVariant.strategic);
+  }
+
+  void enableOptionalRefinement() {
+    if (_includeConstraints) {
+      return;
+    }
+    _includeConstraints = true;
+    _clampCurrentIndex();
+    notifyListeners();
+    _persistDraft();
   }
 
   void acceptRefine() {
@@ -749,5 +797,26 @@ class MigrationQuestionnaireController extends ChangeNotifier {
         includeConstraints: _includeConstraints,
       ),
     );
+  }
+
+  Question? _questionById(String questionId) {
+    for (final question in _questions) {
+      if (question.id == questionId) {
+        return question;
+      }
+    }
+    return null;
+  }
+
+  int _firstUnansweredQuestionIndex() {
+    final activeQuestions = _activeQuestions;
+    for (var index = 0; index < activeQuestions.length; index++) {
+      final question = activeQuestions[index];
+      final hasAnswer = answerValuesFor(question.id).isNotEmpty;
+      if (!hasAnswer) {
+        return index;
+      }
+    }
+    return 0;
   }
 }

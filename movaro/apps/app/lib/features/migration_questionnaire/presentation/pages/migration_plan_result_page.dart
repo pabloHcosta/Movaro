@@ -112,7 +112,11 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
       if (!mounted) {
         return;
       }
-      await Navigator.pushNamed(context, AppRoutes.migrationPlanCopilot);
+      await Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.publicHome,
+        (route) => false,
+      );
     } finally {
       if (mounted) {
         setState(() {
