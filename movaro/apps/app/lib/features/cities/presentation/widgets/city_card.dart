@@ -6,12 +6,12 @@ import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
 import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_score_badge.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_weather_badge.dart';
-import 'package:movaro_app/features/home/application/city_budget_data.dart';
 
 class CityCard extends StatelessWidget {
   const CityCard({
@@ -33,7 +33,7 @@ class CityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final budget = CityBudgetData.forCity(city.id);
+    final budget = city.budgetSnapshot;
     final housing = CityHousingViabilityPresenter.resolve(
       context,
       rentScore: city.rentScore,
@@ -363,7 +363,7 @@ class _CardSnapshotPanel extends StatelessWidget {
   });
 
   final City city;
-  final CityBudget? budget;
+  final CityBudgetSnapshot? budget;
   final CitySeasonalityData? seasonality;
   final CityHousingViabilityPresentation housing;
   final Color panelText;
@@ -655,7 +655,7 @@ class _SnapshotSupportBlock extends StatelessWidget {
 
 String _budgetHeadline(
   BuildContext context,
-  CityBudget? budget,
+  CityBudgetSnapshot? budget,
   City city,
 ) {
   if (budget != null) {
@@ -669,7 +669,7 @@ String _budgetHeadline(
   ).headline;
 }
 
-String _budgetSupporting(BuildContext context, CityBudget? budget) {
+String _budgetSupporting(BuildContext context, CityBudgetSnapshot? budget) {
   if (budget == null) {
     return context.l10n.cityMetricCostMediumSupporting;
   }
@@ -678,7 +678,7 @@ String _budgetSupporting(BuildContext context, CityBudget? budget) {
       '${_formatBrl(context, budget.fairLivingTotal)}–${_formatBrl(context, budget.wellLivingTotal)}';
 }
 
-Color _budgetTint(BuildContext context, CityBudget? budget) {
+Color _budgetTint(BuildContext context, CityBudgetSnapshot? budget) {
   if (budget == null) {
     return AppColors.warning;
   }
@@ -687,7 +687,11 @@ Color _budgetTint(BuildContext context, CityBudget? budget) {
   return AppColors.danger;
 }
 
-Color _budgetBackground(BuildContext context, City city, CityBudget? budget) {
+Color _budgetBackground(
+  BuildContext context,
+  City city,
+  CityBudgetSnapshot? budget,
+) {
   final tint = _budgetTint(context, budget);
   return AppColors.tintedSurfaceFor(
     context,

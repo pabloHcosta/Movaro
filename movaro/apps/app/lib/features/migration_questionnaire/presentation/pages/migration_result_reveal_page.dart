@@ -11,6 +11,7 @@ import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
 import 'package:movaro_app/features/cities/application/services/city_seasonality_conflict_service.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
 import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
@@ -63,6 +64,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await widget.controller.initialize();
+      await _prefetchRecommendationSignals();
       if (!mounted) return;
       _anim.forward();
     });
@@ -292,6 +294,66 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
     );
   }
 
+  Future<void> _prefetchRecommendationSignals() async {
+    final plan = widget.controller.generatedPlan;
+    final recommendedCity = plan?.recommendedCity;
+    if (plan == null || recommendedCity == null) {
+      return;
+    }
+
+    final destinationAirport = FlightRouteContextResolver.resolveDestinationAirport(
+      destinationCityName: recommendedCity.name,
+      destinationCountryIso: FlightRouteContextResolver.resolveDestinationCountryIso(
+        cityCountryCode: recommendedCity.countryCode,
+        planDestinationCountry: plan.destinationCountry,
+      ),
+      destinationLatitude: recommendedCity.latitude,
+      destinationLongitude: recommendedCity.longitude,
+    );
+    final originCountryIso = FlightRouteContextResolver.resolveOriginCountryIso(
+      planOriginCountry: plan.originCountry,
+    );
+    final originAirport = FlightRouteContextResolver.resolveOriginAirport(
+      savedLocation: null,
+      originCountryIso: originCountryIso,
+    );
+    final originIata = originAirport?.iataCode;
+
+    final requests = <Future<Object?>>[];
+    if (originIata != null && destinationAirport?.iataCode != null) {
+      requests.add(
+        widget.citiesController.loadTravelInsightForCity(
+          recommendedCity.id,
+          originIata: originIata,
+          destIata: destinationAirport?.iataCode,
+        ),
+      );
+      for (final city in plan.candidateCities) {
+        final altDestination = FlightRouteContextResolver.resolveDestinationAirport(
+          destinationCityName: city.name,
+          destinationCountryIso: FlightRouteContextResolver.resolveDestinationCountryIso(
+            cityCountryCode: city.countryCode,
+            planDestinationCountry: plan.destinationCountry,
+          ),
+          destinationLatitude: city.latitude,
+          destinationLongitude: city.longitude,
+        );
+        if (altDestination?.iataCode == null) {
+          continue;
+        }
+        requests.add(
+          widget.citiesController.loadTravelInsightForCity(
+            city.id,
+            originIata: originIata,
+            destIata: altDestination?.iataCode,
+          ),
+        );
+      }
+    }
+
+    await Future.wait(requests);
+  }
+
   String _dimensionSectionTitle(BuildContext context) {
     final lang = Localizations.localeOf(context).languageCode;
     return switch (lang) {
@@ -382,6 +444,26 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
             FlightRouteContextResolver.resolveOriginCountryIso(
               planOriginCountry: plan.originCountry,
             );
+        final originAirport = FlightRouteContextResolver.resolveOriginAirport(
+          savedLocation: null,
+          originCountryIso: originCountryIso,
+        );
+        final originIata = originAirport?.iataCode;
+        final recommendedRoute = originIata == null ||
+                destinationAirport?.iataCode == null
+            ? null
+            : widget.citiesController.travelInsightFor(
+                recommendedCity.id,
+                originIata: originIata,
+                destIata: destinationAirport?.iataCode,
+              );
+        final alternativeTradeoff = _FlightTradeoffData.resolve(
+          recommendedRoute: recommendedRoute,
+          citiesController: widget.citiesController,
+          planDestinationCountry: plan.destinationCountry,
+          recommendedCity: recommendedCity,
+          alternatives: alternatives,
+        );
         return Scaffold(
           body: FadeTransition(
             opacity: _fadeIn,
@@ -437,8 +519,14 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                             const SizedBox(height: 12),
                             FlightPriceBadge(
                               originCountryIso: originCountryIso,
+                              originIata: originIata,
                               destIata: destinationAirport?.iataCode,
+                              routeInsight: recommendedRoute,
                             ),
+                            if (alternativeTradeoff != null) ...[
+                              const SizedBox(height: 12),
+                              _FlightTradeoffCard(data: alternativeTradeoff),
+                            ],
                             const SizedBox(height: 16),
                             _TimelineContextBar(plan: plan),
                             if (reasons.isNotEmpty) ...[
@@ -521,6 +609,128 @@ class _HeroSection extends StatelessWidget {
       eyebrow: context.l10n.migrationResultRevealEyebrow,
       subtitle: '${city.stateName} · ${city.stateCode}',
       maxHeight: heroHeight,
+    );
+  }
+}
+
+class _FlightTradeoffData {
+  const _FlightTradeoffData({
+    required this.recommendedCityName,
+    required this.recommendedRange,
+    required this.cheaperCityName,
+    required this.cheaperRange,
+  });
+
+  final String recommendedCityName;
+  final String recommendedRange;
+  final String cheaperCityName;
+  final String cheaperRange;
+
+  static _FlightTradeoffData? resolve({
+    required TravelRouteInsight? recommendedRoute,
+    required CitiesController citiesController,
+    required String? planDestinationCountry,
+    required City recommendedCity,
+    required List<City> alternatives,
+  }) {
+    if (recommendedRoute == null) {
+      return null;
+    }
+
+    City? cheapestCity;
+    TravelRouteInsight? cheapestRoute;
+    for (final city in alternatives) {
+      final altDestination = FlightRouteContextResolver.resolveDestinationAirport(
+        destinationCityName: city.name,
+        destinationCountryIso:
+            FlightRouteContextResolver.resolveDestinationCountryIso(
+              cityCountryCode: city.countryCode,
+              planDestinationCountry: planDestinationCountry,
+            ),
+        destinationLatitude: city.latitude,
+        destinationLongitude: city.longitude,
+      );
+      final route = citiesController.travelInsightFor(
+        city.id,
+        originIata: recommendedRoute.originIata,
+        destIata: altDestination?.iataCode,
+      );
+      if (route == null) {
+        continue;
+      }
+      if (cheapestRoute == null ||
+          route.lowUsdAverage < cheapestRoute.lowUsdAverage) {
+        cheapestRoute = route;
+        cheapestCity = city;
+      }
+    }
+
+    if (cheapestCity == null || cheapestRoute == null) {
+      return null;
+    }
+
+    final delta = recommendedRoute.lowUsdAverage - cheapestRoute.lowUsdAverage;
+    if (delta < 30) {
+      return null;
+    }
+
+    return _FlightTradeoffData(
+      recommendedCityName: recommendedCity.name,
+      recommendedRange: _usdRange(recommendedRoute),
+      cheaperCityName: cheapestCity.name,
+      cheaperRange: _usdRange(cheapestRoute),
+    );
+  }
+
+  static String _usdRange(TravelRouteInsight route) =>
+      'US\$${route.lowUsdMin}-US\$${route.lowUsdMax}';
+}
+
+class _FlightTradeoffCard extends StatelessWidget {
+  const _FlightTradeoffCard({required this.data});
+
+  final _FlightTradeoffData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return FrostedPanel(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.flight_takeoff_rounded,
+            color: AppColors.warning,
+            size: 18,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.migrationResultFlightTradeoffTitle(),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  context.l10n.migrationResultFlightTradeoffBody(
+                    data.recommendedCityName,
+                    data.recommendedRange,
+                    data.cheaperCityName,
+                    data.cheaperRange,
+                  ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

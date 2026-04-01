@@ -6,6 +6,8 @@ class CitySourcesModel {
     required this.territorialIdentity,
     required this.population,
     required this.humanDevelopment,
+    this.employment,
+    this.safety,
     required this.curatedMetrics,
     required this.ranking,
     this.publicReviews,
@@ -22,6 +24,12 @@ class CitySourcesModel {
       humanDevelopment: CitySourceModel.fromJson(
         json['humanDevelopment'] as Map<String, dynamic>,
       ),
+      employment: json['employment'] == null
+          ? null
+          : CitySourceModel.fromJson(json['employment'] as Map<String, dynamic>),
+      safety: json['safety'] == null
+          ? null
+          : CitySourceModel.fromJson(json['safety'] as Map<String, dynamic>),
       curatedMetrics: CitySourceModel.fromJson(
         json['curatedMetrics'] as Map<String, dynamic>,
       ),
@@ -39,6 +47,8 @@ class CitySourcesModel {
   final CitySourceModel territorialIdentity;
   final CitySourceModel population;
   final CitySourceModel humanDevelopment;
+  final CitySourceModel? employment;
+  final CitySourceModel? safety;
   final CitySourceModel curatedMetrics;
   final CitySourceModel ranking;
   final CitySourceModel? publicReviews;
@@ -50,6 +60,12 @@ class CitySourcesModel {
       ),
       population: CitySourceModel.fromEntity(sources.population),
       humanDevelopment: CitySourceModel.fromEntity(sources.humanDevelopment),
+      employment: sources.employment == null
+          ? null
+          : CitySourceModel.fromEntity(sources.employment!),
+      safety: sources.safety == null
+          ? null
+          : CitySourceModel.fromEntity(sources.safety!),
       curatedMetrics: CitySourceModel.fromEntity(sources.curatedMetrics),
       ranking: CitySourceModel.fromEntity(sources.ranking),
       publicReviews: sources.publicReviews == null
@@ -62,6 +78,8 @@ class CitySourcesModel {
     'territorialIdentity': territorialIdentity.toJson(),
     'population': population.toJson(),
     'humanDevelopment': humanDevelopment.toJson(),
+    'employment': employment?.toJson(),
+    'safety': safety?.toJson(),
     'curatedMetrics': curatedMetrics.toJson(),
     'ranking': ranking.toJson(),
     'publicReviews': publicReviews?.toJson(),
@@ -71,6 +89,8 @@ class CitySourcesModel {
     territorialIdentity: territorialIdentity.toEntity(),
     population: population.toEntity(),
     humanDevelopment: humanDevelopment.toEntity(),
+    employment: employment?.toEntity(),
+    safety: safety?.toEntity(),
     curatedMetrics: curatedMetrics.toEntity(),
     ranking: ranking.toEntity(),
     publicReviews: publicReviews?.toEntity(),

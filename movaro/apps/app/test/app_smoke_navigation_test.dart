@@ -32,6 +32,7 @@ import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart
 import 'package:movaro_app/features/cities/domain/entities/city_scores.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_source.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_sources.dart';
+import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
@@ -117,7 +118,13 @@ void main() {
     await tester.tap(discoverAction);
     await _pumpScreen(tester);
 
-    expect(find.text('O que você busca no Brasil agora?'), findsOneWidget);
+    final dismissHelp = find.byIcon(Icons.close);
+    if (dismissHelp.evaluate().isNotEmpty) {
+      await tester.tap(dismissHelp.first);
+      await _pumpScreen(tester);
+    }
+
+    expect(find.text('O que você busca nessa mudança agora?'), findsOneWidget);
     expect(find.textContaining('1 de 3'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
@@ -536,6 +543,13 @@ class _FakeCitiesRepository implements CitiesRepository {
       fetchedAt: '2026-03-12T12:00:00Z',
     );
   }
+
+  @override
+  Future<TravelRouteInsight?> getCityTravelInsight(
+    String cityId, {
+    String? originIata,
+    String? destIata,
+  }) async => null;
 }
 
 class _SmokeCitiesController extends CitiesController {
@@ -649,6 +663,7 @@ const _source = CitySource(
   description: 'Mock source',
   isOfficial: true,
   url: null,
+  sourceType: 'official',
 );
 
 const _sources = CitySources(

@@ -1,6 +1,7 @@
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
+import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 
 abstract class CitiesRepository {
@@ -19,4 +20,10 @@ abstract class CitiesRepository {
   Future<CityMethodology> getMethodology();
 
   Future<CityWeather> getCityWeather(String cityId);
+
+  Future<TravelRouteInsight?> getCityTravelInsight(
+    String cityId, {
+    String? originIata,
+    String? destIata,
+  });
 }

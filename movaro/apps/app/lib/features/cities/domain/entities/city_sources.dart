@@ -5,6 +5,8 @@ class CitySources {
     required this.territorialIdentity,
     required this.population,
     required this.humanDevelopment,
+    this.employment,
+    this.safety,
     required this.curatedMetrics,
     required this.ranking,
     this.publicReviews,
@@ -13,6 +15,8 @@ class CitySources {
   final CitySource territorialIdentity;
   final CitySource population;
   final CitySource humanDevelopment;
+  final CitySource? employment;
+  final CitySource? safety;
   final CitySource curatedMetrics;
   final CitySource ranking;
   final CitySource? publicReviews;
@@ -21,6 +25,8 @@ class CitySources {
     territorialIdentity,
     population,
     humanDevelopment,
+    ?employment,
+    ?safety,
     curatedMetrics,
     ranking,
     ?publicReviews,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
-import 'package:movaro_app/features/home/application/city_budget_data.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
 
 class CityCostOfLivingCard extends StatelessWidget {
   const CityCostOfLivingCard({
@@ -11,7 +11,7 @@ class CityCostOfLivingCard extends StatelessWidget {
     super.key,
   });
 
-  final CityBudget budget;
+  final CityBudgetSnapshot budget;
   final String? preferredCountryId;
 
   @override

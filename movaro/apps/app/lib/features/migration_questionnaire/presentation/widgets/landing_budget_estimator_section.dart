@@ -5,8 +5,7 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/home/application/city_budget_data.dart'
-    show CityBudget, CityBudgetData;
+import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/landing_budget_estimator.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
@@ -32,9 +31,8 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
         ? l10n.landingBudgetSectionTitle
         : l10n.landingBudgetSectionTitleWithCity(estimate.cityContext!);
 
-    final cityBudget = CityBudgetData.forCity(
-      plan.recommendedCity?.id ?? plan.preferredCity?.id,
-    );
+    final cityBudget =
+        plan.recommendedCity?.budgetSnapshot ?? plan.preferredCity?.budgetSnapshot;
 
     return FrostedPanel(
       child: Column(
@@ -323,7 +321,7 @@ class _CityRealCostSection extends StatelessWidget {
     required this.preferredCountryId,
   });
 
-  final CityBudget budget;
+  final CityBudgetSnapshot budget;
   final CopilotExchangeRates? exchangeRates;
   final String? preferredCountryId;
 

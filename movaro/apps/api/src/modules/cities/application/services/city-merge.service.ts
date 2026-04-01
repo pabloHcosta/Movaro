@@ -2,27 +2,45 @@ import { Injectable } from '@nestjs/common';
 
 import { GooglePlacesCityOpinionService } from '../../../../integrations/google/google-places-city-opinion.service';
 import { IbgeLocalitiesService } from '../../../../integrations/ibge/ibge-localities.service';
+import { IbgePopulationService } from '../../../../integrations/ibge/ibge-population.service';
 import { CityMetricsModel } from '../../data/models/city-metrics.model';
+import { CityBudgetSnapshotEntity } from '../../domain/entities/city-budget-snapshot.entity';
 import { CityCardEntity } from '../../domain/entities/city-card.entity';
+import { CitySeasonalitySnapshotEntity } from '../../domain/entities/city-seasonality-snapshot.entity';
 import { CitySourceEntity } from '../../domain/entities/city-source.entity';
 import { CitySourcesEntity } from '../../domain/entities/city-sources.entity';
+import { CityBudgetSnapshotService } from './city-budget-snapshot.service';
+import { CityOfficialMetricsService } from './city-official-metrics.service';
 import { CityRankingService } from './city-ranking.service';
+import { CitySeasonalitySnapshotService } from './city-seasonality-snapshot.service';
 
 @Injectable()
 export class CityMergeService {
   constructor(
     private readonly ibgeLocalitiesService: IbgeLocalitiesService,
+    private readonly ibgePopulationService: IbgePopulationService,
     private readonly cityRankingService: CityRankingService,
     private readonly googlePlacesCityOpinionService: GooglePlacesCityOpinionService,
+    private readonly cityBudgetSnapshotService: CityBudgetSnapshotService,
+    private readonly citySeasonalitySnapshotService: CitySeasonalitySnapshotService,
+    private readonly cityOfficialMetricsService: CityOfficialMetricsService,
   ) {}
 
   async merge(metrics: CityMetricsModel): Promise<CityCardEntity> {
-    const ibgeData = await this.ibgeLocalitiesService.getMunicipalityByIbgeCode(
-      metrics.ibgeCode,
-    );
-    const scores = this.cityRankingService.calculateScores(metrics);
+    const officialMetrics = this.cityOfficialMetricsService.findByCity({
+      cityId: metrics.id,
+      ibgeCode: metrics.ibgeCode,
+    });
+    const resolvedMetrics = this.applyOfficialOverrides(metrics, officialMetrics);
+    const [ibgeData, populationEstimate] = await Promise.all([
+      this.ibgeLocalitiesService.getMunicipalityByIbgeCode(metrics.ibgeCode),
+      this.ibgePopulationService.getPopulationEstimateByIbgeCode(
+        metrics.ibgeCode,
+      ),
+    ]);
+    const scores = this.cityRankingService.calculateScores(resolvedMetrics);
     const recommendationReasons =
-      this.cityRankingService.buildRecommendationReasons(metrics, scores);
+      this.cityRankingService.buildRecommendationReasons(resolvedMetrics, scores);
     const officialName =
       ibgeData.officialName?.trim() || metrics.displayName || metrics.name;
     const stateCode =
@@ -32,17 +50,22 @@ export class CityMergeService {
     const sources = this.buildSources({
       stateCode,
       officialName,
+      officialMetrics,
     });
     const publicOpinion =
       await this.googlePlacesCityOpinionService.getCityOpinion(
-        metrics,
+        resolvedMetrics,
         stateName,
       );
+    const budgetSnapshot = this.resolveBudgetSnapshot(resolvedMetrics);
+    const seasonalitySnapshot = this.resolveSeasonalitySnapshot(resolvedMetrics);
     const sourcesWithOpinion = publicOpinion
       ? new CitySourcesEntity(
           sources.territorialIdentity,
           sources.population,
           sources.humanDevelopment,
+          sources.employment,
+          sources.safety,
           sources.curatedMetrics,
           sources.ranking,
           new CitySourceEntity(
@@ -57,41 +80,125 @@ export class CityMergeService {
       : sources;
 
     return new CityCardEntity(
-      metrics.id,
-      metrics.displayName ?? officialName,
+      resolvedMetrics.id,
+      resolvedMetrics.displayName ?? officialName,
       stateCode,
       stateName,
-      metrics.countryCode,
-      metrics.ibgeCode,
-      metrics.latitude,
-      metrics.longitude,
-      metrics.population,
-      metrics.idhmScore,
-      metrics.idhmReferenceYear,
-      metrics.costOfLivingScore,
-      metrics.rentScore,
-      metrics.safetyScore,
-      metrics.argentinaPopularityScore,
-      metrics.spanishSupportScore,
-      metrics.jobMarketScore,
-      metrics.unemploymentRate,
-      metrics.economicActivityScore,
-      metrics.topIndustries,
+      resolvedMetrics.countryCode,
+      resolvedMetrics.ibgeCode,
+      resolvedMetrics.latitude,
+      resolvedMetrics.longitude,
+      populationEstimate.population,
+      resolvedMetrics.idhmScore,
+      resolvedMetrics.idhmReferenceYear,
+      resolvedMetrics.costOfLivingScore,
+      resolvedMetrics.rentScore,
+      resolvedMetrics.safetyScore,
+      resolvedMetrics.argentinaPopularityScore,
+      resolvedMetrics.spanishSupportScore,
+      resolvedMetrics.jobMarketScore,
+      resolvedMetrics.unemploymentRate,
+      resolvedMetrics.economicActivityScore,
+      resolvedMetrics.topIndustries,
       scores,
       recommendationReasons,
       sourcesWithOpinion,
-      metrics.updatedAt,
+      resolvedMetrics.updatedAt,
       ibgeData.regionName,
       publicOpinion,
+      budgetSnapshot,
+      seasonalitySnapshot,
     );
+  }
+
+  private applyOfficialOverrides(
+    metrics: CityMetricsModel,
+    officialMetrics: ReturnType<CityOfficialMetricsService['findByCity']>,
+  ): CityMetricsModel {
+    if (officialMetrics == null) {
+      return metrics;
+    }
+
+    return {
+      ...metrics,
+      idhmScore: officialMetrics.development?.idhmScore ?? metrics.idhmScore,
+      idhmReferenceYear:
+        officialMetrics.development?.idhmReferenceYear ??
+        metrics.idhmReferenceYear,
+      unemploymentRate:
+        officialMetrics.employment?.unemploymentRate ??
+        metrics.unemploymentRate,
+      jobMarketScore:
+        officialMetrics.employment?.jobMarketScore ?? metrics.jobMarketScore,
+      economicActivityScore:
+        officialMetrics.employment?.economicActivityScore ??
+        metrics.economicActivityScore,
+      topIndustries:
+        officialMetrics.employment?.topIndustries ?? metrics.topIndustries,
+      safetyScore: officialMetrics.safety?.safetyScore ?? metrics.safetyScore,
+    };
+  }
+
+  private resolveBudgetSnapshot(
+    metrics: CityMetricsModel,
+  ): CityBudgetSnapshotEntity | null {
+    const snapshot = metrics.budgetSnapshot;
+    if (snapshot) {
+      return new CityBudgetSnapshotEntity(
+        snapshot.cityLabel,
+        snapshot.singlePersonExcludingRent,
+        snapshot.oneBedroomOutsideCentre,
+        snapshot.oneBedroomCityCentre,
+        snapshot.averageMonthlyNetSalary,
+        snapshot.monthlyTransportPass,
+        snapshot.utilities,
+        snapshot.updatedAt,
+        snapshot.sourceLabel,
+        snapshot.sourceUrl,
+        snapshot.sourceType ?? 'community',
+      );
+    }
+
+    return this.cityBudgetSnapshotService.findByCityId(metrics.id);
+  }
+
+  private resolveSeasonalitySnapshot(
+    metrics: CityMetricsModel,
+  ): CitySeasonalitySnapshotEntity | null {
+    const snapshot = metrics.seasonalitySnapshot;
+    if (snapshot) {
+      return new CitySeasonalitySnapshotEntity(
+        snapshot.peakMonths,
+        snapshot.lowMonths,
+        snapshot.severity,
+        snapshot.visitorsLabelPt,
+        snapshot.visitorsLabelEs,
+        snapshot.visitorsLabelEn,
+        snapshot.rentNotesPt,
+        snapshot.rentNotesEs,
+        snapshot.rentNotesEn,
+        snapshot.jobNotesPt,
+        snapshot.jobNotesEs,
+        snapshot.jobNotesEn,
+        snapshot.populationMultiplierNote ?? null,
+        snapshot.updatedAt,
+        snapshot.sourceLabel,
+        snapshot.sourceUrl ?? null,
+        snapshot.sourceType ?? 'curated',
+      );
+    }
+
+    return this.citySeasonalitySnapshotService.findByCityId(metrics.id);
   }
 
   private buildSources({
     stateCode,
     officialName,
+    officialMetrics,
   }: {
     stateCode: string;
     officialName: string;
+    officialMetrics: ReturnType<CityOfficialMetricsService['findByCity']>;
   }): CitySourcesEntity {
     const ibgeCityUrl = this.buildIbgeCityUrl({
       stateCode,
@@ -118,26 +225,55 @@ export class CityMergeService {
       new CitySourceEntity(
         'human_development',
         'Desenvolvimento humano',
-        'Atlas do Desenvolvimento Humano no Brasil (PNUD, Ipea e FJP)',
-        'IDHM municipal oficial com referencia no Censo 2010.',
+        officialMetrics?.development?.sourceLabel ??
+            'Atlas do Desenvolvimento Humano no Brasil (PNUD, Ipea e FJP)',
+        officialMetrics?.development != null
+            ? 'Indicador oficial ingerido para desenvolvimento humano municipal.'
+            : 'IDHM municipal oficial com referencia no Censo 2010.',
         true,
-        'https://www.undp.org/pt/brazil/idhm-municipios-2010',
+        officialMetrics?.development?.sourceUrl ??
+            'https://www.undp.org/pt/brazil/idhm-municipios-2010',
+        officialMetrics?.development?.sourceType ?? 'official',
       ),
+      officialMetrics?.employment == null
+          ? null
+          : new CitySourceEntity(
+              'employment',
+              'Emprego formal',
+              officialMetrics.employment.sourceLabel,
+              'Indicadores oficiais ingeridos para desemprego, dinamica laboral e sinais de mercado.',
+              officialMetrics.employment.sourceType === 'official',
+              officialMetrics.employment.sourceUrl ?? null,
+              officialMetrics.employment.sourceType ?? 'official',
+            ),
+      officialMetrics?.safety == null
+          ? null
+          : new CitySourceEntity(
+              'safety',
+              'Seguranca publica',
+              officialMetrics.safety.sourceLabel,
+              'Indicador oficial ingerido para leitura de seguranca da localidade.',
+              officialMetrics.safety.sourceType === 'official',
+              officialMetrics.safety.sourceUrl ?? null,
+              officialMetrics.safety.sourceType ?? 'official',
+            ),
       new CitySourceEntity(
         'curated_metrics',
-        'Metricas curadas do produto',
-        'Movaro Dataset Curado v1',
-        'Custo, aluguel, seguranca, popularidade entre argentinos, adaptacao com espanhol, mercado de trabalho, desemprego e setores fortes.',
+        'Metricas interpretativas do produto',
+        'Movaro curated city model',
+        'Indicadores internos e heuristicas do produto. Servem para leitura comparativa, mas nao substituem fontes oficiais por metrica individual.',
         false,
         null,
+        'curated',
       ),
       new CitySourceEntity(
         'ranking',
         'Metodologia de score',
         'Movaro Ranking Methodology v1',
-        'Scores derivados da metodologia do produto sobre dados publicos e dataset curado.',
+        'Scores derivados da metodologia do produto sobre dados publicos e sinais curados. Nao representam um indicador oficial unico.',
         false,
         null,
+        'derived',
       ),
     );
   }

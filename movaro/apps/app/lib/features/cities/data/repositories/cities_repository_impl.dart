@@ -2,10 +2,12 @@ import 'package:movaro_app/features/cities/data/datasources/cities_remote_data_s
 import 'package:movaro_app/features/cities/data/models/city_highlights_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_methodology_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_model.dart';
+import 'package:movaro_app/features/cities/data/models/travel_route_insight_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_weather_model.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
+import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
 
@@ -72,6 +74,29 @@ class CitiesRepositoryImpl implements CitiesRepository {
       '/api/v1/cities/$cityId/weather',
     );
     return CityWeatherModel.fromJson(response).toEntity();
+  }
+
+  @override
+  Future<TravelRouteInsight?> getCityTravelInsight(
+    String cityId, {
+    String? originIata,
+    String? destIata,
+  }) async {
+    final query = <String, String>{};
+    if (originIata != null && originIata.isNotEmpty) {
+      query['originIata'] = originIata;
+    }
+    if (destIata != null && destIata.isNotEmpty) {
+      query['destIata'] = destIata;
+    }
+    final path = query.isEmpty
+        ? '/api/v1/cities/$cityId/travel-insight'
+        : '/api/v1/cities/$cityId/travel-insight?${Uri(queryParameters: query).query}';
+    final response = await _remoteDataSource.getJsonMap(path);
+    if (response.isEmpty) {
+      return null;
+    }
+    return TravelRouteInsightModel.fromJson(response).toEntity();
   }
 
   @override

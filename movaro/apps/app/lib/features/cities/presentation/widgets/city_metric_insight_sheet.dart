@@ -50,55 +50,76 @@ class _CityMetricInsightSheet extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: IconButton(
-                onPressed: () => Navigator.of(context).maybePop(),
-                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-                visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.close_rounded),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: content.tint.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: content.tint.withValues(alpha: 0.16)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: content.tint.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(content.icon, color: content.tint),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          content.label,
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: AppColors.textSoftFor(context),
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          content.headline,
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                color: content.tint,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 4),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: content.tint.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(content.icon, color: content.tint),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        content.label,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AppColors.textSoftFor(context),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        content.headline,
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(
-                              color: content.tint,
-                              fontWeight: FontWeight.w800,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 20),
+            _SectionBlock(
+              title: _localizedText(
+                context,
+                pt: 'Por que isso aparece assim em ${content.cityName}',
+                es: 'Por qué esto aparece así en ${content.cityName}',
+                en: 'Why this shows up this way in ${content.cityName}',
+              ),
+              child: Text(
+                content.whyThisCity,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.45,
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
             _SectionBlock(
               title: context.l10n.cityMetricInsightMeaningTitle,
               child: Text(
@@ -322,10 +343,12 @@ class _SourceCard extends StatelessWidget {
 
 class _CityMetricInsightContent {
   const _CityMetricInsightContent({
+    required this.cityName,
     required this.label,
     required this.headline,
     required this.icon,
     required this.tint,
+    required this.whyThisCity,
     required this.meaning,
     required this.method,
     required this.validate,
@@ -333,10 +356,12 @@ class _CityMetricInsightContent {
     required this.sources,
   });
 
+  final String cityName;
   final String label;
   final String headline;
   final IconData icon;
   final Color tint;
+  final String whyThisCity;
   final String meaning;
   final String method;
   final String validate;
@@ -357,10 +382,20 @@ class _CityMetricInsightContent {
           rentScore: city.rentScore,
         );
         return _CityMetricInsightContent(
+          cityName: city.name,
           label: l10n.cityDetailAffordabilityTitle,
           headline: housing.headline,
           icon: Icons.home_work_outlined,
           tint: housing.tint,
+          whyThisCity: _localizedText(
+            context,
+            pt:
+                'Em ${city.name}, essa leitura cruza moradia ${city.rentScore}/100 com custo geral ${city.movaroScores.economical}/100. Quanto mais altos esses dois sinais, mais leve tende a ser o aluguel de 1 quarto e o peso do dia a dia.',
+            es:
+                'En ${city.name}, esta lectura cruza vivienda ${city.rentScore}/100 con costo general ${city.movaroScores.economical}/100. Cuanto más altos sean esos dos indicadores, más liviano tiende a ser el alquiler de 1 dormitorio y el peso del día a día.',
+            en:
+                'In ${city.name}, this reading combines housing ${city.rentScore}/100 with overall cost ${city.movaroScores.economical}/100. The higher those two signals are, the lighter 1-bedroom rent and day-to-day costs tend to feel.',
+          ),
           meaning: l10n.cityMetricInsightHousingMeaning,
           method: l10n.cityMetricInsightHousingMethod,
           validate: l10n.cityMetricInsightHousingValidate,
@@ -401,10 +436,20 @@ class _CityMetricInsightContent {
           value: city.safetyScore,
         );
         return _CityMetricInsightContent(
+          cityName: city.name,
           label: l10n.cityDetailSafetyLabel,
           headline: safety.headline,
           icon: safety.icon,
           tint: safety.tint,
+          whyThisCity: _localizedText(
+            context,
+            pt:
+                'Em ${city.name}, a segurança entrou como ${safety.headline.toLowerCase()} porque o sinal atual está em ${city.safetyScore}/100. Esse score é comparado com faixas de referência para separar contextos mais estáveis, intermediários ou de maior atenção.',
+            es:
+                'En ${city.name}, la seguridad salió como ${safety.headline.toLowerCase()} porque la señal actual está en ${city.safetyScore}/100. Ese puntaje se compara con rangos de referencia para separar contextos más estables, intermedios o de mayor atención.',
+            en:
+                'In ${city.name}, safety came out as ${safety.headline.toLowerCase()} because the current signal is ${city.safetyScore}/100. That score is compared against reference bands to separate more stable, middle, or higher-attention contexts.',
+          ),
           meaning: l10n.cityMetricInsightSafetyMeaning,
           method: l10n.cityMetricInsightSafetyMethod,
           validate: l10n.cityMetricInsightSafetyValidate,
@@ -421,7 +466,7 @@ class _CityMetricInsightContent {
           sources: [
             _fromCitySource(
               context,
-              city.sources.curatedMetrics,
+              city.sources.safety ?? city.sources.curatedMetrics,
               badge: l10n.cityMetricInsightCurrentBaseBadge,
             ),
             _InsightSource(
@@ -442,10 +487,20 @@ class _CityMetricInsightContent {
           value: city.movaroScores.workOpportunity,
         );
         return _CityMetricInsightContent(
+          cityName: city.name,
           label: l10n.cityDetailWorkLabel,
           headline: work.headline,
           icon: work.icon,
           tint: work.tint,
+          whyThisCity: _localizedText(
+            context,
+            pt:
+                'Em ${city.name}, a leitura de trabalho junta oportunidade ${city.movaroScores.workOpportunity}/100, mercado ${city.jobMarketScore}/100, atividade econômica ${city.economicActivityScore}/100 e desemprego em ${city.unemploymentRate.toStringAsFixed(1)}%. Ela tenta mostrar consistência ao longo do ano, não só vagas pontuais.',
+            es:
+                'En ${city.name}, la lectura de trabajo combina oportunidad ${city.movaroScores.workOpportunity}/100, mercado ${city.jobMarketScore}/100, actividad económica ${city.economicActivityScore}/100 y desempleo de ${city.unemploymentRate.toStringAsFixed(1)}%. Intenta mostrar consistencia durante el año, no solo vacantes puntuales.',
+            en:
+                'In ${city.name}, the work reading combines opportunity ${city.movaroScores.workOpportunity}/100, market ${city.jobMarketScore}/100, economic activity ${city.economicActivityScore}/100, and unemployment at ${city.unemploymentRate.toStringAsFixed(1)}%. It aims to show year-round consistency, not just isolated openings.',
+          ),
           meaning: l10n.cityMetricInsightWorkMeaning,
           method: l10n.cityMetricInsightWorkMethod,
           validate: l10n.cityMetricInsightWorkValidate,
@@ -478,7 +533,7 @@ class _CityMetricInsightContent {
           sources: [
             _fromCitySource(
               context,
-              city.sources.curatedMetrics,
+              city.sources.employment ?? city.sources.curatedMetrics,
               badge: l10n.cityMetricInsightCurrentBaseBadge,
             ),
             _InsightSource(
@@ -508,10 +563,20 @@ class _CityMetricInsightContent {
           value: city.movaroScores.languageAdaptation,
         );
         return _CityMetricInsightContent(
+          cityName: city.name,
           label: l10n.cityDetailLanguageLabel,
           headline: language.headline,
           icon: language.icon,
           tint: language.tint,
+          whyThisCity: _localizedText(
+            context,
+            pt:
+                'Em ${city.name}, a facilidade com português considera linguagem ${city.movaroScores.languageAdaptation}/100, apoio ao espanhol ${city.spanishSupportScore}/100 e recorrência de argentinos em ${city.argentinaPopularityScore}/100. Quanto menores esses sinais, mais autônoma tende a ser a adaptação inicial.',
+            es:
+                'En ${city.name}, la facilidad con el portugués considera lenguaje ${city.movaroScores.languageAdaptation}/100, apoyo al español ${city.spanishSupportScore}/100 y recurrencia de argentinos en ${city.argentinaPopularityScore}/100. Cuanto menores sean esas señales, más autónoma tiende a ser la adaptación inicial.',
+            en:
+                'In ${city.name}, ease with Portuguese considers language ${city.movaroScores.languageAdaptation}/100, Spanish support ${city.spanishSupportScore}/100, and how often Argentinians show up at ${city.argentinaPopularityScore}/100. The lower those signals are, the more self-directed early adaptation tends to be.',
+          ),
           meaning: l10n.cityMetricInsightLanguageMeaning,
           method: l10n.cityMetricInsightLanguageMethod,
           validate: l10n.cityMetricInsightLanguageValidate,
@@ -618,4 +683,20 @@ class _InsightSource {
   final String badge;
   final bool isOfficial;
   final String? url;
+}
+
+String _localizedText(
+  BuildContext context, {
+  required String pt,
+  required String es,
+  required String en,
+}) {
+  switch (Localizations.localeOf(context).languageCode) {
+    case 'es':
+      return es;
+    case 'en':
+      return en;
+    default:
+      return pt;
+  }
 }

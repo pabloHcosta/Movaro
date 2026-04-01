@@ -1,0 +1,14 @@
+[
+  {
+    "cityId": "sao-paulo-sp",
+    "ibgeCode": 3550308,
+    "development": {
+      "idhmScore": 0.805,
+      "idhmReferenceYear": 2010,
+      "sourceLabel": "Atlas do Desenvolvimento Humano no Brasil (PNUD, Ipea e FJP)",
+      "sourceUrl": "https://www.undp.org/pt/brazil/idhm-municipios-2010",
+      "sourceType": "official",
+      "updatedAt": "2026-03-08"
+    }
+  }
+]

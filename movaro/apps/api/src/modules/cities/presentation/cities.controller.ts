@@ -63,6 +63,27 @@ export class CitiesController {
     return this.citiesCatalogService.getCityWeatherById(normalizedId);
   }
 
+  @Get(':id/travel-insight')
+  getCityTravelInsight(
+    @Param('id') id: string,
+    @Query('originIata') originIata?: string,
+    @Query('destIata') destIata?: string,
+  ) {
+    const normalizedId = id.trim();
+    if (
+      normalizedId.length == 0 ||
+      normalizedId.length > 120 ||
+      !/^[a-z0-9-]+$/.test(normalizedId)
+    ) {
+      throw new BadRequestException('Invalid city id.');
+    }
+
+    return this.citiesCatalogService.getCityTravelInsightById(normalizedId, {
+      originIata: originIata?.trim().toUpperCase(),
+      destIata: destIata?.trim().toUpperCase(),
+    });
+  }
+
   @Get(':id')
   getCityById(@Param('id') id: string) {
     const normalizedId = id.trim();

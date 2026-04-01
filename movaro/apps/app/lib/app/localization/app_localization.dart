@@ -92,6 +92,13 @@ extension AppLocalizationsFormatting on AppLocalizations {
   }
 
   String questionTitle(String questionId) {
+    return questionTitleForJourney(questionId);
+  }
+
+  String questionTitleForJourney(
+    String questionId, {
+    String? destinationLabel,
+  }) {
     switch (questionId) {
       case 'origin_country':
         return questionOriginCountryTitle;
@@ -100,13 +107,13 @@ extension AppLocalizationsFormatting on AppLocalizations {
       case 'goal':
         return questionGoalTitle;
       case 'intent':
-        return qIntentPrompt;
+        return questionIntentPrompt();
       case 'funding':
         return qFundingPrompt;
       case 'portuguese_familiarity':
         return questionPortugueseFamiliarityTitle;
       case 'timeline':
-        return qTimelinePrompt;
+        return questionTimelinePrompt();
       case 'travel_group':
         return _localizedText(
           pt: 'Como você vai fazer essa mudança?',
@@ -140,6 +147,22 @@ extension AppLocalizationsFormatting on AppLocalizations {
       default:
         return questionId;
     }
+  }
+
+  String questionIntentPrompt({String? destinationLabel}) {
+    return _localizedText(
+      pt: 'O que você busca nessa mudança agora?',
+      es: '¿Qué buscás en esta mudanza ahora?',
+      en: 'What are you looking for in this move right now?',
+    );
+  }
+
+  String questionTimelinePrompt({String? destinationLabel}) {
+    return _localizedText(
+      pt: 'Quando você gostaria de fazer essa mudança? (aprox.)',
+      es: '¿Cuándo te gustaría hacer esta mudanza? (aprox.)',
+      en: 'When would you like to make this move? (roughly)',
+    );
   }
 
   String questionOptionLabel(String questionId, String value) {
@@ -971,9 +994,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String questionnaireGuideBody() => _localizedText(
-    pt: 'A gente usa essas respostas para organizar sua rota, salvar seu progresso e montar um plano claro para seguir.',
-    es: 'Usamos estas respuestas para ordenar tu ruta, guardar tu progreso y armar un plan claro para seguir.',
-    en: 'We use these answers to organize your route, save your progress, and build a clear plan to follow.',
+    pt: 'A gente usa essas respostas para organizar sua rota, salvar seu progresso e montar um plano claro para seguir. Hoje, o beta esta focado no corredor Argentina -> Brasil.',
+    es: 'Usamos estas respuestas para ordenar tu ruta, guardar tu progreso y armar un plan claro para seguir. Hoy, el beta esta enfocado en el corredor Argentina -> Brasil.',
+    en: 'We use these answers to organize your route, save your progress, and build a clear plan to follow. Today, the beta is focused on the Argentina -> Brazil corridor.',
   );
 
   String discoverFlowBannerTitle() => _localizedText(
@@ -1019,9 +1042,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String questionnaireGuideStepOneBody() => _localizedText(
-    pt: 'Comece pela origem e responda o essencial primeiro.',
-    es: 'Empezá por el origen y respondé primero lo esencial.',
-    en: 'Start with your origin and answer the essentials first.',
+    pt: 'Comece pela origem e responda o essencial primeiro. O destino do MVP atual e Brasil, mas o fluxo ja foi pensado para crescer.',
+    es: 'Empezá por el origen y respondé primero lo esencial. El destino del MVP actual es Brasil, pero el flujo ya esta pensado para crecer.',
+    en: 'Start with your origin and answer the essentials first. Brazil is the current MVP destination, but the flow is already designed to grow.',
   );
 
   String questionnaireGuideStepTwoTitle() => _localizedText(
@@ -1495,17 +1518,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'Your location',
   );
 
-  String cityDetailMapSheetDestinationLabel() => _localizedText(
-    pt: 'Destino',
-    es: 'Destino',
-    en: 'Destination',
-  );
+  String cityDetailMapSheetDestinationLabel() =>
+      _localizedText(pt: 'Destino', es: 'Destino', en: 'Destination');
 
-  String cityDetailMapSheetOriginLabel() => _localizedText(
-    pt: 'Origem',
-    es: 'Origen',
-    en: 'Origin',
-  );
+  String cityDetailMapSheetOriginLabel() =>
+      _localizedText(pt: 'Origem', es: 'Origen', en: 'Origin');
 
   String cityDetailMapOriginMissingLabel() => _localizedText(
     pt: 'Ative a localização para ver a distância',
@@ -1543,8 +1560,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'Before deciding, check what this city usually demands at the start and where it makes sense to focus first.',
   );
 
-  String cityDetailArrivalReserveLabel() =>
-      _localizedText(pt: 'Reserva base', es: 'Reserva base', en: 'Base reserve');
+  String cityDetailArrivalReserveLabel() => _localizedText(
+    pt: 'Reserva base',
+    es: 'Reserva base',
+    en: 'Base reserve',
+  );
 
   String cityDetailArrivalReserveSupporting(int months) => _localizedText(
     pt: 'Estimativa derivada do custo atual da cidade para cerca de $months meses de chegada.',
@@ -1567,18 +1587,28 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'Open the cost block to see the more practical read for this city.',
   );
 
-  String cityDetailArrivalPressureLabel() =>
-      _localizedText(pt: 'Pressão inicial', es: 'Presión inicial', en: 'Entry pressure');
+  String cityDetailArrivalPressureLabel() => _localizedText(
+    pt: 'Pressão inicial',
+    es: 'Presión inicial',
+    en: 'Entry pressure',
+  );
 
   String cityDetailArrivalPressureBasis(
     String housing,
     String language,
     String safety,
     String seasonality,
+    String? flight,
   ) => _localizedText(
-    pt: 'Base usada: moradia $housing, idioma $language, segurança $safety, sazonalidade $seasonality.',
-    es: 'Base usada: vivienda $housing, idioma $language, seguridad $safety, temporada $seasonality.',
-    en: 'Base used: housing $housing, language $language, safety $safety, seasonality $seasonality.',
+    pt: flight == null
+        ? 'Base usada: moradia $housing, idioma $language, segurança $safety, sazonalidade $seasonality.'
+        : 'Base usada: moradia $housing, idioma $language, segurança $safety, sazonalidade $seasonality, voo $flight.',
+    es: flight == null
+        ? 'Base usada: vivienda $housing, idioma $language, seguridad $safety, temporada $seasonality.'
+        : 'Base usada: vivienda $housing, idioma $language, seguridad $safety, temporada $seasonality, vuelo $flight.',
+    en: flight == null
+        ? 'Base used: housing $housing, language $language, safety $safety, seasonality $seasonality.'
+        : 'Base used: housing $housing, language $language, safety $safety, seasonality $seasonality, flight $flight.',
   );
 
   String cityDetailArrivalSeasonalityBasisActive() =>
@@ -1620,6 +1650,112 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'This city tends to require more coordination at the start. Housing, cost, or adaptation deserve extra validation.',
   );
 
+  String cityDetailFlightBurdenTitle() => _localizedText(
+    pt: 'Peso da passagem',
+    es: 'Peso del vuelo',
+    en: 'Flight burden',
+  );
+
+  String cityDetailFlightBurdenBody() => _localizedText(
+    pt: 'Essa leitura separa o custo de chegar do custo de viver. Uma cidade pode encaixar bem, mas ainda pesar na rota de entrada.',
+    es: 'Esta lectura separa el costo de llegar del costo de vivir. Una ciudad puede encajar bien, pero igual pesar en la ruta de entrada.',
+    en: 'This separates the cost of getting there from the cost of living there. A city may fit well and still be heavy on the entry route.',
+  );
+
+  String cityDetailFlightBurdenRangeLabel() => _localizedText(
+    pt: 'Faixa da rota',
+    es: 'Rango de ruta',
+    en: 'Route range',
+  );
+
+  String cityDetailFlightBurdenRangeSupporting(
+    String originIata,
+    String destIata,
+  ) => _localizedText(
+    pt: 'Faixa histórica de baixa para $originIata -> $destIata. Use como referência inicial antes de abrir o preço ao vivo.',
+    es: 'Rango histórico de baja para $originIata -> $destIata. Usalo como referencia inicial antes de abrir el precio en vivo.',
+    en: 'Historical low-season range for $originIata -> $destIata. Use it as a starting reference before opening live pricing.',
+  );
+
+  String cityDetailFlightBurdenPressureLabel() => _localizedText(
+    pt: 'Impacto na chegada',
+    es: 'Impacto al llegar',
+    en: 'Arrival impact',
+  );
+
+  String cityDetailFlightBurdenPressureLow() =>
+      _localizedText(pt: 'Leve', es: 'Leve', en: 'Light');
+
+  String cityDetailFlightBurdenPressureMedium() =>
+      _localizedText(pt: 'Atenção', es: 'Atención', en: 'Watch');
+
+  String cityDetailFlightBurdenPressureHigh() =>
+      _localizedText(pt: 'Pesado', es: 'Pesado', en: 'Heavy');
+
+  String cityDetailFlightBurdenPressureLowBody() => _localizedText(
+    pt: 'A passagem tende a pesar menos na decisão. Ainda vale validar data e bagagem, mas a rota não costuma ser o principal bloqueio.',
+    es: 'El vuelo tiende a pesar menos en la decisión. Igual conviene validar fecha y equipaje, pero la ruta no suele ser el principal bloqueo.',
+    en: 'The flight tends to weigh less in the decision. It is still worth checking dates and baggage, but the route is not usually the main blocker.',
+  );
+
+  String cityDetailFlightBurdenPressureMediumBody() => _localizedText(
+    pt: 'A rota já merece atenção junto com aluguel e reserva inicial. Pequenas mudanças de data podem fazer diferença.',
+    es: 'La ruta ya merece atención junto con alquiler y reserva inicial. Pequeños cambios de fecha pueden hacer diferencia.',
+    en: 'The route already deserves attention alongside rent and initial reserve. Small date changes can make a difference.',
+  );
+
+  String cityDetailFlightBurdenPressureHighBody() => _localizedText(
+    pt: 'Aqui o voo pode virar parte real do problema. Vale comparar essa cidade com opções do sul ou do sudeste antes de fechar a decisão.',
+    es: 'Acá el vuelo puede volverse parte real del problema. Conviene comparar esta ciudad con opciones del sur o sudeste antes de cerrar la decisión.',
+    en: 'Here the flight can become a real part of the problem. It is worth comparing this city with southern or southeastern options before locking the decision.',
+  );
+
+  String cityDetailFlightBurdenPressureBasis(String value, String route) =>
+      _localizedText(
+        pt: 'Base usada: baixa histórica em $value para a rota $route.',
+        es: 'Base usada: piso histórico de $value para la ruta $route.',
+        en: 'Base used: historical low range of $value for the $route route.',
+      );
+
+  String cityDetailFlightBurdenTradeoffLabel() => _localizedText(
+    pt: 'Trade-off com outras cidades',
+    es: 'Trade-off con otras ciudades',
+    en: 'Trade-off vs other cities',
+  );
+
+  String cityDetailFlightBurdenTradeoffBody(
+    String cheaperCity,
+    String cheaperRange,
+    String currentRange,
+  ) => _localizedText(
+    pt: 'Chegar aqui tende a custar mais do que chegar em $cheaperCity. Faixa desta rota: $currentRange. Faixa em $cheaperCity: $cheaperRange.',
+    es: 'Llegar acá tiende a costar más que llegar a $cheaperCity. Rango de esta ruta: $currentRange. Rango en $cheaperCity: $cheaperRange.',
+    en: 'Getting here tends to cost more than getting to $cheaperCity. This route range: $currentRange. $cheaperCity range: $cheaperRange.',
+  );
+
+  String cityDetailFlightBurdenSource() => _localizedText(
+    pt: 'Fonte: histórico de rotas do Movaro (USD) + comparação ao vivo em Google Flights/Skyscanner',
+    es: 'Fuente: historial de rutas de Movaro (USD) + comparación en vivo en Google Flights/Skyscanner',
+    en: 'Source: Movaro route history (USD) + live comparison on Google Flights/Skyscanner',
+  );
+
+  String migrationResultFlightTradeoffTitle() => _localizedText(
+    pt: 'Atenção com o voo',
+    es: 'Atención con el vuelo',
+    en: 'Watch the flight',
+  );
+
+  String migrationResultFlightTradeoffBody(
+    String currentCity,
+    String currentRange,
+    String cheaperCity,
+    String cheaperRange,
+  ) => _localizedText(
+    pt: '$currentCity pode encaixar melhor no perfil, mas a chegada tende a pesar mais no voo. Faixa estimada: $currentRange. Em $cheaperCity, a faixa histórica fica em $cheaperRange.',
+    es: '$currentCity puede encajar mejor con tu perfil, pero la llegada tiende a pesar más en el vuelo. Rango estimado: $currentRange. En $cheaperCity, el rango histórico queda en $cheaperRange.',
+    en: '$currentCity may fit your profile better, but getting there tends to weigh more on airfare. Estimated range: $currentRange. In $cheaperCity, the historical range sits at $cheaperRange.',
+  );
+
   String cityDetailArrivalFirstFocusLabel() =>
       _localizedText(pt: 'Primeiro foco', es: 'Primer foco', en: 'First focus');
 
@@ -1630,12 +1766,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
         en: 'Data used: $headline ($value).',
       );
 
-  String cityDetailArrivalSourceLabel(String source) =>
-      _localizedText(
-        pt: 'Fonte: $source',
-        es: 'Fuente: $source',
-        en: 'Source: $source',
-      );
+  String cityDetailArrivalSourceLabel(String source) => _localizedText(
+    pt: 'Fonte: $source',
+    es: 'Fuente: $source',
+    en: 'Source: $source',
+  );
 
   String cityDetailArrivalFocusHousing() =>
       _localizedText(pt: 'Moradia', es: 'Vivienda', en: 'Housing');
@@ -1646,8 +1781,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
   String cityDetailArrivalFocusWork() =>
       _localizedText(pt: 'Renda', es: 'Ingresos', en: 'Income');
 
-  String cityDetailArrivalFocusSafety() =>
-      _localizedText(pt: 'Bairro e rotina', es: 'Barrio y rutina', en: 'Neighborhood & routine');
+  String cityDetailArrivalFocusSafety() => _localizedText(
+    pt: 'Bairro e rotina',
+    es: 'Barrio y rutina',
+    en: 'Neighborhood & routine',
+  );
 
   String cityDetailArrivalFocusHousingBody() => _localizedText(
     pt: 'Vale validar aluguel, garantia, entrada e bairro antes de assumir compromisso maior.',

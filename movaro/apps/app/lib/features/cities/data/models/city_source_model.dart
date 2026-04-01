@@ -8,6 +8,7 @@ class CitySourceModel {
     required this.description,
     required this.isOfficial,
     required this.url,
+    required this.sourceType,
   });
 
   factory CitySourceModel.fromJson(Map<String, dynamic> json) {
@@ -18,6 +19,8 @@ class CitySourceModel {
       description: json['description'] as String,
       isOfficial: json['isOfficial'] as bool,
       url: json['url'] as String?,
+      sourceType: (json['sourceType'] as String?) ??
+          ((json['isOfficial'] as bool) ? 'official' : 'curated'),
     );
   }
 
@@ -27,6 +30,7 @@ class CitySourceModel {
   final String description;
   final bool isOfficial;
   final String? url;
+  final String sourceType;
 
   factory CitySourceModel.fromEntity(CitySource source) {
     return CitySourceModel(
@@ -36,6 +40,7 @@ class CitySourceModel {
       description: source.description,
       isOfficial: source.isOfficial,
       url: source.url,
+      sourceType: source.sourceType,
     );
   }
 
@@ -46,6 +51,7 @@ class CitySourceModel {
     'description': description,
     'isOfficial': isOfficial,
     'url': url,
+    'sourceType': sourceType,
   };
 
   CitySource toEntity() => CitySource(
@@ -55,5 +61,6 @@ class CitySourceModel {
     description: description,
     isOfficial: isOfficial,
     url: url,
+    sourceType: sourceType,
   );
 }

@@ -85,7 +85,6 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
                                   width: 18,
@@ -101,13 +100,17 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
                                   ),
                                 ),
                                 const SizedBox(width: 6),
-                                Text(
-                                  widget.contextLabel.toUpperCase(),
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF58A6FF),
-                                    letterSpacing: 0.6,
+                                Expanded(
+                                  child: Text(
+                                    widget.contextLabel.toUpperCase(),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF58A6FF),
+                                      letterSpacing: 0.6,
+                                    ),
                                   ),
                                 ),
                               ],

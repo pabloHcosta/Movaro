@@ -19,4 +19,36 @@ export type CityMetricsModel = {
   economicActivityScore: number;
   topIndustries: string[];
   updatedAt: string;
+  budgetSnapshot?: {
+    cityLabel: string;
+    singlePersonExcludingRent: number;
+    oneBedroomOutsideCentre: number;
+    oneBedroomCityCentre: number;
+    averageMonthlyNetSalary: number;
+    monthlyTransportPass: number;
+    utilities: number;
+    updatedAt: string;
+    sourceLabel: string;
+    sourceUrl: string;
+    sourceType?: 'official' | 'community' | 'curated' | 'derived';
+  };
+  seasonalitySnapshot?: {
+    peakMonths: number[];
+    lowMonths: number[];
+    severity: 'high' | 'medium';
+    visitorsLabelPt: string;
+    visitorsLabelEs: string;
+    visitorsLabelEn: string;
+    rentNotesPt: string;
+    rentNotesEs: string;
+    rentNotesEn: string;
+    jobNotesPt: string;
+    jobNotesEs: string;
+    jobNotesEn: string;
+    populationMultiplierNote?: string | null;
+    updatedAt: string;
+    sourceLabel: string;
+    sourceUrl?: string | null;
+    sourceType?: 'official' | 'community' | 'curated' | 'derived';
+  };
 };

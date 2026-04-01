@@ -1,5 +1,7 @@
+import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_scores.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_public_opinion.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_seasonality_snapshot.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_sources.dart';
 
 class City {
@@ -29,6 +31,8 @@ class City {
     required this.sources,
     required this.updatedAt,
     required this.regionName,
+    this.budgetSnapshot,
+    this.seasonalitySnapshot,
     this.publicOpinion,
   });
 
@@ -57,5 +61,7 @@ class City {
   final CitySources sources;
   final String updatedAt;
   final String? regionName;
+  final CityBudgetSnapshot? budgetSnapshot;
+  final CitySeasonalitySnapshot? seasonalitySnapshot;
   final CityPublicOpinion? publicOpinion;
 }

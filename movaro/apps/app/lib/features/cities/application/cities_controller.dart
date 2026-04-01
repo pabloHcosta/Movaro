@@ -3,6 +3,7 @@ import 'package:movaro_app/features/cities/application/services/city_favorites_s
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
+import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
 
@@ -23,6 +24,7 @@ class CitiesController extends ChangeNotifier {
   CityMethodology? _methodology;
   final Map<String, City> _cityCache = {};
   final Map<String, CityWeather> _weatherCache = {};
+  final Map<String, TravelRouteInsight> _travelInsightCache = {};
   final Set<String> _favoriteCityIds = {};
   List<City> _catalog = const [];
   List<City> _searchResults = const [];
@@ -42,6 +44,8 @@ class CitiesController extends ChangeNotifier {
   bool _isInitialized = false;
   final Map<String, Future<City?>> _pendingCityRequests = {};
   final Map<String, Future<CityWeather?>> _pendingWeatherRequests = {};
+  final Map<String, Future<TravelRouteInsight?>> _pendingTravelInsightRequests =
+      {};
 
   CityHighlights? get highlights => _highlights;
   CityMethodology? get methodology => _methodology;
@@ -65,6 +69,15 @@ class CitiesController extends ChangeNotifier {
 
   bool isFavorite(String cityId) => _favoriteCityIds.contains(cityId);
   CityWeather? weatherFor(String cityId) => _weatherCache[cityId];
+  TravelRouteInsight? travelInsightFor(
+    String cityId, {
+    String? originIata,
+    String? destIata,
+  }) => _travelInsightCache[_travelInsightKey(
+    cityId,
+    originIata: originIata,
+    destIata: destIata,
+  )];
 
   Future<void> initialize({bool preloadData = false}) async {
     if (_isInitialized && !preloadData) {
@@ -114,6 +127,18 @@ class CitiesController extends ChangeNotifier {
 
   Future<CityWeather?> prefetchCityWeather(String cityId) async {
     return loadWeatherForCity(cityId);
+  }
+
+  Future<TravelRouteInsight?> prefetchCityTravelInsight(
+    String cityId, {
+    String? originIata,
+    String? destIata,
+  }) async {
+    return loadTravelInsightForCity(
+      cityId,
+      originIata: originIata,
+      destIata: destIata,
+    );
   }
 
   Future<void> loadExplore() async {
@@ -220,6 +245,65 @@ class CitiesController extends ChangeNotifier {
       _pendingWeatherRequests.remove(cityId);
     }
   }
+
+  Future<TravelRouteInsight?> loadTravelInsightForCity(
+    String cityId, {
+    String? originIata,
+    String? destIata,
+  }) async {
+    final cacheKey = _travelInsightKey(
+      cityId,
+      originIata: originIata,
+      destIata: destIata,
+    );
+    if (_travelInsightCache.containsKey(cacheKey)) {
+      return _travelInsightCache[cacheKey];
+    }
+
+    final pendingRequest = _pendingTravelInsightRequests[cacheKey];
+    if (pendingRequest != null) {
+      return pendingRequest;
+    }
+
+    final request = _performLoadTravelInsightForCity(
+      cityId,
+      originIata: originIata,
+      destIata: destIata,
+      cacheKey: cacheKey,
+    );
+    _pendingTravelInsightRequests[cacheKey] = request;
+    return request;
+  }
+
+  Future<TravelRouteInsight?> _performLoadTravelInsightForCity(
+    String cityId, {
+    required String cacheKey,
+    String? originIata,
+    String? destIata,
+  }) async {
+    try {
+      final insight = await _repository.getCityTravelInsight(
+        cityId,
+        originIata: originIata,
+        destIata: destIata,
+      );
+      if (insight != null) {
+        _travelInsightCache[cacheKey] = insight;
+        notifyListeners();
+      }
+      return insight;
+    } catch (_) {
+      return null;
+    } finally {
+      _pendingTravelInsightRequests.remove(cacheKey);
+    }
+  }
+
+  String _travelInsightKey(
+    String cityId, {
+    String? originIata,
+    String? destIata,
+  }) => '${cityId.toLowerCase()}|${originIata?.toUpperCase() ?? ''}|${destIata?.toUpperCase() ?? ''}';
 
   Future<void> search(String query) async {
     if (query.trim().isEmpty) {

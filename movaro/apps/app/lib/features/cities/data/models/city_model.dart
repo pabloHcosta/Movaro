@@ -1,5 +1,7 @@
+import 'package:movaro_app/features/cities/data/models/city_budget_snapshot_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_public_opinion_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_scores_model.dart';
+import 'package:movaro_app/features/cities/data/models/city_seasonality_snapshot_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_sources_model.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 
@@ -30,6 +32,8 @@ class CityModel {
     required this.sources,
     required this.updatedAt,
     required this.regionName,
+    this.budgetSnapshot,
+    this.seasonalitySnapshot,
     this.publicOpinion,
   });
 
@@ -68,6 +72,16 @@ class CityModel {
       ),
       updatedAt: json['updatedAt'] as String,
       regionName: json['regionName'] as String?,
+      budgetSnapshot: json['budgetSnapshot'] == null
+          ? null
+          : CityBudgetSnapshotModel.fromJson(
+              json['budgetSnapshot'] as Map<String, dynamic>,
+            ),
+      seasonalitySnapshot: json['seasonalitySnapshot'] == null
+          ? null
+          : CitySeasonalitySnapshotModel.fromJson(
+              json['seasonalitySnapshot'] as Map<String, dynamic>,
+            ),
       publicOpinion: json['publicOpinion'] == null
           ? null
           : CityPublicOpinionModel.fromJson(
@@ -101,6 +115,8 @@ class CityModel {
   final CitySourcesModel sources;
   final String updatedAt;
   final String? regionName;
+  final CityBudgetSnapshotModel? budgetSnapshot;
+  final CitySeasonalitySnapshotModel? seasonalitySnapshot;
   final CityPublicOpinionModel? publicOpinion;
 
   factory CityModel.fromEntity(City city) {
@@ -130,6 +146,46 @@ class CityModel {
       sources: CitySourcesModel.fromEntity(city.sources),
       updatedAt: city.updatedAt,
       regionName: city.regionName,
+      budgetSnapshot: city.budgetSnapshot == null
+          ? null
+          : CityBudgetSnapshotModel.fromJson({
+              'cityLabel': city.budgetSnapshot!.cityLabel,
+              'singlePersonExcludingRent':
+                  city.budgetSnapshot!.singlePersonExcludingRent,
+              'oneBedroomOutsideCentre':
+                  city.budgetSnapshot!.oneBedroomOutsideCentre,
+              'oneBedroomCityCentre': city.budgetSnapshot!.oneBedroomCityCentre,
+              'averageMonthlyNetSalary':
+                  city.budgetSnapshot!.averageMonthlyNetSalary,
+              'monthlyTransportPass': city.budgetSnapshot!.monthlyTransportPass,
+              'utilities': city.budgetSnapshot!.utilities,
+              'updatedAt': city.budgetSnapshot!.updatedAt,
+              'sourceLabel': city.budgetSnapshot!.sourceLabel,
+              'sourceUrl': city.budgetSnapshot!.sourceUrl,
+              'sourceType': city.budgetSnapshot!.sourceType,
+            }),
+      seasonalitySnapshot: city.seasonalitySnapshot == null
+          ? null
+          : CitySeasonalitySnapshotModel.fromJson({
+              'peakMonths': city.seasonalitySnapshot!.peakMonths,
+              'lowMonths': city.seasonalitySnapshot!.lowMonths,
+              'severity': city.seasonalitySnapshot!.severity.name,
+              'visitorsLabelPt': city.seasonalitySnapshot!.visitorsLabelPt,
+              'visitorsLabelEs': city.seasonalitySnapshot!.visitorsLabelEs,
+              'visitorsLabelEn': city.seasonalitySnapshot!.visitorsLabelEn,
+              'rentNotesPt': city.seasonalitySnapshot!.rentNotesPt,
+              'rentNotesEs': city.seasonalitySnapshot!.rentNotesEs,
+              'rentNotesEn': city.seasonalitySnapshot!.rentNotesEn,
+              'jobNotesPt': city.seasonalitySnapshot!.jobNotesPt,
+              'jobNotesEs': city.seasonalitySnapshot!.jobNotesEs,
+              'jobNotesEn': city.seasonalitySnapshot!.jobNotesEn,
+              'populationMultiplierNote':
+                  city.seasonalitySnapshot!.populationMultiplierNote,
+              'updatedAt': city.seasonalitySnapshot!.updatedAt,
+              'sourceLabel': city.seasonalitySnapshot!.sourceLabel,
+              'sourceUrl': city.seasonalitySnapshot!.sourceUrl,
+              'sourceType': city.seasonalitySnapshot!.sourceType,
+            }),
       publicOpinion: city.publicOpinion == null
           ? null
           : CityPublicOpinionModel.fromEntity(city.publicOpinion!),
@@ -162,6 +218,44 @@ class CityModel {
     'sources': sources.toJson(),
     'updatedAt': updatedAt,
     'regionName': regionName,
+    'budgetSnapshot': budgetSnapshot == null
+        ? null
+        : {
+            'cityLabel': budgetSnapshot!.cityLabel,
+            'singlePersonExcludingRent':
+                budgetSnapshot!.singlePersonExcludingRent,
+            'oneBedroomOutsideCentre': budgetSnapshot!.oneBedroomOutsideCentre,
+            'oneBedroomCityCentre': budgetSnapshot!.oneBedroomCityCentre,
+            'averageMonthlyNetSalary': budgetSnapshot!.averageMonthlyNetSalary,
+            'monthlyTransportPass': budgetSnapshot!.monthlyTransportPass,
+            'utilities': budgetSnapshot!.utilities,
+            'updatedAt': budgetSnapshot!.updatedAt,
+            'sourceLabel': budgetSnapshot!.sourceLabel,
+            'sourceUrl': budgetSnapshot!.sourceUrl,
+            'sourceType': budgetSnapshot!.sourceType,
+          },
+    'seasonalitySnapshot': seasonalitySnapshot == null
+        ? null
+        : {
+            'peakMonths': seasonalitySnapshot!.peakMonths,
+            'lowMonths': seasonalitySnapshot!.lowMonths,
+            'severity': seasonalitySnapshot!.severity.name,
+            'visitorsLabelPt': seasonalitySnapshot!.visitorsLabelPt,
+            'visitorsLabelEs': seasonalitySnapshot!.visitorsLabelEs,
+            'visitorsLabelEn': seasonalitySnapshot!.visitorsLabelEn,
+            'rentNotesPt': seasonalitySnapshot!.rentNotesPt,
+            'rentNotesEs': seasonalitySnapshot!.rentNotesEs,
+            'rentNotesEn': seasonalitySnapshot!.rentNotesEn,
+            'jobNotesPt': seasonalitySnapshot!.jobNotesPt,
+            'jobNotesEs': seasonalitySnapshot!.jobNotesEs,
+            'jobNotesEn': seasonalitySnapshot!.jobNotesEn,
+            'populationMultiplierNote':
+                seasonalitySnapshot!.populationMultiplierNote,
+            'updatedAt': seasonalitySnapshot!.updatedAt,
+            'sourceLabel': seasonalitySnapshot!.sourceLabel,
+            'sourceUrl': seasonalitySnapshot!.sourceUrl,
+            'sourceType': seasonalitySnapshot!.sourceType,
+          },
     'publicOpinion': publicOpinion?.toJson(),
   };
 
@@ -191,6 +285,8 @@ class CityModel {
     sources: sources.toEntity(),
     updatedAt: updatedAt,
     regionName: regionName,
+    budgetSnapshot: budgetSnapshot?.toEntity(),
+    seasonalitySnapshot: seasonalitySnapshot?.toEntity(),
     publicOpinion: publicOpinion?.toEntity(),
   );
 }

@@ -14,9 +14,9 @@ import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_seasonality_conflict_service.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
-import 'package:movaro_app/features/home/application/city_budget_data.dart';
 import 'package:movaro_app/features/home/application/streak_service.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/home_visual_layout.dart';
@@ -1501,7 +1501,7 @@ class _ExplorerStageCard extends StatelessWidget {
   });
 
   final City city;
-  final CityBudget? cityBudget;
+  final CityBudgetSnapshot? cityBudget;
   final VoidCallback onCreatePlan;
 
   @override

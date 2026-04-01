@@ -1,6 +1,8 @@
 import { MovaroScoresEntity } from './movaro-scores.entity';
 import { CitySourcesEntity } from './city-sources.entity';
 import { CityPublicOpinionEntity } from './city-public-opinion.entity';
+import { CityBudgetSnapshotEntity } from './city-budget-snapshot.entity';
+import { CitySeasonalitySnapshotEntity } from './city-seasonality-snapshot.entity';
 
 export class CityCardEntity {
   constructor(
@@ -30,5 +32,7 @@ export class CityCardEntity {
     public readonly updatedAt: string,
     public readonly regionName: string | null,
     public readonly publicOpinion: CityPublicOpinionEntity | null,
+    public readonly budgetSnapshot: CityBudgetSnapshotEntity | null,
+    public readonly seasonalitySnapshot: CitySeasonalitySnapshotEntity | null,
   ) {}
 }

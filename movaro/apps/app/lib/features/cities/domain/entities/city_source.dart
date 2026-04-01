@@ -6,6 +6,7 @@ class CitySource {
     required this.description,
     required this.isOfficial,
     required this.url,
+    required this.sourceType,
   });
 
   final String id;
@@ -14,4 +15,5 @@ class CitySource {
   final String description;
   final bool isOfficial;
   final String? url;
+  final String sourceType;
 }

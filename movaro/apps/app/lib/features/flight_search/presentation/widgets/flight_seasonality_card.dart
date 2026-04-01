@@ -3,6 +3,7 @@ import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/localization/generated/app_localizations.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
 
 enum _PriceLevel { low, mid, high }
@@ -296,6 +297,7 @@ class FlightSeasonalityCard extends StatelessWidget {
     this.originIata,
     this.cityId,
     this.destIata,
+    this.routeInsight,
     super.key,
   });
 
@@ -303,6 +305,7 @@ class FlightSeasonalityCard extends StatelessWidget {
   final String? originIata;
   final String? cityId;
   final String? destIata;
+  final TravelRouteInsight? routeInsight;
 
   String? get _resolvedOriginIata {
     if (originIata != null && originIata!.isNotEmpty) {
@@ -335,7 +338,18 @@ class FlightSeasonalityCard extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final data = _route;
+    final data = routeInsight == null ? _route : _RouteData(
+      originIata: routeInsight!.originIata,
+      destIata: routeInsight!.destIata,
+      months: routeInsight!.months.map((item) => switch (item) {
+        TravelRoutePriceLevel.low => _PriceLevel.low,
+        TravelRoutePriceLevel.mid => _PriceLevel.mid,
+        TravelRoutePriceLevel.high => _PriceLevel.high,
+      }).toList(growable: false),
+      lowUsdMin: routeInsight!.lowUsdMin,
+      lowUsdMax: routeInsight!.lowUsdMax,
+      seasonalWarningKey: routeInsight!.seasonalWarningKey,
+    );
     final monthLabels = _monthLabels(l10n);
     final cheapMonths = data == null
         ? const <String>[]
@@ -609,6 +623,7 @@ class FlightPriceBadge extends StatelessWidget {
     this.originIata,
     this.cityId,
     this.destIata,
+    this.routeInsight,
     super.key,
   });
 
@@ -616,6 +631,7 @@ class FlightPriceBadge extends StatelessWidget {
   final String? originIata;
   final String? cityId;
   final String? destIata;
+  final TravelRouteInsight? routeInsight;
 
   String? get _resolvedOrigin {
     if (originIata != null && originIata!.isNotEmpty) {
@@ -636,10 +652,23 @@ class FlightPriceBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final route = _FlightSeasonalityCatalog.resolveRoute(
-      originIata: _resolvedOrigin,
-      destIata: _resolvedDest,
-    );
+    final route = routeInsight == null
+        ? _FlightSeasonalityCatalog.resolveRoute(
+            originIata: _resolvedOrigin,
+            destIata: _resolvedDest,
+          )
+        : _RouteData(
+            originIata: routeInsight!.originIata,
+            destIata: routeInsight!.destIata,
+            months: routeInsight!.months.map((item) => switch (item) {
+              TravelRoutePriceLevel.low => _PriceLevel.low,
+              TravelRoutePriceLevel.mid => _PriceLevel.mid,
+              TravelRoutePriceLevel.high => _PriceLevel.high,
+            }).toList(growable: false),
+            lowUsdMin: routeInsight!.lowUsdMin,
+            lowUsdMax: routeInsight!.lowUsdMax,
+            seasonalWarningKey: routeInsight!.seasonalWarningKey,
+          );
     if (route == null) {
       return const SizedBox.shrink();
     }

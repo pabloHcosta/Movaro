@@ -51,6 +51,7 @@ class _QuestionPageState extends State<QuestionPage> {
   String? _inlineHint;
   bool _showProcessingScreen = false;
   bool _didPromptOriginLocation = false;
+  bool _didTryAutoHelp = false;
   final ScrollController _optionsScrollController = ScrollController();
   String? _scrollScopeKey;
   bool _showScrollHint = false;
@@ -63,8 +64,28 @@ class _QuestionPageState extends State<QuestionPage> {
     super.initState();
     _optionsScrollController.addListener(_updateScrollHint);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(controller.initializeForQuestionnaire());
+      unawaited(_initializeQuestionnaire());
     });
+  }
+
+  Future<void> _initializeQuestionnaire() async {
+    await controller.initializeForQuestionnaire();
+    if (!mounted) {
+      return;
+    }
+    await _maybeShowHelp();
+  }
+
+  Future<void> _maybeShowHelp() async {
+    if (_didTryAutoHelp) {
+      return;
+    }
+    _didTryAutoHelp = true;
+    await maybeShowContextualHelpGuide(
+      context,
+      preferenceKey: _helpPreferenceKey,
+      content: _helpContent(context),
+    );
   }
 
   Future<void> _showHelp() {
@@ -423,6 +444,10 @@ class _QuestionPageState extends State<QuestionPage> {
     final l10n = context.l10n;
     final showPrimaryAction = !_shouldAutoAdvance(question);
     _prepareScrollableScope(question.id);
+    final questionTitle = l10n.questionTitleForJourney(
+      question.id,
+      destinationLabel: _destinationLabel(),
+    );
 
     return Column(
       children: [
@@ -431,12 +456,6 @@ class _QuestionPageState extends State<QuestionPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _QuestionStageBanner(
-                title: l10n.discoverFlowBannerTitle(),
-                body: l10n.discoverFlowBannerBody(),
-                action: l10n.discoverFlowBannerAction(),
-              ),
-              const SizedBox(height: 14),
               QuestionProgressIndicator(
                 currentStep: controller.currentStepForProgress,
                 totalSteps: controller.totalStepsForProgress,
@@ -445,7 +464,7 @@ class _QuestionPageState extends State<QuestionPage> {
               ),
               const SizedBox(height: 14),
               Text(
-                l10n.questionTitle(question.id),
+                questionTitle,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                   height: 1.12,
@@ -545,6 +564,14 @@ class _QuestionPageState extends State<QuestionPage> {
     return minutes <= 1
         ? context.l10n.questionRemainingTimeUnderOneMinute
         : context.l10n.questionRemainingTimeMinutes(minutes);
+  }
+
+  String? _destinationLabel() {
+    final destination = controller.journeyContextController.selectedDestination;
+    if (destination == null) {
+      return null;
+    }
+    return destination.name;
   }
 
   Widget _buildQuestionOptions(BuildContext context, Question question) {
@@ -1310,59 +1337,6 @@ class _QuestionPageState extends State<QuestionPage> {
         _showScrollHint = nextValue;
       });
     }
-  }
-}
-
-class _QuestionStageBanner extends StatelessWidget {
-  const _QuestionStageBanner({
-    required this.title,
-    required this.body,
-    required this.action,
-  });
-
-  final String title;
-  final String body;
-  final String action;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: scheme.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: scheme.primary.withValues(alpha: 0.16)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title.toUpperCase(),
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: scheme.primary,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            body,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(height: 1.35),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            action,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSoftFor(context),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

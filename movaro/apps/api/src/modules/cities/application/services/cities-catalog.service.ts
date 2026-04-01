@@ -1,21 +1,26 @@
 import { Injectable } from '@nestjs/common';
 
 import { AppErrorFactory } from '../../../../common/errors/app-error.factory';
-import { GetCitiesQueryDto } from '../../presentation/dto/get-cities-query.dto';
+import { OpenMeteoWeatherService } from '../../../../integrations/weather/open-meteo-weather.service';
 import { CityCardEntity } from '../../domain/entities/city-card.entity';
 import { CurrentCityWeatherEntity } from '../../domain/entities/current-city-weather.entity';
+import { TravelRouteInsightEntity } from '../../domain/entities/travel-route-insight.entity';
 import { CityMetricsRepository } from '../../domain/repositories/city-metrics.repository';
+import { GetCitiesQueryDto } from '../../presentation/dto/get-cities-query.dto';
 import { CityMergeService } from './city-merge.service';
 import { CityRankingService } from './city-ranking.service';
-import { OpenMeteoWeatherService } from '../../../../integrations/weather/open-meteo-weather.service';
+import { TravelRouteInsightService } from './travel-route-insight.service';
 
 @Injectable()
 export class CitiesCatalogService {
+  private catalogPromise: Promise<CityCardEntity[]> | null = null;
+
   constructor(
     private readonly cityMetricsRepository: CityMetricsRepository,
     private readonly cityMergeService: CityMergeService,
     private readonly cityRankingService: CityRankingService,
     private readonly openMeteoWeatherService: OpenMeteoWeatherService,
+    private readonly travelRouteInsightService: TravelRouteInsightService,
   ) {}
 
   async getCities(query: GetCitiesQueryDto): Promise<CityCardEntity[]> {
@@ -123,6 +128,21 @@ export class CitiesCatalogService {
     );
   }
 
+  async getCityTravelInsightById(
+    id: string,
+    query: {
+      originIata?: string;
+      destIata?: string;
+    },
+  ): Promise<TravelRouteInsightEntity | null> {
+    await this.getCityById(id);
+    return this.travelRouteInsightService.resolveForCity({
+      cityId: id,
+      originIata: query.originIata,
+      destIata: query.destIata,
+    });
+  }
+
   async search(query: string): Promise<CityCardEntity[]> {
     return this.getCities({
       search: query,
@@ -135,10 +155,20 @@ export class CitiesCatalogService {
   }
 
   private async buildCatalog(): Promise<CityCardEntity[]> {
-    const metrics = this.cityMetricsRepository.getAll();
-    return Promise.all(
-      metrics.map((item) => this.cityMergeService.merge(item)),
-    );
+    if (this.catalogPromise != null) {
+      return this.catalogPromise;
+    }
+
+    this.catalogPromise = Promise.all(
+      this.cityMetricsRepository
+        .getAll()
+        .map((item) => this.cityMergeService.merge(item)),
+    ).catch((error) => {
+      this.catalogPromise = null;
+      throw error;
+    });
+
+    return this.catalogPromise;
   }
 
   private sortBy(
