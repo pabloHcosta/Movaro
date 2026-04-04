@@ -24,9 +24,12 @@ import 'package:movaro_app/features/home/presentation/widgets/main_navigation_ba
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/guide_gps_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/arrival_execution_builder.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/calendar_event_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/document_checklist_adapter.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_event_suggestion_engine.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_event_suggestion_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_readiness_builder.dart';
@@ -34,10 +37,12 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_event_suggestion.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/housing_selection_screen.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/arrival_execution_section.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/guide_event_suggestion_sheet.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/landing_budget_estimator_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_document_readiness_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_readiness_section.dart';
@@ -74,6 +79,11 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   late final Future<CopilotExchangeRates?> _exchangeRatesFuture;
   final MigrationCopilotProgressStore _progressStore =
       MigrationCopilotProgressStore();
+  final GuideEventSuggestionStore _eventSuggestionStore =
+      GuideEventSuggestionStore();
+  final GuideEventSuggestionEngine _eventSuggestionEngine =
+      GuideEventSuggestionEngine();
+  final CalendarEventService _calendarEventService = CalendarEventService();
   Set<String> _readinessCompletedIds = <String>{};
   Set<String> _documentCompletedIds = <String>{};
   Set<String> _arrivalCompletedIds = <String>{};
@@ -85,6 +95,8 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   bool _didTryAutoHelp = false;
   bool _showCelebration = false;
   bool _showExpandedContent = false;
+  bool _isPresentingCalendarAssistant = false;
+  String? _lastAutoPromptSuggestionId;
 
   @override
   void initState() {
@@ -180,6 +192,14 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       _arrivalCompletedIds = Set<String>.from(snapshot.arrivalCompletedIds);
       _loadedActiveItemId = snapshot.activeItemId;
       _completedAtById = Map<String, String>.from(snapshot.completedAtById);
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _gpsController == null) {
+        return;
+      }
+      unawaited(
+        _maybePromptCalendarAssistant(plan: plan, controller: _gpsController!),
+      );
     });
   }
 
@@ -579,6 +599,11 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   }) {
     var sheetItem = item;
     var actionOpened = false;
+    final eventSuggestion = _buildEventSuggestion(
+      plan: plan,
+      item: item,
+      allItems: controller.items,
+    );
 
     return showModalBottomSheet<void>(
       context: context,
@@ -821,6 +846,18 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                             ),
                           ),
                           const SizedBox(height: 10),
+                        ],
+                        if (!isPreview &&
+                            !sheetItem.isCompleted &&
+                            eventSuggestion != null) ...[
+                          _GuideCalendarSuggestionCard(
+                            suggestion: eventSuggestion,
+                            onTap: () => _showCalendarSuggestionSheet(
+                              plan: plan,
+                              suggestion: eventSuggestion,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
                         ],
                         // ── Checklist (interactive in execution, read-only in preview) ──
                         if (sheetItem.hasChecklist) ...[
@@ -1161,6 +1198,142 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     setState(() {
       _showCelebration = false;
     });
+    final plan = widget.controller.generatedPlan;
+    if (plan != null) {
+      await _maybePromptCalendarAssistant(plan: plan, controller: controller);
+    }
+  }
+
+  GuideEventSuggestion? _buildEventSuggestion({
+    required MigrationPlan plan,
+    required GuideActionItem item,
+    required List<GuideActionItem> allItems,
+  }) {
+    return _eventSuggestionEngine.buildForItem(
+      plan: plan,
+      item: item,
+      completedAtById: _completedAtById,
+      completedSteps: _completedAtById.length,
+      totalSteps: allItems.length,
+    );
+  }
+
+  Future<void> _maybePromptCalendarAssistant({
+    required MigrationPlan plan,
+    required GuideGpsController controller,
+  }) async {
+    if (!plan.isCityConfirmed || _isPresentingCalendarAssistant) {
+      return;
+    }
+
+    final item = controller.currentItem;
+    if (item == null || item.isCompleted) {
+      return;
+    }
+
+    final suggestion = _buildEventSuggestion(
+      plan: plan,
+      item: item,
+      allItems: controller.items,
+    );
+    if (suggestion == null) {
+      return;
+    }
+
+    final preference = await _eventSuggestionStore.readPreference(
+      plan: plan,
+      suggestionId: suggestion.id,
+    );
+    if (!preference.shouldAutoPrompt(DateTime.now())) {
+      return;
+    }
+    if (_lastAutoPromptSuggestionId == suggestion.id) {
+      return;
+    }
+    _lastAutoPromptSuggestionId = suggestion.id;
+    if (!mounted) {
+      return;
+    }
+    await _showCalendarSuggestionSheet(
+      plan: plan,
+      suggestion: suggestion,
+      shouldMarkPresented: true,
+    );
+  }
+
+  Future<void> _showCalendarSuggestionSheet({
+    required MigrationPlan plan,
+    required GuideEventSuggestion suggestion,
+    bool shouldMarkPresented = false,
+  }) async {
+    if (_isPresentingCalendarAssistant) {
+      return;
+    }
+    _isPresentingCalendarAssistant = true;
+    if (shouldMarkPresented) {
+      await _eventSuggestionStore.markPresented(
+        plan: plan,
+        suggestionId: suggestion.id,
+      );
+    }
+    if (!context.mounted) {
+      _isPresentingCalendarAssistant = false;
+      return;
+    }
+    final sheetContext = context;
+
+    final result = await showGuideEventSuggestionSheet(
+      sheetContext,
+      suggestion: suggestion,
+      onAddToCalendar: (updatedSuggestion, reminderOption, notes) {
+        return _calendarEventService.addEvent(
+          suggestion: updatedSuggestion,
+          reminderOption: reminderOption,
+          notes: notes,
+        );
+      },
+    );
+    if (!mounted) {
+      _isPresentingCalendarAssistant = false;
+      return;
+    }
+
+    if (result != null) {
+      final messenger = ScaffoldMessenger.of(context);
+      final addedMessage = _localizedText(
+        context,
+        pt: 'Evento pronto no seu calendário.',
+        es: 'Evento listo en tu calendario.',
+        en: 'Event added to your calendar.',
+      );
+      final laterMessage = _localizedText(
+        context,
+        pt: 'Vamos lembrar você mais tarde.',
+        es: 'Te lo recordaremos más tarde.',
+        en: 'We will remind you later.',
+      );
+      switch (result.action) {
+        case GuideEventSuggestionAction.added:
+          await _eventSuggestionStore.markAdded(
+            plan: plan,
+            suggestionId: suggestion.id,
+          );
+          messenger.showSnackBar(SnackBar(content: Text(addedMessage)));
+        case GuideEventSuggestionAction.later:
+          await _eventSuggestionStore.remindLater(
+            plan: plan,
+            suggestionId: suggestion.id,
+          );
+          messenger.showSnackBar(SnackBar(content: Text(laterMessage)));
+        case GuideEventSuggestionAction.skipped:
+          await _eventSuggestionStore.markSkipped(
+            plan: plan,
+            suggestionId: suggestion.id,
+          );
+      }
+    }
+
+    _isPresentingCalendarAssistant = false;
   }
 
   @override
@@ -1584,6 +1757,92 @@ ContextualHelpContent _buildCopilotHelpContent(BuildContext context) {
       ),
     ],
   );
+}
+
+class _GuideCalendarSuggestionCard extends StatelessWidget {
+  const _GuideCalendarSuggestionCard({
+    required this.suggestion,
+    required this.onTap,
+  });
+
+  final GuideEventSuggestion suggestion;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final start = suggestion.startAt;
+    final dateLabel =
+        '${start.day.toString().padLeft(2, '0')}/${start.month.toString().padLeft(2, '0')}';
+    final timeLabel = TimeOfDay.fromDateTime(start).format(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF102A20),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF1B6D52)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.event_available_rounded,
+                size: 18,
+                color: Color(0xFF6FE0AF),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  suggestion.assistantCopy,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFFCBEEDB),
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            suggestion.title,
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$dateLabel • $timeLabel',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: const Color(0xFF9AC9B4),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              onPressed: onTap,
+              icon: const Icon(Icons.calendar_month_outlined, size: 16),
+              label: Text(
+                _localizedText(
+                  context,
+                  pt: 'Adicionar ao calendário',
+                  es: 'Agregar al calendario',
+                  en: 'Add to calendar',
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _PlanStageScreen extends StatefulWidget {
@@ -3250,6 +3509,7 @@ class _GuideDominantActionCard extends StatelessWidget {
   final Future<void> Function(String itemId, String subItemId)
   onChecklistToggle;
   final void Function(String url, String label) onLinkTap;
+
   /// Name of the confirmed destination city — used in the completion share text.
   final String cityName;
 
@@ -3284,11 +3544,8 @@ class _GuideDominantActionCard extends StatelessWidget {
                         children: [
                           Text(
                             context.l10n.copilotPlanCompletedTitle,
-                            style: Theme.of(
-                              context,
-                            ).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.w800),
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -3309,8 +3566,9 @@ class _GuideDominantActionCard extends StatelessWidget {
                   width: double.infinity,
                   child: FilledButton.icon(
                     onPressed: () {
-                      final locale = Localizations.localeOf(context)
-                          .languageCode;
+                      final locale = Localizations.localeOf(
+                        context,
+                      ).languageCode;
                       final city = cityName.isNotEmpty
                           ? cityName
                           : _localizedText(
@@ -7044,9 +7302,9 @@ class _PreArrivalTimingBanner extends StatelessWidget {
         _ => 'You still have 3–6 months — a good time to handle this calmly.',
       },
       'in_6_12m' => switch (locale) {
-        'pt' => 'Você tem 6–12 meses — comece agora para não acumular no final.',
-        'es' =>
-          'Tienes 6–12 meses — empieza ahora para no acumular al final.',
+        'pt' =>
+          'Você tem 6–12 meses — comece agora para não acumular no final.',
+        'es' => 'Tienes 6–12 meses — empieza ahora para no acumular al final.',
         _ => 'You have 6–12 months — start now to avoid a last-minute rush.',
       },
       _ => switch (locale) {

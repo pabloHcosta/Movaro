@@ -46,18 +46,19 @@ class PlanNotificationService {
     _initialized = true;
   }
 
-  Future<void> requestPermissions() async {
+  Future<bool> requestPermissions() async {
     await initialize();
-    await _notifications
+    final iosGranted = await _notifications
         .resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin
         >()
         ?.requestPermissions(alert: true, badge: true, sound: true);
-    await _notifications
+    final androidGranted = await _notifications
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
         >()
         ?.requestNotificationsPermission();
+    return (iosGranted ?? true) && (androidGranted ?? true);
   }
 
   Future<void> scheduleOnboardingSequence(MigrationPlan plan) async {
@@ -140,7 +141,8 @@ class PlanNotificationService {
     await initialize();
     final cityName =
         plan.recommendedCity?.name ?? plan.preferredCity?.name ?? '';
-    final hasMajorCity = cityName.contains('São Paulo') ||
+    final hasMajorCity =
+        cityName.contains('São Paulo') ||
         cityName.contains('Rio') ||
         cityName.contains('Florianópolis');
 
@@ -243,6 +245,38 @@ class PlanNotificationService {
     );
   }
 
+  Future<void> scheduleGuideEventReminders({
+    required String reminderKey,
+    required String title,
+    required String body,
+    required DateTime eventDate,
+    required List<Duration> offsets,
+  }) async {
+    await initialize();
+    for (final offset in offsets) {
+      final scheduledDate = eventDate.subtract(offset);
+      if (!scheduledDate.isAfter(DateTime.now())) {
+        continue;
+      }
+      await _scheduleNotification(
+        id: _guideReminderId(reminderKey, offset),
+        title: title,
+        body: body,
+        scheduledDate: scheduledDate,
+      );
+    }
+  }
+
+  Future<void> cancelGuideEventReminders({
+    required String reminderKey,
+    required List<Duration> offsets,
+  }) async {
+    await initialize();
+    for (final offset in offsets) {
+      await _notifications.cancel(id: _guideReminderId(reminderKey, offset));
+    }
+  }
+
   Future<void> _scheduleNotification({
     required int id,
     required String title,
@@ -299,5 +333,9 @@ class PlanNotificationService {
       'es' => es,
       _ => en,
     };
+  }
+
+  int _guideReminderId(String reminderKey, Duration offset) {
+    return Object.hash(reminderKey, offset.inMinutes) & 0x7fffffff;
   }
 }

@@ -52,6 +52,10 @@
 	<string>Usamos sua localização para detectar seu país de origem e personalizar sua experiência de migração.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Usamos sua localização para detectar seu país de origem e personalizar sua experiência de migração.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Usamos seu calendário para salvar compromissos importantes do seu plano de migração.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Usamos o seletor nativo de calendário do iPhone para salvar seus compromissos com segurança.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
