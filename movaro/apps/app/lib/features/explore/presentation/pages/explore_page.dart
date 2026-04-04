@@ -16,6 +16,10 @@ import 'package:movaro_app/features/explore/presentation/pages/documentation_gui
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
+import 'package:movaro_app/features/home/application/city_feed_datasource.dart';
+import 'package:movaro_app/features/home/domain/city_feed_item.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({
@@ -126,6 +130,12 @@ class _ExplorePageState extends State<ExplorePage> {
                       plan,
                       citiesController.catalog,
                     );
+                    final locale =
+                        Localizations.localeOf(context).languageCode;
+                    final stage = _journeyStage(plan);
+                    final seasonalCities = suggestedCities
+                        .where(CitySeasonalityProfile.hasSeason)
+                        .toList(growable: false);
 
                     return ListView(
                       padding: EdgeInsets.fromLTRB(
@@ -192,6 +202,35 @@ class _ExplorePageState extends State<ExplorePage> {
                             ),
                           ),
                         ),
+                        // ── Curated insights ─────────────────────────────────
+                        const SizedBox(height: 16),
+                        _ExploreSectionShell(
+                          title: _insightsSectionTitle(locale),
+                          child: _ExploreInsightsSection(
+                            locale: locale,
+                            stage: stage,
+                            cityCode: plan?.recommendedCity?.id,
+                            onTapCity: (city) => Navigator.pushNamed(
+                              context,
+                              AppRoutes.cityDetail(city.id),
+                            ),
+                          ),
+                        ),
+                        // ── Seasonality alerts ────────────────────────────────
+                        if (seasonalCities.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          _ExploreSectionShell(
+                            title: _seasonalitySectionTitle(locale),
+                            child: _ExploreSeasonalityAlerts(
+                              cities: seasonalCities,
+                              locale: locale,
+                              onTapCity: (city) => Navigator.pushNamed(
+                                context,
+                                AppRoutes.cityDetail(city.id),
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     );
                   },
@@ -243,6 +282,27 @@ class _ExplorePageState extends State<ExplorePage> {
 
     return suggestions.take(3).toList(growable: false);
   }
+
+  static UserJourneyStage _journeyStage(MigrationPlan? plan) {
+    if (plan == null) return UserJourneyStage.explorer;
+    return switch (plan.timeline) {
+      'in_0_3m' => UserJourneyStage.executor,
+      'in_3_6m' => UserJourneyStage.planner,
+      _ => UserJourneyStage.explorer,
+    };
+  }
+
+  static String _insightsSectionTitle(String locale) => switch (locale) {
+    'pt' => 'Insights para migrantes',
+    'es' => 'Insights para migrantes',
+    _ => 'Migrant insights',
+  };
+
+  static String _seasonalitySectionTitle(String locale) => switch (locale) {
+    'pt' => 'Alertas de sazonalidade',
+    'es' => 'Alertas de temporada',
+    _ => 'Seasonality alerts',
+  };
 
   String _planRoute(
     JourneyContextController journeyContextController,
@@ -1048,5 +1108,311 @@ class _ContentTopicCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// ─── Explore Insights Section ─────────────────────────────────────────────────
+//
+// Shows curated CityFeedDatasource items as vertical cards inside the Explore
+// page. Works without a plan — general content (no city filter) is shown to
+// explorers, city-specific content when a recommended city is known.
+
+class _ExploreInsightsSection extends StatelessWidget {
+  const _ExploreInsightsSection({
+    required this.locale,
+    required this.stage,
+    required this.onTapCity,
+    this.cityCode,
+  });
+
+  final String locale;
+  final UserJourneyStage stage;
+  final String? cityCode;
+  final ValueChanged<City> onTapCity;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = CityFeedDatasource.build(
+      cityCode: cityCode,
+      stage: stage,
+      locale: locale,
+    ).take(5).toList(growable: false);
+
+    if (items.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < items.length; i++) ...[
+          if (i > 0) const SizedBox(height: 10),
+          _ExploreFeedCard(item: items[i], locale: locale),
+        ],
+      ],
+    );
+  }
+}
+
+class _ExploreFeedCard extends StatelessWidget {
+  const _ExploreFeedCard({required this.item, required this.locale});
+
+  final CityFeedItem item;
+  final String locale;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final typeColor = item.typeColor(isDark);
+
+    return FrostedPanel(
+      padding: const EdgeInsets.all(16),
+      backgroundColor: AppColors.surfaceFor(context),
+      borderColor: AppColors.borderFor(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: typeColor.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(item.icon, size: 18, color: typeColor),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.typeLabel(locale),
+                            style:
+                                Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: typeColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ),
+                        if (item.updatedAt != null)
+                          Text(
+                            item.updatedAt!,
+                            style:
+                                Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: AppColors.textSoftFor(context),
+                                  fontSize: 10,
+                                ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    if (item.badge != null)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: typeColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          item.badge!,
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: typeColor,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 10,
+                              ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            item.title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : const Color(0xFF0A0F1E),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            item.body,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Explore Seasonality Alerts ───────────────────────────────────────────────
+//
+// Compact alert cards for each city with high/medium seasonality, linking to
+// the city detail page where the full seasonality section is shown.
+
+class _ExploreSeasonalityAlerts extends StatelessWidget {
+  const _ExploreSeasonalityAlerts({
+    required this.cities,
+    required this.locale,
+    required this.onTapCity,
+  });
+
+  final List<City> cities;
+  final String locale;
+  final ValueChanged<City> onTapCity;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < cities.length; i++) ...[
+          if (i > 0) const SizedBox(height: 10),
+          _SeasonalityAlertCard(
+            city: cities[i],
+            locale: locale,
+            onTap: () => onTapCity(cities[i]),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _SeasonalityAlertCard extends StatelessWidget {
+  const _SeasonalityAlertCard({
+    required this.city,
+    required this.locale,
+    required this.onTap,
+  });
+
+  final City city;
+  final String locale;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final snapshot = CitySeasonalityProfile.of(city);
+    if (snapshot == null) return const SizedBox.shrink();
+
+    final isDark = AppColors.isDark(context);
+    final isHigh = snapshot.severity == CitySeasonalitySeverity.high;
+    final accentColor = isHigh ? AppColors.danger : AppColors.caution;
+    final peakLabel = _peakLabel(snapshot.peakMonths);
+    final severityText = isHigh
+        ? switch (locale) {
+            'pt' => 'Alta temporada',
+            'es' => 'Temporada alta',
+            _ => 'Peak season',
+          }
+        : switch (locale) {
+            'pt' => 'Sazonalidade média',
+            'es' => 'Temporada media',
+            _ => 'Moderate season',
+          };
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: accentColor.withValues(alpha: isDark ? 0.08 : 0.06),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: accentColor.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              isHigh ? Icons.warning_rounded : Icons.info_outline_rounded,
+              size: 18,
+              color: accentColor,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          city.name,
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF0A0F1E),
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: accentColor.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          severityText,
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: accentColor,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 10,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$peakLabel · ${snapshot.visitorsLabel(locale)}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 6),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 12,
+              color: accentColor,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _peakLabel(List<int> months) {
+    const names = [
+      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+    ];
+    if (months.isEmpty) return '';
+    return months.map((m) => names[m - 1]).join(', ');
   }
 }

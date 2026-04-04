@@ -127,6 +127,7 @@ class _PublicHomePageState extends State<PublicHomePage>
                   ? plan?.recommendedCity
                   : null;
               final hasActivePlan = city != null;
+              final hasPlanDraft = plan != null && city == null;
               final guideState = city == null || plan == null
                   ? null
                   : _buildGuideState(plan, _progressSnapshot);
@@ -174,6 +175,44 @@ class _PublicHomePageState extends State<PublicHomePage>
                                       ),
                                       onNewPlan: () =>
                                           _handleManagePlan(context),
+                                    )
+                                  : hasPlanDraft
+                                  ? _PlannerHomeState(
+                                      key: const ValueKey('planner-home'),
+                                      plan: plan,
+                                      citiesController:
+                                          widget.citiesController,
+                                      onContinuePlan: () =>
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.migrationResultReveal,
+                                          ),
+                                      onCompareCities: () {
+                                        final candidates =
+                                            plan.candidateCities;
+                                        if (candidates.isEmpty) return;
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute<void>(
+                                            builder: (_) =>
+                                                CityComparisonScreen(
+                                                  initialCities: candidates
+                                                      .take(2)
+                                                      .toList(),
+                                                  citiesController: widget
+                                                      .citiesController,
+                                                  migrationQuestionnaireController:
+                                                      widget
+                                                          .migrationQuestionnaireController,
+                                                ),
+                                          ),
+                                        );
+                                      },
+                                      onBrowseCities: () =>
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.cities,
+                                          ),
                                     )
                                   : _EmptyHomeState(
                                       key: const ValueKey('empty-home'),
@@ -494,6 +533,270 @@ class _EmptyHomeState extends StatelessWidget {
       onExploreCitiesTap: onExploreCitiesTap,
       onOpenCostsTap: onOpenCostsTap,
       onOpenDocumentsTap: onOpenDocumentsTap,
+    );
+  }
+}
+
+// ─── Planner Home State ───────────────────────────────────────────────────────
+//
+// Shown when the user has completed the questionnaire (plan exists) but has
+// NOT yet confirmed a destination city. Bridges the gap between
+// _EmptyHomeState and _ActiveHomeState.
+//
+// Prompt: "Você tem um plano — agora escolha sua cidade."
+// CTAs: Compare candidate cities · Continue to reveal · Browse all cities
+
+class _PlannerHomeState extends StatelessWidget {
+  const _PlannerHomeState({
+    required this.plan,
+    required this.citiesController,
+    required this.onContinuePlan,
+    required this.onCompareCities,
+    required this.onBrowseCities,
+    super.key,
+  });
+
+  final MigrationPlan plan;
+  final CitiesController citiesController;
+  final VoidCallback onContinuePlan;
+  final VoidCallback onCompareCities;
+  final VoidCallback onBrowseCities;
+
+  static String _t(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) => switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final candidates = plan.candidateCities.take(3).toList(growable: false);
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        16,
+        MediaQuery.of(context).padding.top + 24,
+        16,
+        96,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Stage badge ─────────────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFF1E3A5F)
+                  : const Color(0xFFDBEAFE),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isDark
+                    ? const Color(0xFF3B7CC8)
+                    : const Color(0xFF93C5FD),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.explore_rounded,
+                  size: 13,
+                  color: isDark
+                      ? const Color(0xFF90C4F8)
+                      : const Color(0xFF1D4ED8),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  _t(
+                    context,
+                    pt: 'Escolhendo cidade',
+                    es: 'Eligiendo ciudad',
+                    en: 'Choosing city',
+                  ),
+                  style: AppTypography.compactBadge.copyWith(
+                    color: isDark
+                        ? const Color(0xFF90C4F8)
+                        : const Color(0xFF1D4ED8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          // ── Headline ─────────────────────────────────────────────────────
+          Text(
+            _t(
+              context,
+              pt: 'Seu plano está pronto.\nAgora escolha sua cidade.',
+              es: 'Tu plan está listo.\nAhora elige tu ciudad.',
+              en: 'Your plan is ready.\nNow choose your city.',
+            ),
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: AppColors.textPrimaryFor(context),
+              fontWeight: FontWeight.w800,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _t(
+              context,
+              pt: 'Compare as cidades recomendadas e confirme onde vai morar.',
+              es: 'Compara las ciudades recomendadas y confirma donde vas a vivir.',
+              en: 'Compare recommended cities and confirm where you\'ll live.',
+            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 24),
+          // ── Primary CTA ───────────────────────────────────────────────────
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: onContinuePlan,
+              icon: const Icon(Icons.arrow_forward_rounded),
+              label: Text(
+                _t(
+                  context,
+                  pt: 'Ver cidades recomendadas',
+                  es: 'Ver ciudades recomendadas',
+                  en: 'See recommended cities',
+                ),
+              ),
+            ),
+          ),
+          if (candidates.length >= 2) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: onCompareCities,
+                icon: const Icon(Icons.compare_arrows_rounded),
+                label: Text(
+                  _t(
+                    context,
+                    pt: 'Comparar ${candidates.length} cidades',
+                    es: 'Comparar ${candidates.length} ciudades',
+                    en: 'Compare ${candidates.length} cities',
+                  ),
+                ),
+              ),
+            ),
+          ],
+          // ── Candidate city chips ──────────────────────────────────────────
+          if (candidates.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            Text(
+              _t(
+                context,
+                pt: 'Candidatas para você',
+                es: 'Candidatas para ti',
+                en: 'Your candidates',
+              ),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: AppColors.textSoftFor(context),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 10),
+            for (final city in candidates) ...[
+              _CandidateCityTile(city: city, isDark: isDark),
+              const SizedBox(height: 8),
+            ],
+          ],
+          // ── Browse all link ───────────────────────────────────────────────
+          const SizedBox(height: 16),
+          Center(
+            child: TextButton.icon(
+              onPressed: onBrowseCities,
+              icon: const Icon(Icons.location_city_outlined, size: 16),
+              label: Text(
+                _t(
+                  context,
+                  pt: 'Explorar outras cidades',
+                  es: 'Explorar otras ciudades',
+                  en: 'Explore other cities',
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CandidateCityTile extends StatelessWidget {
+  const _CandidateCityTile({required this.city, required this.isDark});
+
+  final City city;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0E1825) : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.location_city_rounded,
+              size: 18,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  city.name,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimaryFor(context),
+                  ),
+                ),
+                Text(
+                  '${city.stateName} · Score ${city.movaroScores.overall}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: 18,
+            color: AppColors.textSoftFor(context),
+          ),
+        ],
+      ),
     );
   }
 }

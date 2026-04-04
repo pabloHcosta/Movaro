@@ -104,6 +104,30 @@ class MainNavigationBar extends StatelessWidget {
 
     final plan = migrationQuestionnaireController.generatedPlan;
     if (slot == 2 && plan == null) {
+      final locale = Localizations.localeOf(context).languageCode;
+      final message = switch (locale) {
+        'pt' => 'Crie seu plano para acessar sua rota',
+        'es' => 'Crea tu plan para acceder a tu ruta',
+        _ => 'Create your plan to access your route',
+      };
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+          action: SnackBarAction(
+            label: switch (locale) {
+              'pt' => 'Criar plano',
+              'es' => 'Crear plan',
+              _ => 'Create plan',
+            },
+            onPressed: () => Navigator.pushNamed(
+              context,
+              AppRoutes.migrationQuestionnaire,
+            ),
+          ),
+        ),
+      );
       return;
     }
     final hasConfirmedCity = plan?.isCityConfirmed == true;
