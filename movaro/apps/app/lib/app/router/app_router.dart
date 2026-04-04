@@ -25,6 +25,9 @@ import 'package:movaro_app/app/presentation/pages/app_settings_page.dart';
 import 'package:movaro_app/app/presentation/pages/protected_placeholder_page.dart';
 import 'package:movaro_app/features/splash/presentation/pages/splash_page.dart';
 
+final RouteObserver<ModalRoute<dynamic>> appRouteObserver =
+    RouteObserver<ModalRoute<dynamic>>();
+
 class AppRouter {
   const AppRouter({required this.dependencies});
 
@@ -358,6 +361,9 @@ class AppRouter {
       case AppRoutes.migrationPlanCopilot:
         final currentPlan =
             dependencies.migrationQuestionnaireController.generatedPlan;
+        final args = settings.arguments is Map<String, dynamic>
+            ? settings.arguments! as Map<String, dynamic>
+            : null;
         if (currentPlan == null || !currentPlan.isCityConfirmed) {
           return _buildRoute(
             const RouteSettings(name: AppRoutes.migrationResultReveal),
@@ -375,6 +381,7 @@ class AppRouter {
             citiesController: dependencies.citiesController,
             journeyContextController: dependencies.journeyContextController,
             locationController: dependencies.locationController,
+            initialGuideItemId: args?['focusGuideItemId'] as String?,
           ),
         );
       case AppRoutes.authenticatedHome:

@@ -477,6 +477,27 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     notifyListeners();
   }
 
+  MigrationPlan? findSavedPlanForCity(String cityId) {
+    for (final plan in _savedPlans) {
+      if (plan.recommendedCity?.id == cityId || plan.preferredCity?.id == cityId) {
+        return plan;
+      }
+    }
+    return null;
+  }
+
+  Future<void> resumePlan(MigrationPlan plan) async {
+    _generatedPlan = plan;
+    _preferredCity = plan.preferredCity;
+    _selectedVariant = plan.variant;
+    _showRefinePrompt = false;
+    _isRefineResolved = true;
+    _includeConstraints = plan.selectedConstraints.isNotEmpty;
+    _currentIndex = 0;
+    await _migrationPlanRepository.setCurrentPlan(_generatedPlan);
+    notifyListeners();
+  }
+
   Future<bool> generatePlanFromCity(City city) async {
     await initialize();
     _preferredCity = city;

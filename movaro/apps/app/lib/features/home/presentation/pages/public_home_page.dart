@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
+import 'package:movaro_app/app/router/app_router.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
@@ -55,6 +56,7 @@ class PublicHomePage extends StatefulWidget {
   final MigrationQuestionnaireController migrationQuestionnaireController;
   final LocationController locationController;
   final AppEnvironment environment;
+
   /// When the router silently redirected to this page, this message is shown
   /// as a floating snackbar on the first frame so the user understands why.
   final String? redirectMessage;
@@ -64,7 +66,7 @@ class PublicHomePage extends StatefulWidget {
 }
 
 class _PublicHomePageState extends State<PublicHomePage>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, RouteAware {
   final MigrationCopilotProgressStore _progressStore =
       MigrationCopilotProgressStore();
   final StreakService _streakService = StreakService();
@@ -78,6 +80,7 @@ class _PublicHomePageState extends State<PublicHomePage>
   bool _isFirstPlanLoad = true;
   int _prevCompletedCount = 0;
   String _prevTimeline = '';
+  ModalRoute<dynamic>? _route;
 
   @override
   void initState() {
@@ -106,6 +109,9 @@ class _PublicHomePageState extends State<PublicHomePage>
 
   @override
   void dispose() {
+    if (_route != null) {
+      appRouteObserver.unsubscribe(this);
+    }
     WidgetsBinding.instance.removeObserver(this);
     widget.journeyContextController.removeListener(_handleControllerUpdate);
     widget.migrationQuestionnaireController.removeListener(
@@ -113,6 +119,26 @@ class _PublicHomePageState extends State<PublicHomePage>
     );
     widget.citiesController.removeListener(_handleControllerUpdate);
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route == null || identical(route, _route)) {
+      return;
+    }
+    if (_route != null) {
+      appRouteObserver.unsubscribe(this);
+    }
+    _route = route;
+    appRouteObserver.subscribe(this, route);
+  }
+
+  @override
+  void didPopNext() {
+    unawaited(_syncPlanState());
+    unawaited(_refreshProgress());
   }
 
   @override
@@ -177,6 +203,7 @@ class _PublicHomePageState extends State<PublicHomePage>
                                       city: city,
                                       weather: widget.citiesController
                                           .weatherFor(city.id),
+                                      citiesController: widget.citiesController,
                                       plan: plan!,
                                       guideState: guideState!,
                                       cityInsightsController:
@@ -202,39 +229,34 @@ class _PublicHomePageState extends State<PublicHomePage>
                                   ? _PlannerHomeState(
                                       key: const ValueKey('planner-home'),
                                       plan: plan,
-                                      citiesController:
-                                          widget.citiesController,
-                                      onContinuePlan: () =>
-                                          Navigator.pushNamed(
-                                            context,
-                                            AppRoutes.migrationResultReveal,
-                                          ),
+                                      citiesController: widget.citiesController,
+                                      onContinuePlan: () => Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.migrationResultReveal,
+                                      ),
                                       onCompareCities: () {
-                                        final candidates =
-                                            plan.candidateCities;
+                                        final candidates = plan.candidateCities;
                                         if (candidates.isEmpty) return;
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute<void>(
-                                            builder: (_) =>
-                                                CityComparisonScreen(
-                                                  initialCities: candidates
-                                                      .take(3)
-                                                      .toList(),
-                                                  citiesController: widget
-                                                      .citiesController,
-                                                  migrationQuestionnaireController:
-                                                      widget
-                                                          .migrationQuestionnaireController,
-                                                ),
+                                            builder: (_) => CityComparisonScreen(
+                                              initialCities: candidates
+                                                  .take(3)
+                                                  .toList(),
+                                              citiesController:
+                                                  widget.citiesController,
+                                              migrationQuestionnaireController:
+                                                  widget
+                                                      .migrationQuestionnaireController,
+                                            ),
                                           ),
                                         );
                                       },
-                                      onBrowseCities: () =>
-                                          Navigator.pushNamed(
-                                            context,
-                                            AppRoutes.cities,
-                                          ),
+                                      onBrowseCities: () => Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.cities,
+                                      ),
                                     )
                                   : _EmptyHomeState(
                                       key: const ValueKey('empty-home'),
@@ -335,11 +357,11 @@ class _PublicHomePageState extends State<PublicHomePage>
     if (isFreshPlanLoad && !_isFirstPlanLoad) {
       final newCount = snapshot.completedItemsCount;
       final newTimeline = plan.timeline;
-      final wasExplorer = _prevTimeline.isEmpty ||
+      final wasExplorer =
+          _prevTimeline.isEmpty ||
           _prevTimeline == 'later' ||
           _prevTimeline == 'undecided';
-      final nowPlanner =
-          newTimeline == 'in_3_6m' || newTimeline == 'in_6_12m';
+      final nowPlanner = newTimeline == 'in_3_6m' || newTimeline == 'in_6_12m';
       final nowExecutor =
           newTimeline == 'in_0_3m' || newCount > _prevCompletedCount;
 
@@ -363,14 +385,52 @@ class _PublicHomePageState extends State<PublicHomePage>
     }
 
     if (isFreshPlanLoad) {
+      final locale = Localizations.localeOf(context).languageCode;
+      final compareTo = plan.candidateCities
+          .where((candidate) => candidate.id != city.id)
+          .map((candidate) => candidate.id)
+          .take(2)
+          .toList(growable: false);
+
       unawaited(
         widget.cityInsightsController.load(
           cityId: city.id,
           goal: plan.goal,
           timeline: plan.timeline,
-          locale: Localizations.localeOf(context).languageCode,
+          locale: locale,
         ),
       );
+      unawaited(
+        widget.citiesController.loadCityDetailSocialProof(
+          city.id,
+          locale: locale,
+          goal: plan.goal,
+          timeline: plan.timeline,
+        ),
+      );
+      unawaited(
+        widget.citiesController.loadCityDetailClimateSummary(
+          city.id,
+          locale: locale,
+        ),
+      );
+      unawaited(
+        widget.citiesController.loadCityDetailArrivalStory(
+          city.id,
+          locale: locale,
+          goal: plan.goal,
+          timeline: plan.timeline,
+        ),
+      );
+      if (compareTo.isNotEmpty) {
+        unawaited(
+          widget.citiesController.loadCityDetailComparison(
+            city.id,
+            compareTo: compareTo,
+            locale: locale,
+          ),
+        );
+      }
 
       // Schedule a weekly city-content reminder now that we know the confirmed
       // city. Rescheduled on every fresh plan load so it stays current.
@@ -587,68 +647,68 @@ class _PublicHomePageState extends State<PublicHomePage>
 
     final (icon, title, body, action) = switch (newStage) {
       UserJourneyStage.executor => (
-          Icons.rocket_launch_rounded,
-          switch (locale) {
-            'pt' => '🚀 Você entrou no modo execução!',
-            'es' => '🚀 ¡Entraste en modo ejecución!',
-            _ => '🚀 You\'re in execution mode!',
-          },
-          switch (locale) {
-            'pt' =>
-              'Seu primeiro passo está concluído. O guia agora acompanha cada etapa da sua mudança em tempo real.',
-            'es' =>
-              'Tu primer paso está completado. La guía ahora sigue cada etapa de tu mudanza en tiempo real.',
-            _ =>
-              'Your first step is done. The guide now tracks every step of your move in real time.',
-          },
-          switch (locale) {
-            'pt' => 'Continue — cada passo que você conclui desbloqueia o próximo.',
-            'es' => 'Seguí — cada paso que completás desbloquea el siguiente.',
-            _ => 'Keep going — every step you complete unlocks the next.',
-          },
-        ),
+        Icons.rocket_launch_rounded,
+        switch (locale) {
+          'pt' => '🚀 Você entrou no modo execução!',
+          'es' => '🚀 ¡Entraste en modo ejecución!',
+          _ => '🚀 You\'re in execution mode!',
+        },
+        switch (locale) {
+          'pt' =>
+            'Seu primeiro passo está concluído. O guia agora acompanha cada etapa da sua mudança em tempo real.',
+          'es' =>
+            'Tu primer paso está completado. La guía ahora sigue cada etapa de tu mudanza en tiempo real.',
+          _ =>
+            'Your first step is done. The guide now tracks every step of your move in real time.',
+        },
+        switch (locale) {
+          'pt' =>
+            'Continue — cada passo que você conclui desbloqueia o próximo.',
+          'es' => 'Seguí — cada paso que completás desbloquea el siguiente.',
+          _ => 'Keep going — every step you complete unlocks the next.',
+        },
+      ),
       UserJourneyStage.planner => (
-          Icons.calendar_month_rounded,
-          switch (locale) {
-            'pt' => '📅 Você está no modo planejamento!',
-            'es' => '📅 ¡Estás en modo planificación!',
-            _ => '📅 You\'re in planning mode!',
-          },
-          switch (locale) {
-            'pt' =>
-              'Você definiu sua janela de mudança. O guia vai te ajudar a se preparar nos próximos meses.',
-            'es' =>
-              'Definiste tu ventana de mudanza. La guía te ayudará a prepararte en los próximos meses.',
-            _ =>
-              'You\'ve set your move window. The guide will help you prepare over the coming months.',
-          },
-          switch (locale) {
-            'pt' =>
-              'Comece pelos documentos — alguns levam semanas para ficarem prontos.',
-            'es' =>
-              'Empezá por los documentos — algunos tardan semanas en estar listos.',
-            _ =>
-              'Start with documents — some take weeks to be ready.',
-          },
-        ),
+        Icons.calendar_month_rounded,
+        switch (locale) {
+          'pt' => '📅 Você está no modo planejamento!',
+          'es' => '📅 ¡Estás en modo planificación!',
+          _ => '📅 You\'re in planning mode!',
+        },
+        switch (locale) {
+          'pt' =>
+            'Você definiu sua janela de mudança. O guia vai te ajudar a se preparar nos próximos meses.',
+          'es' =>
+            'Definiste tu ventana de mudanza. La guía te ayudará a prepararte en los próximos meses.',
+          _ =>
+            'You\'ve set your move window. The guide will help you prepare over the coming months.',
+        },
+        switch (locale) {
+          'pt' =>
+            'Comece pelos documentos — alguns levam semanas para ficarem prontos.',
+          'es' =>
+            'Empezá por los documentos — algunos tardan semanas en estar listos.',
+          _ => 'Start with documents — some take weeks to be ready.',
+        },
+      ),
       _ => (
-          Icons.explore_rounded,
-          switch (locale) {
-            'pt' => '🗺️ Você está explorando!',
-            'es' => '🗺️ ¡Estás explorando!',
-            _ => '🗺️ You\'re exploring!',
-          },
-          switch (locale) {
-            'pt' => 'Compare cidades e descubra onde você quer viver.',
-            'es' => 'Comparás ciudades y descubrís dónde querés vivir.',
-            _ => 'Compare cities and discover where you want to live.',
-          },
-          switch (locale) {
-            'pt' => 'Quando decidir, crie seu plano personalizado.',
-            'es' => 'Cuando decidas, creá tu plan personalizado.',
-            _ => 'When you decide, create your personalized plan.',
-          },
-        ),
+        Icons.explore_rounded,
+        switch (locale) {
+          'pt' => '🗺️ Você está explorando!',
+          'es' => '🗺️ ¡Estás explorando!',
+          _ => '🗺️ You\'re exploring!',
+        },
+        switch (locale) {
+          'pt' => 'Compare cidades e descubra onde você quer viver.',
+          'es' => 'Comparás ciudades y descubrís dónde querés vivir.',
+          _ => 'Compare cities and discover where you want to live.',
+        },
+        switch (locale) {
+          'pt' => 'Quando decidir, crie seu plano personalizado.',
+          'es' => 'Cuando decidas, creá tu plan personalizado.',
+          _ => 'When you decide, create your personalized plan.',
+        },
+      ),
     };
 
     showModalBottomSheet<void>(
@@ -717,13 +777,11 @@ class _PublicHomePageState extends State<PublicHomePage>
                     width: double.infinity,
                     child: FilledButton(
                       onPressed: () => Navigator.of(sheetCtx).pop(),
-                      child: Text(
-                        switch (locale) {
-                          'pt' => 'Entendido!',
-                          'es' => '¡Entendido!',
-                          _ => 'Got it!',
-                        },
-                      ),
+                      child: Text(switch (locale) {
+                        'pt' => 'Entendido!',
+                        'es' => '¡Entendido!',
+                        _ => 'Got it!',
+                      }),
                     ),
                   ),
                 ],
@@ -829,9 +887,7 @@ class _PlannerHomeState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: isDark
-                  ? const Color(0xFF1E3A5F)
-                  : const Color(0xFFDBEAFE),
+              color: isDark ? const Color(0xFF1E3A5F) : const Color(0xFFDBEAFE),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isDark
@@ -902,14 +958,14 @@ class _PlannerHomeState extends StatelessWidget {
               onPressed: onCompareCities,
               icon: const Icon(Icons.compare_arrows_rounded),
               label: Text(
-                  _t(
-                    context,
-                    pt: 'Ver cidades recomendadas',
-                    es: 'Ver ciudades recomendadas',
-                    en: 'See recommended cities',
-                  ),
+                _t(
+                  context,
+                  pt: 'Ver cidades recomendadas',
+                  es: 'Ver ciudades recomendadas',
+                  en: 'See recommended cities',
                 ),
               ),
+            ),
           ),
           if (candidates.length >= 2) ...[
             const SizedBox(height: 10),
@@ -1099,6 +1155,7 @@ class _ActiveHomeState extends StatelessWidget {
   const _ActiveHomeState({
     required this.city,
     required this.weather,
+    required this.citiesController,
     required this.plan,
     required this.guideState,
     required this.cityInsightsController,
@@ -1115,6 +1172,7 @@ class _ActiveHomeState extends StatelessWidget {
 
   final City city;
   final CityWeather? weather;
+  final CitiesController citiesController;
   final MigrationPlan plan;
   final _HomeGuideState guideState;
   final CityInsightController cityInsightsController;
@@ -1130,6 +1188,40 @@ class _ActiveHomeState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).languageCode;
+    final socialProofKey = citiesController.cityDetailContextKey(
+      city.id,
+      locale: locale,
+      goal: planGoal,
+      timeline: planTimeline,
+    );
+    final climateKey = citiesController.cityDetailContextKey(
+      city.id,
+      locale: locale,
+    );
+    final arrivalKey = citiesController.cityDetailContextKey(
+      city.id,
+      locale: locale,
+      goal: planGoal,
+      timeline: planTimeline,
+    );
+    final compareTo = plan.candidateCities
+        .where((candidate) => candidate.id != city.id)
+        .map((candidate) => candidate.id)
+        .take(2)
+        .toList(growable: false);
+    final comparisonKey = compareTo.isEmpty
+        ? null
+        : citiesController.cityDetailComparisonKey(
+            city.id,
+            compareTo: compareTo,
+            locale: locale,
+          );
+    final socialProof = citiesController.socialProofFor(socialProofKey);
+    final climateSummary = citiesController.climateSummaryFor(climateKey);
+    final arrivalStory = citiesController.arrivalStoryFor(arrivalKey);
+    final comparison = comparisonKey == null
+        ? null
+        : citiesController.comparisonFor(comparisonKey);
     final stage = UserJourneyStageDetector.detect(
       timeline: planTimeline,
       completedSteps: guideState.completedCount,
@@ -1183,8 +1275,8 @@ class _ActiveHomeState extends StatelessWidget {
         final bigScreen = avail > 760;
 
         // ── Computed per-stage flags ──────────────────────────────────────
-        final residenciaComplete = guideState.completedIds
-            .contains('item_2_1_cpf') &&
+        final residenciaComplete =
+            guideState.completedIds.contains('item_2_1_cpf') &&
             guideState.completedIds.contains('item_2_2_residencia');
         final pfItem = guideState.items.cast<GuideActionItem?>().firstWhere(
           (item) => item?.id == 'item_2_2_residencia',
@@ -1199,8 +1291,7 @@ class _ActiveHomeState extends StatelessWidget {
             stage != UserJourneyStage.explorer &&
             pfUnlocked &&
             (guideState.currentItem?.id == 'item_2_2_residencia' ||
-                currentPhase == GuidePhase.documents ||
-                currentPhase == GuidePhase.arrival);
+                currentPhase == GuidePhase.documents);
         final preArrivalCount = guideState.items
             .where(
               (it) =>
@@ -1268,7 +1359,8 @@ class _ActiveHomeState extends StatelessWidget {
                     ),
 
                     // 6. Pre-arrival warning banner — executor stage, pending steps
-                    if (stage == UserJourneyStage.executor && preArrivalCount > 0)
+                    if (stage == UserJourneyStage.executor &&
+                        preArrivalCount > 0)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
                         child: _PreArrivalWarningBanner(
@@ -1314,10 +1406,22 @@ class _ActiveHomeState extends StatelessWidget {
                       cityCode: city.id,
                       stage: stage,
                       locale: locale,
+                      city: city,
+                      weather: weather,
+                      socialProof: socialProof,
+                      climateSummary: climateSummary,
+                      arrivalStory: arrivalStory,
+                      comparison: comparison,
+                      guideCurrentItem: guideState.currentItem,
                       cardHeight: feedCardH,
-                      onOpenGuide: () => Navigator.pushNamed(
+                      onOpenGuideItem: (guideItemId) => Navigator.pushNamed(
                         context,
                         AppRoutes.migrationPlanCopilot,
+                        arguments: guideItemId == null
+                            ? null
+                            : <String, dynamic>{
+                                'focusGuideItemId': guideItemId,
+                              },
                       ),
                     ),
                   ],
@@ -1945,9 +2049,6 @@ class _HomeGuideState {
   }
 }
 
-Color _cardBackground(BuildContext context) =>
-    AppColors.isDark(context) ? const Color(0xFF0E1825) : Colors.white;
-
 Color _cardBorder(BuildContext context) => AppColors.isDark(context)
     ? Colors.white.withValues(alpha: 0.08)
     : Colors.black.withValues(alpha: 0.08);
@@ -2426,7 +2527,6 @@ class _SeasonalityConflictBanner extends StatelessWidget {
   const _SeasonalityConflictBanner({
     required this.city,
     required this.planTimeline,
-    super.key,
   });
 
   final City city;
@@ -2593,87 +2693,4 @@ class _PreArrivalWarningBanner extends StatelessWidget {
       _ => en,
     };
   }
-}
-
-// ─── Budget Quick-Access Card ─────────────────────────────────────────────────
-
-class _BudgetQuickAccessCard extends StatelessWidget {
-  const _BudgetQuickAccessCard({required this.locale, required this.onTap});
-
-  final String locale;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF0D1829) : const Color(0xFFF1F5F9),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isDark ? const Color(0xFF1A2840) : const Color(0xFFE2E8F0),
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(7),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF1E3A5F)
-                    : const Color(0xFFDBEAFE),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.calculate_outlined,
-                size: 18,
-                color: Color(0xFF3B7CC8),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _title(locale),
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimaryFor(context),
-                    ),
-                  ),
-                  Text(
-                    _subtitle(locale),
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppColors.textSoftFor(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 14,
-              color: isDark ? const Color(0xFF3B7CC8) : const Color(0xFF2563EB),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _title(String locale) => switch (locale) {
-    'pt' => 'Calcule seu orçamento',
-    'es' => 'Calcula tu presupuesto',
-    _ => 'Calculate your budget',
-  };
-
-  String _subtitle(String locale) => switch (locale) {
-    'pt' => 'Quanto você precisa para os primeiros 30–90 dias',
-    'es' => 'Cuanto necesitas para los primeros 30–90 dias',
-    _ => 'How much you need for the first 30–90 days',
-  };
 }

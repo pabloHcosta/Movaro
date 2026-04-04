@@ -22,6 +22,9 @@ class CityFeedItem {
     this.cityCodes = const <String>[],
     this.stages = const <UserJourneyStage>[],
     this.updatedAt,
+    this.guideItemId,
+    this.sourceLabel,
+    this.sourceUrl,
   });
 
   final String id;
@@ -47,61 +50,83 @@ class CityFeedItem {
 
   /// Optional curation date shown on cost-sensitive cards, e.g. "Mar/2025".
   final String? updatedAt;
+  final String? guideItemId;
+  final String? sourceLabel;
+  final String? sourceUrl;
 
-  bool isRelevantFor({required String? cityCode, required UserJourneyStage stage}) {
-    final cityMatch = cityCodes.isEmpty || (cityCode != null && cityCodes.contains(cityCode));
+  bool isRelevantFor({
+    required String? cityCode,
+    required UserJourneyStage stage,
+  }) {
+    final normalizedCityCode = _normalizeCityCode(cityCode);
+    final cityMatch =
+        cityCodes.isEmpty ||
+        (normalizedCityCode != null &&
+            cityCodes.map(_normalizeCityCode).contains(normalizedCityCode));
     final stageMatch = stages.isEmpty || stages.contains(stage);
     return cityMatch && stageMatch;
   }
 
+  static String? _normalizeCityCode(String? value) {
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+    final normalized = value.trim().toLowerCase();
+    final parts = normalized.split('-');
+    if (parts.length >= 2 && parts.last.length == 2) {
+      return parts.sublist(0, parts.length - 1).join('-');
+    }
+    return normalized;
+  }
+
   IconData get icon => switch (type) {
-        CityFeedItemType.costUpdate => Icons.show_chart_rounded,
-        CityFeedItemType.lifestyleTip => Icons.wb_sunny_rounded,
-        CityFeedItemType.migrantStory => Icons.format_quote_rounded,
-        CityFeedItemType.practicalTip => Icons.lightbulb_outline_rounded,
-        CityFeedItemType.warning => Icons.warning_amber_rounded,
-        CityFeedItemType.opportunity => Icons.trending_up_rounded,
-      };
+    CityFeedItemType.costUpdate => Icons.show_chart_rounded,
+    CityFeedItemType.lifestyleTip => Icons.wb_sunny_rounded,
+    CityFeedItemType.migrantStory => Icons.format_quote_rounded,
+    CityFeedItemType.practicalTip => Icons.lightbulb_outline_rounded,
+    CityFeedItemType.warning => Icons.warning_amber_rounded,
+    CityFeedItemType.opportunity => Icons.trending_up_rounded,
+  };
 
   Color typeColor(bool isDark) => switch (type) {
-        CityFeedItemType.costUpdate => const Color(0xFF3B7CC8),
-        CityFeedItemType.lifestyleTip => const Color(0xFF1D9E75),
-        CityFeedItemType.migrantStory => const Color(0xFF9B59B6),
-        CityFeedItemType.practicalTip => const Color(0xFF3B7CC8),
-        CityFeedItemType.warning => const Color(0xFFE8873A),
-        CityFeedItemType.opportunity => const Color(0xFF1D9E75),
-      };
+    CityFeedItemType.costUpdate => const Color(0xFF3B7CC8),
+    CityFeedItemType.lifestyleTip => const Color(0xFF1D9E75),
+    CityFeedItemType.migrantStory => const Color(0xFF9B59B6),
+    CityFeedItemType.practicalTip => const Color(0xFF3B7CC8),
+    CityFeedItemType.warning => const Color(0xFFE8873A),
+    CityFeedItemType.opportunity => const Color(0xFF1D9E75),
+  };
 
   String typeLabel(String locale) => switch (type) {
-        CityFeedItemType.costUpdate => switch (locale) {
-            'pt' => 'Custo de vida',
-            'es' => 'Costo de vida',
-            _ => 'Cost of living',
-          },
-        CityFeedItemType.lifestyleTip => switch (locale) {
-            'pt' => 'Estilo de vida',
-            'es' => 'Estilo de vida',
-            _ => 'Lifestyle',
-          },
-        CityFeedItemType.migrantStory => switch (locale) {
-            'pt' => 'Quem já fez',
-            'es' => 'Quien ya lo hizo',
-            _ => 'Real experience',
-          },
-        CityFeedItemType.practicalTip => switch (locale) {
-            'pt' => 'Dica prática',
-            'es' => 'Consejo practico',
-            _ => 'Practical tip',
-          },
-        CityFeedItemType.warning => switch (locale) {
-            'pt' => 'Atenção',
-            'es' => 'Atencion',
-            _ => 'Watch out',
-          },
-        CityFeedItemType.opportunity => switch (locale) {
-            'pt' => 'Oportunidade',
-            'es' => 'Oportunidad',
-            _ => 'Opportunity',
-          },
-      };
+    CityFeedItemType.costUpdate => switch (locale) {
+      'pt' => 'Custo de vida',
+      'es' => 'Costo de vida',
+      _ => 'Cost of living',
+    },
+    CityFeedItemType.lifestyleTip => switch (locale) {
+      'pt' => 'Estilo de vida',
+      'es' => 'Estilo de vida',
+      _ => 'Lifestyle',
+    },
+    CityFeedItemType.migrantStory => switch (locale) {
+      'pt' => 'Quem já fez',
+      'es' => 'Quien ya lo hizo',
+      _ => 'Real experience',
+    },
+    CityFeedItemType.practicalTip => switch (locale) {
+      'pt' => 'Dica prática',
+      'es' => 'Consejo practico',
+      _ => 'Practical tip',
+    },
+    CityFeedItemType.warning => switch (locale) {
+      'pt' => 'Atenção',
+      'es' => 'Atencion',
+      _ => 'Watch out',
+    },
+    CityFeedItemType.opportunity => switch (locale) {
+      'pt' => 'Oportunidade',
+      'es' => 'Oportunidad',
+      _ => 'Opportunity',
+    },
+  };
 }

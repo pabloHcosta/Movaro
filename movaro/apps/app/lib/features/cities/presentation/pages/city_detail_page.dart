@@ -51,9 +51,13 @@ import 'package:movaro_app/features/city_insights/domain/entities/city_insight_e
 import 'package:movaro_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/landing_budget_estimator.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
+
+enum _SameCityPlanChoice { continuePlan, restartPlan }
 
 class CityDetailPage extends StatefulWidget {
   const CityDetailPage({
@@ -87,6 +91,8 @@ class CityDetailPage extends StatefulWidget {
 
 class _CityDetailPageState extends State<CityDetailPage> {
   static const _helpPreferenceKey = 'city_detail';
+  final MigrationCopilotProgressStore _progressStore =
+      MigrationCopilotProgressStore();
   City? _city;
   List<CityInsightEntity> _cityInsights = const [];
   List<CityInsightExplorePlaceEntity> _neighborhoodPlaces = const [];
@@ -1038,6 +1044,80 @@ class _CityDetailPageState extends State<CityDetailPage> {
     final isConfirmedCity =
         plan?.isCityConfirmed == true && plan?.recommendedCity?.id == city.id;
     if (isConfirmedCity) {
+      final choice = await _showSameCityPlanDialog(city: city, plan: plan!);
+      if (!context.mounted || choice == null) {
+        return;
+      }
+      if (choice == _SameCityPlanChoice.continuePlan) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.publicHome,
+          (route) => false,
+        );
+        return;
+      }
+
+      await widget.migrationQuestionnaireController?.clearCurrentPlan();
+      if (!context.mounted) {
+        return;
+      }
+      final generated =
+          await widget.migrationQuestionnaireController?.generatePlanFromCity(
+            city,
+          ) ??
+          false;
+      if (!context.mounted || !generated) {
+        return;
+      }
+      await widget.migrationQuestionnaireController?.confirmPlanCity(city);
+      if (!context.mounted) {
+        return;
+      }
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.publicHome,
+        (route) => false,
+      );
+      return;
+    }
+
+    final savedPlan = widget.migrationQuestionnaireController?.findSavedPlanForCity(
+      city.id,
+    );
+    if (savedPlan != null) {
+      final choice = await _showSameCityPlanDialog(city: city, plan: savedPlan);
+      if (!context.mounted || choice == null) {
+        return;
+      }
+      if (choice == _SameCityPlanChoice.continuePlan) {
+        await widget.migrationQuestionnaireController?.resumePlan(savedPlan);
+        if (!context.mounted) {
+          return;
+        }
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.publicHome,
+          (route) => false,
+        );
+        return;
+      }
+
+      await widget.migrationQuestionnaireController?.clearCurrentPlan();
+      if (!context.mounted) {
+        return;
+      }
+      final generated =
+          await widget.migrationQuestionnaireController?.generatePlanFromCity(
+            city,
+          ) ??
+          false;
+      if (!context.mounted || !generated) {
+        return;
+      }
+      await widget.migrationQuestionnaireController?.confirmPlanCity(city);
+      if (!context.mounted) {
+        return;
+      }
       Navigator.pushNamedAndRemoveUntil(
         context,
         AppRoutes.publicHome,
@@ -1191,6 +1271,258 @@ class _CityDetailPageState extends State<CityDetailPage> {
       await WidgetsBinding.instance.endOfFrame;
       await Future<void>.delayed(const Duration(milliseconds: 40));
     }
+  }
+
+  Future<_SameCityPlanChoice?> _showSameCityPlanDialog({
+    required City city,
+    required MigrationPlan plan,
+  }) async {
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).languageCode;
+    final currentLocation = widget.locationController.savedLocation;
+    final snapshot = await _progressStore.read(plan);
+    if (!mounted) {
+      return null;
+    }
+    final guideItems = MigrationGuideRegistry.build(
+      l10n: l10n,
+      plan: plan,
+      currentLocation: currentLocation,
+      localeCode: locale,
+      completedIds: snapshot.getAllCompletedIds(),
+    );
+    final completedCount = snapshot.completedItemsCount;
+    final totalCount = guideItems.length;
+    final isComplete = totalCount > 0 && completedCount >= totalCount;
+    final title = switch (locale) {
+      'pt' => isComplete
+          ? 'Já existe um plano concluído para ${city.name}'
+          : 'Já existe um plano em andamento para ${city.name}',
+      'es' => isComplete
+          ? 'Ya existe un plan completado para ${city.name}'
+          : 'Ya existe un plan en curso para ${city.name}',
+      _ => isComplete
+          ? 'There is already a completed plan for ${city.name}'
+          : 'There is already an active plan for ${city.name}',
+    };
+    final body = switch (locale) {
+      'pt' => isComplete
+          ? 'Detectamos que esta cidade já tem um plano finalizado. Você pode revisar o que já foi feito ou começar tudo de novo do zero.'
+          : 'Detectamos que esta cidade já tem um plano com progresso salvo. Você pode continuar de onde parou ou recomeçar do zero.',
+      'es' => isComplete
+          ? 'Detectamos que esta ciudad ya tiene un plan finalizado. Puedes revisar lo que ya hiciste o empezar otra vez desde cero.'
+          : 'Detectamos que esta ciudad ya tiene un plan con progreso guardado. Puedes seguir donde lo dejaste o empezar desde cero.',
+      _ => isComplete
+          ? 'We found a finished plan for this city. You can review what is already done or start over from zero.'
+          : 'We found saved progress for this city. You can continue where you left off or start over from zero.',
+    };
+    final progressLabel = switch (locale) {
+      'pt' => isComplete
+          ? 'Plano concluído'
+          : '$completedCount de $totalCount etapas concluídas',
+      'es' => isComplete
+          ? 'Plan completado'
+          : '$completedCount de $totalCount etapas completadas',
+      _ => isComplete
+          ? 'Plan completed'
+          : '$completedCount of $totalCount steps completed',
+    };
+
+    return showDialog<_SameCityPlanChoice>(
+      context: context,
+      builder: (dialogContext) {
+        final isDark = AppColors.isDark(dialogContext);
+        final borderColor = AppColors.borderFor(dialogContext);
+        final titleColor = AppColors.textPrimaryFor(dialogContext);
+        final bodyColor = AppColors.textSoftFor(dialogContext);
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.surfaceFor(dialogContext),
+              border: Border.all(color: borderColor),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: isDark
+                      ? Colors.black.withValues(alpha: 0.48)
+                      : Colors.black.withValues(alpha: 0.10),
+                  blurRadius: isDark ? 48 : 26,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppColors.tintedSurfaceFor(
+                            dialogContext,
+                            tint: AppColors.primary,
+                            lightColor: const Color(0xFFEEF4FF),
+                            darkAlpha: 0.16,
+                          ),
+                          border: Border.all(
+                            color: AppColors.tintedBorderFor(
+                              dialogContext,
+                              tint: AppColors.primary,
+                              lightColor: const Color(0xFFB9D2FF),
+                              darkAlpha: 0.30,
+                            ),
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          Icons.route_rounded,
+                          color: AppColors.primary,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        title,
+                        style: Theme.of(dialogContext).textTheme.titleLarge
+                            ?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: titleColor,
+                            ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        body,
+                        style: Theme.of(dialogContext).textTheme.bodyLarge
+                            ?.copyWith(
+                              color: bodyColor,
+                              height: 1.5,
+                            ),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceMutedFor(dialogContext),
+                          border: Border.all(color: borderColor),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.insights_rounded,
+                              size: 14,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                progressLabel,
+                                style: Theme.of(dialogContext)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: titleColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(height: 1, color: borderColor),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.of(
+                          dialogContext,
+                        ).pop(_SameCityPlanChoice.continuePlan),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1F6FEB),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            switch (locale) {
+                              'pt' => 'Continuar esse plano',
+                              'es' => 'Continuar este plan',
+                              _ => 'Continue this plan',
+                            },
+                            textAlign: TextAlign.center,
+                            style: Theme.of(dialogContext).textTheme.labelLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () => Navigator.of(
+                          dialogContext,
+                        ).pop(_SameCityPlanChoice.restartPlan),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceMutedFor(dialogContext),
+                            border: Border.all(color: borderColor),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            switch (locale) {
+                              'pt' => 'Começar do zero nessa cidade',
+                              'es' => 'Empezar desde cero en esta ciudad',
+                              _ => 'Start over in this city',
+                            },
+                            textAlign: TextAlign.center,
+                            style: Theme.of(dialogContext).textTheme.bodyLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  color: bodyColor,
+                                ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () => Navigator.of(dialogContext).pop(),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Text(
+                            switch (locale) {
+                              'pt' => 'Cancelar',
+                              'es' => 'Cancelar',
+                              _ => 'Cancel',
+                            },
+                            style: Theme.of(dialogContext).textTheme.bodyMedium
+                                ?.copyWith(color: bodyColor),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _navigateToSection(

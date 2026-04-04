@@ -153,6 +153,16 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
             PreparationResourceLinks.buildBookingSearch(city, duration),
       ),
       _TemporaryPortal(
+        name: 'QuintoAndar',
+        emoji: '⭐',
+        description: context.l10n.housingLongTermPortalQuintoAndar,
+        bgColor: const Color(0xFF17120A),
+        borderColor: const Color(0xFF5A451B),
+        urlBuilder: (city, _) => PreparationResourceLinks.buildQuintoAndarSearch(
+          city,
+        ),
+      ),
+      _TemporaryPortal(
         name: 'Viva Real',
         emoji: '🏢',
         description: context.l10n.housingTemporaryPortalVivaReal,

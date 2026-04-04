@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
@@ -23,6 +24,7 @@ class JourneyStepperWidget extends StatelessWidget {
   final List<GuideActionItem> allItems;
   final VoidCallback? onTapActiveTask;
   final VoidCallback? onTapSeeMore;
+
   /// When false the active-task card is omitted — used by the Focus Mode
   /// layout where the card is rendered separately as a primary action card.
   final bool showTaskCard;
@@ -60,21 +62,26 @@ class JourneyStepperWidget extends StatelessWidget {
     final completedCount = allItems.where((it) => it.isCompleted).length;
     final totalCount = allItems.length;
     final currentPhase = _currentPhase();
+    final journeyStage = UserJourneyStageDetector.detect(
+      timeline: plan.timeline,
+      completedSteps: completedCount,
+      totalSteps: totalCount,
+    );
     final isDark = AppColors.isDark(context);
 
-    final currentPhaseItems = allItems
-        .where((it) => it.phase == currentPhase)
-        .toList()
-      ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+    final currentPhaseItems =
+        allItems.where((it) => it.phase == currentPhase).toList()
+          ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
 
-    final activeTask =
-        currentPhaseItems.where((it) => !it.isCompleted).firstOrNull;
-    final remainingInPhase =
-        currentPhaseItems.where((it) => !it.isCompleted).length;
+    final activeTask = currentPhaseItems
+        .where((it) => !it.isCompleted)
+        .firstOrNull;
+    final remainingInPhase = currentPhaseItems
+        .where((it) => !it.isCompleted)
+        .length;
     final cpfUnlockCount = allItems
         .where(
-          (it) =>
-              it.dependencies.contains('item_2_1_cpf') && !it.isCompleted,
+          (it) => it.dependencies.contains('item_2_1_cpf') && !it.isCompleted,
         )
         .length;
 
@@ -124,6 +131,7 @@ class JourneyStepperWidget extends StatelessWidget {
                   child: Center(
                     child: _PhaseNode(
                       phase: _phases[i],
+                      journeyStage: journeyStage,
                       status: _phaseStatus(_phases[i], currentPhase),
                       isDark: isDark,
                     ),
@@ -133,7 +141,8 @@ class JourneyStepperWidget extends StatelessWidget {
                   Expanded(
                     flex: 1,
                     child: _PhaseConnector(
-                      isDone: _phaseStatus(_phases[i], currentPhase) ==
+                      isDone:
+                          _phaseStatus(_phases[i], currentPhase) ==
                           _PhaseNodeStatus.done,
                       isDark: isDark,
                     ),
@@ -153,6 +162,7 @@ class JourneyStepperWidget extends StatelessWidget {
                   flex: 2,
                   child: _PhaseLabel(
                     phase: _phases[i],
+                    journeyStage: journeyStage,
                     isCurrent: _phases[i] == currentPhase,
                     isDark: isDark,
                   ),
@@ -168,9 +178,11 @@ class JourneyStepperWidget extends StatelessWidget {
           _ActiveTaskCard(
             item: activeTask,
             remainingCount: remainingInPhase - 1,
+            journeyStage: journeyStage,
             isDark: isDark,
-            cpfUnlockCount:
-                activeTask.id == 'item_2_1_cpf' ? cpfUnlockCount : 0,
+            cpfUnlockCount: activeTask.id == 'item_2_1_cpf'
+                ? cpfUnlockCount
+                : 0,
             onTapActiveTask: onTapActiveTask,
             onTapSeeMore: onTapSeeMore,
           ),
@@ -184,56 +196,62 @@ class JourneyStepperWidget extends StatelessWidget {
 class _PhaseNode extends StatelessWidget {
   const _PhaseNode({
     required this.phase,
+    required this.journeyStage,
     required this.status,
     required this.isDark,
   });
 
   final GuidePhase phase;
+  final UserJourneyStage journeyStage;
   final _PhaseNodeStatus status;
   final bool isDark;
 
   @override
   Widget build(BuildContext context) {
+    final phaseSymbol = _phaseSymbol(phase, journeyStage);
     final (bg, border, textColor, icon) = switch (status) {
-      _PhaseNodeStatus.done => isDark
-          ? (
-              const Color(0xFF0F3020),
-              const Color(0xFF1D9E75),
-              const Color(0xFF5DCAA5),
-              '✓',
-            )
-          : (
-              const Color(0xFFDCFCE7),
-              const Color(0xFF16A34A),
-              const Color(0xFF166534),
-              '✓',
-            ),
-      _PhaseNodeStatus.now => isDark
-          ? (
-              const Color(0xFF1E3A5F),
-              const Color(0xFF3B7CC8),
-              const Color(0xFF90C4F8),
-              '→',
-            )
-          : (
-              const Color(0xFFDBEAFE),
-              const Color(0xFF2563EB),
-              const Color(0xFF1D40AF),
-              '→',
-            ),
-      _PhaseNodeStatus.lock => isDark
-          ? (
-              const Color(0xFF0A1525),
-              const Color(0xFF1A2840),
-              const Color(0xFF2A3555),
-              _lockEmoji(phase),
-            )
-          : (
-              const Color(0xFFF8FAFC),
-              const Color(0xFFE2E8F0),
-              const Color(0xFFCBD5E1),
-              _lockEmoji(phase),
-            ),
+      _PhaseNodeStatus.done =>
+        isDark
+            ? (
+                const Color(0xFF0F3020),
+                const Color(0xFF1D9E75),
+                const Color(0xFF5DCAA5),
+                '✓',
+              )
+            : (
+                const Color(0xFFDCFCE7),
+                const Color(0xFF16A34A),
+                const Color(0xFF166534),
+                '✓',
+              ),
+      _PhaseNodeStatus.now =>
+        isDark
+            ? (
+                const Color(0xFF1E3A5F),
+                const Color(0xFF3B7CC8),
+                const Color(0xFF90C4F8),
+                phaseSymbol,
+              )
+            : (
+                const Color(0xFFDBEAFE),
+                const Color(0xFF2563EB),
+                const Color(0xFF1D40AF),
+                phaseSymbol,
+              ),
+      _PhaseNodeStatus.lock =>
+        isDark
+            ? (
+                const Color(0xFF0A1525),
+                const Color(0xFF1A2840),
+                const Color(0xFF2A3555),
+                phaseSymbol,
+              )
+            : (
+                const Color(0xFFF8FAFC),
+                const Color(0xFFE2E8F0),
+                const Color(0xFFCBD5E1),
+                phaseSymbol,
+              ),
     };
 
     return Container(
@@ -256,13 +274,25 @@ class _PhaseNode extends StatelessWidget {
     );
   }
 
-  static String _lockEmoji(GuidePhase phase) => switch (phase) {
-        GuidePhase.preparation => '📋',
-        GuidePhase.documents => '📄',
-        GuidePhase.housing => '🏠',
-        GuidePhase.work => '💼',
-        GuidePhase.arrival => '✈',
+  static String _phaseSymbol(GuidePhase phase, UserJourneyStage journeyStage) {
+    if (journeyStage == UserJourneyStage.executor) {
+      return switch (phase) {
+        GuidePhase.preparation => '🧭',
+        GuidePhase.housing => '🛏',
+        GuidePhase.documents => '🪪',
+        GuidePhase.work => '💳',
+        GuidePhase.arrival => '🏡',
       };
+    }
+
+    return switch (phase) {
+      GuidePhase.preparation => '📋',
+      GuidePhase.documents => '📄',
+      GuidePhase.housing => '🏠',
+      GuidePhase.work => '💼',
+      GuidePhase.arrival => '✈',
+    };
+  }
 }
 
 // ─── Phase label (compact text below node) ────────────────────────────────────
@@ -270,11 +300,13 @@ class _PhaseNode extends StatelessWidget {
 class _PhaseLabel extends StatelessWidget {
   const _PhaseLabel({
     required this.phase,
+    required this.journeyStage,
     required this.isCurrent,
     required this.isDark,
   });
 
   final GuidePhase phase;
+  final UserJourneyStage journeyStage;
   final bool isCurrent;
   final bool isDark;
 
@@ -298,6 +330,16 @@ class _PhaseLabel extends StatelessWidget {
 
   /// Abbreviated labels guaranteed to fit on one line regardless of locale.
   String _shortLabel(BuildContext context) {
+    if (journeyStage == UserJourneyStage.executor) {
+      return switch (phase) {
+        GuidePhase.preparation => context.l10n.copilotPhaseShortPreparation,
+        GuidePhase.housing => context.l10n.copilotPhaseShortHousing,
+        GuidePhase.documents => context.l10n.copilotPhaseShortDocuments,
+        GuidePhase.work => context.l10n.copilotPhaseShortWork,
+        GuidePhase.arrival => context.l10n.copilotPhaseShortArrival,
+      };
+    }
+
     final lang = Localizations.localeOf(context).languageCode;
     return switch (phase) {
       GuidePhase.preparation => 'Prep.',
@@ -342,6 +384,7 @@ class _ActiveTaskCard extends StatelessWidget {
   const _ActiveTaskCard({
     required this.item,
     required this.remainingCount,
+    required this.journeyStage,
     required this.isDark,
     required this.cpfUnlockCount,
     this.onTapActiveTask,
@@ -350,6 +393,7 @@ class _ActiveTaskCard extends StatelessWidget {
 
   final GuideActionItem item;
   final int remainingCount;
+  final UserJourneyStage journeyStage;
   final bool isDark;
   final int cpfUnlockCount;
   final VoidCallback? onTapActiveTask;
@@ -474,7 +518,7 @@ class _ActiveTaskCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
-                    '✦ Desbloqueia $cpfUnlockCount passos',
+                    _unlockCopy(context, cpfUnlockCount),
                     style: AppTypography.tinyLabel.copyWith(
                       color: isDark
                           ? const Color(0xFF4ADE80)
@@ -501,7 +545,7 @@ class _ActiveTaskCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(7),
                     ),
                     child: Text(
-                      context.l10n.homeStepperDoNow,
+                      _primaryActionLabel(context),
                       textAlign: TextAlign.center,
                       style: AppTypography.compactBadge.copyWith(
                         color: Colors.white,
@@ -525,7 +569,7 @@ class _ActiveTaskCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(7),
                       ),
                       child: Text(
-                        context.l10n.homeStepperSeeMore('$remainingCount'),
+                        _moreInPhaseLabel(context, remainingCount),
                         textAlign: TextAlign.center,
                         style: AppTypography.tinyLabel.copyWith(
                           color: isDark
@@ -545,21 +589,53 @@ class _ActiveTaskCard extends StatelessWidget {
   }
 
   static String _typeEmoji(GuideActionType type) => switch (type) {
-        GuideActionType.informative => '📋',
-        GuideActionType.external => '🔗',
-        GuideActionType.tool => '🛠',
-        GuideActionType.checklist => '✅',
-      };
+    GuideActionType.informative => '📋',
+    GuideActionType.external => '🔗',
+    GuideActionType.tool => '🛠',
+    GuideActionType.checklist => '✅',
+  };
+
+  String _primaryActionLabel(BuildContext context) {
+    if (journeyStage == UserJourneyStage.executor) {
+      return _localizedText(
+        context,
+        pt: 'Abrir etapa',
+        es: 'Abrir etapa',
+        en: 'Open step',
+      );
+    }
+    return context.l10n.homeStepperDoNow;
+  }
+
+  String _moreInPhaseLabel(BuildContext context, int count) {
+    if (journeyStage == UserJourneyStage.executor) {
+      return _localizedText(
+        context,
+        pt: '+ $count desta fase',
+        es: '+ $count de esta etapa',
+        en: '+ $count in this stage',
+      );
+    }
+    return context.l10n.homeStepperSeeMore('$count');
+  }
+
+  String _unlockCopy(BuildContext context, int count) {
+    return _localizedText(
+      context,
+      pt: '✦ Desbloqueia $count passos',
+      es: '✦ Desbloquea $count pasos',
+      en: '✦ Unlocks $count steps',
+    );
+  }
 
   static String _localizedText(
     BuildContext context, {
     required String pt,
     required String es,
     required String en,
-  }) =>
-      switch (Localizations.localeOf(context).languageCode) {
-        'pt' => pt,
-        'es' => es,
-        _ => en,
-      };
+  }) => switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 }

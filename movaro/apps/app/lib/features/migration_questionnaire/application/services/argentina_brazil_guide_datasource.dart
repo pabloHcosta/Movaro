@@ -393,8 +393,8 @@ class ArgentinaBrazilGuideDataSource {
           en: 'Browse jobs in Brazil',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget:
-            PreparationResourceLinks.officialJobsPortal.toString(),
+        primaryActionTarget: PreparationResourceLinks.officialJobsPortal
+            .toString(),
         steps: _list(
           locale,
           pt: [
@@ -428,28 +428,19 @@ class ArgentinaBrazilGuideDataSource {
         tips: _list(
           locale,
           pt: [
-            _marketExchangeTip(
-              locale,
-              exchangeRates: exchangeRates,
-            ),
+            _marketExchangeTip(locale, exchangeRates: exchangeRates),
             'Salários CLT anunciados já incluem FGTS e encargos — o líquido é o valor anunciado mesmo.',
             'LinkedIn Brasil é muito mais ativo que na Argentina — perfil em português aumenta muito o retorno.',
             'Para trabalho remoto mantendo cliente argentino: MEI simplifica a regularização da renda.',
           ],
           es: [
-            _marketExchangeTip(
-              locale,
-              exchangeRates: exchangeRates,
-            ),
+            _marketExchangeTip(locale, exchangeRates: exchangeRates),
             'Los salarios CLT anunciados ya incluyen FGTS y cargas — el neto es el valor anunciado.',
             'LinkedIn Brasil es mucho mas activo que en Argentina — perfil en portugues aumenta mucho el retorno.',
             'Para trabajo remoto manteniendo cliente argentino: MEI simplifica la regularizacion del ingreso.',
           ],
           en: [
-            _marketExchangeTip(
-              locale,
-              exchangeRates: exchangeRates,
-            ),
+            _marketExchangeTip(locale, exchangeRates: exchangeRates),
             'Advertised CLT salaries already include FGTS and deductions — the net is the advertised figure.',
             'LinkedIn Brasil is far more active than in Argentina — a Portuguese profile significantly increases response rate.',
             'For remote work keeping an Argentine client: MEI simplifies income regularization.',
@@ -478,7 +469,12 @@ class ArgentinaBrazilGuideDataSource {
         ),
         preArrivalRequired: true,
         estimatedEffort: GuideEstimatedEffort.fast,
-        estimatedTimeLabel: _t(locale, pt: '30 min', es: '30 min', en: '30 min'),
+        estimatedTimeLabel: _t(
+          locale,
+          pt: '30 min',
+          es: '30 min',
+          en: '30 min',
+        ),
       ),
       GuideActionItem(
         id: 'item_0_6_saude_entender',
@@ -586,7 +582,12 @@ class ArgentinaBrazilGuideDataSource {
         ),
         preArrivalRequired: true,
         estimatedEffort: GuideEstimatedEffort.fast,
-        estimatedTimeLabel: _t(locale, pt: '20 min', es: '20 min', en: '20 min'),
+        estimatedTimeLabel: _t(
+          locale,
+          pt: '20 min',
+          es: '20 min',
+          en: '20 min',
+        ),
       ),
       GuideActionItem(
         id: 'item_1_3_money',
@@ -984,9 +985,21 @@ class ArgentinaBrazilGuideDataSource {
         ),
         requirements: _list(
           locale,
-          pt: ['CPF emitido', 'Documento com foto', 'R\$ 20-50 para chip e crédito inicial'],
-          es: ['CPF emitido', 'Documento con foto', 'R\$ 20-50 para chip y credito inicial'],
-          en: ['Issued CPF', 'Photo ID', 'R\$ 20-50 for the SIM and initial credit'],
+          pt: [
+            'CPF emitido',
+            'Documento com foto',
+            'R\$ 20-50 para chip e crédito inicial',
+          ],
+          es: [
+            'CPF emitido',
+            'Documento con foto',
+            'R\$ 20-50 para chip y credito inicial',
+          ],
+          en: [
+            'Issued CPF',
+            'Photo ID',
+            'R\$ 20-50 for the SIM and initial credit',
+          ],
         ),
         doneCriteria: _t(
           locale,
@@ -1436,9 +1449,9 @@ class ArgentinaBrazilGuideDataSource {
             id: 'cpf_1',
             title: _t(
               locale,
-              pt: 'Reunir documentos (DNI + comprovante de endereço)',
-              es: 'Reunir documentos (DNI + comprobante de domicilio)',
-              en: 'Gather documents (ID + proof of address)',
+              pt: 'Escolher a rota do CPF (Argentina ou Brasil)',
+              es: 'Elegir la ruta del CPF (Argentina o Brasil)',
+              en: 'Choose your CPF route (Argentina or Brazil)',
             ),
             isCompleted: false,
           ),
@@ -1446,9 +1459,9 @@ class ArgentinaBrazilGuideDataSource {
             id: 'cpf_2',
             title: _t(
               locale,
-              pt: 'Ir à Receita Federal ou Correios',
-              es: 'Ir a Receita Federal o Correios',
-              en: 'Go to Receita Federal or Correios',
+              pt: 'Separar os documentos pedidos pela rota escolhida',
+              es: 'Separar los documentos pedidos por la ruta elegida',
+              en: 'Prepare the documents required by your chosen route',
             ),
             isCompleted: false,
           ),
@@ -1456,9 +1469,9 @@ class ArgentinaBrazilGuideDataSource {
             id: 'cpf_3',
             title: _t(
               locale,
-              pt: 'Receber número do CPF',
-              es: 'Recibir numero del CPF',
-              en: 'Receive CPF number',
+              pt: 'Confirmar e guardar o número emitido',
+              es: 'Confirmar y guardar el numero emitido',
+              en: 'Confirm and save the issued number',
             ),
             isCompleted: false,
           ),
@@ -1642,15 +1655,30 @@ class ArgentinaBrazilGuideDataSource {
         survivalPhrases: [
           SurvivalPhrase(
             phrase: 'Tenho agendamento para hoje',
-            translation: _t(locale, pt: 'Ao chegar na Polícia Federal', es: 'Al llegar a la Policia Federal', en: 'When arriving at Federal Police'),
+            translation: _t(
+              locale,
+              pt: 'Ao chegar na Polícia Federal',
+              es: 'Al llegar a la Policia Federal',
+              en: 'When arriving at Federal Police',
+            ),
           ),
           SurvivalPhrase(
             phrase: 'Quero solicitar minha residência pelo Acordo do Mercosul',
-            translation: _t(locale, pt: 'Para identificar a rota correta', es: 'Para identificar la via correcta', en: 'To identify the right process'),
+            translation: _t(
+              locale,
+              pt: 'Para identificar a rota correta',
+              es: 'Para identificar la via correcta',
+              en: 'To identify the right process',
+            ),
           ),
           SurvivalPhrase(
             phrase: 'Preciso do protocolo de residência',
-            translation: _t(locale, pt: 'Ao final do atendimento', es: 'Al final del turno', en: 'At the end of the appointment'),
+            translation: _t(
+              locale,
+              pt: 'Ao final do atendimento',
+              es: 'Al final del turno',
+              en: 'At the end of the appointment',
+            ),
           ),
         ],
         communityTips: _list(
@@ -1887,7 +1915,10 @@ class ArgentinaBrazilGuideDataSource {
             ),
             pros: _list(
               locale,
-              pt: ['Menor rejeição para estrangeiros', 'Processo 100% pelo app'],
+              pt: [
+                'Menor rejeição para estrangeiros',
+                'Processo 100% pelo app',
+              ],
               es: ['Menor rechazo para extranjeros', 'Proceso 100% por app'],
               en: ['Lower rejection rate for foreigners', '100% app process'],
             ),
@@ -2019,15 +2050,30 @@ class ArgentinaBrazilGuideDataSource {
         survivalPhrases: [
           SurvivalPhrase(
             phrase: 'Quero abrir uma conta corrente',
-            translation: _t(locale, pt: 'Ao chegar no banco ou app', es: 'Al llegar al banco o app', en: 'When opening an account'),
+            translation: _t(
+              locale,
+              pt: 'Ao chegar no banco ou app',
+              es: 'Al llegar al banco o app',
+              en: 'When opening an account',
+            ),
           ),
           SurvivalPhrase(
             phrase: 'Quais documentos são necessários?',
-            translation: _t(locale, pt: 'Para confirmar o que levar', es: 'Para confirmar qué llevar', en: 'To confirm what to bring'),
+            translation: _t(
+              locale,
+              pt: 'Para confirmar o que levar',
+              es: 'Para confirmar qué llevar',
+              en: 'To confirm what to bring',
+            ),
           ),
           SurvivalPhrase(
             phrase: 'Preciso cadastrar minha chave Pix',
-            translation: _t(locale, pt: 'Depois de aprovado', es: 'Despues de la aprobacion', en: 'After account approval'),
+            translation: _t(
+              locale,
+              pt: 'Depois de aprovado',
+              es: 'Despues de la aprobacion',
+              en: 'After account approval',
+            ),
           ),
         ],
         communityTips: _list(
@@ -2113,7 +2159,11 @@ class ArgentinaBrazilGuideDataSource {
         requirements: _list(
           locale,
           pt: ['CPF', 'Comprovante de renda ou fiador', 'Depósito caução'],
-          es: ['CPF', 'Comprobante de ingresos o garante', 'Deposito de garantia'],
+          es: [
+            'CPF',
+            'Comprobante de ingresos o garante',
+            'Deposito de garantia',
+          ],
           en: ['CPF', 'Proof of income or guarantor', 'Security deposit'],
         ),
         doneCriteria: _t(
@@ -2160,19 +2210,39 @@ class ArgentinaBrazilGuideDataSource {
         survivalPhrases: [
           SurvivalPhrase(
             phrase: 'Quero alugar este imóvel',
-            translation: _t(locale, pt: 'Ao visitar o imóvel', es: 'Al visitar el inmueble', en: 'When visiting the property'),
+            translation: _t(
+              locale,
+              pt: 'Ao visitar o imóvel',
+              es: 'Al visitar el inmueble',
+              en: 'When visiting the property',
+            ),
           ),
           SurvivalPhrase(
             phrase: 'Qual é o valor do aluguel e do condomínio?',
-            translation: _t(locale, pt: 'Para entender o custo total', es: 'Para entender el costo total', en: 'To understand total cost'),
+            translation: _t(
+              locale,
+              pt: 'Para entender o custo total',
+              es: 'Para entender el costo total',
+              en: 'To understand total cost',
+            ),
           ),
           SurvivalPhrase(
             phrase: 'Vocês aceitam seguro-fiança no lugar de fiador?',
-            translation: _t(locale, pt: 'Para resolver sem fiador brasileiro', es: 'Para resolver sin garante brasileno', en: 'If you have no Brazilian guarantor'),
+            translation: _t(
+              locale,
+              pt: 'Para resolver sem fiador brasileiro',
+              es: 'Para resolver sin garante brasileno',
+              en: 'If you have no Brazilian guarantor',
+            ),
           ),
           SurvivalPhrase(
             phrase: 'Posso ver o contrato antes de assinar?',
-            translation: _t(locale, pt: 'Sempre peça antes de comprometer', es: 'Siempre pide antes de comprometerte', en: 'Always ask before committing'),
+            translation: _t(
+              locale,
+              pt: 'Sempre peça antes de comprometer',
+              es: 'Siempre pide antes de comprometerte',
+              en: 'Always ask before committing',
+            ),
           ),
         ],
         communityTips: _list(
@@ -2344,8 +2414,8 @@ class ArgentinaBrazilGuideDataSource {
           en: 'Choose income path',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget:
-            PreparationResourceLinks.officialJobsPortal.toString(),
+        primaryActionTarget: PreparationResourceLinks.officialJobsPortal
+            .toString(),
         requirements: _list(
           locale,
           pt: ['CPF', 'CTPS (para CLT)', 'Conta bancária ativa'],
@@ -2760,8 +2830,7 @@ class ArgentinaBrazilGuideDataSource {
           en: 'See SUS card',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget:
-            PreparationResourceLinks.susPortal.toString(),
+        primaryActionTarget: PreparationResourceLinks.susPortal.toString(),
         steps: _list(
           locale,
           pt: [
@@ -2971,8 +3040,8 @@ class ArgentinaBrazilGuideDataSource {
           en: 'See RNM registration',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget:
-            PreparationResourceLinks.rnMRegistrationGuide.toString(),
+        primaryActionTarget: PreparationResourceLinks.rnMRegistrationGuide
+            .toString(),
         steps: _list(
           locale,
           pt: [
@@ -3013,7 +3082,12 @@ class ArgentinaBrazilGuideDataSource {
           ],
         ),
         estimatedEffort: GuideEstimatedEffort.fast,
-        estimatedTimeLabel: _t(locale, pt: '10 min + acompanhamento', es: '10 min + seguimiento', en: '10 min + follow-up'),
+        estimatedTimeLabel: _t(
+          locale,
+          pt: '10 min + acompanhamento',
+          es: '10 min + seguimiento',
+          en: '10 min + follow-up',
+        ),
         urgencyLevel: GuideUrgencyLevel.watch,
         urgencySignal: _t(
           locale,
@@ -3062,8 +3136,7 @@ class ArgentinaBrazilGuideDataSource {
           en: 'Access PF portal',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget:
-            PreparationResourceLinks.pfPortal.toString(),
+        primaryActionTarget: PreparationResourceLinks.pfPortal.toString(),
         steps: _list(
           locale,
           pt: [
@@ -3319,8 +3392,8 @@ class ArgentinaBrazilGuideDataSource {
             en: 'See official rules',
           ),
           primaryActionType: GuidePrimaryActionType.external,
-          primaryActionTarget:
-              PreparationResourceLinks.diplomaValidationGuide.toString(),
+          primaryActionTarget: PreparationResourceLinks.diplomaValidationGuide
+              .toString(),
           steps: _list(
             locale,
             pt: [
@@ -3416,9 +3489,9 @@ class ArgentinaBrazilGuideDataSource {
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
           'item_0_3_budget',
-          'item_0_5_mercado_trabalho',  // research BEFORE leaving
-          'item_0_6_saude_entender',    // understand health BEFORE leaving
-          'item_2_1_cpf',               // can be done before travel or on arrival
+          'item_0_5_mercado_trabalho', // research BEFORE leaving
+          'item_0_6_saude_entender', // understand health BEFORE leaving
+          'item_2_1_cpf', // can be done before travel or on arrival
           'item_1_3_money',
           'item_0_4_flight',
           'item_1_2_housing_temporary',
@@ -3429,7 +3502,7 @@ class ArgentinaBrazilGuideDataSource {
           'item_3_3_pix',
           'item_3_4_trabalho',
           'item_3_2_aluguel_fixo',
-          'item_4_2_saude',             // get SUS card AFTER arriving
+          'item_4_2_saude', // get SUS card AFTER arriving
         ];
       case 'remote_income':
       case 'remote_work':
@@ -3441,8 +3514,8 @@ class ArgentinaBrazilGuideDataSource {
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
           'item_0_3_budget',
-          'item_0_5_mercado_trabalho',  // research BEFORE leaving
-          'item_0_6_saude_entender',    // understand health BEFORE leaving
+          'item_0_5_mercado_trabalho', // research BEFORE leaving
+          'item_0_6_saude_entender', // understand health BEFORE leaving
           'item_2_1_cpf',
           'item_1_3_money',
           'item_0_4_flight',
@@ -3454,7 +3527,7 @@ class ArgentinaBrazilGuideDataSource {
           'item_1_1_chip',
           'item_3_4_trabalho',
           'item_3_2_aluguel_fixo',
-          'item_4_2_saude',             // get SUS card AFTER arriving
+          'item_4_2_saude', // get SUS card AFTER arriving
         ];
       case 'study':
         // Sequence: understand rules → research job market (part-time context)
@@ -3464,8 +3537,8 @@ class ArgentinaBrazilGuideDataSource {
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
           'item_0_3_budget',
-          'item_0_5_mercado_trabalho',  // understand part-time/internship market
-          'item_0_6_saude_entender',    // understand health BEFORE leaving
+          'item_0_5_mercado_trabalho', // understand part-time/internship market
+          'item_0_6_saude_entender', // understand health BEFORE leaving
           'item_2_1_cpf',
           'item_1_3_money',
           'item_0_4_flight',
@@ -3476,7 +3549,7 @@ class ArgentinaBrazilGuideDataSource {
           'item_3_1_conta_bancaria',
           'item_3_3_pix',
           'item_3_2_aluguel_fixo',
-          'item_4_2_saude',             // get SUS card AFTER arriving
+          'item_4_2_saude', // get SUS card AFTER arriving
         ];
       case 'family_partner':
       case 'quality_of_life':
@@ -3489,8 +3562,8 @@ class ArgentinaBrazilGuideDataSource {
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
           'item_0_3_budget',
-          'item_0_5_mercado_trabalho',  // understand local economy before deciding
-          'item_0_6_saude_entender',    // understand health BEFORE leaving
+          'item_0_5_mercado_trabalho', // understand local economy before deciding
+          'item_0_6_saude_entender', // understand health BEFORE leaving
           'item_2_1_cpf',
           'item_1_3_money',
           'item_0_4_flight',
@@ -3500,7 +3573,7 @@ class ArgentinaBrazilGuideDataSource {
           'item_3_1_conta_bancaria',
           'item_3_3_pix',
           'item_3_2_aluguel_fixo',
-          'item_4_2_saude',             // get SUS card AFTER arriving
+          'item_4_2_saude', // get SUS card AFTER arriving
         ];
       default:
         return const [];
@@ -3521,11 +3594,7 @@ class ArgentinaBrazilGuideDataSource {
           es: 'Gratis por la ruta consular/Receita. Los puntos presenciales asociados pueden cobrar una tasa baja.',
           en: 'Free through the consular/Receita route. In-person partner service points may charge a small fee.',
         ),
-        decisionOptions: _cpfDecisionOptions(
-          plan,
-          currentLocation,
-          locale,
-        ),
+        decisionOptions: _cpfDecisionOptions(plan, currentLocation, locale),
         requirements: _list(
           locale,
           pt: [
@@ -3582,7 +3651,8 @@ class ArgentinaBrazilGuideDataSource {
               es: 'Red consular de Brasil en Argentina',
               en: 'Brazilian consular network in Argentina',
             ),
-            url: 'https://www.gov.br/mre/pt-br/assuntos/portal-consular/reparticoes-consulares-do-brasil',
+            url:
+                'https://www.gov.br/mre/pt-br/assuntos/portal-consular/reparticoes-consulares-do-brasil',
           ),
         ],
       ),
@@ -3964,12 +4034,14 @@ class ArgentinaBrazilGuideDataSource {
           en: 'Free or a small fee depending on channel.',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget: 'https://www.argentina.gob.ar/justicia/reincidencia/antecedentespenales',
+        primaryActionTarget:
+            'https://www.argentina.gob.ar/justicia/reincidencia/antecedentespenales',
         executionModes: const [GuideExecutionMode.online],
         externalOfficialLinks: [
           GuideSupportLink(
             label: 'Registro Nacional de Reincidencia',
-            url: 'https://www.argentina.gob.ar/justicia/reincidencia/antecedentespenales',
+            url:
+                'https://www.argentina.gob.ar/justicia/reincidencia/antecedentespenales',
           ),
         ],
       ),
@@ -4049,10 +4121,7 @@ class ArgentinaBrazilGuideDataSource {
             label: 'LinkedIn Brasil',
             url: 'https://www.linkedin.com/jobs',
           ),
-          GuideSupportLink(
-            label: 'Catho',
-            url: 'https://www.catho.com.br',
-          ),
+          GuideSupportLink(label: 'Catho', url: 'https://www.catho.com.br'),
           GuideSupportLink(
             label: 'VAGAS.com',
             url: PreparationResourceLinks.officialJobsPortal.toString(),
@@ -4125,13 +4194,19 @@ class ArgentinaBrazilGuideDataSource {
     final city = _contextCity(plan, currentLocation);
     final inDestination = _isInDestinationCountry(currentLocation, plan);
     final nearestConsularPost = _nearestArgentinaConsularPost(currentLocation);
-    final consularDistance = nearestConsularPost == null || currentLocation == null
+    final consularDistance =
+        nearestConsularPost == null || currentLocation == null
         ? null
-        : const Distance().as(
-            LengthUnit.Kilometer,
-            LatLng(currentLocation.latitude, currentLocation.longitude),
-            LatLng(nearestConsularPost.latitude, nearestConsularPost.longitude),
-          ).round();
+        : const Distance()
+              .as(
+                LengthUnit.Kilometer,
+                LatLng(currentLocation.latitude, currentLocation.longitude),
+                LatLng(
+                  nearestConsularPost.latitude,
+                  nearestConsularPost.longitude,
+                ),
+              )
+              .round();
     return [
       GuideLocationAwareOption(
         title: _t(
@@ -4194,9 +4269,7 @@ class ArgentinaBrazilGuideDataSource {
           es: inDestination
               ? 'Atencion presencial cercana'
               : 'Hacerlo en Brasil',
-          en: inDestination
-              ? 'Nearby in-person option'
-              : 'Do it in Brazil',
+          en: inDestination ? 'Nearby in-person option' : 'Do it in Brazil',
         ),
         subtitle: _t(
           locale,
@@ -4225,13 +4298,19 @@ class ArgentinaBrazilGuideDataSource {
     String locale,
   ) {
     final nearestConsularPost = _nearestArgentinaConsularPost(currentLocation);
-    final consularDistance = nearestConsularPost == null || currentLocation == null
+    final consularDistance =
+        nearestConsularPost == null || currentLocation == null
         ? null
-        : const Distance().as(
-            LengthUnit.Kilometer,
-            LatLng(currentLocation.latitude, currentLocation.longitude),
-            LatLng(nearestConsularPost.latitude, nearestConsularPost.longitude),
-          ).round();
+        : const Distance()
+              .as(
+                LengthUnit.Kilometer,
+                LatLng(currentLocation.latitude, currentLocation.longitude),
+                LatLng(
+                  nearestConsularPost.latitude,
+                  nearestConsularPost.longitude,
+                ),
+              )
+              .round();
     final consularRecommended =
         currentLocation != null &&
         _isInArgentina(currentLocation) &&
@@ -4288,24 +4367,24 @@ class ArgentinaBrazilGuideDataSource {
             consularDistance == null
                 ? 'Só vale a pena se você tiver acesso real a um posto consular brasileiro.'
                 : consularDistance > 200
-                    ? 'Do seu ponto atual, o posto mais próximo fica longe; isso pode virar uma viagem só para o CPF.'
-                    : 'Ainda depende de agenda, deslocamento e regra operacional do posto consular.',
+                ? 'Do seu ponto atual, o posto mais próximo fica longe; isso pode virar uma viagem só para o CPF.'
+                : 'Ainda depende de agenda, deslocamento e regra operacional do posto consular.',
             'Nem toda pessoa vai preferir investir esse tempo antes de resolver voo, moradia e documentos da residência.',
           ],
           es: [
             consularDistance == null
                 ? 'Solo vale la pena si tienes acceso real a un puesto consular brasileño.'
                 : consularDistance > 200
-                    ? 'Desde tu ubicacion actual, el puesto mas cercano queda lejos; esto puede convertirse en un viaje solo por el CPF.'
-                    : 'Igual depende del turno, del desplazamiento y de la operacion del puesto consular.',
+                ? 'Desde tu ubicacion actual, el puesto mas cercano queda lejos; esto puede convertirse en un viaje solo por el CPF.'
+                : 'Igual depende del turno, del desplazamiento y de la operacion del puesto consular.',
             'No toda persona va a querer gastar ese tiempo antes de resolver vuelo, vivienda y documentos de residencia.',
           ],
           en: [
             consularDistance == null
                 ? 'It is only worth it if you have real access to a Brazilian consular post.'
                 : consularDistance > 200
-                    ? 'From your current location, the nearest post is far away; this can turn into a dedicated trip just for CPF.'
-                    : 'It still depends on booking, travel, and the post’s own operating rules.',
+                ? 'From your current location, the nearest post is far away; this can turn into a dedicated trip just for CPF.'
+                : 'It still depends on booking, travel, and the post’s own operating rules.',
             'Not everyone will want to spend that time before solving flights, housing, and residency documents.',
           ],
         ),
@@ -4473,8 +4552,12 @@ class ArgentinaBrazilGuideDataSource {
       GuideLocationAwareOption(
         title: _t(
           locale,
-          pt: inDestination ? 'Unidade migratória da PF' : 'Unidade migratória de referência',
-          es: inDestination ? 'Unidad migratoria de la PF' : 'Unidad migratoria de referencia',
+          pt: inDestination
+              ? 'Unidade migratória da PF'
+              : 'Unidade migratória de referência',
+          es: inDestination
+              ? 'Unidad migratoria de la PF'
+              : 'Unidad migratoria de referencia',
           en: inDestination ? 'PF migration unit' : 'Reference migration unit',
         ),
         subtitle: _t(
@@ -4857,12 +4940,9 @@ String _marketExchangeTip(
 
   return ArgentinaBrazilGuideDataSource._t(
     locale,
-    pt:
-        'Hoje 1 USD = R\$$usdToBrl e ~ARS $usdToArs (cotação de $fetchedAt). Para converter: salário em R\$ ÷ $usdToBrl × dólar em ARS.',
-    es:
-        'Hoy 1 USD = R\$$usdToBrl y ~ARS $usdToArs (cotizacion de $fetchedAt). Para convertir: salario en R\$ ÷ $usdToBrl × dolar en ARS.',
-    en:
-        'Today 1 USD = R\$$usdToBrl and ~ARS $usdToArs (rate from $fetchedAt). To convert: salary in BRL ÷ $usdToBrl × USD in ARS.',
+    pt: 'Hoje 1 USD = R\$$usdToBrl e ~ARS $usdToArs (cotação de $fetchedAt). Para converter: salário em R\$ ÷ $usdToBrl × dólar em ARS.',
+    es: 'Hoy 1 USD = R\$$usdToBrl y ~ARS $usdToArs (cotizacion de $fetchedAt). Para convertir: salario en R\$ ÷ $usdToBrl × dolar en ARS.',
+    en: 'Today 1 USD = R\$$usdToBrl and ~ARS $usdToArs (rate from $fetchedAt). To convert: salary in BRL ÷ $usdToBrl × USD in ARS.',
   );
 }
 

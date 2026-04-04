@@ -143,15 +143,15 @@ class PreparationResourceLinks {
 
   static Uri buildRentalSearch(City city, RentalProvider provider) {
     final state = city.stateCode.toLowerCase();
-    final plusCity = _slugify(city.name).replaceAll('-', '+');
     final hyphenCity = _slugify(city.name);
+    final zapCity = _slugify(city.name).replaceAll('-', '%2B');
 
     return switch (provider) {
       RentalProvider.zapImoveis => Uri.parse(
-        'https://www.zapimoveis.com.br/aluguel/imoveis/$state+$plusCity/',
+        'https://www.zapimoveis.com.br/aluguel/imoveis/$state$zapCity/',
       ),
       RentalProvider.vivaReal => Uri.parse(
-        'https://www.vivareal.com.br/aluguel/imoveis/$state+$plusCity/',
+        'https://www.vivareal.com.br/aluguel/$state/$hyphenCity/',
       ),
       RentalProvider.chavesNaMao => Uri.parse(
         'https://www.chavesnamao.com.br/imoveis-para-alugar/$state-$hyphenCity/',
@@ -188,10 +188,8 @@ class PreparationResourceLinks {
     TemporaryHousingDuration duration,
   ) {
     final uf = city.stateCode.toLowerCase();
-    final slug = _slugify(city.name).replaceAll('-', '+');
-    return Uri.parse(
-      'https://www.vivareal.com.br/aluguel/imoveis/$uf+$slug/?__vt=temporada',
-    );
+    final slug = _slugify(city.name);
+    return Uri.parse('https://www.vivareal.com.br/aluguel/$uf/$slug/');
   }
 
   static Uri buildZapTemporarySearch(
@@ -199,10 +197,8 @@ class PreparationResourceLinks {
     TemporaryHousingDuration duration,
   ) {
     final uf = city.stateCode.toLowerCase();
-    final slug = _slugify(city.name).replaceAll('-', '+');
-    return Uri.parse(
-      'https://www.zapimoveis.com.br/temporada/imoveis/$uf+$slug/',
-    );
+    final slug = _slugify(city.name).replaceAll('-', '%2B');
+    return Uri.parse('https://www.zapimoveis.com.br/aluguel/imoveis/$uf$slug/');
   }
 
   static String _durationParam(TemporaryHousingDuration duration) {

@@ -1,4 +1,8 @@
 import 'package:movaro_app/features/home/domain/city_feed_item.dart';
+import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
 
 /// Static curated feed content for the City Feed.
@@ -12,10 +16,43 @@ class CityFeedDatasource {
     required String? cityCode,
     required UserJourneyStage stage,
     required String locale,
+    City? city,
+    CityWeather? weather,
+    CityDetailSocialProof? socialProof,
+    CityDetailClimateSummary? climateSummary,
+    CityDetailArrivalStory? arrivalStory,
+    CityDetailComparison? comparison,
+    GuideActionItem? guideCurrentItem,
   }) {
-    return _all(locale)
+    final dynamicItems = _dynamicItems(
+      locale,
+      stage: stage,
+      city: city,
+      weather: weather,
+      socialProof: socialProof,
+      climateSummary: climateSummary,
+      arrivalStory: arrivalStory,
+      comparison: comparison,
+      guideCurrentItem: guideCurrentItem,
+    );
+    final seenIds = dynamicItems.map((item) => item.id).toSet();
+    final hasRealCost = city?.budgetSnapshot != null;
+    final hasRealClimate = climateSummary != null || weather != null;
+    final hasRealSocial = socialProof != null;
+    final fallbackItems = _all(locale)
         .where((item) => item.isRelevantFor(cityCode: cityCode, stage: stage))
+        .where((item) => !seenIds.contains(item.id))
+        .where(
+          (item) =>
+              !(hasRealCost && item.type == CityFeedItemType.costUpdate) &&
+              !(hasRealSocial && item.type == CityFeedItemType.migrantStory) &&
+              !(hasRealClimate &&
+                  item.id.startsWith('lifestyle_') &&
+                  (item.cityCodes.isNotEmpty || cityCode != null)),
+        )
         .toList();
+
+    return [...dynamicItems, ...fallbackItems];
   }
 
   static String _t(
@@ -31,7 +68,6 @@ class CityFeedDatasource {
 
   static List<CityFeedItem> _all(String locale) => [
     // ── COST UPDATES ────────────────────────────────────────────────────────
-
     CityFeedItem(
       id: 'cost_sp_rent_2024',
       type: CityFeedItemType.costUpdate,
@@ -49,13 +85,18 @@ class CityFeedDatasource {
         en: 'Studio: R\$1,200–2,200 · 1-bed apartment: R\$2,000–3,500 · Shared room: R\$800–1,400. Centro and Zona Sul offer best value.',
       ),
       cityCodes: const ['sao-paulo', 'sp'],
-      updatedAt: 'Mar/2025',
+      sourceLabel: _curatedSourceLabel(locale),
     ),
 
     CityFeedItem(
       id: 'cost_floripa_rent_2024',
       type: CityFeedItemType.costUpdate,
-      badge: _t(locale, pt: 'Florianópolis', es: 'Florianopolis', en: 'Florianópolis'),
+      badge: _t(
+        locale,
+        pt: 'Florianópolis',
+        es: 'Florianopolis',
+        en: 'Florianópolis',
+      ),
       title: _t(
         locale,
         pt: 'Custo de vida em Floripa',
@@ -69,7 +110,7 @@ class CityFeedDatasource {
         en: 'Studio rental: R\$1,800–3,200 (cheaper inland). Food: R\$1,200–2,000/month. Transport: R\$200–400. Estimated solo: R\$4,000–6,500/month.',
       ),
       cityCodes: const ['florianopolis', 'floripa'],
-      updatedAt: 'Mar/2025',
+      sourceLabel: _curatedSourceLabel(locale),
     ),
 
     CityFeedItem(
@@ -89,13 +130,18 @@ class CityFeedDatasource {
         en: 'Studio: R\$1,200–2,000 · Água Verde and Portão neighborhoods offer best value. Cost of living ~20% lower than SP with high quality of life.',
       ),
       cityCodes: const ['curitiba'],
-      updatedAt: 'Mar/2025',
+      sourceLabel: _curatedSourceLabel(locale),
     ),
 
     CityFeedItem(
       id: 'cost_rj_rent_2024',
       type: CityFeedItemType.costUpdate,
-      badge: _t(locale, pt: 'Rio de Janeiro', es: 'Rio de Janeiro', en: 'Rio de Janeiro'),
+      badge: _t(
+        locale,
+        pt: 'Rio de Janeiro',
+        es: 'Rio de Janeiro',
+        en: 'Rio de Janeiro',
+      ),
       title: _t(
         locale,
         pt: 'Morar no Rio: o que custa',
@@ -109,13 +155,18 @@ class CityFeedDatasource {
         en: 'Botafogo, Flamengo, Laranjeiras: R\$1,800–3,500 for 1 bed. Avoid Zona Norte initially — harder logistics for newcomers. Barra and Recreio offer more space for less.',
       ),
       cityCodes: const ['rio-de-janeiro', 'rj'],
-      updatedAt: 'Mar/2025',
+      sourceLabel: _curatedSourceLabel(locale),
     ),
 
     CityFeedItem(
       id: 'cost_poa_rent_2024',
       type: CityFeedItemType.costUpdate,
-      badge: _t(locale, pt: 'Porto Alegre', es: 'Porto Alegre', en: 'Porto Alegre'),
+      badge: _t(
+        locale,
+        pt: 'Porto Alegre',
+        es: 'Porto Alegre',
+        en: 'Porto Alegre',
+      ),
       title: _t(
         locale,
         pt: 'Porto Alegre: salários e custos',
@@ -129,11 +180,10 @@ class CityFeedDatasource {
         en: '1-bed rental: R\$1,400–2,400 · Moinhos de Vento and Bom Fim are most popular with migrants. Estimated total: R\$3,500–5,500/month.',
       ),
       cityCodes: const ['porto-alegre'],
-      updatedAt: 'Mar/2025',
+      sourceLabel: _curatedSourceLabel(locale),
     ),
 
     // ── SALARY INTELLIGENCE ─────────────────────────────────────────────────
-
     CityFeedItem(
       id: 'salary_tech_sp',
       type: CityFeedItemType.opportunity,
@@ -171,7 +221,6 @@ class CityFeedDatasource {
     ),
 
     // ── PRACTICAL TIPS ──────────────────────────────────────────────────────
-
     CityFeedItem(
       id: 'tip_housing_no_fiador',
       type: CityFeedItemType.practicalTip,
@@ -201,11 +250,13 @@ class CityFeedDatasource {
       ),
       body: _t(
         locale,
-        pt: 'C6 Bank e Banco Inter aprovam estrangeiros com CPF + passaporte com mais frequência que Nubank. Se recusado: tente presencialmente no Bradesco ou Caixa com comprovante de residência.',
-        es: 'C6 Bank e Banco Inter aprueban a extranjeros con CPF + pasaporte con mas frecuencia que Nubank. Si rechazado: intenta en persona en Bradesco o Caixa con comprobante de domicilio.',
-        en: 'C6 Bank and Banco Inter approve foreigners with CPF + passport more often than Nubank. If rejected: try in-person at Bradesco or Caixa with proof of address.',
+        pt: 'Comece pelo banco que pedir menos fricção para abrir conta com CPF e documento. Se um banco digital recusar, tente outro ou vá para uma agência tradicional com comprovante de endereço.',
+        es: 'Empieza por el banco que pida menos friccion para abrir cuenta con CPF y documento. Si un banco digital rechaza, prueba otro o ve a una sucursal tradicional con comprobante de domicilio.',
+        en: 'Start with the bank that creates the least friction for opening an account with CPF and ID. If one digital bank rejects you, try another or go to a traditional branch with proof of address.',
       ),
       stages: const [UserJourneyStage.executor],
+      guideItemId: 'item_3_1_conta_bancaria',
+      sourceLabel: _curatedSourceLabel(locale),
     ),
 
     CityFeedItem(
@@ -219,11 +270,13 @@ class CityFeedDatasource {
       ),
       body: _t(
         locale,
-        pt: 'Correios emitem CPF na hora por R\$7. Leve passaporte + comprovante de endereço (pode ser reserva do Airbnb). Na Receita Federal é de graça, mas a fila costuma ser maior.',
-        es: 'Correios emiten CPF al instante por R\$7. Lleva pasaporte + comprobante de domicilio (puede ser reserva de Airbnb). En Receita Federal es gratis pero la fila suele ser mayor.',
-        en: 'Correios issues CPF on the spot for R\$7. Bring passport + address proof (Airbnb booking works). Receita Federal is free but queues tend to be longer.',
+        pt: 'Se você deixar o CPF para o Brasil, resolva isso logo nos primeiros dias com seu endereço inicial em mãos. Correios e Receita entram como rotas usuais, mas confirme canal, custo e disponibilidade antes de sair.',
+        es: 'Si dejas el CPF para Brasil, resuelvelo en los primeros dias con tu direccion inicial a mano. Correios y Receita suelen ser rutas comunes, pero confirma canal, costo y disponibilidad antes de salir.',
+        en: 'If you leave CPF for Brazil, handle it in the first days with your initial address ready. Correios and Receita are common routes, but confirm channel, cost, and availability before you go.',
       ),
       stages: const [UserJourneyStage.executor],
+      guideItemId: 'item_2_1_cpf',
+      sourceLabel: _curatedSourceLabel(locale),
     ),
 
     CityFeedItem(
@@ -238,11 +291,14 @@ class CityFeedDatasource {
       ),
       body: _t(
         locale,
-        pt: 'Em SP e RJ, a fila de agendamento chega a 60–90 dias. Quem chega sem agendamento espera meses. O site aceita agendamento antes de você entrar no país — faça isso agora.',
-        es: 'En SP y RJ, la cola de turnos llega a 60–90 dias. Quien llega sin turno espera meses. El sitio acepta turnos antes de entrar al pais — hazlo ahora.',
-        en: 'In SP and RJ, booking wait times reach 60–90 days. Arriving without an appointment means months of waiting. The website accepts bookings before you enter the country — do it now.',
+        pt: 'Se sua cidade de chegada costuma ter fila, vale tentar o agendamento ainda antes do embarque. O portal oficial aceita essa consulta antecipada, mas o tempo real varia por unidade.',
+        es: 'Si tu ciudad de llegada suele tener fila, conviene intentar el turno antes de viajar. El portal oficial permite esa consulta anticipada, pero el tiempo real varia por unidad.',
+        en: 'If your arrival city tends to have backlogs, it is worth trying to book before you travel. The official portal allows that early check, but real wait times vary by unit.',
       ),
       stages: const [UserJourneyStage.planner, UserJourneyStage.executor],
+      guideItemId: 'item_2_2_residencia',
+      sourceLabel: _officialSourceLabel(locale),
+      sourceUrl: 'https://servicos.pf.gov.br/agenda-web/acessar',
     ),
 
     CityFeedItem(
@@ -264,7 +320,6 @@ class CityFeedDatasource {
     ),
 
     // ── MIGRANT STORIES ─────────────────────────────────────────────────────
-
     CityFeedItem(
       id: 'story_pablo_sp',
       type: CityFeedItemType.migrantStory,
@@ -281,6 +336,7 @@ class CityFeedDatasource {
         en: 'Pablo, designer, 29. "I went to Correios on day two, CPF issued on the spot. C6 Bank approved in 24h. First rental through QuintoAndar without a guarantor. The hardest part was the PF — 45-day wait because I hadn\'t booked in advance."',
       ),
       cityCodes: const ['sao-paulo', 'sp'],
+      sourceLabel: _communitySourceLabel(locale),
     ),
 
     CityFeedItem(
@@ -299,6 +355,7 @@ class CityFeedDatasource {
         en: 'Lucía, yoga teacher, 32. "Cost of living caught me off guard — I thought it would be cheaper than SP. But the quality of life makes up for it. Found a shared room in a Facebook group for R\$1,100/month."',
       ),
       cityCodes: const ['florianopolis', 'floripa'],
+      sourceLabel: _communitySourceLabel(locale),
     ),
 
     CityFeedItem(
@@ -317,6 +374,7 @@ class CityFeedDatasource {
         en: 'Martín, accountant, 41. "I chose Curitiba because it felt more familiar — the culture is closer to Buenos Aires than SP. Furnished apartment for R\$2,200 all included. Excellent quality of life."',
       ),
       cityCodes: const ['curitiba'],
+      sourceLabel: _communitySourceLabel(locale),
     ),
 
     CityFeedItem(
@@ -334,10 +392,10 @@ class CityFeedDatasource {
         es: 'Andres, 35. "Fui por Nubank porque todo el mundo lo usa. Rechazado. Probe Inter — rechazado. C6 Bank: aprobado con CPF + pasaporte en 20 minutos. Si eres nuevo en Brasil, empieza por C6."',
         en: 'Andres, 35. "I went with Nubank because everyone uses it. Rejected. Tried Inter — rejected. C6 Bank: approved with CPF + passport in 20 minutes. If you\'re new to Brazil, start with C6."',
       ),
+      sourceLabel: _communitySourceLabel(locale),
     ),
 
     // ── LIFESTYLE ────────────────────────────────────────────────────────────
-
     CityFeedItem(
       id: 'lifestyle_sp_day',
       type: CityFeedItemType.lifestyleTip,
@@ -377,7 +435,6 @@ class CityFeedDatasource {
     ),
 
     // ── WARNINGS ────────────────────────────────────────────────────────────
-
     CityFeedItem(
       id: 'warning_rental_scam',
       type: CityFeedItemType.warning,
@@ -415,7 +472,6 @@ class CityFeedDatasource {
     ),
 
     // ── OPPORTUNITIES ────────────────────────────────────────────────────────
-
     CityFeedItem(
       id: 'opportunity_mei_income',
       type: CityFeedItemType.opportunity,
@@ -470,4 +526,364 @@ class CityFeedDatasource {
       stages: const [UserJourneyStage.explorer],
     ),
   ];
+
+  static List<CityFeedItem> _dynamicItems(
+    String locale, {
+    required UserJourneyStage stage,
+    City? city,
+    CityWeather? weather,
+    CityDetailSocialProof? socialProof,
+    CityDetailClimateSummary? climateSummary,
+    CityDetailArrivalStory? arrivalStory,
+    CityDetailComparison? comparison,
+    GuideActionItem? guideCurrentItem,
+  }) {
+    final items = <CityFeedItem>[];
+
+    if (guideCurrentItem != null) {
+      items.add(
+        CityFeedItem(
+          id: 'guide_now_${guideCurrentItem.id}',
+          type: switch (guideCurrentItem.urgencyLevel) {
+            GuideUrgencyLevel.urgent ||
+            GuideUrgencyLevel.critical => CityFeedItemType.warning,
+            _ => CityFeedItemType.practicalTip,
+          },
+          badge: _phaseLabel(locale, guideCurrentItem.phase),
+          title: _t(
+            locale,
+            pt: 'Agora: ${guideCurrentItem.title}',
+            es: 'Ahora: ${guideCurrentItem.title}',
+            en: 'Now: ${guideCurrentItem.title}',
+          ),
+          body:
+              guideCurrentItem.urgencySignal ??
+              guideCurrentItem.whyItMatters ??
+              guideCurrentItem.shortDescription,
+          guideItemId: guideCurrentItem.id,
+        ),
+      );
+    }
+
+    final budget = city?.budgetSnapshot;
+    if (city != null && budget != null) {
+      items.add(
+        CityFeedItem(
+          id: 'real_budget_${city.id}',
+          type: CityFeedItemType.costUpdate,
+          badge: city.name,
+          title: _t(
+            locale,
+            pt: 'Quanto custa viver em ${city.name}',
+            es: 'Cuanto cuesta vivir en ${city.name}',
+            en: 'What it costs to live in ${city.name}',
+          ),
+          body: _t(
+            locale,
+            pt: 'Base real da cidade: viver no modo enxuto começa perto de R\$${budget.fairLivingTotal}; com mais folga, R\$${budget.wellLivingTotal}. Fonte: ${budget.sourceLabel}.',
+            es: 'Base real de la ciudad: vivir en modo ajustado empieza cerca de R\$${budget.fairLivingTotal}; con mas margen, R\$${budget.wellLivingTotal}. Fuente: ${budget.sourceLabel}.',
+            en: 'Real city baseline: lean living starts near R\$${budget.fairLivingTotal}; with more room, R\$${budget.wellLivingTotal}. Source: ${budget.sourceLabel}.',
+          ),
+          updatedAt: budget.updatedAt,
+          sourceLabel: budget.sourceLabel,
+          sourceUrl: budget.sourceUrl,
+        ),
+      );
+    }
+
+    final climate = climateSummary;
+    if (city != null && climate != null) {
+      final condition = climate.currentWeather.conditionLabel;
+      final temp = climate.currentWeather.temperatureCelsius.round();
+      final seasonality = climate.seasonality;
+      final seasonalityText = seasonality == null
+          ? null
+          : _t(
+              locale,
+              pt: '${seasonality.visitorsLabel}. ${seasonality.rentNotes}',
+              es: '${seasonality.visitorsLabel}. ${seasonality.rentNotes}',
+              en: '${seasonality.visitorsLabel}. ${seasonality.rentNotes}',
+            );
+      items.add(
+        CityFeedItem(
+          id: 'real_climate_${city.id}',
+          type: CityFeedItemType.lifestyleTip,
+          badge: _t(
+            locale,
+            pt: 'Clima real',
+            es: 'Clima real',
+            en: 'Live climate',
+          ),
+          title: _t(
+            locale,
+            pt: 'Clima agora em ${city.name}',
+            es: 'Clima ahora en ${city.name}',
+            en: 'Weather now in ${city.name}',
+          ),
+          body: _t(
+            locale,
+            pt: 'Agora faz $temp°C e ${condition.toLowerCase()}. ${seasonalityText ?? ''}'
+                .trim(),
+            es: 'Ahora hace $temp°C y ${condition.toLowerCase()}. ${seasonalityText ?? ''}'
+                .trim(),
+            en: 'It is $temp°C and ${condition.toLowerCase()} now. ${seasonalityText ?? ''}'
+                .trim(),
+          ),
+          sourceLabel: climate.sources.isEmpty
+              ? null
+              : climate.sources.first.label,
+          sourceUrl: climate.sources.isEmpty ? null : climate.sources.first.url,
+        ),
+      );
+    } else if (city != null && weather != null) {
+      final fallbackCondition = _weatherCodeLabel(locale, weather.weatherCode);
+      items.add(
+        CityFeedItem(
+          id: 'weather_${city.id}',
+          type: CityFeedItemType.lifestyleTip,
+          badge: _t(
+            locale,
+            pt: 'Clima real',
+            es: 'Clima real',
+            en: 'Live climate',
+          ),
+          title: _t(
+            locale,
+            pt: 'Clima agora em ${city.name}',
+            es: 'Clima ahora en ${city.name}',
+            en: 'Weather now in ${city.name}',
+          ),
+          body: _t(
+            locale,
+            pt: '${weather.temperatureCelsius.round()}°C agora, ${fallbackCondition.toLowerCase()}. Use isso como leitura do dia, não da estação inteira.',
+            es: '${weather.temperatureCelsius.round()}°C ahora, ${fallbackCondition.toLowerCase()}. Usalo como lectura del dia, no de toda la estacion.',
+            en: '${weather.temperatureCelsius.round()}°C now, ${fallbackCondition.toLowerCase()}. Use this as a day reading, not the whole season.',
+          ),
+        ),
+      );
+    }
+
+    if (socialProof != null) {
+      final opinion = socialProof.publicOpinion;
+      final text =
+          socialProof.routineInsight?.shortText ??
+          socialProof.neighborhoodInsight?.shortText ??
+          opinion?.summary;
+      if (text != null && text.isNotEmpty) {
+        items.add(
+          CityFeedItem(
+            id: 'social_${socialProof.cityId}',
+            type: CityFeedItemType.migrantStory,
+            badge: _t(
+              locale,
+              pt: 'Sinal social',
+              es: 'Senal social',
+              en: 'Social signal',
+            ),
+            title: _t(
+              locale,
+              pt: 'Como ${socialProof.cityName} aparece para quem já vive aí',
+              es: 'Como se ve ${socialProof.cityName} para quien ya vive ahi',
+              en: 'How ${socialProof.cityName} reads to people already there',
+            ),
+            body: text,
+            sourceLabel:
+                opinion?.provider ?? socialProof.sources.firstOrNull?.label,
+            sourceUrl:
+                opinion?.placeUrl ?? socialProof.sources.firstOrNull?.url,
+          ),
+        );
+      }
+    }
+
+    if (arrivalStory != null) {
+      final storyText = arrivalStory.story?.shortText;
+      final firstNeighborhood = arrivalStory.neighborhoods.firstOrNull;
+      final focus = arrivalStory.firstMonthFocus
+          .take(2)
+          .map((item) => item.label)
+          .join(' + ');
+      final body = [
+        if (storyText != null && storyText.isNotEmpty) storyText,
+        if (focus.isNotEmpty)
+          _t(
+            locale,
+            pt: 'Primeiro foco: $focus.',
+            es: 'Primer foco: $focus.',
+            en: 'First focus: $focus.',
+          ),
+        if (firstNeighborhood != null)
+          _t(
+            locale,
+            pt: 'Bom ponto para começar: ${firstNeighborhood.name}.',
+            es: 'Buen punto para empezar: ${firstNeighborhood.name}.',
+            en: 'Useful starting area: ${firstNeighborhood.name}.',
+          ),
+      ].join(' ');
+      if (body.isNotEmpty) {
+        items.add(
+          CityFeedItem(
+            id: 'arrival_${arrivalStory.cityId}',
+            type: stage == UserJourneyStage.executor
+                ? CityFeedItemType.practicalTip
+                : CityFeedItemType.lifestyleTip,
+            badge: _t(
+              locale,
+              pt: 'Primeiro mês',
+              es: 'Primer mes',
+              en: 'First month',
+            ),
+            title: _t(
+              locale,
+              pt: 'Como começar em ${arrivalStory.cityName}',
+              es: 'Como empezar en ${arrivalStory.cityName}',
+              en: 'How to start in ${arrivalStory.cityName}',
+            ),
+            body: body,
+            sourceLabel: arrivalStory.sources.firstOrNull?.label,
+            sourceUrl: arrivalStory.sources.firstOrNull?.url,
+          ),
+        );
+      }
+    }
+
+    if (comparison != null && comparison.metrics.isNotEmpty) {
+      final usefulMetric = comparison.metrics.firstWhere(
+        (metric) => metric.primaryValue != null,
+        orElse: () => comparison.metrics.first,
+      );
+      final best = usefulMetric.comparisons.firstWhere(
+        (item) => item.cityId == comparison.cityId,
+        orElse: () => usefulMetric.comparisons.first,
+      );
+      final competitors = usefulMetric.comparisons
+          .where((item) => item.cityId != comparison.cityId)
+          .toList(growable: false);
+      if (competitors.isNotEmpty) {
+        items.add(
+          CityFeedItem(
+            id: 'comparison_${comparison.cityId}',
+            type: CityFeedItemType.opportunity,
+            badge: _t(
+              locale,
+              pt: 'Comparativo',
+              es: 'Comparativa',
+              en: 'Comparison',
+            ),
+            title: _t(
+              locale,
+              pt: 'Como ${comparison.cityName} se compara',
+              es: 'Como se compara ${comparison.cityName}',
+              en: 'How ${comparison.cityName} compares',
+            ),
+            body: _t(
+              locale,
+              pt: '${usefulMetric.label}: ${comparison.cityName} está em ${best.value ?? '-'}${usefulMetric.unit}. Compare com ${competitors.map((item) => item.cityName).join(' e ')}.',
+              es: '${usefulMetric.label}: ${comparison.cityName} esta en ${best.value ?? '-'}${usefulMetric.unit}. Comparalo con ${competitors.map((item) => item.cityName).join(' y ')}.',
+              en: '${usefulMetric.label}: ${comparison.cityName} is at ${best.value ?? '-'}${usefulMetric.unit}. Compare it with ${competitors.map((item) => item.cityName).join(' and ')}.',
+            ),
+          ),
+        );
+      }
+    }
+
+    return items;
+  }
+
+  static String _phaseLabel(String locale, GuidePhase phase) => switch (phase) {
+    GuidePhase.preparation => _t(
+      locale,
+      pt: 'Preparação',
+      es: 'Preparacion',
+      en: 'Preparation',
+    ),
+    GuidePhase.housing => _t(
+      locale,
+      pt: 'Moradia',
+      es: 'Vivienda',
+      en: 'Housing',
+    ),
+    GuidePhase.documents => _t(
+      locale,
+      pt: 'Documentos',
+      es: 'Documentos',
+      en: 'Documents',
+    ),
+    GuidePhase.work => _t(locale, pt: 'Trabalho', es: 'Trabajo', en: 'Work'),
+    GuidePhase.arrival => _t(
+      locale,
+      pt: 'Chegada',
+      es: 'Llegada',
+      en: 'Arrival',
+    ),
+  };
+
+  static String _curatedSourceLabel(String locale) => _t(
+    locale,
+    pt: 'Curadoria Movaro',
+    es: 'Curaduria Movaro',
+    en: 'Movaro curation',
+  );
+
+  static String _communitySourceLabel(String locale) => _t(
+    locale,
+    pt: 'Relato comunitário curado',
+    es: 'Relato comunitario curado',
+    en: 'Curated community story',
+  );
+
+  static String _officialSourceLabel(String locale) => _t(
+    locale,
+    pt: 'Fonte oficial',
+    es: 'Fuente oficial',
+    en: 'Official source',
+  );
+
+  static String _weatherCodeLabel(String locale, int? code) {
+    if (code == null) {
+      return _t(
+        locale,
+        pt: 'tempo estável',
+        es: 'clima estable',
+        en: 'stable weather',
+      );
+    }
+    if (code == 0) {
+      return _t(
+        locale,
+        pt: 'céu limpo',
+        es: 'cielo despejado',
+        en: 'clear skies',
+      );
+    }
+    if ({1, 2, 3}.contains(code)) {
+      return _t(
+        locale,
+        pt: 'tempo aberto',
+        es: 'tiempo abierto',
+        en: 'partly clear weather',
+      );
+    }
+    if ({45, 48}.contains(code)) {
+      return _t(locale, pt: 'névoa', es: 'niebla', en: 'fog');
+    }
+    if ({51, 53, 55, 56, 57}.contains(code)) {
+      return _t(locale, pt: 'garoa', es: 'llovizna', en: 'drizzle');
+    }
+    if ({61, 63, 65, 66, 67, 80, 81, 82}.contains(code)) {
+      return _t(locale, pt: 'chuva', es: 'lluvia', en: 'rain');
+    }
+    if ({71, 73, 75, 77, 85, 86}.contains(code)) {
+      return _t(locale, pt: 'neve', es: 'nieve', en: 'snow');
+    }
+    if ({95, 96, 99}.contains(code)) {
+      return _t(locale, pt: 'trovoadas', es: 'tormenta', en: 'thunderstorms');
+    }
+    return _t(
+      locale,
+      pt: 'tempo variável',
+      es: 'clima variable',
+      en: 'mixed weather',
+    );
+  }
 }

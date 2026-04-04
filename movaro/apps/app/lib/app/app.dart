@@ -36,6 +36,7 @@ class MovaroApp extends StatelessWidget {
             onGenerateRoute: AppRouter(
               dependencies: dependencies,
             ).onGenerateRoute,
+            navigatorObservers: [appRouteObserver],
             initialRoute: AppRoutes.splash,
           ),
         );

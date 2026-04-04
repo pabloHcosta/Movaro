@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
+import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/home/application/city_feed_datasource.dart';
 import 'package:movaro_app/features/home/domain/city_feed_item.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
 
 /// Horizontally scrollable snackable content feed.
@@ -17,14 +21,29 @@ class CityFeedWidget extends StatelessWidget {
     required this.cityCode,
     required this.stage,
     required this.locale,
+    this.city,
+    this.weather,
+    this.socialProof,
+    this.climateSummary,
+    this.arrivalStory,
+    this.comparison,
+    this.guideCurrentItem,
     this.cardHeight = 152.0,
-    this.onOpenGuide,
+    this.onOpenGuideItem,
     super.key,
   });
 
   final String? cityCode;
   final UserJourneyStage stage;
   final String locale;
+  final City? city;
+  final CityWeather? weather;
+  final CityDetailSocialProof? socialProof;
+  final CityDetailClimateSummary? climateSummary;
+  final CityDetailArrivalStory? arrivalStory;
+  final CityDetailComparison? comparison;
+  final GuideActionItem? guideCurrentItem;
+
   /// Height of the scrollable card row.
   /// Defaults to 152 pt — enough to show 3 body lines without clipping.
   /// The Focus Mode layout passes a screen-derived value computed by
@@ -33,7 +52,7 @@ class CityFeedWidget extends StatelessWidget {
 
   /// Optional: called when the user taps the guide CTA inside an expanded
   /// card. If null, the "Ver no guia" button is not shown.
-  final VoidCallback? onOpenGuide;
+  final ValueChanged<String?>? onOpenGuideItem;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +60,13 @@ class CityFeedWidget extends StatelessWidget {
       cityCode: cityCode,
       stage: stage,
       locale: locale,
+      city: city,
+      weather: weather,
+      socialProof: socialProof,
+      climateSummary: climateSummary,
+      arrivalStory: arrivalStory,
+      comparison: comparison,
+      guideCurrentItem: guideCurrentItem,
     );
 
     if (items.isEmpty) return const SizedBox.shrink();
@@ -70,7 +96,7 @@ class CityFeedWidget extends StatelessWidget {
             itemCount: items.length,
             separatorBuilder: (context, index) => const SizedBox(width: 10),
             itemBuilder: (context, index) =>
-                _FeedCard(item: items[index], onOpenGuide: onOpenGuide),
+                _FeedCard(item: items[index], onOpenGuideItem: onOpenGuideItem),
           ),
         ),
       ],
@@ -78,17 +104,17 @@ class CityFeedWidget extends StatelessWidget {
   }
 
   String _sectionTitle(String locale) => switch (locale) {
-        'pt' => 'PARA VOCÊ',
-        'es' => 'PARA TI',
-        _ => 'FOR YOU',
-      };
+    'pt' => 'PARA VOCÊ',
+    'es' => 'PARA TI',
+    _ => 'FOR YOU',
+  };
 }
 
 class _FeedCard extends StatelessWidget {
-  const _FeedCard({required this.item, this.onOpenGuide});
+  const _FeedCard({required this.item, this.onOpenGuideItem});
 
   final CityFeedItem item;
-  final VoidCallback? onOpenGuide;
+  final ValueChanged<String?>? onOpenGuideItem;
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +123,7 @@ class _FeedCard extends StatelessWidget {
     final locale = Localizations.localeOf(context).languageCode;
 
     return GestureDetector(
-      onTap: () => _showExpandedCard(context, onOpenGuide),
+      onTap: () => _showExpandedCard(context, onOpenGuideItem),
       child: Container(
         width: 240,
         padding: const EdgeInsets.all(13),
@@ -191,22 +217,22 @@ class _FeedCard extends StatelessWidget {
   }
 
   static String _verMaisLabel(String locale) => switch (locale) {
-        'pt' => 'Ver mais →',
-        'es' => 'Ver más →',
-        _ => 'See more →',
-      };
+    'pt' => 'Ver mais →',
+    'es' => 'Ver más →',
+    _ => 'See more →',
+  };
 
-  void _showExpandedCard(BuildContext context, VoidCallback? onOpenGuide) {
+  void _showExpandedCard(
+    BuildContext context,
+    ValueChanged<String?>? onOpenGuideItem,
+  ) {
     final isDark = AppColors.isDark(context);
     final color = item.typeColor(isDark);
     final locale = Localizations.localeOf(context).languageCode;
 
     // Items where a "Ver no guia" CTA is meaningful — tips, warnings,
     // opportunities all have a corresponding guide step the user can act on.
-    final showGuideCta = onOpenGuide != null &&
-        (item.type == CityFeedItemType.practicalTip ||
-            item.type == CityFeedItemType.warning ||
-            item.type == CityFeedItemType.opportunity);
+    final showGuideCta = onOpenGuideItem != null && item.guideItemId != null;
 
     final guideCtaLabel = switch (locale) {
       'pt' => 'Ver passo a passo no guia →',
@@ -227,9 +253,7 @@ class _FeedCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.surfaceFor(sheetContext),
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: AppColors.borderFor(sheetContext),
-                ),
+                border: Border.all(color: AppColors.borderFor(sheetContext)),
               ),
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -243,9 +267,7 @@ class _FeedCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: color.withValues(
-                            alpha: isDark ? 0.18 : 0.12,
-                          ),
+                          color: color.withValues(alpha: isDark ? 0.18 : 0.12),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(item.icon, size: 18, color: color),
@@ -264,13 +286,14 @@ class _FeedCard extends StatelessWidget {
                             const SizedBox(height: 3),
                             Text(
                               item.title,
-                              style: Theme.of(
-                                sheetContext,
-                              ).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimaryFor(sheetContext),
-                                height: 1.25,
-                              ),
+                              style: Theme.of(sheetContext).textTheme.titleSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.textPrimaryFor(
+                                      sheetContext,
+                                    ),
+                                    height: 1.25,
+                                  ),
                             ),
                           ],
                         ),
@@ -293,21 +316,34 @@ class _FeedCard extends StatelessWidget {
                   // Body
                   ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxHeight:
-                          MediaQuery.of(sheetContext).size.height * 0.45,
+                      maxHeight: MediaQuery.of(sheetContext).size.height * 0.45,
                     ),
                     child: SingleChildScrollView(
                       child: Text(
                         item.body,
-                        style: Theme.of(
-                          sheetContext,
-                        ).textTheme.bodySmall?.copyWith(
-                          height: 1.55,
-                          color: AppColors.textSoftFor(sheetContext),
-                        ),
+                        style: Theme.of(sheetContext).textTheme.bodySmall
+                            ?.copyWith(
+                              height: 1.55,
+                              color: AppColors.textSoftFor(sheetContext),
+                            ),
                       ),
                     ),
                   ),
+                  if (item.sourceLabel != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      item.sourceUrl == null
+                          ? item.sourceLabel!
+                          : '${item.sourceLabel!} · ${item.updatedAt ?? ''}'
+                                .trim()
+                                .replaceFirst(RegExp(r' · $'), ''),
+                      style: Theme.of(sheetContext).textTheme.labelSmall
+                          ?.copyWith(
+                            color: AppColors.textSoftFor(sheetContext),
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ],
                   // Guide CTA — only for actionable item types
                   if (showGuideCta) ...[
                     const SizedBox(height: 16),
@@ -316,7 +352,7 @@ class _FeedCard extends StatelessWidget {
                       child: FilledButton.icon(
                         onPressed: () {
                           Navigator.of(sheetContext).pop();
-                          onOpenGuide();
+                          onOpenGuideItem(item.guideItemId);
                         },
                         icon: const Icon(Icons.route_rounded, size: 16),
                         label: Text(guideCtaLabel),

@@ -60,6 +60,7 @@ class MigrationPlanCopilotPage extends StatefulWidget {
     required this.citiesController,
     required this.journeyContextController,
     required this.locationController,
+    this.initialGuideItemId,
     super.key,
   });
 
@@ -68,6 +69,7 @@ class MigrationPlanCopilotPage extends StatefulWidget {
   final CitiesController citiesController;
   final JourneyContextController journeyContextController;
   final LocationController locationController;
+  final String? initialGuideItemId;
 
   @override
   State<MigrationPlanCopilotPage> createState() =>
@@ -97,10 +99,13 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   bool _showCelebration = false;
   bool _showExpandedContent = false;
   bool _isPresentingCalendarAssistant = false;
+  String? _pendingPreviewGuideItemId;
+  bool _didAutoOpenPreview = false;
 
   @override
   void initState() {
     super.initState();
+    _pendingPreviewGuideItemId = widget.initialGuideItemId;
     _exchangeRatesFuture = widget.exchangeRatesService.fetchLatest();
     unawaited(_loadExchangeRates());
     unawaited(PlanNotificationService.instance.cancelPlanReminders());
@@ -250,6 +255,45 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       activeItemId: _loadedActiveItemId,
     );
     _gpsControllerKey = signature;
+    _maybeOpenPreviewItem(plan);
+  }
+
+  void _maybeOpenPreviewItem(MigrationPlan plan) {
+    if (_didAutoOpenPreview) {
+      return;
+    }
+    final previewItemId = _pendingPreviewGuideItemId;
+    final controller = _gpsController;
+    if (previewItemId == null || controller == null) {
+      return;
+    }
+    final previewItem = controller.items.cast<GuideActionItem?>().firstWhere(
+      (item) => item?.id == previewItemId,
+      orElse: () => null,
+    );
+    if (previewItem == null) {
+      _pendingPreviewGuideItemId = null;
+      _didAutoOpenPreview = true;
+      return;
+    }
+    _pendingPreviewGuideItemId = null;
+    _didAutoOpenPreview = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final city = plan.isCityConfirmed ? plan.recommendedCity : null;
+      unawaited(
+        _showExecutionSheet(
+          controller,
+          previewItem,
+          plan,
+          city,
+          isPreview: true,
+          currentPriorityItem: controller.currentItem,
+        ),
+      );
+    });
   }
 
   void _syncProgressFromStage(
@@ -600,6 +644,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     MigrationPlan plan,
     City? city, {
     bool isPreview = false,
+    GuideActionItem? currentPriorityItem,
   }) {
     var sheetItem = item;
     var actionOpened = false;
@@ -770,6 +815,13 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                 // ── CPF Unlock Chain Banner ──
                                 if (sheetItem.id == 'item_2_1_cpf')
                                   _CpfUnlockBanner(allItems: controller.items),
+                                if (isPreview) ...[
+                                  _FocusedTipPreviewBanner(
+                                    item: sheetItem,
+                                    currentPriorityItem: currentPriorityItem,
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
                                 // ── Urgency Signal Banner ──
                                 if (sheetItem.urgencySignal != null) ...[
                                   Container(
@@ -874,16 +926,16 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                     title: _localizedText(
                                       sheetContext,
                                       pt: sheetItem.id == 'item_2_1_cpf'
-                                          ? 'Quando você decidir a rota'
+                                          ? 'Mini-checklist para fechar este passo'
                                           : 'Checklist da etapa',
                                       es: sheetItem.id == 'item_2_1_cpf'
-                                          ? 'Cuando decidas la ruta'
+                                          ? 'Mini checklist para cerrar este paso'
                                           : 'Checklist de la etapa',
                                       en: sheetItem.id == 'item_2_1_cpf'
-                                          ? 'Once you choose your route'
+                                          ? 'Mini checklist to close this step'
                                           : 'Step checklist',
                                     ),
-                                    initiallyExpanded: sheetItem.id != 'item_2_1_cpf',
+                                    initiallyExpanded: true,
                                     child: Column(
                                       children: [
                                         for (final subItem
@@ -957,19 +1009,20 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                             en: 'Compare the two routes',
                                           )
                                         : isInProgress
-                                            ? _localizedText(
-                                                sheetContext,
-                                                pt: '▶ Em andamento — próximos passos',
-                                                es: '▶ En progreso — próximos pasos',
-                                                en: '▶ In progress — next steps',
-                                              )
-                                            : _localizedText(
-                                                sheetContext,
-                                                pt: 'Como fazer',
-                                                es: 'Como hacerlo',
-                                                en: 'How to do it',
-                                              ),
-                                    initiallyExpanded: sheetItem.id != 'item_2_1_cpf',
+                                        ? _localizedText(
+                                            sheetContext,
+                                            pt: '▶ Em andamento — próximos passos',
+                                            es: '▶ En progreso — próximos pasos',
+                                            en: '▶ In progress — next steps',
+                                          )
+                                        : _localizedText(
+                                            sheetContext,
+                                            pt: 'Como fazer',
+                                            es: 'Como hacerlo',
+                                            en: 'How to do it',
+                                          ),
+                                    initiallyExpanded:
+                                        sheetItem.id != 'item_2_1_cpf',
                                     child: sheetItem.id == 'item_2_1_cpf'
                                         ? _CpfDecisionContent(
                                             item: sheetItem,
@@ -1824,6 +1877,63 @@ class _GuideCalendarSuggestionCard extends StatelessWidget {
                   es: 'Agregar al calendario',
                   en: 'Add to calendar',
                 ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FocusedTipPreviewBanner extends StatelessWidget {
+  const _FocusedTipPreviewBanner({
+    required this.item,
+    required this.currentPriorityItem,
+  });
+
+  final GuideActionItem item;
+  final GuideActionItem? currentPriorityItem;
+
+  @override
+  Widget build(BuildContext context) {
+    final sameAsCurrent = currentPriorityItem?.id == item.id;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.visibility_outlined,
+            size: 16,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              sameAsCurrent
+                  ? _localizedText(
+                      context,
+                      pt: 'Você abriu esta etapa a partir de uma dica da home. Seu fluxo continua igual.',
+                      es: 'Abriste esta etapa desde una sugerencia de la home. Tu flujo sigue igual.',
+                      en: 'You opened this step from a home tip. Your flow stays the same.',
+                    )
+                  : _localizedText(
+                      context,
+                      pt: 'Você está vendo uma dica relacionada. Seu passo principal continua em "${currentPriorityItem?.title ?? item.title}".',
+                      es: 'Estas viendo una sugerencia relacionada. Tu paso principal sigue en "${currentPriorityItem?.title ?? item.title}".',
+                      en: 'You are viewing a related tip. Your main step remains "${currentPriorityItem?.title ?? item.title}".',
+                    ),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppColors.textPrimaryFor(context),
+                fontWeight: FontWeight.w600,
+                height: 1.4,
               ),
             ),
           ),
@@ -4222,8 +4332,12 @@ class _CpfExecutionBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final recommended = item.decisionOptions?.cast<GuideDecisionOption?>()
-        .firstWhere((option) => option?.recommended == true, orElse: () => null);
+    final recommended = item.decisionOptions
+        ?.cast<GuideDecisionOption?>()
+        .firstWhere(
+          (option) => option?.recommended == true,
+          orElse: () => null,
+        );
 
     return Container(
       width: double.infinity,
@@ -4636,7 +4750,7 @@ class _GuideBestOptionBanner extends StatelessWidget {
                 Text(
                   option.title,
                   style: Theme.of(
-                  context,
+                    context,
                   ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 if (helper != null) ...[
@@ -4674,7 +4788,9 @@ class _GuideBestOptionBanner extends StatelessWidget {
                               color: Colors.white.withValues(alpha: 0.55),
                               borderRadius: BorderRadius.circular(999),
                               border: Border.all(
-                                color: AppColors.primary.withValues(alpha: 0.18),
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.18,
+                                ),
                               ),
                             ),
                             child: Row(
@@ -4683,12 +4799,13 @@ class _GuideBestOptionBanner extends StatelessWidget {
                                 Flexible(
                                   child: Text(
                                     option.helperLabel!,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.labelSmall?.copyWith(
-                                      color: const Color(0xFF275D9D),
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: const Color(0xFF275D9D),
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                   ),
                                 ),
                                 if (option.helperUrl != null) ...[
@@ -4727,7 +4844,9 @@ class _GuideBestOptionBanner extends StatelessWidget {
                                 color: Colors.white.withValues(alpha: 0.40),
                                 borderRadius: BorderRadius.circular(999),
                                 border: Border.all(
-                                  color: AppColors.primary.withValues(alpha: 0.14),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.14,
+                                  ),
                                 ),
                               ),
                               child: Row(
@@ -4740,12 +4859,13 @@ class _GuideBestOptionBanner extends StatelessWidget {
                                       es: 'CPF en el exterior',
                                       en: 'CPF abroad',
                                     ),
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.labelSmall?.copyWith(
-                                      color: const Color(0xFF275D9D),
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: const Color(0xFF275D9D),
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                   ),
                                   const SizedBox(width: 6),
                                   const Icon(
