@@ -149,7 +149,7 @@ class DocumentChecklistAdapter {
           es: 'Tambien podes hacer el CPF antes del viaje en el Consulado de Brasil en Buenos Aires.',
           en: 'You can also request CPF before traveling at the Brazilian Consulate in Buenos Aires.',
         ),
-        link: 'https://www.gov.br/receitafederal/pt-br',
+        link: 'https://www.gov.br/pt-br/servicos/inscrever-no-cpf-no-exterior',
         isOptional: false,
       ),
       DocumentItem(
@@ -165,9 +165,9 @@ class DocumentChecklistAdapter {
         ),
         description: _text(
           l10n,
-          pt: 'Argentinos podem pedir residencia no Brasil pelo Acordo Mercosul. O processo e feito na Policia Federal depois da chegada, dentro do prazo de 90 dias.',
-          es: 'Los argentinos pueden pedir residencia en Brasil por el Acuerdo Mercosur. El tramite se hace en la Policia Federal despues de llegar, dentro del plazo de 90 dias.',
-          en: 'Argentine citizens can apply for residence in Brazil under the Mercosur Agreement. The process is handled with the Federal Police after arrival, within the 90-day period.',
+          pt: 'Argentinos podem pedir residencia no Brasil pelo Acordo Mercosul. O protocolo precisa acontecer dentro do prazo de 90 dias, e o registro RNM/CRNM depois aparece como etapa separada.',
+          es: 'Los argentinos pueden pedir residencia en Brasil por el Acuerdo Mercosur. El tramite debe entrar dentro del plazo de 90 dias y el registro RNM/CRNM aparece despues como etapa separada.',
+          en: 'Argentine citizens can apply for residence in Brazil under the Mercosur Agreement. The filing must happen within the 90-day period, and RNM/CRNM registration appears later as a separate step.',
         ),
         timeEstimate: _text(
           l10n,
@@ -177,11 +177,11 @@ class DocumentChecklistAdapter {
         ),
         tip: _text(
           l10n,
-          pt: 'E mais simples do que parece. Para essa rota, nao entra passaporte, apostila nem traducao juramentada como requisito principal.',
-          es: 'Es mas simple de lo que parece. Para esta ruta, pasaporte, apostilla y traduccion jurada no son el requisito principal.',
-          en: 'It is simpler than it sounds. For this route, passport, apostille, and sworn translation are not the main requirement.',
+          pt: 'Em cidades com fila, agendar cedo ajuda. Mas o ponto central e nao deixar o protocolo para a reta final dos 90 dias.',
+          es: 'En ciudades con cola, agendar temprano ayuda. Pero el punto central es no dejar el tramite para la recta final de los 90 dias.',
+          en: 'In cities with long queues, booking early helps. But the key point is not leaving the filing to the final stretch of the 90 days.',
         ),
-        link: 'https://www.gov.br/pf/pt-br',
+        link: 'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia-resolucao-mercosul',
         isOptional: false,
       ),
     ];

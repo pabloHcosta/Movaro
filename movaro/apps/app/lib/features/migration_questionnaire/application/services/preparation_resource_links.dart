@@ -1,5 +1,25 @@
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 
+class FederalPoliceUnitContact {
+  const FederalPoliceUnitContact({
+    required this.label,
+    required this.email,
+  });
+
+  final String label;
+  final String email;
+
+  Uri buildMailtoUri(City city) {
+    final subject = Uri.encodeComponent(
+      'Agendamento de imigração para ${city.name}/${city.stateCode}',
+    );
+    final body = Uri.encodeComponent(
+      'Olá, moro ou pretendo residir em ${city.name}/${city.stateCode} e preciso de orientação sobre o agendamento de imigração / CRNM.',
+    );
+    return Uri.parse('mailto:$email?subject=$subject&body=$body');
+  }
+}
+
 enum RentalProvider { zapImoveis, vivaReal, chavesNaMao }
 
 enum TemporaryHousingDuration { oneWeek, oneMonth, twoThreeMonths }
@@ -32,7 +52,19 @@ class PreparationResourceLinks {
   );
 
   static final Uri argentinaResidenceAgreement = Uri.parse(
-    'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia/acordo-de-residencia-brasil-e-argentina',
+    'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia-resolucao-mercosul',
+  );
+
+  static final Uri cpfInBrazil = Uri.parse(
+    'https://www.gov.br/pt-br/servicos/inscrever-no-cpf',
+  );
+
+  static final Uri cpfInExterior = Uri.parse(
+    'https://www.gov.br/pt-br/servicos/inscrever-no-cpf-no-exterior',
+  );
+
+  static final Uri rnMRegistrationGuide = Uri.parse(
+    'https://www.gov.br/pf/pt-br/assuntos/imigracao/duvidas-frequentes/autorizacao-de-residencia-e-registro-nacional-migratorio-rnm/como-devo-realizar-o-registro-de-rnm',
   );
 
   static final Uri migrantSupportNetwork = Uri.parse(
@@ -204,8 +236,119 @@ class PreparationResourceLinks {
   );
 
   static final Uri pfScheduling = Uri.parse(
-    'https://www.gov.br/pf/pt-br/assuntos/imigracao/agendamento',
+    'https://servicos.pf.gov.br/agenda-web/acessar',
   );
+
+  static final Uri pfFaq = Uri.parse(
+    'https://www.gov.br/pf/pt-br/assuntos/imigracao/pt/duvidas',
+  );
+
+  static final Uri pfUnitDirectory = Uri.parse(
+    'https://www.gov.br/pf/pt-br/assuntos/imigracao/declaracoes-e-formularios/TabelacircunscrioemailPF2026.pdf',
+  );
+
+  static const Map<String, FederalPoliceUnitContact> _pfUnitByCityId = {
+    'sao-paulo-sp': FederalPoliceUnitContact(
+      label: 'SR/PF/SP',
+      email: 'migracao.srsp@pf.gov.br',
+    ),
+    'rio-de-janeiro-rj': FederalPoliceUnitContact(
+      label: 'SR/PF/RJ',
+      email: 'migracao.srrj@pf.gov.br',
+    ),
+    'armacao-dos-buzios-rj': FederalPoliceUnitContact(
+      label: 'DPF/MCE/RJ',
+      email: 'migracao.mce.rj@pf.gov.br',
+    ),
+    'arraial-do-cabo-rj': FederalPoliceUnitContact(
+      label: 'DPF/MCE/RJ',
+      email: 'migracao.mce.rj@pf.gov.br',
+    ),
+    'cabo-frio-rj': FederalPoliceUnitContact(
+      label: 'DPF/MCE/RJ',
+      email: 'migracao.mce.rj@pf.gov.br',
+    ),
+    'niteroi-rj': FederalPoliceUnitContact(
+      label: 'DPF/NRI/RJ',
+      email: 'migracao.nri.rj@pf.gov.br',
+    ),
+    'curitiba-pr': FederalPoliceUnitContact(
+      label: 'SR/PF/PR',
+      email: 'migracao.srpr@pf.gov.br',
+    ),
+    'foz-do-iguacu-pr': FederalPoliceUnitContact(
+      label: 'DPF/FIG/PR',
+      email: 'migracao.fig.pr@pf.gov.br',
+    ),
+    'florianopolis-sc': FederalPoliceUnitContact(
+      label: 'SR/PF/SC',
+      email: 'migracao.srsc@pf.gov.br',
+    ),
+    'balneario-camboriu-sc': FederalPoliceUnitContact(
+      label: 'DPF/IJI/SC',
+      email: 'migracao.iji.sc@pf.gov.br',
+    ),
+    'bombinhas-sc': FederalPoliceUnitContact(
+      label: 'DPF/IJI/SC',
+      email: 'migracao.iji.sc@pf.gov.br',
+    ),
+    'itajai-sc': FederalPoliceUnitContact(
+      label: 'DPF/IJI/SC',
+      email: 'migracao.iji.sc@pf.gov.br',
+    ),
+    'joinville-sc': FederalPoliceUnitContact(
+      label: 'DPF/JVE/SC',
+      email: 'migracao.jve.sc@pf.gov.br',
+    ),
+    'porto-alegre-rs': FederalPoliceUnitContact(
+      label: 'SR/PF/RS',
+      email: 'migracao.srrs@pf.gov.br',
+    ),
+    'maceio-al': FederalPoliceUnitContact(
+      label: 'SR/PF/AL',
+      email: 'migracao.sral@pf.gov.br',
+    ),
+    'maragogi-al': FederalPoliceUnitContact(
+      label: 'SR/PF/AL',
+      email: 'migracao.sral@pf.gov.br',
+    ),
+    'joao-pessoa-pb': FederalPoliceUnitContact(
+      label: 'SR/PF/PB',
+      email: 'migracao.srpb@pf.gov.br',
+    ),
+    'recife-pe': FederalPoliceUnitContact(
+      label: 'SR/PF/PE',
+      email: 'migracao.srpe@pf.gov.br',
+    ),
+    'natal-rn': FederalPoliceUnitContact(
+      label: 'SR/PF/RN',
+      email: 'migracao.srrn@pf.gov.br',
+    ),
+    'aracaju-se': FederalPoliceUnitContact(
+      label: 'SR/PF/SE',
+      email: 'migracao.srse@pf.gov.br',
+    ),
+    'goiania-go': FederalPoliceUnitContact(
+      label: 'SR/PF/GO',
+      email: 'migracao.srgo@pf.gov.br',
+    ),
+    'salvador-ba': FederalPoliceUnitContact(
+      label: 'SR/PF/BA',
+      email: 'migracao.srba@pf.gov.br',
+    ),
+    'porto-seguro-ba': FederalPoliceUnitContact(
+      label: 'DPF/PSO/BA',
+      email: 'migracao.pso.ba@pf.gov.br',
+    ),
+    'campo-grande-ms': FederalPoliceUnitContact(
+      label: 'SR/PF/MS',
+      email: 'migracao.srms@pf.gov.br',
+    ),
+  };
+
+  static FederalPoliceUnitContact? resolvePfUnitContact(City city) {
+    return _pfUnitByCityId[city.id];
+  }
 
   static String _slugify(String value) {
     const accents = {

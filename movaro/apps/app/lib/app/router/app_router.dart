@@ -103,6 +103,7 @@ class AppRouter {
         CityDetailPage(
           cityId: cityId,
           citiesController: dependencies.citiesController,
+          cityInsightsController: dependencies.cityInsightsController,
           migrationQuestionnaireController:
               dependencies.migrationQuestionnaireController,
           locationController: dependencies.locationController,

@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:add_2_calendar_new/add_2_calendar_new.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_event_suggestion.dart';
@@ -31,7 +34,7 @@ class CalendarEventService {
       iosParams: IOSParams(reminder: _iosReminder(selectedReminder)),
     );
 
-    final added = await Add2Calendar.addEvent2Cal(event);
+    final added = await _safeAddEvent(event);
     if (!added) {
       return false;
     }
@@ -51,6 +54,24 @@ class CalendarEventService {
     }
 
     return true;
+  }
+
+  Future<bool> _safeAddEvent(Event event) async {
+    try {
+      final future = Add2Calendar.addEvent2Cal(event);
+      if (Platform.isIOS) {
+        return await future.timeout(
+          const Duration(seconds: 4),
+          onTimeout: () => true,
+        );
+      }
+      return await future.timeout(
+        const Duration(seconds: 12),
+        onTimeout: () => false,
+      );
+    } catch (_) {
+      return false;
+    }
   }
 
   Duration? _iosReminder(GuideEventReminderOption option) {

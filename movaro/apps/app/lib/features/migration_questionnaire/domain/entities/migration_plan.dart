@@ -21,6 +21,7 @@ class MigrationPlan {
     this.recommendedCity,
     this.preferredCity,
     this.candidateCities = const [],
+    this.candidateCityMatchScores = const {},
     this.cityRecommendationReasons = const [],
     this.isCityConfirmed = false,
   });
@@ -42,6 +43,7 @@ class MigrationPlan {
   final City? recommendedCity;
   final City? preferredCity;
   final List<City> candidateCities;
+  final Map<String, double> candidateCityMatchScores;
   final List<String> cityRecommendationReasons;
   final bool isCityConfirmed;
 
@@ -63,6 +65,7 @@ class MigrationPlan {
     City? recommendedCity,
     Object? preferredCity = _migrationPlanNoChange,
     List<City>? candidateCities,
+    Map<String, double>? candidateCityMatchScores,
     List<String>? cityRecommendationReasons,
     bool? isCityConfirmed,
   }) {
@@ -88,6 +91,8 @@ class MigrationPlan {
           ? this.preferredCity
           : preferredCity as City?,
       candidateCities: candidateCities ?? this.candidateCities,
+      candidateCityMatchScores:
+          candidateCityMatchScores ?? this.candidateCityMatchScores,
       cityRecommendationReasons:
           cityRecommendationReasons ?? this.cityRecommendationReasons,
       isCityConfirmed: isCityConfirmed ?? this.isCityConfirmed,

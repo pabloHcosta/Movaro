@@ -45,6 +45,8 @@ class GuideDecisionOption {
     required this.description,
     this.pros = const <String>[],
     this.cons = const <String>[],
+    this.helperLabel,
+    this.helperUrl,
     this.recommended = false,
   });
 
@@ -52,6 +54,8 @@ class GuideDecisionOption {
   final String description;
   final List<String> pros;
   final List<String> cons;
+  final String? helperLabel;
+  final String? helperUrl;
   final bool recommended;
 }
 

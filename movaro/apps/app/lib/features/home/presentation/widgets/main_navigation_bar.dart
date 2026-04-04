@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
+import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_text_styles.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
@@ -26,6 +27,7 @@ class MainNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = _items(context);
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final isDark = AppColors.isDark(context);
 
     return Container(
       color: Colors.transparent,
@@ -36,9 +38,24 @@ class MainNavigationBar extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
             decoration: BoxDecoration(
-              color: const Color(0xF20E1628),
+              color: isDark
+                  ? const Color(0xF20E1628)
+                  : const Color(0xEFFFFFFF),
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.06)
+                    : Colors.black.withValues(alpha: 0.08),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isDark
+                      ? Colors.black.withValues(alpha: 0.24)
+                      : Colors.black.withValues(alpha: 0.08),
+                  blurRadius: isDark ? 24 : 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
             child: Row(
@@ -50,6 +67,7 @@ class MainNavigationBar extends StatelessWidget {
                       icon: item.icon,
                       activeIcon: item.activeIcon,
                       isActive: currentIndex == item.slot,
+                      isDark: isDark,
                       onTap: () => _handleTap(context, item.slot),
                     ),
                   ),
@@ -168,6 +186,7 @@ class _NavTab extends StatelessWidget {
     required this.icon,
     required this.activeIcon,
     required this.isActive,
+    required this.isDark,
     required this.onTap,
   });
 
@@ -175,6 +194,7 @@ class _NavTab extends StatelessWidget {
   final IconData icon;
   final IconData activeIcon;
   final bool isActive;
+  final bool isDark;
   final VoidCallback onTap;
 
   @override
@@ -184,7 +204,9 @@ class _NavTab extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
-        splashColor: Colors.white.withValues(alpha: 0.08),
+        splashColor: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.05),
         highlightColor: Colors.transparent,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
@@ -220,7 +242,9 @@ class _NavTab extends StatelessWidget {
                 size: 22,
                 color: isActive
                     ? Colors.white
-                    : Colors.white.withValues(alpha: 0.4),
+                    : (isDark
+                        ? Colors.white.withValues(alpha: 0.4)
+                        : AppColors.textSoft.withValues(alpha: 0.85)),
               ),
               const SizedBox(height: 3),
               Text(
@@ -230,7 +254,9 @@ class _NavTab extends StatelessWidget {
                   fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                   color: isActive
                       ? Colors.white
-                      : Colors.white.withValues(alpha: 0.4),
+                      : (isDark
+                          ? Colors.white.withValues(alpha: 0.4)
+                          : AppColors.textSoft.withValues(alpha: 0.92)),
                 ),
               ),
             ],

@@ -207,6 +207,41 @@ class GuideEventSuggestionEngine {
               GuideEventReminderOption.oneDayAndTwoHoursBefore,
           isHighPriority: true,
         );
+      case 'item_4_5_registro_rnm':
+        final start = _nextBusinessDayAt(
+          arrivalDate.add(const Duration(days: 30)),
+          hour: 10,
+        );
+        return GuideEventSuggestion(
+          id: 'event_${item.id}',
+          sourceItemId: item.id,
+          type: GuideEventType.deadline,
+          title: _text(
+            pt: 'Revisar registro RNM / CRNM',
+            es: 'Revisar registro RNM / CRNM',
+            en: 'Review RNM / CRNM registration',
+          ),
+          description: _text(
+            pt: 'Use este lembrete para checar se a autorização saiu e se já abriu a etapa oficial de registro migratório.',
+            es: 'Usa este recordatorio para revisar si ya salio la autorizacion y si ya se abrio la etapa oficial del registro migratorio.',
+            en: 'Use this reminder to check whether residence has been granted and whether the official migration registration step has opened.',
+          ),
+          assistantCopy: _text(
+            pt: 'Aqui o mais importante é não confundir protocolo inicial com registro final. O lembrete ajuda a fechar essa segunda etapa no momento certo.',
+            es: 'Aqui lo importante es no confundir el protocolo inicial con el registro final. El recordatorio ayuda a cerrar esa segunda etapa en el momento correcto.',
+            en: 'The important part here is not confusing the initial protocol with the final registration. This reminder helps close that second step at the right time.',
+          ),
+          startAt: start,
+          endAt: start.add(const Duration(minutes: 30)),
+          suggestedDurationMinutes: 30,
+          locationLabel: _text(
+            pt: 'Portal da Polícia Federal',
+            es: 'Portal de la Policía Federal',
+            en: 'Federal Police portal',
+          ),
+          defaultReminderOption: GuideEventReminderOption.oneDayBefore,
+          isHighPriority: true,
+        );
       case 'item_3_2_aluguel_fixo':
         final start = _nextBusinessDayAt(
           arrivalDate.add(const Duration(days: 14)),
@@ -267,7 +302,9 @@ class GuideEventSuggestionEngine {
           defaultReminderOption: GuideEventReminderOption.oneDayBefore,
         );
       case 'item_4_3_permanencia':
-        final residenceCompletedAt = completedAtById['item_2_2_residencia'];
+        final residenceCompletedAt =
+            completedAtById['item_4_5_registro_rnm'] ??
+            completedAtById['item_2_2_residencia'];
         final residenceDate = DateTime.tryParse(residenceCompletedAt ?? '');
         if (residenceDate == null) {
           return null;

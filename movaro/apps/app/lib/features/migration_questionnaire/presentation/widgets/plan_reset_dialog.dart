@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
+import 'package:movaro_app/app/theme/app_colors.dart';
 
 enum PlanResetChoice { deleteOnly, rebuild }
 
@@ -14,18 +15,25 @@ Future<PlanResetChoice?> showPlanResetDialog(
     context: context,
     barrierDismissible: true,
     builder: (dialogContext) {
+      final isDark = AppColors.isDark(dialogContext);
+      final surfaceColor = AppColors.surfaceFor(dialogContext);
+      final borderColor = AppColors.borderFor(dialogContext);
+      final titleColor = AppColors.textPrimaryFor(dialogContext);
+      final bodyColor = AppColors.textSoftFor(dialogContext);
       return Dialog(
         backgroundColor: Colors.transparent,
         elevation: 0,
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF111827),
-            border: Border.all(color: const Color(0xFF1E2636)),
+            color: surfaceColor,
+            border: Border.all(color: borderColor),
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.6),
-                blurRadius: 48,
+                color: isDark
+                    ? Colors.black.withValues(alpha: 0.48)
+                    : Colors.black.withValues(alpha: 0.10),
+                blurRadius: isDark ? 48 : 26,
               ),
             ],
           ),
@@ -41,13 +49,25 @@ Future<PlanResetChoice?> showPlanResetDialog(
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1C0000),
-                        border: Border.all(color: const Color(0xFF4A0000)),
+                        color: AppColors.tintedSurfaceFor(
+                          dialogContext,
+                          tint: AppColors.danger,
+                          lightColor: const Color(0xFFFFEFEF),
+                          darkAlpha: 0.16,
+                        ),
+                        border: Border.all(
+                          color: AppColors.tintedBorderFor(
+                            dialogContext,
+                            tint: AppColors.danger,
+                            lightColor: const Color(0xFFF3B8B8),
+                            darkAlpha: 0.30,
+                          ),
+                        ),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: const Icon(
                         Icons.warning_amber_rounded,
-                        color: Color(0xFFF87171),
+                        color: AppColors.danger,
                         size: 22,
                       ),
                     ),
@@ -56,14 +76,14 @@ Future<PlanResetChoice?> showPlanResetDialog(
                       copy.manageActionLabel,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFFF0F6FC),
+                        color: titleColor,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       copy.dialogBody,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: const Color(0xFF6B7280),
+                        color: bodyColor,
                         height: 1.5,
                       ),
                     ),
@@ -71,15 +91,27 @@ Future<PlanResetChoice?> showPlanResetDialog(
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1C0000),
-                        border: Border.all(color: const Color(0xFF3D0000)),
+                        color: AppColors.tintedSurfaceFor(
+                          dialogContext,
+                          tint: AppColors.danger,
+                          lightColor: const Color(0xFFFFF4F4),
+                          darkAlpha: 0.14,
+                        ),
+                        border: Border.all(
+                          color: AppColors.tintedBorderFor(
+                            dialogContext,
+                            tint: AppColors.danger,
+                            lightColor: const Color(0xFFF3B8B8),
+                            darkAlpha: 0.24,
+                          ),
+                        ),
                         borderRadius: BorderRadius.circular(9),
                       ),
                       child: Row(
                         children: [
                           const Icon(
                             Icons.info_outline_rounded,
-                            color: Color(0xFFF87171),
+                            color: AppColors.danger,
                             size: 13,
                           ),
                           const SizedBox(width: 7),
@@ -88,7 +120,7 @@ Future<PlanResetChoice?> showPlanResetDialog(
                               copy.cityWarning(cityName),
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
-                                    color: const Color(0xFFF87171),
+                                    color: AppColors.danger,
                                     height: 1.4,
                                   ),
                             ),
@@ -99,7 +131,7 @@ Future<PlanResetChoice?> showPlanResetDialog(
                   ],
                 ),
               ),
-              Container(height: 1, color: const Color(0xFF0D1117)),
+              Container(height: 1, color: borderColor),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
                 child: Column(
@@ -143,8 +175,8 @@ Future<PlanResetChoice?> showPlanResetDialog(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(vertical: 11),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1C2128),
-                          border: Border.all(color: const Color(0xFF2D333B)),
+                          color: AppColors.surfaceMutedFor(dialogContext),
+                          border: Border.all(color: borderColor),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -153,7 +185,7 @@ Future<PlanResetChoice?> showPlanResetDialog(
                           style: Theme.of(context).textTheme.bodyLarge
                               ?.copyWith(
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF6B7280),
+                                color: bodyColor,
                               ),
                         ),
                       ),

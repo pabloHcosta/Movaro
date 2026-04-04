@@ -11,6 +11,7 @@ import { CitySourceEntity } from '../../domain/entities/city-source.entity';
 import { CitySourcesEntity } from '../../domain/entities/city-sources.entity';
 import { CityBudgetSnapshotService } from './city-budget-snapshot.service';
 import { CityOfficialMetricsService } from './city-official-metrics.service';
+import { CityPublicOpinionSeedService } from './city-public-opinion-seed.service';
 import { CityRankingService } from './city-ranking.service';
 import { CitySeasonalitySnapshotService } from './city-seasonality-snapshot.service';
 
@@ -21,6 +22,7 @@ export class CityMergeService {
     private readonly ibgePopulationService: IbgePopulationService,
     private readonly cityRankingService: CityRankingService,
     private readonly googlePlacesCityOpinionService: GooglePlacesCityOpinionService,
+    private readonly cityPublicOpinionSeedService: CityPublicOpinionSeedService,
     private readonly cityBudgetSnapshotService: CityBudgetSnapshotService,
     private readonly citySeasonalitySnapshotService: CitySeasonalitySnapshotService,
     private readonly cityOfficialMetricsService: CityOfficialMetricsService,
@@ -53,10 +55,10 @@ export class CityMergeService {
       officialMetrics,
     });
     const publicOpinion =
-      await this.googlePlacesCityOpinionService.getCityOpinion(
+      (await this.googlePlacesCityOpinionService.getCityOpinion(
         resolvedMetrics,
         stateName,
-      );
+      )) ?? this.cityPublicOpinionSeedService.findByCityId(resolvedMetrics.id);
     const budgetSnapshot = this.resolveBudgetSnapshot(resolvedMetrics);
     const seasonalitySnapshot = this.resolveSeasonalitySnapshot(resolvedMetrics);
     const sourcesWithOpinion = publicOpinion
@@ -71,10 +73,13 @@ export class CityMergeService {
           new CitySourceEntity(
             'public_reviews',
             'Percepcao publica',
-            'Google Maps',
-            'Leitura automatica de temas recorrentes em avaliacoes publicas da localidade. Nao representa a opiniao de toda a cidade.',
+            publicOpinion.provider,
+            publicOpinion.provider === 'Google Maps'
+              ? 'Leitura automatica de temas recorrentes em avaliacoes publicas da localidade. Nao representa a opiniao de toda a cidade.'
+              : 'Leitura comunitaria agregada de qualidade de vida e custo publicada por fonte externa. Serve como sinal complementar, nao como consenso absoluto.',
             false,
             publicOpinion.placeUrl,
+            publicOpinion.provider === 'Google Maps' ? 'curated' : 'community',
           ),
         )
       : sources;

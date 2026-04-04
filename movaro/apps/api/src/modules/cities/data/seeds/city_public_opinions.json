@@ -1,0 +1,367 @@
+[
+  {
+    "cityId": "aracaju-se",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Aracaju",
+    "placeUrl": "https://livingcost.org/cost/brazil/aracaju",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Aracaju com quality of life 44. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Good.",
+    "positivePoints": [
+      "qualidade do ar"
+    ],
+    "criticalPoints": [
+      "qualidade de vida no dia a dia",
+      "pressão entre salário médio e custo mensal"
+    ],
+    "collectedAt": "2026-04-04T16:23:55.209Z"
+  },
+  {
+    "cityId": "balneario-camboriu-sc",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Balneario Camboriu",
+    "placeUrl": "https://livingcost.org/cost/brazil/balneario-camboriu",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Balneario Camboriu com quality of life 55. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:42.695Z"
+  },
+  {
+    "cityId": "cabo-frio-rj",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Cabo Frio",
+    "placeUrl": "https://livingcost.org/cost/brazil/cabo-frio",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Cabo Frio com quality of life 39. O salário líquido mediano cobre o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [
+      "salário médio cobre o custo mensal"
+    ],
+    "criticalPoints": [
+      "qualidade de vida no dia a dia",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:46.352Z"
+  },
+  {
+    "cityId": "campo-grande-ms",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Campo Grande",
+    "placeUrl": "https://livingcost.org/cost/brazil/campo-grande",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Campo Grande com quality of life 55. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:58.060Z"
+  },
+  {
+    "cityId": "curitiba-pr",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Curitiba",
+    "placeUrl": "https://livingcost.org/cost/brazil/curitiba",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Curitiba com quality of life 65. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Good.",
+    "positivePoints": [
+      "qualidade de vida percebida",
+      "qualidade do ar"
+    ],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal"
+    ],
+    "collectedAt": "2026-04-04T16:23:47.782Z"
+  },
+  {
+    "cityId": "florianopolis-sc",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Florianopolis",
+    "placeUrl": "https://livingcost.org/cost/brazil/florianopolis",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Florianopolis com quality of life 60. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:42.065Z"
+  },
+  {
+    "cityId": "foz-do-iguacu-pr",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Foz do Iguacu",
+    "placeUrl": "https://livingcost.org/cost/brazil/foz-do-iguacu",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Foz do Iguacu com quality of life 39. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Good.",
+    "positivePoints": [
+      "qualidade do ar"
+    ],
+    "criticalPoints": [
+      "qualidade de vida no dia a dia",
+      "pressão entre salário médio e custo mensal"
+    ],
+    "collectedAt": "2026-04-04T16:23:48.412Z"
+  },
+  {
+    "cityId": "goiania-go",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Goiania",
+    "placeUrl": "https://livingcost.org/cost/brazil/goiania",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Goiania com quality of life 59. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Good.",
+    "positivePoints": [
+      "qualidade do ar"
+    ],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal"
+    ],
+    "collectedAt": "2026-04-04T16:23:56.010Z"
+  },
+  {
+    "cityId": "guaruja-sp",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Guaruja",
+    "placeUrl": "https://livingcost.org/cost/brazil/guaruja",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Guaruja com quality of life 48. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "qualidade de vida no dia a dia",
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:24:02.619Z"
+  },
+  {
+    "cityId": "itajai-sc",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Itajai",
+    "placeUrl": "https://livingcost.org/cost/brazil/itajai",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Itajai com quality of life 43. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "qualidade de vida no dia a dia",
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:50.467Z"
+  },
+  {
+    "cityId": "joao-pessoa-pb",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Joao Pessoa",
+    "placeUrl": "https://livingcost.org/cost/brazil/joao-pessoa",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Joao Pessoa com quality of life 60. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Excellent.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal"
+    ],
+    "collectedAt": "2026-04-04T16:23:53.157Z"
+  },
+  {
+    "cityId": "joinville-sc",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Joinville",
+    "placeUrl": "https://livingcost.org/cost/brazil/joinville",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Joinville com quality of life 57. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:49.042Z"
+  },
+  {
+    "cityId": "maceio-al",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Maceio",
+    "placeUrl": "https://livingcost.org/cost/brazil/maceio",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Maceio com quality of life 45. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Excellent.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "qualidade de vida no dia a dia",
+      "pressão entre salário médio e custo mensal"
+    ],
+    "collectedAt": "2026-04-04T16:23:51.893Z"
+  },
+  {
+    "cityId": "natal-rn",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Natal",
+    "placeUrl": "https://livingcost.org/cost/brazil/natal",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Natal com quality of life 58. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Excellent.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal"
+    ],
+    "collectedAt": "2026-04-04T16:23:54.579Z"
+  },
+  {
+    "cityId": "niteroi-rj",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Niteroi",
+    "placeUrl": "https://livingcost.org/cost/brazil/niteroi",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Niteroi com quality of life 66. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [
+      "qualidade de vida percebida"
+    ],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:46.980Z"
+  },
+  {
+    "cityId": "porto-alegre-rs",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Porto Alegre",
+    "placeUrl": "https://livingcost.org/cost/brazil/porto-alegre",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Porto Alegre com quality of life 65. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [
+      "qualidade de vida percebida"
+    ],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:51.266Z"
+  },
+  {
+    "cityId": "porto-seguro-ba",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Porto Seguro",
+    "placeUrl": "https://livingcost.org/cost/brazil/porto-seguro",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Porto Seguro com quality of life 37. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "qualidade de vida no dia a dia",
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:57.434Z"
+  },
+  {
+    "cityId": "recife-pe",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Recife",
+    "placeUrl": "https://livingcost.org/cost/brazil/recife",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Recife com quality of life 65. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Excellent.",
+    "positivePoints": [
+      "qualidade de vida percebida"
+    ],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal"
+    ],
+    "collectedAt": "2026-04-04T16:23:53.954Z"
+  },
+  {
+    "cityId": "rio-de-janeiro-rj",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Rio de Janeiro",
+    "placeUrl": "https://livingcost.org/cost/brazil/rio-de-janeiro",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Rio de Janeiro com quality of life 67. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [
+      "qualidade de vida percebida"
+    ],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:44.300Z"
+  },
+  {
+    "cityId": "salvador-ba",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Salvador",
+    "placeUrl": "https://livingcost.org/cost/brazil/salvador",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Salvador com quality of life 62. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:56.807Z"
+  },
+  {
+    "cityId": "santos-sp",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Santos",
+    "placeUrl": "https://livingcost.org/cost/brazil/santos",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Santos com quality of life 63. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:58.686Z"
+  },
+  {
+    "cityId": "sao-paulo-sp",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Sao Paulo",
+    "placeUrl": "https://livingcost.org/cost/brazil/sao-paulo",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Sao Paulo com quality of life 74. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [
+      "qualidade de vida percebida"
+    ],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:43.497Z"
+  },
+  {
+    "cityId": "ubatuba-sp",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Ubatuba",
+    "placeUrl": "https://livingcost.org/cost/brazil/ubatuba",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Ubatuba com quality of life 36. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "qualidade de vida no dia a dia",
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-04-04T16:23:59.312Z"
+  }
+]

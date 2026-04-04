@@ -2519,15 +2519,21 @@ extension AppLocalizationsFormatting on AppLocalizations {
         );
       case 'item_2_1_cpf':
         return _localizedText(
-          pt: 'Tirar o CPF',
-          es: 'Sacar el CPF',
-          en: 'Get your CPF',
+          pt: 'Organizar o CPF',
+          es: 'Resolver el CPF',
+          en: 'Sort out your CPF',
         );
       case 'item_2_2_residencia':
         return _localizedText(
-          pt: 'Solicitar residência Mercosul na Polícia Federal',
-          es: 'Solicitar residencia Mercosur en la Policía Federal',
-          en: 'Apply for Mercosur residence at the Federal Police',
+          pt: 'Iniciar residência Mercosul na Polícia Federal',
+          es: 'Iniciar residencia Mercosur en la Policía Federal',
+          en: 'Start Mercosur residence at the Federal Police',
+        );
+      case 'item_4_5_registro_rnm':
+        return _localizedText(
+          pt: 'Acompanhar registro RNM e CRNM',
+          es: 'Seguir registro RNM y CRNM',
+          en: 'Track RNM and CRNM registration',
         );
       case 'item_2_3_ctps':
         return _localizedText(

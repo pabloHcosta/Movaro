@@ -228,6 +228,8 @@ class GuideGpsController extends ChangeNotifier {
     await PlanNotificationService.instance.cancelPlanReminders();
     if (item.id == 'item_2_2_residencia') {
       await PlanNotificationService.instance.cancelPFReminder();
+    }
+    if (item.id == 'item_4_5_registro_rnm') {
       _applyResidenceDeadlineBadge();
       final completedAt = _completedAtById[item.id];
       if (completedAt != null) {
@@ -246,7 +248,9 @@ class GuideGpsController extends ChangeNotifier {
   }
 
   void _applyResidenceDeadlineBadge() {
-    final residenceCompletedAt = _completedAtById['item_2_2_residencia'];
+    final residenceCompletedAt =
+        _completedAtById['item_4_5_registro_rnm'] ??
+        _completedAtById['item_2_2_residencia'];
     if (residenceCompletedAt == null) {
       return;
     }

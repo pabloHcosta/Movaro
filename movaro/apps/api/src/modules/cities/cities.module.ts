@@ -11,6 +11,7 @@ import { CitiesCatalogService } from './application/services/cities-catalog.serv
 import { CityBudgetSnapshotService } from './application/services/city-budget-snapshot.service';
 import { CityMergeService } from './application/services/city-merge.service';
 import { CityOfficialMetricsService } from './application/services/city-official-metrics.service';
+import { CityPublicOpinionSeedService } from './application/services/city-public-opinion-seed.service';
 import { CityRankingService } from './application/services/city-ranking.service';
 import { CitySeasonalitySnapshotService } from './application/services/city-seasonality-snapshot.service';
 import { TravelRouteInsightService } from './application/services/travel-route-insight.service';
@@ -32,6 +33,7 @@ import { CitiesController } from './presentation/cities.controller';
     GooglePlacesCityOpinionService,
     OpenMeteoWeatherService,
     CityBudgetSnapshotService,
+    CityPublicOpinionSeedService,
     CitySeasonalitySnapshotService,
     CityRankingService,
     TravelRouteInsightService,

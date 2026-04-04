@@ -14,5 +14,5 @@ export interface CityInsightExplorePlaceEntity {
   mapUrl: string;
   latitude?: number;
   longitude?: number;
-  source: 'openstreetmap' | 'template';
+  source: 'openstreetmap' | 'template' | 'curated';
 }

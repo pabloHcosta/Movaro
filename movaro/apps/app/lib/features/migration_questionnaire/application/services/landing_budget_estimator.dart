@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 enum LandingBudgetScenario { lean, balanced, comfortable }
@@ -50,9 +51,9 @@ class LandingBudgetEstimator {
   const LandingBudgetEstimator._();
 
   static LandingBudgetEstimate build({required MigrationPlan plan}) {
-    final monthlyBase = _resolveMonthlyBase(plan);
-    final setupBase = _resolveSetupBase(plan, monthlyBase);
-    final bufferBase = _resolveBufferBase(plan, monthlyBase);
+    final cityBudget =
+        plan.recommendedCity?.budgetSnapshot ?? plan.preferredCity?.budgetSnapshot;
+    final monthlyBase = _resolveMonthlyBase(plan, cityBudget);
 
     return LandingBudgetEstimate(
       summaryKey: _summaryKey(plan.timeline),
@@ -62,25 +63,73 @@ class LandingBudgetEstimator {
           scenario: LandingBudgetScenario.lean,
           titleKey: 'landingBudgetLeanTitle',
           descriptionKey: 'landingBudgetLeanBody',
-          monthlyBase: (monthlyBase * 0.82).round(),
-          setupBase: (setupBase * 0.78).round(),
-          bufferBase: (bufferBase * 0.72).round(),
+          monthlyBase: _resolveScenarioMonthlyBase(
+            LandingBudgetScenario.lean,
+            monthlyBase,
+            cityBudget,
+          ),
+          setupBase: _resolveSetupBase(
+            plan,
+            _resolveScenarioMonthlyBase(
+              LandingBudgetScenario.lean,
+              monthlyBase,
+              cityBudget,
+            ),
+            LandingBudgetScenario.lean,
+          ),
+          bufferBase: _resolveBufferBase(
+            plan,
+            _resolveScenarioMonthlyBase(
+              LandingBudgetScenario.lean,
+              monthlyBase,
+              cityBudget,
+            ),
+            LandingBudgetScenario.lean,
+          ),
         ),
         _scenario(
           scenario: LandingBudgetScenario.balanced,
           titleKey: 'landingBudgetBalancedTitle',
           descriptionKey: 'landingBudgetBalancedBody',
           monthlyBase: monthlyBase,
-          setupBase: setupBase,
-          bufferBase: bufferBase,
+          setupBase: _resolveSetupBase(
+            plan,
+            monthlyBase,
+            LandingBudgetScenario.balanced,
+          ),
+          bufferBase: _resolveBufferBase(
+            plan,
+            monthlyBase,
+            LandingBudgetScenario.balanced,
+          ),
         ),
         _scenario(
           scenario: LandingBudgetScenario.comfortable,
           titleKey: 'landingBudgetComfortableTitle',
           descriptionKey: 'landingBudgetComfortableBody',
-          monthlyBase: (monthlyBase * 1.18).round(),
-          setupBase: (setupBase * 1.22).round(),
-          bufferBase: (bufferBase * 1.28).round(),
+          monthlyBase: _resolveScenarioMonthlyBase(
+            LandingBudgetScenario.comfortable,
+            monthlyBase,
+            cityBudget,
+          ),
+          setupBase: _resolveSetupBase(
+            plan,
+            _resolveScenarioMonthlyBase(
+              LandingBudgetScenario.comfortable,
+              monthlyBase,
+              cityBudget,
+            ),
+            LandingBudgetScenario.comfortable,
+          ),
+          bufferBase: _resolveBufferBase(
+            plan,
+            _resolveScenarioMonthlyBase(
+              LandingBudgetScenario.comfortable,
+              monthlyBase,
+              cityBudget,
+            ),
+            LandingBudgetScenario.comfortable,
+          ),
         ),
       ],
     );
@@ -108,85 +157,131 @@ class LandingBudgetEstimator {
     );
   }
 
-  static int _resolveMonthlyBase(MigrationPlan plan) {
+  static int _resolveMonthlyBase(
+    MigrationPlan plan,
+    CityBudgetSnapshot? cityBudget,
+  ) {
+    if (cityBudget != null) {
+      return cityBudget.fairLivingTotal;
+    }
+
     final city = plan.recommendedCity;
     if (city == null) {
-      return 4200;
+      return 3600;
     }
 
     final monthlyFromScores =
-        2300 +
-        ((100 - city.costOfLivingScore) * 24) +
-        ((100 - city.rentScore) * 18);
+        2000 +
+        ((100 - city.costOfLivingScore) * 18) +
+        ((100 - city.rentScore) * 14);
 
     final regionalFactor = switch (city.regionName?.toLowerCase()) {
-      'sudeste' => 1.10,
-      'sul' => 1.03,
+      'sudeste' => 1.08,
+      'sul' => 1.02,
       'centro-oeste' => 1.01,
-      'nordeste' => 0.95,
-      'norte' => 0.97,
+      'nordeste' => 0.93,
+      'norte' => 0.95,
       _ => 1.0,
     };
 
-    return (monthlyFromScores * regionalFactor).round().clamp(2800, 6800);
+    return (monthlyFromScores * regionalFactor).round().clamp(2400, 5600);
   }
 
-  static int _resolveSetupBase(MigrationPlan plan, int monthlyBase) {
-    final city = plan.recommendedCity;
-    final rentPressure = city == null
-        ? 1.0
-        : (1.05 + ((100 - city.rentScore) / 250));
+  static int _resolveScenarioMonthlyBase(
+    LandingBudgetScenario scenario,
+    int balancedMonthlyBase,
+    CityBudgetSnapshot? cityBudget,
+  ) {
+    if (cityBudget == null) {
+      return switch (scenario) {
+        LandingBudgetScenario.lean => (balancedMonthlyBase * 0.88).round(),
+        LandingBudgetScenario.balanced => balancedMonthlyBase,
+        LandingBudgetScenario.comfortable => (balancedMonthlyBase * 1.12).round(),
+      };
+    }
+
+    return switch (scenario) {
+      LandingBudgetScenario.lean =>
+        cityBudget.singlePersonExcludingRent +
+            (cityBudget.cheaperRent * 0.72).round(),
+      LandingBudgetScenario.balanced => cityBudget.fairLivingTotal,
+      LandingBudgetScenario.comfortable =>
+        cityBudget.singlePersonExcludingRent +
+            cityBudget.pricierRent +
+            (cityBudget.monthlyTransportPass * 0.35).round(),
+    };
+  }
+
+  static int _resolveSetupBase(
+    MigrationPlan plan,
+    int monthlyBase,
+    LandingBudgetScenario scenario,
+  ) {
     final timelineFactor = switch (plan.timeline) {
-      'asap' => 1.15,
-      '6_months' => 1.0,
-      '12_months' => 0.92,
-      'researching' => 0.88,
+      'in_0_3m' => 1.0,
+      'in_3_6m' => 0.9,
+      'in_6_12m' => 0.82,
+      'later' || 'undecided' => 0.72,
       _ => 1.0,
     };
     final goalFactor = switch (plan.goal) {
-      'entrepreneur' => 1.18,
-      'remote_work' => 1.08,
-      'study' => 0.96,
-      'retire' => 1.02,
-      'beach_life' => 1.07,
+      'entrepreneur' => 1.08,
+      'remote_work' => 0.96,
+      'study' => 0.88,
+      'retire' => 0.86,
+      'beach_life' => 0.92,
       _ => 1.0,
     };
+    final scenarioFactor = switch (scenario) {
+      LandingBudgetScenario.lean => 0.45,
+      LandingBudgetScenario.balanced => 0.72,
+      LandingBudgetScenario.comfortable => 0.98,
+    };
 
-    final estimate =
-        monthlyBase * 1.35 * rentPressure * timelineFactor * goalFactor;
-    return estimate.round().clamp(2500, 12000);
+    final estimate = monthlyBase * scenarioFactor * timelineFactor * goalFactor;
+    return estimate.round().clamp(900, 6500);
   }
 
-  static int _resolveBufferBase(MigrationPlan plan, int monthlyBase) {
+  static int _resolveBufferBase(
+    MigrationPlan plan,
+    int monthlyBase,
+    LandingBudgetScenario scenario,
+  ) {
     final riskFactor = switch (plan.timeline) {
-      'asap' => 0.95,
-      '6_months' => 0.78,
-      '12_months' => 0.65,
-      'researching' => 0.58,
+      'in_0_3m' => 0.55,
+      'in_3_6m' => 0.42,
+      'in_6_12m' => 0.34,
+      'later' || 'undecided' => 0.26,
       _ => 0.72,
     };
     final languageFactor = switch (plan.goal) {
       'work' => 1.0,
-      'entrepreneur' => 1.05,
-      'study' => 0.82,
-      'retire' => 0.9,
-      'beach_life' => 0.92,
-      _ => 0.88,
+      'entrepreneur' => 1.08,
+      'study' => 0.72,
+      'retire' => 0.7,
+      'beach_life' => 0.76,
+      _ => 0.82,
+    };
+    final scenarioFactor = switch (scenario) {
+      LandingBudgetScenario.lean => 0.55,
+      LandingBudgetScenario.balanced => 0.9,
+      LandingBudgetScenario.comfortable => 1.25,
     };
 
-    final estimate = monthlyBase * riskFactor * languageFactor;
-    return math.max(1200, estimate.round());
+    final estimate = monthlyBase * riskFactor * languageFactor * scenarioFactor;
+    return math.max(500, estimate.round());
   }
 
   static String _summaryKey(String timeline) {
     switch (timeline) {
-      case 'asap':
+      case 'in_0_3m':
         return 'landingBudgetSummaryAsap';
-      case '6_months':
+      case 'in_3_6m':
         return 'landingBudgetSummarySixMonths';
-      case '12_months':
+      case 'in_6_12m':
         return 'landingBudgetSummaryTwelveMonths';
-      case 'researching':
+      case 'later':
+      case 'undecided':
       default:
         return 'landingBudgetSummaryResearching';
     }

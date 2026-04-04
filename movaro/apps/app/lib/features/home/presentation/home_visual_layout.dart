@@ -40,14 +40,8 @@ class HomeVisualLayout extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _StageSummaryBanner(
-                    stage: context.l10n.stageClarityTitle,
-                    body: context.l10n.stageClarityBody,
-                    action: context.l10n.stageClarityAction,
-                    accent: scheme.primary,
-                    compact: isCompact,
-                  ),
-                  SizedBox(height: isCompact ? 12 : 16),
+                  _AppValueHeader(scheme: scheme, compact: isCompact),
+                  SizedBox(height: isCompact ? 10 : 14),
                   _buildTitle(context, scheme, isCompact),
                   SizedBox(height: isCompact ? 8 : 10),
                   _buildSubtitle(context, scheme, isCompact),
@@ -204,151 +198,151 @@ class HomeVisualLayout extends StatelessWidget {
   ) {
     final l10n = context.l10n;
     final items = [
-      (
-        Icons.explore_outlined,
-        l10n.homeEntryExploreCitiesAction,
-        onExploreCitiesTap,
-      ),
+      (Icons.explore_outlined, l10n.homeEntryExploreCitiesAction, onExploreCitiesTap),
       (Icons.attach_money_rounded, l10n.homeVisualCostsAction, onOpenCostsTap),
-      (
-        Icons.description_outlined,
-        l10n.homeVisualDocumentsAction,
-        onOpenDocumentsTap,
-      ),
+      (Icons.description_outlined, l10n.homeVisualDocumentsAction, onOpenDocumentsTap),
     ];
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final item in items)
+          _SecondaryChip(
+            icon: item.$1,
+            label: item.$2,
+            scheme: scheme,
+            onTap: item.$3,
+          ),
+      ],
+    );
+  }
+}
+
+class _AppValueHeader extends StatelessWidget {
+  const _AppValueHeader({required this.scheme, required this.compact});
+
+  final ColorScheme scheme;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final headline = switch (locale) {
+      'es' => 'Tu guía para mudarte a Brasil',
+      'en' => 'Your guide to moving to Brazil',
+      _ => 'Seu guia para se mudar para o Brasil',
+    };
+    final chips = switch (locale) {
+      'es' => ['Ciudades reales', 'Documentos', 'Plan propio'],
+      'en' => ['Real cities', 'Documents', 'My plan'],
+      _ => ['Cidades reais', 'Documentos', 'Plano próprio'],
+    };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.homeEntryShortcutsTitle,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: scheme.onSurface.withValues(alpha: 0.80),
-          ),
+        Row(
+          children: [
+            const Text('🇧🇷', style: TextStyle(fontSize: 16, height: 1)),
+            const SizedBox(width: 7),
+            Expanded(
+              child: Text(
+                headline,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: scheme.onSurface.withValues(alpha: 0.72),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: scheme.surfaceContainerHighest.withValues(alpha: 0.42),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: scheme.outlineVariant.withValues(alpha: 0.35),
-            ),
-          ),
-          child: Column(
-            children: [
-              for (var index = 0; index < items.length; index++) ...[
-                InkWell(
-                  onTap: items[index].$3,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: isCompact ? 10 : 12,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          items[index].$1,
-                          size: isCompact ? 16 : 17,
-                          color: scheme.onSurface.withValues(alpha: 0.42),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            items[index].$2,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: scheme.onSurface.withValues(
-                                    alpha: 0.68,
-                                  ),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          size: 18,
-                          color: scheme.onSurface.withValues(alpha: 0.22),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (index != items.length - 1)
-                  Divider(
-                    height: 1,
-                    color: scheme.outlineVariant.withValues(alpha: 0.5),
-                  ),
-              ],
+        Row(
+          children: [
+            for (var i = 0; i < chips.length; i++) ...[
+              _ValueChip(label: chips[i], scheme: scheme),
+              if (i < chips.length - 1) const SizedBox(width: 6),
             ],
-          ),
+          ],
         ),
       ],
     );
   }
 }
 
-class _StageSummaryBanner extends StatelessWidget {
-  const _StageSummaryBanner({
-    required this.stage,
-    required this.body,
-    required this.action,
-    required this.accent,
-    required this.compact,
-  });
+class _ValueChip extends StatelessWidget {
+  const _ValueChip({required this.label, required this.scheme});
 
-  final String stage;
-  final String body;
-  final String action;
-  final Color accent;
-  final bool compact;
+  final String label;
+  final ColorScheme scheme;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(compact ? 12 : 14),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.48),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: accent.withValues(alpha: 0.18)),
+        color: scheme.primary.withValues(alpha: 0.09),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: scheme.primary.withValues(alpha: 0.18)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            stage.toUpperCase(),
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: accent,
-              fontWeight: FontWeight.w800,
-            ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: scheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _SecondaryChip extends StatelessWidget {
+  const _SecondaryChip({
+    required this.icon,
+    required this.label,
+    required this.scheme,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final ColorScheme scheme;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: scheme.outlineVariant.withValues(alpha: 0.40),
           ),
-          SizedBox(height: compact ? 4 : 6),
-          Text(
-            body,
-            maxLines: compact ? 1 : 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: scheme.onSurface.withValues(alpha: 0.78),
-              height: 1.35,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: scheme.onSurface.withValues(alpha: 0.55),
             ),
-          ),
-          SizedBox(height: compact ? 4 : 6),
-          Text(
-            action,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: scheme.onSurface.withValues(alpha: 0.58),
-              fontWeight: FontWeight.w600,
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurface.withValues(alpha: 0.72),
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -450,6 +444,18 @@ class _PathCard extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    body,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: foreground.withValues(
+                        alpha: isPrimary ? 0.80 : 0.65,
+                      ),
+                      height: 1.25,
+                    ),
                   ),
                   const Spacer(),
                   SizedBox(

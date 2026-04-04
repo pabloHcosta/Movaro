@@ -149,20 +149,20 @@ class PlanNotificationService {
     await _scheduleNotification(
       id: 1201,
       title: _text(
-        pt: 'Agende a Polícia Federal agora',
-        es: 'Agenda la Policía Federal ahora',
-        en: 'Schedule the Federal Police appointment now',
+        pt: 'Revise a etapa da Polícia Federal',
+        es: 'Revisa la etapa de la Policía Federal',
+        en: 'Review the Federal Police step',
       ),
       body: hasMajorCity
           ? _text(
-              pt: 'Filas de 60–90 dias em $cityName. Quanto antes você agendar, melhor.',
-              es: 'Filas de 60–90 días en $cityName. Cuanto antes agendes, mejor.',
-              en: 'Queues of 60–90 days in $cityName. The sooner you schedule, the better.',
+              pt: 'Se $cityName estiver com fila longa, adiantar a agenda ajuda. O principal é não deixar o protocolo para a reta final dos 90 dias.',
+              es: 'Si $cityName tiene cola larga, adelantar el turno ayuda. Lo principal es no dejar el tramite para la recta final de los 90 dias.',
+              en: 'If $cityName has a long backlog, booking earlier helps. The key is not leaving the filing to the final stretch of the 90 days.',
             )
           : _text(
-              pt: 'Agendar cedo evita filas longas. Não deixe para depois.',
-              es: 'Agendar temprano evita largas filas. No lo dejes para después.',
-              en: 'Scheduling early avoids long queues. Do not leave it for later.',
+              pt: 'Checar cedo a agenda da PF ajuda a evitar corrida no fim do prazo.',
+              es: 'Revisar temprano la agenda de la PF ayuda a evitar correr al final del plazo.',
+              en: 'Checking the PF schedule early helps avoid a rush near the deadline.',
             ),
       scheduledDate: DateTime.now().add(const Duration(days: 1)),
     );

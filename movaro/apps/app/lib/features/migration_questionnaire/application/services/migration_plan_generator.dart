@@ -19,11 +19,11 @@ class MigrationPlanGenerator {
   // users feel the app "doesn't understand them". At least one must always
   // surface in the top-3 results.
   static const _anchorCityIds = {
-    'florianopolis',
-    'rio-de-janeiro',
-    'sao-paulo',
-    'balneario-camboriu',
-    'curitiba',
+    'florianopolis-sc',
+    'rio-de-janeiro-rj',
+    'sao-paulo-sp',
+    'balneario-camboriu-sc',
+    'curitiba-pr',
   };
 
   static const Map<String, String> _archetypeByIntent = {
@@ -213,6 +213,10 @@ class MigrationPlanGenerator {
       candidateCities: recommendation.topCities
           .map((item) => item.city)
           .toList(),
+      candidateCityMatchScores: {
+        for (final item in recommendation.topCities)
+          item.city.id: item.score,
+      },
       cityRecommendationReasons: recommendation.reasons,
       isCityConfirmed: false,
       steps: _buildSteps(
@@ -321,9 +325,9 @@ class MigrationPlanGenerator {
         archetypeKey.contains('remote') ||
         priorities.any((p) => p == 'warm_climate_beach' || p == 'nature');
     if (isLifestyle) {
-      final hasFloripa = top.any((c) => c.city.id == 'florianopolis');
+      final hasFloripa = top.any((c) => c.city.id == 'florianopolis-sc');
       if (!hasFloripa) {
-        final floripa = _findById(ranked, 'florianopolis');
+        final floripa = _findById(ranked, 'florianopolis-sc');
         if (floripa != null) _replaceAtPosition(top, floripa, 2);
       }
     }
@@ -331,9 +335,9 @@ class MigrationPlanGenerator {
     // ── RULE 3: job/career → São Paulo ───────────────────────────────────
     final isCareer = archetypeKey.startsWith('job_hunter');
     if (isCareer) {
-      final hasSp = top.any((c) => c.city.id == 'sao-paulo');
+      final hasSp = top.any((c) => c.city.id == 'sao-paulo-sp');
       if (!hasSp) {
-        final sp = _findById(ranked, 'sao-paulo');
+        final sp = _findById(ranked, 'sao-paulo-sp');
         if (sp != null) _replaceAtPosition(top, sp, 2);
       }
     }

@@ -20,7 +20,11 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "supabase:check": "node ./scripts/check-supabase.js",
-    "ingest:official-city-metrics": "node ./scripts/ingest-official-city-metrics.js"
+    "ingest:official-city-metrics": "node ./scripts/ingest-official-city-metrics.js",
+    "ingest:city-market-data": "node ./scripts/ingest-city-market-data.js",
+    "ingest:numbeo-city-snapshots": "node ./scripts/ingest-numbeo-city-snapshots.js",
+    "ingest:livingcost-city-data": "node ./scripts/ingest-livingcost-city-data.js",
+    "ingest:osm-city-neighborhoods": "node ./scripts/ingest-osm-city-neighborhoods.js"
   },
   "dependencies": {
     "@fastify/helmet": "^13.0.2",

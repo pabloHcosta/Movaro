@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
@@ -9,6 +10,39 @@ import 'package:movaro_app/features/location/location_data.dart';
 
 class ArgentinaBrazilGuideDataSource {
   const ArgentinaBrazilGuideDataSource._();
+
+  static const List<_BrazilConsularPost> _argentinaConsularPosts = [
+    _BrazilConsularPost(
+      city: 'Buenos Aires',
+      latitude: -34.6037,
+      longitude: -58.3816,
+      officialUrl: 'https://cgbuenosaires.itamaraty.gov.br',
+    ),
+    _BrazilConsularPost(
+      city: 'Córdoba',
+      latitude: -31.4201,
+      longitude: -64.1888,
+      officialUrl: 'https://cordoba.itamaraty.gov.br',
+    ),
+    _BrazilConsularPost(
+      city: 'Mendoza',
+      latitude: -32.8895,
+      longitude: -68.8458,
+      officialUrl: 'https://mendoza.itamaraty.gov.br',
+    ),
+    _BrazilConsularPost(
+      city: 'Paso de los Libres',
+      latitude: -29.7125,
+      longitude: -57.0877,
+      officialUrl: 'https://pasodeloslibres.itamaraty.gov.br',
+    ),
+    _BrazilConsularPost(
+      city: 'Puerto Iguazú',
+      latitude: -25.5972,
+      longitude: -54.5786,
+      officialUrl: 'https://puertoiguazu.itamaraty.gov.br',
+    ),
+  ];
 
   /// Returns `true` when the origin→destination pair matches Argentina→Brazil,
   /// regardless of whether values are ISO codes or journey values.
@@ -23,6 +57,7 @@ class ArgentinaBrazilGuideDataSource {
     MigrationPlan plan, {
     LocationData? currentLocation,
     String? localeCode,
+    CopilotExchangeRates? exchangeRates,
   }) {
     final locale = _locale(localeCode);
     final items = <GuideActionItem>[
@@ -393,19 +428,28 @@ class ArgentinaBrazilGuideDataSource {
         tips: _list(
           locale,
           pt: [
-            'O dólar vale ~R\$5,80. Para converter: salário em R\$ ÷ 5,80 × câmbio do dólar no ARS.',
+            _marketExchangeTip(
+              locale,
+              exchangeRates: exchangeRates,
+            ),
             'Salários CLT anunciados já incluem FGTS e encargos — o líquido é o valor anunciado mesmo.',
             'LinkedIn Brasil é muito mais ativo que na Argentina — perfil em português aumenta muito o retorno.',
             'Para trabalho remoto mantendo cliente argentino: MEI simplifica a regularização da renda.',
           ],
           es: [
-            'El dolar vale ~R\$5,80. Para convertir: salario en R\$ ÷ 5,80 × tipo de cambio del dolar en ARS.',
+            _marketExchangeTip(
+              locale,
+              exchangeRates: exchangeRates,
+            ),
             'Los salarios CLT anunciados ya incluyen FGTS y cargas — el neto es el valor anunciado.',
             'LinkedIn Brasil es mucho mas activo que en Argentina — perfil en portugues aumenta mucho el retorno.',
             'Para trabajo remoto manteniendo cliente argentino: MEI simplifica la regularizacion del ingreso.',
           ],
           en: [
-            'The dollar is ~R\$5.80. To convert: salary in R\$ ÷ 5.80 × ARS dollar rate.',
+            _marketExchangeTip(
+              locale,
+              exchangeRates: exchangeRates,
+            ),
             'Advertised CLT salaries already include FGTS and deductions — the net is the advertised figure.',
             'LinkedIn Brasil is far more active than in Argentina — a Portuguese profile significantly increases response rate.',
             'For remote work keeping an Argentine client: MEI simplifies income regularization.',
@@ -458,9 +502,9 @@ class ArgentinaBrazilGuideDataSource {
         icon: Icons.health_and_safety_outlined,
         context: _t(
           locale,
-          pt: 'O Brasil tem sistema público de saúde universal (SUS) — gratuito e acessível com CPF. Entender como funciona antes de chegar te poupa tempo e ansiedade no momento de maior instabilidade.',
-          es: 'Brasil tiene un sistema de salud publico universal (SUS) — gratuito y accesible con CPF. Entender como funciona antes de llegar te ahorra tiempo y ansiedad en el momento de mayor inestabilidad.',
-          en: 'Brazil has a universal public health system (SUS) — free and accessible with a CPF. Understanding how it works before arriving saves you time and anxiety during the most unstable period.',
+          pt: 'O Brasil tem sistema público de saúde universal (SUS). Entender onde ir numa urgência, como funciona a atenção básica e quando o CPF entra na rotina do SUS evita muita ansiedade na chegada.',
+          es: 'Brasil tiene un sistema publico de salud universal (SUS). Entender adonde ir en una urgencia, como funciona la atencion basica y cuando entra el CPF en la rutina del SUS evita mucha ansiedad al llegar.',
+          en: 'Brazil has a universal public health system (SUS). Understanding where to go in an emergency, how primary care works, and when CPF matters in the SUS routine prevents a lot of stress on arrival.',
         ),
         whyItMatters: _t(
           locale,
@@ -471,23 +515,26 @@ class ArgentinaBrazilGuideDataSource {
         steps: _list(
           locale,
           pt: [
-            'Entenda que o SUS é universal e gratuito — qualquer pessoa com CPF pode usar.',
+            'Entenda que urgências e emergências no SUS não dependem de ter CPF ou Cartão SUS emitido.',
             'Saiba a diferença entre UBS (consultas de rotina), UPA (urgência 24h) e Hospital (emergência).',
             'Pesquise o custo de planos privados básicos na sua cidade: geralmente R\$150–400/mês.',
+            'Veja como fazer o Cartão SUS/CNS depois da chegada — aí sim o CPF entra para organizar seu cadastro.',
             'Se tiver condição crônica ou uso de medicamento contínuo, leve estoque dos primeiros 60 dias da Argentina.',
             'Verifique se seus medicamentos habituais têm equivalente no Brasil — o nome comercial pode ser diferente.',
           ],
           es: [
-            'Entiende que el SUS es universal y gratuito — cualquier persona con CPF puede usarlo.',
+            'Entiende que las urgencias y emergencias en el SUS no dependen de tener CPF o Tarjeta SUS emitida.',
             'Conoce la diferencia entre UBS (consultas de rutina), UPA (urgencias 24h) y Hospital (emergencias).',
             'Investiga el costo de planes privados basicos en tu ciudad: generalmente R\$150–400/mes.',
+            'Mira como sacar la Tarjeta SUS/CNS despues de llegar — ahi si el CPF entra para ordenar tu registro.',
             'Si tienes condicion cronica o uso de medicamento continuo, lleva stock de los primeros 60 dias desde Argentina.',
             'Verifica si tus medicamentos habituales tienen equivalente en Brasil — el nombre comercial puede ser diferente.',
           ],
           en: [
-            'Understand that SUS is universal and free — anyone with a CPF can use it.',
+            'Understand that urgent and emergency SUS care does not depend on already having a CPF or SUS card.',
             'Know the difference between UBS (routine appointments), UPA (24h urgent care), and Hospital (emergencies).',
             'Research the cost of basic private plans in your city: typically R\$150–400/month.',
+            'Check how to get your SUS/CNS card after arrival — that is when CPF becomes part of the regular registration flow.',
             'If you have a chronic condition or ongoing medication, bring a 60-day supply from Argentina.',
             'Check whether your regular medications have equivalents in Brazil — the brand name may be different.',
           ],
@@ -503,17 +550,17 @@ class ArgentinaBrazilGuideDataSource {
           pt: [
             'Para urgências nos primeiros dias (antes do Cartão SUS), vá à UPA — é gratuito mesmo sem documentação completa.',
             'Planos básicos: Amil One, SulAmérica Especial, Hapvida custam entre R\$150–300/mês para adultos.',
-            'O Cartão SUS (CNS) se faz na UBS com CPF — mas isso só pode ser feito depois de chegar no Brasil.',
+            'O Cartão SUS (CNS) costuma ser organizado na UBS depois da chegada, normalmente usando o CPF para vincular seu cadastro.',
           ],
           es: [
             'Para urgencias en los primeros dias (antes de la Tarjeta SUS), ve a la UPA — es gratis incluso sin documentacion completa.',
             'Planes basicos: Amil One, SulAmerica Especial, Hapvida cuestan entre R\$150–300/mes para adultos.',
-            'La Tarjeta SUS (CNS) se hace en la UBS con CPF — pero eso solo se puede hacer despues de llegar a Brasil.',
+            'La Tarjeta SUS (CNS) suele organizarse en la UBS despues de llegar, normalmente usando el CPF para vincular tu registro.',
           ],
           en: [
             'For emergencies in the first days (before your SUS card), go to the UPA — it is free even without complete documentation.',
             'Basic plans: Amil One, SulAmérica Especial, Hapvida cost R\$150–300/month for adults.',
-            'The SUS card (CNS) is obtained at the UBS with your CPF — but that can only be done after arriving in Brazil.',
+            'The SUS card (CNS) is usually arranged at the UBS after arrival, normally using CPF to link your record.',
           ],
         ),
         communityTips: _list(
@@ -892,21 +939,22 @@ class ArgentinaBrazilGuideDataSource {
         ),
         fullContent: null,
         type: GuideActionType.checklist,
-        phase: GuidePhase.housing,
-        orderIndex: 5,
+        phase: GuidePhase.arrival,
+        orderIndex: 8,
         isCompleted: false,
         icon: Icons.sim_card_outlined,
+        dependencies: <String>['item_2_1_cpf'],
         context: _t(
           locale,
-          pt: 'Um número brasileiro é necessário para SMS de bancos, apps de transporte e muitos cadastros.',
-          es: 'Un numero brasileno es necesario para SMS de bancos, apps de transporte y muchos registros.',
-          en: 'A Brazilian number is needed for bank SMS, transport apps, and many registrations.',
+          pt: 'Depois de emitir o CPF, ter um número brasileiro ajuda a ativar banco, Pix e apps essenciais já com seu cadastro principal no Brasil.',
+          es: 'Despues de emitir el CPF, tener un numero brasileno ayuda a activar banco, Pix y apps esenciales ya con tu registro principal en Brasil.',
+          en: 'After issuing CPF, having a Brazilian number helps you activate bank access, Pix, and essential apps with your main registration in Brazil.',
         ),
         whyItMatters: _t(
           locale,
-          pt: 'Sem chip local, você não consegue ativar conta bancária, validar cadastros nem usar apps essenciais.',
-          es: 'Sin chip local, no puedes activar cuenta bancaria, validar registros ni usar apps esenciales.',
-          en: 'Without a local SIM, you cannot activate a bank account, validate registrations, or use essential apps.',
+          pt: 'Com CPF em mãos, o chip vira uma etapa prática de execução para receber SMS, validar cadastros e consolidar sua rotina digital no Brasil.',
+          es: 'Con el CPF en mano, el chip pasa a ser una etapa practica para recibir SMS, validar registros y consolidar tu rutina digital en Brasil.',
+          en: 'With CPF in hand, the SIM becomes a practical execution step to receive SMS, validate registrations, and stabilize your digital routine in Brazil.',
         ),
         primaryActionLabel: _t(
           locale,
@@ -919,26 +967,26 @@ class ArgentinaBrazilGuideDataSource {
         steps: _list(
           locale,
           pt: [
-            'Compre um chip pré-pago no aeroporto ou loja de operadora.',
-            'Ative com passaporte ou DNI no balcão.',
-            'Registre o CPF assim que tiver para liberar mais serviços.',
+            'Depois do CPF, compre um chip pré-pago em loja de operadora ou revenda confiável.',
+            'Ative a linha e registre o CPF no atendimento para evitar limitações depois.',
+            'Teste SMS e internet móvel antes de sair da loja.',
           ],
           es: [
-            'Compra un chip prepago en el aeropuerto o tienda de operadora.',
-            'Activa con pasaporte o DNI en el mostrador.',
-            'Registra el CPF apenas lo tengas para liberar mas servicios.',
+            'Despues del CPF, compra un chip prepago en tienda de operadora o punto confiable.',
+            'Activa la linea y registra el CPF en la atencion para evitar limites despues.',
+            'Prueba SMS e internet movil antes de salir de la tienda.',
           ],
           en: [
-            'Buy a prepaid SIM at the airport or carrier store.',
-            'Activate with your passport or national ID at the counter.',
-            'Register your CPF as soon as you have it to unlock more services.',
+            'After CPF, buy a prepaid SIM at a carrier store or trusted reseller.',
+            'Activate the line and register your CPF during activation to avoid later limits.',
+            'Test SMS and mobile data before leaving the store.',
           ],
         ),
         requirements: _list(
           locale,
-          pt: ['Passaporte ou DNI', 'R\$ 20-50 para o chip e crédito inicial'],
-          es: ['Pasaporte o DNI', 'R\$ 20-50 para el chip y credito inicial'],
-          en: ['Passport or national ID', 'R\$ 20-50 for the SIM and initial credit'],
+          pt: ['CPF emitido', 'Documento com foto', 'R\$ 20-50 para chip e crédito inicial'],
+          es: ['CPF emitido', 'Documento con foto', 'R\$ 20-50 para chip y credito inicial'],
+          en: ['Issued CPF', 'Photo ID', 'R\$ 20-50 for the SIM and initial credit'],
         ),
         doneCriteria: _t(
           locale,
@@ -950,7 +998,7 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: [
             'No aeroporto, os chips costumam ser mais caros. Se puder, compre em loja na cidade.',
-            'Guarde o número — ele será sua chave Pix depois.',
+            'Guarde o número — ele pode virar sua chave Pix depois.',
           ],
           es: [
             'En el aeropuerto los chips suelen ser mas caros. Si puedes, compra en tienda en la ciudad.',
@@ -1297,28 +1345,27 @@ class ArgentinaBrazilGuideDataSource {
         id: 'item_2_1_cpf',
         title: _t(
           locale,
-          pt: 'Tire seu CPF',
-          es: 'Saca tu CPF',
-          en: 'Get your CPF',
+          pt: 'Organize seu CPF',
+          es: 'Resuelve tu CPF',
+          en: 'Sort out your CPF',
         ),
         shortDescription: _t(
           locale,
-          pt: 'Esse é o primeiro documento que realmente destrava sua vida prática no Brasil.',
-          es: 'Este es el primer documento que realmente destraba tu vida practica en Brasil.',
-          en: 'This is the first document that truly unlocks practical life in Brazil.',
+          pt: 'Você pode resolver isso ainda na Argentina pelo consulado ou nos primeiros dias no Brasil.',
+          es: 'Puedes resolverlo todavia en Argentina por consulado o en los primeros dias en Brasil.',
+          en: 'You can handle this while still in Argentina through the consulate or in your first days in Brazil.',
         ),
         fullContent: null,
         type: GuideActionType.informative,
-        phase: GuidePhase.documents,
-        orderIndex: 7,
+        phase: GuidePhase.preparation,
+        orderIndex: 5,
         isCompleted: false,
         icon: Icons.badge_outlined,
-        dependencies: <String>['item_1_1_chip'],
         context: _t(
           locale,
-          pt: 'É o seu número fiscal no Brasil.',
-          es: 'Es tu numero fiscal en Brasil.',
-          en: 'It is your tax ID in Brazil.',
+          pt: 'É o seu número fiscal no Brasil e entra em quase toda a vida prática da mudança.',
+          es: 'Es tu numero fiscal en Brasil y aparece en casi toda la vida practica de la mudanza.',
+          en: 'It is your Brazilian tax ID and shows up in almost every practical part of the move.',
         ),
         whyItMatters: _t(
           locale,
@@ -1335,19 +1382,19 @@ class ArgentinaBrazilGuideDataSource {
         steps: _list(
           locale,
           pt: [
-            'Veja se vai fazer na Receita Federal ou nos Correios.',
-            'Separe DNI ou passaporte e um comprovante de endereço no Brasil.',
-            'Faça o pedido e confirme o número emitido.',
+            'Escolha a rota: consulado/embaixada do Brasil ainda na Argentina ou Receita/parceiro depois da chegada.',
+            'Confira no portal oficial quais documentos valem para a rota escolhida.',
+            'Faça o pedido e confirme o número emitido para já usar em banco, Pix e cadastros.',
           ],
           es: [
-            'Mira si lo haras en Receita Federal o en Correios.',
-            'Separa DNI o pasaporte y un comprobante de domicilio en Brasil.',
-            'Haz el tramite y confirma el numero emitido.',
+            'Elige la ruta: consulado/embajada de Brasil todavia en Argentina o Receita/punto asociado despues de llegar.',
+            'Revisa en el portal oficial que documentos sirven para la ruta elegida.',
+            'Haz el tramite y confirma el numero emitido para usarlo en banco, Pix y registros.',
           ],
           en: [
-            'Check whether you will do it at Receita Federal or Correios.',
-            'Prepare your ID or passport and proof of address in Brazil.',
-            'Submit the request and confirm the issued number.',
+            'Choose the route: Brazilian consulate/embassy while still in Argentina or Receita/partner service after arrival.',
+            'Check the official portal for which documents are valid for your chosen route.',
+            'Submit the request and confirm the issued number so you can use it for banking, Pix, and registrations.',
           ],
         ),
         doneCriteria: _t(
@@ -1359,16 +1406,16 @@ class ArgentinaBrazilGuideDataSource {
         tips: _list(
           locale,
           pt: [
-            'Não espere a residência sair. O CPF pode ser pedido antes.',
-            'Se sua moradia for temporária, use um comprovante com seu nome e endereço.',
+            'Não espere a residência sair. O CPF pode ser pedido antes e até no exterior.',
+            'Se você preferir deixar para o Brasil, resolva isso logo nos primeiros dias.',
           ],
           es: [
-            'No esperes a que salga la residencia. El CPF puede pedirse antes.',
-            'Si tu vivienda es temporal, usa un comprobante con tu nombre y direccion.',
+            'No esperes a que salga la residencia. El CPF puede pedirse antes e incluso en el exterior.',
+            'Si prefieres dejarlo para Brasil, resuelvelo en los primeros dias.',
           ],
           en: [
-            'Do not wait for residency to be approved. CPF can be requested before that.',
-            'If your housing is temporary, use proof with your name and address.',
+            'Do not wait for residency approval. CPF can be requested before that and even abroad.',
+            'If you prefer to leave it for Brazil, handle it in your first few days.',
           ],
         ),
         blockingReason: _t(
@@ -1419,9 +1466,9 @@ class ArgentinaBrazilGuideDataSource {
         urgencyLevel: GuideUrgencyLevel.urgent,
         urgencySignal: _t(
           locale,
-          pt: 'CPF destrava tudo: sem ele, não tem banco, não tem Pix, não tem aluguel. Faça no primeiro dia.',
-          es: 'El CPF destraba todo: sin el no hay banco, no hay Pix, no hay alquiler. Hazlo el primer dia.',
-          en: 'CPF unlocks everything: without it there is no bank, no Pix, no rental. Do it on day one.',
+          pt: 'Se puder fazer ainda na Argentina, você chega mais destravado. Se não, resolva nos primeiros dias no Brasil.',
+          es: 'Si puedes hacerlo todavia en Argentina, llegaras mas destrabado. Si no, resuelvelo en los primeros dias en Brasil.',
+          en: 'If you can do it while still in Argentina, you arrive less blocked. If not, handle it in your first few days in Brazil.',
         ),
         communityTips: _list(
           locale,
@@ -1446,15 +1493,15 @@ class ArgentinaBrazilGuideDataSource {
         id: 'item_2_2_residencia',
         title: _t(
           locale,
-          pt: 'Solicite sua residência Mercosul',
-          es: 'Solicita tu residencia Mercosur',
-          en: 'Apply for your Mercosur residency',
+          pt: 'Inicie sua residência Mercosul',
+          es: 'Inicia tu residencia Mercosur',
+          en: 'Start your Mercosur residence process',
         ),
         shortDescription: _t(
           locale,
-          pt: 'Esse é o passo que regulariza sua permanência e dá base para trabalho e contratos.',
-          es: 'Este es el paso que regulariza tu permanencia y da base para trabajo y contratos.',
-          en: 'This is the step that regularizes your stay and supports work and contracts.',
+          pt: 'Esse é o protocolo que coloca sua regularização em andamento dentro da janela legal dos 90 dias.',
+          es: 'Este es el tramite que pone tu regularizacion en marcha dentro de la ventana legal de 90 dias.',
+          en: 'This is the filing step that puts your regularization in motion within the legal 90-day window.',
         ),
         fullContent: null,
         type: GuideActionType.informative,
@@ -1465,9 +1512,9 @@ class ArgentinaBrazilGuideDataSource {
         dependencies: <String>['item_2_1_cpf'],
         context: _t(
           locale,
-          pt: 'Como argentino, você pode se regularizar no Brasil pela rota Mercosul.',
-          es: 'Como argentino, puedes regularizarte en Brasil por la via Mercosur.',
-          en: 'As an Argentine citizen, you can regularize in Brazil through the Mercosur path.',
+          pt: 'Como argentino, a rota Mercosul costuma ser o caminho principal para regularizar sua permanência no Brasil.',
+          es: 'Como argentino, la ruta Mercosur suele ser el camino principal para regularizar tu permanencia en Brasil.',
+          en: 'As an Argentine citizen, the Mercosur route is usually the main path to regularize your stay in Brazil.',
         ),
         whyItMatters: _t(
           locale,
@@ -1477,28 +1524,32 @@ class ArgentinaBrazilGuideDataSource {
         ),
         primaryActionLabel: _t(
           locale,
-          pt: 'Agendar na Polícia Federal',
-          es: 'Pedir turno en la Policia Federal',
-          en: 'Book Federal Police appointment',
+          pt: 'Ver rota oficial da residência',
+          es: 'Ver ruta oficial de residencia',
+          en: 'See the official residency path',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget:
-            PreparationResourceLinks.pfScheduling.toString(),
+        primaryActionTarget: PreparationResourceLinks
+            .argentinaResidenceAgreement
+            .toString(),
         steps: _list(
           locale,
           pt: [
-            'Agende o atendimento o mais cedo possível.',
-            'Monte a pasta com documentos, cópias, foto e comprovantes.',
+            'Confirme no portal oficial quais documentos entram na sua rota Mercosul.',
+            'Monte a pasta com documentos, cópias, foto e comprovantes antes de sair correndo atrás de vaga.',
+            'Se a sua cidade costuma ter fila, tente agendar cedo; se não, vá com a pasta pronta logo no início da chegada.',
             'Vá ao atendimento e guarde o protocolo recebido.',
           ],
           es: [
-            'Saca el turno lo antes posible.',
-            'Arma la carpeta con documentos, copias, foto y comprobantes.',
+            'Confirma en el portal oficial que documentos entran en tu ruta Mercosur.',
+            'Arma la carpeta con documentos, copias, foto y comprobantes antes de salir corriendo por un turno.',
+            'Si tu ciudad suele tener cola, intenta agendar temprano; si no, llega con la carpeta lista al inicio.',
             'Asiste al turno y guarda el protocolo recibido.',
           ],
           en: [
-            'Book the appointment as early as possible.',
-            'Prepare the folder with documents, copies, photo, and proofs.',
+            'Confirm on the official portal which documents apply to your Mercosur route.',
+            'Build the folder with documents, copies, photo, and proofs before rushing for an appointment.',
+            'If your city usually has a backlog, try booking early; if not, arrive with the folder ready at the start.',
             'Attend the appointment and keep the protocol you receive.',
           ],
         ),
@@ -1511,15 +1562,18 @@ class ArgentinaBrazilGuideDataSource {
         tips: _list(
           locale,
           pt: [
-            'Em muitas cidades, o gargalo é vaga. O ideal é agendar nos primeiros dias no Brasil.',
+            'Agendar antes de embarcar pode ajudar em cidades com fila, mas não é obrigação legal geral.',
+            'O que é obrigatório é não deixar o protocolo para a reta final dos 90 dias.',
             'Leve originais e cópias para não perder a ida.',
           ],
           es: [
-            'En muchas ciudades, el cuello de botella es el turno. Lo ideal es pedirlo en los primeros dias en Brasil.',
+            'Agendar antes de viajar puede ayudar en ciudades con cola, pero no es una obligacion legal general.',
+            'Lo obligatorio es no dejar el tramite para la recta final de los 90 dias.',
             'Lleva originales y copias para no perder la ida.',
           ],
           en: [
-            'In many cities, the bottleneck is appointment availability. Ideally, book it in your first days in Brazil.',
+            'Booking before boarding can help in cities with long queues, but it is not a general legal requirement.',
+            'What matters legally is not leaving the filing to the last stretch of the 90 days.',
             'Bring originals and copies so you do not waste the visit.',
           ],
         ),
@@ -1541,9 +1595,9 @@ class ArgentinaBrazilGuideDataSource {
             id: 'res_1',
             title: _t(
               locale,
-              pt: 'Agendar no site da Polícia Federal',
-              es: 'Pedir turno en el sitio de la Policia Federal',
-              en: 'Book on the Federal Police website',
+              pt: 'Verificar a rota oficial e a agenda da Polícia Federal',
+              es: 'Revisar la ruta oficial y la agenda de la Policia Federal',
+              en: 'Check the official route and Federal Police booking',
             ),
             isCompleted: false,
           ),
@@ -1578,13 +1632,12 @@ class ArgentinaBrazilGuideDataSource {
             isCompleted: false,
           ),
         ],
-        preArrivalRequired: true,
         urgencyLevel: GuideUrgencyLevel.critical,
         urgencySignal: _t(
           locale,
-          pt: 'Agende pela internet AINDA NA ARGENTINA — muitas cidades têm fila de 60-90 dias na PF.',
-          es: 'Saca el turno por internet AUN EN ARGENTINA — muchas ciudades tienen cola de 60-90 dias en la PF.',
-          en: 'Book online WHILE STILL IN ARGENTINA — many cities have a 60-90 day backlog at the Federal Police.',
+          pt: 'Seu pedido precisa entrar dentro da janela dos 90 dias. Se a sua cidade tem fila, tente agendar cedo; se não, chegue com a pasta pronta.',
+          es: 'Tu tramite tiene que entrar dentro de la ventana de 90 dias. Si tu ciudad tiene cola, intenta agendar temprano; si no, llega con la carpeta lista.',
+          en: 'Your filing needs to happen within the 90-day window. If your city has queues, try booking early; if not, arrive with the folder ready.',
         ),
         survivalPhrases: [
           SurvivalPhrase(
@@ -1603,17 +1656,17 @@ class ArgentinaBrazilGuideDataSource {
         communityTips: _list(
           locale,
           pt: [
-            '"Agendei pela internet ainda na Argentina — quando cheguei, a espera era de 2 meses para quem não agendou."',
+            '"Na minha cidade fez diferença agendar cedo; em outras, o mais importante foi chegar com a pasta pronta."',
             '"Leve originais E cópias de tudo. Eles pedem cópia na maioria das vezes, mas o original confirma."',
             '"O protocolo que você recebe já serve como documento — com ele dá pra abrir conta e alugar."',
           ],
           es: [
-            '"Saque el turno por internet todavia en Argentina — cuando llegue, la espera era de 2 meses para quienes no tenian turno."',
+            '"En mi ciudad hizo diferencia agendar temprano; en otras, lo clave fue llegar con la carpeta lista."',
             '"Lleva originales Y copias de todo. Piden copia la mayoria de las veces, pero el original confirma."',
             '"El protocolo que recibes ya sirve como documento — con el puedes abrir cuenta y alquilar."',
           ],
           en: [
-            '"I booked online while still in Argentina — when I arrived, the wait was 2 months for those without appointments."',
+            '"In my city it helped to book early; in others, the key was arriving with the folder ready."',
             '"Bring originals AND copies of everything. They usually ask for copies but the original confirms."',
             '"The protocol you receive already works as a document — with it you can open an account and rent."',
           ],
@@ -1639,7 +1692,7 @@ class ArgentinaBrazilGuideDataSource {
         orderIndex: 9,
         isCompleted: false,
         icon: Icons.work_outline_rounded,
-        dependencies: <String>['item_2_1_cpf'],
+        dependencies: <String>['item_2_2_residencia'],
         context: _t(
           locale,
           pt: 'A CTPS é obrigatória para qualquer contratação formal (CLT) no Brasil.',
@@ -2678,9 +2731,9 @@ class ArgentinaBrazilGuideDataSource {
         ),
         shortDescription: _t(
           locale,
-          pt: 'Com CPF em mãos, o Cartão SUS sai em qualquer UBS em 15 minutos. Agora você escolhe o plano definitivo.',
-          es: 'Con el CPF en mano, la Tarjeta SUS sale en cualquier UBS en 15 minutos. Ahora eliges la cobertura definitiva.',
-          en: 'With your CPF in hand, the SUS card is issued at any UBS in 15 minutes. Now you choose your definitive coverage.',
+          pt: 'Depois de se instalar, organize o que vai usar no dia a dia: SUS, UPA de referência e, se fizer sentido, plano privado.',
+          es: 'Despues de instalarte, organiza lo que usaras en el dia a dia: SUS, UPA de referencia y, si tiene sentido, plan privado.',
+          en: 'After settling in, organize what you will use day to day: SUS, your reference UPA, and a private plan if it makes sense.',
         ),
         fullContent: null,
         type: GuideActionType.checklist,
@@ -2713,18 +2766,21 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: [
             'Veja se o SUS já cobre o que você precisa no começo.',
+            'Se quiser organizar seu cadastro no SUS, confira na UBS da região como fazer o CNS/Cartão SUS com seus documentos.',
             'Se tiver CLT, confirme se o trabalho oferece plano.',
             'Se for autônomo, compare se vale contratar algo privado nos primeiros meses.',
             'Localize a UPA ou posto de saúde mais perto da sua casa.',
           ],
           es: [
             'Mira si el SUS ya cubre lo que necesitas al principio.',
+            'Si quieres ordenar tu registro en el SUS, revisa en la UBS de tu zona como sacar el CNS/Tarjeta SUS con tus documentos.',
             'Si tienes trabajo CLT, confirma si ofrece plan.',
             'Si eres autonomo, compara si vale contratar algo privado en los primeros meses.',
             'Localiza la UPA o puesto de salud mas cerca de tu casa.',
           ],
           en: [
             'Check whether SUS already covers what you need at the start.',
+            'If you want to organize your SUS registration, check with the local UBS how to obtain your CNS/SUS card with your documents.',
             'If you have CLT work, confirm whether it offers a health plan.',
             'If you are self-employed, compare whether private cover is worth it in the first months.',
             'Find the nearest UPA or health clinic to your home.',
@@ -2732,9 +2788,9 @@ class ArgentinaBrazilGuideDataSource {
         ),
         requirements: _list(
           locale,
-          pt: ['CPF', 'Documento com foto'],
-          es: ['CPF', 'Documento con foto'],
-          en: ['CPF', 'Photo ID'],
+          pt: ['Documento com foto', 'CPF quando solicitado pela UBS'],
+          es: ['Documento con foto', 'CPF cuando la UBS lo pida'],
+          en: ['Photo ID', 'CPF when requested by the UBS'],
         ),
         doneCriteria: _t(
           locale,
@@ -2746,15 +2802,18 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: [
             'Mesmo com plano, vale entender qual posto ou UPA atende sua região.',
-            'O Cartão Nacional de Saúde (CNS) pode ser feito em qualquer UBS com CPF.',
+            'Para urgência, a referência continua sendo UPA/hospital mesmo antes de organizar o CNS.',
+            'O Cartão Nacional de Saúde (CNS) costuma ser organizado na UBS com os documentos que a unidade pedir.',
           ],
           es: [
             'Incluso con plan, conviene saber que puesto o UPA atiende tu zona.',
-            'El Cartao Nacional de Saude (CNS) se hace en cualquier UBS con CPF.',
+            'Para urgencias, la referencia sigue siendo UPA/hospital incluso antes de organizar el CNS.',
+            'La Tarjeta Nacional de Salud (CNS) suele organizarse en la UBS con los documentos que la unidad pida.',
           ],
           en: [
             'Even with a plan, it is worth knowing which clinic or UPA serves your area.',
-            'The National Health Card (CNS) can be obtained at any UBS with your CPF.',
+            'For urgent care, UPA/hospital remains the reference even before organizing the CNS.',
+            'The National Health Card (CNS) is usually arranged at the UBS with whichever documents the unit requests.',
           ],
         ),
         decisionOptions: [
@@ -2873,6 +2932,97 @@ class ArgentinaBrazilGuideDataSource {
         ),
       ),
       GuideActionItem(
+        id: 'item_4_5_registro_rnm',
+        title: _t(
+          locale,
+          pt: 'Acompanhe o registro RNM / CRNM',
+          es: 'Sigue el registro RNM / CRNM',
+          en: 'Track your RNM / CRNM registration',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'Depois da autorização concedida, existe uma etapa própria de registro migratório e emissão da CRNM.',
+          es: 'Despues de la autorizacion concedida, existe una etapa propia de registro migratorio y emision de la CRNM.',
+          en: 'After residence is granted, there is a separate migration registration and CRNM issuance step.',
+        ),
+        fullContent: null,
+        type: GuideActionType.informative,
+        phase: GuidePhase.arrival,
+        orderIndex: 17,
+        isCompleted: false,
+        icon: Icons.badge_rounded,
+        dependencies: <String>['item_2_2_residencia'],
+        context: _t(
+          locale,
+          pt: 'Autorização de residência e registro migratório não são a mesma coisa. Quando a autorização sair, acompanhe o registro para não perder o prazo oficial.',
+          es: 'Autorizacion de residencia y registro migratorio no son lo mismo. Cuando salga la autorizacion, sigue el registro para no perder el plazo oficial.',
+          en: 'Residence authorization and migration registration are not the same thing. Once authorization is granted, follow the registration step so you do not miss the official deadline.',
+        ),
+        whyItMatters: _t(
+          locale,
+          pt: 'O protocolo inicial preserva direitos, mas o registro e a emissão da CRNM fecham a documentação migratória da etapa temporária.',
+          es: 'El protocolo inicial preserva derechos, pero el registro y la emision de la CRNM cierran la documentacion migratoria de la etapa temporaria.',
+          en: 'The initial protocol preserves rights, but registration and CRNM issuance complete the migration documentation for the temporary stage.',
+        ),
+        primaryActionLabel: _t(
+          locale,
+          pt: 'Ver registro RNM',
+          es: 'Ver registro RNM',
+          en: 'See RNM registration',
+        ),
+        primaryActionType: GuidePrimaryActionType.external,
+        primaryActionTarget:
+            PreparationResourceLinks.rnMRegistrationGuide.toString(),
+        steps: _list(
+          locale,
+          pt: [
+            'Acompanhe quando a autorização de residência for concedida ou publicada.',
+            'Confira a orientação oficial do RNM/CRNM e o prazo aplicável ao seu caso.',
+            'Faça o registro na janela correta e guarde o protocolo/cartão emitido.',
+          ],
+          es: [
+            'Sigue cuando la autorizacion de residencia sea concedida o publicada.',
+            'Revisa la orientacion oficial del RNM/CRNM y el plazo que aplica a tu caso.',
+            'Haz el registro en la ventana correcta y guarda el protocolo/tarjeta emitida.',
+          ],
+          en: [
+            'Track when residence authorization is granted or published.',
+            'Check the official RNM/CRNM guidance and the deadline that applies to your case.',
+            'Complete the registration in the correct window and keep the issued protocol/card.',
+          ],
+        ),
+        doneCriteria: _t(
+          locale,
+          pt: 'Você já entendeu o passo de registro e está acompanhando a emissão do seu RNM / CRNM sem perder o prazo oficial.',
+          es: 'Ya entendiste el paso de registro y estas siguiendo la emision de tu RNM / CRNM sin perder el plazo oficial.',
+          en: 'You already understand the registration step and are tracking your RNM / CRNM issuance without missing the official deadline.',
+        ),
+        tips: _list(
+          locale,
+          pt: [
+            'O protocolo da residência já ajuda no meio do caminho, então você não depende de um cartão instantâneo.',
+            'Quando a autorização for concedida já no Brasil, o registro costuma ter prazo próprio de 30 dias.',
+          ],
+          es: [
+            'El protocolo de residencia ya ayuda en el camino, asi que no dependes de una tarjeta instantanea.',
+            'Cuando la autorizacion se concede ya en Brasil, el registro suele tener un plazo propio de 30 dias.',
+          ],
+          en: [
+            'The residency protocol already helps in the meantime, so you do not depend on an instant card.',
+            'When authorization is granted in Brazil, registration usually has its own 30-day deadline.',
+          ],
+        ),
+        estimatedEffort: GuideEstimatedEffort.fast,
+        estimatedTimeLabel: _t(locale, pt: '10 min + acompanhamento', es: '10 min + seguimiento', en: '10 min + follow-up'),
+        urgencyLevel: GuideUrgencyLevel.watch,
+        urgencySignal: _t(
+          locale,
+          pt: 'Essa etapa só entra depois da autorização concedida, mas não deixe passar se o portal da PF abrir a janela do RNM.',
+          es: 'Este paso solo entra despues de la autorizacion concedida, pero no lo dejes pasar si el portal de la PF abre la ventana del RNM.',
+          en: 'This step only applies after residence is granted, but do not miss it if the PF portal opens your RNM window.',
+        ),
+      ),
+      GuideActionItem(
         id: 'item_4_3_permanencia',
         title: _t(
           locale,
@@ -2889,10 +3039,10 @@ class ArgentinaBrazilGuideDataSource {
         fullContent: null,
         type: GuideActionType.external,
         phase: GuidePhase.arrival,
-        orderIndex: 17,
+        orderIndex: 18,
         isCompleted: false,
         icon: Icons.event_available_outlined,
-        dependencies: <String>['item_2_2_residencia'],
+        dependencies: <String>['item_4_5_registro_rnm'],
         context: _t(
           locale,
           pt: 'A residência temporária Mercosul tem validade de 2 anos. Antes do vencimento, você precisa pedir a permanente.',
@@ -2918,19 +3068,19 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: [
             'Verifique a data de vencimento da sua residência temporária.',
-            'Reúna os documentos exigidos (CPF, comprovante de endereço, antecedentes, protocolo de residência).',
+            'Reúna os documentos exigidos (CPF, comprovante de endereço, antecedentes e seus documentos migratórios atualizados).',
             'Agende atendimento na Polícia Federal para solicitar a transformação.',
             'Compareça ao atendimento e acompanhe o andamento pelo portal.',
           ],
           es: [
             'Verifica la fecha de vencimiento de tu residencia temporaria.',
-            'Reune los documentos requeridos (CPF, comprobante de domicilio, antecedentes, protocolo de residencia).',
+            'Reune los documentos requeridos (CPF, comprobante de domicilio, antecedentes y tus documentos migratorios actualizados).',
             'Agenda turno en la Policia Federal para solicitar la transformacion.',
             'Asiste al turno y sigue el tramite por el portal.',
           ],
           en: [
             'Check the expiration date of your temporary residence.',
-            'Gather required documents (CPF, proof of address, criminal record, residency protocol).',
+            'Gather required documents (CPF, proof of address, criminal record, and your updated migration documents).',
             'Schedule an appointment at the Federal Police to apply for conversion.',
             'Attend the appointment and track progress through the portal.',
           ],
@@ -3259,21 +3409,21 @@ class ArgentinaBrazilGuideDataSource {
     switch (goal) {
       case 'work':
       case 'find_job_br':
-        // Sequence: understand rules → research job market → understand health
-        // → budget → money → flight → arrive (SIM+housing)
-        // → CPF → residency → work card → bank → Pix → execute income path → long-term rent
+        // Sequence: understand rules → base documents and research before travel
+        // → optional CPF route before boarding → money/arrival logistics
+        // → residency filing on arrival → work card → bank → Pix → income path
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
           'item_0_3_budget',
           'item_0_5_mercado_trabalho',  // research BEFORE leaving
           'item_0_6_saude_entender',    // understand health BEFORE leaving
+          'item_2_1_cpf',               // can be done before travel or on arrival
           'item_1_3_money',
           'item_0_4_flight',
-          'item_1_1_chip',
           'item_1_2_housing_temporary',
-          'item_2_1_cpf',
           'item_2_2_residencia',
+          'item_1_1_chip',
           'item_2_3_ctps',
           'item_3_1_conta_bancaria',
           'item_3_3_pix',
@@ -3285,44 +3435,43 @@ class ArgentinaBrazilGuideDataSource {
       case 'remote_work':
       case 'entrepreneur':
         // Sequence: understand rules → research income model → understand health
-        // → budget → money → flight → arrive (SIM+housing)
-        // → CPF → bank → Pix → MEI (formalize income fast) → residency
-        // → work definition → long-term rent
+        // → optional CPF route before boarding → money/logistics
+        // → bank/Pix/MEI → residency filing → work definition → rent
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
           'item_0_3_budget',
           'item_0_5_mercado_trabalho',  // research BEFORE leaving
           'item_0_6_saude_entender',    // understand health BEFORE leaving
+          'item_2_1_cpf',
           'item_1_3_money',
           'item_0_4_flight',
-          'item_1_1_chip',
           'item_1_2_housing_temporary',
-          'item_2_1_cpf',
           'item_3_1_conta_bancaria',
           'item_3_3_pix',
           'item_4_4_mei',
           'item_2_2_residencia',
+          'item_1_1_chip',
           'item_3_4_trabalho',
           'item_3_2_aluguel_fixo',
           'item_4_2_saude',             // get SUS card AFTER arriving
         ];
       case 'study':
-        // Sequence: understand rules → research job market (part-time context) → understand health
-        // → budget → money → flight → arrive (SIM+housing)
-        // → CPF → residency → work card → bank → Pix → rent
+        // Sequence: understand rules → research job market (part-time context)
+        // → understand health → optional CPF route before travel
+        // → money/arrival logistics → residency → work card → bank → Pix → rent
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
           'item_0_3_budget',
           'item_0_5_mercado_trabalho',  // understand part-time/internship market
           'item_0_6_saude_entender',    // understand health BEFORE leaving
+          'item_2_1_cpf',
           'item_1_3_money',
           'item_0_4_flight',
-          'item_1_1_chip',
           'item_1_2_housing_temporary',
-          'item_2_1_cpf',
           'item_2_2_residencia',
+          'item_1_1_chip',
           'item_2_3_ctps',
           'item_3_1_conta_bancaria',
           'item_3_3_pix',
@@ -3334,20 +3483,20 @@ class ArgentinaBrazilGuideDataSource {
       case 'beach_life':
       case 'fresh_start':
         // Sequence: understand rules → research local economy → understand health
-        // → budget → money → flight → arrive (SIM+housing)
-        // → CPF → residency → bank → Pix → rent → get SUS card
+        // → optional CPF route before travel → money/arrival logistics
+        // → residency → bank → Pix → rent → get SUS card
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
           'item_0_3_budget',
           'item_0_5_mercado_trabalho',  // understand local economy before deciding
           'item_0_6_saude_entender',    // understand health BEFORE leaving
+          'item_2_1_cpf',
           'item_1_3_money',
           'item_0_4_flight',
-          'item_1_1_chip',
           'item_1_2_housing_temporary',
-          'item_2_1_cpf',
           'item_2_2_residencia',
+          'item_1_1_chip',
           'item_3_1_conta_bancaria',
           'item_3_3_pix',
           'item_3_2_aluguel_fixo',
@@ -3368,26 +3517,31 @@ class ArgentinaBrazilGuideDataSource {
       'item_2_1_cpf' => item.copyWith(
         costInfo: _t(
           locale,
-          pt: 'Gratuito na Receita Federal. Pode haver taxa baixa se você usar atendimento parceiro.',
-          es: 'Gratis en Receita Federal. Puede haber una tasa baja si usas un punto asociado.',
-          en: 'Free at Receita Federal. There may be a small fee at partner service points.',
+          pt: 'Gratuito pela rota consular/Receita. Parceiros presenciais podem cobrar taxa baixa de atendimento.',
+          es: 'Gratis por la ruta consular/Receita. Los puntos presenciales asociados pueden cobrar una tasa baja.',
+          en: 'Free through the consular/Receita route. In-person partner service points may charge a small fee.',
+        ),
+        decisionOptions: _cpfDecisionOptions(
+          plan,
+          currentLocation,
+          locale,
         ),
         requirements: _list(
           locale,
           pt: [
-            'Documento de identidade',
-            'Dados pessoais',
-            'Comprovante de endereço quando solicitado',
+            'Documento de identidade válido',
+            'Dados pessoais completos',
+            'Documentos pedidos pela rota escolhida (consulado ou atendimento no Brasil)',
           ],
           es: [
-            'Documento de identidad',
-            'Datos personales',
-            'Comprobante de domicilio cuando se pida',
+            'Documento de identidad valido',
+            'Datos personales completos',
+            'Documentos pedidos por la ruta elegida (consulado o atencion en Brasil)',
           ],
           en: [
-            'Identity document',
-            'Personal data',
-            'Proof of address when requested',
+            'Valid identity document',
+            'Complete personal data',
+            'Documents required by the chosen route (consulate or service in Brazil)',
           ],
         ),
         estimatedTime: _t(
@@ -3406,20 +3560,38 @@ class ArgentinaBrazilGuideDataSource {
           GuideSupportLink(
             label: _t(
               locale,
-              pt: 'Receita Federal',
-              es: 'Receita Federal',
-              en: 'Receita Federal',
+              pt: 'CPF no Brasil',
+              es: 'CPF en Brasil',
+              en: 'CPF in Brazil',
             ),
-            url: 'https://www.gov.br/pt-br/servicos/inscrever-no-cpf',
+            url: PreparationResourceLinks.cpfInBrazil.toString(),
+          ),
+          GuideSupportLink(
+            label: _t(
+              locale,
+              pt: 'CPF no exterior',
+              es: 'CPF en el exterior',
+              en: 'CPF abroad',
+            ),
+            url: PreparationResourceLinks.cpfInExterior.toString(),
+          ),
+          GuideSupportLink(
+            label: _t(
+              locale,
+              pt: 'Rede consular do Brasil na Argentina',
+              es: 'Red consular de Brasil en Argentina',
+              en: 'Brazilian consular network in Argentina',
+            ),
+            url: 'https://www.gov.br/mre/pt-br/assuntos/portal-consular/reparticoes-consulares-do-brasil',
           ),
         ],
       ),
       'item_2_2_residencia' => item.copyWith(
         costInfo: _t(
           locale,
-          pt: 'Pode envolver taxas e custos de cópia, foto e deslocamento.',
-          es: 'Puede incluir tasas y costos de copias, foto y traslado.',
-          en: 'May involve fees plus copy, photo, and transport costs.',
+          pt: 'Pode envolver taxas, foto, cópias e deslocamento. O valor exato depende da etapa e da cidade.',
+          es: 'Puede incluir tasas, foto, copias y traslado. El valor exacto depende de la etapa y de la ciudad.',
+          en: 'This may involve fees, photos, copies, and transport. The exact amount depends on the stage and city.',
         ),
         requirements: _list(
           locale,
@@ -3454,17 +3626,58 @@ class ArgentinaBrazilGuideDataSource {
         ],
         locationAwareOptions: _residencyOptions(plan, currentLocation, locale),
         mapLinks: _residencyMapLinks(plan, currentLocation, locale),
-        externalOfficialLinks: [
-          GuideSupportLink(
-            label: _t(
-              locale,
-              pt: 'Polícia Federal',
-              es: 'Policia Federal',
-              en: 'Federal Police',
-            ),
-            url: 'https://www.gov.br/pf/pt-br/assuntos/imigracao',
-          ),
+        externalOfficialLinks: _pfOfficialSupportLinks(
+          plan,
+          currentLocation,
+          locale,
+        ),
+      ),
+      'item_4_5_registro_rnm' => item.copyWith(
+        costInfo: _t(
+          locale,
+          pt: 'Consulte o portal oficial para saber se há taxa ou exigência complementar na etapa do registro.',
+          es: 'Consulta el portal oficial para saber si hay tasa o exigencia complementaria en la etapa del registro.',
+          en: 'Check the official portal to see whether there is any fee or extra requirement at the registration stage.',
+        ),
+        requirements: _list(
+          locale,
+          pt: [
+            'Autorização de residência concedida ou publicada',
+            'Documento de identidade válido',
+            'CPF e dados de contato atualizados',
+          ],
+          es: [
+            'Autorizacion de residencia concedida o publicada',
+            'Documento de identidad valido',
+            'CPF y datos de contacto actualizados',
+          ],
+          en: [
+            'Residence authorization granted or published',
+            'Valid identity document',
+            'CPF and updated contact details',
+          ],
+        ),
+        estimatedTime: _t(
+          locale,
+          pt: 'Consulta + acompanhamento do portal',
+          es: 'Consulta + seguimiento del portal',
+          en: 'Portal check + follow-up',
+        ),
+        executionModes: const [
+          GuideExecutionMode.online,
+          GuideExecutionMode.inPerson,
         ],
+        locationAwareOptions: _registrationOptions(
+          plan,
+          currentLocation,
+          locale,
+        ),
+        mapLinks: _residencyMapLinks(plan, currentLocation, locale),
+        externalOfficialLinks: _pfRegistrationSupportLinks(
+          plan,
+          currentLocation,
+          locale,
+        ),
       ),
       'item_3_1_conta_bancaria' => item.copyWith(
         costInfo: _t(
@@ -3731,28 +3944,17 @@ class ArgentinaBrazilGuideDataSource {
           GuideExecutionMode.inPerson,
           GuideExecutionMode.online,
         ],
-        locationAwareOptions: _residencyOptions(plan, currentLocation, locale),
+        locationAwareOptions: _registrationOptions(
+          plan,
+          currentLocation,
+          locale,
+        ),
         mapLinks: _residencyMapLinks(plan, currentLocation, locale),
-        externalOfficialLinks: [
-          GuideSupportLink(
-            label: _t(
-              locale,
-              pt: 'Polícia Federal - Imigração',
-              es: 'Policia Federal - Inmigracion',
-              en: 'Federal Police - Immigration',
-            ),
-            url: PreparationResourceLinks.pfPortal.toString(),
-          ),
-          GuideSupportLink(
-            label: _t(
-              locale,
-              pt: 'Agendamento PF',
-              es: 'Agendamiento PF',
-              en: 'PF Scheduling',
-            ),
-            url: PreparationResourceLinks.pfScheduling.toString(),
-          ),
-        ],
+        externalOfficialLinks: _pfRegistrationSupportLinks(
+          plan,
+          currentLocation,
+          locale,
+        ),
       ),
       'item_0_2_antecedentes' => item.copyWith(
         costInfo: _t(
@@ -3922,51 +4124,251 @@ class ArgentinaBrazilGuideDataSource {
   ) {
     final city = _contextCity(plan, currentLocation);
     final inDestination = _isInDestinationCountry(currentLocation, plan);
+    final nearestConsularPost = _nearestArgentinaConsularPost(currentLocation);
+    final consularDistance = nearestConsularPost == null || currentLocation == null
+        ? null
+        : const Distance().as(
+            LengthUnit.Kilometer,
+            LatLng(currentLocation.latitude, currentLocation.longitude),
+            LatLng(nearestConsularPost.latitude, nearestConsularPost.longitude),
+          ).round();
     return [
+      GuideLocationAwareOption(
+        title: _t(
+          locale,
+          pt: 'Fazer na Argentina',
+          es: 'Hacerlo en Argentina',
+          en: 'Do it in Argentina',
+        ),
+        subtitle: _t(
+          locale,
+          pt: nearestConsularPost == null
+              ? 'Use a rota oficial de CPF no exterior via consulado ou embaixada do Brasil'
+              : _consularCpfSubtitlePt(
+                  nearestConsularPost.city,
+                  consularDistance,
+                ),
+          es: nearestConsularPost == null
+              ? 'Usa la ruta oficial de CPF en el exterior por consulado o embajada de Brasil'
+              : _consularCpfSubtitleEs(
+                  nearestConsularPost.city,
+                  consularDistance,
+                ),
+          en: nearestConsularPost == null
+              ? 'Use the official CPF abroad route through a Brazilian consulate or embassy'
+              : _consularCpfSubtitleEn(
+                  nearestConsularPost.city,
+                  consularDistance,
+                ),
+        ),
+        address: nearestConsularPost?.city,
+        distanceKm: consularDistance,
+        officialUrl: PreparationResourceLinks.cpfInExterior.toString(),
+        officialLabel: 'gov.br',
+      ),
+      if (nearestConsularPost != null)
+        GuideLocationAwareOption(
+          title: _t(
+            locale,
+            pt: 'Posto consular mais próximo',
+            es: 'Puesto consular mas cercano',
+            en: 'Nearest consular post',
+          ),
+          subtitle: _t(
+            locale,
+            pt: 'Consulte horários, e-consular e exigências locais do posto de ${nearestConsularPost.city}',
+            es: 'Consulta horarios, e-consular y exigencias locales del puesto de ${nearestConsularPost.city}',
+            en: 'Check hours, e-consular flow, and local requirements for the ${nearestConsularPost.city} post',
+          ),
+          address: nearestConsularPost.city,
+          distanceKm: consularDistance,
+          officialUrl: nearestConsularPost.officialUrl,
+          officialLabel: 'Itamaraty',
+        ),
       GuideLocationAwareOption(
         title: _t(
           locale,
           pt: inDestination
               ? 'Atendimento presencial próximo'
-              : 'Onde fazer ao chegar',
+              : 'Fazer no Brasil',
           es: inDestination
               ? 'Atencion presencial cercana'
-              : 'Donde hacerlo al llegar',
+              : 'Hacerlo en Brasil',
           en: inDestination
               ? 'Nearby in-person option'
-              : 'Where to do it when you arrive',
+              : 'Do it in Brazil',
         ),
         subtitle: _t(
           locale,
           pt: inDestination
               ? 'Buscar Receita Federal ou parceiro autorizado'
-              : 'Use $city como referência para planejar esse passo',
+              : 'Se deixar para o Brasil, use $city como referência para planejar esse passo',
           es: inDestination
               ? 'Buscar Receita Federal o punto autorizado'
-              : 'Usa $city como referencia para planear este paso',
+              : 'Si lo dejas para Brasil, usa $city como referencia para planear este paso',
           en: inDestination
               ? 'Search Receita Federal or an authorized point'
-              : 'Use $city as the planning reference for this step',
+              : 'If you leave it for Brazil, use $city as the planning reference for this step',
         ),
         address: city,
         distanceKm: inDestination ? _distanceKm(plan, currentLocation) : null,
         mapUrl: _mapSearchUrl('Receita Federal $city'),
+        officialUrl: PreparationResourceLinks.cpfInBrazil.toString(),
+        officialLabel: 'gov.br',
       ),
-      GuideLocationAwareOption(
+    ];
+  }
+
+  static List<GuideDecisionOption> _cpfDecisionOptions(
+    MigrationPlan plan,
+    LocationData? currentLocation,
+    String locale,
+  ) {
+    final nearestConsularPost = _nearestArgentinaConsularPost(currentLocation);
+    final consularDistance = nearestConsularPost == null || currentLocation == null
+        ? null
+        : const Distance().as(
+            LengthUnit.Kilometer,
+            LatLng(currentLocation.latitude, currentLocation.longitude),
+            LatLng(nearestConsularPost.latitude, nearestConsularPost.longitude),
+          ).round();
+    final consularRecommended =
+        currentLocation != null &&
+        _isInArgentina(currentLocation) &&
+        consularDistance != null &&
+        consularDistance <= 200;
+
+    return [
+      GuideDecisionOption(
         title: _t(
           locale,
-          pt: 'Ver instruções oficiais',
-          es: 'Ver instrucciones oficiales',
-          en: 'See official instructions',
+          pt: 'Fazer ainda na Argentina',
+          es: 'Hacerlo todavia en Argentina',
+          en: 'Do it while still in Argentina',
         ),
-        subtitle: _t(
+        description: _t(
           locale,
-          pt: 'Passo a passo atualizado no portal oficial',
-          es: 'Paso a paso actualizado en el portal oficial',
-          en: 'Updated official step-by-step',
+          pt: nearestConsularPost == null
+              ? 'Boa rota se você já tem acesso fácil a um posto consular brasileiro e quer chegar ao Brasil com banco e cadastros menos travados.'
+              : 'Boa rota se você consegue chegar ao posto de ${nearestConsularPost.city} sem transformar isso em uma viagem cara ou lenta.',
+          es: nearestConsularPost == null
+              ? 'Buena ruta si ya tienes acceso facil a un puesto consular brasileño y quieres llegar a Brasil con banco y registros menos trabados.'
+              : 'Buena ruta si puedes llegar al puesto de ${nearestConsularPost.city} sin convertirlo en un viaje caro o lento.',
+          en: nearestConsularPost == null
+              ? 'Good route if you already have easy access to a Brazilian consular post and want to reach Brazil with banking and registrations less blocked.'
+              : 'Good route if you can reach the ${nearestConsularPost.city} consular post without turning this into an expensive or slow trip.',
         ),
-        officialUrl: 'https://www.gov.br/pt-br/servicos/inscrever-no-cpf',
-        officialLabel: 'gov.br',
+        helperLabel: nearestConsularPost == null
+            ? null
+            : _t(
+                locale,
+                pt: 'Posto mais próximo: ${nearestConsularPost.city}',
+                es: 'Puesto mas cercano: ${nearestConsularPost.city}',
+                en: 'Nearest post: ${nearestConsularPost.city}',
+              ),
+        helperUrl: nearestConsularPost?.officialUrl,
+        pros: _list(
+          locale,
+          pt: [
+            'Você chega com o CPF já resolvido para banco, Pix e parte dos cadastros.',
+            'Relatos práticos costumam descrever o atendimento consular como rápido quando a vaga já está marcada.',
+          ],
+          es: [
+            'Llegas con el CPF ya resuelto para banco, Pix y parte de los registros.',
+            'Los relatos practicos suelen describir la atencion consular como rapida cuando el turno ya esta marcado.',
+          ],
+          en: [
+            'You arrive with CPF already sorted for banking, Pix, and part of your registrations.',
+            'Practical reports often describe the consular visit as quick once the appointment is booked.',
+          ],
+        ),
+        cons: _list(
+          locale,
+          pt: [
+            consularDistance == null
+                ? 'Só vale a pena se você tiver acesso real a um posto consular brasileiro.'
+                : consularDistance > 200
+                    ? 'Do seu ponto atual, o posto mais próximo fica longe; isso pode virar uma viagem só para o CPF.'
+                    : 'Ainda depende de agenda, deslocamento e regra operacional do posto consular.',
+            'Nem toda pessoa vai preferir investir esse tempo antes de resolver voo, moradia e documentos da residência.',
+          ],
+          es: [
+            consularDistance == null
+                ? 'Solo vale la pena si tienes acceso real a un puesto consular brasileño.'
+                : consularDistance > 200
+                    ? 'Desde tu ubicacion actual, el puesto mas cercano queda lejos; esto puede convertirse en un viaje solo por el CPF.'
+                    : 'Igual depende del turno, del desplazamiento y de la operacion del puesto consular.',
+            'No toda persona va a querer gastar ese tiempo antes de resolver vuelo, vivienda y documentos de residencia.',
+          ],
+          en: [
+            consularDistance == null
+                ? 'It is only worth it if you have real access to a Brazilian consular post.'
+                : consularDistance > 200
+                    ? 'From your current location, the nearest post is far away; this can turn into a dedicated trip just for CPF.'
+                    : 'It still depends on booking, travel, and the post’s own operating rules.',
+            'Not everyone will want to spend that time before solving flights, housing, and residency documents.',
+          ],
+        ),
+        recommended: consularRecommended,
+      ),
+      GuideDecisionOption(
+        title: _t(
+          locale,
+          pt: 'Fazer nos primeiros dias no Brasil',
+          es: 'Hacerlo en los primeros dias en Brasil',
+          en: 'Do it in your first days in Brazil',
+        ),
+        description: _t(
+          locale,
+          pt: 'Boa rota para quem quer concentrar energia na viagem e resolver o CPF já com o endereço inicial e a chegada acontecendo.',
+          es: 'Buena ruta para quien quiere concentrar energia en el viaje y resolver el CPF ya con la direccion inicial y la llegada en marcha.',
+          en: 'A good route if you want to focus on the move itself and handle CPF once your initial address and arrival are already in motion.',
+        ),
+        helperLabel: nearestConsularPost == null
+            ? null
+            : _t(
+                locale,
+                pt: consularDistance != null && consularDistance > 200
+                    ? 'Seu posto consular de referência fica longe'
+                    : 'Boa opção se você prefere não depender de agenda consular',
+                es: consularDistance != null && consularDistance > 200
+                    ? 'Tu puesto consular de referencia queda lejos'
+                    : 'Buena opcion si prefieres no depender de un turno consular',
+                en: consularDistance != null && consularDistance > 200
+                    ? 'Your reference consular post is far away'
+                    : 'A good option if you prefer not to depend on a consular appointment',
+              ),
+        pros: _list(
+          locale,
+          pt: [
+            'Você evita uma viagem extra na Argentina se não mora perto de um consulado.',
+            'O canal oficial no Brasil aceita estrangeiros por web, e-mail e pontos parceiros; em unidades conveniadas a espera costuma ser curta.',
+          ],
+          es: [
+            'Evitas un viaje extra en Argentina si no vives cerca de un consulado.',
+            'El canal oficial en Brasil acepta extranjeros por web, e-mail y puntos asociados; en unidades conveniadas la espera suele ser corta.',
+          ],
+          en: [
+            'You avoid an extra trip in Argentina if you do not live near a consulate.',
+            'The official Brazil route accepts foreigners through web, email, and partner points; wait times at partner units are often short.',
+          ],
+        ),
+        cons: _list(
+          locale,
+          pt: [
+            'Você chega ao Brasil ainda sem o CPF, então banco, Pix e parte dos cadastros ficam para depois da chegada.',
+            'Relatos práticos mostram que a experiência no Brasil pode variar mais entre canais e às vezes exige acompanhamento posterior.',
+          ],
+          es: [
+            'Llegas a Brasil todavia sin CPF, entonces banco, Pix y parte de los registros quedan para despues de llegar.',
+            'Los relatos practicos muestran que la experiencia en Brasil puede variar mas entre canales y a veces exige seguimiento posterior.',
+          ],
+          en: [
+            'You arrive in Brazil still without CPF, so banking, Pix, and part of your registrations stay blocked until after arrival.',
+            'Practical reports show that the Brazil route can vary more across channels and sometimes requires later follow-up.',
+          ],
+        ),
+        recommended: !consularRecommended,
       ),
     ];
   }
@@ -4010,20 +4412,80 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: inDestination
               ? 'Busque a unidade que atende imigração'
-              : 'Use $city como referência para planejar o atendimento',
+              : 'Use $city como referência e chegue com a pasta pronta; o agendamento antecipado é recomendação, não regra geral',
           es: inDestination
               ? 'Busca la unidad que atiende inmigracion'
-              : 'Usa $city como referencia para planear la atencion',
+              : 'Usa $city como referencia y llega con la carpeta lista; agendar antes es recomendacion, no regla general',
           en: inDestination
               ? 'Search for the unit that handles immigration'
-              : 'Use $city as your planning reference for the appointment',
+              : 'Use $city as your planning reference and arrive with the folder ready; booking early is a recommendation, not a universal rule',
         ),
         address: city,
         distanceKm: inDestination ? _distanceKm(plan, currentLocation) : null,
         mapUrl: _mapSearchUrl('Polícia Federal imigração $city'),
-        officialUrl:
-            PreparationResourceLinks.pfScheduling.toString(),
+        officialUrl: PreparationResourceLinks.pfScheduling.toString(),
         officialLabel: 'PF',
+      ),
+      GuideLocationAwareOption(
+        title: _t(
+          locale,
+          pt: 'Ver rota oficial Mercosul',
+          es: 'Ver ruta oficial Mercosur',
+          en: 'See official Mercosur route',
+        ),
+        subtitle: _t(
+          locale,
+          pt: 'Consulte a exigência oficial antes de montar a pasta final',
+          es: 'Consulta la exigencia oficial antes de armar la carpeta final',
+          en: 'Check the official requirements before finalizing your folder',
+        ),
+        officialUrl: PreparationResourceLinks.argentinaResidenceAgreement
+            .toString(),
+        officialLabel: 'gov.br',
+      ),
+    ];
+  }
+
+  static List<GuideLocationAwareOption> _registrationOptions(
+    MigrationPlan plan,
+    LocationData? currentLocation,
+    String locale,
+  ) {
+    final city = _contextCity(plan, currentLocation);
+    final inDestination = _isInDestinationCountry(currentLocation, plan);
+    return [
+      GuideLocationAwareOption(
+        title: _t(
+          locale,
+          pt: 'Ver passo oficial do RNM / CRNM',
+          es: 'Ver paso oficial del RNM / CRNM',
+          en: 'See the official RNM / CRNM step',
+        ),
+        subtitle: _t(
+          locale,
+          pt: 'Use isso quando a autorização já tiver saído ou sido publicada',
+          es: 'Usa esto cuando la autorizacion ya haya salido o sido publicada',
+          en: 'Use this once residence has already been granted or published',
+        ),
+        officialUrl: PreparationResourceLinks.rnMRegistrationGuide.toString(),
+        officialLabel: 'PF',
+      ),
+      GuideLocationAwareOption(
+        title: _t(
+          locale,
+          pt: inDestination ? 'Unidade migratória da PF' : 'Unidade migratória de referência',
+          es: inDestination ? 'Unidad migratoria de la PF' : 'Unidad migratoria de referencia',
+          en: inDestination ? 'PF migration unit' : 'Reference migration unit',
+        ),
+        subtitle: _t(
+          locale,
+          pt: 'Acompanhe a unidade responsável por $city',
+          es: 'Sigue la unidad responsable por $city',
+          en: 'Track the unit responsible for $city',
+        ),
+        address: city,
+        distanceKm: inDestination ? _distanceKm(plan, currentLocation) : null,
+        mapUrl: _mapSearchUrl('Polícia Federal imigração $city'),
       ),
     ];
   }
@@ -4039,6 +4501,110 @@ class ArgentinaBrazilGuideDataSource {
         label: _t(locale, pt: 'Abrir mapa', es: 'Abrir mapa', en: 'Open map'),
         url: _mapSearchUrl('Polícia Federal imigração $city'),
       ),
+    ];
+  }
+
+  static List<GuideSupportLink> _pfOfficialSupportLinks(
+    MigrationPlan plan,
+    LocationData? currentLocation,
+    String locale,
+  ) {
+    final city = plan.recommendedCity ?? plan.preferredCity;
+    final contact = city == null
+        ? null
+        : PreparationResourceLinks.resolvePfUnitContact(city);
+
+    return [
+      GuideSupportLink(
+        label: _t(
+          locale,
+          pt: 'Residência Mercosul',
+          es: 'Residencia Mercosur',
+          en: 'Mercosur residence',
+        ),
+        url: PreparationResourceLinks.argentinaResidenceAgreement.toString(),
+      ),
+      GuideSupportLink(
+        label: _t(
+          locale,
+          pt: 'Agenda oficial da PF',
+          es: 'Agenda oficial de la PF',
+          en: 'Official PF booking',
+        ),
+        url: PreparationResourceLinks.pfScheduling.toString(),
+      ),
+      if (city != null && contact != null)
+        GuideSupportLink(
+          label: _t(
+            locale,
+            pt: 'Unidade responsável em ${city.name}',
+            es: 'Unidad responsable en ${city.name}',
+            en: 'Responsible unit in ${city.name}',
+          ),
+          url: contact.buildMailtoUri(city).toString(),
+        )
+      else
+        GuideSupportLink(
+          label: _t(
+            locale,
+            pt: 'Lista oficial de unidades da PF',
+            es: 'Lista oficial de unidades de la PF',
+            en: 'Official PF unit directory',
+          ),
+          url: PreparationResourceLinks.pfUnitDirectory.toString(),
+        ),
+    ];
+  }
+
+  static List<GuideSupportLink> _pfRegistrationSupportLinks(
+    MigrationPlan plan,
+    LocationData? currentLocation,
+    String locale,
+  ) {
+    final city = plan.recommendedCity ?? plan.preferredCity;
+    final contact = city == null
+        ? null
+        : PreparationResourceLinks.resolvePfUnitContact(city);
+
+    return [
+      GuideSupportLink(
+        label: _t(
+          locale,
+          pt: 'Registro RNM / CRNM',
+          es: 'Registro RNM / CRNM',
+          en: 'RNM / CRNM registration',
+        ),
+        url: PreparationResourceLinks.rnMRegistrationGuide.toString(),
+      ),
+      GuideSupportLink(
+        label: _t(
+          locale,
+          pt: 'Portal de imigração da PF',
+          es: 'Portal de inmigracion de la PF',
+          en: 'PF immigration portal',
+        ),
+        url: PreparationResourceLinks.pfPortal.toString(),
+      ),
+      if (city != null && contact != null)
+        GuideSupportLink(
+          label: _t(
+            locale,
+            pt: 'Unidade responsável em ${city.name}',
+            es: 'Unidad responsable en ${city.name}',
+            en: 'Responsible unit in ${city.name}',
+          ),
+          url: contact.buildMailtoUri(city).toString(),
+        )
+      else
+        GuideSupportLink(
+          label: _t(
+            locale,
+            pt: 'Lista oficial de unidades da PF',
+            es: 'Lista oficial de unidades de la PF',
+            en: 'Official PF unit directory',
+          ),
+          url: PreparationResourceLinks.pfUnitDirectory.toString(),
+        ),
     ];
   }
 
@@ -4163,6 +4729,76 @@ class ArgentinaBrazilGuideDataSource {
     return distanceKm.round();
   }
 
+  static _BrazilConsularPost? _nearestArgentinaConsularPost(
+    LocationData? currentLocation,
+  ) {
+    if (currentLocation == null || !_isInArgentina(currentLocation)) {
+      return null;
+    }
+    _BrazilConsularPost? best;
+    var bestDistance = double.infinity;
+    for (final post in _argentinaConsularPosts) {
+      final distanceKm = const Distance().as(
+        LengthUnit.Kilometer,
+        LatLng(currentLocation.latitude, currentLocation.longitude),
+        LatLng(post.latitude, post.longitude),
+      );
+      if (distanceKm < bestDistance) {
+        best = post;
+        bestDistance = distanceKm;
+      }
+    }
+    return best;
+  }
+
+  static bool _isInArgentina(LocationData? currentLocation) {
+    if (currentLocation == null) {
+      return false;
+    }
+    final code = currentLocation.countryCode.trim().toUpperCase();
+    final name = currentLocation.countryName.trim().toUpperCase();
+    return code == 'AR' || name == 'ARGENTINA';
+  }
+
+  static String _consularCpfSubtitlePt(String city, int? distanceKm) {
+    if (distanceKm == null) {
+      return 'O posto de $city é a referência oficial mais próxima para tentar resolver isso antes da viagem';
+    }
+    if (distanceKm <= 40) {
+      return 'Você está perto de $city: essa costuma ser a rota mais limpa para chegar ao Brasil com o CPF já resolvido';
+    }
+    if (distanceKm <= 200) {
+      return 'O posto de $city fica a ~$distanceKm km: é viável se você já consegue encaixar essa ida antes da viagem';
+    }
+    return 'O posto de $city fica a ~$distanceKm km: só compensa se você já vai passar por lá, para não transformar o CPF em uma viagem paralela';
+  }
+
+  static String _consularCpfSubtitleEs(String city, int? distanceKm) {
+    if (distanceKm == null) {
+      return 'El puesto de $city es la referencia oficial mas cercana para intentar resolver esto antes del viaje';
+    }
+    if (distanceKm <= 40) {
+      return 'Estas cerca de $city: esta suele ser la ruta mas limpia para llegar a Brasil con el CPF ya resuelto';
+    }
+    if (distanceKm <= 200) {
+      return 'El puesto de $city queda a ~$distanceKm km: es viable si ya puedes encajar esa ida antes del viaje';
+    }
+    return 'El puesto de $city queda a ~$distanceKm km: solo conviene si ya vas a pasar por ahi, para no convertir el CPF en un viaje paralelo';
+  }
+
+  static String _consularCpfSubtitleEn(String city, int? distanceKm) {
+    if (distanceKm == null) {
+      return '$city is the closest official post if you want to try solving this before the trip';
+    }
+    if (distanceKm <= 40) {
+      return 'You are close to $city: this is usually the cleanest route if you want to arrive in Brazil with CPF already sorted';
+    }
+    if (distanceKm <= 200) {
+      return 'The $city post is about $distanceKm km away: viable if you can fit that visit in before departure';
+    }
+    return 'The $city post is about $distanceKm km away: only worth it if you will already pass through there, so CPF does not become a side trip';
+  }
+
   static String _mapSearchUrl(String query) {
     return 'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(query)}';
   }
@@ -4186,4 +4822,57 @@ class ArgentinaBrazilGuideDataSource {
     }
     return false;
   }
+}
+
+class _BrazilConsularPost {
+  const _BrazilConsularPost({
+    required this.city,
+    required this.latitude,
+    required this.longitude,
+    required this.officialUrl,
+  });
+
+  final String city;
+  final double latitude;
+  final double longitude;
+  final String officialUrl;
+}
+
+String _marketExchangeTip(
+  String locale, {
+  required CopilotExchangeRates? exchangeRates,
+}) {
+  if (exchangeRates == null) {
+    return ArgentinaBrazilGuideDataSource._t(
+      locale,
+      pt: 'Use a cotação oficial do dia para converter salário em R\$ para ARS antes de comparar propostas.',
+      es: 'Usa el tipo de cambio oficial del dia para convertir salario en R\$ a ARS antes de comparar propuestas.',
+      en: 'Use the official daily exchange rate to convert salary in BRL to ARS before comparing offers.',
+    );
+  }
+
+  final usdToBrl = exchangeRates.usdToBrl.toStringAsFixed(2);
+  final usdToArs = exchangeRates.usdToArs.toStringAsFixed(0);
+  final fetchedAt = _formatFetchedAt(exchangeRates.fetchedAt);
+
+  return ArgentinaBrazilGuideDataSource._t(
+    locale,
+    pt:
+        'Hoje 1 USD = R\$$usdToBrl e ~ARS $usdToArs (cotação de $fetchedAt). Para converter: salário em R\$ ÷ $usdToBrl × dólar em ARS.',
+    es:
+        'Hoy 1 USD = R\$$usdToBrl y ~ARS $usdToArs (cotizacion de $fetchedAt). Para convertir: salario en R\$ ÷ $usdToBrl × dolar en ARS.',
+    en:
+        'Today 1 USD = R\$$usdToBrl and ~ARS $usdToArs (rate from $fetchedAt). To convert: salary in BRL ÷ $usdToBrl × USD in ARS.',
+  );
+}
+
+String _formatFetchedAt(String raw) {
+  final parsed = DateTime.tryParse(raw);
+  if (parsed == null) {
+    return raw;
+  }
+  final year = parsed.year.toString().padLeft(4, '0');
+  final month = parsed.month.toString().padLeft(2, '0');
+  final day = parsed.day.toString().padLeft(2, '0');
+  return '$day/$month/$year';
 }

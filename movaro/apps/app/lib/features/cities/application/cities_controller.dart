@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:movaro_app/features/cities/application/services/city_favorites_store.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
 import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
@@ -25,6 +26,10 @@ class CitiesController extends ChangeNotifier {
   final Map<String, City> _cityCache = {};
   final Map<String, CityWeather> _weatherCache = {};
   final Map<String, TravelRouteInsight> _travelInsightCache = {};
+  final Map<String, CityDetailSocialProof> _socialProofCache = {};
+  final Map<String, CityDetailClimateSummary> _climateSummaryCache = {};
+  final Map<String, CityDetailArrivalStory> _arrivalStoryCache = {};
+  final Map<String, CityDetailComparison> _comparisonCache = {};
   final Set<String> _favoriteCityIds = {};
   List<City> _catalog = const [];
   List<City> _searchResults = const [];
@@ -45,6 +50,14 @@ class CitiesController extends ChangeNotifier {
   final Map<String, Future<City?>> _pendingCityRequests = {};
   final Map<String, Future<CityWeather?>> _pendingWeatherRequests = {};
   final Map<String, Future<TravelRouteInsight?>> _pendingTravelInsightRequests =
+      {};
+  final Map<String, Future<CityDetailSocialProof?>> _pendingSocialProofRequests =
+      {};
+  final Map<String, Future<CityDetailClimateSummary?>>
+  _pendingClimateSummaryRequests = {};
+  final Map<String, Future<CityDetailArrivalStory?>> _pendingArrivalStoryRequests =
+      {};
+  final Map<String, Future<CityDetailComparison?>> _pendingComparisonRequests =
       {};
 
   CityHighlights? get highlights => _highlights;
@@ -78,6 +91,11 @@ class CitiesController extends ChangeNotifier {
     originIata: originIata,
     destIata: destIata,
   )];
+  CityDetailSocialProof? socialProofFor(String key) => _socialProofCache[key];
+  CityDetailClimateSummary? climateSummaryFor(String key) =>
+      _climateSummaryCache[key];
+  CityDetailArrivalStory? arrivalStoryFor(String key) => _arrivalStoryCache[key];
+  CityDetailComparison? comparisonFor(String key) => _comparisonCache[key];
 
   Future<void> initialize({bool preloadData = false}) async {
     if (_isInitialized && !preloadData) {
@@ -304,6 +322,216 @@ class CitiesController extends ChangeNotifier {
     String? originIata,
     String? destIata,
   }) => '${cityId.toLowerCase()}|${originIata?.toUpperCase() ?? ''}|${destIata?.toUpperCase() ?? ''}';
+
+  String cityDetailContextKey(
+    String cityId, {
+    String? locale,
+    String? goal,
+    String? timeline,
+  }) => [
+    cityId.toLowerCase(),
+    locale ?? '',
+    goal ?? '',
+    timeline ?? '',
+  ].join('|');
+
+  String cityDetailComparisonKey(
+    String cityId, {
+    required List<String> compareTo,
+    String? locale,
+  }) => [
+    cityId.toLowerCase(),
+    locale ?? '',
+    ...compareTo.map((item) => item.toLowerCase()),
+  ].join('|');
+
+  Future<CityDetailSocialProof?> loadCityDetailSocialProof(
+    String cityId, {
+    String? locale,
+    String? goal,
+    String? timeline,
+  }) async {
+    final key = cityDetailContextKey(
+      cityId,
+      locale: locale,
+      goal: goal,
+      timeline: timeline,
+    );
+    if (_socialProofCache.containsKey(key)) {
+      return _socialProofCache[key];
+    }
+    final pending = _pendingSocialProofRequests[key];
+    if (pending != null) {
+      return pending;
+    }
+    final request = _performLoadSocialProof(
+      cityId,
+      key: key,
+      locale: locale,
+      goal: goal,
+      timeline: timeline,
+    );
+    _pendingSocialProofRequests[key] = request;
+    return request;
+  }
+
+  Future<CityDetailSocialProof?> _performLoadSocialProof(
+    String cityId, {
+    required String key,
+    String? locale,
+    String? goal,
+    String? timeline,
+  }) async {
+    try {
+      final payload = await _repository.getCityDetailSocialProof(
+        cityId,
+        locale: locale,
+        goal: goal,
+        timeline: timeline,
+      );
+      _socialProofCache[key] = payload;
+      notifyListeners();
+      return payload;
+    } catch (_) {
+      return null;
+    } finally {
+      _pendingSocialProofRequests.remove(key);
+    }
+  }
+
+  Future<CityDetailClimateSummary?> loadCityDetailClimateSummary(
+    String cityId, {
+    String? locale,
+  }) async {
+    final key = cityDetailContextKey(cityId, locale: locale);
+    if (_climateSummaryCache.containsKey(key)) {
+      return _climateSummaryCache[key];
+    }
+    final pending = _pendingClimateSummaryRequests[key];
+    if (pending != null) return pending;
+    final request = _performLoadClimateSummary(cityId, key: key, locale: locale);
+    _pendingClimateSummaryRequests[key] = request;
+    return request;
+  }
+
+  Future<CityDetailClimateSummary?> _performLoadClimateSummary(
+    String cityId, {
+    required String key,
+    String? locale,
+  }) async {
+    try {
+      final payload = await _repository.getCityDetailClimateSummary(
+        cityId,
+        locale: locale,
+      );
+      _climateSummaryCache[key] = payload;
+      notifyListeners();
+      return payload;
+    } catch (_) {
+      return null;
+    } finally {
+      _pendingClimateSummaryRequests.remove(key);
+    }
+  }
+
+  Future<CityDetailArrivalStory?> loadCityDetailArrivalStory(
+    String cityId, {
+    String? locale,
+    String? goal,
+    String? timeline,
+  }) async {
+    final key = cityDetailContextKey(
+      cityId,
+      locale: locale,
+      goal: goal,
+      timeline: timeline,
+    );
+    if (_arrivalStoryCache.containsKey(key)) {
+      return _arrivalStoryCache[key];
+    }
+    final pending = _pendingArrivalStoryRequests[key];
+    if (pending != null) return pending;
+    final request = _performLoadArrivalStory(
+      cityId,
+      key: key,
+      locale: locale,
+      goal: goal,
+      timeline: timeline,
+    );
+    _pendingArrivalStoryRequests[key] = request;
+    return request;
+  }
+
+  Future<CityDetailArrivalStory?> _performLoadArrivalStory(
+    String cityId, {
+    required String key,
+    String? locale,
+    String? goal,
+    String? timeline,
+  }) async {
+    try {
+      final payload = await _repository.getCityDetailArrivalStory(
+        cityId,
+        locale: locale,
+        goal: goal,
+        timeline: timeline,
+      );
+      _arrivalStoryCache[key] = payload;
+      notifyListeners();
+      return payload;
+    } catch (_) {
+      return null;
+    } finally {
+      _pendingArrivalStoryRequests.remove(key);
+    }
+  }
+
+  Future<CityDetailComparison?> loadCityDetailComparison(
+    String cityId, {
+    required List<String> compareTo,
+    String? locale,
+  }) async {
+    final key = cityDetailComparisonKey(
+      cityId,
+      compareTo: compareTo,
+      locale: locale,
+    );
+    if (_comparisonCache.containsKey(key)) {
+      return _comparisonCache[key];
+    }
+    final pending = _pendingComparisonRequests[key];
+    if (pending != null) return pending;
+    final request = _performLoadComparison(
+      cityId,
+      key: key,
+      compareTo: compareTo,
+      locale: locale,
+    );
+    _pendingComparisonRequests[key] = request;
+    return request;
+  }
+
+  Future<CityDetailComparison?> _performLoadComparison(
+    String cityId, {
+    required String key,
+    required List<String> compareTo,
+    String? locale,
+  }) async {
+    try {
+      final payload = await _repository.getCityDetailComparison(
+        cityId,
+        compareTo: compareTo,
+        locale: locale,
+      );
+      _comparisonCache[key] = payload;
+      notifyListeners();
+      return payload;
+    } catch (_) {
+      return null;
+    } finally {
+      _pendingComparisonRequests.remove(key);
+    }
+  }
 
   Future<void> search(String query) async {
     if (query.trim().isEmpty) {

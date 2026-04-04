@@ -23,6 +23,7 @@ class MigrationPlanModel {
     this.recommendedCity,
     this.preferredCity,
     this.candidateCities = const [],
+    this.candidateCityMatchScores = const {},
     this.cityRecommendationReasons = const [],
     this.isCityConfirmed = false,
   });
@@ -71,6 +72,15 @@ class MigrationPlanModel {
                 CityModel.fromJson(item as Map<String, dynamic>).toEntity(),
           )
           .toList(),
+      candidateCityMatchScores:
+          (json['candidateCityMatchScores'] as Map<String, dynamic>? ??
+                  const <String, dynamic>{})
+              .map(
+                (key, value) => MapEntry(
+                  key,
+                  (value as num?)?.toDouble() ?? 0,
+                ),
+              ),
       cityRecommendationReasons:
           (json['cityRecommendationReasons'] as List<dynamic>? ?? const [])
               .map((item) => item as String)
@@ -98,6 +108,7 @@ class MigrationPlanModel {
       recommendedCity: plan.recommendedCity,
       preferredCity: plan.preferredCity,
       candidateCities: plan.candidateCities,
+      candidateCityMatchScores: plan.candidateCityMatchScores,
       cityRecommendationReasons: plan.cityRecommendationReasons,
       isCityConfirmed: plan.isCityConfirmed,
     );
@@ -120,6 +131,7 @@ class MigrationPlanModel {
   final City? recommendedCity;
   final City? preferredCity;
   final List<City> candidateCities;
+  final Map<String, double> candidateCityMatchScores;
   final List<String> cityRecommendationReasons;
   final bool isCityConfirmed;
 
@@ -147,6 +159,7 @@ class MigrationPlanModel {
     'candidateCities': candidateCities
         .map((city) => CityModel.fromEntity(city).toJson())
         .toList(),
+    'candidateCityMatchScores': candidateCityMatchScores,
     'cityRecommendationReasons': cityRecommendationReasons,
     'isCityConfirmed': isCityConfirmed,
   };
@@ -169,6 +182,7 @@ class MigrationPlanModel {
     recommendedCity: recommendedCity,
     preferredCity: preferredCity,
     candidateCities: candidateCities,
+    candidateCityMatchScores: candidateCityMatchScores,
     cityRecommendationReasons: cityRecommendationReasons,
     isCityConfirmed: isCityConfirmed,
   );

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_event_suggestion.dart';
 
 enum GuideEventSuggestionAction { added, later, skipped }
@@ -66,6 +65,8 @@ class _GuideEventSuggestionSheetState
   late GuideEventReminderOption _reminderOption;
   final TextEditingController _notesController = TextEditingController();
   bool _isSubmitting = false;
+  bool _showNotes = false;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -87,34 +88,54 @@ class _GuideEventSuggestionSheetState
       Localizations.localeOf(context).toLanguageTag(),
     );
     final timeOfDay = TimeOfDay.fromDateTime(_draft.startAt);
+    final deadlineFormat = DateFormat.yMMMd(
+      Localizations.localeOf(context).toLanguageTag(),
+    );
 
     return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 12,
-          right: 12,
-          top: 12,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 12,
-        ),
-        child: FrostedPanel(
-          padding: const EdgeInsets.all(18),
-          borderRadius: BorderRadius.circular(28),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+      child: FractionallySizedBox(
+        heightFactor: 0.74,
+        child: Container(
+          margin: EdgeInsets.only(
+            left: 8,
+            right: 8,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 8,
+          ),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x22000000),
+                blurRadius: 24,
+                offset: Offset(0, -6),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: Row(
                   children: [
                     Expanded(
                       child: Text(
                         _text(
                           context,
-                          pt: 'Assistente de calendário',
-                          es: 'Asistente de calendario',
-                          en: 'Calendar assistant',
+                          pt: 'Adicionar ao calendário',
+                          es: 'Agregar al calendario',
+                          en: 'Add to calendar',
                         ),
-                        style: theme.textTheme.titleLarge?.copyWith(
+                        style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -127,203 +148,273 @@ class _GuideEventSuggestionSheetState
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  _draft.title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _draft.assistantCopy,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSoftFor(context),
-                    height: 1.45,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                _InfoCard(
-                  icon: Icons.info_outline_rounded,
-                  title: _text(
-                    context,
-                    pt: 'Por que sugerimos isso',
-                    es: 'Por qué sugerimos esto',
-                    en: 'Why we suggest this',
-                  ),
-                  body: _draft.description,
-                ),
-                const SizedBox(height: 12),
-                Row(
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                   children: [
-                    Expanded(
-                      child: _QuickEditButton(
-                        icon: Icons.calendar_today_rounded,
-                        label: dateFormat.format(_draft.startAt),
-                        onTap: _isSubmitting ? null : _pickDate,
+                    Text(
+                      _draft.title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _QuickEditButton(
-                        icon: Icons.schedule_rounded,
-                        label: timeOfDay.format(context),
-                        onTap: _isSubmitting ? null : _pickTime,
+                    const SizedBox(height: 6),
+                    Text(
+                      _draft.assistantCopy,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        height: 1.4,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                _InfoCard(
-                  icon: Icons.timelapse_rounded,
-                  title: _text(
-                    context,
-                    pt: 'Duração sugerida',
-                    es: 'Duración sugerida',
-                    en: 'Suggested duration',
-                  ),
-                  body: _durationLabel(
-                    context,
-                    _draft.suggestedDurationMinutes,
-                  ),
-                  trailing: _draft.locationLabel,
-                ),
-                if (_draft.hardDeadline != null) ...[
-                  const SizedBox(height: 10),
-                  _InfoCard(
-                    icon: Icons.priority_high_rounded,
-                    title: _text(
-                      context,
-                      pt: 'Prazo importante',
-                      es: 'Plazo importante',
-                      en: 'Important deadline',
-                    ),
-                    body: DateFormat.yMMMd(
-                      Localizations.localeOf(context).toLanguageTag(),
-                    ).format(_draft.hardDeadline!),
-                  ),
-                ],
-                const SizedBox(height: 14),
-                Text(
-                  _text(
-                    context,
-                    pt: 'Lembretes',
-                    es: 'Recordatorios',
-                    en: 'Reminders',
-                  ),
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: GuideEventReminderOption.values
-                      .map(
-                        (option) => ChoiceChip(
-                          label: Text(_reminderLabel(context, option)),
-                          selected: _reminderOption == option,
-                          onSelected: _isSubmitting
-                              ? null
-                              : (_) {
-                                  setState(() {
-                                    _reminderOption = option;
-                                  });
-                                },
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _MetaPill(
+                          icon: Icons.calendar_today_rounded,
+                          label: dateFormat.format(_draft.startAt),
                         ),
-                      )
-                      .toList(growable: false),
-                ),
-                const SizedBox(height: 14),
-                TextField(
-                  controller: _notesController,
-                  minLines: 1,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    labelText: _text(
-                      context,
-                      pt: 'Nota opcional',
-                      es: 'Nota opcional',
-                      en: 'Optional note',
+                        _MetaPill(
+                          icon: Icons.schedule_rounded,
+                          label: timeOfDay.format(context),
+                        ),
+                        _MetaPill(
+                          icon: Icons.timelapse_rounded,
+                          label: _durationLabel(
+                            context,
+                            _draft.suggestedDurationMinutes,
+                          ),
+                        ),
+                        if (_draft.locationLabel case final location?)
+                          _MetaPill(
+                            icon: Icons.place_outlined,
+                            label: location,
+                          ),
+                        if (_draft.hardDeadline != null)
+                          _MetaPill(
+                            icon: Icons.priority_high_rounded,
+                            label: _text(
+                              context,
+                              pt: 'Prazo ${deadlineFormat.format(_draft.hardDeadline!)}',
+                              es: 'Plazo ${deadlineFormat.format(_draft.hardDeadline!)}',
+                              en: 'Deadline ${deadlineFormat.format(_draft.hardDeadline!)}',
+                            ),
+                            tone: _MetaPillTone.warning,
+                          ),
+                      ],
                     ),
-                    hintText: _text(
-                      context,
-                      pt: 'Ex.: levar passaporte e comprovante',
-                      es: 'Ej.: llevar pasaporte y comprobante',
-                      en: 'E.g. bring passport and proof of address',
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _QuickEditButton(
+                            icon: Icons.calendar_today_rounded,
+                            label: dateFormat.format(_draft.startAt),
+                            onTap: _isSubmitting ? null : _pickDate,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _QuickEditButton(
+                            icon: Icons.schedule_rounded,
+                            label: timeOfDay.format(context),
+                            onTap: _isSubmitting ? null : _pickTime,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: _isSubmitting ? null : _handleAdd,
-                    icon: _isSubmitting
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.event_available_rounded, size: 18),
-                    label: Text(
+                    const SizedBox(height: 14),
+                    Text(
                       _text(
                         context,
-                        pt: 'Adicionar ao calendário',
-                        es: 'Agregar al calendario',
-                        en: 'Add to calendar',
+                        pt: 'Lembrete',
+                        es: 'Recordatorio',
+                        en: 'Reminder',
+                      ),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: GuideEventReminderOption.values
+                          .map(
+                            (option) => ChoiceChip(
+                              label: Text(_reminderLabel(context, option)),
+                              selected: _reminderOption == option,
+                              onSelected: _isSubmitting
+                                  ? null
+                                  : (_) {
+                                      setState(() {
+                                        _reminderOption = option;
+                                      });
+                                    },
+                            ),
+                          )
+                          .toList(growable: false),
+                    ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
                         onPressed: _isSubmitting
                             ? null
-                            : () => Navigator.of(context).pop(
-                                GuideEventSuggestionResult(
-                                  action: GuideEventSuggestionAction.later,
-                                  suggestion: _draft,
-                                  reminderOption: _reminderOption,
-                                  notes: _trimmedNotes,
-                                ),
-                              ),
-                        child: Text(
+                            : () {
+                                setState(() {
+                                  _showNotes = !_showNotes;
+                                });
+                              },
+                        icon: Icon(
+                          _showNotes
+                              ? Icons.notes_rounded
+                              : Icons.add_comment_outlined,
+                          size: 18,
+                        ),
+                        label: Text(
                           _text(
                             context,
-                            pt: 'Lembrar depois',
-                            es: 'Recordarme después',
-                            en: 'Remind me later',
+                            pt: _showNotes ? 'Esconder nota' : 'Adicionar nota',
+                            es: _showNotes ? 'Ocultar nota' : 'Agregar nota',
+                            en: _showNotes ? 'Hide note' : 'Add note',
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextButton(
-                        onPressed: _isSubmitting
-                            ? null
-                            : () => Navigator.of(context).pop(
-                                GuideEventSuggestionResult(
-                                  action: GuideEventSuggestionAction.skipped,
-                                  suggestion: _draft,
-                                  reminderOption: _reminderOption,
-                                  notes: _trimmedNotes,
-                                ),
-                              ),
+                    if (_showNotes) ...[
+                      const SizedBox(height: 4),
+                      TextField(
+                        controller: _notesController,
+                        minLines: 1,
+                        maxLines: 2,
+                        decoration: InputDecoration(
+                          isDense: true,
+                          labelText: _text(
+                            context,
+                            pt: 'Nota opcional',
+                            es: 'Nota opcional',
+                            en: 'Optional note',
+                          ),
+                          hintText: _text(
+                            context,
+                            pt: 'Passaporte, comprovante, protocolo...',
+                            es: 'Pasaporte, comprobante, constancia...',
+                            en: 'Passport, receipt, protocol...',
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (_errorMessage != null) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.errorContainer.withValues(
+                            alpha: 0.6,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                         child: Text(
-                          _text(context, pt: 'Pular', es: 'Omitir', en: 'Skip'),
+                          _errorMessage!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onErrorContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: _isSubmitting ? null : _handleAdd,
+                        icon: _isSubmitting
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.event_available_rounded,
+                                size: 18,
+                              ),
+                        label: Text(
+                          _text(
+                            context,
+                            pt: 'Adicionar ao calendário',
+                            es: 'Agregar al calendario',
+                            en: 'Add to calendar',
+                          ),
                         ),
                       ),
                     ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _isSubmitting
+                                ? null
+                                : () => Navigator.of(context).pop(
+                                    GuideEventSuggestionResult(
+                                      action: GuideEventSuggestionAction.later,
+                                      suggestion: _draft,
+                                      reminderOption: _reminderOption,
+                                      notes: _trimmedNotes,
+                                    ),
+                                  ),
+                            child: Text(
+                              _text(
+                                context,
+                                pt: 'Depois',
+                                es: 'Después',
+                                en: 'Later',
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextButton(
+                            onPressed: _isSubmitting
+                                ? null
+                                : () => Navigator.of(context).pop(
+                                    GuideEventSuggestionResult(
+                                      action:
+                                          GuideEventSuggestionAction.skipped,
+                                      suggestion: _draft,
+                                      reminderOption: _reminderOption,
+                                      notes: _trimmedNotes,
+                                    ),
+                                  ),
+                            child: Text(
+                              _text(
+                                context,
+                                pt: 'Pular',
+                                es: 'Omitir',
+                                en: 'Skip',
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -342,7 +433,7 @@ class _GuideEventSuggestionSheetState
       firstDate: DateTime.now().subtract(const Duration(days: 1)),
       lastDate: DateTime.now().add(const Duration(days: 730)),
     );
-    if (picked == null) {
+    if (picked == null || !mounted) {
       return;
     }
 
@@ -368,7 +459,7 @@ class _GuideEventSuggestionSheetState
       context: context,
       initialTime: TimeOfDay.fromDateTime(_draft.startAt),
     );
-    if (picked == null) {
+    if (picked == null || !mounted) {
       return;
     }
 
@@ -392,29 +483,51 @@ class _GuideEventSuggestionSheetState
   Future<void> _handleAdd() async {
     setState(() {
       _isSubmitting = true;
+      _errorMessage = null;
     });
-    final added = await widget.onAddToCalendar(
-      _draft,
-      _reminderOption,
-      _trimmedNotes,
-    );
-    if (!mounted) {
-      return;
+    try {
+      final added = await widget.onAddToCalendar(
+        _draft,
+        _reminderOption,
+        _trimmedNotes,
+      );
+      if (!mounted) {
+        return;
+      }
+      if (!added) {
+        setState(() {
+          _isSubmitting = false;
+          _errorMessage = _text(
+            context,
+            pt: 'Não foi possível abrir o calendário agora. Tente novamente em alguns segundos.',
+            es: 'No fue posible abrir el calendario ahora. Inténtalo otra vez en unos segundos.',
+            en: 'Could not open the calendar right now. Try again in a few seconds.',
+          );
+        });
+        return;
+      }
+      Navigator.of(context).pop(
+        GuideEventSuggestionResult(
+          action: GuideEventSuggestionAction.added,
+          suggestion: _draft,
+          reminderOption: _reminderOption,
+          notes: _trimmedNotes,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isSubmitting = false;
+        _errorMessage = _text(
+          context,
+          pt: 'O calendário do aparelho não respondeu. Feche e tente de novo.',
+          es: 'El calendario del dispositivo no respondió. Cierra e inténtalo otra vez.',
+          en: 'The device calendar did not respond. Close it and try again.',
+        );
+      });
     }
-    setState(() {
-      _isSubmitting = false;
-    });
-    if (!added) {
-      return;
-    }
-    Navigator.of(context).pop(
-      GuideEventSuggestionResult(
-        action: GuideEventSuggestionAction.added,
-        suggestion: _draft,
-        reminderOption: _reminderOption,
-        notes: _trimmedNotes,
-      ),
-    );
   }
 
   String _durationLabel(BuildContext context, int minutes) {
@@ -483,62 +596,48 @@ class _GuideEventSuggestionSheetState
   }
 }
 
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({
+class _MetaPill extends StatelessWidget {
+  const _MetaPill({
     required this.icon,
-    required this.title,
-    required this.body,
-    this.trailing,
+    required this.label,
+    this.tone = _MetaPillTone.neutral,
   });
 
   final IconData icon;
-  final String title;
-  final String body;
-  final String? trailing;
+  final String label;
+  final _MetaPillTone tone;
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final color = switch (tone) {
+      _MetaPillTone.neutral => scheme.surfaceContainerHighest,
+      _MetaPillTone.warning => scheme.errorContainer,
+    };
+    final foreground = switch (tone) {
+      _MetaPillTone.neutral => scheme.onSurfaceVariant,
+      _MetaPillTone.warning => scheme.onErrorContainer,
+    };
+
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: color,
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  body,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSoftFor(context),
-                    height: 1.4,
-                  ),
-                ),
-                if (trailing != null) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    trailing!,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ],
+          Icon(icon, size: 14, color: foreground),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: foreground,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -546,6 +645,8 @@ class _InfoCard extends StatelessWidget {
     );
   }
 }
+
+enum _MetaPillTone { neutral, warning }
 
 class _QuickEditButton extends StatelessWidget {
   const _QuickEditButton({

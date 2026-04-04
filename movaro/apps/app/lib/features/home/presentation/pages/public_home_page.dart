@@ -24,6 +24,7 @@ import 'package:movaro_app/features/home/presentation/widgets/main_navigation_ba
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
@@ -218,7 +219,7 @@ class _PublicHomePageState extends State<PublicHomePage>
                                             builder: (_) =>
                                                 CityComparisonScreen(
                                                   initialCities: candidates
-                                                      .take(2)
+                                                      .take(3)
                                                       .toList(),
                                                   citiesController: widget
                                                       .citiesController,
@@ -317,9 +318,7 @@ class _PublicHomePageState extends State<PublicHomePage>
     }
 
     final planKey = _planKey(plan);
-    if (_loadedPlanKey == planKey) {
-      return;
-    }
+    final isFreshPlanLoad = _loadedPlanKey != planKey;
 
     final snapshot = await _progressStore.read(plan);
     if (!mounted) {
@@ -333,7 +332,7 @@ class _PublicHomePageState extends State<PublicHomePage>
 
     // ── Stage transition detection ───────────────────────────────────────
     // Skip on the very first load (user already in that state, not advancing).
-    if (!_isFirstPlanLoad) {
+    if (isFreshPlanLoad && !_isFirstPlanLoad) {
       final newCount = snapshot.completedItemsCount;
       final newTimeline = plan.timeline;
       final wasExplorer = _prevTimeline.isEmpty ||
@@ -357,27 +356,29 @@ class _PublicHomePageState extends State<PublicHomePage>
       }
       _prevCompletedCount = newCount;
       _prevTimeline = newTimeline;
-    } else {
+    } else if (isFreshPlanLoad) {
       _isFirstPlanLoad = false;
       _prevCompletedCount = snapshot.completedItemsCount;
       _prevTimeline = plan.timeline;
     }
 
-    unawaited(
-      widget.cityInsightsController.load(
-        cityId: city.id,
-        goal: plan.goal,
-        timeline: plan.timeline,
-        locale: Localizations.localeOf(context).languageCode,
-      ),
-    );
+    if (isFreshPlanLoad) {
+      unawaited(
+        widget.cityInsightsController.load(
+          cityId: city.id,
+          goal: plan.goal,
+          timeline: plan.timeline,
+          locale: Localizations.localeOf(context).languageCode,
+        ),
+      );
 
-    // Schedule a weekly city-content reminder now that we know the confirmed
-    // city. Rescheduled on every fresh plan load so it stays current.
-    final cityLabel = city.name;
-    unawaited(
-      PlanNotificationService.instance.scheduleCityContentReminder(cityLabel),
-    );
+      // Schedule a weekly city-content reminder now that we know the confirmed
+      // city. Rescheduled on every fresh plan load so it stays current.
+      final cityLabel = city.name;
+      unawaited(
+        PlanNotificationService.instance.scheduleCityContentReminder(cityLabel),
+      );
+    }
   }
 
   Future<void> _startPlanFlow(BuildContext context) async {
@@ -498,14 +499,29 @@ class _PublicHomePageState extends State<PublicHomePage>
           ).toList(growable: false)
           ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
 
+    final activeCandidate = snapshot.activeItemId == null
+        ? null
+        : items.cast<GuideActionItem?>().firstWhere(
+            (item) => item?.id == snapshot.activeItemId,
+            orElse: () => null,
+          );
+
     GuideActionItem? currentItem;
-    for (final item in items) {
-      final unlocked = item.dependencies.every(completedIds.contains);
-      if (!item.isCompleted && unlocked) {
-        currentItem = item;
-        break;
-      }
+    if (activeCandidate != null &&
+        !activeCandidate.isCompleted &&
+        activeCandidate.dependencies.every(completedIds.contains)) {
+      currentItem = activeCandidate;
     }
+
+    currentItem ??= () {
+      for (final item in items) {
+        final unlocked = item.dependencies.every(completedIds.contains);
+        if (!item.isCompleted && unlocked) {
+          return item;
+        }
+      }
+      return null;
+    }();
 
     currentItem ??= items.firstWhere(
       (item) => !item.isCompleted,
@@ -883,31 +899,31 @@ class _PlannerHomeState extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: onContinuePlan,
-              icon: const Icon(Icons.arrow_forward_rounded),
+              onPressed: onCompareCities,
+              icon: const Icon(Icons.compare_arrows_rounded),
               label: Text(
-                _t(
-                  context,
-                  pt: 'Ver cidades recomendadas',
-                  es: 'Ver ciudades recomendadas',
-                  en: 'See recommended cities',
+                  _t(
+                    context,
+                    pt: 'Ver cidades recomendadas',
+                    es: 'Ver ciudades recomendadas',
+                    en: 'See recommended cities',
+                  ),
                 ),
               ),
-            ),
           ),
           if (candidates.length >= 2) ...[
             const SizedBox(height: 10),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: onCompareCities,
-                icon: const Icon(Icons.compare_arrows_rounded),
+                onPressed: onContinuePlan,
+                icon: const Icon(Icons.arrow_forward_rounded),
                 label: Text(
                   _t(
                     context,
-                    pt: 'Comparar ${candidates.length} cidades',
-                    es: 'Comparar ${candidates.length} ciudades',
-                    en: 'Compare ${candidates.length} cities',
+                    pt: 'Ver cidade mais indicada',
+                    es: 'Ver ciudad más indicada',
+                    en: 'See top recommended city',
                   ),
                 ),
               ),
@@ -929,8 +945,17 @@ class _PlannerHomeState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            for (final city in candidates) ...[
-              _CandidateCityTile(city: city, isDark: isDark),
+            for (var index = 0; index < candidates.length; index++) ...[
+              _CandidateCityTile(
+                city: candidates[index],
+                rank: index + 1,
+                matchScore: plan.candidateCityMatchScores[candidates[index].id],
+                isDark: isDark,
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  AppRoutes.cityDetail(candidates[index].id),
+                ),
+              ),
               const SizedBox(height: 8),
             ],
           ],
@@ -957,66 +982,114 @@ class _PlannerHomeState extends StatelessWidget {
 }
 
 class _CandidateCityTile extends StatelessWidget {
-  const _CandidateCityTile({required this.city, required this.isDark});
+  const _CandidateCityTile({
+    required this.city,
+    required this.rank,
+    required this.isDark,
+    required this.onTap,
+    this.matchScore,
+  });
 
   final City city;
+  final int rank;
+  final double? matchScore;
   final bool isDark;
+  final VoidCallback onTap;
+
+  static String _t(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) => switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0E1825) : Colors.white,
+    final matchPct = matchScore == null
+        ? null
+        : (matchScore! * 100).round().clamp(0, 100);
+    final subtitle = matchPct == null
+        ? _t(
+            context,
+            pt: '${city.stateName} · $rankª mais indicada para o seu plano',
+            es: '${city.stateName} · $rankª más indicada para tu plan',
+            en: '${city.stateName} · #$rank for your plan',
+          )
+        : _t(
+            context,
+            pt: '${city.stateName} · $matchPct% de encaixe no seu plano',
+            es: '${city.stateName} · $matchPct% de encaje con tu plan',
+            en: '${city.stateName} · $matchPct% plan fit',
+          );
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.08)
-              : Colors.black.withValues(alpha: 0.08),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF0E1825) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.08),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: Text(
+                    '$rank',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      city.name,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimaryFor(context),
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 18,
+                color: AppColors.textSoftFor(context),
+              ),
+            ],
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.location_city_rounded,
-              size: 18,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  city.name,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimaryFor(context),
-                  ),
-                ),
-                Text(
-                  '${city.stateName} · Score ${city.movaroScores.overall}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSoftFor(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            Icons.chevron_right_rounded,
-            size: 18,
-            color: AppColors.textSoftFor(context),
-          ),
-        ],
       ),
     );
   }
@@ -1113,8 +1186,21 @@ class _ActiveHomeState extends StatelessWidget {
         final residenciaComplete = guideState.completedIds
             .contains('item_2_1_cpf') &&
             guideState.completedIds.contains('item_2_2_residencia');
-        final showPFNudge = !residenciaComplete &&
-            stage != UserJourneyStage.explorer;
+        final pfItem = guideState.items.cast<GuideActionItem?>().firstWhere(
+          (item) => item?.id == 'item_2_2_residencia',
+          orElse: () => null,
+        );
+        final pfUnlocked =
+            pfItem != null &&
+            pfItem.dependencies.every(guideState.completedIds.contains);
+        final currentPhase = guideState.currentItem?.phase;
+        final showPFNudge =
+            !residenciaComplete &&
+            stage != UserJourneyStage.explorer &&
+            pfUnlocked &&
+            (guideState.currentItem?.id == 'item_2_2_residencia' ||
+                currentPhase == GuidePhase.documents ||
+                currentPhase == GuidePhase.arrival);
         final preArrivalCount = guideState.items
             .where(
               (it) =>
@@ -1133,103 +1219,109 @@ class _ActiveHomeState extends StatelessWidget {
               height: heroH,
               onOpenSettings: onOpenSettings,
             ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 2. PF Appointment Nudge — shown for planner/executor stages
+                    //    before residência is complete. Highest-impact failure point.
+                    if (showPFNudge)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                        child: _PFAppointmentNudge(city: city),
+                      ),
 
-            // 2. PF Appointment Nudge — shown for planner/executor stages
-            //    before residência is complete. Highest-impact failure point.
-            if (showPFNudge)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: _PFAppointmentNudge(
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.migrationPlanCopilot,
-                  ),
+                    // 3. Explorer stage: affordability card replaces action card
+                    if (stage == UserJourneyStage.explorer) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                        child: _ExplorerStageCard(
+                          city: city,
+                          cityBudget: null,
+                          onCreatePlan: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.migrationQuestionnaire,
+                          ),
+                        ),
+                      ),
+                    ] else ...[
+                      // 4. Primary action card — the single current guide step
+                      if (guideState.currentItem != null)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          child: _PrimaryActionCard(
+                            item: guideState.currentItem!,
+                            phaseName: guideState.phaseName(context),
+                            isDark: isDark,
+                            bigScreen: bigScreen,
+                            onTap: () => onViewAction(guideState.currentItem!),
+                          ),
+                        ),
+                    ],
+
+                    // 5. Seasonality conflict warning (only for critical timing)
+                    _SeasonalityConflictBanner(
+                      city: city,
+                      planTimeline: planTimeline,
+                    ),
+
+                    // 6. Pre-arrival warning banner — executor stage, pending steps
+                    if (stage == UserJourneyStage.executor && preArrivalCount > 0)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                        child: _PreArrivalWarningBanner(
+                          count: preArrivalCount,
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.migrationPlanCopilot,
+                          ),
+                        ),
+                      ),
+
+                    // 7. Tu Jornada — compact phase stepper + quick-action chips
+                    const SizedBox(height: 6),
+                    if (stage == UserJourneyStage.planner)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                        child: _PlannerCountdownChip(timeline: planTimeline),
+                      ),
+                    JourneyStepperWidget(
+                      plan: plan,
+                      allItems: guideState.items,
+                      showTaskCard: false,
+                      onTapActiveTask: guideState.currentItem != null
+                          ? () => onViewAction(guideState.currentItem!)
+                          : null,
+                      onTapSeeMore: guideState.currentItem != null
+                          ? () => onViewAction(guideState.currentItem!)
+                          : null,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 5, 16, 0),
+                      child: _SecondaryActionRow(
+                        onCompare: onCompare,
+                        onViewCity: onViewCity,
+                        onNewPlan: onNewPlan,
+                        compact: true,
+                      ),
+                    ),
+
+                    // 8. Para Ti — horizontal card carousel
+                    SizedBox(height: paraGap),
+                    CityFeedWidget(
+                      cityCode: city.id,
+                      stage: stage,
+                      locale: locale,
+                      cardHeight: feedCardH,
+                      onOpenGuide: () => Navigator.pushNamed(
+                        context,
+                        AppRoutes.migrationPlanCopilot,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-
-            // 3. Explorer stage: affordability card replaces action card
-            if (stage == UserJourneyStage.explorer) ...[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: _ExplorerStageCard(
-                  city: city,
-                  cityBudget: null,
-                  onCreatePlan: () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.migrationQuestionnaire,
-                  ),
-                ),
-              ),
-            ] else ...[
-              // 4. Primary action card — the single current guide step
-              if (guideState.currentItem != null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: _PrimaryActionCard(
-                    item: guideState.currentItem!,
-                    phaseName: guideState.phaseName(context),
-                    isDark: isDark,
-                    bigScreen: bigScreen,
-                    onTap: () => onViewAction(guideState.currentItem!),
-                  ),
-                ),
-            ],
-
-            // 5. Seasonality conflict warning (only for critical timing)
-            _SeasonalityConflictBanner(city: city, planTimeline: planTimeline),
-
-            // 6. Pre-arrival warning banner — executor stage, pending steps
-            if (stage == UserJourneyStage.executor && preArrivalCount > 0)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-                child: _PreArrivalWarningBanner(
-                  count: preArrivalCount,
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.migrationPlanCopilot,
-                  ),
-                ),
-              ),
-
-            // 7. Tu Jornada — compact phase stepper + quick-action chips
-            const SizedBox(height: 6),
-            // Planner countdown chip above the stepper
-            if (stage == UserJourneyStage.planner)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
-                child: _PlannerCountdownChip(timeline: planTimeline),
-              ),
-            JourneyStepperWidget(
-              plan: plan,
-              allItems: guideState.items,
-              showTaskCard: false,
-              onTapActiveTask: guideState.currentItem != null
-                  ? () => onViewAction(guideState.currentItem!)
-                  : null,
-              onTapSeeMore: guideState.currentItem != null
-                  ? () => onViewAction(guideState.currentItem!)
-                  : null,
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 5, 16, 0),
-              child: _SecondaryActionRow(
-                onCompare: onCompare,
-                onViewCity: onViewCity,
-                onNewPlan: onNewPlan,
-                compact: true,
-              ),
-            ),
-
-            // 8. Para Ti — horizontal card carousel (height fills screen)
-            SizedBox(height: paraGap),
-            CityFeedWidget(
-              cityCode: city.id,
-              stage: stage,
-              locale: locale,
-              cardHeight: feedCardH,
-              onOpenGuide: () => Navigator.pushNamed(
-                context,
-                AppRoutes.migrationPlanCopilot,
               ),
             ),
           ],
@@ -1900,102 +1992,145 @@ _ScreenSize _screenSizeOf(BuildContext context) {
 // ─── PF Appointment Nudge ─────────────────────────────────────────────────────
 
 class _PFAppointmentNudge extends StatelessWidget {
-  const _PFAppointmentNudge({required this.onTap});
+  const _PFAppointmentNudge({required this.city});
 
-  final VoidCallback onTap;
+  final City city;
 
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF2D0A0A) : const Color(0xFFFFF1F2),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isDark ? const Color(0xFF7A1F1F) : const Color(0xFFFECACA),
-          ),
+    final contact = PreparationResourceLinks.resolvePfUnitContact(city);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF2D0A0A) : const Color(0xFFFFF1F2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? const Color(0xFF7A1F1F) : const Color(0xFFFECACA),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(
-              Icons.assignment_late_rounded,
-              size: 18,
-              color: Color(0xFFE24B4A),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _localizedText(
-                      context,
-                      pt: 'Agende a Polícia Federal agora',
-                      es: 'Saca el turno de la Policía Federal ahora',
-                      en: 'Book your Federal Police appointment now',
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.assignment_late_rounded,
+            size: 18,
+            color: Color(0xFFE24B4A),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _localizedText(
+                    context,
+                    pt: 'Confira cedo a etapa da Polícia Federal',
+                    es: 'Revisa temprano la etapa de la Policía Federal',
+                    en: 'Review the Federal Police step early',
+                  ),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: const Color(0xFFE24B4A),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  _localizedText(
+                    context,
+                    pt: 'Se a sua cidade tiver fila, adiantar o agendamento ajuda. O importante é não deixar o protocolo da residência para a reta final dos 90 dias.',
+                    es: 'Si tu ciudad tiene cola, adelantar el turno ayuda. Lo importante es no dejar el tramite de residencia para la recta final de los 90 dias.',
+                    en: 'If your city has long queues, booking earlier helps. What matters is not leaving the residence filing to the final stretch of the 90 days.',
+                  ),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: isDark
+                        ? const Color(0xFFD4716F)
+                        : const Color(0xFFB91C1C),
+                    fontWeight: FontWeight.w400,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => launchUrl(
+                    PreparationResourceLinks.pfScheduling,
+                    mode: LaunchMode.externalApplication,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
                     ),
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    decoration: BoxDecoration(
                       color: const Color(0xFFE24B4A),
-                      fontWeight: FontWeight.w700,
+                      borderRadius: BorderRadius.circular(7),
+                    ),
+                    child: Text(
+                      _localizedText(
+                        context,
+                        pt: 'Abrir agenda oficial da PF →',
+                        es: 'Abrir agenda oficial de la PF →',
+                        en: 'Open official PF booking →',
+                      ),
+                      style: AppTypography.compactBadge.copyWith(
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    _localizedText(
-                      context,
-                      pt: 'Fila de 60–90 dias em SP e RJ. Agende pelo site antes de embarcar.',
-                      es: 'Cola de 60–90 días en SP y RJ. Saca el turno antes de viajar.',
-                      en: '60–90 day backlog in SP and RJ. Book online before you board.',
-                    ),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => launchUrl(
+                    contact?.buildMailtoUri(city) ??
+                        PreparationResourceLinks.pfUnitDirectory,
+                    mode: LaunchMode.externalApplication,
+                  ),
+                  child: Text(
+                    contact == null
+                        ? _localizedText(
+                            context,
+                            pt: 'Sem vaga? abra a lista oficial da unidade responsável →',
+                            es: '¿Sin turno? abre la lista oficial de la unidad responsable →',
+                            en: 'No slots? open the official responsible-unit list →',
+                          )
+                        : _localizedText(
+                            context,
+                            pt: 'Sem vaga? falar com ${contact.label} (${contact.email}) →',
+                            es: '¿Sin turno? hablar con ${contact.label} (${contact.email}) →',
+                            en: 'No slots? contact ${contact.label} (${contact.email}) →',
+                          ),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: isDark
-                          ? const Color(0xFFD4716F)
-                          : const Color(0xFFB91C1C),
-                      fontWeight: FontWeight.w400,
-                      height: 1.4,
+                          ? const Color(0xFFF6B6B4)
+                          : const Color(0xFF991B1B),
+                      fontWeight: FontWeight.w600,
+                      height: 1.35,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => launchUrl(
-                      Uri.parse(
-                        'https://www.gov.br/pf/pt-br/assuntos/imigracao/agendamento',
-                      ),
-                      mode: LaunchMode.externalApplication,
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE24B4A),
-                        borderRadius: BorderRadius.circular(7),
-                      ),
-                      child: Text(
-                        _localizedText(
-                          context,
-                          pt: 'Agendar no site da PF →',
-                          es: 'Pedir turno en el sitio de la PF →',
-                          en: 'Book on PF website →',
-                        ),
-                        style: AppTypography.compactBadge.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _localizedText(
+                    context,
+                    pt: 'A agenda é nacional. Se não aparecer horário, a unidade migratória da sua cidade orienta o próximo passo.',
+                    es: 'La agenda es nacional. Si no aparece turno, la unidad migratoria de tu ciudad indica el siguiente paso.',
+                    en: 'The booking portal is national. If no slot appears, the migration unit for your city can guide the next step.',
                   ),
-                ],
-              ),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: isDark
+                        ? const Color(0xFFD4716F)
+                        : const Color(0xFFB91C1C),
+                    fontWeight: FontWeight.w400,
+                    height: 1.35,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

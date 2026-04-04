@@ -1,4 +1,6 @@
 PODS:
+  - add_2_calendar_new (0.0.1):
+    - Flutter
   - app_links (7.0.0):
     - Flutter
   - Flutter (1.0.0)
@@ -28,6 +30,7 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
+  - add_2_calendar_new (from `.symlinks/plugins/add_2_calendar_new/ios`)
   - app_links (from `.symlinks/plugins/app_links/ios`)
   - Flutter (from `Flutter`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
@@ -42,6 +45,8 @@ DEPENDENCIES:
   - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/darwin`)
 
 EXTERNAL SOURCES:
+  add_2_calendar_new:
+    :path: ".symlinks/plugins/add_2_calendar_new/ios"
   app_links:
     :path: ".symlinks/plugins/app_links/ios"
   Flutter:
@@ -68,6 +73,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
 
 SPEC CHECKSUMS:
+  add_2_calendar_new: 68ef3d90f48e9ae4056357711462e427be6098a0
   app_links: a754cbec3c255bd4bbb4d236ecc06f28cd9a7ce8
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_local_notifications: 643a3eda1ce1c0599413ca31672536d423dee214

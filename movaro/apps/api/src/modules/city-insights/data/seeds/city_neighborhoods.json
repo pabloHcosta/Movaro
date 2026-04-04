@@ -1,0 +1,434 @@
+[
+  {
+    "cityId": "aracaju-se",
+    "cityName": "Aracaju",
+    "places": [
+      {
+        "id": "aracaju-se-osm-neighborhood-node-951572374",
+        "name": "Grageru",
+        "neighborhood": "Grageru",
+        "region": "Aracaju",
+        "category": "bairro",
+        "shortText": "Grageru aparece no OpenStreetMap como área relevante dentro de Aracaju.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-10.9372035&mlon=-37.0604994#map=14/-10.9372035/-37.0604994",
+        "source": "openstreetmap",
+        "latitude": -10.9372035,
+        "longitude": -37.0604994
+      },
+      {
+        "id": "aracaju-se-osm-neighborhood-node-3401720088",
+        "name": "Marcos Freire I",
+        "neighborhood": "Marcos Freire I",
+        "region": "Aracaju",
+        "category": "bairro",
+        "shortText": "Marcos Freire I aparece no OpenStreetMap como área relevante dentro de Aracaju.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-10.8479071&mlon=-37.0696507#map=14/-10.8479071/-37.0696507",
+        "source": "openstreetmap",
+        "latitude": -10.8479071,
+        "longitude": -37.0696507
+      },
+      {
+        "id": "aracaju-se-osm-neighborhood-node-11137432371",
+        "name": "João Alves",
+        "neighborhood": "João Alves",
+        "region": "Aracaju",
+        "category": "bairro",
+        "shortText": "João Alves aparece no OpenStreetMap como área relevante dentro de Aracaju.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-10.8569148&mlon=-37.0832153#map=14/-10.8569148/-37.0832153",
+        "source": "openstreetmap",
+        "latitude": -10.8569148,
+        "longitude": -37.0832153
+      },
+      {
+        "id": "aracaju-se-osm-neighborhood-node-11144594656",
+        "name": "Mangabeira",
+        "neighborhood": "Mangabeira",
+        "region": "Aracaju",
+        "category": "bairro",
+        "shortText": "Mangabeira aparece no OpenStreetMap como área relevante dentro de Aracaju.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-10.8568502&mlon=-37.0748413#map=14/-10.8568502/-37.0748413",
+        "source": "openstreetmap",
+        "latitude": -10.8568502,
+        "longitude": -37.0748413
+      }
+    ]
+  },
+  {
+    "cityId": "armacao-dos-buzios-rj",
+    "cityName": "Armacao dos Buzios",
+    "places": [
+      {
+        "id": "armacao-dos-buzios-rj-osm-neighborhood-node-1747171744",
+        "name": "Alto de Búzios",
+        "neighborhood": "Alto de Búzios",
+        "region": "Armacao dos Buzios",
+        "category": "bairro",
+        "shortText": "Alto de Búzios aparece no OpenStreetMap como área relevante dentro de Armacao dos Buzios.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-22.7680721&mlon=-41.8983832#map=14/-22.7680721/-41.8983832",
+        "source": "openstreetmap",
+        "latitude": -22.7680721,
+        "longitude": -41.8983832
+      },
+      {
+        "id": "armacao-dos-buzios-rj-osm-neighborhood-node-1747171745",
+        "name": "Altos da Brava",
+        "neighborhood": "Altos da Brava",
+        "region": "Armacao dos Buzios",
+        "category": "bairro",
+        "shortText": "Altos da Brava aparece no OpenStreetMap como área relevante dentro de Armacao dos Buzios.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-22.755759&mlon=-41.8792507#map=14/-22.755759/-41.8792507",
+        "source": "openstreetmap",
+        "latitude": -22.755759,
+        "longitude": -41.8792507
+      },
+      {
+        "id": "armacao-dos-buzios-rj-osm-neighborhood-node-1747171749",
+        "name": "Ferradura",
+        "neighborhood": "Ferradura",
+        "region": "Armacao dos Buzios",
+        "category": "bairro",
+        "shortText": "Ferradura aparece no OpenStreetMap como área relevante dentro de Armacao dos Buzios.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-22.7682416&mlon=-41.8903742#map=14/-22.7682416/-41.8903742",
+        "source": "openstreetmap",
+        "latitude": -22.7682416,
+        "longitude": -41.8903742
+      },
+      {
+        "id": "armacao-dos-buzios-rj-osm-neighborhood-node-1747171750",
+        "name": "Geribá",
+        "neighborhood": "Geribá",
+        "region": "Armacao dos Buzios",
+        "category": "bairro",
+        "shortText": "Geribá aparece no OpenStreetMap como área relevante dentro de Armacao dos Buzios.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-22.7784547&mlon=-41.914626#map=14/-22.7784547/-41.914626",
+        "source": "openstreetmap",
+        "latitude": -22.7784547,
+        "longitude": -41.914626
+      }
+    ]
+  },
+  {
+    "cityId": "balneario-camboriu-sc",
+    "cityName": "Balneario Camboriu",
+    "places": [
+      {
+        "id": "balneario-camboriu-sc-osm-neighborhood-node-416766273",
+        "name": "Machados",
+        "neighborhood": "Machados",
+        "region": "Balneario Camboriu",
+        "category": "bairro",
+        "shortText": "Machados aparece no OpenStreetMap como área relevante dentro de Balneario Camboriu.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-26.8631423&mlon=-48.6891257#map=14/-26.8631423/-48.6891257",
+        "source": "openstreetmap",
+        "latitude": -26.8631423,
+        "longitude": -48.6891257
+      },
+      {
+        "id": "balneario-camboriu-sc-osm-neighborhood-node-2917884373",
+        "name": "Meia Praia",
+        "neighborhood": "Meia Praia",
+        "region": "Balneario Camboriu",
+        "category": "bairro",
+        "shortText": "Meia Praia aparece no OpenStreetMap como área relevante dentro de Balneario Camboriu.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-27.128857&mlon=-48.6060978#map=14/-27.128857/-48.6060978",
+        "source": "openstreetmap",
+        "latitude": -27.128857,
+        "longitude": -48.6060978
+      },
+      {
+        "id": "balneario-camboriu-sc-osm-neighborhood-node-2942692354",
+        "name": "Baía",
+        "neighborhood": "Baía",
+        "region": "Balneario Camboriu",
+        "category": "bairro",
+        "shortText": "Baía aparece no OpenStreetMap como área relevante dentro de Balneario Camboriu.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-26.9762015&mlon=-48.7440559#map=14/-26.9762015/-48.7440559",
+        "source": "openstreetmap",
+        "latitude": -26.9762015,
+        "longitude": -48.7440559
+      },
+      {
+        "id": "balneario-camboriu-sc-osm-neighborhood-node-2942692355",
+        "name": "Km 12",
+        "neighborhood": "Km 12",
+        "region": "Balneario Camboriu",
+        "category": "bairro",
+        "shortText": "Km 12 aparece no OpenStreetMap como área relevante dentro de Balneario Camboriu.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-26.9614196&mlon=-48.7592739#map=14/-26.9614196/-48.7592739",
+        "source": "openstreetmap",
+        "latitude": -26.9614196,
+        "longitude": -48.7592739
+      }
+    ]
+  },
+  {
+    "cityId": "florianopolis-sc",
+    "cityName": "Florianopolis",
+    "places": [
+      {
+        "id": "florianopolis-sc-osm-neighborhood-way-1426302212",
+        "name": "Sede",
+        "neighborhood": "Sede",
+        "region": "Florianopolis",
+        "category": "bairro",
+        "shortText": "Sede aparece no OpenStreetMap como área relevante dentro de Florianopolis.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-27.5931789&mlon=-48.5438634#map=14/-27.5931789/-48.5438634",
+        "source": "openstreetmap",
+        "latitude": -27.5931789,
+        "longitude": -48.5438634
+      },
+      {
+        "id": "florianopolis-sc-osm-neighborhood-node-1249891090",
+        "name": "Córrego Grande",
+        "neighborhood": "Córrego Grande",
+        "region": "Florianopolis",
+        "category": "bairro",
+        "shortText": "Córrego Grande aparece no OpenStreetMap como área relevante dentro de Florianopolis.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-27.5997109&mlon=-48.5021999#map=14/-27.5997109/-48.5021999",
+        "source": "openstreetmap",
+        "latitude": -27.5997109,
+        "longitude": -48.5021999
+      },
+      {
+        "id": "florianopolis-sc-osm-neighborhood-node-1249891093",
+        "name": "Agronômica",
+        "neighborhood": "Agronômica",
+        "region": "Florianopolis",
+        "category": "bairro",
+        "shortText": "Agronômica aparece no OpenStreetMap como área relevante dentro de Florianopolis.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-27.5781447&mlon=-48.5357168#map=14/-27.5781447/-48.5357168",
+        "source": "openstreetmap",
+        "latitude": -27.5781447,
+        "longitude": -48.5357168
+      },
+      {
+        "id": "florianopolis-sc-osm-neighborhood-node-1249891099",
+        "name": "Trindade",
+        "neighborhood": "Trindade",
+        "region": "Florianopolis",
+        "category": "bairro",
+        "shortText": "Trindade aparece no OpenStreetMap como área relevante dentro de Florianopolis.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-27.5893834&mlon=-48.5224004#map=14/-27.5893834/-48.5224004",
+        "source": "openstreetmap",
+        "latitude": -27.5893834,
+        "longitude": -48.5224004
+      }
+    ]
+  },
+  {
+    "cityId": "guaruja-sp",
+    "cityName": "Guaruja",
+    "places": [
+      {
+        "id": "guaruja-sp-osm-neighborhood-relation-18937523",
+        "name": "Vila Matias",
+        "neighborhood": "Vila Matias",
+        "region": "Guaruja",
+        "category": "bairro",
+        "shortText": "Vila Matias aparece no OpenStreetMap como área relevante dentro de Guaruja.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-23.9457021&mlon=-46.3277554#map=14/-23.9457021/-46.3277554",
+        "source": "openstreetmap",
+        "latitude": -23.9457021,
+        "longitude": -46.3277554
+      },
+      {
+        "id": "guaruja-sp-osm-neighborhood-node-615751797",
+        "name": "Centro",
+        "neighborhood": "Centro",
+        "region": "Guaruja",
+        "category": "bairro",
+        "shortText": "Centro aparece no OpenStreetMap como área relevante dentro de Guaruja.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-23.9345025&mlon=-46.327468#map=14/-23.9345025/-46.327468",
+        "source": "openstreetmap",
+        "latitude": -23.9345025,
+        "longitude": -46.327468
+      },
+      {
+        "id": "guaruja-sp-osm-neighborhood-node-615755111",
+        "name": "Ponta da Praia",
+        "neighborhood": "Ponta da Praia",
+        "region": "Guaruja",
+        "category": "bairro",
+        "shortText": "Ponta da Praia aparece no OpenStreetMap como área relevante dentro de Guaruja.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-23.9862005&mlon=-46.3017868#map=14/-23.9862005/-46.3017868",
+        "source": "openstreetmap",
+        "latitude": -23.9862005,
+        "longitude": -46.3017868
+      },
+      {
+        "id": "guaruja-sp-osm-neighborhood-node-1825887109",
+        "name": "Morrinhos",
+        "neighborhood": "Morrinhos",
+        "region": "Guaruja",
+        "category": "bairro",
+        "shortText": "Morrinhos aparece no OpenStreetMap como área relevante dentro de Guaruja.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-23.9620804&mlon=-46.2523823#map=14/-23.9620804/-46.2523823",
+        "source": "openstreetmap",
+        "latitude": -23.9620804,
+        "longitude": -46.2523823
+      }
+    ]
+  },
+  {
+    "cityId": "joao-pessoa-pb",
+    "cityName": "Joao Pessoa",
+    "places": [
+      {
+        "id": "joao-pessoa-pb-osm-neighborhood-relation-3064194",
+        "name": "Valentina Figueiredo",
+        "neighborhood": "Valentina Figueiredo",
+        "region": "Joao Pessoa",
+        "category": "bairro",
+        "shortText": "Valentina Figueiredo aparece no OpenStreetMap como área relevante dentro de Joao Pessoa.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-7.1980572&mlon=-34.846902#map=14/-7.1980572/-34.846902",
+        "source": "openstreetmap",
+        "latitude": -7.1980572,
+        "longitude": -34.846902
+      },
+      {
+        "id": "joao-pessoa-pb-osm-neighborhood-relation-3065228",
+        "name": "Castelo Branco",
+        "neighborhood": "Castelo Branco",
+        "region": "Joao Pessoa",
+        "category": "bairro",
+        "shortText": "Castelo Branco aparece no OpenStreetMap como área relevante dentro de Joao Pessoa.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-7.1357821&mlon=-34.8458074#map=14/-7.1357821/-34.8458074",
+        "source": "openstreetmap",
+        "latitude": -7.1357821,
+        "longitude": -34.8458074
+      },
+      {
+        "id": "joao-pessoa-pb-osm-neighborhood-relation-3066916",
+        "name": "Monte Castelo",
+        "neighborhood": "Monte Castelo",
+        "region": "Joao Pessoa",
+        "category": "bairro",
+        "shortText": "Monte Castelo aparece no OpenStreetMap como área relevante dentro de Joao Pessoa.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-6.9762204&mlon=-34.8299138#map=14/-6.9762204/-34.8299138",
+        "source": "openstreetmap",
+        "latitude": -6.9762204,
+        "longitude": -34.8299138
+      },
+      {
+        "id": "joao-pessoa-pb-osm-neighborhood-node-416654261",
+        "name": "Jacaré",
+        "neighborhood": "Jacaré",
+        "region": "Joao Pessoa",
+        "category": "bairro",
+        "shortText": "Jacaré aparece no OpenStreetMap como área relevante dentro de Joao Pessoa.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-7.0367996&mlon=-34.8523895#map=14/-7.0367996/-34.8523895",
+        "source": "openstreetmap",
+        "latitude": -7.0367996,
+        "longitude": -34.8523895
+      }
+    ]
+  },
+  {
+    "cityId": "niteroi-rj",
+    "cityName": "Niteroi",
+    "places": [
+      {
+        "id": "niteroi-rj-osm-neighborhood-node-267936643",
+        "name": "Itacoatiara",
+        "neighborhood": "Itacoatiara",
+        "region": "Niteroi",
+        "category": "bairro",
+        "shortText": "Itacoatiara aparece no OpenStreetMap como área relevante dentro de Niteroi.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-22.971&mlon=-43.0321#map=14/-22.971/-43.0321",
+        "source": "openstreetmap",
+        "latitude": -22.971,
+        "longitude": -43.0321
+      },
+      {
+        "id": "niteroi-rj-osm-neighborhood-node-336143976",
+        "name": "São Francisco",
+        "neighborhood": "São Francisco",
+        "region": "Niteroi",
+        "category": "bairro",
+        "shortText": "São Francisco aparece no OpenStreetMap como área relevante dentro de Niteroi.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-22.9181&mlon=-43.0864#map=14/-22.9181/-43.0864",
+        "source": "openstreetmap",
+        "latitude": -22.9181,
+        "longitude": -43.0864
+      },
+      {
+        "id": "niteroi-rj-osm-neighborhood-node-336168605",
+        "name": "Boa Viagem",
+        "neighborhood": "Boa Viagem",
+        "region": "Niteroi",
+        "category": "bairro",
+        "shortText": "Boa Viagem aparece no OpenStreetMap como área relevante dentro de Niteroi.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-22.9082&mlon=-43.1298#map=14/-22.9082/-43.1298",
+        "source": "openstreetmap",
+        "latitude": -22.9082,
+        "longitude": -43.1298
+      },
+      {
+        "id": "niteroi-rj-osm-neighborhood-node-336168618",
+        "name": "Gragoatá",
+        "neighborhood": "Gragoatá",
+        "region": "Niteroi",
+        "category": "bairro",
+        "shortText": "Gragoatá aparece no OpenStreetMap como área relevante dentro de Niteroi.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-22.9029&mlon=-43.1357#map=14/-22.9029/-43.1357",
+        "source": "openstreetmap",
+        "latitude": -22.9029,
+        "longitude": -43.1357
+      }
+    ]
+  },
+  {
+    "cityId": "paraty-rj",
+    "cityName": "Paraty",
+    "places": [
+      {
+        "id": "paraty-rj-osm-neighborhood-node-2616788226",
+        "name": "Laranjeiras",
+        "neighborhood": "Laranjeiras",
+        "region": "Paraty",
+        "category": "bairro",
+        "shortText": "Laranjeiras aparece no OpenStreetMap como área relevante dentro de Paraty.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-23.3374279&mlon=-44.6677033#map=14/-23.3374279/-44.6677033",
+        "source": "openstreetmap",
+        "latitude": -23.3374279,
+        "longitude": -44.6677033
+      },
+      {
+        "id": "paraty-rj-osm-neighborhood-node-6562877842",
+        "name": "Vila Dom Pedro I",
+        "neighborhood": "Vila Dom Pedro I",
+        "region": "Paraty",
+        "category": "bairro",
+        "shortText": "Vila Dom Pedro I aparece no OpenStreetMap como área relevante dentro de Paraty.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-23.2268546&mlon=-44.7257267#map=14/-23.2268546/-44.7257267",
+        "source": "openstreetmap",
+        "latitude": -23.2268546,
+        "longitude": -44.7257267
+      },
+      {
+        "id": "paraty-rj-osm-neighborhood-node-12546214939",
+        "name": "Jabaquara",
+        "neighborhood": "Jabaquara",
+        "region": "Paraty",
+        "category": "bairro",
+        "shortText": "Jabaquara aparece no OpenStreetMap como área relevante dentro de Paraty.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-23.2064056&mlon=-44.720877#map=14/-23.2064056/-44.720877",
+        "source": "openstreetmap",
+        "latitude": -23.2064056,
+        "longitude": -44.720877
+      },
+      {
+        "id": "paraty-rj-osm-neighborhood-node-12546214940",
+        "name": "Centro Histórico",
+        "neighborhood": "Centro Histórico",
+        "region": "Paraty",
+        "category": "bairro",
+        "shortText": "Centro Histórico aparece no OpenStreetMap como área relevante dentro de Paraty.",
+        "mapUrl": "https://www.openstreetmap.org/?mlat=-23.219069&mlon=-44.7133518#map=14/-23.219069/-44.7133518",
+        "source": "openstreetmap",
+        "latitude": -23.219069,
+        "longitude": -44.7133518
+      }
+    ]
+  }
+]

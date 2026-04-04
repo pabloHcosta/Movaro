@@ -1,0 +1,22 @@
+PODS:
+  - add_2_calendar_new (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+
+DEPENDENCIES:
+  - add_2_calendar_new (from `.symlinks/plugins/add_2_calendar_new/ios`)
+  - Flutter (from `Flutter`)
+
+EXTERNAL SOURCES:
+  add_2_calendar_new:
+    :path: ".symlinks/plugins/add_2_calendar_new/ios"
+  Flutter:
+    :path: Flutter
+
+SPEC CHECKSUMS:
+  add_2_calendar_new: 68ef3d90f48e9ae4056357711462e427be6098a0
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+
+PODFILE CHECKSUM: 4305caec6b40dde0ae97be1573c53de1882a07e5
+
+COCOAPODS: 1.16.2

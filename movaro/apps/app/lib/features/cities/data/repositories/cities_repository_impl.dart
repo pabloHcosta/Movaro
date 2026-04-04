@@ -1,10 +1,12 @@
 import 'package:movaro_app/features/cities/data/datasources/cities_remote_data_source.dart';
+import 'package:movaro_app/features/cities/data/models/city_detail_payloads_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_highlights_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_methodology_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_model.dart';
 import 'package:movaro_app/features/cities/data/models/travel_route_insight_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_weather_model.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
 import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
@@ -97,6 +99,70 @@ class CitiesRepositoryImpl implements CitiesRepository {
       return null;
     }
     return TravelRouteInsightModel.fromJson(response).toEntity();
+  }
+
+  @override
+  Future<CityDetailSocialProof> getCityDetailSocialProof(
+    String cityId, {
+    String? locale,
+    String? goal,
+    String? timeline,
+  }) async {
+    final query = <String, String>{};
+    if (locale != null && locale.isNotEmpty) query['locale'] = locale;
+    if (goal != null && goal.isNotEmpty) query['goal'] = goal;
+    if (timeline != null && timeline.isNotEmpty) query['timeline'] = timeline;
+    final path = query.isEmpty
+        ? '/api/v1/city-detail/$cityId/social-proof'
+        : '/api/v1/city-detail/$cityId/social-proof?${Uri(queryParameters: query).query}';
+    final response = await _remoteDataSource.getJsonMap(path);
+    return CityDetailPayloadsModel.socialProofFromJson(response);
+  }
+
+  @override
+  Future<CityDetailClimateSummary> getCityDetailClimateSummary(
+    String cityId, {
+    String? locale,
+  }) async {
+    final path = locale == null || locale.isEmpty
+        ? '/api/v1/city-detail/$cityId/climate-summary'
+        : '/api/v1/city-detail/$cityId/climate-summary?${Uri(queryParameters: {'locale': locale}).query}';
+    final response = await _remoteDataSource.getJsonMap(path);
+    return CityDetailPayloadsModel.climateSummaryFromJson(response);
+  }
+
+  @override
+  Future<CityDetailArrivalStory> getCityDetailArrivalStory(
+    String cityId, {
+    String? locale,
+    String? goal,
+    String? timeline,
+  }) async {
+    final query = <String, String>{};
+    if (locale != null && locale.isNotEmpty) query['locale'] = locale;
+    if (goal != null && goal.isNotEmpty) query['goal'] = goal;
+    if (timeline != null && timeline.isNotEmpty) query['timeline'] = timeline;
+    final path = query.isEmpty
+        ? '/api/v1/city-detail/$cityId/arrival-story'
+        : '/api/v1/city-detail/$cityId/arrival-story?${Uri(queryParameters: query).query}';
+    final response = await _remoteDataSource.getJsonMap(path);
+    return CityDetailPayloadsModel.arrivalStoryFromJson(response);
+  }
+
+  @override
+  Future<CityDetailComparison> getCityDetailComparison(
+    String cityId, {
+    required List<String> compareTo,
+    String? locale,
+  }) async {
+    final query = <String, String>{
+      'compareTo': compareTo.join(','),
+      if (locale != null && locale.isNotEmpty) 'locale': locale,
+    };
+    final response = await _remoteDataSource.getJsonMap(
+      '/api/v1/city-detail/$cityId/comparison?${Uri(queryParameters: query).query}',
+    );
+    return CityDetailPayloadsModel.comparisonFromJson(response);
   }
 
   @override
