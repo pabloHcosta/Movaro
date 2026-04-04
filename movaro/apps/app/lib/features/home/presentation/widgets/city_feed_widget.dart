@@ -9,12 +9,16 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 ///
 /// Renders [CityFeedItem] cards filtered by the user's city and journey stage.
 /// Each card is intentionally compact — one idea per card, no overload.
+///
+/// [onOpenGuide] — optional callback invoked when the user taps "Ver no guia"
+/// inside an expanded card. Typically navigates to the migration copilot.
 class CityFeedWidget extends StatelessWidget {
   const CityFeedWidget({
     required this.cityCode,
     required this.stage,
     required this.locale,
     this.cardHeight = 152.0,
+    this.onOpenGuide,
     super.key,
   });
 
@@ -26,6 +30,10 @@ class CityFeedWidget extends StatelessWidget {
   /// The Focus Mode layout passes a screen-derived value computed by
   /// LayoutBuilder (typically 148–178 pt depending on device).
   final double cardHeight;
+
+  /// Optional: called when the user taps the guide CTA inside an expanded
+  /// card. If null, the "Ver no guia" button is not shown.
+  final VoidCallback? onOpenGuide;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +69,8 @@ class CityFeedWidget extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: items.length,
             separatorBuilder: (context, index) => const SizedBox(width: 10),
-            itemBuilder: (context, index) => _FeedCard(item: items[index]),
+            itemBuilder: (context, index) =>
+                _FeedCard(item: items[index], onOpenGuide: onOpenGuide),
           ),
         ),
       ],
@@ -76,9 +85,10 @@ class CityFeedWidget extends StatelessWidget {
 }
 
 class _FeedCard extends StatelessWidget {
-  const _FeedCard({required this.item});
+  const _FeedCard({required this.item, this.onOpenGuide});
 
   final CityFeedItem item;
+  final VoidCallback? onOpenGuide;
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +97,7 @@ class _FeedCard extends StatelessWidget {
     final locale = Localizations.localeOf(context).languageCode;
 
     return GestureDetector(
-      onTap: () => _showExpandedCard(context),
+      onTap: () => _showExpandedCard(context, onOpenGuide),
       child: Container(
         width: 240,
         padding: const EdgeInsets.all(13),
@@ -168,10 +178,23 @@ class _FeedCard extends StatelessWidget {
     );
   }
 
-  void _showExpandedCard(BuildContext context) {
+  void _showExpandedCard(BuildContext context, VoidCallback? onOpenGuide) {
     final isDark = AppColors.isDark(context);
     final color = item.typeColor(isDark);
     final locale = Localizations.localeOf(context).languageCode;
+
+    // Items where a "Ver no guia" CTA is meaningful — tips, warnings,
+    // opportunities all have a corresponding guide step the user can act on.
+    final showGuideCta = onOpenGuide != null &&
+        (item.type == CityFeedItemType.practicalTip ||
+            item.type == CityFeedItemType.warning ||
+            item.type == CityFeedItemType.opportunity);
+
+    final guideCtaLabel = switch (locale) {
+      'pt' => 'Ver passo a passo no guia →',
+      'es' => 'Ver paso a paso en la guía →',
+      _ => 'See step-by-step guide →',
+    };
 
     showModalBottomSheet<void>(
       context: context,
@@ -253,7 +276,7 @@ class _FeedCard extends StatelessWidget {
                   ConstrainedBox(
                     constraints: BoxConstraints(
                       maxHeight:
-                          MediaQuery.of(sheetContext).size.height * 0.50,
+                          MediaQuery.of(sheetContext).size.height * 0.45,
                     ),
                     child: SingleChildScrollView(
                       child: Text(
@@ -267,6 +290,21 @@ class _FeedCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  // Guide CTA — only for actionable item types
+                  if (showGuideCta) ...[
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          Navigator.of(sheetContext).pop();
+                          onOpenGuide();
+                        },
+                        icon: const Icon(Icons.route_rounded, size: 16),
+                        label: Text(guideCtaLabel),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

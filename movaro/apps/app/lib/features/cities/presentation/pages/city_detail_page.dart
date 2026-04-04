@@ -448,42 +448,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
                           ),
                           if (strengths.isNotEmpty) const SizedBox(height: 12),
 
-                          // ── Block 3: Quick Summary ──────────────────────
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _QuickSummaryCard(city: city),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // ── Block 4: Category List ──────────────────────
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _CategoryListCard(city: city),
-                          ),
-                          const SizedBox(height: 12),
-                          ConstrainedBox(
-                            key: _arrivalSectionKey,
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _ArrivalViabilityCard(
-                              city: city,
-                              budget: budget,
-                              preferredCountryId: plan?.originCountry,
-                              routeInsight: routeInsight,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          if (routeInsight != null)
-                            ConstrainedBox(
-                              key: _flightBurdenSectionKey,
-                              constraints: const BoxConstraints(maxWidth: 1160),
-                              child: _FlightBurdenCard(
-                                routeInsight: routeInsight,
-                                budget: budget,
-                                preferredCountryId: plan?.originCountry,
-                              ),
-                            ),
-                          if (routeInsight != null) const SizedBox(height: 12),
-
+                          // ── Block 3: Cost of Living (always visible) ────
                           if (budget case final budget?) ...[
                             ConstrainedBox(
                               key: _costSectionKey,
@@ -495,74 +460,9 @@ class _CityDetailPageState extends State<CityDetailPage> {
                             ),
                             const SizedBox(height: 12),
                           ],
-                          // ── Location banner ─────────────────────────────
-                          FutureBuilder<bool>(
-                            future: _locationBannerFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.data != true) {
-                                return const SizedBox.shrink();
-                              }
-                              return ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 1160,
-                                ),
-                                child: LocationBannerWidget(
-                                  onActivate: () async {
-                                    final granted = await Navigator.pushNamed(
-                                      context,
-                                      AppRoutes.locationPermission,
-                                      arguments:
-                                          const LocationPermissionScreenArgs(
-                                            returnToPrevious: true,
-                                          ),
-                                    );
 
-                                    if (!mounted) {
-                                      return;
-                                    }
-
-                                    setState(() {
-                                      _locationBannerFuture = widget
-                                          .locationController
-                                          .shouldShowInlineBanner();
-                                    });
-
-                                    if (granted == true &&
-                                        widget
-                                                .locationController
-                                                .savedLocation !=
-                                            null) {
-                                      await _load();
-                                    }
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // ── Map section ─────────────────────────────────
-                          ConstrainedBox(
-                            key: _mapSectionKey,
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _CityLocationPanel(
-                              city: city,
-                              detectedLocation: _resolvedDetectedLocation(),
-                              isActivePlanCity:
-                                  widget
-                                      .migrationQuestionnaireController
-                                      ?.generatedPlan
-                                      ?.recommendedCity
-                                      ?.id ==
-                                  city.id,
-                              onOpenMap: () => _openCityMapSheet(city),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // ── Seasonality Alert ────────────────────────────
+                          // ── Block 4: Seasonality (always visible) ────────
                           if (CitySeasonalityProfile.hasSeason(city)) ...[
-                            const SizedBox(height: 16),
                             ConstrainedBox(
                               key: _seasonalitySectionKey,
                               constraints: const BoxConstraints(maxWidth: 1160),
@@ -581,114 +481,236 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                 ),
                               ),
                             ),
+                            const SizedBox(height: 12),
                           ],
 
-                          if (city.publicOpinion != null) ...[
-                            const SizedBox(height: 16),
-                            ConstrainedBox(
-                              key: _opinionSectionKey,
-                              constraints: const BoxConstraints(maxWidth: 1160),
-                              child: CityPublicOpinionSection(
-                                opinion: city.publicOpinion!,
+                          // ── Secondary sections (progressive disclosure) ──
+                          _SecondaryContentSection(
+                            cityName: city.name,
+                            children: [
+                              // Quick Summary
+                              ConstrainedBox(
+                                constraints:
+                                    const BoxConstraints(maxWidth: 1160),
+                                child: _QuickSummaryCard(city: city),
                               ),
-                            ),
-                          ],
-                          const SizedBox(height: 16),
+                              const SizedBox(height: 12),
 
-                          // ── Deep Dive (Analysis) ────────────────────────
-                          ConstrainedBox(
-                            key: _analysisSectionKey,
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: Card(
-                              child: ExpansionTile(
-                                controller: _analysisTileController,
-                                tilePadding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 6,
+                              // Category List
+                              ConstrainedBox(
+                                constraints:
+                                    const BoxConstraints(maxWidth: 1160),
+                                child: _CategoryListCard(city: city),
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Arrival Viability
+                              ConstrainedBox(
+                                key: _arrivalSectionKey,
+                                constraints:
+                                    const BoxConstraints(maxWidth: 1160),
+                                child: _ArrivalViabilityCard(
+                                  city: city,
+                                  budget: budget,
+                                  preferredCountryId: plan?.originCountry,
+                                  routeInsight: routeInsight,
                                 ),
-                                childrenPadding: const EdgeInsets.fromLTRB(
-                                  16,
-                                  0,
-                                  16,
-                                  16,
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Flight burden
+                              if (routeInsight != null) ...[
+                                ConstrainedBox(
+                                  key: _flightBurdenSectionKey,
+                                  constraints:
+                                      const BoxConstraints(maxWidth: 1160),
+                                  child: _FlightBurdenCard(
+                                    routeInsight: routeInsight,
+                                    budget: budget,
+                                    preferredCountryId: plan?.originCountry,
+                                  ),
                                 ),
-                                title: Text(
-                                  l10n.cityDetailDeepDiveTitle,
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium,
-                                ),
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 16),
-                                    child: _SnapshotPanel(
-                                      city: city,
-                                      localeName: localeName,
-                                      showTitle: false,
+                                const SizedBox(height: 12),
+                              ],
+
+                              // Location banner
+                              FutureBuilder<bool>(
+                                future: _locationBannerFuture,
+                                builder: (context, snapshot) {
+                                  if (snapshot.data != true) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return ConstrainedBox(
+                                    constraints:
+                                        const BoxConstraints(maxWidth: 1160),
+                                    child: LocationBannerWidget(
+                                      onActivate: () async {
+                                        final granted =
+                                            await Navigator.pushNamed(
+                                              context,
+                                              AppRoutes.locationPermission,
+                                              arguments:
+                                                  const LocationPermissionScreenArgs(
+                                                    returnToPrevious: true,
+                                                  ),
+                                            );
+                                        if (!mounted) return;
+                                        setState(() {
+                                          _locationBannerFuture = widget
+                                              .locationController
+                                              .shouldShowInlineBanner();
+                                        });
+                                        if (granted == true &&
+                                            widget.locationController
+                                                    .savedLocation !=
+                                                null) {
+                                          await _load();
+                                        }
+                                      },
                                     ),
-                                  ),
-                                  LayoutBuilder(
-                                    builder: (context, constraints) {
-                                      final wide = constraints.maxWidth >= 980;
-                                      final detailWidth = wide
-                                          ? (constraints.maxWidth - 16) / 2
-                                          : constraints.maxWidth;
-
-                                      return Wrap(
-                                        spacing: 16,
-                                        runSpacing: 16,
-                                        children: [
-                                          SizedBox(
-                                            width: detailWidth,
-                                            child: _WorkOpportunityPanel(
-                                              city: city,
-                                              budget: budget,
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: detailWidth,
-                                            child: _IdhmContextPanel(
-                                              city: city,
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ],
+                                  );
+                                },
                               ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
+                              const SizedBox(height: 12),
 
-                          // ── Flights ─────────────────────────────────────
-                          ConstrainedBox(
-                            key: _flightsSectionKey,
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: FlightSeasonalityCard(
-                              originCountryIso: originCountryIso,
-                              originIata: originAirport?.iataCode,
-                              destIata: destinationAirport?.iataCode,
-                              routeInsight: routeInsight,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ConstrainedBox(
-                            key: _sourcesSectionKey,
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: CitySourcesSection(sources: city.sources),
-                          ),
-                          const SizedBox(height: 16),
-                          Center(
-                            child: Text(
-                              '${l10n.citiesMethodologyNote} · ${l10n.cityDetailUpdatedLabel(_formatUpdatedAt(context, city.updatedAt))}',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: AppColors.textSoftFor(context),
-                                    height: 1.4,
+                              // Map
+                              ConstrainedBox(
+                                key: _mapSectionKey,
+                                constraints:
+                                    const BoxConstraints(maxWidth: 1160),
+                                child: _CityLocationPanel(
+                                  city: city,
+                                  detectedLocation:
+                                      _resolvedDetectedLocation(),
+                                  isActivePlanCity: widget
+                                          .migrationQuestionnaireController
+                                          ?.generatedPlan
+                                          ?.recommendedCity
+                                          ?.id ==
+                                      city.id,
+                                  onOpenMap: () => _openCityMapSheet(city),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Public opinion
+                              if (city.publicOpinion != null) ...[
+                                ConstrainedBox(
+                                  key: _opinionSectionKey,
+                                  constraints:
+                                      const BoxConstraints(maxWidth: 1160),
+                                  child: CityPublicOpinionSection(
+                                    opinion: city.publicOpinion!,
                                   ),
-                            ),
+                                ),
+                                const SizedBox(height: 12),
+                              ],
+
+                              // Deep Dive (Analysis)
+                              ConstrainedBox(
+                                key: _analysisSectionKey,
+                                constraints:
+                                    const BoxConstraints(maxWidth: 1160),
+                                child: Card(
+                                  child: ExpansionTile(
+                                    controller: _analysisTileController,
+                                    tilePadding:
+                                        const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 6,
+                                        ),
+                                    childrenPadding:
+                                        const EdgeInsets.fromLTRB(
+                                          16,
+                                          0,
+                                          16,
+                                          16,
+                                        ),
+                                    title: Text(
+                                      l10n.cityDetailDeepDiveTitle,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleMedium,
+                                    ),
+                                    children: [
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 16),
+                                        child: _SnapshotPanel(
+                                          city: city,
+                                          localeName: localeName,
+                                          showTitle: false,
+                                        ),
+                                      ),
+                                      LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          final wide =
+                                              constraints.maxWidth >= 980;
+                                          final detailWidth = wide
+                                              ? (constraints.maxWidth - 16) / 2
+                                              : constraints.maxWidth;
+                                          return Wrap(
+                                            spacing: 16,
+                                            runSpacing: 16,
+                                            children: [
+                                              SizedBox(
+                                                width: detailWidth,
+                                                child: _WorkOpportunityPanel(
+                                                  city: city,
+                                                  budget: budget,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: detailWidth,
+                                                child: _IdhmContextPanel(
+                                                  city: city,
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Flights
+                              ConstrainedBox(
+                                key: _flightsSectionKey,
+                                constraints:
+                                    const BoxConstraints(maxWidth: 1160),
+                                child: FlightSeasonalityCard(
+                                  originCountryIso: originCountryIso,
+                                  originIata: originAirport?.iataCode,
+                                  destIata: destinationAirport?.iataCode,
+                                  routeInsight: routeInsight,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Sources
+                              ConstrainedBox(
+                                key: _sourcesSectionKey,
+                                constraints:
+                                    const BoxConstraints(maxWidth: 1160),
+                                child:
+                                    CitySourcesSection(sources: city.sources),
+                              ),
+                              const SizedBox(height: 12),
+                              Center(
+                                child: Text(
+                                  '${l10n.citiesMethodologyNote} · ${l10n.cityDetailUpdatedLabel(_formatUpdatedAt(context, city.updatedAt))}',
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: AppColors.textSoftFor(context),
+                                        height: 1.4,
+                                      ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -1167,6 +1189,116 @@ class _CityDetailPageState extends State<CityDetailPage> {
     }
 
     return _DecisionSnapshotPanel.defaultWatchoutText(context, city);
+  }
+}
+
+// ─── Progressive disclosure wrapper ──────────────────────────────────────────
+//
+// Wraps secondary content sections behind a toggle. Users see a
+// "Ver mais sobre {city}" button; expanding reveals all detail sections.
+// This keeps the essential info (snapshot, strengths, cost, seasonality)
+// immediately visible without overwhelming first-time visitors.
+
+class _SecondaryContentSection extends StatefulWidget {
+  const _SecondaryContentSection({
+    required this.cityName,
+    required this.children,
+  });
+
+  final String cityName;
+  final List<Widget> children;
+
+  @override
+  State<_SecondaryContentSection> createState() =>
+      _SecondaryContentSectionState();
+}
+
+class _SecondaryContentSectionState extends State<_SecondaryContentSection> {
+  bool _expanded = false;
+
+  static String _expandLabel(BuildContext context, String cityName) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => 'Ver mais sobre $cityName',
+      'es' => 'Ver más sobre $cityName',
+      _ => 'See more about $cityName',
+    };
+  }
+
+  static String _collapseLabel(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => 'Ver menos',
+      'es' => 'Ver menos',
+      _ => 'See less',
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Expand / collapse toggle
+        GestureDetector(
+          onTap: () => setState(() => _expanded = !_expanded),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.04)
+                  : Colors.black.withValues(alpha: 0.03),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.07)
+                    : Colors.black.withValues(alpha: 0.07),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  _expanded
+                      ? _collapseLabel(context)
+                      : _expandLabel(context, widget.cityName),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                AnimatedRotation(
+                  turns: _expanded ? 0.5 : 0.0,
+                  duration: const Duration(milliseconds: 250),
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 18,
+                    color: AppColors.textSoftFor(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        // Animated children
+        AnimatedCrossFade(
+          firstChild: const SizedBox.shrink(),
+          secondChild: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 12),
+              ...widget.children,
+            ],
+          ),
+          crossFadeState: _expanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 300),
+          sizeCurve: Curves.easeInOut,
+        ),
+      ],
+    );
   }
 }
 
@@ -2264,29 +2396,43 @@ class _CtaPrimaryRow extends StatelessWidget {
   final VoidCallback onPrimaryAction;
   final VoidCallback onCompareAction;
 
+  static String _chooseCityLabel(BuildContext context) =>
+      switch (Localizations.localeOf(context).languageCode) {
+        'pt' => 'Escolher esta cidade',
+        'es' => 'Elegir esta ciudad',
+        _ => 'Choose this city',
+      };
+
   @override
   Widget build(BuildContext context) {
+    // Determine the primary CTA label based on plan state.
+    // Rule: ONE clear action — always about choosing the city.
     final primaryLabel = planContext?.isRecommended == true
         ? context.l10n.migrationPlanChooseCityAction
         : validationFlow
         ? context.l10n.migrationPlanChooseCityAction
-        : context.l10n.cityDetailAddToPlanAction;
+        : _chooseCityLabel(context);
 
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: FilledButton.icon(
-            onPressed: onPrimaryAction,
-            icon: const Icon(Icons.check_circle_outline_rounded),
-            label: Text(primaryLabel),
+        // Single dominant primary action
+        FilledButton.icon(
+          onPressed: onPrimaryAction,
+          icon: const Icon(Icons.check_circle_outline_rounded),
+          label: Text(primaryLabel),
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 14),
           ),
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onCompareAction,
-            icon: const Icon(Icons.compare_arrows_rounded),
-            label: Text(context.l10n.cityDetailCompareAction),
+        const SizedBox(height: 8),
+        // Secondary action: text button — visually subordinate
+        TextButton.icon(
+          onPressed: onCompareAction,
+          icon: const Icon(Icons.compare_arrows_rounded, size: 16),
+          label: Text(context.l10n.cityDetailCompareAction),
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.textSoftFor(context),
           ),
         ),
       ],

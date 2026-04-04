@@ -945,6 +945,10 @@ class _ActiveHomeState extends StatelessWidget {
               stage: stage,
               locale: locale,
               cardHeight: feedCardH,
+              onOpenGuide: () => Navigator.pushNamed(
+                context,
+                AppRoutes.migrationPlanCopilot,
+              ),
             ),
           ],
         );
