@@ -165,6 +165,7 @@ class _CitySeasonalitySectionState extends State<CitySeasonalitySection> {
           locale: widget.locale,
           severityColor: severityColor,
           isDark: isDark,
+          arrivalMonths: conflict?.arrivalMonths,
         ),
 
         const SizedBox(height: 14),
@@ -248,6 +249,7 @@ class _MonthCalendar extends StatelessWidget {
     required this.locale,
     required this.severityColor,
     required this.isDark,
+    this.arrivalMonths,
   });
 
   final List<int> peakMonths;
@@ -255,6 +257,9 @@ class _MonthCalendar extends StatelessWidget {
   final String locale;
   final Color severityColor;
   final bool isDark;
+  /// Months the user plans to arrive, derived from their plan timeline.
+  /// When set, arrival months are highlighted with a blue dot in the calendar.
+  final List<int>? arrivalMonths;
 
   static const _monthsPt = [
     'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
@@ -278,6 +283,7 @@ class _MonthCalendar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final months = _months;
+    final arrivals = arrivalMonths ?? const <int>[];
 
     return Wrap(
       spacing: 6,
@@ -286,11 +292,13 @@ class _MonthCalendar extends StatelessWidget {
         final monthNum = i + 1;
         final isPeak = peakMonths.contains(monthNum);
         final isLow = lowMonths.contains(monthNum);
+        final isArrival = arrivals.contains(monthNum);
 
         return _MonthChip(
           label: months[i],
           isPeak: isPeak,
           isLow: isLow,
+          isArrival: isArrival,
           peakColor: severityColor,
           isDark: isDark,
         );
@@ -306,6 +314,7 @@ class _MonthChip extends StatelessWidget {
     required this.isLow,
     required this.peakColor,
     required this.isDark,
+    this.isArrival = false,
   });
 
   final String label;
@@ -313,6 +322,8 @@ class _MonthChip extends StatelessWidget {
   final bool isLow;
   final Color peakColor;
   final bool isDark;
+  /// True when this month falls within the user's planned arrival window.
+  final bool isArrival;
 
   @override
   Widget build(BuildContext context) {
@@ -328,7 +339,7 @@ class _MonthChip extends StatelessWidget {
       fontWeight = FontWeight.w800;
     } else if (isLow) {
       bgColor = AppColors.surfaceMutedFor(context);
-      textColor = AppColors.textSoftFor(context).withValues(alpha: 0.5);
+      textColor = AppColors.textSoftFor(context).withValues(alpha: 0.72);
       borderColor = AppColors.borderFor(context);
       fontWeight = FontWeight.w400;
     } else {
@@ -338,13 +349,22 @@ class _MonthChip extends StatelessWidget {
       fontWeight = FontWeight.w500;
     }
 
+    // Arrival months that also fall on peak season get a thicker accent border
+    // so color-blind users still see the timing conflict at a glance.
+    final resolvedBorderColor = (isArrival && isPeak)
+        ? peakColor
+        : isArrival
+            ? AppColors.primary.withValues(alpha: 0.5)
+            : borderColor;
+    final borderWidth = (isArrival && isPeak) ? 1.5 : 1.0;
+
     return Container(
       width: 44,
       padding: const EdgeInsets.symmetric(vertical: 7),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: borderColor),
+        border: Border.all(color: resolvedBorderColor, width: borderWidth),
       ),
       alignment: Alignment.center,
       child: Column(
@@ -358,15 +378,31 @@ class _MonthChip extends StatelessWidget {
                   fontSize: 10,
                 ),
           ),
-          if (isPeak) ...[
+          if (isPeak || isArrival) ...[
             const SizedBox(height: 3),
-            Container(
-              width: 4,
-              height: 4,
-              decoration: BoxDecoration(
-                color: peakColor,
-                shape: BoxShape.circle,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isPeak)
+                  Container(
+                    width: 4,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: peakColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                if (isPeak && isArrival) const SizedBox(width: 2),
+                if (isArrival)
+                  Container(
+                    width: 4,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+              ],
             ),
           ],
         ],

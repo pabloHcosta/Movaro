@@ -730,8 +730,31 @@ class _CityDetailPageState extends State<CityDetailPage> {
                   child: AnimatedBuilder(
                     animation: _scrollController,
                     builder: (context, _) {
+                      final locale =
+                          Localizations.localeOf(context).languageCode;
+                      final breadcrumb =
+                          widget.fromMigrationResult
+                              ? switch (locale) {
+                                'pt' => 'Resultado do plano',
+                                'es' => 'Resultado del plan',
+                                _ => 'Plan result',
+                              }
+                              : widget.selectForPlan
+                              ? switch (locale) {
+                                'pt' => 'Selecionar cidade',
+                                'es' => 'Seleccionar ciudad',
+                                _ => 'Select city',
+                              }
+                              : widget.validationFlow
+                              ? switch (locale) {
+                                'pt' => 'Explorar cidades',
+                                'es' => 'Explorar ciudades',
+                                _ => 'Explore cities',
+                              }
+                              : null;
                       return AppGlassHeader(
                         title: l10n.cityDetailHeaderTitle(),
+                        subtitle: breadcrumb,
                         onBack: _goBackToCities,
                         onHelp: _showHelp,
                       );
@@ -2379,6 +2402,34 @@ Color _difficultyColorForCity(City city) {
   return AppColors.danger;
 }
 
+IconData _costIconForCity(City city) {
+  if (city.rentScore >= 70) return Icons.check_circle_outline_rounded;
+  if (city.rentScore >= 45) return Icons.warning_amber_rounded;
+  return Icons.error_outline_rounded;
+}
+
+IconData _qualityIconForCity(City city) {
+  final average =
+      ((city.idhmScore * 100).round() +
+          city.safetyScore +
+          city.spanishSupportScore) /
+      3;
+  if (average >= 72) return Icons.check_circle_outline_rounded;
+  if (average >= 56) return Icons.info_outline_rounded;
+  return Icons.warning_amber_rounded;
+}
+
+IconData _difficultyIconForCity(City city) {
+  final average =
+      (city.rentScore +
+          city.movaroScores.languageAdaptation +
+          city.movaroScores.workOpportunity) /
+      3;
+  if (average >= 68) return Icons.check_circle_outline_rounded;
+  if (average >= 52) return Icons.warning_amber_rounded;
+  return Icons.error_outline_rounded;
+}
+
 // ─── Block 1: CTA Principal ───────────────────────────────────────────────────
 
 class _CtaPrimaryRow extends StatelessWidget {
@@ -2504,6 +2555,7 @@ class _QuickSummaryCard extends StatelessWidget {
                   label: context.l10n.cityDetailAffordabilityTitle,
                   value: _costLabelForCity(context, city),
                   color: _costColorForCity(city),
+                  icon: _costIconForCity(city),
                 ),
               ),
               const SizedBox(width: 8),
@@ -2512,6 +2564,7 @@ class _QuickSummaryCard extends StatelessWidget {
                   label: context.l10n.cityDetailQualityLabel,
                   value: _qualityLabelForCity(context, city),
                   color: _qualityColorForCity(city),
+                  icon: _qualityIconForCity(city),
                 ),
               ),
               const SizedBox(width: 8),
@@ -2520,6 +2573,7 @@ class _QuickSummaryCard extends StatelessWidget {
                   label: context.l10n.cityDetailDifficultyLabel,
                   value: _difficultyLabelForCity(context, city),
                   color: _difficultyColorForCity(city),
+                  icon: _difficultyIconForCity(city),
                 ),
               ),
             ],
@@ -2535,11 +2589,15 @@ class _SummaryIndicator extends StatelessWidget {
     required this.label,
     required this.value,
     required this.color,
+    required this.icon,
   });
 
   final String label;
   final String value;
   final Color color;
+  /// Semantic icon conveying the metric tone (check / warning / alert).
+  /// Shown alongside the value text so color-blind users can read the tone.
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -2562,14 +2620,22 @@ class _SummaryIndicator extends StatelessWidget {
             maxLines: 2,
           ),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w700,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              Icon(icon, size: 13, color: color),
+              const SizedBox(width: 3),
+              Expanded(
+                child: Text(
+                  value,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ],
       ),

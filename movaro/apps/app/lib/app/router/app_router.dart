@@ -45,6 +45,7 @@ class AppRouter {
               dependencies.migrationQuestionnaireController,
           locationController: dependencies.locationController,
           environment: dependencies.environment,
+          redirectMessage: 'Faça login para acessar essa área.',
         ),
       );
     }
@@ -67,6 +68,8 @@ class AppRouter {
               dependencies.migrationQuestionnaireController,
           locationController: dependencies.locationController,
           environment: dependencies.environment,
+          redirectMessage:
+              'Complete seu perfil de jornada para acessar essa página.',
         ),
       );
     }
@@ -282,6 +285,7 @@ class AppRouter {
             migrationQuestionnaireController:
                 dependencies.migrationQuestionnaireController,
             locationController: dependencies.locationController,
+            redirectMessage: 'Faça login para acessar essa área.',
           ),
         );
       case AppRoutes.onboarding:
@@ -398,11 +402,16 @@ class AppRouter {
         );
       default:
         return _buildRoute(
-          const RouteSettings(name: AppRoutes.journeySetup),
-          JourneySetupPage(
-            catalogRepository: dependencies.catalogRepository,
+          const RouteSettings(name: AppRoutes.publicHome),
+          PublicHomePage(
+            cityInsightsController: dependencies.cityInsightsController,
+            environment: dependencies.environment,
             journeyContextController: dependencies.journeyContextController,
+            citiesController: dependencies.citiesController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
             locationController: dependencies.locationController,
+            redirectMessage: 'Página não encontrada.',
           ),
         );
     }

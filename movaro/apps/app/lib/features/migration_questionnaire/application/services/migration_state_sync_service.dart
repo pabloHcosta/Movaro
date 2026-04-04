@@ -27,6 +27,7 @@ class MigrationStateSyncService implements MigrationSyncScheduler {
   static const String _tableName = 'app_state_snapshots';
   static const String _scope = 'migration';
   static const Duration _debounce = Duration(milliseconds: 900);
+  static const Duration _networkRetryCooldown = Duration(minutes: 1);
 
   final bool _enabled;
   final LocalMigrationPlanRepository _migrationPlanRepository;
@@ -39,9 +40,23 @@ class MigrationStateSyncService implements MigrationSyncScheduler {
   bool _isSyncing = false;
   bool _isAuthUnavailable = false;
   bool _hasLoggedAuthUnavailable = false;
+  DateTime? _networkRetryNotBefore;
 
-  bool get _isAvailable => _enabled;
+  bool get _isAvailable => _enabled && !_isNetworkRetryCooldownActive;
   SupabaseClient get _client => Supabase.instance.client;
+  bool get _isNetworkRetryCooldownActive {
+    final retryAt = _networkRetryNotBefore;
+    if (retryAt == null) {
+      return false;
+    }
+
+    if (DateTime.now().isAfter(retryAt)) {
+      _networkRetryNotBefore = null;
+      return false;
+    }
+
+    return true;
+  }
 
   @override
   void scheduleSync() {
@@ -91,6 +106,10 @@ class MigrationStateSyncService implements MigrationSyncScheduler {
         await _applySnapshot(payload);
       });
     } catch (error, stackTrace) {
+      if (_handleTransientSyncFailure(error)) {
+        return;
+      }
+
       debugPrint('MigrationStateSyncService.restoreIfNeeded failed: $error');
       debugPrintStack(stackTrace: stackTrace);
     }
@@ -132,6 +151,10 @@ class MigrationStateSyncService implements MigrationSyncScheduler {
         'updated_at': DateTime.now().toUtc().toIso8601String(),
       }, onConflict: 'user_id,scope');
     } catch (error, stackTrace) {
+      if (_handleTransientSyncFailure(error)) {
+        return;
+      }
+
       debugPrint('MigrationStateSyncService.syncNow failed: $error');
       debugPrintStack(stackTrace: stackTrace);
     } finally {
@@ -147,6 +170,9 @@ class MigrationStateSyncService implements MigrationSyncScheduler {
 
     try {
       await _client.auth.signInAnonymously();
+    } on AuthRetryableFetchException catch (error) {
+      _handleTransientSyncFailure(error);
+      return;
     } on AuthApiException catch (error) {
       if (error.code == 'anonymous_provider_disabled') {
         _isAuthUnavailable = true;
@@ -160,6 +186,39 @@ class MigrationStateSyncService implements MigrationSyncScheduler {
       }
       rethrow;
     }
+  }
+
+  bool _handleTransientSyncFailure(Object error) {
+    if (!_isTransientNetworkError(error)) {
+      return false;
+    }
+
+    final retryAt = DateTime.now().add(_networkRetryCooldown);
+    final shouldLog =
+        _networkRetryNotBefore == null ||
+        retryAt.isAfter(_networkRetryNotBefore!);
+    _networkRetryNotBefore = retryAt;
+    _syncTimer?.cancel();
+    _syncTimer = null;
+
+    if (shouldLog) {
+      debugPrint(
+        'MigrationStateSyncService paused: Supabase is temporarily unreachable. Retrying after ${_networkRetryCooldown.inMinutes} minute(s).',
+      );
+    }
+
+    return true;
+  }
+
+  bool _isTransientNetworkError(Object error) {
+    if (error is AuthRetryableFetchException) {
+      return true;
+    }
+
+    final message = error.toString();
+    return message.contains('SocketException') ||
+        message.contains('ClientException') ||
+        message.contains('Failed host lookup');
   }
 
   Future<bool> _hasMeaningfulLocalData() async {

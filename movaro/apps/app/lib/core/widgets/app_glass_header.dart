@@ -5,6 +5,7 @@ import 'package:movaro_app/core/widgets/frosted_panel.dart';
 class AppGlassHeader extends StatelessWidget {
   const AppGlassHeader({
     required this.title,
+    this.subtitle,
     this.onBack,
     this.onHelp,
     this.trailing,
@@ -12,11 +13,14 @@ class AppGlassHeader extends StatelessWidget {
   });
 
   final String title;
+  /// Optional breadcrumb line shown below [title] in a smaller muted style.
+  final String? subtitle;
   final VoidCallback? onBack;
   final VoidCallback? onHelp;
   final Widget? trailing;
 
   static const double _height = 64;
+  static const double _heightWithSubtitle = 74;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +34,7 @@ class AppGlassHeader extends StatelessWidget {
           );
 
     return SizedBox(
-      height: _height,
+      height: subtitle != null ? _heightWithSubtitle : _height,
       child: FrostedPanel(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         borderRadius: BorderRadius.circular(999),
@@ -59,13 +63,37 @@ class AppGlassHeader extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
+              child: subtitle != null
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          title,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          subtitle!,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: AppColors.textSoftFor(context),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
             ),
             SizedBox(
               width: sideWidth,

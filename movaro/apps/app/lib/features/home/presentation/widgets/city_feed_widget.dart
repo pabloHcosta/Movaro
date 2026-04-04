@@ -158,6 +158,18 @@ class _FeedCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            // "Ver mais" affordance — replaces silent ellipsis with a visible
+            // cue when the body is long enough that it might be clipped.
+            if (item.body.length > 100) ...[
+              const SizedBox(height: 2),
+              Text(
+                _verMaisLabel(locale),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
             if (item.updatedAt != null) ...[
               const SizedBox(height: 4),
               Align(
@@ -177,6 +189,12 @@ class _FeedCard extends StatelessWidget {
       ),
     );
   }
+
+  static String _verMaisLabel(String locale) => switch (locale) {
+        'pt' => 'Ver mais →',
+        'es' => 'Ver más →',
+        _ => 'See more →',
+      };
 
   void _showExpandedCard(BuildContext context, VoidCallback? onOpenGuide) {
     final isDark = AppColors.isDark(context);

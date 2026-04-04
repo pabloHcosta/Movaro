@@ -43,6 +43,7 @@ import 'package:movaro_app/features/migration_questionnaire/presentation/widgets
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_readiness_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_structure_widgets.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 enum _PreparationSection { overview, documents, housing, work, arrival }
@@ -777,6 +778,14 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                           ),
                           const SizedBox(height: 12),
                         ],
+                        // ── Pre-arrival timing context (companion mode) ──
+                        // When the item MUST be done before travel and is not
+                        // yet complete, surface a timeline-aware nudge so the
+                        // user understands WHY the clock matters.
+                        if (!isPreview &&
+                            sheetItem.preArrivalRequired &&
+                            !sheetItem.isCompleted)
+                          _PreArrivalTimingBanner(timeline: plan.timeline),
                         // ── Primary Action Button (action-first, hidden in preview) ──
                         if (!isPreview &&
                             sheetItem.resolvedPrimaryActionType !=
@@ -833,8 +842,13 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // ── Companion quick reference (in-progress) ──
-                                if (isInProgress &&
+                                // ── Companion quick reference ──
+                                // Shown for ANY incomplete item with phrases
+                                // or requirements — not just mid-checklist.
+                                // Documents, housing, and work items all have
+                                // "what to say" / "what to bring" content that
+                                // is useful whether or not a checklist exists.
+                                if (!sheetItem.isCompleted &&
                                     (sheetItem.hasSurvivalPhrases ||
                                         sheetItem.hasRequirements))
                                   _QuickReferenceCard(item: sheetItem),
@@ -1277,6 +1291,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                 showExpandedContent: _showExpandedContent,
                                 awaitingConfirmation:
                                     gpsController.awaitingConfirmation,
+                                cityName: city.name,
                                 onPrimaryTap: (item) => _handleCurrentActionTap(
                                   gpsController,
                                   item,
@@ -3224,6 +3239,7 @@ class _GuideDominantActionCard extends StatelessWidget {
     required this.onPrimaryTap,
     required this.onChecklistToggle,
     required this.onLinkTap,
+    this.cityName = '',
   });
 
   final GuideActionItem? item;
@@ -3234,6 +3250,8 @@ class _GuideDominantActionCard extends StatelessWidget {
   final Future<void> Function(String itemId, String subItemId)
   onChecklistToggle;
   final void Function(String url, String label) onLinkTap;
+  /// Name of the confirmed destination city — used in the completion share text.
+  final String cityName;
 
   @override
   Widget build(BuildContext context) {
@@ -3244,17 +3262,87 @@ class _GuideDominantActionCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  context.l10n.copilotPlanCompletedTitle,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        Icons.emoji_events_rounded,
+                        size: 28,
+                        color: AppColors.success,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.l10n.copilotPlanCompletedTitle,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            context.l10n.copilotPlanCompletedBody,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: AppColors.textSoftFor(context),
+                                  height: 1.4,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  context.l10n.copilotPlanCompletedBody,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSoftFor(context),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      final locale = Localizations.localeOf(context)
+                          .languageCode;
+                      final city = cityName.isNotEmpty
+                          ? cityName
+                          : _localizedText(
+                              context,
+                              pt: 'minha nova cidade',
+                              es: 'mi nueva ciudad',
+                              en: 'my new city',
+                            );
+                      final text = switch (locale) {
+                        'pt' =>
+                          'Completei todos os passos do meu plano de migração para $city com o Movaro! 🇧🇷🏆',
+                        'es' =>
+                          '¡Completé todos los pasos de mi plan de migración a $city con Movaro! 🇧🇷🏆',
+                        _ =>
+                          'I completed all steps of my migration plan to $city with Movaro! 🇧🇷🏆',
+                      };
+                      unawaited(
+                        SharePlus.instance.share(ShareParams(text: text)),
+                      );
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.success,
+                    ),
+                    icon: const Icon(Icons.share_rounded, size: 18),
+                    label: Text(
+                      _localizedText(
+                        context,
+                        pt: 'Compartilhar conquista',
+                        es: 'Compartir logro',
+                        en: 'Share achievement',
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -4432,6 +4520,17 @@ class _GuideUpcomingSection extends StatelessWidget {
     if (items.isEmpty) {
       return const SizedBox.shrink();
     }
+
+    // Group upcoming items by phase while preserving phase order.
+    final Map<GuidePhase, List<GuideActionItem>> grouped = {};
+    for (final phase in GuidePhase.values) {
+      final phaseItems = items.where((i) => i.phase == phase).toList();
+      if (phaseItems.isNotEmpty) grouped[phase] = phaseItems;
+    }
+
+    // Track sequential index across all phases (current item is #1, so start at 2).
+    var overallIndex = 2;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -4449,17 +4548,86 @@ class _GuideUpcomingSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        for (var index = 0; index < items.length; index++) ...[
-          _UpcomingGuideItemTile(
-            indexLabel: '${index + 2}',
-            item: items[index],
-            unlocked: controller.isItemUnlocked(items[index]),
-            onTap: controller.isItemUnlocked(items[index])
-                ? () => onSelectItem(items[index].id)
-                : null,
-          ),
-          if (index != items.length - 1) const SizedBox(height: 8),
+        for (final entry in grouped.entries) ...[
+          // Phase header — mirrors _GuideAllItemsList
+          _UpcomingPhaseHeader(phase: entry.key),
+          const SizedBox(height: 6),
+          for (var i = 0; i < entry.value.length; i++) ...[
+            _UpcomingGuideItemTile(
+              indexLabel: '${overallIndex++}',
+              item: entry.value[i],
+              unlocked: controller.isItemUnlocked(entry.value[i]),
+              onTap: controller.isItemUnlocked(entry.value[i])
+                  ? () => onSelectItem(entry.value[i].id)
+                  : null,
+            ),
+            if (i != entry.value.length - 1) const SizedBox(height: 8),
+          ],
+          const SizedBox(height: 14),
         ],
+      ],
+    );
+  }
+}
+
+/// Compact phase divider used in [_GuideUpcomingSection].
+/// Uses the same color map and label logic as [_GuideAllItemsList].
+class _UpcomingPhaseHeader extends StatelessWidget {
+  const _UpcomingPhaseHeader({required this.phase});
+
+  final GuidePhase phase;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _GuideAllItemsList._phaseColor[phase] ?? AppColors.primary;
+    final locale = Localizations.localeOf(context).languageCode;
+    final label = switch (phase) {
+      GuidePhase.preparation => switch (locale) {
+        'pt' => 'Preparação',
+        'es' => 'Preparación',
+        _ => 'Preparation',
+      },
+      GuidePhase.housing => switch (locale) {
+        'pt' => 'Moradia',
+        'es' => 'Vivienda',
+        _ => 'Housing',
+      },
+      GuidePhase.documents => switch (locale) {
+        'pt' => 'Documentos',
+        'es' => 'Documentos',
+        _ => 'Documents',
+      },
+      GuidePhase.work => switch (locale) {
+        'pt' => 'Trabalho',
+        'es' => 'Trabajo',
+        _ => 'Work',
+      },
+      GuidePhase.arrival => switch (locale) {
+        'pt' => 'Chegada',
+        'es' => 'Llegada',
+        _ => 'Arrival',
+      },
+    };
+
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 14,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 7),
+        Text(
+          label.toUpperCase(),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.6,
+          ),
+        ),
       ],
     );
   }
@@ -6801,5 +6969,91 @@ class _UnlockChip extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// ─── Pre-arrival Timing Banner ─────────────────────────────────────────────────
+//
+// Shown in the execution sheet when an item is marked preArrivalRequired and is
+// not yet complete. Gives the user a timeline-aware sense of urgency based on
+// their plan's declared migration window.
+
+class _PreArrivalTimingBanner extends StatelessWidget {
+  const _PreArrivalTimingBanner({required this.timeline});
+
+  final String timeline;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final locale = Localizations.localeOf(context).languageCode;
+    final message = _message(locale);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1A1A0A) : const Color(0xFFFFFBEB),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isDark ? const Color(0xFF5A4A00) : const Color(0xFFFDE68A),
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.flight_takeoff_rounded,
+              size: 15,
+              color: Color(0xFFD97706),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFD97706),
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _message(String locale) {
+    return switch (timeline) {
+      'in_0_3m' => switch (locale) {
+        'pt' =>
+          'Sua mudança é em menos de 3 meses — resolva isso antes de embarcar.',
+        'es' =>
+          'Tu mudanza es en menos de 3 meses — resuelve esto antes de viajar.',
+        _ => 'Your move is within 3 months — handle this before you board.',
+      },
+      'in_3_6m' => switch (locale) {
+        'pt' =>
+          'Você ainda tem 3–6 meses — ótimo momento para resolver isso sem pressa.',
+        'es' =>
+          'Todavía tienes 3–6 meses — buen momento para resolverlo sin apuros.',
+        _ => 'You still have 3–6 months — a good time to handle this calmly.',
+      },
+      'in_6_12m' => switch (locale) {
+        'pt' => 'Você tem 6–12 meses — comece agora para não acumular no final.',
+        'es' =>
+          'Tienes 6–12 meses — empieza ahora para no acumular al final.',
+        _ => 'You have 6–12 months — start now to avoid a last-minute rush.',
+      },
+      _ => switch (locale) {
+        'pt' => 'Este passo precisa ser resolvido antes de viajar.',
+        'es' => 'Este paso debe resolverse antes de viajar.',
+        _ => 'This step must be completed before you travel.',
+      },
+    };
   }
 }

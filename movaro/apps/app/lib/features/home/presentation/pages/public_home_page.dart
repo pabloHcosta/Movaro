@@ -32,6 +32,7 @@ import 'package:movaro_app/features/migration_questionnaire/presentation/widgets
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/home/presentation/widgets/city_feed_widget.dart';
 import 'package:movaro_app/features/home/presentation/widgets/journey_stepper_widget.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -43,6 +44,7 @@ class PublicHomePage extends StatefulWidget {
     required this.migrationQuestionnaireController,
     required this.locationController,
     required this.environment,
+    this.redirectMessage,
     super.key,
   });
 
@@ -52,6 +54,9 @@ class PublicHomePage extends StatefulWidget {
   final MigrationQuestionnaireController migrationQuestionnaireController;
   final LocationController locationController;
   final AppEnvironment environment;
+  /// When the router silently redirected to this page, this message is shown
+  /// as a floating snackbar on the first frame so the user understands why.
+  final String? redirectMessage;
 
   @override
   State<PublicHomePage> createState() => _PublicHomePageState();
@@ -67,6 +72,12 @@ class _PublicHomePageState extends State<PublicHomePage>
   String? _loadedPlanKey;
   String? _loadedWeatherCityId;
 
+  // Stage transition tracking — used to show a one-time celebration modal
+  // when the user advances from explorer → planner or planner → executor.
+  bool _isFirstPlanLoad = true;
+  int _prevCompletedCount = 0;
+  String _prevTimeline = '';
+
   @override
   void initState() {
     super.initState();
@@ -79,6 +90,16 @@ class _PublicHomePageState extends State<PublicHomePage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_syncPlanState());
       unawaited(_recordStreak());
+      final msg = widget.redirectMessage;
+      if (msg != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(msg),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
     });
   }
 
@@ -310,6 +331,38 @@ class _PublicHomePageState extends State<PublicHomePage>
       _progressSnapshot = snapshot;
     });
 
+    // ── Stage transition detection ───────────────────────────────────────
+    // Skip on the very first load (user already in that state, not advancing).
+    if (!_isFirstPlanLoad) {
+      final newCount = snapshot.completedItemsCount;
+      final newTimeline = plan.timeline;
+      final wasExplorer = _prevTimeline.isEmpty ||
+          _prevTimeline == 'later' ||
+          _prevTimeline == 'undecided';
+      final nowPlanner =
+          newTimeline == 'in_3_6m' || newTimeline == 'in_6_12m';
+      final nowExecutor =
+          newTimeline == 'in_0_3m' || newCount > _prevCompletedCount;
+
+      if (_prevCompletedCount == 0 && newCount > 0) {
+        // First step completed → executor mode
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _showStageTransitionSheet(UserJourneyStage.executor);
+        });
+      } else if (wasExplorer && nowPlanner && !nowExecutor) {
+        // Timeline committed → planner mode
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _showStageTransitionSheet(UserJourneyStage.planner);
+        });
+      }
+      _prevCompletedCount = newCount;
+      _prevTimeline = newTimeline;
+    } else {
+      _isFirstPlanLoad = false;
+      _prevCompletedCount = snapshot.completedItemsCount;
+      _prevTimeline = plan.timeline;
+    }
+
     unawaited(
       widget.cityInsightsController.load(
         cityId: city.id,
@@ -317,6 +370,13 @@ class _PublicHomePageState extends State<PublicHomePage>
         timeline: plan.timeline,
         locale: Localizations.localeOf(context).languageCode,
       ),
+    );
+
+    // Schedule a weekly city-content reminder now that we know the confirmed
+    // city. Rescheduled on every fresh plan load so it stays current.
+    final cityLabel = city.name;
+    unawaited(
+      PlanNotificationService.instance.scheduleCityContentReminder(cityLabel),
     );
   }
 
@@ -480,6 +540,14 @@ class _PublicHomePageState extends State<PublicHomePage>
 
   Future<void> _recordStreak() async {
     await _streakService.recordActivity();
+    // Schedule a re-engagement nudge 7 days from now. If the user opens the
+    // app again before then, this call reschedules it — so the notification
+    // only fires after a true 7-day absence.
+    unawaited(
+      PlanNotificationService.instance.scheduleReEngagementReminder(
+        DateTime.now(),
+      ),
+    );
   }
 
   /// Force-refreshes the progress snapshot from disk (e.g. after returning
@@ -496,6 +564,159 @@ class _PublicHomePageState extends State<PublicHomePage>
     setState(() {
       _progressSnapshot = snapshot;
     });
+  }
+
+  void _showStageTransitionSheet(UserJourneyStage newStage) {
+    final locale = Localizations.localeOf(context).languageCode;
+
+    final (icon, title, body, action) = switch (newStage) {
+      UserJourneyStage.executor => (
+          Icons.rocket_launch_rounded,
+          switch (locale) {
+            'pt' => '🚀 Você entrou no modo execução!',
+            'es' => '🚀 ¡Entraste en modo ejecución!',
+            _ => '🚀 You\'re in execution mode!',
+          },
+          switch (locale) {
+            'pt' =>
+              'Seu primeiro passo está concluído. O guia agora acompanha cada etapa da sua mudança em tempo real.',
+            'es' =>
+              'Tu primer paso está completado. La guía ahora sigue cada etapa de tu mudanza en tiempo real.',
+            _ =>
+              'Your first step is done. The guide now tracks every step of your move in real time.',
+          },
+          switch (locale) {
+            'pt' => 'Continue — cada passo que você conclui desbloqueia o próximo.',
+            'es' => 'Seguí — cada paso que completás desbloquea el siguiente.',
+            _ => 'Keep going — every step you complete unlocks the next.',
+          },
+        ),
+      UserJourneyStage.planner => (
+          Icons.calendar_month_rounded,
+          switch (locale) {
+            'pt' => '📅 Você está no modo planejamento!',
+            'es' => '📅 ¡Estás en modo planificación!',
+            _ => '📅 You\'re in planning mode!',
+          },
+          switch (locale) {
+            'pt' =>
+              'Você definiu sua janela de mudança. O guia vai te ajudar a se preparar nos próximos meses.',
+            'es' =>
+              'Definiste tu ventana de mudanza. La guía te ayudará a prepararte en los próximos meses.',
+            _ =>
+              'You\'ve set your move window. The guide will help you prepare over the coming months.',
+          },
+          switch (locale) {
+            'pt' =>
+              'Comece pelos documentos — alguns levam semanas para ficarem prontos.',
+            'es' =>
+              'Empezá por los documentos — algunos tardan semanas en estar listos.',
+            _ =>
+              'Start with documents — some take weeks to be ready.',
+          },
+        ),
+      _ => (
+          Icons.explore_rounded,
+          switch (locale) {
+            'pt' => '🗺️ Você está explorando!',
+            'es' => '🗺️ ¡Estás explorando!',
+            _ => '🗺️ You\'re exploring!',
+          },
+          switch (locale) {
+            'pt' => 'Compare cidades e descubra onde você quer viver.',
+            'es' => 'Comparás ciudades y descubrís dónde querés vivir.',
+            _ => 'Compare cities and discover where you want to live.',
+          },
+          switch (locale) {
+            'pt' => 'Quando decidir, crie seu plano personalizado.',
+            'es' => 'Cuando decidas, creá tu plan personalizado.',
+            _ => 'When you decide, create your personalized plan.',
+          },
+        ),
+    };
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: false,
+      builder: (sheetCtx) {
+        final isDark = AppColors.isDark(sheetCtx);
+        final accent = switch (newStage) {
+          UserJourneyStage.executor => AppColors.success,
+          UserJourneyStage.planner => AppColors.primary,
+          _ => AppColors.caution,
+        };
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.surfaceFor(sheetCtx),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: AppColors.borderFor(sheetCtx)),
+              ),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(icon, size: 26, color: accent),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    title,
+                    style: Theme.of(sheetCtx).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimaryFor(sheetCtx),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    body,
+                    style: Theme.of(sheetCtx).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSoftFor(sheetCtx),
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    action,
+                    style: Theme.of(sheetCtx).textTheme.labelMedium?.copyWith(
+                      color: accent,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 18),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () => Navigator.of(sheetCtx).pop(),
+                      child: Text(
+                        switch (locale) {
+                          'pt' => 'Entendido!',
+                          'es' => '¡Entendido!',
+                          _ => 'Got it!',
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   String _planKey(MigrationPlan plan) {
@@ -888,6 +1109,20 @@ class _ActiveHomeState extends StatelessWidget {
         // (iPhone 11 / 14 Pro and above).
         final bigScreen = avail > 760;
 
+        // ── Computed per-stage flags ──────────────────────────────────────
+        final residenciaComplete = guideState.completedIds
+            .contains('item_2_1_cpf') &&
+            guideState.completedIds.contains('item_2_2_residencia');
+        final showPFNudge = !residenciaComplete &&
+            stage != UserJourneyStage.explorer;
+        final preArrivalCount = guideState.items
+            .where(
+              (it) =>
+                  it.preArrivalRequired &&
+                  !guideState.completedIds.contains(it.id),
+            )
+            .length;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -899,24 +1134,71 @@ class _ActiveHomeState extends StatelessWidget {
               onOpenSettings: onOpenSettings,
             ),
 
-            // 2. Primary action card — the single current guide step
-            if (guideState.currentItem != null)
+            // 2. PF Appointment Nudge — shown for planner/executor stages
+            //    before residência is complete. Highest-impact failure point.
+            if (showPFNudge)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: _PrimaryActionCard(
-                  item: guideState.currentItem!,
-                  phaseName: guideState.phaseName(context),
-                  isDark: isDark,
-                  bigScreen: bigScreen,
-                  onTap: () => onViewAction(guideState.currentItem!),
+                child: _PFAppointmentNudge(
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.migrationPlanCopilot,
+                  ),
                 ),
               ),
 
-            // 3. Seasonality conflict warning (only for critical timing)
+            // 3. Explorer stage: affordability card replaces action card
+            if (stage == UserJourneyStage.explorer) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: _ExplorerStageCard(
+                  city: city,
+                  cityBudget: null,
+                  onCreatePlan: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.migrationQuestionnaire,
+                  ),
+                ),
+              ),
+            ] else ...[
+              // 4. Primary action card — the single current guide step
+              if (guideState.currentItem != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: _PrimaryActionCard(
+                    item: guideState.currentItem!,
+                    phaseName: guideState.phaseName(context),
+                    isDark: isDark,
+                    bigScreen: bigScreen,
+                    onTap: () => onViewAction(guideState.currentItem!),
+                  ),
+                ),
+            ],
+
+            // 5. Seasonality conflict warning (only for critical timing)
             _SeasonalityConflictBanner(city: city, planTimeline: planTimeline),
 
-            // 4. Tu Jornada — compact phase stepper + quick-action chips
+            // 6. Pre-arrival warning banner — executor stage, pending steps
+            if (stage == UserJourneyStage.executor && preArrivalCount > 0)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                child: _PreArrivalWarningBanner(
+                  count: preArrivalCount,
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.migrationPlanCopilot,
+                  ),
+                ),
+              ),
+
+            // 7. Tu Jornada — compact phase stepper + quick-action chips
             const SizedBox(height: 6),
+            // Planner countdown chip above the stepper
+            if (stage == UserJourneyStage.planner)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                child: _PlannerCountdownChip(timeline: planTimeline),
+              ),
             JourneyStepperWidget(
               plan: plan,
               allItems: guideState.items,
@@ -938,7 +1220,7 @@ class _ActiveHomeState extends StatelessWidget {
               ),
             ),
 
-            // 4. Para Ti — horizontal card carousel (height fills screen)
+            // 8. Para Ti — horizontal card carousel (height fills screen)
             SizedBox(height: paraGap),
             CityFeedWidget(
               cityCode: city.id,
