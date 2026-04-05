@@ -14,9 +14,9 @@ class CurrencyScope extends InheritedNotifier<CurrencyController> {
     return scope!.notifier!;
   }
 
-  /// Returns the explicitly selected currency code, or null.
+  /// Returns the resolved currency code (user-selected > GPS-detected > null).
   static String? preferredCodeOf(BuildContext context) {
-    return of(context).currencyCode;
+    return of(context).resolvedCurrencyCode;
   }
 }
 

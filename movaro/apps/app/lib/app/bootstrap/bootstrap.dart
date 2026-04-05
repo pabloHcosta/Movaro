@@ -6,6 +6,7 @@ import 'package:movaro_app/app/bootstrap/app_dependencies.dart';
 import 'package:movaro_app/app/currency/currency_controller.dart';
 import 'package:movaro_app/app/localization/locale_controller.dart';
 import 'package:movaro_app/app/theme/theme_controller.dart';
+import 'package:movaro_app/core/exchange_rates/exchange_rates_controller.dart';
 import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
 import 'package:movaro_app/features/city_insights/data/datasources/city_insights_remote_data_source.dart';
 import 'package:movaro_app/features/city_insights/data/repositories/city_insight_repository_impl.dart';
@@ -113,6 +114,21 @@ Future<AppDependencies> buildAppDependencies({
   final currencyController = CurrencyController();
   await currencyController.initialize();
 
+  // Sync GPS-detected country to currency whenever JourneyContextController changes.
+  journeyContextController.addListener(() {
+    final countryId = journeyContextController.detectedLocation?.countryId;
+    currencyController.setDetectedCurrencyFromCountry(countryId);
+  });
+  // Apply any already-persisted detected location immediately.
+  currencyController.setDetectedCurrencyFromCountry(
+    journeyContextController.detectedLocation?.countryId,
+  );
+
+  final exchangeRatesController = ExchangeRatesController(
+    service: copilotExchangeRatesService,
+  );
+  unawaited(exchangeRatesController.initialize());
+
   return AppDependencies(
     environment: environment,
     authController: authController,
@@ -127,5 +143,6 @@ Future<AppDependencies> buildAppDependencies({
     localeController: localeController,
     themeController: themeController,
     currencyController: currencyController,
+    exchangeRatesController: exchangeRatesController,
   );
 }

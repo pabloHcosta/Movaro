@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:movaro_app/app/currency/currency_scope.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/exchange_rates/exchange_rates_scope.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 
 class MultiCurrencyAmount extends StatefulWidget {
@@ -47,9 +48,11 @@ class MultiCurrencyAmount extends StatefulWidget {
     String? primaryLocale,
   }) {
     final settingsCurrencyCode = CurrencyScope.preferredCodeOf(context);
+    // Use scope rates as fallback when no explicit rates are provided.
+    final effectiveRates = exchangeRates ?? ExchangeRatesScope.ratesOf(context);
     final options = _buildOptions(
       amountInBrl: amountInBrl,
-      exchangeRates: exchangeRates,
+      exchangeRates: effectiveRates,
       fallbackLocale:
           primaryLocale ?? Localizations.localeOf(context).toString(),
       preferredCountryId: preferredCountryId,
@@ -258,9 +261,12 @@ class _MultiCurrencyAmountState extends State<MultiCurrencyAmount> {
   @override
   Widget build(BuildContext context) {
     final settingsCurrencyCode = context.preferredCurrencyCode;
+    // Use scope rates as fallback when no explicit rates are provided.
+    final effectiveRates =
+        widget.exchangeRates ?? ExchangeRatesScope.ratesOf(context);
     final options = MultiCurrencyAmount._buildOptions(
       amountInBrl: widget.amountInBrl,
-      exchangeRates: widget.exchangeRates,
+      exchangeRates: effectiveRates,
       fallbackLocale:
           widget.primaryLocale ?? Localizations.localeOf(context).toString(),
       preferredCountryId: widget.preferredCountryId,
