@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/app.dart';
 import 'package:movaro_app/app/bootstrap/app_dependencies.dart';
+import 'package:movaro_app/app/currency/currency_controller.dart';
 import 'package:movaro_app/app/localization/locale_controller.dart';
 import 'package:movaro_app/app/theme/theme_controller.dart';
 import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
@@ -109,6 +110,8 @@ Future<AppDependencies> buildAppDependencies({
   await localeController.initialize();
   final themeController = ThemeController();
   await themeController.initialize();
+  final currencyController = CurrencyController();
+  await currencyController.initialize();
 
   return AppDependencies(
     environment: environment,
@@ -123,5 +126,6 @@ Future<AppDependencies> buildAppDependencies({
     locationController: locationController,
     localeController: localeController,
     themeController: themeController,
+    currencyController: currencyController,
   );
 }

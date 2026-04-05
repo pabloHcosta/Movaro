@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:movaro_app/app/currency/currency_scope.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 
@@ -45,12 +46,14 @@ class MultiCurrencyAmount extends StatefulWidget {
     String? preferredCountryId,
     String? primaryLocale,
   }) {
+    final settingsCurrencyCode = CurrencyScope.preferredCodeOf(context);
     final options = _buildOptions(
       amountInBrl: amountInBrl,
       exchangeRates: exchangeRates,
       fallbackLocale:
           primaryLocale ?? Localizations.localeOf(context).toString(),
       preferredCountryId: preferredCountryId,
+      settingsCurrencyCode: settingsCurrencyCode,
     );
     return options.first.label;
   }
@@ -60,6 +63,7 @@ class MultiCurrencyAmount extends StatefulWidget {
     required CopilotExchangeRates? exchangeRates,
     required String fallbackLocale,
     String? preferredCountryId,
+    String? settingsCurrencyCode,
   }) {
     final effectiveRates = _EffectiveExchangeRates.resolve(exchangeRates);
     final optionsByCode = <String, _CurrencyOption>{
@@ -77,6 +81,14 @@ class MultiCurrencyAmount extends StatefulWidget {
           locale: 'en_US',
           currencyCode: 'USD',
           amount: amountInBrl * effectiveRates.brlToUsd,
+        ),
+      ),
+      'EUR': _CurrencyOption(
+        currencyCode: 'EUR',
+        label: _formatCurrency(
+          locale: 'en_EU',
+          currencyCode: 'EUR',
+          amount: amountInBrl * effectiveRates.brlToEur,
         ),
       ),
       'ARS': _CurrencyOption(
@@ -103,11 +115,47 @@ class MultiCurrencyAmount extends StatefulWidget {
           amount: amountInBrl * effectiveRates.brlToUyu,
         ),
       ),
+      'COP': _CurrencyOption(
+        currencyCode: 'COP',
+        label: _formatCurrency(
+          locale: 'es_CO',
+          currencyCode: 'COP',
+          amount: amountInBrl * effectiveRates.brlToCop,
+        ),
+      ),
+      'PEN': _CurrencyOption(
+        currencyCode: 'PEN',
+        label: _formatCurrency(
+          locale: 'es_PE',
+          currencyCode: 'PEN',
+          amount: amountInBrl * effectiveRates.brlToPen,
+        ),
+      ),
+      'PYG': _CurrencyOption(
+        currencyCode: 'PYG',
+        label: _formatCurrency(
+          locale: 'es_PY',
+          currencyCode: 'PYG',
+          amount: amountInBrl * effectiveRates.brlToPyg,
+        ),
+      ),
+      'BOB': _CurrencyOption(
+        currencyCode: 'BOB',
+        label: _formatCurrency(
+          locale: 'es_BO',
+          currencyCode: 'BOB',
+          amount: amountInBrl * effectiveRates.brlToBob,
+        ),
+      ),
     };
 
+    // Priority: explicit settings selection > country-inferred > USD > BRL
     final localCurrencyCode = _currencyCodeForCountry(preferredCountryId);
     final primaryCode =
-        localCurrencyCode != null &&
+        settingsCurrencyCode != null &&
+            optionsByCode.containsKey(settingsCurrencyCode)
+        ? settingsCurrencyCode
+        : localCurrencyCode != null &&
             optionsByCode.containsKey(localCurrencyCode)
         ? localCurrencyCode
         : optionsByCode.containsKey('USD')
@@ -144,6 +192,20 @@ class MultiCurrencyAmount extends StatefulWidget {
       case 'uruguay':
       case 'uy':
         return 'UYU';
+      case 'colombia':
+      case 'co':
+        return 'COP';
+      case 'peru':
+      case 'peru':
+      case 'pe':
+        return 'PEN';
+      case 'paraguai':
+      case 'paraguay':
+      case 'py':
+        return 'PYG';
+      case 'bolivia':
+      case 'bo':
+        return 'BOB';
       case 'brasil':
       case 'brazil':
       case 'br':
@@ -168,14 +230,19 @@ class MultiCurrencyAmount extends StatefulWidget {
       name: currencyCode,
       symbol: switch (currencyCode) {
         'USD' => 'US\$',
+        'EUR' => '€',
         'ARS' => 'AR\$',
         'CLP' => 'CLP\$',
         'UYU' => 'UYU\$',
+        'COP' => 'COP\$',
+        'PEN' => 'S/.',
+        'PYG' => '₲',
+        'BOB' => 'Bs.',
         'BRL' => 'R\$',
         _ => currencyCode,
       },
       decimalDigits: switch (currencyCode) {
-        'USD' => 2,
+        'USD' || 'EUR' || 'PEN' || 'BOB' => 2,
         _ => 0,
       },
     );
@@ -190,12 +257,14 @@ class _MultiCurrencyAmountState extends State<MultiCurrencyAmount> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsCurrencyCode = context.preferredCurrencyCode;
     final options = MultiCurrencyAmount._buildOptions(
       amountInBrl: widget.amountInBrl,
       exchangeRates: widget.exchangeRates,
       fallbackLocale:
           widget.primaryLocale ?? Localizations.localeOf(context).toString(),
       preferredCountryId: widget.preferredCountryId,
+      settingsCurrencyCode: settingsCurrencyCode,
     );
 
     final selected = options.firstWhere(
@@ -274,21 +343,36 @@ class _CurrencyOption {
 class _EffectiveExchangeRates {
   const _EffectiveExchangeRates({
     required this.brlToUsd,
+    required this.brlToEur,
     required this.brlToArs,
     required this.brlToClp,
     required this.brlToUyu,
+    required this.brlToCop,
+    required this.brlToPen,
+    required this.brlToPyg,
+    required this.brlToBob,
   });
 
   final double brlToUsd;
+  final double brlToEur;
   final double brlToArs;
   final double brlToClp;
   final double brlToUyu;
+  final double brlToCop;
+  final double brlToPen;
+  final double brlToPyg;
+  final double brlToBob;
 
   static const _fallback = _EffectiveExchangeRates(
     brlToUsd: 0.20,
+    brlToEur: 0.18,
     brlToArs: 190.0,
     brlToClp: 185.0,
     brlToUyu: 8.2,
+    brlToCop: 840.0,
+    brlToPen: 0.75,
+    brlToPyg: 1560.0,
+    brlToBob: 1.38,
   );
 
   static _EffectiveExchangeRates resolve(CopilotExchangeRates? liveRates) {
@@ -297,9 +381,14 @@ class _EffectiveExchangeRates {
     }
     return _EffectiveExchangeRates(
       brlToUsd: liveRates.brlToUsd,
+      brlToEur: liveRates.brlToEur,
       brlToArs: liveRates.brlToArs,
-      brlToClp: liveRates.brlToUsd * 930.0,
-      brlToUyu: liveRates.brlToUsd * 41.0,
+      brlToClp: liveRates.brlToClp,
+      brlToUyu: liveRates.brlToUyu,
+      brlToCop: liveRates.brlToCop,
+      brlToPen: liveRates.brlToPen,
+      brlToPyg: liveRates.brlToPyg,
+      brlToBob: liveRates.brlToBob,
     );
   }
 }

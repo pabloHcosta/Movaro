@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { BcbExchangeRateService } from '../../integrations/exchange/bcb-exchange-rate.service';
 import { BcraExchangeRateService } from '../../integrations/exchange/bcra-exchange-rate.service';
+import { OpenExchangeRateService } from '../../integrations/exchange/open-exchange-rate.service';
 import { ExchangeRatesService } from './application/services/exchange-rates.service';
 import { ReferenceController } from './presentation/reference.controller';
 
@@ -10,6 +11,7 @@ import { ReferenceController } from './presentation/reference.controller';
   providers: [
     BcbExchangeRateService,
     BcraExchangeRateService,
+    OpenExchangeRateService,
     ExchangeRatesService,
   ],
   exports: [ExchangeRatesService],

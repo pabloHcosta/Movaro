@@ -1,3 +1,4 @@
+import 'package:movaro_app/app/currency/currency_controller.dart';
 import 'package:movaro_app/app/localization/locale_controller.dart';
 import 'package:movaro_app/app/theme/theme_controller.dart';
 import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
@@ -25,6 +26,7 @@ class AppDependencies {
     required this.locationController,
     required this.localeController,
     required this.themeController,
+    required this.currencyController,
   });
 
   final AppEnvironment environment;
@@ -39,4 +41,5 @@ class AppDependencies {
   final LocationController locationController;
   final LocaleController localeController;
   final ThemeController themeController;
+  final CurrencyController currencyController;
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movaro_app/app/currency/currency_controller.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/localization/locale_controller.dart';
 import 'package:movaro_app/app/theme/theme_controller.dart';
@@ -11,20 +12,27 @@ class AppSettingsPage extends StatelessWidget {
   const AppSettingsPage({
     required this.localeController,
     required this.themeController,
+    required this.currencyController,
     super.key,
   });
 
   final LocaleController localeController;
   final ThemeController themeController;
+  final CurrencyController currencyController;
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([localeController, themeController]),
+      listenable: Listenable.merge([
+        localeController,
+        themeController,
+        currencyController,
+      ]),
       builder: (context, _) {
         final activeLocale = localeController.effectiveLocale;
         final currentOverride = localeController.locale?.languageCode;
         final currentTheme = themeController.themeMode;
+        final currentCurrency = currencyController.currencyCode;
 
         return Scaffold(
           body: Stack(
@@ -138,6 +146,45 @@ class AppSettingsPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
+                            context.l10n.settingsCurrencyTitle(),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            context.l10n.settingsCurrencyBody(),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context).hintColor,
+                                  height: 1.4,
+                                ),
+                          ),
+                          const SizedBox(height: 14),
+                          _OptionTile(
+                            label: context.l10n.settingsCurrencyAuto(),
+                            selected: currentCurrency == null,
+                            onTap: currencyController.clearCurrency,
+                          ),
+                          const SizedBox(height: 10),
+                          for (final entry in _currencyOptions)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _OptionTile(
+                                label: entry.$1,
+                                selected: currentCurrency == entry.$2,
+                                onTap: () =>
+                                    currencyController.setCurrency(entry.$2),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    FrostedPanel(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
                             context.l10n.settingsSystemLanguageTitle(),
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(fontWeight: FontWeight.w800),
@@ -180,6 +227,20 @@ class AppSettingsPage extends StatelessWidget {
     }
   }
 }
+
+/// (label, currencyCode) pairs shown in the settings currency selector.
+const _currencyOptions = [
+  ('US Dollar (USD)', 'USD'),
+  ('Euro (EUR)', 'EUR'),
+  ('Real Brasileiro (BRL)', 'BRL'),
+  ('Peso Argentino (ARS)', 'ARS'),
+  ('Peso Chileno (CLP)', 'CLP'),
+  ('Peso Uruguayo (UYU)', 'UYU'),
+  ('Peso Colombiano (COP)', 'COP'),
+  ('Sol Peruano (PEN)', 'PEN'),
+  ('Guaraní Paraguayo (PYG)', 'PYG'),
+  ('Boliviano (BOB)', 'BOB'),
+];
 
 class _OptionTile extends StatelessWidget {
   const _OptionTile({
