@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { CitiesCatalogService } from '../../../../cities/application/services/cities-catalog.service';
+import { CityCardEntity } from '../../../../cities/domain/entities/city-card.entity';
 import { AssistantKnowledgeService } from '../assistant-knowledge.service';
 import { normalizeChatCorridor } from '../chat-country-normalizer';
 import { AskChatDto } from '../../../presentation/dto/ask-chat.dto';
@@ -73,6 +74,147 @@ const LOW_MONTHS_BY_PROFILE: Record<SeasonalityProfileKey, number[]> = {
   coastal_south: [3, 4, 9, 10, 11],
   northeast: [4, 5, 9, 10, 11],
   north: [5, 6, 9, 10],
+};
+
+type TravelPriceLevel = 'low' | 'mid' | 'high';
+
+interface DestinationTravelSeasonalityProfile {
+  months: TravelPriceLevel[];
+  lowUsdMin: number;
+  lowUsdMax: number;
+  seasonalWarningKey?: string;
+}
+
+const CITY_TO_IATA: Record<string, string> = {
+  'florianopolis-sc': 'FLN',
+  'balneario-camboriu-sc': 'NVT',
+  'itajai-sc': 'NVT',
+  'joinville-sc': 'NVT',
+  'blumenau-sc': 'NVT',
+  'sao-paulo-sp': 'GRU',
+  'curitiba-pr': 'CWB',
+  'rio-de-janeiro-rj': 'GIG',
+  'armacao-dos-buzios-rj': 'GIG',
+  'porto-alegre-rs': 'POA',
+  'belo-horizonte-mg': 'CNF',
+  'salvador-ba': 'SSA',
+  'recife-pe': 'REC',
+  'fortaleza-ce': 'FOR',
+  'natal-rn': 'NAT',
+  'joao-pessoa-pb': 'JPA',
+  'aracaju-se': 'AJU',
+  'maceio-al': 'MCZ',
+  'campo-grande-ms': 'CGR',
+  'manaus-am': 'MAO',
+  'belem-pa': 'BEL',
+};
+
+const DEFAULT_TRAVEL_MONTHS: TravelPriceLevel[] = [
+  'high',
+  'high',
+  'mid',
+  'low',
+  'low',
+  'mid',
+  'mid',
+  'mid',
+  'low',
+  'low',
+  'low',
+  'high',
+];
+
+const COASTAL_SOUTH_TRAVEL_MONTHS: TravelPriceLevel[] = [
+  'high',
+  'high',
+  'low',
+  'low',
+  'mid',
+  'mid',
+  'mid',
+  'mid',
+  'low',
+  'low',
+  'low',
+  'high',
+];
+
+const NORTHEAST_TRAVEL_MONTHS: TravelPriceLevel[] = [
+  'mid',
+  'mid',
+  'mid',
+  'low',
+  'low',
+  'mid',
+  'mid',
+  'high',
+  'low',
+  'low',
+  'mid',
+  'high',
+];
+
+const NORTH_TRAVEL_MONTHS: TravelPriceLevel[] = [
+  'high',
+  'high',
+  'high',
+  'mid',
+  'low',
+  'low',
+  'mid',
+  'mid',
+  'low',
+  'low',
+  'mid',
+  'high',
+];
+
+const DESTINATION_TRAVEL_PROFILES: Record<
+  string,
+  DestinationTravelSeasonalityProfile
+> = {
+  GRU: { months: DEFAULT_TRAVEL_MONTHS, lowUsdMin: 133, lowUsdMax: 160 },
+  FLN: {
+    months: COASTAL_SOUTH_TRAVEL_MONTHS,
+    lowUsdMin: 150,
+    lowUsdMax: 200,
+    seasonalWarningKey: 'fln',
+  },
+  NVT: {
+    months: COASTAL_SOUTH_TRAVEL_MONTHS,
+    lowUsdMin: 160,
+    lowUsdMax: 210,
+    seasonalWarningKey: 'nvt',
+  },
+  CWB: { months: DEFAULT_TRAVEL_MONTHS, lowUsdMin: 170, lowUsdMax: 250 },
+  GIG: {
+    months: DEFAULT_TRAVEL_MONTHS,
+    lowUsdMin: 150,
+    lowUsdMax: 220,
+    seasonalWarningKey: 'gig',
+  },
+  POA: { months: DEFAULT_TRAVEL_MONTHS, lowUsdMin: 140, lowUsdMax: 190 },
+  CNF: { months: DEFAULT_TRAVEL_MONTHS, lowUsdMin: 175, lowUsdMax: 240 },
+  SSA: { months: NORTHEAST_TRAVEL_MONTHS, lowUsdMin: 200, lowUsdMax: 280 },
+  REC: { months: NORTHEAST_TRAVEL_MONTHS, lowUsdMin: 210, lowUsdMax: 290 },
+  FOR: { months: NORTHEAST_TRAVEL_MONTHS, lowUsdMin: 210, lowUsdMax: 300 },
+  NAT: { months: NORTHEAST_TRAVEL_MONTHS, lowUsdMin: 220, lowUsdMax: 310 },
+  JPA: { months: NORTHEAST_TRAVEL_MONTHS, lowUsdMin: 215, lowUsdMax: 295 },
+  AJU: { months: NORTHEAST_TRAVEL_MONTHS, lowUsdMin: 205, lowUsdMax: 285 },
+  MCZ: { months: NORTHEAST_TRAVEL_MONTHS, lowUsdMin: 215, lowUsdMax: 300 },
+  CGR: { months: DEFAULT_TRAVEL_MONTHS, lowUsdMin: 165, lowUsdMax: 235 },
+  MAO: {
+    months: NORTH_TRAVEL_MONTHS,
+    lowUsdMin: 260,
+    lowUsdMax: 360,
+    seasonalWarningKey: 'mao',
+  },
+  BEL: {
+    months: NORTH_TRAVEL_MONTHS,
+    lowUsdMin: 250,
+    lowUsdMax: 340,
+    seasonalWarningKey: 'bel',
+  },
 };
 
 const TOPIC_KEYWORDS: Record<GuidanceTopic, string[]> = {
@@ -174,6 +316,9 @@ export class CorridorGuidanceResolverService {
     const cityName = dto.recommendedCityId
       ? this.citiesCatalogService.getCityDisplayNameById(dto.recommendedCityId)
       : null;
+    const city = resolvedCityId
+      ? await this.safeGetCityById(resolvedCityId)
+      : null;
 
     const exactQuickPrompt = this.detectExactQuickPromptTopic(dto.message);
     if (exactQuickPrompt) {
@@ -188,6 +333,7 @@ export class CorridorGuidanceResolverService {
           normalizedCompletedItemIds,
           cityName,
           resolvedCityId,
+          city,
         ),
       };
     }
@@ -448,6 +594,7 @@ export class CorridorGuidanceResolverService {
     completedItemIds: string[],
     cityName: string | null,
     cityId: string | null,
+    city: CityCardEntity | null,
   ): string {
     switch (topic) {
       case 'visa':
@@ -460,6 +607,7 @@ export class CorridorGuidanceResolverService {
           currentPhase,
           cityName,
           cityId,
+          city,
         );
       default:
         return '';
@@ -501,24 +649,193 @@ export class CorridorGuidanceResolverService {
     currentPhase: string | undefined,
     cityName: string | null,
     cityId: string | null,
+    city: CityCardEntity | null,
   ): string {
+    const liveCityName = city?.name ?? cityName;
+    const cityReference = liveCityName ?? this.genericDestinationLabel(locale);
+    const seasonalityMonths = this.resolveSeasonalityLowMonths(city, cityId);
+    const cheapestFlightMonths = this.resolveCheapestFlightMonths(cityId);
+    const arrivalWindow = this.bestArrivalWindow(
+      seasonalityMonths,
+      cheapestFlightMonths,
+    );
+    const planningNote = this.bestTimePlanningNote(locale, currentPhase);
+    const cityPressureNote = this.cityPressureNote(locale, cityReference, city);
+    const flightNote = this.flightWindowNote(
+      locale,
+      cheapestFlightMonths,
+      cityId,
+    );
+    const arrivalWindowLabel = this.joinMonths(
+      arrivalWindow.map((month) => this.monthLabel(month, locale)),
+      locale,
+    );
+
+    if (locale === 'es') {
+      return `Si tu ciudad base es ${cityReference}, la mejor ventana suele ser ${arrivalWindowLabel}. ${cityPressureNote} ${flightNote} ${planningNote}`;
+    }
+    if (locale === 'en') {
+      return `If your base city is ${cityReference}, the best arrival window is usually ${arrivalWindowLabel}. ${cityPressureNote} ${flightNote} ${planningNote}`;
+    }
+    return `Se a sua cidade base é ${cityReference}, a melhor janela costuma ser ${arrivalWindowLabel}. ${cityPressureNote} ${flightNote} ${planningNote}`;
+  }
+
+  private resolveSeasonalityLowMonths(
+    city: CityCardEntity | null,
+    cityId: string | null,
+  ): number[] {
+    const fromSnapshot = city?.seasonalitySnapshot?.lowMonths ?? [];
+    if (fromSnapshot.length > 0) {
+      return fromSnapshot;
+    }
+
     const seasonalProfile = cityId
       ? CITY_TO_SEASONALITY_PROFILE[cityId] ?? 'default'
       : 'default';
-    const lowMonths = LOW_MONTHS_BY_PROFILE[seasonalProfile].map((month) =>
-      this.monthLabel(month, locale),
+    return LOW_MONTHS_BY_PROFILE[seasonalProfile];
+  }
+
+  private resolveCheapestFlightMonths(cityId: string | null): number[] {
+    const iata = cityId ? CITY_TO_IATA[cityId] : null;
+    if (!iata) {
+      return [];
+    }
+
+    const profile = DESTINATION_TRAVEL_PROFILES[iata];
+    if (!profile) {
+      return [];
+    }
+
+    return profile.months
+      .map((level, index) => ({ level, month: index + 1 }))
+      .filter((item) => item.level === 'low')
+      .map((item) => item.month);
+  }
+
+  private bestArrivalWindow(
+    seasonalityMonths: number[],
+    cheapestFlightMonths: number[],
+  ): number[] {
+    if (seasonalityMonths.length === 0 && cheapestFlightMonths.length === 0) {
+      return [4, 5, 9, 10];
+    }
+
+    if (seasonalityMonths.length === 0) {
+      return cheapestFlightMonths;
+    }
+
+    if (cheapestFlightMonths.length === 0) {
+      return seasonalityMonths;
+    }
+
+    const cheapestSet = new Set(cheapestFlightMonths);
+    const overlap = seasonalityMonths.filter((month) => cheapestSet.has(month));
+    return overlap.length > 0 ? overlap : seasonalityMonths;
+  }
+
+  private cityPressureNote(
+    locale: GuidanceLocale,
+    cityReference: string,
+    city: CityCardEntity | null,
+  ): string {
+    const snapshot = city?.seasonalitySnapshot;
+    if (snapshot) {
+      const rentNote =
+        locale === 'es'
+          ? snapshot.rentNotesEs
+          : locale === 'en'
+            ? snapshot.rentNotesEn
+            : snapshot.rentNotesPt;
+      return rentNote;
+    }
+
+    const profile = city?.id
+      ? CITY_TO_SEASONALITY_PROFILE[city.id] ?? 'default'
+      : 'default';
+    return this.climateNote(profile, locale, cityReference);
+  }
+
+  private flightWindowNote(
+    locale: GuidanceLocale,
+    cheapestFlightMonths: number[],
+    cityId: string | null,
+  ): string {
+    if (cheapestFlightMonths.length === 0) {
+      if (locale === 'es') {
+        return 'Sin ciudad definida, la referencia de pasajes todavía es más genérica.';
+      }
+      if (locale === 'en') {
+        return 'Without a defined city, flight timing stays more generic.';
+      }
+      return 'Sem cidade definida, a referência de passagem ainda fica mais genérica.';
+    }
+
+    const iata = cityId ? CITY_TO_IATA[cityId] : null;
+    const profile = iata ? DESTINATION_TRAVEL_PROFILES[iata] : null;
+    const warning = profile?.seasonalWarningKey
+      ? this.flightWarning(locale, profile.seasonalWarningKey)
+      : null;
+
+    const cheapestWindowLabel = this.joinMonths(
+      cheapestFlightMonths.map((month) => this.monthLabel(month, locale)),
+      locale,
     );
-    const cityReference = cityName ?? this.genericDestinationLabel(locale);
-    const climateNote = this.climateNote(seasonalProfile, locale, cityReference);
-    const planningNote = this.bestTimePlanningNote(locale, currentPhase);
 
     if (locale === 'es') {
-      return `Para ${cityReference}, normalmente conviene mirar ${this.joinMonths(lowMonths, locale)}: suelen equilibrar mejor tarifa de vuelo y llegada. ${climateNote} ${planningNote}`;
+      return `En vuelo, ${cheapestWindowLabel} suele ser la ventana más liviana. ${warning ?? ''}`.trim();
     }
     if (locale === 'en') {
-      return `For ${cityReference}, ${this.joinMonths(lowMonths, locale)} usually gives the best balance between flight price and arrival conditions. ${climateNote} ${planningNote}`;
+      return `For flights, ${cheapestWindowLabel} is usually the lightest window. ${warning ?? ''}`.trim();
     }
-    return `Para ${cityReference}, ${this.joinMonths(lowMonths, locale)} costumam dar o melhor equilíbrio entre passagem e chegada. ${climateNote} ${planningNote}`;
+    return `Na passagem, ${cheapestWindowLabel} costuma ser a janela mais leve. ${warning ?? ''}`.trim();
+  }
+
+  private flightWarning(
+    locale: GuidanceLocale,
+    key: string,
+  ): string | null {
+    switch (key) {
+      case 'fln':
+        return locale === 'es'
+          ? 'Florianópolis suele tener menos vuelos directos fuera de marzo-abril.'
+          : locale === 'en'
+            ? 'Florianopolis usually has fewer direct flights outside Mar-Apr.'
+            : 'Florianópolis costuma ter menos voos diretos fora de mar-abr.';
+      case 'nvt':
+        return locale === 'es'
+          ? 'Navegantes reacciona bastante a verano y feriados largos.'
+          : locale === 'en'
+            ? 'Navegantes reacts strongly to summer peaks and long holidays.'
+            : 'Navegantes reage bastante ao verão e aos feriados longos.';
+      case 'gig':
+        return locale === 'es'
+          ? 'Febrero suele concentrar la alta más fuerte por Carnaval.'
+          : locale === 'en'
+            ? 'February usually concentrates the strongest peak because of Carnival.'
+            : 'Fevereiro costuma concentrar a alta mais forte por causa do Carnaval.';
+      case 'mao':
+        return locale === 'es'
+          ? 'Manaos conviene cruzarla con la ventana de lluvias antes de emitir.'
+          : locale === 'en'
+            ? 'For Manaus, cross-check the rainiest window before issuing tickets.'
+            : 'Para Manaus, vale cruzar isso com a janela de chuvas antes de emitir.';
+      case 'bel':
+        return locale === 'es'
+          ? 'Belém también conviene mirarla junto con la estacionalidad de lluvias.'
+          : locale === 'en'
+            ? 'For Belem, also check the local rainy season before locking dates.'
+            : 'Para Belém, também vale olhar a sazonalidade de chuvas antes de fechar.';
+      default:
+        return null;
+    }
+  }
+
+  private async safeGetCityById(cityId: string): Promise<CityCardEntity | null> {
+    try {
+      return await this.citiesCatalogService.getCityById(cityId);
+    } catch {
+      return null;
+    }
   }
 
   private monthLabel(month: number, locale: GuidanceLocale): string {

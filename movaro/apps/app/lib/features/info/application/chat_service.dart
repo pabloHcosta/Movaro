@@ -40,10 +40,7 @@ class ChatStarterPrompt {
 }
 
 class ChatStarterPrompts {
-  const ChatStarterPrompts({
-    required this.categories,
-    required this.chips,
-  });
+  const ChatStarterPrompts({required this.categories, required this.chips});
 
   final List<ChatStarterPrompt> categories;
   final List<ChatStarterPrompt> chips;
@@ -120,19 +117,22 @@ class ChatService {
       return;
     }
 
+    final safeAnswerText = _sanitizeWellFormedUtf16(answer.text);
+
     _history.add(
       ChatMessage(
         role: 'assistant',
-        text: answer.text,
+        text: safeAnswerText,
         timestamp: DateTime.now(),
       ),
     );
 
-    // Stream character by character for typewriter effect
+    // Stream Unicode-safe chunks for the typewriter effect.
+    final scalarValues = safeAnswerText.runes.toList(growable: false);
     const chunkSize = 4;
-    for (var i = 0; i < answer.text.length; i += chunkSize) {
-      final end = (i + chunkSize).clamp(0, answer.text.length);
-      yield answer.text.substring(i, end);
+    for (var i = 0; i < scalarValues.length; i += chunkSize) {
+      final end = (i + chunkSize).clamp(0, scalarValues.length);
+      yield String.fromCharCodes(scalarValues.sublist(i, end));
       await Future<void>.delayed(const Duration(milliseconds: 12));
     }
   }
@@ -160,7 +160,7 @@ class ChatService {
 
     final data = await _client.postJsonMap('/api/v1/chat/ask', body);
 
-    final text = data['answer'] as String? ?? '';
+    final text = _sanitizeWellFormedUtf16(data['answer'] as String? ?? '');
     final sourceRaw = data['source'] as String? ?? '';
     final confidence = (data['confidence'] as num?)?.toDouble() ?? 0.0;
 
@@ -176,6 +176,47 @@ class ChatService {
       confidence: confidence,
     );
   }
+
+  static String _sanitizeWellFormedUtf16(String input) {
+    if (input.isEmpty) return input;
+
+    final units = input.codeUnits;
+    final sanitized = <int>[];
+
+    for (var i = 0; i < units.length; i++) {
+      final unit = units[i];
+
+      if (_isHighSurrogate(unit)) {
+        if (i + 1 < units.length && _isLowSurrogate(units[i + 1])) {
+          sanitized
+            ..add(unit)
+            ..add(units[i + 1]);
+          i++;
+          continue;
+        }
+
+        sanitized.add(_replacementCharacter);
+        continue;
+      }
+
+      if (_isLowSurrogate(unit)) {
+        sanitized.add(_replacementCharacter);
+        continue;
+      }
+
+      sanitized.add(unit);
+    }
+
+    return String.fromCharCodes(sanitized);
+  }
+
+  static bool _isHighSurrogate(int codeUnit) =>
+      codeUnit >= 0xD800 && codeUnit <= 0xDBFF;
+
+  static bool _isLowSurrogate(int codeUnit) =>
+      codeUnit >= 0xDC00 && codeUnit <= 0xDFFF;
+
+  static const int _replacementCharacter = 0xFFFD;
 
   Future<ChatStarterPrompts> fetchStarterPrompts() async {
     try {

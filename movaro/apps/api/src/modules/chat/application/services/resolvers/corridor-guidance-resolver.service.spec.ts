@@ -5,9 +5,24 @@ import { AssistantKnowledgeService } from '../assistant-knowledge.service';
 describe('CorridorGuidanceResolverService', () => {
   const citiesCatalogService = {
     getCityDisplayNameById: jest.fn().mockReturnValue('Florianopolis'),
-    resolveCityId: jest.fn().mockImplementation((id: string) =>
-      id == 'florianopolis' ? 'florianopolis-sc' : id,
-    ),
+    getCityById: jest.fn().mockResolvedValue({
+      id: 'florianopolis-sc',
+      name: 'Florianopolis',
+      seasonalitySnapshot: {
+        lowMonths: [3, 4, 9, 10, 11],
+        rentNotesPt:
+          'Na alta temporada, aluguel e oferta ficam mais pressionados em Florianopolis.',
+        rentNotesEs:
+          'En temporada alta, alquiler y oferta se presionan más en Florianopolis.',
+        rentNotesEn:
+          'In peak season, rent and supply get tighter in Florianopolis.',
+      },
+    }),
+    resolveCityId: jest
+      .fn()
+      .mockImplementation((id: string) =>
+        id == 'florianopolis' ? 'florianopolis-sc' : id,
+      ),
   } as unknown as CitiesCatalogService;
   const assistantKnowledgeService = {
     getQuickPromptTemplate: jest.fn().mockResolvedValue(null),
@@ -48,7 +63,29 @@ describe('CorridorGuidanceResolverService', () => {
     });
 
     expect(result.found).toBe(true);
-    expect(result.answer).toContain('Ainda não existem respostas guiadas sem IA');
+    expect(result.answer).toContain(
+      'Ainda não existem respostas guiadas sem IA',
+    );
+  });
+
+  it('recognizes Uruguay -> Brasil as partial guided coverage', async () => {
+    const service = new CorridorGuidanceResolverService(
+      citiesCatalogService,
+      assistantKnowledgeService,
+    );
+
+    const result = await service.resolve({
+      message: 'Como funciona a moradia nesse corredor?',
+      originCountry: 'UY',
+      destinationCountry: 'BR',
+      locale: 'pt',
+    });
+
+    expect(result.found).toBe(true);
+    expect(result.answer).toContain('cobertura parcial');
+    expect(result.answer).not.toContain(
+      'Ainda não existem respostas guiadas sem IA',
+    );
   });
 
   it('normalizes country aliases before resolving corridor guidance', async () => {
@@ -68,7 +105,9 @@ describe('CorridorGuidanceResolverService', () => {
 
     expect(result.found).toBe(true);
     expect(result.answer).toContain('CPF');
-    expect(result.answer).not.toContain('Ainda não existem respostas guiadas sem IA');
+    expect(result.answer).not.toContain(
+      'Ainda não existem respostas guiadas sem IA',
+    );
   });
 
   it('returns a short non-AI visa answer for exact quick prompts', async () => {
@@ -109,6 +148,7 @@ describe('CorridorGuidanceResolverService', () => {
     expect(result.found).toBe(true);
     expect(result.answer).toContain('Florianopolis');
     expect(result.answer).toContain('mar');
-    expect(result.answer).toContain('verão');
+    expect(result.answer).toContain('passagem');
+    expect(result.answer).toContain('aluguel');
   });
 });
