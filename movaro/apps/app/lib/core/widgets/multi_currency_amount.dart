@@ -61,6 +61,51 @@ class MultiCurrencyAmount extends StatefulWidget {
     return options.first.label;
   }
 
+  /// Formats a USD amount into the user's preferred currency.
+  /// Falls back to displaying in USD if exchange rates are not yet loaded.
+  static String formatFromUsd({
+    required BuildContext context,
+    required num amountInUsd,
+    String? preferredCountryId,
+  }) {
+    final rates = ExchangeRatesScope.ratesOf(context);
+    if (rates == null) {
+      return formatCurrency(
+        locale: 'en_US',
+        currencyCode: 'USD',
+        amount: amountInUsd,
+      );
+    }
+    final amountInBrl = amountInUsd * rates.usdToBrl;
+    return formatPreferredCurrency(
+      context: context,
+      amountInBrl: amountInBrl,
+      exchangeRates: rates,
+      preferredCountryId: preferredCountryId,
+    );
+  }
+
+  /// Formats a USD min–max range (e.g. flight prices) into the user's
+  /// preferred currency. Returns a string like "R$500–R$800".
+  static String formatRangeFromUsd({
+    required BuildContext context,
+    required num minUsd,
+    required num maxUsd,
+    String? preferredCountryId,
+  }) {
+    final min = formatFromUsd(
+      context: context,
+      amountInUsd: minUsd,
+      preferredCountryId: preferredCountryId,
+    );
+    final max = formatFromUsd(
+      context: context,
+      amountInUsd: maxUsd,
+      preferredCountryId: preferredCountryId,
+    );
+    return '$min–$max';
+  }
+
   static List<_CurrencyOption> _buildOptions({
     required num amountInBrl,
     required CopilotExchangeRates? exchangeRates,

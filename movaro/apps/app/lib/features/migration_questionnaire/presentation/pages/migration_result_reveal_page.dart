@@ -21,6 +21,7 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 
 /// Shown immediately after the questionnaire completes.
 ///
@@ -616,15 +617,33 @@ class _HeroSection extends StatelessWidget {
 class _FlightTradeoffData {
   const _FlightTradeoffData({
     required this.recommendedCityName,
-    required this.recommendedRange,
+    required this.recommendedUsdMin,
+    required this.recommendedUsdMax,
     required this.cheaperCityName,
-    required this.cheaperRange,
+    required this.cheaperUsdMin,
+    required this.cheaperUsdMax,
   });
 
   final String recommendedCityName;
-  final String recommendedRange;
+  final int recommendedUsdMin;
+  final int recommendedUsdMax;
   final String cheaperCityName;
-  final String cheaperRange;
+  final int cheaperUsdMin;
+  final int cheaperUsdMax;
+
+  String recommendedRange(BuildContext context) =>
+      MultiCurrencyAmount.formatRangeFromUsd(
+        context: context,
+        minUsd: recommendedUsdMin,
+        maxUsd: recommendedUsdMax,
+      );
+
+  String cheaperRange(BuildContext context) =>
+      MultiCurrencyAmount.formatRangeFromUsd(
+        context: context,
+        minUsd: cheaperUsdMin,
+        maxUsd: cheaperUsdMax,
+      );
 
   static _FlightTradeoffData? resolve({
     required TravelRouteInsight? recommendedRoute,
@@ -676,14 +695,13 @@ class _FlightTradeoffData {
 
     return _FlightTradeoffData(
       recommendedCityName: recommendedCity.name,
-      recommendedRange: _usdRange(recommendedRoute),
+      recommendedUsdMin: recommendedRoute.lowUsdMin,
+      recommendedUsdMax: recommendedRoute.lowUsdMax,
       cheaperCityName: cheapestCity.name,
-      cheaperRange: _usdRange(cheapestRoute),
+      cheaperUsdMin: cheapestRoute.lowUsdMin,
+      cheaperUsdMax: cheapestRoute.lowUsdMax,
     );
   }
-
-  static String _usdRange(TravelRouteInsight route) =>
-      'US\$${route.lowUsdMin}-US\$${route.lowUsdMax}';
 }
 
 class _FlightTradeoffCard extends StatelessWidget {
@@ -717,9 +735,9 @@ class _FlightTradeoffCard extends StatelessWidget {
                 Text(
                   context.l10n.migrationResultFlightTradeoffBody(
                     data.recommendedCityName,
-                    data.recommendedRange,
+                    data.recommendedRange(context),
                     data.cheaperCityName,
-                    data.cheaperRange,
+                    data.cheaperRange(context),
                   ),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.textSoftFor(context),
