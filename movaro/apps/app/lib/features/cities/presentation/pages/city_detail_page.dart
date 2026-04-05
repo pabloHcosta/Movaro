@@ -44,7 +44,6 @@ import 'package:movaro_app/features/cities/presentation/widgets/city_metric_pres
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_public_opinion_section.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_seasonality_section.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_snapshot_tile.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_sources_section.dart';
 import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
 import 'package:movaro_app/features/city_insights/domain/entities/city_insight_entity.dart';
@@ -842,50 +841,30 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                       16,
                                       16,
                                     ),
-                                    title: Text(
-                                      l10n.cityDetailDeepDiveTitle,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.titleMedium,
+                                    title: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            l10n.cityDetailDeepDiveTitle,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w800,
+                                                ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        _OverallScoreChip(
+                                          score: city.movaroScores.overall,
+                                        ),
+                                      ],
                                     ),
                                     children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          bottom: 16,
-                                        ),
-                                        child: _SnapshotPanel(
-                                          city: city,
-                                          localeName: localeName,
-                                          showTitle: false,
-                                        ),
-                                      ),
-                                      LayoutBuilder(
-                                        builder: (context, constraints) {
-                                          final wide =
-                                              constraints.maxWidth >= 980;
-                                          final detailWidth = wide
-                                              ? (constraints.maxWidth - 16) / 2
-                                              : constraints.maxWidth;
-                                          return Wrap(
-                                            spacing: 16,
-                                            runSpacing: 16,
-                                            children: [
-                                              SizedBox(
-                                                width: detailWidth,
-                                                child: _WorkOpportunityPanel(
-                                                  city: city,
-                                                  budget: budget,
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: detailWidth,
-                                                child: _IdhmContextPanel(
-                                                  city: city,
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        },
+                                      _CityAnalysisContent(
+                                        city: city,
+                                        budget: budget,
+                                        localeName: localeName,
                                       ),
                                     ],
                                   ),
@@ -1242,32 +1221,41 @@ class _CityDetailPageState extends State<CityDetailPage> {
   }
 
   Future<void> _scrollToKey(GlobalKey key) async {
+    if (!mounted || !_scrollController.hasClients) {
+      return;
+    }
+
     final ctx = key.currentContext;
-    if (ctx == null || !_scrollController.hasClients) {
-      return;
-    }
+    if (ctx == null) return;
 
-    if (!ctx.mounted) {
-      return;
-    }
+    final target = ctx.findRenderObject();
+    if (target is! RenderBox || !target.hasSize) return;
 
-    await Scrollable.ensureVisible(
-      ctx,
-      alignment: 0.02,
+    // Find the ListView's RenderObject so we can calculate relative offset.
+    final listRO = _scrollController.position.context
+        .storageContext
+        .findRenderObject();
+    if (listRO is! RenderBox) return;
+
+    // y-offset of the target's top edge relative to the viewport's top.
+    final relativeOffset = target.localToGlobal(Offset.zero, ancestor: listRO);
+    final newOffset = (_scrollController.offset + relativeOffset.dy)
+        .clamp(0.0, _scrollController.position.maxScrollExtent);
+
+    await _scrollController.animateTo(
+      newOffset,
       duration: const Duration(milliseconds: 420),
       curve: Curves.easeOutCubic,
-      alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
     );
   }
 
   Future<void> _waitForKeyContext(GlobalKey key) async {
-    for (var attempt = 0; attempt < 16; attempt++) {
-      if (!mounted) {
-        return;
-      }
-      if (key.currentContext != null) {
-        return;
-      }
+    // expandAndWait already waited for the expand animation. We just need the
+    // element to exist in the tree (AnimatedCrossFade keeps both children in
+    // tree, so this typically resolves on the first attempt).
+    for (var attempt = 0; attempt < 10; attempt++) {
+      if (!mounted) return;
+      if (key.currentContext != null) return;
       await WidgetsBinding.instance.endOfFrame;
       await Future<void>.delayed(const Duration(milliseconds: 40));
     }
@@ -1871,7 +1859,7 @@ class _SecondaryContentSectionState extends State<_SecondaryContentSection> {
       });
     }
     await WidgetsBinding.instance.endOfFrame;
-    await Future<void>.delayed(const Duration(milliseconds: 320));
+    await Future<void>.delayed(const Duration(milliseconds: 480));
   }
 
   static String _expandLabel(BuildContext context, String cityName) {
@@ -2151,7 +2139,6 @@ class _ResultBarCelebration extends StatelessWidget {
 
 // ─── End of migration result bar ──────────────────────────────────────────────
 
-enum _SnapshotAlertTone { positive, watchout, context }
 
 class _PlanCityContext {
   const _PlanCityContext({
@@ -3718,27 +3705,29 @@ class _ArrivalViabilityCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  context.l10n.cityDetailArrivalViabilityTitle(),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                ),
-              ),
-              TextButton(
-                onPressed: () => _showInsightSheet(
-                  context,
-                  title: context.l10n.cityDetailArrivalViabilityTitle(),
-                  summary: context.l10n.cityDetailArrivalViabilityBody(),
-                ),
-                child: Text(_detailActionLabel(context)),
-              ),
-            ],
+          // ── Header ────────────────────────────────────────────────────
+          Text(
+            context.l10n.cityDetailArrivalViabilityTitle(),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              height: 1.2,
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
+          Text(
+            _cityDetailLocalizedText(
+              context,
+              pt: 'Reserve, pressão de chegada e foco inicial',
+              es: 'Reserva, presión de llegada y foco inicial',
+              en: 'Reserve, arrival pressure and initial focus',
+            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 14),
           IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -3796,6 +3785,7 @@ class _ArrivalViabilityCard extends StatelessWidget {
             supporting: firstFocusBody,
             basis: _firstFocusBasis(context),
             source: _firstFocusSource(context),
+            fullWidth: true,
           ),
           if (firstMonthStory != null) ...[
             const SizedBox(height: 8),
@@ -3803,9 +3793,11 @@ class _ArrivalViabilityCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.surfaceMutedFor(context),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: AppColors.borderFor(context)),
+                color: AppColors.primary.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.16),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -3813,33 +3805,39 @@ class _ArrivalViabilityCard extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        Icons.calendar_view_week_outlined,
-                        size: 18,
+                        Icons.calendar_today_outlined,
+                        size: 13,
                         color: AppColors.primary,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 5),
                       Expanded(
                         child: Text(
                           _cityDetailLocalizedText(
                             context,
                             pt: 'Como tende a ser o primeiro mês',
                             es: 'Cómo tiende a ser el primer mes',
-                            en: 'What month one tends to feel like',
+                            en: 'What the first month tends to feel like',
                           ),
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(fontWeight: FontWeight.w800),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 9),
                   Text(
                     firstMonthStory.$1,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(height: 1.45),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                    ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     firstMonthStory.$2,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -4256,6 +4254,7 @@ class _ArrivalInfoTile extends StatelessWidget {
     this.preferredCountryId,
     this.basis,
     this.source,
+    this.fullWidth = false,
   });
 
   final IconData icon;
@@ -4267,69 +4266,99 @@ class _ArrivalInfoTile extends StatelessWidget {
   final String? preferredCountryId;
   final String? basis;
   final String? source;
+  final bool fullWidth;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMutedFor(context),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.borderFor(context)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 18, color: tint),
-          const SizedBox(height: 10),
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Icon + label in one row
+        Row(
+          children: [
+            Icon(icon, size: 13, color: tint),
+            const SizedBox(width: 5),
+            Expanded(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: tint,
+                  fontWeight: FontWeight.w700,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 9),
+        // Value
+        if (amountInBrl != null)
+          DefaultTextStyle(
+            style: Theme.of(context).textTheme.titleSmall!.copyWith(
+              fontWeight: FontWeight.w800,
+              height: 1.15,
+            ),
+            child: MultiCurrencyAmount(
+              amountInBrl: amountInBrl!,
+              exchangeRates: null,
+              preferredCountryId: preferredCountryId,
+              compact: true,
+            ),
+          )
+        else
           Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              fontWeight: FontWeight.w700,
+            value!,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: tint,
+              fontWeight: FontWeight.w800,
+              height: 1.15,
             ),
           ),
-          const SizedBox(height: 6),
-          if (amountInBrl != null)
-            DefaultTextStyle(
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w800),
-              child: MultiCurrencyAmount(
-                amountInBrl: amountInBrl!,
-                exchangeRates: null,
-                preferredCountryId: preferredCountryId,
-                compact: true,
-              ),
-            )
-          else
-            Text(
-              value!,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: tint,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () => _showInsightSheet(
-              context,
-              title: label,
-              summary: supporting,
-              basis: basis,
-              source: source == null
-                  ? null
-                  : context.l10n.cityDetailArrivalSourceLabel(source!),
-            ),
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(0, 0),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(_detailActionLabel(context)),
+        const SizedBox(height: 8),
+        // "Ver mais" link
+        GestureDetector(
+          onTap: () => _showInsightSheet(
+            context,
+            title: label,
+            summary: supporting,
+            basis: basis,
+            source: source == null
+                ? null
+                : context.l10n.cityDetailArrivalSourceLabel(source!),
           ),
-        ],
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _detailActionLabel(context),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 2),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 14,
+                color: AppColors.textSoftFor(context),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    return Container(
+      width: fullWidth ? double.infinity : null,
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: tint.withValues(alpha: 0.18)),
       ),
+      child: content,
     );
   }
 }
@@ -4502,13 +4531,9 @@ class _SecondaryActionsRow extends StatelessWidget {
   const _SecondaryActionsRow({required this.actions});
 
   final List<_DetailQuickAction> actions;
-  static const _maxVisibleActions = 5;
 
   @override
   Widget build(BuildContext context) {
-    final visible = actions.take(_maxVisibleActions).toList(growable: false);
-    final overflow = actions.skip(_maxVisibleActions).toList(growable: false);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -4517,9 +4542,9 @@ class _SecondaryActionsRow extends StatelessWidget {
           child: Text(
             _cityDetailLocalizedText(
               context,
-              pt: 'Acesso rápido aos temas desta página',
-              es: 'Acceso rápido a los temas de esta página',
-              en: 'Quick access to sections on this page',
+              pt: 'Acesso rápido',
+              es: 'Acceso rápido',
+              en: 'Quick access',
             ),
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: AppColors.textSoftFor(context),
@@ -4528,26 +4553,13 @@ class _SecondaryActionsRow extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 42,
+          height: 40,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            itemCount: visible.length + (overflow.isEmpty ? 0 : 1),
-            separatorBuilder: (context, index) => const SizedBox(width: 8),
+            itemCount: actions.length,
+            separatorBuilder: (context, i) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
-              if (index >= visible.length) {
-                return _SecondaryActionChip(
-                  icon: Icons.more_horiz_rounded,
-                  label: _cityDetailLocalizedText(
-                    context,
-                    pt: 'Mais',
-                    es: 'Más',
-                    en: 'More',
-                  ),
-                  onTap: () => _showMoreActions(context, overflow),
-                  isMore: true,
-                );
-              }
-              final action = visible[index];
+              final action = actions[index];
               return _SecondaryActionChip(
                 icon: action.icon,
                 label: action.label,
@@ -4557,66 +4569,6 @@ class _SecondaryActionsRow extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Future<void> _showMoreActions(
-    BuildContext context,
-    List<_DetailQuickAction> actions,
-  ) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: FractionallySizedBox(
-          heightFactor: 0.72,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _cityDetailLocalizedText(
-                    context,
-                    pt: 'Mais temas',
-                    es: 'Más temas',
-                    en: 'More topics',
-                  ),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-                ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: ListView.separated(
-                    itemCount: actions.length,
-                    separatorBuilder: (context, index) =>
-                        Divider(color: AppColors.borderFor(context), height: 1),
-                    itemBuilder: (context, index) {
-                      final action = actions[index];
-                      return ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: Icon(action.icon, color: AppColors.primary),
-                        title: Text(action.label),
-                        trailing: const Icon(Icons.chevron_right_rounded),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            action.onTap();
-                          });
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -4640,20 +4592,16 @@ class _SecondaryActionChip extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
-    this.isMore = false,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  final bool isMore;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: isMore
-          ? AppColors.primary.withValues(alpha: 0.08)
-          : AppColors.surfaceFor(context),
+      color: AppColors.surfaceFor(context),
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         onTap: onTap,
@@ -4664,9 +4612,7 @@ class _SecondaryActionChip extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
-              color: isMore
-                  ? AppColors.primary.withValues(alpha: 0.18)
-                  : AppColors.borderFor(context),
+              color: AppColors.borderFor(context),
             ),
           ),
           child: Row(
@@ -4675,7 +4621,7 @@ class _SecondaryActionChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 16,
-                color: isMore ? AppColors.primary : AppColors.primary,
+                color: AppColors.primary,
               ),
               const SizedBox(width: 6),
               Text(
@@ -6680,177 +6626,6 @@ String _cityDetailLocalizedText(
   };
 }
 
-class _WorkOpportunityPanel extends StatelessWidget {
-  const _WorkOpportunityPanel({required this.city, required this.budget});
-
-  final City city;
-  final CityBudgetSnapshot? budget;
-
-  @override
-  Widget build(BuildContext context) {
-    return _DetailBlock(
-      title: context.l10n.cityDetailWorkLabel,
-      children: [
-        Text(
-          _cityDetailLocalizedText(
-            context,
-            pt: 'Aqui ficam os sinais complementares que ajudam a validar se a cidade sustenta trabalho e renda no dia a dia.',
-            es: 'Aquí quedan las señales complementarias que ayudan a validar si la ciudad sostiene trabajo e ingresos en el día a día.',
-            en: 'These are the complementary signals that help validate whether the city can sustain work and income day to day.',
-          ),
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSoftFor(context),
-            height: 1.4,
-          ),
-        ),
-        const SizedBox(height: 14),
-        _InlineMetricRow(
-          icon: Icons.query_stats_rounded,
-          label: context.l10n.cityDetailUnemploymentLabel,
-          headline: _unemploymentHeadline(context, city.unemploymentRate),
-          supporting: '${city.unemploymentRate.toStringAsFixed(1)}%',
-          tint: _unemploymentTint(city.unemploymentRate),
-          detailTitle: context.l10n.cityDetailUnemploymentLabel,
-          basis: _cityDetailLocalizedText(
-            context,
-            pt: 'Quanto menor a taxa de desemprego, mais espaço tende a existir para entrada no mercado. ${city.name} está em ${city.unemploymentRate.toStringAsFixed(1)}%.',
-            es: 'Cuanto menor es la tasa de desempleo, más espacio tiende a existir para entrar al mercado. ${city.name} está en ${city.unemploymentRate.toStringAsFixed(1)}%.',
-            en: 'The lower the unemployment rate, the more room there tends to be for entering the market. ${city.name} is currently at ${city.unemploymentRate.toStringAsFixed(1)}%.',
-          ),
-          source: 'Novo Caged / fontes curadas da cidade',
-        ),
-        if (budget != null) ...[
-          const SizedBox(height: 12),
-          _InlineMetricRow(
-            icon: Icons.account_balance_wallet_outlined,
-            label: _cityDetailLocalizedText(
-              context,
-              pt: 'Salário x custo base',
-              es: 'Salario vs costo base',
-              en: 'Salary vs base cost',
-            ),
-            headline: _salaryCoverageHeadline(context, budget!),
-            supporting: _salaryCoverageSupporting(context, budget!),
-            tint: _salaryCoverageTint(budget!),
-            detailTitle: _cityDetailLocalizedText(
-              context,
-              pt: 'Salário x custo base',
-              es: 'Salario vs costo base',
-              en: 'Salary vs base cost',
-            ),
-            basis: _cityDetailLocalizedText(
-              context,
-              pt: 'Salário líquido médio ${budget!.averageMonthlyNetSalary} BRL contra custo base de ${budget!.fairLivingTotal} BRL em ${budget!.cityLabel}.',
-              es: 'Salario neto medio ${budget!.averageMonthlyNetSalary} BRL contra costo base de ${budget!.fairLivingTotal} BRL en ${budget!.cityLabel}.',
-              en: 'Average net salary ${budget!.averageMonthlyNetSalary} BRL versus base cost of ${budget!.fairLivingTotal} BRL in ${budget!.cityLabel}.',
-            ),
-            source: '${budget!.sourceLabel} · ${budget!.updatedAt}',
-          ),
-        ],
-        const SizedBox(height: 14),
-        Text(
-          context.l10n.cityDetailIndustriesTitle,
-          style: Theme.of(
-            context,
-          ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          city.topIndustries.map(context.l10n.industryLabel).join(', '),
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSoftFor(context),
-            height: 1.4,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _IdhmContextPanel extends StatelessWidget {
-  const _IdhmContextPanel({required this.city});
-
-  final City city;
-
-  @override
-  Widget build(BuildContext context) {
-    final idhm = CityIdhmPresentation.resolve(context, value: city.idhmScore);
-
-    return _DetailBlock(
-      title: context.l10n.cityDetailContextTitle,
-      children: [
-        _InlineMetricRow(
-          icon: Icons.public_rounded,
-          label:
-              '${context.l10n.cityDetailIdhmLabel} ${city.idhmReferenceYear}',
-          headline: idhm.headline,
-          supporting: idhm.supporting,
-          tint: idhm.tint,
-          detailTitle: context.l10n.cityDetailContextTitle,
-          basis: _cityDetailLocalizedText(
-            context,
-            pt: 'O IDHM de ${city.name} está em ${city.idhmScore.toStringAsFixed(3)} e usa a referência ${city.idhmReferenceYear}.',
-            es: 'El IDHM de ${city.name} está en ${city.idhmScore.toStringAsFixed(3)} y usa la referencia ${city.idhmReferenceYear}.',
-            en: 'The HDI for ${city.name} is ${city.idhmScore.toStringAsFixed(3)} using the ${city.idhmReferenceYear} reference.',
-          ),
-          source: 'Atlas do Desenvolvimento Humano / ${city.idhmReferenceYear}',
-        ),
-        const SizedBox(height: 12),
-        _InlineMetricRow(
-          icon: Icons.groups_rounded,
-          label: context.l10n.cityDetailPopulationLabel,
-          headline: NumberFormatters.compactPopulation(
-            value: city.population,
-            locale: Localizations.localeOf(context).toString(),
-          ),
-          supporting: NumberFormatters.fullInteger(
-            value: city.population,
-            locale: Localizations.localeOf(context).toString(),
-          ),
-          tint: AppColors.primary,
-          detailTitle: context.l10n.cityDetailPopulationLabel,
-          basis: _cityDetailLocalizedText(
-            context,
-            pt: 'População estimada de ${NumberFormatters.fullInteger(value: city.population, locale: Localizations.localeOf(context).toString())} habitantes.',
-            es: 'Población estimada de ${NumberFormatters.fullInteger(value: city.population, locale: Localizations.localeOf(context).toString())} habitantes.',
-            en: 'Estimated population of ${NumberFormatters.fullInteger(value: city.population, locale: Localizations.localeOf(context).toString())} inhabitants.',
-          ),
-          source: 'IBGE / fontes demográficas da cidade',
-        ),
-      ],
-    );
-  }
-}
-
-String _salaryCoverageHeadline(
-  BuildContext context,
-  CityBudgetSnapshot budget,
-) {
-  final ratio = budget.fairLivingCoverageRatio;
-  if (ratio >= 1.2) {
-    return _cityDetailLocalizedText(
-      context,
-      pt: 'Cobre com folga',
-      es: 'Cubre con margen',
-      en: 'Covers with margin',
-    );
-  }
-  if (ratio >= 1.0) {
-    return _cityDetailLocalizedText(
-      context,
-      pt: 'Cobre no limite',
-      es: 'Cubre al limite',
-      en: 'Covers tightly',
-    );
-  }
-  return _cityDetailLocalizedText(
-    context,
-    pt: 'Nao cobre sozinho',
-    es: 'No cubre solo',
-    en: 'Does not cover alone',
-  );
-}
-
 String _salaryCoverageSupporting(
   BuildContext context,
   CityBudgetSnapshot budget,
@@ -6883,112 +6658,6 @@ Color _salaryCoverageTint(CityBudgetSnapshot budget) {
   return AppColors.danger;
 }
 
-_SnapshotAlertTone _toneForScore(int value) {
-  if (value >= 67) {
-    return _SnapshotAlertTone.positive;
-  }
-  if (value < 55) {
-    return _SnapshotAlertTone.watchout;
-  }
-  return _SnapshotAlertTone.context;
-}
-
-String _snapshotFooter(BuildContext context, _SnapshotAlertTone tone) {
-  switch (tone) {
-    case _SnapshotAlertTone.positive:
-      return context.l10n.cityDetailSnapshotPositiveTag;
-    case _SnapshotAlertTone.watchout:
-      return context.l10n.cityDetailSnapshotWatchoutTag;
-    case _SnapshotAlertTone.context:
-      return context.l10n.cityDetailSnapshotContextTag;
-  }
-}
-
-class _InlineMetricRow extends StatelessWidget {
-  const _InlineMetricRow({
-    required this.icon,
-    required this.label,
-    required this.headline,
-    required this.supporting,
-    required this.tint,
-    this.detailTitle,
-    this.basis,
-    this.source,
-  });
-
-  final IconData icon;
-  final String label;
-  final String headline;
-  final String supporting;
-  final Color tint;
-  final String? detailTitle;
-  final String? basis;
-  final String? source;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMutedFor(context),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: tint.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, size: 20, color: tint),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: AppColors.textSoftFor(context),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  headline,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 6),
-                TextButton(
-                  onPressed: () => _showInsightSheet(
-                    context,
-                    title: detailTitle ?? label,
-                    summary: supporting,
-                    basis: basis,
-                    source: source,
-                  ),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(0, 0),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(_detailActionLabel(context)),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 String _popularitySupporting(BuildContext context, int score) {
   if (score >= 80) {
     return context.l10n.citySnapshotPopularityHighSupporting;
@@ -7019,16 +6688,121 @@ Color _unemploymentTint(double value) {
   return AppColors.danger;
 }
 
-class _SnapshotPanel extends StatelessWidget {
-  const _SnapshotPanel({
+// ─── New: Redesigned City Analysis ────────────────────────────────────────────
+
+// Overall score chip shown in the ExpansionTile header.
+class _OverallScoreChip extends StatelessWidget {
+  const _OverallScoreChip({required this.score});
+  final int score;
+
+  Color _tint() {
+    if (score >= 72) return AppColors.success;
+    if (score >= 55) return AppColors.warning;
+    return AppColors.danger;
+  }
+
+  String _label(BuildContext context) {
+    if (score >= 72) {
+      return _cityDetailLocalizedText(
+        context,
+        pt: 'Forte',
+        es: 'Fuerte',
+        en: 'Strong',
+      );
+    }
+    if (score >= 55) {
+      return _cityDetailLocalizedText(
+        context,
+        pt: 'Médio',
+        es: 'Medio',
+        en: 'Fair',
+      );
+    }
+    return _cityDetailLocalizedText(
+      context,
+      pt: 'Atenção',
+      es: 'Atención',
+      en: 'Caution',
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tint = _tint();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: tint.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$score',
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+              color: tint,
+            ),
+          ),
+          const SizedBox(width: 5),
+          Text(
+            _label(context),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: tint,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Root widget that composes the full analysis content.
+class _CityAnalysisContent extends StatelessWidget {
+  const _CityAnalysisContent({
     required this.city,
+    required this.budget,
     required this.localeName,
-    this.showTitle = true,
   });
 
   final City city;
+  final CityBudgetSnapshot? budget;
   final String localeName;
-  final bool showTitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // ── 1. Indicators ───────────────────────────────────────────────
+        _AnalysisIndicatorsSection(city: city),
+        const SizedBox(height: 12),
+
+        // ── 2. Financial reality (only when budget data is available) ───
+        if (budget != null) ...[
+          _AnalysisFinancialSection(budget: budget!, city: city),
+          const SizedBox(height: 12),
+        ],
+
+        // ── 3. Work & economy ───────────────────────────────────────────
+        _AnalysisWorkSection(city: city),
+        const SizedBox(height: 12),
+
+        // ── 4. City context ─────────────────────────────────────────────
+        _AnalysisContextSection(city: city, localeName: localeName),
+      ],
+    );
+  }
+}
+
+// ── Section 1: score bars ─────────────────────────────────────────────────────
+
+class _AnalysisIndicatorsSection extends StatelessWidget {
+  const _AnalysisIndicatorsSection({required this.city});
+  final City city;
 
   @override
   Widget build(BuildContext context) {
@@ -7043,11 +6817,6 @@ class _SnapshotPanel extends StatelessWidget {
       kind: CityMetricKind.safety,
       value: city.safetyScore,
     );
-    final language = CityMetricPresentation.resolve(
-      context,
-      kind: CityMetricKind.language,
-      value: city.movaroScores.languageAdaptation,
-    );
     final housing = CityHousingViabilityPresenter.resolve(
       context,
       rentScore: city.rentScore,
@@ -7057,108 +6826,69 @@ class _SnapshotPanel extends StatelessWidget {
       kind: CityMetricKind.work,
       value: city.movaroScores.workOpportunity,
     );
+    final language = CityMetricPresentation.resolve(
+      context,
+      kind: CityMetricKind.language,
+      value: city.movaroScores.languageAdaptation,
+    );
 
-    return FrostedPanel(
+    return _AnalysisBlock(
+      icon: Icons.bar_chart_rounded,
+      title: _cityDetailLocalizedText(
+        context,
+        pt: 'Indicadores',
+        es: 'Indicadores',
+        en: 'Indicators',
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
-          if (showTitle) ...[
-            Text(
-              context.l10n.cityDetailSnapshotTitle,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 16),
-          ],
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final wide = constraints.maxWidth >= 680;
-              return GridView.count(
-                crossAxisCount: wide ? 3 : 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: wide ? 1.08 : 0.92,
-                children: [
-                  CitySnapshotTile(
-                    label:
-                        '${context.l10n.cityDetailIdhmLabel} ${city.idhmReferenceYear}',
-                    value: idhm.headline,
-                    footer: _snapshotFooter(
-                      context,
-                      city.idhmScore >= 0.8
-                          ? _SnapshotAlertTone.positive
-                          : city.idhmScore < 0.7
-                          ? _SnapshotAlertTone.watchout
-                          : _SnapshotAlertTone.context,
-                    ),
-                    tint: idhm.tint,
-                    background: idhm.background,
-                    icon: Icons.public_rounded,
-                  ),
-                  CitySnapshotTile(
-                    label: context.l10n.cityDetailCostLabel,
-                    value: cost.headline,
-                    footer: _snapshotFooter(
-                      context,
-                      _toneForScore(city.movaroScores.economical),
-                    ),
-                    tint: cost.tint,
-                    background: cost.background,
-                    icon: Icons.payments_outlined,
-                  ),
-                  CitySnapshotTile(
-                    label: context.l10n.cityHousingViabilityTileLabel,
-                    value: housing.headline,
-                    footer: _snapshotFooter(
-                      context,
-                      city.rentScore >= 67
-                          ? _SnapshotAlertTone.positive
-                          : city.rentScore < 55
-                          ? _SnapshotAlertTone.watchout
-                          : _SnapshotAlertTone.context,
-                    ),
-                    tint: housing.tint,
-                    background: housing.background,
-                    icon: Icons.home_work_outlined,
-                  ),
-                  CitySnapshotTile(
-                    label: context.l10n.cityDetailSafetyLabel,
-                    value: safety.headline,
-                    footer: _snapshotFooter(
-                      context,
-                      _toneForScore(city.safetyScore),
-                    ),
-                    tint: safety.tint,
-                    background: safety.background,
-                    icon: Icons.shield_outlined,
-                  ),
-                  CitySnapshotTile(
-                    label: context.l10n.cityDetailLanguageLabel,
-                    value: language.headline,
-                    footer: _snapshotFooter(
-                      context,
-                      _toneForScore(city.movaroScores.languageAdaptation),
-                    ),
-                    tint: language.tint,
-                    background: language.background,
-                    icon: Icons.translate_rounded,
-                  ),
-                  CitySnapshotTile(
-                    label: context.l10n.cityDetailWorkLabel,
-                    value: work.headline,
-                    footer: _snapshotFooter(
-                      context,
-                      _toneForScore(city.movaroScores.workOpportunity),
-                    ),
-                    tint: work.tint,
-                    background: work.background,
-                    icon: Icons.work_outline_rounded,
-                  ),
-                ],
-              );
-            },
+          _AnalysisScoreBar(
+            icon: Icons.public_rounded,
+            label:
+                '${context.l10n.cityDetailIdhmLabel} ${city.idhmReferenceYear}',
+            headline: idhm.headline,
+            score: (city.idhmScore * 100).round(),
+            tint: idhm.tint,
+          ),
+          const SizedBox(height: 10),
+          _AnalysisScoreBar(
+            icon: Icons.shield_outlined,
+            label: context.l10n.cityDetailSafetyLabel,
+            headline: safety.headline,
+            score: city.safetyScore,
+            tint: safety.tint,
+          ),
+          const SizedBox(height: 10),
+          _AnalysisScoreBar(
+            icon: Icons.payments_outlined,
+            label: context.l10n.cityDetailCostLabel,
+            headline: cost.headline,
+            score: city.movaroScores.economical,
+            tint: cost.tint,
+          ),
+          const SizedBox(height: 10),
+          _AnalysisScoreBar(
+            icon: Icons.home_work_outlined,
+            label: context.l10n.cityHousingViabilityTileLabel,
+            headline: housing.headline,
+            score: city.rentScore,
+            tint: housing.tint,
+          ),
+          const SizedBox(height: 10),
+          _AnalysisScoreBar(
+            icon: Icons.work_outline_rounded,
+            label: context.l10n.cityDetailWorkLabel,
+            headline: work.headline,
+            score: city.movaroScores.workOpportunity,
+            tint: work.tint,
+          ),
+          const SizedBox(height: 10),
+          _AnalysisScoreBar(
+            icon: Icons.translate_rounded,
+            label: context.l10n.cityDetailLanguageLabel,
+            headline: language.headline,
+            score: city.movaroScores.languageAdaptation,
+            tint: language.tint,
           ),
         ],
       ),
@@ -7166,23 +6896,804 @@ class _SnapshotPanel extends StatelessWidget {
   }
 }
 
-class _DetailBlock extends StatelessWidget {
-  const _DetailBlock({required this.title, required this.children});
+// ── Section 2: Financial reality ─────────────────────────────────────────────
 
-  final String title;
-  final List<Widget> children;
+class _AnalysisFinancialSection extends StatelessWidget {
+  const _AnalysisFinancialSection({
+    required this.budget,
+    required this.city,
+  });
+
+  final CityBudgetSnapshot budget;
+  final City city;
 
   @override
   Widget build(BuildContext context) {
-    return FrostedPanel(
+    final coverageColor = _salaryCoverageTint(budget);
+    final coverageRatio = budget.fairLivingCoverageRatio;
+
+    return _AnalysisBlock(
+      icon: Icons.account_balance_wallet_outlined,
+      title: _cityDetailLocalizedText(
+        context,
+        pt: 'Realidade financeira',
+        es: 'Realidad financiera',
+        en: 'Financial reality',
+      ),
+      subtitle: budget.updatedAt,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 12),
-          ...children,
+          // Salary — emphasis row
+          _AnalysisBudgetRow(
+            icon: Icons.payments_rounded,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Salário líquido médio',
+              es: 'Salario neto medio',
+              en: 'Average net salary',
+            ),
+            value: _formatBrl(budget.averageMonthlyNetSalary),
+            tint: AppColors.success,
+            emphasis: true,
+          ),
+          const SizedBox(height: 10),
+          Divider(height: 1, color: AppColors.borderFor(context)),
+          const SizedBox(height: 10),
+          // Rent outside centre
+          _AnalysisBudgetRow(
+            icon: Icons.home_outlined,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Aluguel fora do centro',
+              es: 'Alquiler fuera del centro',
+              en: 'Rent outside centre',
+            ),
+            value: _formatBrl(budget.oneBedroomOutsideCentre),
+            tint: AppColors.primary,
+          ),
+          const SizedBox(height: 8),
+          // Rent city centre
+          _AnalysisBudgetRow(
+            icon: Icons.apartment_outlined,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Aluguel no centro',
+              es: 'Alquiler en el centro',
+              en: 'Rent in city centre',
+            ),
+            value: _formatBrl(budget.oneBedroomCityCentre),
+            tint: AppColors.primary,
+          ),
+          const SizedBox(height: 8),
+          // Living costs excl. rent
+          _AnalysisBudgetRow(
+            icon: Icons.restaurant_outlined,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Custo de vida (sem aluguel)',
+              es: 'Costo de vida (sin alquiler)',
+              en: 'Cost of living (ex-rent)',
+            ),
+            value: _formatBrl(budget.singlePersonExcludingRent),
+            tint: AppColors.primary,
+          ),
+          if (budget.monthlyTransportPass > 0) ...[
+            const SizedBox(height: 8),
+            _AnalysisBudgetRow(
+              icon: Icons.directions_bus_outlined,
+              label: _cityDetailLocalizedText(
+                context,
+                pt: 'Passe de transporte',
+                es: 'Pase de transporte',
+                en: 'Transport pass',
+              ),
+              value: _formatBrl(budget.monthlyTransportPass),
+              tint: AppColors.primary,
+            ),
+          ],
+          if (budget.utilities > 0) ...[
+            const SizedBox(height: 8),
+            _AnalysisBudgetRow(
+              icon: Icons.bolt_outlined,
+              label: _cityDetailLocalizedText(
+                context,
+                pt: 'Utilidades (água, luz, internet)',
+                es: 'Servicios (agua, luz, internet)',
+                en: 'Utilities (water, power, internet)',
+              ),
+              value: _formatBrl(budget.utilities),
+              tint: AppColors.primary,
+            ),
+          ],
+          const SizedBox(height: 10),
+          Divider(height: 1, color: AppColors.borderFor(context)),
+          const SizedBox(height: 10),
+          // Cost range summary
+          _AnalysisBudgetRow(
+            icon: Icons.calculate_outlined,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Custo total estimado',
+              es: 'Costo total estimado',
+              en: 'Estimated total cost',
+            ),
+            value:
+                '${_formatBrl(budget.fairLivingTotal)} – ${_formatBrl(budget.wellLivingTotal)}/mês',
+            tint: AppColors.textSoftFor(context),
+          ),
+          const SizedBox(height: 14),
+          // Coverage ratio card
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: coverageColor.withValues(alpha: 0.07),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: coverageColor.withValues(alpha: 0.25),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.donut_large_rounded,
+                      size: 15,
+                      color: coverageColor,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        _cityDetailLocalizedText(
+                          context,
+                          pt: 'Cobertura salarial',
+                          es: 'Cobertura salarial',
+                          en: 'Salary coverage',
+                        ),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: coverageColor,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ),
+                    Text(
+                      '${(coverageRatio * 100).round()}%',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: coverageColor,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: (coverageRatio / 2.0).clamp(0.0, 1.0),
+                    backgroundColor: coverageColor.withValues(alpha: 0.14),
+                    valueColor: AlwaysStoppedAnimation<Color>(coverageColor),
+                    minHeight: 6,
+                  ),
+                ),
+                const SizedBox(height: 7),
+                Text(
+                  _salaryCoverageSupporting(context, budget),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: coverageColor.withValues(alpha: 0.90),
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _cityDetailLocalizedText(
+              context,
+              pt: 'Fonte: ${budget.sourceLabel} · ${budget.updatedAt}',
+              es: 'Fuente: ${budget.sourceLabel} · ${budget.updatedAt}',
+              en: 'Source: ${budget.sourceLabel} · ${budget.updatedAt}',
+            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
+          ),
         ],
       ),
     );
   }
+}
+
+// ── Section 3: Work & economy ─────────────────────────────────────────────────
+
+class _AnalysisWorkSection extends StatelessWidget {
+  const _AnalysisWorkSection({required this.city});
+  final City city;
+
+  @override
+  Widget build(BuildContext context) {
+    final unemploymentTint = _unemploymentTint(city.unemploymentRate);
+    final ecoTint = city.economicActivityScore >= 70
+        ? AppColors.success
+        : city.economicActivityScore >= 50
+        ? AppColors.warning
+        : AppColors.danger;
+
+    return _AnalysisBlock(
+      icon: Icons.work_outline_rounded,
+      title: _cityDetailLocalizedText(
+        context,
+        pt: 'Trabalho & economia',
+        es: 'Trabajo & economía',
+        en: 'Work & economy',
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Unemployment pill row
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: unemploymentTint.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: unemploymentTint.withValues(alpha: 0.18),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.query_stats_rounded,
+                  size: 17,
+                  color: unemploymentTint,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    context.l10n.cityDetailUnemploymentLabel,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                    ),
+                  ),
+                ),
+                Text(
+                  '${city.unemploymentRate.toStringAsFixed(1)}%',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: unemploymentTint,
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: unemploymentTint.withValues(alpha: 0.13),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    _unemploymentHeadline(context, city.unemploymentRate),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: unemploymentTint,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (city.economicActivityScore > 0) ...[
+            const SizedBox(height: 10),
+            _AnalysisScoreBar(
+              icon: Icons.auto_graph_rounded,
+              label: _cityDetailLocalizedText(
+                context,
+                pt: 'Atividade econômica',
+                es: 'Actividad económica',
+                en: 'Economic activity',
+              ),
+              headline: city.economicActivityScore >= 70
+                  ? _cityDetailLocalizedText(
+                    context,
+                    pt: 'Forte',
+                    es: 'Fuerte',
+                    en: 'Strong',
+                  )
+                  : city.economicActivityScore >= 50
+                  ? _cityDetailLocalizedText(
+                    context,
+                    pt: 'Moderada',
+                    es: 'Moderada',
+                    en: 'Moderate',
+                  )
+                  : _cityDetailLocalizedText(
+                    context,
+                    pt: 'Limitada',
+                    es: 'Limitada',
+                    en: 'Limited',
+                  ),
+              score: city.economicActivityScore,
+              tint: ecoTint,
+            ),
+          ],
+          if (city.topIndustries.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Text(
+              context.l10n.cityDetailIndustriesTitle,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: city.topIndustries.map((industry) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.07),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.16),
+                    ),
+                  ),
+                  child: Text(
+                    context.l10n.industryLabel(industry),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Section 4: City context ───────────────────────────────────────────────────
+
+class _AnalysisContextSection extends StatelessWidget {
+  const _AnalysisContextSection({
+    required this.city,
+    required this.localeName,
+  });
+
+  final City city;
+  final String localeName;
+
+  @override
+  Widget build(BuildContext context) {
+    final popularityScore = city.movaroScores.popularForArgentinians;
+    final popularityTint = popularityScore >= 80
+        ? AppColors.success
+        : popularityScore >= 60
+        ? AppColors.warning
+        : AppColors.danger;
+    final popularityLabel = popularityScore >= 80
+        ? _cityDetailLocalizedText(context, pt: 'Alta', es: 'Alta', en: 'High')
+        : popularityScore >= 60
+        ? _cityDetailLocalizedText(
+          context,
+          pt: 'Moderada',
+          es: 'Moderada',
+          en: 'Moderate',
+        )
+        : _cityDetailLocalizedText(
+          context,
+          pt: 'Baixa',
+          es: 'Baja',
+          en: 'Low',
+        );
+
+    return _AnalysisBlock(
+      icon: Icons.location_city_rounded,
+      title: _cityDetailLocalizedText(
+        context,
+        pt: 'Contexto da cidade',
+        es: 'Contexto de la ciudad',
+        en: 'City context',
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Population
+          _AnalysisInfoRow(
+            icon: Icons.groups_rounded,
+            label: context.l10n.cityDetailPopulationLabel,
+            value: NumberFormatters.compactPopulation(
+              value: city.population,
+              locale: localeName,
+            ),
+            detail: NumberFormatters.fullInteger(
+              value: city.population,
+              locale: localeName,
+            ),
+            tint: AppColors.primary,
+          ),
+          const SizedBox(height: 10),
+          // Argentina popularity bar
+          _AnalysisScoreBar(
+            icon: Icons.favorite_border_rounded,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Popular entre argentinos',
+              es: 'Popular entre argentinos',
+              en: 'Popular among Argentinians',
+            ),
+            headline: popularityLabel,
+            score: popularityScore,
+            tint: popularityTint,
+          ),
+          const SizedBox(height: 10),
+          // Spanish support
+          if (city.spanishSupportScore > 0) ...[
+            _AnalysisScoreBar(
+              icon: Icons.record_voice_over_outlined,
+              label: _cityDetailLocalizedText(
+                context,
+                pt: 'Suporte ao espanhol',
+                es: 'Soporte al español',
+                en: 'Spanish support',
+              ),
+              headline: city.spanishSupportScore >= 75
+                  ? _cityDetailLocalizedText(
+                    context,
+                    pt: 'Bom',
+                    es: 'Bueno',
+                    en: 'Good',
+                  )
+                  : city.spanishSupportScore >= 55
+                  ? _cityDetailLocalizedText(
+                    context,
+                    pt: 'Parcial',
+                    es: 'Parcial',
+                    en: 'Partial',
+                  )
+                  : _cityDetailLocalizedText(
+                    context,
+                    pt: 'Limitado',
+                    es: 'Limitado',
+                    en: 'Limited',
+                  ),
+              score: city.spanishSupportScore,
+              tint: city.spanishSupportScore >= 75
+                  ? AppColors.success
+                  : city.spanishSupportScore >= 55
+                  ? AppColors.warning
+                  : AppColors.danger,
+            ),
+            const SizedBox(height: 10),
+          ],
+          // IBGE code
+          _AnalysisInfoRow(
+            icon: Icons.tag_rounded,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Código IBGE',
+              es: 'Código IBGE',
+              en: 'IBGE Code',
+            ),
+            value: city.ibgeCode.toString(),
+            tint: AppColors.textSoftFor(context),
+          ),
+          if (city.regionName != null) ...[
+            const SizedBox(height: 8),
+            _AnalysisInfoRow(
+              icon: Icons.map_outlined,
+              label: _cityDetailLocalizedText(
+                context,
+                pt: 'Região',
+                es: 'Región',
+                en: 'Region',
+              ),
+              value: city.regionName!,
+              tint: AppColors.textSoftFor(context),
+            ),
+          ],
+          // Recommendation reasons
+          if (city.recommendationReasons.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Text(
+              _cityDetailLocalizedText(
+                context,
+                pt: 'Por que ${city.name} se destaca',
+                es: 'Por qué destaca ${city.name}',
+                en: 'Why ${city.name} stands out',
+              ),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ...city.recommendationReasons.take(4).map(
+              (reason) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline_rounded,
+                      size: 15,
+                      color: AppColors.success,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        reason,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSoftFor(context),
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Shared block wrapper ──────────────────────────────────────────────────────
+
+class _AnalysisBlock extends StatelessWidget {
+  const _AnalysisBlock({
+    required this.icon,
+    required this.title,
+    required this.child,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final Widget child;
+  final String? subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.04)
+            : Colors.black.withValues(alpha: 0.02),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderFor(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 15, color: AppColors.primary),
+              ),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              if (subtitle != null)
+                Text(
+                  subtitle!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+// ── Score bar ─────────────────────────────────────────────────────────────────
+
+class _AnalysisScoreBar extends StatelessWidget {
+  const _AnalysisScoreBar({
+    required this.icon,
+    required this.label,
+    required this.headline,
+    required this.score,
+    required this.tint,
+  });
+
+  final IconData icon;
+  final String label;
+  final String headline;
+  final int score;
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    final fraction = (score / 100).clamp(0.0, 1.0);
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: tint),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    headline,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: tint,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 5),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: fraction,
+                  backgroundColor: tint.withValues(alpha: 0.12),
+                  valueColor: AlwaysStoppedAnimation<Color>(tint),
+                  minHeight: 5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Budget amount row ─────────────────────────────────────────────────────────
+
+class _AnalysisBudgetRow extends StatelessWidget {
+  const _AnalysisBudgetRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.tint,
+    this.emphasis = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color tint;
+  final bool emphasis;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: tint.withValues(alpha: 0.75)),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          value,
+          style: emphasis
+              ? Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: tint,
+                )
+              : Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Info row (label + value + optional detail) ────────────────────────────────
+
+class _AnalysisInfoRow extends StatelessWidget {
+  const _AnalysisInfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.tint,
+    this.detail,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color tint;
+  final String? detail;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: tint),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              value,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (detail != null)
+              Text(
+                detail!,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ── BRL currency formatter ────────────────────────────────────────────────────
+
+String _formatBrl(int amount) {
+  return NumberFormat.currency(
+    locale: 'pt_BR',
+    symbol: 'R\$ ',
+    decimalDigits: 0,
+  ).format(amount);
 }

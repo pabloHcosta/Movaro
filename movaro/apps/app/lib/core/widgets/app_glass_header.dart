@@ -25,13 +25,19 @@ class AppGlassHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
-    final sideWidth = _headerSideWidthFor(context);
     final helpAction = onHelp == null
         ? null
         : _HeaderIconButton(
             onPressed: onHelp,
             icon: Icons.help_outline_rounded,
           );
+    final hasTrailingActions =
+        (helpAction != null ? 1 : 0) + (trailing != null ? 1 : 0);
+    final leadingWidth = _headerSideWidthFor(context, actionCount: onBack == null ? 0 : 1);
+    final trailingWidth = _headerSideWidthFor(
+      context,
+      actionCount: hasTrailingActions == 0 ? 1 : hasTrailingActions,
+    );
 
     return SizedBox(
       height: subtitle != null ? _heightWithSubtitle : _height,
@@ -46,7 +52,7 @@ class AppGlassHeader extends StatelessWidget {
         child: Row(
           children: [
             SizedBox(
-              width: sideWidth,
+              width: leadingWidth,
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: _HeaderActionSlot(
@@ -96,7 +102,7 @@ class AppGlassHeader extends StatelessWidget {
                     ),
             ),
             SizedBox(
-              width: sideWidth,
+              width: trailingWidth,
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Row(
@@ -118,11 +124,11 @@ class AppGlassHeader extends StatelessWidget {
   }
 }
 
-double _headerSideWidthFor(BuildContext context) {
+double _headerSideWidthFor(BuildContext context, {required int actionCount}) {
   final width = MediaQuery.sizeOf(context).width;
-  if (width < 380) return 72;
-  if (width < 430) return 84;
-  return 104;
+  final slotWidth = width < 380 ? 40.0 : 44.0;
+  final horizontalPadding = width < 380 ? 0.0 : 4.0;
+  return (actionCount * slotWidth) + horizontalPadding;
 }
 
 class _HeaderActionSlot extends StatelessWidget {
@@ -132,10 +138,12 @@ class _HeaderActionSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final minSide = width < 380 ? 40.0 : 44.0;
     return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+      constraints: BoxConstraints(minWidth: minSide, minHeight: minSide),
       child: child == null
-          ? const SizedBox(width: 44, height: 44)
+          ? SizedBox(width: minSide, height: minSide)
           : Center(child: child),
     );
   }
@@ -152,11 +160,13 @@ class _HeaderIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final side = width < 380 ? 40.0 : 44.0;
     return IconButton(
       onPressed: onPressed,
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(width: 44, height: 44),
-      splashRadius: 22,
+      constraints: BoxConstraints.tightFor(width: side, height: side),
+      splashRadius: side / 2,
       iconSize: 20,
       icon: Icon(icon),
     );

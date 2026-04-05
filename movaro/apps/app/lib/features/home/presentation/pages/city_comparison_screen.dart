@@ -999,44 +999,57 @@ class _ComparisonHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final labelWidth = compact ? 72.0 : 80.0;
+    final gap = compact ? 8.0 : 10.0;
+
     return FrostedPanel(
-      padding: const EdgeInsets.all(14),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              width: compact ? 74 : 80,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 4,
-                  vertical: 14,
+      padding: EdgeInsets.all(compact ? 12 : 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Section label ─────────────────────────────────────────────
+          Row(
+            children: [
+              Text(
+                context.l10n.cityComparisonHeaderLabel.toUpperCase(),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontSize: 9,
+                  letterSpacing: 1.1,
+                  color: AppColors.textSoftFor(context),
+                  fontWeight: FontWeight.w800,
                 ),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  context.l10n.cityComparisonHeaderLabel.toUpperCase(),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 8,
-                    letterSpacing: 0.9,
-                    color: AppColors.textSoftFor(context),
-                    fontWeight: FontWeight.w800,
+              ),
+              Expanded(
+                child: Container(
+                  height: 1,
+                  margin: const EdgeInsets.only(left: 10),
+                  color: scheme.outlineVariant.withValues(alpha: 0.30),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // ── City columns ──────────────────────────────────────────────
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Spacer aligning with metric label column below
+              SizedBox(width: labelWidth),
+              SizedBox(width: gap),
+              for (final city in cities) ...[
+                Expanded(
+                  child: _CityHeaderColumn(
+                    city: city,
+                    isWinner: city.city.id == winner.city.id,
+                    compact: compact,
                   ),
                 ),
-              ),
-            ),
-            SizedBox(width: compact ? 8 : 10),
-            for (final city in cities) ...[
-              Expanded(
-                child: _CityHeaderColumn(
-                  city: city,
-                  isWinner: city.city.id == winner.city.id,
-                  compact: compact,
-                ),
-              ),
-              if (city != cities.last) SizedBox(width: compact ? 8 : 10),
+                if (city != cities.last) SizedBox(width: gap),
+              ],
             ],
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1055,117 +1068,189 @@ class _CityHeaderColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final nameStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
-      fontSize: _nameFontSize(city.city.name),
-      fontWeight: FontWeight.w800,
-      color: Colors.white,
-      height: 1.15,
-    );
+    final isDark = AppColors.isDark(context);
+    final scheme = Theme.of(context).colorScheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox(
-          height: 24,
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: isWinner
-                ? Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      context.l10n.cityComparisonTopBadge,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ),
+    // Compute a composite score 0–100 for the bar
+    final composite = ((city.city.rentScore +
+                city.city.movaroScores.languageAdaptation +
+                city.city.safetyScore +
+                city.city.costOfLivingScore) /
+            4)
+        .clamp(0, 100)
+        .toDouble();
+
+    final initials = city.city.name
+        .split(' ')
+        .take(2)
+        .map((w) => w.isNotEmpty ? w[0] : '')
+        .join()
+        .toUpperCase();
+
+    final cardBg = isWinner
+        ? LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primary,
+              const Color(0xFF0055EE),
+            ],
+          )
+        : null;
+
+    final cardColor = isWinner
+        ? null
+        : (isDark
+            ? scheme.surfaceContainerHighest.withValues(alpha: 0.72)
+            : scheme.surfaceContainerLow);
+
+    final onCard = isWinner ? Colors.white : scheme.onSurface;
+    final onCardMuted = isWinner
+        ? Colors.white.withValues(alpha: 0.65)
+        : AppColors.textSoftFor(context);
+
+    return Container(
+      padding: EdgeInsets.all(compact ? 10 : 12),
+      decoration: BoxDecoration(
+        gradient: cardBg,
+        color: cardColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isWinner
+              ? AppColors.primary.withValues(alpha: 0.0)
+              : scheme.outlineVariant.withValues(alpha: 0.40),
         ),
-        const SizedBox(height: 6),
-        Expanded(
-          child: Container(
-            constraints: BoxConstraints(minHeight: compact ? 124 : 132),
-            padding: EdgeInsets.fromLTRB(
-              compact ? 8 : 10,
-              compact ? 12 : 14,
-              compact ? 8 : 10,
-              compact ? 10 : 12,
-            ),
+        boxShadow: isWinner
+            ? [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.28),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ]
+            : null,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ── Initials avatar ────────────────────────────────────────
+          Container(
+            width: compact ? 32 : 36,
+            height: compact ? 32 : 36,
             decoration: BoxDecoration(
               color: isWinner
-                  ? AppColors.primary.withValues(alpha: 0.08)
-                  : AppColors.surfaceMutedFor(context),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: isWinner
-                    ? AppColors.primary.withValues(alpha: 0.32)
-                    : AppColors.borderFor(context),
-              ),
-              boxShadow: isWinner
-                  ? [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.12),
-                        blurRadius: 22,
-                        offset: const Offset(0, 10),
-                      ),
-                    ]
-                  : null,
+                  ? Colors.white.withValues(alpha: 0.18)
+                  : AppColors.primary.withValues(alpha: 0.10),
+              shape: BoxShape.circle,
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  city.city.name,
-                  maxLines: compact ? 3 : 2,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.visible,
-                  style: nameStyle,
+            child: Center(
+              child: Text(
+                initials,
+                style: TextStyle(
+                  fontSize: compact ? 11 : 12,
+                  fontWeight: FontWeight.w800,
+                  color: isWinner ? Colors.white : AppColors.primary,
+                  letterSpacing: 0.5,
+                  height: 1,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  '${city.city.stateCode} · ${city.cityCode}',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: compact ? 7.5 : 8,
-                    color: AppColors.textSoftFor(context),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ],
+          SizedBox(height: compact ? 8 : 10),
+
+          // ── City name ──────────────────────────────────────────────
+          Text(
+            city.city.name,
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: _nameFontSize(city.city.name),
+              fontWeight: FontWeight.w800,
+              color: onCard,
+              height: 1.15,
+            ),
+          ),
+          SizedBox(height: compact ? 4 : 5),
+
+          // ── State · code ───────────────────────────────────────────
+          Text(
+            '${city.city.stateCode} · ${city.cityCode}',
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: compact ? 8 : 8.5,
+              color: onCardMuted,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.3,
+            ),
+          ),
+          SizedBox(height: compact ? 10 : 12),
+
+          // ── Score bar ──────────────────────────────────────────────
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: composite / 100,
+              minHeight: 4,
+              backgroundColor: isWinner
+                  ? Colors.white.withValues(alpha: 0.20)
+                  : scheme.outlineVariant.withValues(alpha: 0.30),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isWinner
+                    ? Colors.white.withValues(alpha: 0.85)
+                    : AppColors.primary.withValues(alpha: 0.65),
+              ),
+            ),
+          ),
+          SizedBox(height: compact ? 4 : 5),
+
+          // ── Score label ────────────────────────────────────────────
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (isWinner)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    context.l10n.cityComparisonTopBadge,
+                    style: TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                )
+              else
+                const SizedBox.shrink(),
+              Text(
+                '${composite.round()}',
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  color: onCardMuted,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   double _nameFontSize(String name) {
-    if (!compact) {
-      if (name.length >= 20) {
-        return 10;
-      }
-      if (name.length >= 15) {
-        return 10.5;
-      }
-      return 11.5;
-    }
-
-    if (name.length >= 20) {
-      return 8.6;
-    }
-    if (name.length >= 15) {
-      return 9.0;
-    }
-    return 9.6;
+    if (name.length >= 18) return compact ? 8.5 : 9.5;
+    if (name.length >= 12) return compact ? 9.0 : 10.0;
+    return compact ? 10.0 : 11.0;
   }
 }
 
@@ -1208,21 +1293,46 @@ class _MetricSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return FrostedPanel(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(compact ? 12 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          // ── Section header ───────────────────────────────────────────
+          Row(
+            children: [
+              Text(
+                title.toUpperCase(),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.0,
+                  color: AppColors.textSoftFor(context),
+                  fontSize: 9,
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  height: 1,
+                  margin: const EdgeInsets.only(left: 10),
+                  color: scheme.outlineVariant.withValues(alpha: 0.30),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 14),
-          for (final metric in metrics) ...[
-            _MetricRow(metric: metric, cities: cities, compact: compact),
-            if (metric != metrics.last) const SizedBox(height: 10),
+          const SizedBox(height: 12),
+          for (var i = 0; i < metrics.length; i++) ...[
+            _MetricRow(
+              metric: metrics[i],
+              cities: cities,
+              compact: compact,
+              isEven: i.isEven,
+            ),
+            if (i < metrics.length - 1)
+              Divider(
+                height: compact ? 10 : 12,
+                color: scheme.outlineVariant.withValues(alpha: 0.20),
+              ),
           ],
         ],
       ),
@@ -1230,40 +1340,83 @@ class _MetricSection extends StatelessWidget {
   }
 }
 
+// Maps metric keys to icons for scannability
+IconData _metricIcon(String key) => switch (key) {
+  'salary_coverage' => Icons.account_balance_wallet_outlined,
+  'safety' => Icons.shield_outlined,
+  'language' => Icons.translate_rounded,
+  'job_stability' => Icons.work_outline_rounded,
+  'salary' => Icons.payments_outlined,
+  'rent' => Icons.home_outlined,
+  'food' => Icons.restaurant_outlined,
+  'transport' => Icons.directions_bus_outlined,
+  'hdi' => Icons.bar_chart_rounded,
+  'job' => Icons.business_center_outlined,
+  'community' => Icons.people_outline_rounded,
+  'cost' => Icons.receipt_long_outlined,
+  'distance' => Icons.straighten_rounded,
+  'size' => Icons.location_city_outlined,
+  'flight' => Icons.flight_takeoff_rounded,
+  'arrival' => Icons.flag_outlined,
+  _ => Icons.data_usage_rounded,
+};
+
 class _MetricRow extends StatelessWidget {
   const _MetricRow({
     required this.metric,
     required this.cities,
     required this.compact,
+    this.isEven = false,
   });
 
   final _MetricDefinition metric;
   final List<_ComparisonCityData> cities;
   final bool compact;
+  final bool isEven;
 
   @override
   Widget build(BuildContext context) {
     final winners = metric.bestCityIds(cities);
     final losers = metric.worstCityIds(cities);
-    final minWidth = cities.length >= 3 ? 72.0 : 90.0;
+    final labelWidth = compact ? 72.0 : 80.0;
+    final gap = compact ? 8.0 : 10.0;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // ── Metric label ─────────────────────────────────────────────
         SizedBox(
-          width: 80,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Text(
-              metric.label(context),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSoftFor(context),
+          width: labelWidth,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 1),
+                child: Icon(
+                  _metricIcon(metric.key),
+                  size: 13,
+                  color: AppColors.textSoftFor(context),
+                ),
               ),
-            ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  metric.label(context),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: compact ? 10 : 11,
+                    color: AppColors.textSoftFor(context),
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: gap),
+        // ── Value cells ───────────────────────────────────────────────
         for (final city in cities) ...[
           Expanded(
             child: Builder(
@@ -1277,40 +1430,57 @@ class _MetricRow extends StatelessWidget {
                     metric.semanticColors(context, city) ??
                     _MetricCellColors.resolve(context, state);
                 final value = metric.displayValue(context, city);
+                final isBest = state == _MetricCellState.best;
+                final isWorst = state == _MetricCellState.worst;
 
                 return Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: compact ? 6 : 8,
-                    vertical: compact ? 10 : 12,
+                    horizontal: compact ? 6 : 7,
+                    vertical: compact ? 8 : 9,
                   ),
                   decoration: BoxDecoration(
                     color: colors.background,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: colors.border),
-                  ),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(minWidth: minWidth),
-                      child: Text(
-                        value,
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              fontSize: compact ? 10 : 11,
-                              fontWeight: FontWeight.w800,
-                              color: colors.text,
-                            ),
-                      ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: colors.border,
+                      width: isBest ? 1.2 : 1.0,
                     ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isBest || isWorst) ...[
+                        Icon(
+                          isBest
+                              ? Icons.arrow_upward_rounded
+                              : Icons.arrow_downward_rounded,
+                          size: 9,
+                          color: colors.text,
+                        ),
+                        const SizedBox(width: 2),
+                      ],
+                      Flexible(
+                        child: Text(
+                          value,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: compact ? 10 : 10.5,
+                            fontWeight: isBest ? FontWeight.w800 : FontWeight.w700,
+                            color: colors.text,
+                            height: 1.1,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },
             ),
           ),
-          if (city != cities.last) const SizedBox(width: 10),
+          if (city != cities.last) SizedBox(width: gap),
         ],
       ],
     );

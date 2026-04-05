@@ -34,6 +34,7 @@ class VersionedJsonFileStore {
     }
 
     final tempFile = File('${file.path}.tmp');
+    await tempFile.parent.create(recursive: true);
     final payload = jsonEncode(<String, dynamic>{
       'schemaVersion': schemaVersion,
       'updatedAt': DateTime.now().toIso8601String(),
@@ -43,18 +44,34 @@ class VersionedJsonFileStore {
     await tempFile.writeAsString(payload, flush: true);
 
     if (file.existsSync()) {
-      await file.delete();
+      try {
+        await file.delete();
+      } catch (_) {}
     }
-    await tempFile.rename(file.path);
+    try {
+      await tempFile.rename(file.path);
+    } on FileSystemException {
+      await file.parent.create(recursive: true);
+      await tempFile.copy(file.path);
+      if (tempFile.existsSync()) {
+        try {
+          await tempFile.delete();
+        } catch (_) {}
+      }
+    }
   }
 
   static Future<void> delete(File file) async {
     if (file.existsSync()) {
-      await file.delete();
+      try {
+        await file.delete();
+      } catch (_) {}
     }
     final backup = _backupFile(file);
     if (backup.existsSync()) {
-      await backup.delete();
+      try {
+        await backup.delete();
+      } catch (_) {}
     }
   }
 

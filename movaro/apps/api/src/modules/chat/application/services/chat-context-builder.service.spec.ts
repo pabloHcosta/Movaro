@@ -53,4 +53,20 @@ describe('ChatContextBuilderService', () => {
     expect(context.coverageLevel).toBe('full');
     expect(context.supportedCorridor).toBe('Argentina → Brasil');
   });
+
+  it('marks Uruguay -> Brasil as partial coverage', async () => {
+    const service = new ChatContextBuilderService({
+      resolveCityId: jest.fn().mockReturnValue(null),
+      getCityById: jest.fn(),
+    } as unknown as CitiesCatalogService);
+
+    const context = await service.buildContext({
+      originCountry: 'UY',
+      destinationCountry: 'BR',
+      locale: 'pt',
+    });
+
+    expect(context.coverageLevel).toBe('partial');
+    expect(context.supportedCorridor).toBe('Uruguai → Brasil');
+  });
 });

@@ -4,8 +4,8 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_text_styles.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/document_checklist_adapter.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -50,7 +50,7 @@ class _MigrationDocumentReadinessSectionState
         .where((item) => widget.completedItemIds.contains(item.id))
         .length;
 
-    if (_isArgentinaToBrazil) {
+    if (_usesStructuredCorridorGuide) {
       return FrostedPanel(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +78,7 @@ class _MigrationDocumentReadinessSectionState
                   : visibleCompletedCount / items.length,
             ),
             const SizedBox(height: 18),
-            _TopBanner(localeName: l10n.localeName),
+            _TopBanner(localeName: l10n.localeName, corridorKey: _corridorKey),
             const SizedBox(height: 14),
             _PhaseGroup(
               title: _beforeTravelTitle(l10n),
@@ -117,11 +117,16 @@ class _MigrationDocumentReadinessSectionState
     );
   }
 
-  bool get _isArgentinaToBrazil =>
-      ArgentinaBrazilGuideDataSource.isArgentinaToBrazil(
+  bool get _usesStructuredCorridorGuide =>
+      MigrationGuideRegistry.supportsCorridor(
         widget.plan.originCountry,
         widget.plan.destinationCountry,
       );
+
+  String? get _corridorKey => MigrationGuideRegistry.corridorKey(
+    widget.plan.originCountry,
+    widget.plan.destinationCountry,
+  );
 
   void _setActiveItem(String id) {
     setState(() {
@@ -138,6 +143,16 @@ class _MigrationDocumentReadinessSectionState
   }
 
   String _sectionSummary(dynamic l10n) {
+    if (_corridorKey == 'uruguai->brasil') {
+      return switch (l10n.localeName.split('_').first) {
+        'pt' =>
+          'Para sair do Uruguai rumo ao Brasil, o foco inicial e alinhar documento de entrada, base Mercosul e CPF sem tratar a mudanca como turismo genérico.',
+        'es' =>
+          'Para salir de Uruguay hacia Brasil, el foco inicial es alinear documento de entrada, base Mercosur y CPF sin tratar la mudanza como turismo genérico.',
+        _ =>
+          'For someone moving from Uruguay to Brazil, the initial focus is aligning the entry document, the Mercosur basis, and CPF without treating the move as generic tourism.',
+      };
+    }
     return switch (l10n.localeName.split('_').first) {
       'pt' =>
         'Argentinos nao precisam de passaporte nem visto para entrar no Brasil. Veja o que voce realmente precisa.',
@@ -157,6 +172,16 @@ class _MigrationDocumentReadinessSectionState
   }
 
   String _beforeTravelContext(dynamic l10n) {
+    if (_corridorKey == 'uruguai->brasil') {
+      return switch (l10n.localeName.split('_').first) {
+        'pt' =>
+          '✓ Antes de viajar, valide a lógica de entrada e a rota de residência. Para mudança, isso importa mais do que uma leitura turística solta.',
+        'es' =>
+          '✓ Antes de viajar, validá la lógica de entrada y la ruta de residencia. Para mudanza, eso importa más que una lectura turística suelta.',
+        _ =>
+          '✓ Before departure, validate the entry logic and the residence path. For relocation, that matters more than a loose tourism reading.',
+      };
+    }
     return switch (l10n.localeName.split('_').first) {
       'pt' =>
         '✓ Argentinos entram no Brasil so com o DNI. Sem passaporte e sem visto.',
@@ -188,9 +213,10 @@ class _MigrationDocumentReadinessSectionState
 }
 
 class _TopBanner extends StatelessWidget {
-  const _TopBanner({required this.localeName});
+  const _TopBanner({required this.localeName, this.corridorKey});
 
   final String localeName;
+  final String? corridorKey;
 
   @override
   Widget build(BuildContext context) {
@@ -234,18 +260,33 @@ class _TopBanner extends StatelessWidget {
   }
 
   String get _title => switch (localeName.split('_').first) {
-    'pt' => 'Argentinos entram no Brasil com o DNI',
-    'es' => 'Los argentinos entran a Brasil con el DNI',
-    _ => 'Argentine citizens can enter Brazil with DNI',
+    'pt' =>
+      corridorKey == 'uruguai->brasil'
+          ? 'Mudança exige leitura diferente de turismo'
+          : 'Argentinos entram no Brasil com o DNI',
+    'es' =>
+      corridorKey == 'uruguai->brasil'
+          ? 'La mudanza exige una lectura distinta al turismo'
+          : 'Los argentinos entran a Brasil con el DNI',
+    _ =>
+      corridorKey == 'uruguai->brasil'
+          ? 'Relocation requires a different read from tourism'
+          : 'Argentine citizens can enter Brazil with DNI',
   };
 
   String get _body => switch (localeName.split('_').first) {
     'pt' =>
-      'Nada de passaporte, visto ou apostila para entrar. A regularizacao e feita depois da chegada.',
+      corridorKey == 'uruguai->brasil'
+          ? 'Antes de embarcar, confirme documento de entrada, base Mercosul e ordem documental. Isso reduz ruído logo na chegada.'
+          : 'Nada de passaporte, visto ou apostila para entrar. A regularizacao e feita depois da chegada.',
     'es' =>
-      'Nada de pasaporte, visa o apostilla para entrar. La regularizacion se hace despues de llegar.',
+      corridorKey == 'uruguai->brasil'
+          ? 'Antes de viajar, confirmá documento de entrada, base Mercosur y orden documental. Eso reduce ruido apenas llegás.'
+          : 'Nada de pasaporte, visa o apostilla para entrar. La regularizacion se hace despues de llegar.',
     _ =>
-      'No passport, visa, or apostille is required to enter. Regularization happens after arrival.',
+      corridorKey == 'uruguai->brasil'
+          ? 'Before departure, confirm the entry document, the Mercosur basis, and the document order. That reduces friction right after arrival.'
+          : 'No passport, visa, or apostille is required to enter. Regularization happens after arrival.',
   };
 }
 

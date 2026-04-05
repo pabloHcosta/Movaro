@@ -9,6 +9,7 @@ import { CorridorGuidanceResolverService } from './resolvers/corridor-guidance-r
 import { CostResolverService } from './resolvers/cost-resolver.service';
 import { DocResolverService } from './resolvers/doc-resolver.service';
 import { FaqResolverService } from './resolvers/faq-resolver.service';
+import { GuideAnswersService } from './guide-answers.service';
 import { AskChatDto } from '../../presentation/dto/ask-chat.dto';
 
 export type AnswerSource = 'app_data' | 'ai';
@@ -44,6 +45,7 @@ export class OrchestratorService {
     private readonly corridorGuidanceResolver: CorridorGuidanceResolverService,
     private readonly costResolver: CostResolverService,
     private readonly docResolver: DocResolverService,
+    private readonly guideAnswersService: GuideAnswersService,
     private readonly faqResolver: FaqResolverService,
     private readonly geminiFallback: GeminiFallbackService,
     private readonly chatContextBuilder: ChatContextBuilderService,
@@ -152,12 +154,31 @@ export class OrchestratorService {
     // ── Deterministic corridor guidance for quick chat prompts ────────────────
     if (!answer || resolverConfidence < CONFIDENCE_THRESHOLD) {
       const corridorGuidance = await this.corridorGuidanceResolver.resolve(dto);
-      if (corridorGuidance.found &&
-          corridorGuidance.confidence >= CONFIDENCE_THRESHOLD) {
+      if (
+        corridorGuidance.found &&
+        corridorGuidance.confidence >= CONFIDENCE_THRESHOLD
+      ) {
         answer = corridorGuidance.answer;
         resolverConfidence = corridorGuidance.confidence;
         this.logger.debug(
           `[Orchestrator] corridor guidance answered (confidence=${corridorGuidance.confidence.toFixed(2)})`,
+        );
+      }
+    }
+
+    // ── Guide answers: same curated knowledge exposed in the guide UI ─────────
+    if (!answer || resolverConfidence < CONFIDENCE_THRESHOLD) {
+      const guideAnswer = await this.guideAnswersService.resolve({
+        message,
+        destinationCountry,
+        originCountry,
+        locale,
+      });
+      if (guideAnswer.found && guideAnswer.confidence >= CONFIDENCE_THRESHOLD) {
+        answer = guideAnswer.answer;
+        resolverConfidence = guideAnswer.confidence;
+        this.logger.debug(
+          `[Orchestrator] guide answers resolved (confidence=${guideAnswer.confidence.toFixed(2)})`,
         );
       }
     }

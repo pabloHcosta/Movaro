@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
 import { AssistantKnowledgeService } from '../assistant-knowledge.service';
-import {
-  ARGENTINA_BRAZIL_GUIDE_ITEMS,
-  GuideItem,
-} from '../../../data/argentina-brazil-guide.datasource';
+import { normalizeChatCorridor } from '../chat-country-normalizer';
+import type { GuideItem } from '../../../data/argentina-brazil-guide.datasource';
+import { findRegisteredGuideCatalogByCorridor } from '../../../data/guide-catalog.registry';
 
 export interface DocResolverResult {
   confidence: number;
@@ -99,10 +98,6 @@ const KEYWORD_TO_IDS: Array<{ keywords: string[]; ids: string[] }> = [
   },
 ];
 
-const ALL_ITEMS_BY_ID = new Map<string, GuideItem>(
-  ARGENTINA_BRAZIL_GUIDE_ITEMS.map((item) => [item.id, item]),
-);
-
 @Injectable()
 export class DocResolverService {
   constructor(
@@ -117,9 +112,7 @@ export class DocResolverService {
   ): Promise<DocResolverResult> {
     const corridorKey =
       originCountry && destinationCountry
-        ? `${originCountry.toLowerCase().trim()}->${destinationCountry
-            .toLowerCase()
-            .trim()}`
+        ? normalizeChatCorridor(originCountry, destinationCountry)
         : '';
     const normalizedLocale = locale === 'es' || locale === 'en' ? locale : 'pt';
 
@@ -148,6 +141,16 @@ export class DocResolverService {
       }
     }
 
+    const catalog = corridorKey
+      ? findRegisteredGuideCatalogByCorridor(corridorKey)
+      : null;
+    if (!catalog) {
+      return { confidence: 0, items: [], summary: '' };
+    }
+
+    const allItemsById = new Map<string, GuideItem>(
+      catalog.items.map((item) => [item.id, item]),
+    );
     const lower = message.toLowerCase();
     const matchedIds = new Set<string>();
 
@@ -158,7 +161,7 @@ export class DocResolverService {
     }
 
     const items = [...matchedIds]
-      .map((id) => ALL_ITEMS_BY_ID.get(id))
+      .map((id) => allItemsById.get(id))
       .filter((item): item is GuideItem => item !== undefined)
       .slice(0, 4); // max 4 items per response
 

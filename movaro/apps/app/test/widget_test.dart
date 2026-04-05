@@ -36,4 +36,36 @@ void main() {
     expect(journeyContextController.selectedOrigin?.id, 'argentina');
     expect(journeyContextController.selectedDestination?.id, 'brasil');
   });
+
+  test('supports Uruguay -> Brasil in the real journey catalog', () async {
+    final catalogRepository = CatalogRepositoryImpl(
+      dataSource: SeedCatalogDataSource(),
+    );
+    final journeyTempDir = await Directory.systemTemp.createTemp(
+      'movaro_test_journey_uybr',
+    );
+    final journeyContextController = JourneyContextController(
+      catalogRepository: catalogRepository,
+      store: JourneyPreferencesStore(
+        directoryProvider: () async => journeyTempDir,
+      ),
+    );
+
+    await journeyContextController.initialize();
+    await journeyContextController.completeJourney(
+      originCountryId: 'uruguai',
+      destinationCountryId: 'brasil',
+    );
+
+    expect(journeyContextController.hasSupportedJourney, isTrue);
+    expect(
+      journeyContextController.isRouteSupported(
+        originCountryId: 'uruguai',
+        destinationCountryId: 'brasil',
+      ),
+      isTrue,
+    );
+    expect(journeyContextController.selectedOrigin?.id, 'uruguai');
+    expect(journeyContextController.selectedDestination?.id, 'brasil');
+  });
 }

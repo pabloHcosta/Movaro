@@ -17,6 +17,7 @@ class CityCostOfLivingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).languageCode;
+    final scheme = Theme.of(context).colorScheme;
 
     String copy({required String pt, required String es, required String en}) =>
         switch (locale) {
@@ -29,115 +30,195 @@ class CityCostOfLivingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            copy(
-              pt: 'Quanto custa viver em ${budget.cityLabel}',
-              es: 'Cuánto cuesta vivir en ${budget.cityLabel}',
-              en: 'How much it costs to live in ${budget.cityLabel}',
-            ),
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            copy(
-              pt: 'Base real para 1 pessoa: custo mensal sem aluguel + aluguel de 1 quarto.',
-              es: 'Base real para 1 persona: costo mensual sin alquiler + alquiler de 1 ambiente.',
-              en: 'Real baseline for 1 person: monthly costs excluding rent + 1-bedroom rent.',
-            ),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 10),
+          // ── Header ────────────────────────────────────────────────────
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: _CostPill(
-                  tone: AppColors.warning,
-                  label: copy(
-                    pt: 'Viver justo',
-                    es: 'Vivir justo',
-                    en: 'Live fairly',
+                child: Text(
+                  copy(
+                    pt: 'Quanto custa viver em ${budget.cityLabel}',
+                    es: 'Cuánto cuesta vivir en ${budget.cityLabel}',
+                    en: 'Cost of living in ${budget.cityLabel}',
                   ),
-                  amountInBrl: budget.fairLivingTotal,
-                  preferredCountryId: preferredCountryId,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _CostPill(
-                  tone: AppColors.success,
-                  label: copy(
-                    pt: 'Viver bem',
-                    es: 'Vivir bien',
-                    en: 'Live well',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
                   ),
-                  amountInBrl: budget.wellLivingTotal,
-                  preferredCountryId: preferredCountryId,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          GridView.count(
-            crossAxisCount: 2,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 6,
-            childAspectRatio: 2.35,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              _CostMetaChip(
-                label: copy(
-                  pt: 'Sem aluguel',
-                  es: 'Sin alquiler',
-                  en: 'Excl. rent',
-                ),
-                amountInBrl: budget.singlePersonExcludingRent,
-                preferredCountryId: preferredCountryId,
-              ),
-              _CostMetaChip(
-                label: copy(
-                  pt: '1 quarto fora',
-                  es: '1 amb. fuera',
-                  en: '1-bed outside',
-                ),
-                amountInBrl: budget.oneBedroomOutsideCentre,
-                preferredCountryId: preferredCountryId,
-              ),
-              _CostMetaChip(
-                label: copy(
-                  pt: '1 quarto centro',
-                  es: '1 amb. centro',
-                  en: '1-bed centre',
-                ),
-                amountInBrl: budget.oneBedroomCityCentre,
-                preferredCountryId: preferredCountryId,
-              ),
-              _CostMetaChip(
-                label: copy(
-                  pt: 'Passe mensal',
-                  es: 'Pase mensual',
-                  en: 'Monthly pass',
-                ),
-                amountInBrl: budget.monthlyTransportPass,
-                preferredCountryId: preferredCountryId,
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 4),
           Text(
             copy(
-              pt: 'Fonte: ${budget.sourceLabel} · atualizado em ${budget.updatedAt}',
-              es: 'Fuente: ${budget.sourceLabel} · actualizado en ${budget.updatedAt}',
-              en: 'Source: ${budget.sourceLabel} · updated ${budget.updatedAt}',
+              pt: 'Para 1 pessoa · base mensal · inclui aluguel',
+              es: 'Para 1 persona · base mensual · incluye alquiler',
+              en: '1 person · monthly basis · includes rent',
             ),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSoftFor(context),
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+
+          const SizedBox(height: 14),
+
+          // ── Main cost tiers ───────────────────────────────────────────
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: _CostTierCard(
+                    tone: AppColors.warning,
+                    icon: Icons.trending_flat_rounded,
+                    label: copy(
+                      pt: 'Viver justo',
+                      es: 'Vivir justo',
+                      en: 'Live fairly',
+                    ),
+                    amountInBrl: budget.fairLivingTotal,
+                    preferredCountryId: preferredCountryId,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _CostTierCard(
+                    tone: AppColors.success,
+                    icon: Icons.trending_up_rounded,
+                    label: copy(
+                      pt: 'Viver bem',
+                      es: 'Vivir bien',
+                      en: 'Live well',
+                    ),
+                    amountInBrl: budget.wellLivingTotal,
+                    preferredCountryId: preferredCountryId,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // ── Breakdown ─────────────────────────────────────────────────
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHighest.withValues(alpha: 0.38),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: scheme.outlineVariant.withValues(alpha: 0.30),
+              ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _BreakdownItem(
+                        icon: Icons.receipt_long_outlined,
+                        label: copy(
+                          pt: 'Sem aluguel',
+                          es: 'Sin alquiler',
+                          en: 'Excl. rent',
+                        ),
+                        amountInBrl: budget.singlePersonExcludingRent,
+                        preferredCountryId: preferredCountryId,
+                      ),
+                    ),
+                    Container(
+                      width: 1,
+                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                      color: scheme.outlineVariant.withValues(alpha: 0.40),
+                    ),
+                    Expanded(
+                      child: _BreakdownItem(
+                        icon: Icons.home_outlined,
+                        label: copy(
+                          pt: '1 quarto fora',
+                          es: '1 amb. fuera',
+                          en: '1-bed outside',
+                        ),
+                        amountInBrl: budget.oneBedroomOutsideCentre,
+                        preferredCountryId: preferredCountryId,
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(
+                  height: 20,
+                  color: scheme.outlineVariant.withValues(alpha: 0.35),
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _BreakdownItem(
+                        icon: Icons.apartment_outlined,
+                        label: copy(
+                          pt: '1 quarto centro',
+                          es: '1 amb. centro',
+                          en: '1-bed centre',
+                        ),
+                        amountInBrl: budget.oneBedroomCityCentre,
+                        preferredCountryId: preferredCountryId,
+                      ),
+                    ),
+                    Container(
+                      width: 1,
+                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                      color: scheme.outlineVariant.withValues(alpha: 0.40),
+                    ),
+                    Expanded(
+                      child: _BreakdownItem(
+                        icon: Icons.directions_bus_outlined,
+                        label: copy(
+                          pt: 'Passe mensal',
+                          es: 'Pase mensual',
+                          en: 'Monthly pass',
+                        ),
+                        amountInBrl: budget.monthlyTransportPass,
+                        preferredCountryId: preferredCountryId,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // ── Source ────────────────────────────────────────────────────
+          Row(
+            children: [
+              Icon(
+                Icons.info_outline_rounded,
+                size: 12,
+                color: AppColors.textSoftFor(context),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  copy(
+                    pt: '${budget.sourceLabel} · atualizado em ${budget.updatedAt}',
+                    es: '${budget.sourceLabel} · actualizado en ${budget.updatedAt}',
+                    en: '${budget.sourceLabel} · updated ${budget.updatedAt}',
+                  ),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    fontWeight: FontWeight.w400,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -145,15 +226,19 @@ class CityCostOfLivingCard extends StatelessWidget {
   }
 }
 
-class _CostPill extends StatelessWidget {
-  const _CostPill({
+// ── Cost tier card (Viver justo / Viver bem) ──────────────────────────────────
+
+class _CostTierCard extends StatelessWidget {
+  const _CostTierCard({
     required this.tone,
+    required this.icon,
     required this.label,
     required this.amountInBrl,
     required this.preferredCountryId,
   });
 
   final Color tone;
+  final IconData icon;
   final String label;
   final num amountInBrl;
   final String? preferredCountryId;
@@ -161,27 +246,40 @@ class _CostPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
-        color: tone.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: tone.withValues(alpha: 0.16)),
+        color: tone.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: tone.withValues(alpha: 0.20)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: tone,
-              fontWeight: FontWeight.w700,
-            ),
+          Row(
+            children: [
+              Icon(icon, size: 13, color: tone),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: tone,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 9),
           DefaultTextStyle(
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w900),
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+              fontWeight: FontWeight.w900,
+              height: 1.15,
+            ),
             child: MultiCurrencyAmount(
               amountInBrl: amountInBrl,
               exchangeRates: null,
@@ -195,52 +293,62 @@ class _CostPill extends StatelessWidget {
   }
 }
 
-class _CostMetaChip extends StatelessWidget {
-  const _CostMetaChip({
+// ── Breakdown item ────────────────────────────────────────────────────────────
+
+class _BreakdownItem extends StatelessWidget {
+  const _BreakdownItem({
+    required this.icon,
     required this.label,
     required this.amountInBrl,
     required this.preferredCountryId,
   });
 
+  final IconData icon;
   final String label;
   final num amountInBrl;
   final String? preferredCountryId;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMutedFor(context),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.borderFor(context)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Icon(
+              icon,
+              size: 12,
               color: AppColors.textSoftFor(context),
-              fontWeight: FontWeight.w700,
             ),
-          ),
-          const SizedBox(height: 4),
-          DefaultTextStyle(
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w700),
-            child: MultiCurrencyAmount(
-              amountInBrl: amountInBrl,
-              exchangeRates: null,
-              preferredCountryId: preferredCountryId,
-              compact: true,
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
+          ],
+        ),
+        const SizedBox(height: 5),
+        DefaultTextStyle(
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+            fontWeight: FontWeight.w700,
+            height: 1.2,
           ),
-        ],
-      ),
+          child: MultiCurrencyAmount(
+            amountInBrl: amountInBrl,
+            exchangeRates: null,
+            preferredCountryId: preferredCountryId,
+            compact: true,
+          ),
+        ),
+      ],
     );
   }
 }

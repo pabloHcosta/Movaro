@@ -1,8 +1,5 @@
-import {
-  ARGENTINA_BRAZIL_GUIDE_ITEMS,
-  type GuideItem,
-  PHASE_ORDER,
-} from '../../../data/argentina-brazil-guide.datasource';
+import { findRegisteredGuideCatalogByCorridor } from '../../../data/guide-catalog.registry';
+import type { GuideItem } from '../../../data/argentina-brazil-guide.datasource';
 
 export type GuidanceTopic =
   | 'documents'
@@ -23,6 +20,7 @@ export interface CorridorGuidanceContext {
 
 export interface CorridorGuidanceProfile {
   key: string;
+  coverageLevel?: 'full' | 'partial';
   guideItems: GuideItem[];
   phaseOrder: readonly string[];
   completedItemAliases?: Record<string, string>;
@@ -47,17 +45,19 @@ export interface CorridorGuidanceProfile {
   ): string;
 }
 
+const argentinaBrazilGuideCatalog =
+  findRegisteredGuideCatalogByCorridor('argentina->brasil');
+
+if (!argentinaBrazilGuideCatalog) {
+  throw new Error('Missing guide catalog for argentina->brasil');
+}
+
 export const argentinaBrazilGuidanceProfile: CorridorGuidanceProfile = {
   key: 'argentina->brasil',
-  guideItems: ARGENTINA_BRAZIL_GUIDE_ITEMS,
-  phaseOrder: PHASE_ORDER,
-  completedItemAliases: {
-    item_2_1_cpf: 'doc-01',
-    item_2_2_residencia: 'doc-02',
-    item_0_2_antecedentes: 'prep-04',
-    item_1_2_housing_temporary: 'hou-01',
-    item_3_1_conta_bancaria: 'wor-01',
-  },
+  coverageLevel: 'full',
+  guideItems: argentinaBrazilGuideCatalog.items,
+  phaseOrder: argentinaBrazilGuideCatalog.phaseOrder,
+  completedItemAliases: argentinaBrazilGuideCatalog.completedItemAliases,
   quickPromptLabel(locale) {
     if (locale === 'es') return '¿Cómo obtener mi CPF?';
     if (locale === 'en') return 'How do I get my CPF?';
@@ -307,6 +307,42 @@ ${progress}${cityLine ? `\n\n${cityLine}` : ''}`;
   },
 };
 
+const uruguayBrazilGuideCatalog =
+  findRegisteredGuideCatalogByCorridor('uruguai->brasil');
+
+if (!uruguayBrazilGuideCatalog) {
+  throw new Error('Missing guide catalog for uruguai->brasil');
+}
+
+export const uruguayBrazilGuidanceProfile: CorridorGuidanceProfile = {
+  key: 'uruguai->brasil',
+  coverageLevel: 'partial',
+  guideItems: uruguayBrazilGuideCatalog.items,
+  phaseOrder: uruguayBrazilGuideCatalog.phaseOrder,
+  quickPromptLabel(locale) {
+    if (locale === 'es') return '¿Primer documento local?';
+    if (locale === 'en') return 'First local document?';
+    return 'Primeiro documento local?';
+  },
+  quickPromptMessage(locale) {
+    if (locale === 'es')
+      return '¿Cuál es el primer documento local que debería resolver al llegar a Brasil?';
+    if (locale === 'en')
+      return 'What is the first local document I should solve after arriving in Brazil?';
+    return 'Qual é o primeiro documento local que eu deveria resolver ao chegar no Brasil?';
+  },
+  buildAnswer(topic, locale) {
+    if (locale === 'es') {
+      return `Este corredor ya fue reconocido por Movaro, pero todavía tiene cobertura parcial. Hoy la recomendación segura es usar el asistente para orientación inicial y confirmar reglas operativas antes de tratarlo como guía cerrada. Tema consultado: ${topic}.`;
+    }
+    if (locale === 'en') {
+      return `This corridor is already recognized by Movaro, but it still has partial coverage. For now, the safe recommendation is to use the assistant for initial orientation and confirm operational rules before treating it as a closed guide. Topic requested: ${topic}.`;
+    }
+    return `Esse corredor já foi reconhecido pelo Movaro, mas ainda está com cobertura parcial. Por enquanto, a recomendação segura é usar o assistente para orientação inicial e confirmar regras operacionais antes de tratar isso como um guia fechado. Tema consultado: ${topic}.`;
+  },
+};
+
 export const corridorGuidanceProfiles: CorridorGuidanceProfile[] = [
   argentinaBrazilGuidanceProfile,
+  uruguayBrazilGuidanceProfile,
 ];

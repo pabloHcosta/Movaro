@@ -4,6 +4,14 @@ const COUNTRY_ALIASES: Record<string, string> = {
   brasil: 'brasil',
   brazil: 'brasil',
   br: 'brasil',
+  chile: 'chile',
+  cl: 'chile',
+  uruguay: 'uruguai',
+  uruguai: 'uruguai',
+  uy: 'uruguai',
+  paraguay: 'paraguai',
+  paraguai: 'paraguai',
+  py: 'paraguai',
 };
 
 function normalizeToken(value: string): string {

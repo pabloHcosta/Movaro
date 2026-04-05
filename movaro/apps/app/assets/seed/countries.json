@@ -41,10 +41,10 @@
     "isoCode": "UY",
     "locationAliases": ["uruguay", "uruguai", "oriental republic of uruguay"],
     "coverage": {
-      "originStatus": "partial",
+      "originStatus": "full",
       "destinationStatus": "partial",
       "publicContentStatus": "partial",
-      "supportedDestinationIds": []
+      "supportedDestinationIds": ["brasil"]
     }
   },
   {

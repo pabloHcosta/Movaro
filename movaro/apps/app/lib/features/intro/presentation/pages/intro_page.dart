@@ -255,13 +255,11 @@ class _IntroSlideData {
     required this.description,
     required this.primaryLabel,
     required this.illustration,
-    this.secondaryLabel,
   });
 
   final String title;
   final String description;
   final String primaryLabel;
-  final String? secondaryLabel;
   final String illustration;
 }
 
@@ -369,30 +367,44 @@ class _IntroSlidePage extends StatelessWidget {
           flex: 20,
           child: LayoutBuilder(
             builder: (context, constraints) {
+              final veryTight = constraints.maxHeight < 140;
+              final compactSpacing = veryTight ? 8.0 : 14.0;
               return Center(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.center,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: 620,
-                      maxHeight: constraints.maxHeight,
-                    ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 620),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          slide.title,
-                          textAlign: TextAlign.center,
-                          style: titleStyle,
+                        Flexible(
+                          child: Text(
+                            slide.title,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: titleStyle?.copyWith(
+                              fontSize: veryTight
+                                  ? (titleStyle.fontSize ?? 36) - 4
+                                  : titleStyle.fontSize,
+                              height: veryTight ? 0.98 : titleStyle.height,
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 14),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 620),
+                        SizedBox(height: compactSpacing),
+                        Flexible(
                           child: Text(
                             slide.description,
                             textAlign: TextAlign.center,
-                            style: descriptionStyle,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: descriptionStyle?.copyWith(
+                              fontSize: veryTight
+                                  ? (descriptionStyle.fontSize ?? 17) - 2
+                                  : descriptionStyle.fontSize,
+                              height: veryTight ? 1.25 : descriptionStyle.height,
+                            ),
                           ),
                         ),
                       ],
@@ -440,19 +452,6 @@ class _IntroSlidePage extends StatelessWidget {
                         ),
                 ),
               ),
-              if (slide.secondaryLabel != null) ...[
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: isBusy ? null : onSecondaryAction,
-                  child: Text(
-                    slide.secondaryLabel!,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.78),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
             ],
           ),
         ),
@@ -604,39 +603,5 @@ const _introGuideSvg = r'''
   <text x="68" y="173" font-size="11" fill="rgba(255,255,255,0.4)" font-family="sans-serif">Conta bancária brasileira</text>
   <rect x="32" y="186" width="216" height="16" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
   <text x="68" y="198" font-size="9" fill="rgba(255,255,255,0.25)" font-family="sans-serif">+ 3 itens aguardando...</text>
-</svg>
-''';
-
-const _introLocationSvg = r'''
-<svg width="280" height="240" viewBox="0 0 280 240" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="20" y="8" width="240" height="160" rx="18" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-  <line x1="20" y1="48" x2="260" y2="48" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
-  <line x1="20" y1="88" x2="260" y2="88" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
-  <line x1="20" y1="128" x2="260" y2="128" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
-  <line x1="60" y1="8" x2="60" y2="168" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
-  <line x1="100" y1="8" x2="100" y2="168" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
-  <line x1="140" y1="8" x2="140" y2="168" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
-  <line x1="180" y1="8" x2="180" y2="168" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
-  <line x1="220" y1="8" x2="220" y2="168" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
-  <circle cx="140" cy="88" r="52" fill="rgba(25,118,210,0.08)" stroke="rgba(100,181,246,0.15)" stroke-width="1"/>
-  <circle cx="140" cy="88" r="34" fill="rgba(25,118,210,0.15)" stroke="rgba(100,181,246,0.25)" stroke-width="1"/>
-  <circle cx="140" cy="88" r="18" fill="rgba(25,118,210,0.3)" stroke="rgba(100,181,246,0.45)" stroke-width="1.5"/>
-  <circle cx="140" cy="88" r="9" fill="#1976D2" stroke="#64B5F6" stroke-width="2"/>
-  <circle cx="140" cy="88" r="4" fill="white"/>
-  <rect x="152" y="62" width="90" height="20" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-  <text x="197" y="75" font-size="9.5" fill="white" text-anchor="middle" font-family="sans-serif" font-weight="600">Buenos Aires 🇦🇷</text>
-  <line x1="152" y1="74" x2="149" y2="82" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-  <circle cx="80" cy="60" r="5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
-  <circle cx="200" cy="120" r="5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
-  <circle cx="220" cy="50" r="4" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
-  <circle cx="50" cy="130" r="4" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
-  <rect x="20" y="178" width="240" height="20" rx="10" fill="rgba(34,197,94,0.12)" stroke="rgba(34,197,94,0.25)" stroke-width="1"/>
-  <circle cx="38" cy="188" r="7" fill="#22C55E"/>
-  <text x="38" y="192" font-size="10" fill="white" text-anchor="middle" font-family="sans-serif">✓</text>
-  <text x="140" y="192" font-size="9" fill="rgba(255,255,255,0.7)" text-anchor="middle" font-family="sans-serif">País de origem detectado automaticamente</text>
-  <rect x="20" y="202" width="240" height="20" rx="10" fill="rgba(25,118,210,0.12)" stroke="rgba(25,118,210,0.25)" stroke-width="1"/>
-  <circle cx="38" cy="212" r="7" fill="#1976D2"/>
-  <text x="38" y="216" font-size="10" fill="white" text-anchor="middle" font-family="sans-serif">✓</text>
-  <text x="140" y="216" font-size="9" fill="rgba(255,255,255,0.7)" text-anchor="middle" font-family="sans-serif">Moeda e conteúdo na sua língua</text>
 </svg>
 ''';

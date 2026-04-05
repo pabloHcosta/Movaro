@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/generated/app_localizations.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 
 enum DocumentPhase { beforeTravel, uponArrival }
 
@@ -44,15 +44,21 @@ class DocumentChecklistAdapter {
     required String travelGroup,
     required MigrationDocumentReadinessChecklist fallbackChecklist,
   }) {
-    if (ArgentinaBrazilGuideDataSource.isArgentinaToBrazil(
+    final corridorKey = MigrationGuideRegistry.corridorKey(
       originCountry,
       destinationCountry,
-    )) {
+    );
+
+    if (corridorKey == 'argentina->brasil') {
       return _argentinaToBrazilItems(
         l10n: l10n,
         goal: goal,
         travelGroup: travelGroup,
       );
+    }
+
+    if (corridorKey == 'uruguai->brasil') {
+      return _uruguayToBrazilItems(l10n: l10n);
     }
 
     return _genericItems(fallbackChecklist);
@@ -181,7 +187,8 @@ class DocumentChecklistAdapter {
           es: 'En ciudades con cola, agendar temprano ayuda. Pero el punto central es no dejar el tramite para la recta final de los 90 dias.',
           en: 'In cities with long queues, booking early helps. But the key point is not leaving the filing to the final stretch of the 90 days.',
         ),
-        link: 'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia-resolucao-mercosul',
+        link:
+            'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia-resolucao-mercosul',
         isOptional: false,
       ),
     ];
@@ -248,6 +255,119 @@ class DocumentChecklistAdapter {
     }
 
     return items;
+  }
+
+  static List<DocumentItem> _uruguayToBrazilItems({
+    required AppLocalizations l10n,
+  }) {
+    return <DocumentItem>[
+      DocumentItem(
+        id: 'uy_doc_travel_basis',
+        phase: DocumentPhase.beforeTravel,
+        priority: DocumentPriority.critical,
+        icon: '🛂',
+        title: _text(
+          l10n,
+          pt: 'Validar o documento de entrada para mudança',
+          es: 'Validar el documento de entrada para la mudanza',
+          en: 'Validate the entry document for relocation',
+        ),
+        description: _text(
+          l10n,
+          pt: 'Para mudança, estudo ou trabalho, confirme o documento de viagem e a lógica de entrada antes de embarcar. Evite tratar a viagem como turismo genérico.',
+          es: 'Para mudanza, estudio o trabajo, confirmá el documento de viaje y la lógica de entrada antes de viajar. Evitá tratar el viaje como turismo genérico.',
+          en: 'For relocation, study, or work, confirm the travel document and entry logic before departure. Do not treat the trip as generic tourism.',
+        ),
+        timeEstimate: _text(
+          l10n,
+          pt: '10 min para revisar',
+          es: '10 min para revisar',
+          en: '10 min to review',
+        ),
+        link: 'https://www.gov.br/pf/pt-br/assuntos/imigracao',
+        isOptional: false,
+      ),
+      DocumentItem(
+        id: 'uy_doc_mercosur',
+        phase: DocumentPhase.beforeTravel,
+        priority: DocumentPriority.critical,
+        icon: '🏛️',
+        title: _text(
+          l10n,
+          pt: 'Entender a residência Mercosul',
+          es: 'Entender la residencia Mercosur',
+          en: 'Understand Mercosur residence',
+        ),
+        description: _text(
+          l10n,
+          pt: 'Para uruguaios que vão viver no Brasil, a residência Mercosul tende a ser a base principal de regularização.',
+          es: 'Para personas uruguayas que van a vivir en Brasil, la residencia Mercosur suele ser la base principal de regularización.',
+          en: 'For Uruguayans planning to live in Brazil, Mercosur residence tends to be the main regularization path.',
+        ),
+        timeEstimate: _text(
+          l10n,
+          pt: '20 min para mapear',
+          es: '20 min para mapear',
+          en: '20 min to map',
+        ),
+        tip: _text(
+          l10n,
+          pt: 'Trate isso como etapa central da mudança, não como pergunta de turismo.',
+          es: 'Tratala como una etapa central de la mudanza, no como una duda de turismo.',
+          en: 'Treat this as a central relocation step, not as a tourism question.',
+        ),
+        link:
+            'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia/acordo-de-residencia-para-nacionais-dos-estados-partes-do-mercosul-bolivia-e-chile',
+        isOptional: false,
+      ),
+      DocumentItem(
+        id: 'uy_doc_cpf',
+        phase: DocumentPhase.uponArrival,
+        priority: DocumentPriority.critical,
+        icon: '📋',
+        title: _text(
+          l10n,
+          pt: 'Resolver o CPF cedo',
+          es: 'Resolver el CPF temprano',
+          en: 'Sort out CPF early',
+        ),
+        description: _text(
+          l10n,
+          pt: 'CPF destrava banco, aluguel e contratos. O canal e os documentos aceitos variam conforme sua situação migratória.',
+          es: 'El CPF desbloquea banco, alquiler y contratos. El canal y los documentos aceptados varían según tu situación migratoria.',
+          en: 'CPF unlocks banking, rent, and contracts. The channel and accepted documents vary with your migration status.',
+        ),
+        timeEstimate: _text(
+          l10n,
+          pt: '20 a 30 min',
+          es: '20 a 30 min',
+          en: '20 to 30 min',
+        ),
+        link:
+            'https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cpf/assuntos-relacionados/perguntas-e-respostas',
+        isOptional: false,
+      ),
+      DocumentItem(
+        id: 'uy_doc_bank',
+        phase: DocumentPhase.uponArrival,
+        priority: DocumentPriority.important,
+        icon: '🏦',
+        title: _text(
+          l10n,
+          pt: 'Abrir conta depois da base documental',
+          es: 'Abrir cuenta después de la base documental',
+          en: 'Open a bank account after the document base',
+        ),
+        description: _text(
+          l10n,
+          pt: 'Conta bancária normalmente entra melhor depois de CPF e de uma situação migratória coerente.',
+          es: 'La cuenta bancaria normalmente encaja mejor después del CPF y de una situación migratoria coherente.',
+          en: 'A bank account usually fits better after CPF and a coherent migration status.',
+        ),
+        timeEstimate: _text(l10n, pt: '30 min', es: '30 min', en: '30 min'),
+        isOptional: false,
+      ),
+    ];
   }
 
   static List<DocumentItem> _genericItems(

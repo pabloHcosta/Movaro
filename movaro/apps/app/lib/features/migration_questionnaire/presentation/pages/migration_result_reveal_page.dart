@@ -5,6 +5,7 @@ import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/exit_flow_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/journey_stage_banner.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
@@ -115,25 +116,15 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
   }
 
   Future<void> _goHomeWithConfirmation() async {
-    final shouldLeave = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(context.l10n.bmpExitDialogTitle),
-        content: Text(context.l10n.bmpExitDialogBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(context.l10n.commonBackAction),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(context.l10n.bmpExitDialogLeave),
-          ),
-        ],
-      ),
+    final shouldLeave = await ExitFlowDialog.show(
+      context,
+      title: context.l10n.bmpExitDialogTitle,
+      body: context.l10n.bmpExitDialogBody,
+      stayLabel: context.l10n.bmpExitDialogStay,
+      leaveLabel: context.l10n.bmpExitDialogLeave,
     );
 
-    if (!mounted || shouldLeave != true) {
+    if (!mounted || !shouldLeave) {
       return;
     }
 

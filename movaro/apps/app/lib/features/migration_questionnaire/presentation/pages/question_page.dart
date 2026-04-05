@@ -17,6 +17,7 @@ import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/core/widgets/contextual_help.dart';
+import 'package:movaro_app/core/widgets/exit_flow_dialog.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
@@ -295,18 +296,15 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   Future<void> _handleExitFlow(BuildContext context) async {
-    final shouldLeave = await showDialog<bool>(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) => _ExitFlowDialog(
-        title: context.l10n.bmpExitDialogTitle,
-        body: context.l10n.bmpExitDialogBody,
-        stayLabel: context.l10n.bmpExitDialogStay,
-        leaveLabel: context.l10n.bmpExitDialogLeave,
-      ),
+    final shouldLeave = await ExitFlowDialog.show(
+      context,
+      title: context.l10n.bmpExitDialogTitle,
+      body: context.l10n.bmpExitDialogBody,
+      stayLabel: context.l10n.bmpExitDialogStay,
+      leaveLabel: context.l10n.bmpExitDialogLeave,
     );
 
-    if (!context.mounted || shouldLeave != true) {
+    if (!context.mounted || !shouldLeave) {
       return;
     }
 
@@ -2738,70 +2736,6 @@ class _RefineMiniCard extends StatelessWidget {
   }
 }
 
-class _ExitFlowDialog extends StatelessWidget {
-  const _ExitFlowDialog({
-    required this.title,
-    required this.body,
-    required this.stayLabel,
-    required this.leaveLabel,
-  });
-
-  final String title;
-  final String body;
-  final String stayLabel;
-  final String leaveLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-      child: FrostedPanel(
-        padding: const EdgeInsets.all(22),
-        borderRadius: BorderRadius.circular(28),
-        backgroundColor: AppColors.isDark(context)
-            ? const Color(0xEE0F1722)
-            : const Color(0xF7FFFFFF),
-        borderColor: AppColors.isDark(context)
-            ? Colors.white.withValues(alpha: 0.08)
-            : AppColors.primary.withValues(alpha: 0.10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 10),
-            Text(
-              body,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSoftFor(context),
-                height: 1.45,
-              ),
-            ),
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: Text(stayLabel),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: Text(leaveLabel),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class _QuestionLocationDialog extends StatelessWidget {
   const _QuestionLocationDialog({
