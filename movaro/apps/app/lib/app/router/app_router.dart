@@ -340,6 +340,7 @@ class AppRouter {
           AppSettingsPage(
             localeController: dependencies.localeController,
             themeController: dependencies.themeController,
+            currencyController: dependencies.currencyController,
           ),
         );
       case AppRoutes.migrationPlanResult:

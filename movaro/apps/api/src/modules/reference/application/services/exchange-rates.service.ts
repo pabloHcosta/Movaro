@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { BcbExchangeRateService } from '../../../../integrations/exchange/bcb-exchange-rate.service';
 import { BcraExchangeRateService } from '../../../../integrations/exchange/bcra-exchange-rate.service';
+import { OpenExchangeRateService } from '../../../../integrations/exchange/open-exchange-rate.service';
 
 type ExchangeRatesSnapshot = {
   usdToBrl: number;
@@ -10,6 +11,13 @@ type ExchangeRatesSnapshot = {
   arsToBrl: number;
   usdToArs: number;
   arsToUsd: number;
+  brlToEur: number;
+  brlToClp: number;
+  brlToUyu: number;
+  brlToCop: number;
+  brlToPen: number;
+  brlToPyg: number;
+  brlToBob: number;
   fetchedAt: string;
   source: 'official';
   sources: string[];
@@ -20,6 +28,7 @@ export class ExchangeRatesService {
   constructor(
     private readonly bcbExchangeRateService: BcbExchangeRateService,
     private readonly bcraExchangeRateService: BcraExchangeRateService,
+    private readonly openExchangeRateService: OpenExchangeRateService,
   ) {}
 
   private cache: ExchangeRatesSnapshot | null = null;
@@ -32,9 +41,10 @@ export class ExchangeRatesService {
       return this.cache;
     }
 
-    const [bcb, bcra] = await Promise.all([
+    const [bcb, bcra, open] = await Promise.all([
       this.bcbExchangeRateService.getUsdToBrl(),
       this.bcraExchangeRateService.getBrlToArs(),
+      this.openExchangeRateService.getUsdRates(),
     ]);
 
     const usdToBrl = bcb.usdToBrl;
@@ -44,6 +54,15 @@ export class ExchangeRatesService {
     const usdToArs = usdToBrl * brlToArs;
     const arsToUsd = 1 / usdToArs;
 
+    // Derive BRL-based rates from USD-based rates
+    const brlToEur = brlToUsd * open.usdToEur;
+    const brlToClp = brlToUsd * open.usdToClp;
+    const brlToUyu = brlToUsd * open.usdToUyu;
+    const brlToCop = brlToUsd * open.usdToCop;
+    const brlToPen = brlToUsd * open.usdToPen;
+    const brlToPyg = brlToUsd * open.usdToPyg;
+    const brlToBob = brlToUsd * open.usdToBob;
+
     const snapshot: ExchangeRatesSnapshot = {
       usdToBrl,
       brlToUsd,
@@ -51,11 +70,19 @@ export class ExchangeRatesService {
       arsToBrl,
       usdToArs,
       arsToUsd,
+      brlToEur,
+      brlToClp,
+      brlToUyu,
+      brlToCop,
+      brlToPen,
+      brlToPyg,
+      brlToBob,
       fetchedAt: new Date().toISOString(),
       source: 'official',
       sources: [
         `BCB SGS 1 ${bcb.referenceDate}`,
         `BCRA Cotizaciones ${bcra.referenceDate}`,
+        `CurrencyAPI ${open.referenceDate}`,
       ],
     };
 

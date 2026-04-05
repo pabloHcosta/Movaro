@@ -747,6 +747,24 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'Follow system',
   );
 
+  String settingsCurrencyTitle() => _localizedText(
+    pt: 'Moeda preferida',
+    es: 'Moneda preferida',
+    en: 'Preferred currency',
+  );
+
+  String settingsCurrencyBody() => _localizedText(
+    pt: 'Escolha a moeda usada para exibir valores no app. Os precos sao convertidos em tempo real com cotacoes oficiais.',
+    es: 'Elegí la moneda usada para mostrar valores en la app. Los precios se convierten en tiempo real con cotizaciones oficiales.',
+    en: 'Choose the currency used to display amounts in the app. Prices are converted in real time using official exchange rates.',
+  );
+
+  String settingsCurrencyAuto() => _localizedText(
+    pt: 'Automatico (pelo pais de origem)',
+    es: 'Automatico (por pais de origen)',
+    en: 'Automatic (by origin country)',
+  );
+
   String helpHideAgainLabel() => _localizedText(
     pt: 'Nao mostrar novamente',
     es: 'No mostrar de nuevo',

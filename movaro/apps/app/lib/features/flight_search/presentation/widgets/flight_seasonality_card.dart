@@ -3,6 +3,7 @@ import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/localization/generated/app_localizations.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
 
@@ -524,14 +525,22 @@ class _PriceLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final range = MultiCurrencyAmount.formatRangeFromUsd(
+      context: context,
+      minUsd: lowMin,
+      maxUsd: lowMax,
+    );
+    final locale = Localizations.localeOf(context).languageCode;
+    final cheapLabel = switch (locale) {
+      'pt' => 'Barato ($range)',
+      'es' => 'Barato ($range)',
+      _ => 'Cheap ($range)',
+    };
     return Wrap(
       spacing: 14,
       runSpacing: 6,
       children: [
-        _LegendDot(
-          color: AppColors.success,
-          label: context.l10n.flightSeasonalityLegendLow(lowMin, lowMax),
-        ),
+        _LegendDot(color: AppColors.success, label: cheapLabel),
         _LegendDot(
           color: AppColors.warning,
           label: context.l10n.flightSeasonalityLegendMid,

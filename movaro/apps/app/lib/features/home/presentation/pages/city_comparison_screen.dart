@@ -2638,7 +2638,11 @@ class _ComparisonCityData {
       flightAccessScore: _flightAccessScore(routeInsight),
       flightRangeLabel: routeInsight == null
           ? _localizedText(context, pt: 'Sem leitura', es: 'Sin lectura', en: 'No route read')
-          : 'US\$${routeInsight.lowUsdMin}-US\$${routeInsight.lowUsdMax}',
+          : MultiCurrencyAmount.formatRangeFromUsd(
+              context: context,
+              minUsd: routeInsight.lowUsdMin,
+              maxUsd: routeInsight.lowUsdMax,
+            ),
       flightPressureLabel: flightPressure,
       arrivalEaseScore: arrivalEaseScore,
       arrivalEaseLabel: _arrivalEaseLabel(context, arrivalEaseScore, lens),
