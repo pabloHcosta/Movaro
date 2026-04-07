@@ -36,6 +36,7 @@ import 'package:movaro_app/features/home/presentation/widgets/city_feed_widget.d
 import 'package:movaro_app/features/home/presentation/widgets/journey_stepper_widget.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_personalization_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PublicHomePage extends StatefulWidget {
@@ -548,16 +549,27 @@ class _PublicHomePageState extends State<PublicHomePage>
     MigrationPlan plan,
     MigrationCopilotProgressSnapshot snapshot,
   ) {
-    final completedIds = snapshot.getAllCompletedIds();
+    final localeCode = Localizations.localeOf(context).languageCode;
+    final explicitCompletedIds = snapshot.getAllCompletedIds();
     final items =
-        MigrationGuideRegistry.build(
-            l10n: context.l10n,
+        GuidePersonalizationService.personalize(
             plan: plan,
-            currentLocation: widget.locationController.savedLocation,
-            localeCode: Localizations.localeOf(context).languageCode,
-            completedIds: completedIds,
+            items: MigrationGuideRegistry.build(
+              l10n: context.l10n,
+              plan: plan,
+              currentLocation: widget.locationController.savedLocation,
+              localeCode: localeCode,
+              completedIds: explicitCompletedIds,
+            ),
+            explicitCompletedIds: explicitCompletedIds,
+            explicitDismissedReasons: snapshot.dismissedReasonsById,
+            localeCode: localeCode,
           ).toList(growable: false)
           ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+    final completedIds = items
+        .where((item) => item.isCompleted)
+        .map((item) => item.id)
+        .toSet();
 
     final activeCandidate = snapshot.activeItemId == null
         ? null
@@ -799,7 +811,7 @@ class _PublicHomePageState extends State<PublicHomePage>
       plan.destinationCountry,
       plan.goal,
       plan.timeline,
-      plan.recommendedCity?.id ?? 'no-city',
+      plan.currentPlanCity?.id ?? 'no-city',
     ].join('::');
   }
 }
@@ -871,7 +883,7 @@ class _PlannerHomeState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
-    final candidates = plan.candidateCities.take(3).toList(growable: false);
+    final candidates = plan.reviewCities.take(3).toList(growable: false);
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
@@ -977,9 +989,9 @@ class _PlannerHomeState extends StatelessWidget {
                 label: Text(
                   _t(
                     context,
-                    pt: 'Ver cidade mais indicada',
-                    es: 'Ver ciudad más indicada',
-                    en: 'See top recommended city',
+                    pt: 'Ver cidade em destaque no momento',
+                    es: 'Ver ciudad destacada por ahora',
+                    en: 'See the city highlighted right now',
                   ),
                 ),
               ),
