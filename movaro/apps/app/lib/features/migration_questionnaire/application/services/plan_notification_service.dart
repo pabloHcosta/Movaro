@@ -66,7 +66,7 @@ class PlanNotificationService {
     await cancelPlanReminders();
 
     final cityName =
-        plan.recommendedCity?.name ??
+        plan.currentPlanCity?.name ??
         _text(pt: 'sua cidade', es: 'tu ciudad', en: 'your city');
     final nextItem = _getNextPendingItemTitle(plan);
 
@@ -75,13 +75,13 @@ class PlanNotificationService {
       title: _text(
         pt: 'Seu plano de $cityName está pronto',
         es: 'Tu plan para $cityName ya está listo',
-        en: 'Your $cityName plan is ready',
+        en: 'Your $cityName guide is ready to review',
       ),
       body: nextItem != null
           ? _text(
               pt: 'Próximo passo: $nextItem. Leva menos de 5 minutos.',
               es: 'Próximo paso: $nextItem. Te lleva menos de 5 minutos.',
-              en: 'Next step: $nextItem. It takes less than 5 minutes.',
+              en: 'One possible next item: $nextItem. It may take less than 5 minutes.',
             )
           : _text(
               pt: 'Continue de onde parou no guia de mudança.',
@@ -96,18 +96,18 @@ class PlanNotificationService {
       title: _text(
         pt: 'Seu plano ainda está te esperando',
         es: 'Tu plan todavía te está esperando',
-        en: 'Your plan is still waiting for you',
+        en: 'Your guide is still available',
       ),
       body: nextItem != null
           ? _text(
               pt: 'Você ainda não concluiu: $nextItem. 5 minutos e está feito.',
               es: 'Todavía no completaste: $nextItem. En 5 minutos queda hecho.',
-              en: 'You still have not finished: $nextItem. Five minutes and it is done.',
+              en: 'You still have this item open: $nextItem. It may take around five minutes.',
             )
           : _text(
               pt: 'Volte ao guia e marque o próximo passo do seu plano.',
               es: 'Volvé a la guía y marcá el próximo paso de tu plan.',
-              en: 'Return to the guide and mark the next step in your plan.',
+              en: 'Return to the guide and continue with the item that feels most relevant now.',
             ),
       scheduledDate: DateTime.now().add(const Duration(hours: 72)),
     );
@@ -140,7 +140,7 @@ class PlanNotificationService {
   Future<void> schedulePFAppointmentReminder(MigrationPlan plan) async {
     await initialize();
     final cityName =
-        plan.recommendedCity?.name ?? plan.preferredCity?.name ?? '';
+        plan.currentPlanCity?.name ?? '';
     final hasMajorCity =
         cityName.contains('São Paulo') ||
         cityName.contains('Rio') ||

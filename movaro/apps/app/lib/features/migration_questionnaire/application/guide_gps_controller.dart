@@ -15,6 +15,9 @@ class GuideGpsController extends ChangeNotifier {
     required Set<String> documentCompletedIds,
     required Set<String> arrivalCompletedIds,
     Map<String, String> completedAtById = const <String, String>{},
+    Set<String> prioritizedItemIds = const <String>{},
+    Map<String, GuideDismissReason> dismissedReasonsById =
+        const <String, GuideDismissReason>{},
     String? activeItemId,
   }) : _plan = plan,
        _progressStore = progressStore,
@@ -22,6 +25,10 @@ class GuideGpsController extends ChangeNotifier {
        _documentCompletedIds = Set<String>.from(documentCompletedIds),
        _arrivalCompletedIds = Set<String>.from(arrivalCompletedIds),
        _completedAtById = Map<String, String>.from(completedAtById),
+       _prioritizedItemIds = Set<String>.from(prioritizedItemIds),
+       _dismissedReasonsById = Map<String, GuideDismissReason>.from(
+         dismissedReasonsById,
+       ),
        _items = List<GuideActionItem>.from(items)
          ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex)),
        _activeItemId = activeItemId {
@@ -35,6 +42,8 @@ class GuideGpsController extends ChangeNotifier {
   Set<String> _documentCompletedIds;
   Set<String> _arrivalCompletedIds;
   Map<String, String> _completedAtById;
+  Set<String> _prioritizedItemIds;
+  final Map<String, GuideDismissReason> _dismissedReasonsById;
   final List<GuideActionItem> _items;
   String? _activeItemId;
   bool _currentItemStarted = false;
@@ -47,11 +56,14 @@ class GuideGpsController extends ChangeNotifier {
   Set<String> get arrivalCompletedIds => _arrivalCompletedIds;
   Map<String, String> get completedAtById =>
       Map<String, String>.unmodifiable(_completedAtById);
+  Set<String> get prioritizedItemIds =>
+      Set<String>.unmodifiable(_prioritizedItemIds);
+  Map<String, GuideDismissReason> get dismissedReasonsById =>
+      Map<String, GuideDismissReason>.unmodifiable(_dismissedReasonsById);
 
   Set<String> get allCompletedIds => <String>{
-    ..._readinessCompletedIds,
-    ..._documentCompletedIds,
-    ..._arrivalCompletedIds,
+    for (final item in _items)
+      if (item.isCompleted) item.id,
   };
 
   int get completedCount => allCompletedIds.length;
@@ -62,14 +74,9 @@ class GuideGpsController extends ChangeNotifier {
   int get progressPercent => (progress * 100).round();
 
   GuideActionItem? get currentItem {
-    final remainingItems = _items.where((item) => !item.isCompleted).toList()
-      ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
-    if (remainingItems.isEmpty) {
-      return null;
-    }
-    final availableItems = remainingItems.where(isItemUnlocked).toList();
+    final availableItems = _rankedAvailablePendingItems();
     if (availableItems.isEmpty) {
-      return remainingItems.first;
+      return null;
     }
     if (_activeItemId == null) {
       return availableItems.first;
@@ -82,15 +89,18 @@ class GuideGpsController extends ChangeNotifier {
 
   List<GuideActionItem> get upcomingItems {
     final current = currentItem;
-    if (current == null) {
-      return const [];
-    }
-    return _items
-        .where(
-          (item) => !item.isCompleted && item.orderIndex > current.orderIndex,
-        )
-        .take(3)
-        .toList(growable: false);
+    final excludedIds = current == null
+        ? const <String>{}
+        : <String>{current.id};
+    return _rankedAvailablePendingItems(
+      excludeIds: excludedIds,
+    ).take(3).toList(growable: false);
+  }
+
+  List<GuideActionItem> itemsForPhase(GuidePhase phase) {
+    final phaseItems = _items.where((item) => item.phase == phase).toList();
+    phaseItems.sort(_compareItemsForDisplay);
+    return List<GuideActionItem>.unmodifiable(phaseItems);
   }
 
   bool isItemUnlocked(GuideActionItem item) {
@@ -140,7 +150,13 @@ class GuideGpsController extends ChangeNotifier {
     }
 
     final item = _items[index];
-    _items[index] = item.copyWith(isCompleted: true);
+    _items[index] = item.copyWith(
+      isCompleted: true,
+      dismissReason: null,
+      isUserPrioritized: false,
+    );
+    _dismissedReasonsById.remove(item.id);
+    _prioritizedItemIds.remove(item.id);
     _setCompleted(item);
     _setCompletedAt(itemId);
     await _handlePostCompletion(item);
@@ -162,6 +178,124 @@ class GuideGpsController extends ChangeNotifier {
     _activeItemId = item.id;
     _currentItemStarted = false;
     _awaitingConfirmation = false;
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> dismissItem(String itemId, GuideDismissReason reason) async {
+    final index = _items.indexWhere((item) => item.id == itemId);
+    if (index == -1) {
+      return;
+    }
+
+    final item = _items[index];
+    if (!item.isDismissible || (item.isCompleted && !item.isDismissed)) {
+      return;
+    }
+
+    _items[index] = item.copyWith(
+      isCompleted: true,
+      dismissReason: reason,
+      isUserPrioritized: false,
+    );
+    _dismissedReasonsById[itemId] = reason;
+    _prioritizedItemIds.remove(itemId);
+    _setCompleted(item);
+    _setCompletedAt(itemId);
+    if (_activeItemId == itemId) {
+      _activeItemId = null;
+      _currentItemStarted = false;
+      _awaitingConfirmation = false;
+    }
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> dismissItems(
+    Iterable<String> itemIds,
+    GuideDismissReason reason,
+  ) async {
+    final normalizedIds = itemIds.toSet();
+    if (normalizedIds.isEmpty) {
+      return;
+    }
+
+    var changed = false;
+    for (final itemId in normalizedIds) {
+      final index = _items.indexWhere((item) => item.id == itemId);
+      if (index == -1) {
+        continue;
+      }
+
+      final item = _items[index];
+      if (!item.isDismissible || (item.isCompleted && !item.isDismissed)) {
+        continue;
+      }
+
+      _items[index] = item.copyWith(
+        isCompleted: true,
+        dismissReason: reason,
+        isUserPrioritized: false,
+      );
+      _dismissedReasonsById[itemId] = reason;
+      _prioritizedItemIds.remove(itemId);
+      _setCompleted(item);
+      _setCompletedAt(itemId);
+      if (_activeItemId == itemId) {
+        _activeItemId = null;
+        _currentItemStarted = false;
+        _awaitingConfirmation = false;
+      }
+      changed = true;
+    }
+
+    if (!changed) {
+      return;
+    }
+
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> restoreDismissedItem(String itemId) async {
+    final index = _items.indexWhere((item) => item.id == itemId);
+    if (index == -1) {
+      return;
+    }
+
+    final item = _items[index];
+    if (!item.isDismissed) {
+      return;
+    }
+
+    _items[index] = item.copyWith(isCompleted: false, dismissReason: null);
+    _dismissedReasonsById.remove(itemId);
+    _unsetCompleted(item);
+    _completedAtById = <String, String>{..._completedAtById}..remove(itemId);
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> togglePrioritizeItem(String itemId) async {
+    final index = _items.indexWhere((item) => item.id == itemId);
+    if (index == -1) {
+      return;
+    }
+
+    final item = _items[index];
+    if (item.isCompleted ||
+        item.isDismissed ||
+        item.resolvedTier == GuideItemTier.critical) {
+      return;
+    }
+
+    final shouldPrioritize = !_prioritizedItemIds.contains(itemId);
+    if (shouldPrioritize) {
+      _prioritizedItemIds = <String>{..._prioritizedItemIds, itemId};
+    } else {
+      _prioritizedItemIds = <String>{..._prioritizedItemIds}..remove(itemId);
+    }
+    _items[index] = item.copyWith(isUserPrioritized: shouldPrioritize);
     notifyListeners();
     await _persist();
   }
@@ -213,6 +347,22 @@ class GuideGpsController extends ChangeNotifier {
     }
   }
 
+  void _unsetCompleted(GuideActionItem item) {
+    switch (item.phase) {
+      case GuidePhase.documents:
+        _documentCompletedIds = <String>{..._documentCompletedIds}
+          ..remove(item.id);
+      case GuidePhase.arrival:
+        _arrivalCompletedIds = <String>{..._arrivalCompletedIds}
+          ..remove(item.id);
+      case GuidePhase.preparation:
+      case GuidePhase.housing:
+      case GuidePhase.work:
+        _readinessCompletedIds = <String>{..._readinessCompletedIds}
+          ..remove(item.id);
+    }
+  }
+
   void _setCompletedAt(String itemId) {
     _completedAtById = <String, String>{
       ..._completedAtById,
@@ -221,7 +371,111 @@ class GuideGpsController extends ChangeNotifier {
   }
 
   void _hydrateDynamicItems() {
+    _hydrateUserState();
     _applyResidenceDeadlineBadge();
+  }
+
+  void _hydrateUserState() {
+    for (var i = 0; i < _items.length; i++) {
+      final item = _items[i];
+      _items[i] = item.copyWith(
+        dismissReason: _dismissedReasonsById[item.id],
+        isUserPrioritized: _prioritizedItemIds.contains(item.id),
+      );
+    }
+  }
+
+  List<GuideActionItem> _rankedAvailablePendingItems({
+    Set<String> excludeIds = const <String>{},
+  }) {
+    final pendingItems = _items.where((item) {
+      return !item.isCompleted &&
+          !excludeIds.contains(item.id) &&
+          isItemUnlocked(item);
+    }).toList();
+    pendingItems.sort(_comparePriorityDescending);
+    return pendingItems;
+  }
+
+  int _compareItemsForDisplay(GuideActionItem a, GuideActionItem b) {
+    final aPending = !a.isCompleted;
+    final bPending = !b.isCompleted;
+    if (aPending != bPending) {
+      return aPending ? -1 : 1;
+    }
+    if (!aPending && !bPending) {
+      return a.orderIndex.compareTo(b.orderIndex);
+    }
+    final unlockCompare = _boolPriority(isItemUnlocked(b), isItemUnlocked(a));
+    if (unlockCompare != 0) {
+      return unlockCompare;
+    }
+    return _comparePriorityDescending(a, b);
+  }
+
+  int _comparePriorityDescending(GuideActionItem a, GuideActionItem b) {
+    final scoreCompare = _priorityScore(b).compareTo(_priorityScore(a));
+    if (scoreCompare != 0) {
+      return scoreCompare;
+    }
+    return a.orderIndex.compareTo(b.orderIndex);
+  }
+
+  int _priorityScore(GuideActionItem item) {
+    var score = 0;
+    switch (item.resolvedTier) {
+      case GuideItemTier.critical:
+        score += 100;
+      case GuideItemTier.recommended:
+        score += 45;
+      case GuideItemTier.optional:
+        score += 10;
+    }
+    if (item.preArrivalRequired) {
+      score += 50;
+    }
+    switch (item.urgencyLevel) {
+      case GuideUrgencyLevel.critical:
+        score += 40;
+      case GuideUrgencyLevel.urgent:
+        score += 25;
+      case GuideUrgencyLevel.watch:
+        score += 10;
+      case GuideUrgencyLevel.normal:
+      case null:
+        break;
+    }
+    if (item.isUserPrioritized) {
+      score += 30;
+    }
+    if (item.phase == _phaseContextForPriority()) {
+      score += 5;
+    }
+    score -= item.orderIndex;
+    return score;
+  }
+
+  GuidePhase _phaseContextForPriority() {
+    final activeItem = _items.cast<GuideActionItem?>().firstWhere(
+      (item) => item?.id == _activeItemId,
+      orElse: () => null,
+    );
+    if (activeItem != null && !activeItem.isCompleted) {
+      return activeItem.phase;
+    }
+
+    final nextBySequence = _items.cast<GuideActionItem?>().firstWhere(
+      (item) => item != null && !item.isCompleted,
+      orElse: () => null,
+    );
+    return nextBySequence?.phase ?? GuidePhase.arrival;
+  }
+
+  int _boolPriority(bool left, bool right) {
+    if (left == right) {
+      return 0;
+    }
+    return left ? -1 : 1;
   }
 
   Future<void> _handlePostCompletion(GuideActionItem item) async {
@@ -294,6 +548,8 @@ class GuideGpsController extends ChangeNotifier {
       arrivalCompletedIds: _arrivalCompletedIds,
       activeItemId: _activeItemId,
       completedAtById: _completedAtById,
+      prioritizedItemIds: _prioritizedItemIds,
+      dismissedReasonsById: _dismissedReasonsById,
     );
   }
 }

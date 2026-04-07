@@ -12,6 +12,10 @@ enum GuideEstimatedEffort { fast, medium, longer }
 
 enum GuideExecutionMode { online, inPerson }
 
+enum GuideItemTier { critical, recommended, optional }
+
+enum GuideDismissReason { alreadyDone, notApplicable, later }
+
 /// Urgency level for guide items — drives visual indicators.
 enum GuideUrgencyLevel {
   /// Normal flow — no urgency.
@@ -145,6 +149,11 @@ class GuideActionItem {
     this.externalOfficialLinks,
     this.urgencyLevel,
     this.urgencySignal,
+    this.tier,
+    this.isDismissible = true,
+    this.applicabilityConditions = const <String>[],
+    this.dismissReason,
+    this.isUserPrioritized = false,
     this.preArrivalRequired = false,
     this.warningFlags,
     this.survivalPhrases,
@@ -195,6 +204,21 @@ class GuideActionItem {
   /// Example: "Book the PF appointment before arriving — 60-day backlog expected."
   final String? urgencySignal;
 
+  /// User-facing importance tier. When omitted, it is inferred from urgency.
+  final GuideItemTier? tier;
+
+  /// Whether the user can dismiss this item as already handled / not applicable.
+  final bool isDismissible;
+
+  /// Questionnaire-driven relevance flags, used to hide contextual items.
+  final List<String> applicabilityConditions;
+
+  /// Why the item was dismissed by the user, if applicable.
+  final GuideDismissReason? dismissReason;
+
+  /// Personal priority marker toggled by the user.
+  final bool isUserPrioritized;
+
   /// True when this step must be completed before arriving in Brazil.
   /// Drives the "Pre-arrival" section in the copilot and home warnings.
   final bool preArrivalRequired;
@@ -211,12 +235,25 @@ class GuideActionItem {
   /// Drives the "Dica de quem já fez isso" community layer.
   final List<String>? communityTips;
 
-  bool get hasWarningFlags =>
-      warningFlags != null && warningFlags!.isNotEmpty;
+  bool get hasWarningFlags => warningFlags != null && warningFlags!.isNotEmpty;
   bool get hasSurvivalPhrases =>
       survivalPhrases != null && survivalPhrases!.isNotEmpty;
   bool get hasCommunityTips =>
       communityTips != null && communityTips!.isNotEmpty;
+  bool get isDismissed => dismissReason != null;
+  GuideItemTier get resolvedTier {
+    if (tier != null) {
+      return tier!;
+    }
+    if (preArrivalRequired || urgencyLevel == GuideUrgencyLevel.critical) {
+      return GuideItemTier.critical;
+    }
+    if (urgencyLevel == GuideUrgencyLevel.urgent ||
+        urgencyLevel == GuideUrgencyLevel.watch) {
+      return GuideItemTier.recommended;
+    }
+    return GuideItemTier.optional;
+  }
 
   bool get hasChecklist => checklistItems != null && checklistItems!.isNotEmpty;
   bool get hasSteps => steps != null && steps!.isNotEmpty;
@@ -297,6 +334,11 @@ class GuideActionItem {
     List<GuideSupportLink>? externalOfficialLinks,
     GuideUrgencyLevel? urgencyLevel,
     String? urgencySignal,
+    GuideItemTier? tier,
+    bool? isDismissible,
+    List<String>? applicabilityConditions,
+    Object? dismissReason = _guideActionItemNoChange,
+    bool? isUserPrioritized,
     bool? preArrivalRequired,
     List<String>? warningFlags,
     List<SurvivalPhrase>? survivalPhrases,
@@ -341,6 +383,14 @@ class GuideActionItem {
           externalOfficialLinks ?? this.externalOfficialLinks,
       urgencyLevel: urgencyLevel ?? this.urgencyLevel,
       urgencySignal: urgencySignal ?? this.urgencySignal,
+      tier: tier ?? this.tier,
+      isDismissible: isDismissible ?? this.isDismissible,
+      applicabilityConditions:
+          applicabilityConditions ?? this.applicabilityConditions,
+      dismissReason: identical(dismissReason, _guideActionItemNoChange)
+          ? this.dismissReason
+          : dismissReason as GuideDismissReason?,
+      isUserPrioritized: isUserPrioritized ?? this.isUserPrioritized,
       preArrivalRequired: preArrivalRequired ?? this.preArrivalRequired,
       warningFlags: warningFlags ?? this.warningFlags,
       survivalPhrases: survivalPhrases ?? this.survivalPhrases,
@@ -348,3 +398,5 @@ class GuideActionItem {
     );
   }
 }
+
+const Object _guideActionItemNoChange = Object();

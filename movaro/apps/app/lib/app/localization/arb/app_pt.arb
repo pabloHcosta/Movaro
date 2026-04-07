@@ -44,7 +44,7 @@
   "publicHomeHeadline": "Planeje sua mudança com mais clareza",
   "publicHomeDescription": "Entenda suas opções em poucos passos antes de decidir o que salvar.",
   "publicHomeScopeBadge": "Hoje: Argentina -> Brasil",
-  "publicHomeFocusedDescription": "Hoje, o Movaro foi desenhado para quem está avaliando a mudança da Argentina para o Brasil. Em vez de mostrar tudo de uma vez, ele ajuda você a escolher o melhor primeiro passo.",
+  "publicHomeFocusedDescription": "Hoje, o Movaro foi desenhado para quem está avaliando a mudança da Argentina para o Brasil. Em vez de mostrar tudo de uma vez, ele ajuda você a explorar pontos de partida úteis.",
   "publicHomeSelectedJourneyDescription": "O Movaro vai organizar sua experiência para a jornada {origin} -> {destination}. Você começa com o essencial e aprofunda só quando fizer sentido.",
   "@publicHomeSelectedJourneyDescription": {
     "placeholders": {
@@ -56,8 +56,8 @@
       }
     }
   },
-  "publicHomePrimaryQuestionTitle": "Comece pela decisão principal",
-  "publicHomePrimaryQuestionBody": "Primeiro, descubra se você precisa de um plano guiado, de comparação entre cidades ou apenas de um panorama rápido do produto.",
+  "publicHomePrimaryQuestionTitle": "Comece por uma pergunta útil",
+  "publicHomePrimaryQuestionBody": "Você pode começar com um plano guiado, uma comparação entre cidades ou um panorama rápido do produto.",
   "publicHomeTrustFastTitle": "Entrada rápida",
   "publicHomeTrustFastBody": "Você consegue começar sem formulário longo nem bloqueio inicial.",
   "publicHomeTrustGuestTitle": "Sem login agora",
@@ -118,9 +118,9 @@
   "homeHeroOriginLabel": "Origem",
   "homeHeroDestinationLabel": "Destino",
   "homeHeroNoPlanTitle": "Seu plano de migração em 3 passos",
-  "homeHeroNoPlanBody": "Responda o questionário e receba uma cidade indicada para o seu perfil.",
+  "homeHeroNoPlanBody": "Responda o questionário e revise cidades que podem combinar com o seu perfil.",
   "homeHeroStepQuestionnaire": "Responder questionário",
-  "homeHeroStepCity": "Receber cidade ideal",
+  "homeHeroStepCity": "Revisar cidades possíveis",
   "homeHeroStepGuide": "Executar com guia",
   "homeHeroStartAction": "Montar meu plano -> leva ~5 min",
   "homeHeroPlanActiveBadge": "Plano ativo",
@@ -706,7 +706,7 @@
   },
   "planStepOpenHousingPointOne": "Priorize bairros com boa conexão com o que você precisa no dia a dia: trabalho, transporte e serviços.",
   "planStepOpenHousingPointTwo": "Use a leitura de custo da cidade como ponto de partida, mas confirme aluguel e contrato antes de decidir.",
-  "planStepOpenHousingPointThree": "A análise por bairro ainda precisa de uma base dedicada; por enquanto, use a cidade recomendada como filtro inicial.",
+  "planStepOpenHousingPointThree": "A análise por bairro ainda precisa de uma base dedicada; por enquanto, use o encaixe de cidade atual como filtro inicial.",
   "planStepOpenGeneralEyebrow": "Checklist guiada",
   "planStepOpenGeneralSummary": "Este passo funciona melhor como uma validação prática dentro da sua chegada ao Brasil.",
   "planStepOpenGeneralPointOne": "Resolva o essencial primeiro para não abrir frentes demais ao mesmo tempo.",
@@ -1094,7 +1094,7 @@
   "cityComparisonCommunityLarge": "Grande",
   "cityComparisonCommunityMedium": "Média",
   "cityComparisonCommunitySmall": "Pequena",
-  "cityComparisonWinnerLabel": "MELHOR ESCOLHA PARA VOCÊ",
+  "cityComparisonWinnerLabel": "VANTAGEM ATUAL NA COMPARAÇÃO",
   "cityComparisonUnavailable": "—",
   "cityComparisonStartPlanAction": "Iniciar plano em {city} →",
   "@cityComparisonStartPlanAction": {
@@ -1485,7 +1485,7 @@
     }
   },
   "housingDecisionSectionBody": "Antes de decidir a cidade, vale entender como aluguel e garantias funcionam no Brasil. O maior risco não é só o preço mensal: é chegar sem um caminho viável para contrato, bairro e instalação inicial.",
-  "housingDecisionSectionBodyWithCity": "Antes de assumir {city} como a melhor opção, valide se aluguel, garantias e instalação inicial parecem viáveis para o seu momento. O risco não está só no preço: está no caminho real para fechar a moradia.",
+  "housingDecisionSectionBodyWithCity": "Antes de tratar {city} como uma opção forte, valide se aluguel, garantias e instalação inicial parecem viáveis para o seu momento. O risco não está só no preço: está no caminho real para fechar a moradia.",
   "@housingDecisionSectionBodyWithCity": {
     "placeholders": {
       "city": {}
@@ -1697,7 +1697,7 @@
       }
     }
   },
-  "migrationPlanCopilotResultBody": "Primeiro, veja se a cidade recomendada faz sentido para você. Quando quiser transformar essa decisão em preparação concreta, abra a camada guiada com checklist, documentos e reserva de chegada.",
+  "migrationPlanCopilotResultBody": "Primeiro, veja se o encaixe de cidade atual ainda faz sentido para você. Quando quiser transformar essa exploração em preparação concreta, abra a camada guiada com checklist, documentos e reserva de chegada.",
   "migrationPlanCopilotStepCounter": "Etapa {current} de {total}",
   "@migrationPlanCopilotStepCounter": {
     "placeholders": {
@@ -1734,12 +1734,12 @@
   "migrationPlanCopilotRiskHousing": "A entrada em moradia ainda pode gerar atrito na chegada. Revise reserva, garantias e plano de fallback antes de tratar a mudança como operacional.",
   "migrationPlanCopilotStagesTitle": "Abra uma etapa guiada",
   "migrationPlanCopilotStagesBody": "Você pode entrar direto na etapa que precisa, mas o Movaro mantém a ordem clara para a mudança não perder prioridade.",
-  "migrationPlanCopilotRecommendedTitle": "Próximo passo recomendado",
-  "migrationPlanCopilotRecommendedReadinessBody": "Comece por esta etapa para destravar os primeiros bloqueios e dar base real para o restante do plano.",
-  "migrationPlanCopilotRecommendedDocumentsBody": "A camada documental ainda merece atenção primeiro. Resolva isso agora para evitar travas mais caras depois.",
-  "migrationPlanCopilotRecommendedBudgetBody": "Agora vale transformar o plano em números reais e revisar a entrada em moradia antes da chegada apertar.",
-  "migrationPlanCopilotRecommendedArrivalBody": "Você já tem base suficiente para organizar a chegada. Use esta etapa para sair do plano e entrar em execução.",
-  "migrationPlanCopilotRecommendedOpen": "Abrir etapa recomendada",
+  "migrationPlanCopilotRecommendedTitle": "Área sugerida para revisar agora",
+  "migrationPlanCopilotRecommendedReadinessBody": "Esta etapa pode ajudar a destravar os primeiros bloqueios e dar uma base mais sólida para o restante do plano.",
+  "migrationPlanCopilotRecommendedDocumentsBody": "A camada documental pode merecer atenção primeiro. Revisar isso agora pode reduzir travas mais caras depois.",
+  "migrationPlanCopilotRecommendedBudgetBody": "Este pode ser um bom momento para transformar o plano em números reais e revisar a entrada em moradia antes da chegada apertar.",
+  "migrationPlanCopilotRecommendedArrivalBody": "Você talvez já tenha base suficiente para organizar a chegada. Esta etapa pode ajudar a sair do planejamento e entrar na execução.",
+  "migrationPlanCopilotRecommendedOpen": "Abrir etapa sugerida",
   "migrationPlanCopilotQuickQuestionsTitle": "Dúvidas rápidas",
   "migrationPlanCopilotQuickQuestionsBody": "Use estas respostas curtas quando bater uma dúvida prática antes de avançar.",
   "migrationPlanCopilotQuickQuestionDocumentsTitle": "Quais documentos eu devo mover primeiro?",
@@ -1851,24 +1851,24 @@
       "city": {}
     }
   },
-  "migrationPlanResultPrimaryCtaEyebrow": "Próximo passo",
-  "migrationPlanResultStartPlanTitle": "Começar meu plano",
-  "migrationPlanResultStartPlanBody": "Revise {city} com um pouco mais de contexto e confirme quando estiver pronto para liberar o plano guiado completo.",
+  "migrationPlanResultPrimaryCtaEyebrow": "Possível próximo movimento",
+  "migrationPlanResultStartPlanTitle": "Abrir esta rota",
+  "migrationPlanResultStartPlanBody": "Revise {city} com um pouco mais de contexto e continue explorando se ela ainda parecer relevante para a sua rota.",
   "@migrationPlanResultStartPlanBody": {
     "placeholders": {
       "city": {}
     }
   },
-  "migrationPlanResultStartPlanAction": "Começar meu plano",
+  "migrationPlanResultStartPlanAction": "Abrir esta rota",
   "migrationPlanResultOpenPlanTitle": "Ver plano completo",
   "migrationPlanResultOpenPlanAction": "Ver plano completo",
   "migrationPlanResultCompatibilityHigh": "Alta compatibilidade",
   "migrationPlanResultCompatibilityMedium": "Boa compatibilidade",
   "migrationPlanResultCompatibilityInitial": "Compatibilidade inicial",
   "migrationPlanResultCompatibilityHelpTitle": "Como funciona a compatibilidade",
-  "migrationPlanResultCompatibilityHelpBody": "A compatibilidade combina suas prioridades, seu prazo e seu objetivo de mudança com os sinais disponíveis de cada cidade. É uma leitura direcional para começar pela cidade mais forte para você.",
+  "migrationPlanResultCompatibilityHelpBody": "A compatibilidade combina suas prioridades, seu prazo e seu objetivo de mudança com os sinais disponíveis de cada cidade. É uma leitura direcional pensada para comparar opções e explorar um ponto de partida.",
   "migrationPlanResultUnavailableTitle": "Não foi possível carregar o resultado da sua cidade.",
-  "migrationPlanResultUnavailableBody": "Tente novamente para abrir sua recomendação e continuar a partir do questionário.",
+  "migrationPlanResultUnavailableBody": "Tente novamente para abrir suas cidades sugeridas e continuar a partir do questionário.",
   "migrationPlanResultBasedOnAnswersTitle": "Baseado nas suas respostas",
   "migrationPlanResultCityDataTitle": "Dados da cidade",
   "migrationPlanResultOtherCitiesTitle": "Outras cidades compatíveis",
@@ -2017,7 +2017,7 @@
   "migrationPlanHousingCompareAction": "Comparar cidades",
   "migrationPlanScrollHint": "Ver mais",
   "languageSelectorSystem": "Sistema",
-  "bmpDisclaimer": "Isto monta um ponto de partida. Não é consultoria legal.",
+  "bmpDisclaimer": "Isto monta um ponto de partida. Não substitui orientação jurídica profissional.",
   "bmpProgressStep": "Etapa {current} de {total}",
   "@bmpProgressStep": {
     "placeholders": {
@@ -2308,20 +2308,20 @@
       "city": {}
     }
   },
-  "explorePlanDraftTitle": "Your plan still needs a decision",
-  "explorePlanDraftBody": "You already have a draft. Reopen the result and confirm the city before moving into checklist mode.",
-  "explorePlanDraftBodyWithCity": "{city} is currently leading. Reopen the result, compare it, and confirm it when ready.",
+  "explorePlanDraftTitle": "Seu plano ainda precisa de uma revisão mais próxima",
+  "explorePlanDraftBody": "Você já tem um rascunho. Reabra o resultado e revise as opções de cidade antes de entrar no modo checklist.",
+  "explorePlanDraftBodyWithCity": "{city} aparece entre as opções mais fortes no momento. Reabra o resultado e compare de novo quando quiser.",
   "@explorePlanDraftBodyWithCity": {
     "placeholders": {
       "city": {}
     }
   },
-  "exploreRecommendedCityTitle": "Leading city right now",
-  "exploreRecommendedCityBody": "Open the city details to validate cost, quality of life, and fit with your plan.",
-  "exploreOpenCityAction": "Open city",
-  "exploreOpenContentAction": "Open guide",
-  "explorePlanDocsBody": "Documents usually unlock the next part of the move faster than more comparison.",
-  "exploreContentDocumentsBody": "See CPF, registration, banking, and legal stay with less noise and clearer routing.",
+  "exploreRecommendedCityTitle": "Cidade para revisar agora",
+  "exploreRecommendedCityBody": "Abra o detalhe da cidade para revisar custo, qualidade de vida e encaixe com seu plano.",
+  "exploreOpenCityAction": "Abrir cidade",
+  "exploreOpenContentAction": "Abrir guia",
+  "explorePlanDocsBody": "Documentos costumam destravar a próxima parte da mudança mais rápido do que continuar comparando.",
+  "exploreContentDocumentsBody": "Veja CPF, registro, banco e permanência legal com menos ruído e um caminho mais claro.",
   "exploreContentHousingBody": "Review rent pressure, guarantees, deposits, and first-landing decisions before choosing a neighborhood.",
   "exploreContentWorkBody": "Check work setup, contribution paths, and what to validate before treating income as solved.",
   "documentationFocusTitle": "Useful for your current journey",
@@ -2598,7 +2598,7 @@
   "aiChatUnavailable": "Assistente indisponível",
   "aiChatRetry": "O assistente ainda está carregando. Tente novamente em instantes.",
   "aiChatNetworkError": "Erro de conexão. Verifique sua internet e tente novamente.",
-  "migrationResultRevealEyebrow": "Sua cidade recomendada",
+  "migrationResultRevealEyebrow": "Encaixe de cidade atual",
   "migrationResultRevealHeaderTitle": "Recomendação",
   "migrationResultRevealRedoAction": "Refazer questionário",
   "migrationResultRevealCompatibilityLabel": "{pct}% compatível",
@@ -2637,8 +2637,8 @@
   "homeEntryTitleHighlight": "como quer começar",
   "homeEntrySubtitle": "Receba uma direção inicial em poucos minutos ou valide uma cidade que você já está considerando antes de entrar no modo execução.",
   "homeEntrySupportLine": "Direção inicial em cerca de 2 minutos",
-  "homeEntryDiscoverTitle": "Quero descobrir minha melhor cidade",
-  "homeEntryDiscoverBody": "Responda poucas perguntas e receba uma direção inicial com cidade recomendada, alternativas e próximos passos.",
+  "homeEntryDiscoverTitle": "Quero descobrir cidades possíveis",
+  "homeEntryDiscoverBody": "Responda poucas perguntas e receba uma direção inicial com encaixes de cidade, alternativas e possíveis próximos passos.",
   "homeEntryDiscoverBadge": "Caminho mais rápido",
   "homeEntryDiscoverAction": "Receber minha direção inicial",
   "homeEntryKnownCityTitle": "Já tenho uma cidade em mente",
@@ -2924,7 +2924,7 @@
     }
   },
   "housingPlanCityBannerBody": "A maioria dos argentinos chega com moradia temporária e assina contrato depois de conhecer os bairros. Esse costuma ser o caminho mais seguro para começar.",
-  "housingTemporaryBadge": "Recomendado para chegada",
+  "housingTemporaryBadge": "Costuma ajudar na chegada",
   "housingTemporaryCardTitle": "Moradia temporária",
   "housingTemporaryCardBody": "Para os primeiros 30 a 90 dias. Sem contrato longo, sem fiador e com tempo para conhecer a cidade antes de decidir.",
   "housingTemporaryStatDurationValue": "1-3 meses",
@@ -3040,7 +3040,7 @@
   "citySeasonalityHousingTitle": "Moradia na temporada",
   "citySeasonalityJobsTitle": "Mercado de trabalho",
   "citySeasonalityPopulationPrefix": "população",
-  "citySeasonalityHighAdvice": "Dica: planeje chegar fora da alta temporada (mai–out). Você terá muito mais opções de moradia de longo prazo e preços razoáveis. Se precisar chegar na alta, reserve moradia com pelo menos 3 meses de antecedência.",
+  "citySeasonalityHighAdvice": "Dica: chegar fora da alta temporada (mai–out) pode abrir mais opções de moradia de longo prazo e preços razoáveis. Se a alta temporada for a sua única janela, reservar moradia com pelo menos 3 meses de antecedência pode ajudar.",
   "citySeasonalityMediumAdvice": "Dica: prefira assinar contratos de longa duração antes da temporada alta. Isso garante estabilidade de preço mesmo quando a demanda turística aumenta.",
   "citySeasonalityCardBadgeHigh": "Alta temporada",
   "citySeasonalityCardBadgeMedium": "Sazonalidade"

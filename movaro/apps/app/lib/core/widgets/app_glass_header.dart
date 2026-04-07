@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
 
 class AppGlassHeader extends StatelessWidget {
   const AppGlassHeader({
@@ -13,18 +12,18 @@ class AppGlassHeader extends StatelessWidget {
   });
 
   final String title;
+
   /// Optional breadcrumb line shown below [title] in a smaller muted style.
   final String? subtitle;
   final VoidCallback? onBack;
   final VoidCallback? onHelp;
   final Widget? trailing;
 
-  static const double _height = 64;
-  static const double _heightWithSubtitle = 74;
+  static const double _height = 52;
+  static const double _heightWithSubtitle = 60;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
     final helpAction = onHelp == null
         ? null
         : _HeaderIconButton(
@@ -33,7 +32,10 @@ class AppGlassHeader extends StatelessWidget {
           );
     final hasTrailingActions =
         (helpAction != null ? 1 : 0) + (trailing != null ? 1 : 0);
-    final leadingWidth = _headerSideWidthFor(context, actionCount: onBack == null ? 0 : 1);
+    final leadingWidth = _headerSideWidthFor(
+      context,
+      actionCount: onBack == null ? 0 : 1,
+    );
     final trailingWidth = _headerSideWidthFor(
       context,
       actionCount: hasTrailingActions == 0 ? 1 : hasTrailingActions,
@@ -41,84 +43,86 @@ class AppGlassHeader extends StatelessWidget {
 
     return SizedBox(
       height: subtitle != null ? _heightWithSubtitle : _height,
-      child: FrostedPanel(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-        borderRadius: BorderRadius.circular(999),
-        backgroundColor: isDark
-            ? const Color(0xB3141B26)
-            : Colors.white.withValues(alpha: 0.7),
-        blurSigma: 14,
-        boxShadow: const [],
-        child: Row(
-          children: [
-            SizedBox(
-              width: leadingWidth,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: _HeaderActionSlot(
-                  child: onBack == null
-                      ? null
-                      : Transform.translate(
-                          offset: const Offset(-2, 0),
-                          child: _HeaderIconButton(
-                            onPressed: onBack,
-                            icon: Icons.arrow_back_rounded,
-                          ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: leadingWidth,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: _HeaderActionSlot(
+                child: onBack == null
+                    ? null
+                    : Transform.translate(
+                        offset: const Offset(-2, 0),
+                        child: _HeaderIconButton(
+                          onPressed: onBack,
+                          icon: Icons.arrow_back_rounded,
                         ),
-                ),
+                      ),
               ),
             ),
-            Expanded(
-              child: subtitle != null
-                  ? Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          title,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        const SizedBox(height: 1),
-                        Text(
-                          subtitle!,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: AppColors.textSoftFor(context),
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    )
-                  : Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleSmall,
+          ),
+          Expanded(
+            child: subtitle != null
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.3,
+                              color: AppColors.textPrimaryFor(context),
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: AppColors.textSoftFor(context),
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.1,
+                            ),
+                      ),
+                    ],
+                  )
+                : Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.3,
+                      color: AppColors.textPrimaryFor(context),
                     ),
-            ),
-            SizedBox(
-              width: trailingWidth,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (helpAction != null)
-                      _HeaderActionSlot(child: helpAction),
-                    if (trailing != null) _HeaderActionSlot(child: trailing),
-                    if (helpAction == null && trailing == null)
-                      const _HeaderActionSlot(),
-                  ],
-                ),
+                  ),
+          ),
+          SizedBox(
+            width: trailingWidth,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (helpAction != null) _HeaderActionSlot(child: helpAction),
+                  if (trailing != null) _HeaderActionSlot(child: trailing),
+                  if (helpAction == null && trailing == null)
+                    const _HeaderActionSlot(),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -139,21 +143,18 @@ class _HeaderActionSlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    final minSide = width < 380 ? 40.0 : 44.0;
+    final side = width < 380 ? 40.0 : 44.0;
     return ConstrainedBox(
-      constraints: BoxConstraints(minWidth: minSide, minHeight: minSide),
+      constraints: BoxConstraints.tightFor(width: side, height: side),
       child: child == null
-          ? SizedBox(width: minSide, height: minSide)
+          ? SizedBox(width: side, height: side)
           : Center(child: child),
     );
   }
 }
 
 class _HeaderIconButton extends StatelessWidget {
-  const _HeaderIconButton({
-    required this.onPressed,
-    required this.icon,
-  });
+  const _HeaderIconButton({required this.onPressed, required this.icon});
 
   final VoidCallback? onPressed;
   final IconData icon;
@@ -162,13 +163,29 @@ class _HeaderIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     final side = width < 380 ? 40.0 : 44.0;
-    return IconButton(
-      onPressed: onPressed,
-      padding: EdgeInsets.zero,
-      constraints: BoxConstraints.tightFor(width: side, height: side),
-      splashRadius: side / 2,
-      iconSize: 20,
-      icon: Icon(icon),
+    final isDark = AppColors.isDark(context);
+
+    return Material(
+      color: isDark
+          ? Colors.white.withValues(alpha: 0.08)
+          : Colors.white.withValues(alpha: 0.76),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.05),
+        ),
+      ),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(16),
+        child: SizedBox(
+          width: side,
+          height: side,
+          child: Icon(icon, size: 20, color: AppColors.textPrimaryFor(context)),
+        ),
+      ),
     );
   }
 }

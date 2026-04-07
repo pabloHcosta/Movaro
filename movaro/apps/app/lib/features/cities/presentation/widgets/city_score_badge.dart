@@ -109,28 +109,15 @@ class CityScoreBadge extends StatelessWidget {
                     maxLines: 2,
                   ),
                   const SizedBox(height: 3),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      _ScoreValuePill(
-                        value: value,
-                        tint: metric.tint,
-                        trendIcon: trendIcon,
-                        compact: true,
-                      ),
-                      Text(
-                        metric.supporting,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: textSoft,
-                          height: 1.15,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 10.5,
-                        ),
-                        maxLines: 2,
-                      ),
-                    ],
+                  Text(
+                    metric.supporting,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: textSoft,
+                      height: 1.15,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 10.5,
+                    ),
+                    maxLines: 2,
                   ),
                 ],
               ),
@@ -221,22 +208,18 @@ class CityScoreBadge extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _ScoreValuePill(
-                value: value,
-                tint: metric.tint,
-                trendIcon: trendIcon,
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                decoration: BoxDecoration(
-                  color: badgeBackground,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+            decoration: BoxDecoration(
+              color: badgeBackground,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(trendIcon, size: 13, color: metric.tint),
+                const SizedBox(width: 5),
+                Text(
                   metric.badge,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: metric.tint,
@@ -245,8 +228,8 @@ class CityScoreBadge extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -261,48 +244,5 @@ class CityScoreBadge extends StatelessWidget {
       return Icons.remove_rounded;
     }
     return Icons.trending_down_rounded;
-  }
-}
-
-class _ScoreValuePill extends StatelessWidget {
-  const _ScoreValuePill({
-    required this.value,
-    required this.tint,
-    required this.trendIcon,
-    this.compact = false,
-  });
-
-  final int value;
-  final Color tint;
-  final IconData trendIcon;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 8 : 10,
-        vertical: compact ? 5 : 6,
-      ),
-      decoration: BoxDecoration(
-        color: tint.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: tint.withValues(alpha: 0.14)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(trendIcon, size: compact ? 13 : 14, color: tint),
-          const SizedBox(width: 6),
-          Text(
-            '$value',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: tint,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

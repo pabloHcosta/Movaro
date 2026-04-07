@@ -41,7 +41,7 @@ describe('CorridorGuidanceResolverService', () => {
       locale: 'pt',
       currentPhase: 'documents',
       completedItemIds: [],
-      recommendedCityId: 'florianopolis',
+      highlightedCityId: 'florianopolis',
     });
 
     expect(result.found).toBe(true);
@@ -140,7 +140,7 @@ describe('CorridorGuidanceResolverService', () => {
       originCountry: 'argentina',
       destinationCountry: 'brasil',
       locale: 'pt',
-      recommendedCityId: 'florianopolis',
+      highlightedCityId: 'florianopolis',
       currentPhase: 'documents',
       completedItemIds: [],
     });

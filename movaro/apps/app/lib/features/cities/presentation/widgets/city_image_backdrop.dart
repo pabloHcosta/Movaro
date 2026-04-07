@@ -197,9 +197,13 @@ class CollapsibleCityHero extends StatelessWidget {
     this.eyebrow,
     this.subtitle,
     this.meta,
+    this.metaBelowTitle = false,
     this.maxHeightFactor = 0.38,
     this.minHeight = 140,
     this.maxHeight,
+    this.topContentInset = 0,
+    this.bottomContentOffset = 0,
+    this.showCollapseControl = true,
     super.key,
   });
 
@@ -209,9 +213,13 @@ class CollapsibleCityHero extends StatelessWidget {
   final String? eyebrow;
   final String? subtitle;
   final Widget? meta;
+  final bool metaBelowTitle;
   final double maxHeightFactor;
   final double minHeight;
   final double? maxHeight;
+  final double topContentInset;
+  final double bottomContentOffset;
+  final bool showCollapseControl;
 
   double _progress(double collapseRange) {
     if (!scrollController.hasClients || collapseRange <= 0) {
@@ -253,7 +261,8 @@ class CollapsibleCityHero extends StatelessWidget {
         final metaOpacity = (1 - (progress * 2.8)).clamp(0.0, 1.0);
         final imageScale = lerpDouble(1.0, 1.05, progress) ?? 1.0;
         final imageShift = lerpDouble(0, -18, progress) ?? 0;
-        final bottomPadding = lerpDouble(20, 12, progress) ?? 12;
+        final bottomPadding =
+            (lerpDouble(20, 12, progress) ?? 12) + bottomContentOffset;
         final topOverlayAlpha = lerpDouble(0.10, 0.28, progress) ?? 0.28;
         final bottomOverlayAlpha = lerpDouble(0.74, 0.88, progress) ?? 0.88;
         final titleShadowAlpha = lerpDouble(0.18, 0.32, progress) ?? 0.32;
@@ -293,110 +302,157 @@ class CollapsibleCityHero extends StatelessWidget {
               Positioned(
                 left: 20,
                 right: 20,
-                bottom: bottomPadding,
+                bottom: bottomPadding.clamp(0.0, 40.0),
                 child: SafeArea(
                   top: false,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (meta != null)
-                        AnimatedOpacity(
-                          duration: const Duration(milliseconds: 180),
-                          opacity: metaOpacity,
-                          child: IgnorePointer(
-                            ignoring: metaOpacity < 0.05,
-                            child: meta!,
-                          ),
-                        ),
-                      if (meta != null) const SizedBox(height: 10),
-                      if (eyebrow != null)
-                        AnimatedOpacity(
-                          duration: const Duration(milliseconds: 180),
-                          opacity: eyebrowOpacity,
-                          child: Text(
-                            eyebrow!,
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.78),
-                                  letterSpacing: 0.4,
-                                ),
-                          ),
-                        ),
-                      if (eyebrow != null) const SizedBox(height: 4),
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.displaySmall
-                            ?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: titleFontSize,
-                              height: 0.98,
-                              shadows: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(
-                                    alpha: titleShadowAlpha,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final reservedHeadlineSpace = titleFontSize + 72;
+                      final maxInset =
+                          (constraints.maxHeight - reservedHeadlineSpace).clamp(
+                            0.0,
+                            topContentInset,
+                          );
+                      final effectiveTopInset =
+                          lerpDouble(maxInset, 0, progress) ?? 0;
+
+                      return Padding(
+                        padding: EdgeInsets.only(top: effectiveTopInset),
+                        child: Align(
+                          alignment: Alignment.bottomLeft,
+                          child: SingleChildScrollView(
+                            reverse: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (meta != null && !metaBelowTitle)
+                                  AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 180),
+                                    opacity: metaOpacity,
+                                    child: IgnorePointer(
+                                      ignoring: metaOpacity < 0.05,
+                                      child: meta!,
+                                    ),
                                   ),
-                                  blurRadius: 18,
-                                  offset: const Offset(0, 8),
+                                if (meta != null && !metaBelowTitle)
+                                  const SizedBox(height: 10),
+                                if (eyebrow != null)
+                                  AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 180),
+                                    opacity: eyebrowOpacity,
+                                    child: Text(
+                                      eyebrow!,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium
+                                          ?.copyWith(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.78,
+                                            ),
+                                            letterSpacing: 0.4,
+                                          ),
+                                    ),
+                                  ),
+                                if (eyebrow != null) const SizedBox(height: 4),
+                                Text(
+                                  title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .displaySmall
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: titleFontSize,
+                                        height: 0.98,
+                                        shadows: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(
+                                              alpha: titleShadowAlpha,
+                                            ),
+                                            blurRadius: 18,
+                                            offset: const Offset(0, 8),
+                                          ),
+                                        ],
+                                      ),
                                 ),
+                                if (subtitle != null) ...[
+                                  const SizedBox(height: 6),
+                                  AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 180),
+                                    opacity: subtitleOpacity,
+                                    child: IgnorePointer(
+                                      ignoring: subtitleOpacity < 0.05,
+                                      child: Text(
+                                        subtitle!,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall
+                                            ?.copyWith(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.84,
+                                              ),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                if (meta != null && metaBelowTitle) ...[
+                                  const SizedBox(height: 12),
+                                  AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 180),
+                                    opacity: metaOpacity,
+                                    child: IgnorePointer(
+                                      ignoring: metaOpacity < 0.05,
+                                      child: meta!,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
-                      ),
-                      if (subtitle != null) ...[
-                        const SizedBox(height: 6),
-                        AnimatedOpacity(
-                          duration: const Duration(milliseconds: 180),
-                          opacity: subtitleOpacity,
-                          child: IgnorePointer(
-                            ignoring: subtitleOpacity < 0.05,
-                            child: Text(
-                              subtitle!,
-                              style: Theme.of(context).textTheme.titleSmall
-                                  ?.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.84),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
                           ),
                         ),
-                      ],
-                    ],
+                      );
+                    },
                   ),
                 ),
               ),
-              Positioned(
-                right: 16,
-                bottom: 14,
-                child: SafeArea(
-                  top: false,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => _toggle(context, collapseRange),
-                      borderRadius: BorderRadius.circular(999),
-                      child: Ink(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(
-                            alpha: compactControlAlpha,
+              if (showCollapseControl)
+                Positioned(
+                  right: 16,
+                  bottom: 14,
+                  child: SafeArea(
+                    top: false,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => _toggle(context, collapseRange),
+                        borderRadius: BorderRadius.circular(999),
+                        child: Ink(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(
+                              alpha: compactControlAlpha,
+                            ),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.16),
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.16),
-                          ),
-                        ),
-                        child: Center(
-                          child: AnimatedRotation(
-                            duration: const Duration(milliseconds: 220),
-                            turns: progress > 0.55 ? 0.5 : 0.0,
-                            child: const Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              color: Colors.white,
-                              size: 22,
+                          child: Center(
+                            child: AnimatedRotation(
+                              duration: const Duration(milliseconds: 220),
+                              turns: progress > 0.55 ? 0.0 : 0.5,
+                              child: const Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              ),
                             ),
                           ),
                         ),
@@ -404,7 +460,6 @@ class CollapsibleCityHero extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         );

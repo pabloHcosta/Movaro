@@ -2,7 +2,7 @@ import { ChatContextBuilderService } from './chat-context-builder.service';
 import { CitiesCatalogService } from '../../../cities/application/services/cities-catalog.service';
 
 describe('ChatContextBuilderService', () => {
-  it('builds city context even when recommendedCityId arrives without state suffix', async () => {
+  it('builds city context even when highlightedCityId arrives without state suffix', async () => {
     const service = new ChatContextBuilderService({
       resolveCityId: jest.fn().mockReturnValue('florianopolis-sc'),
       getCityById: jest.fn().mockResolvedValue({
@@ -29,7 +29,7 @@ describe('ChatContextBuilderService', () => {
     const context = await service.buildContext({
       originCountry: 'argentina',
       destinationCountry: 'brasil',
-      recommendedCityId: 'florianopolis',
+      highlightedCityId: 'florianopolis',
       locale: 'pt',
     });
 

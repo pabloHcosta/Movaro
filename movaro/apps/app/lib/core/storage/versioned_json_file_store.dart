@@ -52,7 +52,12 @@ class VersionedJsonFileStore {
       await tempFile.rename(file.path);
     } on FileSystemException {
       await file.parent.create(recursive: true);
-      await tempFile.copy(file.path);
+      if (tempFile.existsSync()) {
+        await tempFile.copy(file.path);
+      } else {
+        // iOS simulator can fail rename after consuming the temp file.
+        await file.writeAsString(payload, flush: true);
+      }
       if (tempFile.existsSync()) {
         try {
           await tempFile.delete();

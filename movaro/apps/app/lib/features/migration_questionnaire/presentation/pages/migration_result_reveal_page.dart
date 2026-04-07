@@ -26,9 +26,9 @@ import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 
 /// Shown immediately after the questionnaire completes.
 ///
-/// Reveals the recommended city with a cinematic hero image, a compatibility
-/// score, the top reasons for the recommendation, and alternative cities the
-/// user can explore before starting the guided plan.
+/// Surfaces the current shortlist with a cinematic hero image, compatibility
+/// signals, leading reasons, and alternative cities the user can explore
+/// before choosing how to continue the guided plan.
 class MigrationResultRevealPage extends StatefulWidget {
   const MigrationResultRevealPage({
     required this.controller,
@@ -93,13 +93,13 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
   }
 
   Future<void> _compareAlternatives(
-    City recommendedCity,
+    City highlightedCity,
     List<City> alternatives,
   ) async {
     _showCityComparisonSheet(
       context,
       widget.controller.generatedPlan!,
-      recommendedCity,
+      highlightedCity,
       alternatives,
     );
   }
@@ -288,19 +288,19 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
 
   Future<void> _prefetchRecommendationSignals() async {
     final plan = widget.controller.generatedPlan;
-    final recommendedCity = plan?.recommendedCity;
-    if (plan == null || recommendedCity == null) {
+    final primaryCity = plan?.currentPlanCity;
+    if (plan == null || primaryCity == null) {
       return;
     }
 
     final destinationAirport = FlightRouteContextResolver.resolveDestinationAirport(
-      destinationCityName: recommendedCity.name,
+      destinationCityName: primaryCity.name,
       destinationCountryIso: FlightRouteContextResolver.resolveDestinationCountryIso(
-        cityCountryCode: recommendedCity.countryCode,
+        cityCountryCode: primaryCity.countryCode,
         planDestinationCountry: plan.destinationCountry,
       ),
-      destinationLatitude: recommendedCity.latitude,
-      destinationLongitude: recommendedCity.longitude,
+      destinationLatitude: primaryCity.latitude,
+      destinationLongitude: primaryCity.longitude,
     );
     final originCountryIso = FlightRouteContextResolver.resolveOriginCountryIso(
       planOriginCountry: plan.originCountry,
@@ -315,12 +315,12 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
     if (originIata != null && destinationAirport?.iataCode != null) {
       requests.add(
         widget.citiesController.loadTravelInsightForCity(
-          recommendedCity.id,
+          primaryCity.id,
           originIata: originIata,
           destIata: destinationAirport?.iataCode,
         ),
       );
-      for (final city in plan.candidateCities) {
+      for (final city in plan.reviewCities) {
         final altDestination = FlightRouteContextResolver.resolveDestinationAirport(
           destinationCityName: city.name,
           destinationCountryIso: FlightRouteContextResolver.resolveDestinationCountryIso(
@@ -369,7 +369,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
   void _showCityComparisonSheet(
     BuildContext context,
     MigrationPlan plan,
-    City recommendedCity,
+    City highlightedCity,
     List<City> alternatives,
   ) {
     showModalBottomSheet<void>(
@@ -378,7 +378,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
       backgroundColor: Colors.transparent,
       builder: (_) => _CityComparisonSheet(
         plan: plan,
-        recommendedCity: recommendedCity,
+        highlightedCity: highlightedCity,
         alternatives: alternatives,
       ),
     );
@@ -392,11 +392,11 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
       animation: widget.controller,
       builder: (context, _) {
         final plan = widget.controller.generatedPlan;
-        final recommendedCity = plan?.recommendedCity;
+        final primaryCity = plan?.currentPlanCity;
 
         if (widget.controller.isInitializing ||
             plan == null ||
-            recommendedCity == null) {
+            primaryCity == null) {
           return const Scaffold(
             body: Stack(
               children: [
@@ -407,30 +407,30 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
           );
         }
 
-        final alternatives = plan.candidateCities
-            .where((c) => c.id != recommendedCity.id)
+        final alternatives = plan.reviewCities
+            .where((c) => c.id != primaryCity.id)
             .toList(growable: false);
 
         final compatibilityPct = (plan.confidence * 100).round().clamp(0, 100);
 
         final reasons = plan.cityRecommendationReasons.isNotEmpty
             ? plan.cityRecommendationReasons
-            : recommendedCity.recommendationReasons;
+            : primaryCity.recommendationReasons;
 
         final preferredCity = plan.preferredCity;
         final hasPreferred = preferredCity != null;
-        final preferredMatchesRecommended =
-            hasPreferred && preferredCity.id == recommendedCity.id;
+        final preferredMatchesHighlighted =
+            hasPreferred && preferredCity.id == primaryCity.id;
         final destinationAirport =
             FlightRouteContextResolver.resolveDestinationAirport(
-              destinationCityName: recommendedCity.name,
+              destinationCityName: primaryCity.name,
               destinationCountryIso:
                   FlightRouteContextResolver.resolveDestinationCountryIso(
-                    cityCountryCode: recommendedCity.countryCode,
+                    cityCountryCode: primaryCity.countryCode,
                     planDestinationCountry: plan.destinationCountry,
                   ),
-              destinationLatitude: recommendedCity.latitude,
-              destinationLongitude: recommendedCity.longitude,
+              destinationLatitude: primaryCity.latitude,
+              destinationLongitude: primaryCity.longitude,
             );
         final originCountryIso =
             FlightRouteContextResolver.resolveOriginCountryIso(
@@ -441,19 +441,19 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
           originCountryIso: originCountryIso,
         );
         final originIata = originAirport?.iataCode;
-        final recommendedRoute = originIata == null ||
+        final primaryRoute = originIata == null ||
                 destinationAirport?.iataCode == null
             ? null
             : widget.citiesController.travelInsightFor(
-                recommendedCity.id,
+                primaryCity.id,
                 originIata: originIata,
                 destIata: destinationAirport?.iataCode,
               );
         final alternativeTradeoff = _FlightTradeoffData.resolve(
-          recommendedRoute: recommendedRoute,
+          primaryRoute: primaryRoute,
           citiesController: widget.citiesController,
           planDestinationCountry: plan.destinationCountry,
-          recommendedCity: recommendedCity,
+          highlightedCity: primaryCity,
           alternatives: alternatives,
         );
         return Scaffold(
@@ -468,7 +468,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                   Column(
                     children: [
                       _HeroSection(
-                        city: recommendedCity,
+                        city: primaryCity,
                         scrollController: _scrollController,
                       ),
                       Expanded(
@@ -483,28 +483,28 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               icon: Icons.explore_rounded,
                             ),
                             const SizedBox(height: 16),
-                            if (hasPreferred && preferredMatchesRecommended)
+                            if (hasPreferred && preferredMatchesHighlighted)
                               _AntiAnchorReinforcementBanner(
-                                cityName: recommendedCity.name,
+                                cityName: primaryCity.name,
                               ),
 
-                            if (hasPreferred && !preferredMatchesRecommended)
+                            if (hasPreferred && !preferredMatchesHighlighted)
                               _AntiAnchorComparisonSection(
                                 preferredCity: preferredCity,
-                                recommendedCity: recommendedCity,
+                                highlightedCity: primaryCity,
                                 onGoWithPreferred: () =>
                                     _openCityDetail(preferredCity),
-                                onTryRecommended: () =>
-                                    _openCityDetail(recommendedCity),
+                                onTryHighlighted: () =>
+                                    _openCityDetail(primaryCity),
                               ),
 
                             if (hasPreferred) const SizedBox(height: 16),
 
                             _CompatibilityCard(
-                              city: recommendedCity,
+                              city: primaryCity,
                               compatibilityPct: compatibilityPct,
                               onTap: () => _showCompatibilityBreakdown(
-                                recommendedCity,
+                                primaryCity,
                                 compatibilityPct,
                               ),
                             ),
@@ -513,7 +513,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               originCountryIso: originCountryIso,
                               originIata: originIata,
                               destIata: destinationAirport?.iataCode,
-                              routeInsight: recommendedRoute,
+                              routeInsight: primaryRoute,
                             ),
                             if (alternativeTradeoff != null) ...[
                               const SizedBox(height: 12),
@@ -524,7 +524,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                             if (reasons.isNotEmpty) ...[
                               const SizedBox(height: 16),
                               _WhyCitySection(
-                                cityName: recommendedCity.name,
+                                cityName: primaryCity.name,
                                 reasons: reasons,
                               ),
                             ],
@@ -533,7 +533,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               _AlternativesSection(
                                 cities: alternatives,
                                 confidence: plan.confidence,
-                                recommendedCity: recommendedCity,
+                                highlightedCity: primaryCity,
                                 planTimeline: plan.timeline,
                                 onTap: (city) => _openCityDetail(city),
                               ),
@@ -541,7 +541,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                             const SizedBox(height: 16),
                             _GuidePreviewSection(
                               plan: plan,
-                              cityName: recommendedCity.name,
+                              cityName: primaryCity.name,
                             ),
                           ],
                         ),
@@ -554,13 +554,13 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                     right: 0,
                     bottom: 0,
                     child: _FooterCta(
-                      city: recommendedCity,
+                      city: primaryCity,
                       hasAlternatives: alternatives.isNotEmpty,
-                      onViewDetails: () => _openCityDetail(recommendedCity),
+                      onViewDetails: () => _openCityDetail(primaryCity),
                       onCompare: () =>
-                          _compareAlternatives(recommendedCity, alternatives),
+                          _compareAlternatives(primaryCity, alternatives),
                       onStartPreparation: () =>
-                          _startPreparation(recommendedCity),
+                          _startPreparation(primaryCity),
                     ),
                   ),
                   SafeArea(
@@ -607,26 +607,26 @@ class _HeroSection extends StatelessWidget {
 
 class _FlightTradeoffData {
   const _FlightTradeoffData({
-    required this.recommendedCityName,
-    required this.recommendedUsdMin,
-    required this.recommendedUsdMax,
+    required this.highlightedCityName,
+    required this.highlightedUsdMin,
+    required this.highlightedUsdMax,
     required this.cheaperCityName,
     required this.cheaperUsdMin,
     required this.cheaperUsdMax,
   });
 
-  final String recommendedCityName;
-  final int recommendedUsdMin;
-  final int recommendedUsdMax;
+  final String highlightedCityName;
+  final int highlightedUsdMin;
+  final int highlightedUsdMax;
   final String cheaperCityName;
   final int cheaperUsdMin;
   final int cheaperUsdMax;
 
-  String recommendedRange(BuildContext context) =>
+  String highlightedRange(BuildContext context) =>
       MultiCurrencyAmount.formatRangeFromUsd(
         context: context,
-        minUsd: recommendedUsdMin,
-        maxUsd: recommendedUsdMax,
+        minUsd: highlightedUsdMin,
+        maxUsd: highlightedUsdMax,
       );
 
   String cheaperRange(BuildContext context) =>
@@ -637,13 +637,13 @@ class _FlightTradeoffData {
       );
 
   static _FlightTradeoffData? resolve({
-    required TravelRouteInsight? recommendedRoute,
+    required TravelRouteInsight? primaryRoute,
     required CitiesController citiesController,
     required String? planDestinationCountry,
-    required City recommendedCity,
+    required City highlightedCity,
     required List<City> alternatives,
   }) {
-    if (recommendedRoute == null) {
+    if (primaryRoute == null) {
       return null;
     }
 
@@ -662,7 +662,7 @@ class _FlightTradeoffData {
       );
       final route = citiesController.travelInsightFor(
         city.id,
-        originIata: recommendedRoute.originIata,
+        originIata: primaryRoute.originIata,
         destIata: altDestination?.iataCode,
       );
       if (route == null) {
@@ -679,15 +679,15 @@ class _FlightTradeoffData {
       return null;
     }
 
-    final delta = recommendedRoute.lowUsdAverage - cheapestRoute.lowUsdAverage;
+    final delta = primaryRoute.lowUsdAverage - cheapestRoute.lowUsdAverage;
     if (delta < 30) {
       return null;
     }
 
     return _FlightTradeoffData(
-      recommendedCityName: recommendedCity.name,
-      recommendedUsdMin: recommendedRoute.lowUsdMin,
-      recommendedUsdMax: recommendedRoute.lowUsdMax,
+      highlightedCityName: highlightedCity.name,
+      highlightedUsdMin: primaryRoute.lowUsdMin,
+      highlightedUsdMax: primaryRoute.lowUsdMax,
       cheaperCityName: cheapestCity.name,
       cheaperUsdMin: cheapestRoute.lowUsdMin,
       cheaperUsdMax: cheapestRoute.lowUsdMax,
@@ -725,8 +725,8 @@ class _FlightTradeoffCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   context.l10n.migrationResultFlightTradeoffBody(
-                    data.recommendedCityName,
-                    data.recommendedRange(context),
+                    data.highlightedCityName,
+                    data.highlightedRange(context),
                     data.cheaperCityName,
                     data.cheaperRange(context),
                   ),
@@ -927,14 +927,14 @@ class _AlternativesSection extends StatelessWidget {
   const _AlternativesSection({
     required this.cities,
     required this.confidence,
-    required this.recommendedCity,
+    required this.highlightedCity,
     required this.onTap,
     this.planTimeline,
   });
 
   final List<City> cities;
   final double confidence;
-  final City recommendedCity;
+  final City highlightedCity;
   final void Function(City) onTap;
 
   /// When provided, each alternative city is checked for a seasonality
@@ -946,7 +946,7 @@ class _AlternativesSection extends StatelessWidget {
     final isDark = AppColors.isDark(context);
     final l10n = context.l10n;
     final recDims = MigrationPlanGenerator.cityDimensionsPublic(
-      recommendedCity,
+      highlightedCity,
     );
     final locale = Localizations.localeOf(context).languageCode;
 
@@ -979,10 +979,10 @@ class _AlternativesSection extends StatelessWidget {
 
           // Compute dimension diff chips
           final altDims = MigrationPlanGenerator.cityDimensionsPublic(city);
-          // Biggest advantage of alt over recommended
+          // Biggest advantage of alt over highlighted city
           String? altWinsDim;
           double altWinsDelta = 0;
-          // Biggest advantage of recommended over alt
+          // Biggest advantage of highlighted city over alt
           String? recWinsDim;
           double recWinsDelta = 0;
           for (final key in recDims.keys) {
@@ -1084,7 +1084,7 @@ class _AlternativesSection extends StatelessWidget {
                               _DiffChip(
                                 label: _dimensionLabel(context, recWinsDim),
                                 wins: false,
-                                cityName: recommendedCity.name,
+                                cityName: highlightedCity.name,
                               ),
                             if (seasonConflict?.hasConflict == true)
                               _SeasonalityConflictChip(
@@ -1379,12 +1379,12 @@ class _DiffChip extends StatelessWidget {
 class _CityComparisonSheet extends StatefulWidget {
   const _CityComparisonSheet({
     required this.plan,
-    required this.recommendedCity,
+    required this.highlightedCity,
     required this.alternatives,
   });
 
   final MigrationPlan plan;
-  final City recommendedCity;
+  final City highlightedCity;
   final List<City> alternatives;
 
   @override
@@ -1404,7 +1404,7 @@ class _CityComparisonSheetState extends State<_CityComparisonSheet> {
     final compareCity =
         alternatives[_selectedIndex.clamp(0, alternatives.length - 1)];
     final recDims = MigrationPlanGenerator.cityDimensionsPublic(
-      widget.recommendedCity,
+      widget.highlightedCity,
     );
     final altDims = MigrationPlanGenerator.cityDimensionsPublic(compareCity);
 
@@ -1525,7 +1525,7 @@ class _CityComparisonSheetState extends State<_CityComparisonSheet> {
 
                 // ── Score gap banner ─────────────────────────────────────────
                 _ScoreGapBanner(
-                  recommendedCity: widget.recommendedCity,
+                  highlightedCity: widget.highlightedCity,
                   compareCity: compareCity,
                   gapPct: gapPct,
                   recWins: recWinsOverall,
@@ -1540,7 +1540,7 @@ class _CityComparisonSheetState extends State<_CityComparisonSheet> {
                     const SizedBox(width: 5),
                     Expanded(
                       child: Text(
-                        widget.recommendedCity.name,
+                        widget.highlightedCity.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -1608,14 +1608,14 @@ class _CityComparisonSheetState extends State<_CityComparisonSheet> {
 
 class _ScoreGapBanner extends StatelessWidget {
   const _ScoreGapBanner({
-    required this.recommendedCity,
+    required this.highlightedCity,
     required this.compareCity,
     required this.gapPct,
     required this.recWins,
     required this.locale,
   });
 
-  final City recommendedCity;
+  final City highlightedCity;
   final City compareCity;
   final int gapPct;
   final bool recWins;
@@ -1624,7 +1624,7 @@ class _ScoreGapBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
-    final winner = recWins ? recommendedCity.name : compareCity.name;
+    final winner = recWins ? highlightedCity.name : compareCity.name;
 
     final gapLabel = switch (gapPct) {
       <= 3 => switch (locale) {
@@ -2764,15 +2764,15 @@ class _AntiAnchorReinforcementBanner extends StatelessWidget {
 class _AntiAnchorComparisonSection extends StatelessWidget {
   const _AntiAnchorComparisonSection({
     required this.preferredCity,
-    required this.recommendedCity,
+    required this.highlightedCity,
     required this.onGoWithPreferred,
-    required this.onTryRecommended,
+    required this.onTryHighlighted,
   });
 
   final City preferredCity;
-  final City recommendedCity;
+  final City highlightedCity;
   final VoidCallback onGoWithPreferred;
-  final VoidCallback onTryRecommended;
+  final VoidCallback onTryHighlighted;
 
   @override
   Widget build(BuildContext context) {
@@ -2781,7 +2781,7 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
 
     final prefDims = MigrationPlanGenerator.cityDimensionsPublic(preferredCity);
     final recDims = MigrationPlanGenerator.cityDimensionsPublic(
-      recommendedCity,
+      highlightedCity,
     );
 
     final strengths = <String>[];
@@ -2835,7 +2835,7 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
                     Text(
                       l10n.antiAnchorComparisonBody(
                         preferredCity.name,
-                        recommendedCity.name,
+                        highlightedCity.name,
                       ),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: textSoft,
@@ -2850,7 +2850,7 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
           const SizedBox(height: 16),
           if (strengths.isNotEmpty) ...[
             Text(
-              '${l10n.antiAnchorStrength()} · ${recommendedCity.name}',
+              '${l10n.antiAnchorStrength()} · ${highlightedCity.name}',
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: AppColors.success,
@@ -2882,7 +2882,7 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
           ],
           if (attentionPoints.isNotEmpty) ...[
             Text(
-              '${l10n.antiAnchorAttention()} · ${recommendedCity.name}',
+              '${l10n.antiAnchorAttention()} · ${highlightedCity.name}',
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: AppColors.warning,
@@ -2933,7 +2933,7 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton(
-                  onPressed: onTryRecommended,
+                  onPressed: onTryHighlighted,
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
@@ -2941,7 +2941,7 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    l10n.antiAnchorTryRecommended(recommendedCity.name),
+                    l10n.antiAnchorTryRecommended(highlightedCity.name),
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 12),
                   ),

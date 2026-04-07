@@ -550,15 +550,15 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String introRedesignPlanDescription() => _localizedText(
-    pt: 'A gente transforma suas respostas em um plano claro para você seguir.',
-    es: 'Transformamos tus respuestas en un plan claro para que lo sigas.',
-    en: 'We turn your answers into a clear plan for you to follow.',
+    pt: 'A gente transforma suas respostas em um plano claro para você revisar e organizar sua jornada.',
+    es: 'Transformamos tus respuestas en un plan claro para que revises y organices tu camino.',
+    en: 'We turn your answers into a clear plan you can review and use to organize your journey.',
   );
 
   String introRedesignGuideTitle() => _localizedText(
-    pt: 'Saiba exatamente o que precisa resolver antes de chegar',
-    es: 'Sabé exactamente qué necesitás resolver antes de llegar',
-    en: 'Know exactly what you need to sort out before you arrive',
+    pt: 'Entenda o que costuma valer revisar antes de chegar',
+    es: 'Entendé qué suele valer la pena revisar antes de llegar',
+    en: 'Understand what is commonly worth reviewing before you arrive',
   );
 
   String introRedesignGuideDescription() => _localizedText(
@@ -844,9 +844,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
       _localizedText(pt: '⚡ Mais rápido', es: '⚡ Más rápido', en: '⚡ Fastest');
 
   String questionnaireVariantLeanDescription() => _localizedText(
-    pt: '4 perguntas essenciais para chegar a uma cidade recomendada sem perder tempo.',
-    es: '4 preguntas esenciales para llegar a una ciudad recomendada sin perder tiempo.',
-    en: '4 essential questions to reach a recommended city without wasting time.',
+    pt: '4 perguntas essenciais para chegar a uma shortlist de cidades sem perder tempo.',
+    es: '4 preguntas esenciales para llegar a una shortlist de ciudades sin perder tiempo.',
+    en: '4 essential questions to reach a city shortlist without wasting time.',
   );
 
   String questionnaireVariantLeanTime() =>
@@ -1024,9 +1024,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String discoverFlowBannerBody() => _localizedText(
-    pt: 'Responda poucas perguntas para receber uma direção inicial com cidade recomendada, alternativas e próximos passos.',
-    es: 'Respondé pocas preguntas para recibir una dirección inicial con ciudad recomendada, alternativas y próximos pasos.',
-    en: 'Answer a few questions to get an initial direction with a recommended city, alternatives, and next steps.',
+    pt: 'Responda poucas perguntas para receber uma direção inicial com cidade em destaque, alternativas e próximos passos.',
+    es: 'Respondé pocas preguntas para recibir una dirección inicial con una ciudad destacada, alternativas y próximos pasos.',
+    en: 'Answer a few questions to get an initial direction with a highlighted city, alternatives, and next steps.',
   );
 
   String discoverFlowBannerAction() => _localizedText(
@@ -2175,9 +2175,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String redoQuestionnaireDialogWarning() => _localizedText(
-    pt: 'A cidade recomendada e o plano atual serão descartados.',
-    es: 'La ciudad recomendada y el plan actual se descartarán.',
-    en: 'The recommended city and current plan will be discarded.',
+    pt: 'A cidade em destaque e o plano atual serão descartados.',
+    es: 'La ciudad destacada y el plan actual se descartarán.',
+    en: 'The highlighted city and current plan will be discarded.',
   );
 
   String redoQuestionnaireDialogConfirm() => _localizedText(
@@ -2328,9 +2328,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String antiAnchorReinforcementBody(String cityName) => _localizedText(
-    pt: '$cityName também é a nossa recomendação com base no seu perfil.',
-    es: '$cityName también es nuestra recomendación según tu perfil.',
-    en: '$cityName is also our recommendation based on your profile.',
+    pt: '$cityName também aparece entre os encaixes mais fortes com base no seu perfil.',
+    es: '$cityName también aparece entre los encajes más fuertes según tu perfil.',
+    en: '$cityName also appears among the stronger matches based on your profile.',
   );
 
   String antiAnchorComparisonTitle(String preferredCity) => _localizedText(
@@ -2341,11 +2341,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
 
   String antiAnchorComparisonBody(
     String preferredCity,
-    String recommendedCity,
+    String highlightedCity,
   ) => _localizedText(
-    pt: 'Mas com base no seu perfil, $recommendedCity pode ser uma opção ainda melhor. Veja a comparação:',
-    es: 'Pero según tu perfil, $recommendedCity podría ser una opción aún mejor. Mirá la comparación:',
-    en: 'But based on your profile, $recommendedCity might be an even better option. See the comparison:',
+    pt: 'Mas com base no seu perfil, $highlightedCity também aparece como um encaixe forte. Veja a comparação:',
+    es: 'Pero según tu perfil, $highlightedCity también aparece como un encaje fuerte. Mirá la comparación:',
+    en: 'But based on your profile, $highlightedCity also appears as a strong match. See the comparison:',
   );
 
   String antiAnchorGoWithPreferred(String cityName) => _localizedText(

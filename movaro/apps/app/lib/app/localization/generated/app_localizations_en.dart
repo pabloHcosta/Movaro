@@ -103,7 +103,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get publicHomeFocusedDescription =>
-      'Movaro is currently designed for people evaluating a move from Argentina to Brazil. Instead of showing everything at once, it helps you choose the best first step.';
+      'Movaro is currently designed for people evaluating a move from Argentina to Brazil. Instead of showing everything at once, it helps you explore useful starting points.';
 
   @override
   String publicHomeSelectedJourneyDescription(
@@ -114,11 +114,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get publicHomePrimaryQuestionTitle => 'Start with the main decision';
+  String get publicHomePrimaryQuestionTitle => 'Start with a useful question';
 
   @override
   String get publicHomePrimaryQuestionBody =>
-      'First, decide whether you need a guided plan, a city comparison, or just a quick overview of what the product does.';
+      'You can begin with a guided plan, a city comparison, or a quick overview of what the product does.';
 
   @override
   String get publicHomeTrustFastTitle => 'Fast start';
@@ -245,13 +245,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeHeroNoPlanBody =>
-      'Answer a few quick questions and get a recommended city that fits your profile.';
+      'Answer a few quick questions and review cities that may fit your profile.';
 
   @override
   String get homeHeroStepQuestionnaire => 'Answer quick questions';
 
   @override
-  String get homeHeroStepCity => 'Get ideal city';
+  String get homeHeroStepCity => 'Review possible cities';
 
   @override
   String get homeHeroStepGuide => 'Execute with guide';
@@ -606,23 +606,23 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get explorePlanDraftTitle => 'Your plan still needs a decision';
+  String get explorePlanDraftTitle => 'Your plan still needs a closer review';
 
   @override
   String get explorePlanDraftBody =>
-      'You already have a draft. Reopen the result and confirm the city before moving into checklist mode.';
+      'You already have a draft. Reopen the result and review the city options before moving into checklist mode.';
 
   @override
   String explorePlanDraftBodyWithCity(Object city) {
-    return '$city is currently leading. Reopen the result, compare it, and confirm it when ready.';
+    return '$city is one of the leading options right now. Reopen the result and compare it again when you are ready.';
   }
 
   @override
-  String get exploreRecommendedCityTitle => 'Leading city right now';
+  String get exploreRecommendedCityTitle => 'City to review now';
 
   @override
   String get exploreRecommendedCityBody =>
-      'Open the city details to validate cost, quality of life, and fit with your plan.';
+      'Open the city details to review cost, quality of life, and fit with your plan.';
 
   @override
   String get exploreOpenCityAction => 'Open city';
@@ -1651,15 +1651,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get migrationPlanSummaryTitle => 'What you told us';
 
   @override
-  String get planRecommendedCityTitle => 'Suggested city to start with';
+  String get planRecommendedCityTitle => 'City to review first';
 
   @override
   String planRecommendedCityDescription(String city, String stateCode) {
-    return 'Based on your choices, Movaro suggests looking at $city, $stateCode first.';
+    return 'Based on your choices, $city, $stateCode appears as a useful place to review first.';
   }
 
   @override
-  String get planRecommendedCityAction => 'View this city';
+  String get planRecommendedCityAction => 'Review this city';
 
   @override
   String planSummaryOrigin(String value) {
@@ -1948,7 +1948,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planStepOpenHousingPointThree =>
-      'Neighborhood-level analysis still needs a dedicated data layer; for now, use the recommended city as your first filter.';
+      'Neighborhood-level analysis still needs a dedicated data layer; for now, use the current city match as an initial filter.';
 
   @override
   String get planStepOpenGeneralEyebrow => 'Guided checklist';
@@ -2101,25 +2101,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'Good options if you are looking for work';
 
   @override
-  String get citiesExploreHousingEasyTitle => 'Best for a lighter landing';
+  String get citiesExploreHousingEasyTitle => 'Good for a lighter landing';
 
   @override
   String get citiesExploreHousingPressureTitle => 'Need more cash upfront';
 
   @override
   String get citiesExploreSoftLandingTitle =>
-      'Best for a lower-friction landing';
+      'Good for a lower-friction landing';
 
   @override
   String get citiesExploreFamilyStabilityTitle =>
-      'Best for a more predictable arrival';
+      'Good for a more predictable arrival';
 
   @override
-  String get citiesExploreIncomeStartTitle => 'Best if you need income early';
+  String get citiesExploreIncomeStartTitle =>
+      'Good if you may need income early';
 
   @override
   String get citiesExploreCoastalTitle =>
-      'Best if you want to live near the beach';
+      'Good if you want to live near the beach';
 
   @override
   String get citiesExploreCoastalSoftLandingTitle =>
@@ -2344,21 +2345,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Use these indicators as a starting point, not as absolute truth.';
 
   @override
-  String get cityDetailDecisionSnapshotTitle => 'Decision snapshot';
+  String get cityDetailDecisionSnapshotTitle => 'Quick city read';
 
   @override
   String cityDetailDecisionSnapshotSubtitle(Object bestFor) {
-    return 'Movaro sees this city as a strong option if you are prioritizing $bestFor.';
+    return 'This city may be more relevant if you are prioritizing $bestFor.';
   }
 
   @override
   String cityDetailDecisionSnapshotPlanSubtitle(Object bestFor) {
-    return 'For your plan, this city stands out if you are prioritizing $bestFor.';
+    return 'For your plan, this city may stand out if you are prioritizing $bestFor.';
   }
 
   @override
   String cityDetailDecisionSnapshotRecommendedSubtitle(Object bestFor) {
-    return 'This city is currently leading in your plan if your focus is $bestFor.';
+    return 'This city is currently one of the stronger matches in your plan if your focus is $bestFor.';
   }
 
   @override
@@ -2749,30 +2750,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stageClarityBody =>
-      'Understand your starting point and choose the best path to begin.';
+      'Understand your starting point and review useful ways to begin.';
 
   @override
   String get stageClarityAction => 'Choose one path below';
 
   @override
-  String get stageDecisionTitle => 'Decision';
+  String get stageDecisionTitle => 'Explore options';
 
   @override
   String get stageDecisionBody =>
-      'Get an initial recommendation and validate the city that makes the most sense now.';
+      'Get an initial shortlist and review the cities that seem most relevant now.';
 
   @override
-  String get stageDecisionAction => 'Answer and move to the result';
+  String get stageDecisionAction => 'Answer and view matches';
 
   @override
   String get stageExecutionTitle => 'Execution';
 
   @override
   String get stageExecutionBody =>
-      'Turn the chosen city into concrete next steps.';
+      'Turn the reviewed city into concrete next steps.';
 
   @override
-  String get stageExecutionAction => 'Start with the recommended action';
+  String get stageExecutionAction => 'Start with a suggested action';
 
   @override
   String favoritesPageCount(Object current, Object total) {
@@ -2851,7 +2852,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cityComparisonHeaderLabel => 'Metric';
 
   @override
-  String get cityComparisonBestFitBadge => 'BEST FIT';
+  String get cityComparisonBestFitBadge => 'STRONG MATCH';
 
   @override
   String get cityComparisonTopBadge => 'TOP';
@@ -2899,7 +2900,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cityComparisonCommunitySmall => 'Small';
 
   @override
-  String get cityComparisonWinnerLabel => 'BEST CHOICE FOR YOU';
+  String get cityComparisonWinnerLabel => 'CURRENT COMPARISON EDGE';
 
   @override
   String get cityComparisonUnavailable => '—';
@@ -3942,11 +3943,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planBeachDecisionCoastalHeadline =>
-      'The recommendation already points to the coast';
+      'Your current city match already points to the coast';
 
   @override
   String planBeachDecisionCoastalBody(Object cityName) {
-    return '$cityName already fits the coastal-city filter. The next step is understanding whether housing entry and local routine match your current situation.';
+    return '$cityName already fits the coastal-city filter. A useful next check is whether housing entry and local routine match your current situation.';
   }
 
   @override
@@ -4390,7 +4391,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String housingDecisionSectionBodyWithCity(Object city) {
-    return 'Before assuming $city is the best option, validate whether rent, guarantees, and initial setup look viable for your current situation. The risk is not only the price, but the real path to secure housing.';
+    return 'Before treating $city as a strong option, validate whether rent, guarantees, and initial setup look viable for your current situation. The risk is not only the price, but the real path to secure housing.';
   }
 
   @override
@@ -4879,7 +4880,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get migrationPlanCopilotResultBody =>
-      'First, check whether the recommended city really fits your context. When you want to turn that decision into concrete preparation, open the guided layer with a checklist, documents, and an arrival reserve.';
+      'First, check whether the current city match still fits your context. When you want to turn that exploration into concrete preparation, open the guided layer with a checklist, documents, and an arrival reserve.';
 
   @override
   String migrationPlanCopilotStepCounter(Object current, Object total) {
@@ -4954,7 +4955,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get migrationPlanCopilotFallbackActionBody =>
-      'Open this stage to see the first recommended action.';
+      'Open this stage to see a useful first action.';
 
   @override
   String get migrationPlanCopilotRiskTitle => 'Main risk now';
@@ -4979,26 +4980,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can jump directly to the stage you need, but Movaro keeps the order clear so the move does not lose priority.';
 
   @override
-  String get migrationPlanCopilotRecommendedTitle => 'Recommended next step';
+  String get migrationPlanCopilotRecommendedTitle =>
+      'Suggested area to review next';
 
   @override
   String get migrationPlanCopilotRecommendedReadinessBody =>
-      'Start with this stage to remove the first blockers and give the rest of the plan a stronger base.';
+      'This stage may help reduce the first blockers and give the rest of the plan a stronger base.';
 
   @override
   String get migrationPlanCopilotRecommendedDocumentsBody =>
-      'The document layer still deserves attention first. Resolve it now to avoid more expensive blockers later.';
+      'The document layer may deserve attention first. Reviewing it now can reduce more expensive blockers later.';
 
   @override
   String get migrationPlanCopilotRecommendedBudgetBody =>
-      'Now it is worth turning the plan into real numbers and reviewing housing entry before arrival gets tight.';
+      'This may be a good moment to turn the plan into real numbers and review housing entry before arrival gets tight.';
 
   @override
   String get migrationPlanCopilotRecommendedArrivalBody =>
-      'You already have enough base to organize the arrival. Use this stage to move from plan to execution.';
+      'You may already have enough base to organize the arrival. This stage can help you move from planning into execution.';
 
   @override
-  String get migrationPlanCopilotRecommendedOpen => 'Open recommended stage';
+  String get migrationPlanCopilotRecommendedOpen => 'Open suggested stage';
 
   @override
   String get migrationPlanCopilotQuickQuestionsTitle => 'Quick questions';
@@ -5047,16 +5049,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get migrationPlanCopilotFinishAction => 'Finish for now';
 
   @override
-  String get migrationPlanDecisionLabel => 'City choice';
+  String get migrationPlanDecisionLabel => 'City comparison';
 
   @override
   String migrationPlanDecisionTitle(Object goal) {
-    return 'Now compare the cities that best match $goal';
+    return 'Now compare the cities that may match $goal more closely';
   }
 
   @override
   String migrationPlanDecisionBody(Object timeline) {
-    return 'Based on your $timeline horizon, these options come first because they are closer to the profile you selected.';
+    return 'Based on your $timeline horizon, these options appear first because they are closer to the profile you selected.';
   }
 
   @override
@@ -5064,7 +5066,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get migrationPlanDecisionSummaryBody =>
-      'Choose the city that makes the most sense first. The detailed checklist only comes after that decision.';
+      'Review the city options first. The detailed checklist becomes more useful after you decide which route to keep exploring.';
 
   @override
   String migrationPlanHeroTitle(Object city) {
@@ -5171,18 +5173,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get migrationPlanResultPrimaryCtaEyebrow => 'Next step';
+  String get migrationPlanResultPrimaryCtaEyebrow => 'Possible next move';
 
   @override
-  String get migrationPlanResultStartPlanTitle => 'Start my plan';
+  String get migrationPlanResultStartPlanTitle => 'Open this route';
 
   @override
   String migrationPlanResultStartPlanBody(Object city) {
-    return 'Review $city with a little more context and confirm it when you are ready to unlock the full guided plan.';
+    return 'Review $city with a little more context and keep exploring it if it still feels relevant for your route.';
   }
 
   @override
-  String get migrationPlanResultStartPlanAction => 'Start my plan';
+  String get migrationPlanResultStartPlanAction => 'Open this route';
 
   @override
   String get migrationPlanResultOpenPlanTitle => 'View full plan';
@@ -5205,7 +5207,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get migrationPlanResultCompatibilityHelpBody =>
-      'Compatibility combines your priorities, timeline, and migration goal with the signals available for each city. It is a directional match to help you start with the strongest city first.';
+      'Compatibility combines your priorities, timeline, and migration goal with the signals available for each city. It is a directional match meant to help you compare options and explore a starting point.';
 
   @override
   String get migrationPlanResultUnavailableTitle =>
@@ -5213,7 +5215,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get migrationPlanResultUnavailableBody =>
-      'Try again to reopen your recommendation and continue from the quick questions.';
+      'Try again to reopen your city matches and continue from the quick questions.';
 
   @override
   String get migrationPlanResultBasedOnAnswersTitle => 'Based on your answers';
@@ -5450,7 +5452,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bmpDisclaimer =>
-      'This builds a starting point. It is not legal advice.';
+      'This builds a starting point. It does not replace professional legal guidance.';
 
   @override
   String bmpProgressStep(Object current, Object total) {
@@ -6493,7 +6495,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Connection error. Check your internet and try again.';
 
   @override
-  String get migrationResultRevealEyebrow => 'Your recommended city';
+  String get migrationResultRevealEyebrow => 'Current city match';
 
   @override
   String get migrationResultRevealHeaderTitle => 'Recommendation';
@@ -6562,11 +6564,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeEntrySupportLine => 'Initial direction in about 2 minutes';
 
   @override
-  String get homeEntryDiscoverTitle => 'I want to discover my best city';
+  String get homeEntryDiscoverTitle => 'I want to discover possible cities';
 
   @override
   String get homeEntryDiscoverBody =>
-      'Answer a few questions and get an initial direction with a recommended city, alternatives, and next steps.';
+      'Answer a few questions and get an initial direction with city matches, alternatives, and possible next steps.';
 
   @override
   String get homeEntryDiscoverBadge => 'Fastest path';
@@ -7126,7 +7128,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Most Argentine movers start with temporary housing and only sign a long contract after learning the neighborhoods. That is usually the safest path.';
 
   @override
-  String get housingTemporaryBadge => 'Recommended for arrival';
+  String get housingTemporaryBadge => 'Often useful on arrival';
 
   @override
   String get housingTemporaryCardTitle => 'Temporary housing';
@@ -7395,7 +7397,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get citySeasonalityHighAdvice =>
-      'Tip: plan to arrive outside peak season (May–Oct). You\'ll find far more long-term rental options at reasonable prices. If you must arrive in peak season, book accommodation at least 3 months in advance.';
+      'Tip: arriving outside peak season (May–Oct) may open more long-term rental options at reasonable prices. If peak season is your only window, booking accommodation at least 3 months in advance may help.';
 
   @override
   String get citySeasonalityMediumAdvice =>

@@ -18,56 +18,167 @@ class SplashLoadingView extends StatefulWidget {
 }
 
 class _SplashLoadingViewState extends State<SplashLoadingView>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
+  // One-shot entrance sequence
+  late final AnimationController _entranceController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  )..forward();
+
+  // Continuous breathing cycle
   late final AnimationController _pulseController = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 2400),
   )..repeat(reverse: true);
 
+  // ── Entrance animations ──────────────────────────────────────────────────
+  late final Animation<double> _markFade = CurvedAnimation(
+    parent: _entranceController,
+    curve: const Interval(0.00, 0.45, curve: Curves.easeOut),
+  );
+
+  late final Animation<double> _markScale =
+      Tween<double>(begin: 0.80, end: 1.00).animate(
+        CurvedAnimation(
+          parent: _entranceController,
+          curve: const Interval(0.00, 0.58, curve: Curves.easeOutBack),
+        ),
+      );
+
+  late final Animation<double> _wordmarkFade = CurvedAnimation(
+    parent: _entranceController,
+    curve: const Interval(0.30, 0.68, curve: Curves.easeOut),
+  );
+
+  late final Animation<double> _wordmarkSlide =
+      Tween<double>(begin: 14.0, end: 0.0).animate(
+        CurvedAnimation(
+          parent: _entranceController,
+          curve: const Interval(0.30, 0.74, curve: Curves.easeOutCubic),
+        ),
+      );
+
+  late final Animation<double> _taglineFade = CurvedAnimation(
+    parent: _entranceController,
+    curve: const Interval(0.50, 0.86, curve: Curves.easeOut),
+  );
+
+  late final Animation<double> _dotsFade = CurvedAnimation(
+    parent: _entranceController,
+    curve: const Interval(0.70, 1.00, curve: Curves.easeOut),
+  );
+
+  // ── Breathing glow ───────────────────────────────────────────────────────
+  late final Animation<double> _glowPulse = CurvedAnimation(
+    parent: _pulseController,
+    curve: Curves.easeInOut,
+  );
+
   @override
   void dispose() {
+    _entranceController.dispose();
     _pulseController.dispose();
     super.dispose();
+  }
+
+  String _tagline(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'es' => 'Tu guia para explorar ciudades con más claridad.',
+      'en' => 'Your guide to explore cities with more clarity.',
+      _ => 'Seu guia para explorar cidades com mais clareza.',
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isCompact = screenWidth < 520;
-
-    final logoSize = isCompact ? 148.0 : 188.0;
-    final progressTopSpacing = isCompact ? 20.0 : 24.0;
+    final markSize = isCompact ? 88.0 : 108.0;
 
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
           const AmbientBackground(),
-          const _SplashBackground(),
-          SafeArea(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 420),
-                  child: AnimatedBuilder(
-                    animation: _pulseController,
-                    builder: (context, _) {
-                      final glowValue = Curves.easeInOut.transform(
-                        _pulseController.value,
-                      );
 
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _SplashMark(size: logoSize, glowValue: glowValue),
-                          SizedBox(height: progressTopSpacing),
-                          const _SplashProgress(),
-                        ],
-                      );
-                    },
+          // Animated background (glows breathe with pulse)
+          AnimatedBuilder(
+            animation: _pulseController,
+            builder: (context, _) =>
+                _SplashBackground(glowValue: _glowPulse.value),
+          ),
+
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Spacer(flex: 2),
+
+                  // ── Logo mark — entrance: fade + scale ──────────────────
+                  FadeTransition(
+                    opacity: _markFade,
+                    child: ScaleTransition(
+                      scale: _markScale,
+                      child: AnimatedBuilder(
+                        animation: _pulseController,
+                        builder: (context, _) => _SplashMark(
+                          size: markSize,
+                          glowValue: _glowPulse.value,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+
+                  const SizedBox(height: 28),
+
+                  // ── Wordmark — entrance: fade + slide up ────────────────
+                  FadeTransition(
+                    opacity: _wordmarkFade,
+                    child: AnimatedBuilder(
+                      animation: _entranceController,
+                      builder: (context, _) => Transform.translate(
+                        offset: Offset(0, _wordmarkSlide.value),
+                        child: Text(
+                          'Movaro',
+                          style: Theme.of(context).textTheme.displaySmall
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -2.2,
+                                height: 1.0,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // ── Tagline — entrance: fade ────────────────────────────
+                  FadeTransition(
+                    opacity: _taglineFade,
+                    child: Text(
+                      _tagline(context),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.55),
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+
+                  const Spacer(flex: 3),
+
+                  // ── Pulsing dots — replaces fake progress bar ───────────
+                  FadeTransition(
+                    opacity: _dotsFade,
+                    child: _LoadingDots(controller: _pulseController),
+                  ),
+
+                  const SizedBox(height: 52),
+                ],
               ),
             ),
           ),
@@ -77,11 +188,19 @@ class _SplashLoadingViewState extends State<SplashLoadingView>
   }
 }
 
+// ── Animated background ──────────────────────────────────────────────────────
+
 class _SplashBackground extends StatelessWidget {
-  const _SplashBackground();
+  const _SplashBackground({required this.glowValue});
+
+  final double glowValue;
 
   @override
   Widget build(BuildContext context) {
+    final topAlpha = 0.16 + (glowValue * 0.12);
+    final bottomAlpha = 0.22 + (glowValue * 0.14);
+    final centerAlpha = 0.06 + (glowValue * 0.05);
+
     return DecoratedBox(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -90,7 +209,7 @@ class _SplashBackground extends StatelessWidget {
             AppColors.heroMiddle,
             AppColors.heroEnd,
           ],
-          stops: [0.06, 0.56, 1],
+          stops: [0.0, 0.50, 1.0],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -98,18 +217,19 @@ class _SplashBackground extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
+          // Top-left lavender glow — breathes with pulse
           Positioned(
-            top: -80,
-            left: -40,
+            top: -140,
+            left: -100,
             child: IgnorePointer(
               child: Container(
-                width: 220,
-                height: 220,
+                width: 440,
+                height: 440,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppColors.glowLavender.withValues(alpha: 0.10),
+                      AppColors.glowLavender.withValues(alpha: topAlpha),
                       Colors.transparent,
                     ],
                   ),
@@ -117,18 +237,20 @@ class _SplashBackground extends StatelessWidget {
               ),
             ),
           ),
+
+          // Bottom-right blue glow — breathes with pulse
           Positioned(
-            right: -90,
-            bottom: -120,
+            right: -130,
+            bottom: -170,
             child: IgnorePointer(
               child: Container(
-                width: 320,
-                height: 320,
+                width: 500,
+                height: 500,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppColors.glowBlue.withValues(alpha: 0.18),
+                      AppColors.glowBlue.withValues(alpha: bottomAlpha),
                       Colors.transparent,
                     ],
                   ),
@@ -136,21 +258,19 @@ class _SplashBackground extends StatelessWidget {
               ),
             ),
           ),
-          Positioned(
-            right: 0,
-            top: 0,
-            bottom: 0,
+
+          // Center radial accent (subtle primary hue)
+          Positioned.fill(
             child: IgnorePointer(
-              child: Container(
-                width: 260,
+              child: DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: RadialGradient(
+                    center: const Alignment(0.05, -0.10),
+                    radius: 0.58,
                     colors: [
-                      Colors.white.withValues(alpha: 0),
-                      Colors.white.withValues(alpha: 0.05),
+                      AppColors.primary.withValues(alpha: centerAlpha),
+                      Colors.transparent,
                     ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
                   ),
                 ),
               ),
@@ -161,6 +281,8 @@ class _SplashBackground extends StatelessWidget {
     );
   }
 }
+
+// ── Logo mark with double glow ───────────────────────────────────────────────
 
 class _SplashMark extends StatelessWidget {
   const _SplashMark({required this.size, required this.glowValue});
@@ -170,76 +292,108 @@ class _SplashMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scale = 1 + (glowValue * 0.016);
-    final glowAlpha = 0.12 + (glowValue * 0.08);
+    final outerAlpha = 0.12 + (glowValue * 0.10);
+    final innerAlpha = 0.07 + (glowValue * 0.06);
+    final outerSize = size + 108.0;
+    final innerSize = size + 40.0;
 
-    return Transform.scale(
-      scale: scale,
-      child: SizedBox(
-        width: size + 84,
-        height: size + 84,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: size + 84,
-              height: size + 84,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.glowBlue.withValues(alpha: glowAlpha),
-                    Colors.transparent,
-                  ],
-                ),
+    return SizedBox(
+      width: outerSize,
+      height: outerSize,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Outer diffuse glow
+          Container(
+            width: outerSize,
+            height: outerSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  AppColors.glowBlue.withValues(alpha: outerAlpha),
+                  Colors.transparent,
+                ],
               ),
             ),
-            SvgPicture.asset(
-              'assets/brand/movaro_mark_light.svg',
-              width: size,
-              height: size,
+          ),
+
+          // Inner tight glow
+          Container(
+            width: innerSize,
+            height: innerSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  Colors.white.withValues(alpha: innerAlpha),
+                  Colors.transparent,
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+
+          // Brand mark
+          SvgPicture.asset(
+            'assets/brand/movaro_mark_light.svg',
+            width: size,
+            height: size,
+          ),
+        ],
       ),
     );
   }
 }
 
-class _SplashProgress extends StatelessWidget {
-  const _SplashProgress();
+// ── Pulsing loading dots ─────────────────────────────────────────────────────
+
+class _LoadingDots extends StatelessWidget {
+  const _LoadingDots({required this.controller});
+
+  final AnimationController controller;
+
+  static const _count = 3;
+  static const _size = 6.0;
+  static const _spacing = 9.0;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(999),
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        final t = Curves.easeInOut.transform(controller.value);
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < _count; i++) ...[
+              if (i > 0) const SizedBox(width: _spacing),
+              _buildDot(i, t),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDot(int index, double t) {
+    // Each dot peaks at a different phase in the 0→1 cycle:
+    // dot 0 peaks at t=0.0, dot 1 at t=0.5, dot 2 at t=1.0
+    // The controller reverses (0→1→0→1...) creating a pendulum wave.
+    final phase = index / (_count - 1); // 0.0, 0.5, 1.0
+    final dist = (t - phase).abs();
+    final brightness = (1.0 - dist * 2.2).clamp(0.0, 1.0);
+
+    final alpha = 0.22 + (brightness * 0.78);
+    final scale = 0.62 + (brightness * 0.38);
+
+    return Transform.scale(
+      scale: scale,
       child: Container(
-        width: 126,
-        height: 3,
-        color: Colors.white.withValues(alpha: 0.16),
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.12, end: 0.78),
-          duration: const Duration(milliseconds: 1300),
-          curve: Curves.easeOutCubic,
-          builder: (context, value, child) {
-            return Align(
-              alignment: Alignment.centerLeft,
-              child: FractionallySizedBox(
-                widthFactor: value,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.glowLavender.withValues(alpha: 0.92),
-                        Colors.white,
-                        AppColors.glowBlue.withValues(alpha: 0.95),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+        width: _size,
+        height: _size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withValues(alpha: alpha),
         ),
       ),
     );

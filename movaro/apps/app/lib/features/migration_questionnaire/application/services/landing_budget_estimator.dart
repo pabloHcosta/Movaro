@@ -52,12 +52,12 @@ class LandingBudgetEstimator {
 
   static LandingBudgetEstimate build({required MigrationPlan plan}) {
     final cityBudget =
-        plan.recommendedCity?.budgetSnapshot ?? plan.preferredCity?.budgetSnapshot;
+        plan.currentPlanCity?.budgetSnapshot;
     final monthlyBase = _resolveMonthlyBase(plan, cityBudget);
 
     return LandingBudgetEstimate(
       summaryKey: _summaryKey(plan.timeline),
-      cityContext: plan.recommendedCity?.name,
+      cityContext: plan.currentPlanCity?.name,
       scenarios: [
         _scenario(
           scenario: LandingBudgetScenario.lean,
@@ -165,7 +165,7 @@ class LandingBudgetEstimator {
       return cityBudget.fairLivingTotal;
     }
 
-    final city = plan.recommendedCity;
+    final city = plan.currentPlanCity;
     if (city == null) {
       return 3600;
     }

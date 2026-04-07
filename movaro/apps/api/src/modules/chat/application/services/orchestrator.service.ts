@@ -64,7 +64,7 @@ export class OrchestratorService {
       locale,
       originCountry,
       destinationCountry,
-      dto.recommendedCityId,
+      dto.highlightedCityId,
       dto.currentPhase,
       dto.migrationGoal,
       dto.planTimeline,
@@ -112,7 +112,9 @@ export class OrchestratorService {
     switch (intent.intent) {
       case 'city_info': {
         const cityId =
-          intent.entities['cityId'] ?? dto.recommendedCityId ?? null;
+          intent.entities['cityId'] ??
+          dto.highlightedCityId ??
+          null;
         const result = await this.cityResolver.resolve(
           cityId ?? undefined,
           locale,
@@ -221,7 +223,7 @@ export class OrchestratorService {
         originCountry,
         destinationCountry,
         locale,
-        recommendedCityId: dto.recommendedCityId,
+        highlightedCityId: dto.highlightedCityId,
         currentPhase: dto.currentPhase,
         completedItemIds: dto.completedItemIds,
         migrationGoal: dto.migrationGoal,
@@ -261,7 +263,7 @@ export class OrchestratorService {
     locale: string,
     originCountry: string,
     destinationCountry: string,
-    recommendedCityId?: string,
+    highlightedCityId?: string,
     currentPhase?: string,
     migrationGoal?: string,
     planTimeline?: string,
@@ -271,7 +273,7 @@ export class OrchestratorService {
       locale,
       originCountry.toLowerCase().trim(),
       destinationCountry.toLowerCase().trim(),
-      recommendedCityId?.toLowerCase().trim() ?? '-',
+      highlightedCityId?.toLowerCase().trim() ?? '-',
       currentPhase?.toLowerCase().trim() ?? '-',
       migrationGoal?.toLowerCase().trim() ?? '-',
       planTimeline?.toLowerCase().trim() ?? '-',

@@ -24,7 +24,7 @@ export class BuildChatContextDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  recommendedCityId?: string;
+  highlightedCityId?: string;
 
   /**
    * Current copilot phase.

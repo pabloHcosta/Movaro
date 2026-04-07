@@ -103,7 +103,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get publicHomeFocusedDescription =>
-      'Hoje, o Movaro foi desenhado para quem está avaliando a mudança da Argentina para o Brasil. Em vez de mostrar tudo de uma vez, ele ajuda você a escolher o melhor primeiro passo.';
+      'Hoje, o Movaro foi desenhado para quem está avaliando a mudança da Argentina para o Brasil. Em vez de mostrar tudo de uma vez, ele ajuda você a explorar pontos de partida úteis.';
 
   @override
   String publicHomeSelectedJourneyDescription(
@@ -114,11 +114,11 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get publicHomePrimaryQuestionTitle => 'Comece pela decisão principal';
+  String get publicHomePrimaryQuestionTitle => 'Comece por uma pergunta útil';
 
   @override
   String get publicHomePrimaryQuestionBody =>
-      'Primeiro, descubra se você precisa de um plano guiado, de comparação entre cidades ou apenas de um panorama rápido do produto.';
+      'Você pode começar com um plano guiado, uma comparação entre cidades ou um panorama rápido do produto.';
 
   @override
   String get publicHomeTrustFastTitle => 'Entrada rápida';
@@ -246,13 +246,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get homeHeroNoPlanBody =>
-      'Responda o questionário e receba uma cidade indicada para o seu perfil.';
+      'Responda o questionário e revise cidades que podem combinar com o seu perfil.';
 
   @override
   String get homeHeroStepQuestionnaire => 'Responder questionário';
 
   @override
-  String get homeHeroStepCity => 'Receber cidade ideal';
+  String get homeHeroStepCity => 'Revisar cidades possíveis';
 
   @override
   String get homeHeroStepGuide => 'Executar com guia';
@@ -609,37 +609,38 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get explorePlanDraftTitle => 'Your plan still needs a decision';
+  String get explorePlanDraftTitle =>
+      'Seu plano ainda precisa de uma revisão mais próxima';
 
   @override
   String get explorePlanDraftBody =>
-      'You already have a draft. Reopen the result and confirm the city before moving into checklist mode.';
+      'Você já tem um rascunho. Reabra o resultado e revise as opções de cidade antes de entrar no modo checklist.';
 
   @override
   String explorePlanDraftBodyWithCity(Object city) {
-    return '$city is currently leading. Reopen the result, compare it, and confirm it when ready.';
+    return '$city aparece entre as opções mais fortes no momento. Reabra o resultado e compare de novo quando quiser.';
   }
 
   @override
-  String get exploreRecommendedCityTitle => 'Leading city right now';
+  String get exploreRecommendedCityTitle => 'Cidade para revisar agora';
 
   @override
   String get exploreRecommendedCityBody =>
-      'Open the city details to validate cost, quality of life, and fit with your plan.';
+      'Abra o detalhe da cidade para revisar custo, qualidade de vida e encaixe com seu plano.';
 
   @override
-  String get exploreOpenCityAction => 'Open city';
+  String get exploreOpenCityAction => 'Abrir cidade';
 
   @override
-  String get exploreOpenContentAction => 'Open guide';
+  String get exploreOpenContentAction => 'Abrir guia';
 
   @override
   String get explorePlanDocsBody =>
-      'Documents usually unlock the next part of the move faster than more comparison.';
+      'Documentos costumam destravar a próxima parte da mudança mais rápido do que continuar comparando.';
 
   @override
   String get exploreContentDocumentsBody =>
-      'See CPF, registration, banking, and legal stay with less noise and clearer routing.';
+      'Veja CPF, registro, banco e permanência legal com menos ruído e um caminho mais claro.';
 
   @override
   String get exploreContentHousingBody =>
@@ -1957,7 +1958,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get planStepOpenHousingPointThree =>
-      'A análise por bairro ainda precisa de uma base dedicada; por enquanto, use a cidade recomendada como filtro inicial.';
+      'A análise por bairro ainda precisa de uma base dedicada; por enquanto, use o encaixe de cidade atual como filtro inicial.';
 
   @override
   String get planStepOpenGeneralEyebrow => 'Checklist guiada';
@@ -2910,7 +2911,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cityComparisonCommunitySmall => 'Pequena';
 
   @override
-  String get cityComparisonWinnerLabel => 'MELHOR ESCOLHA PARA VOCÊ';
+  String get cityComparisonWinnerLabel => 'VANTAGEM ATUAL NA COMPARAÇÃO';
 
   @override
   String get cityComparisonUnavailable => '—';
@@ -4407,7 +4408,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String housingDecisionSectionBodyWithCity(Object city) {
-    return 'Antes de assumir $city como a melhor opção, valide se aluguel, garantias e instalação inicial parecem viáveis para o seu momento. O risco não está só no preço: está no caminho real para fechar a moradia.';
+    return 'Antes de tratar $city como uma opção forte, valide se aluguel, garantias e instalação inicial parecem viáveis para o seu momento. O risco não está só no preço: está no caminho real para fechar a moradia.';
   }
 
   @override
@@ -4905,7 +4906,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get migrationPlanCopilotResultBody =>
-      'Primeiro, veja se a cidade recomendada faz sentido para você. Quando quiser transformar essa decisão em preparação concreta, abra a camada guiada com checklist, documentos e reserva de chegada.';
+      'Primeiro, veja se o encaixe de cidade atual ainda faz sentido para você. Quando quiser transformar essa exploração em preparação concreta, abra a camada guiada com checklist, documentos e reserva de chegada.';
 
   @override
   String migrationPlanCopilotStepCounter(Object current, Object total) {
@@ -5007,26 +5008,26 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get migrationPlanCopilotRecommendedTitle =>
-      'Próximo passo recomendado';
+      'Área sugerida para revisar agora';
 
   @override
   String get migrationPlanCopilotRecommendedReadinessBody =>
-      'Comece por esta etapa para destravar os primeiros bloqueios e dar base real para o restante do plano.';
+      'Esta etapa pode ajudar a destravar os primeiros bloqueios e dar uma base mais sólida para o restante do plano.';
 
   @override
   String get migrationPlanCopilotRecommendedDocumentsBody =>
-      'A camada documental ainda merece atenção primeiro. Resolva isso agora para evitar travas mais caras depois.';
+      'A camada documental pode merecer atenção primeiro. Revisar isso agora pode reduzir travas mais caras depois.';
 
   @override
   String get migrationPlanCopilotRecommendedBudgetBody =>
-      'Agora vale transformar o plano em números reais e revisar a entrada em moradia antes da chegada apertar.';
+      'Este pode ser um bom momento para transformar o plano em números reais e revisar a entrada em moradia antes da chegada apertar.';
 
   @override
   String get migrationPlanCopilotRecommendedArrivalBody =>
-      'Você já tem base suficiente para organizar a chegada. Use esta etapa para sair do plano e entrar em execução.';
+      'Você talvez já tenha base suficiente para organizar a chegada. Esta etapa pode ajudar a sair do planejamento e entrar na execução.';
 
   @override
-  String get migrationPlanCopilotRecommendedOpen => 'Abrir etapa recomendada';
+  String get migrationPlanCopilotRecommendedOpen => 'Abrir etapa sugerida';
 
   @override
   String get migrationPlanCopilotQuickQuestionsTitle => 'Dúvidas rápidas';
@@ -5199,18 +5200,19 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get migrationPlanResultPrimaryCtaEyebrow => 'Próximo passo';
+  String get migrationPlanResultPrimaryCtaEyebrow =>
+      'Possível próximo movimento';
 
   @override
-  String get migrationPlanResultStartPlanTitle => 'Começar meu plano';
+  String get migrationPlanResultStartPlanTitle => 'Abrir esta rota';
 
   @override
   String migrationPlanResultStartPlanBody(Object city) {
-    return 'Revise $city com um pouco mais de contexto e confirme quando estiver pronto para liberar o plano guiado completo.';
+    return 'Revise $city com um pouco mais de contexto e continue explorando se ela ainda parecer relevante para a sua rota.';
   }
 
   @override
-  String get migrationPlanResultStartPlanAction => 'Começar meu plano';
+  String get migrationPlanResultStartPlanAction => 'Abrir esta rota';
 
   @override
   String get migrationPlanResultOpenPlanTitle => 'Ver plano completo';
@@ -5234,7 +5236,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get migrationPlanResultCompatibilityHelpBody =>
-      'A compatibilidade combina suas prioridades, seu prazo e seu objetivo de mudança com os sinais disponíveis de cada cidade. É uma leitura direcional para começar pela cidade mais forte para você.';
+      'A compatibilidade combina suas prioridades, seu prazo e seu objetivo de mudança com os sinais disponíveis de cada cidade. É uma leitura direcional pensada para comparar opções e explorar um ponto de partida.';
 
   @override
   String get migrationPlanResultUnavailableTitle =>
@@ -5242,7 +5244,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get migrationPlanResultUnavailableBody =>
-      'Tente novamente para abrir sua recomendação e continuar a partir do questionário.';
+      'Tente novamente para abrir suas cidades sugeridas e continuar a partir do questionário.';
 
   @override
   String get migrationPlanResultBasedOnAnswersTitle =>
@@ -5482,7 +5484,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get bmpDisclaimer =>
-      'Isto monta um ponto de partida. Não é consultoria legal.';
+      'Isto monta um ponto de partida. Não substitui orientação jurídica profissional.';
 
   @override
   String bmpProgressStep(Object current, Object total) {
@@ -6520,7 +6522,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Erro de conexão. Verifique sua internet e tente novamente.';
 
   @override
-  String get migrationResultRevealEyebrow => 'Sua cidade recomendada';
+  String get migrationResultRevealEyebrow => 'Encaixe de cidade atual';
 
   @override
   String get migrationResultRevealHeaderTitle => 'Recomendação';
@@ -6589,11 +6591,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeEntrySupportLine => 'Direção inicial em cerca de 2 minutos';
 
   @override
-  String get homeEntryDiscoverTitle => 'Quero descobrir minha melhor cidade';
+  String get homeEntryDiscoverTitle => 'Quero descobrir cidades possíveis';
 
   @override
   String get homeEntryDiscoverBody =>
-      'Responda poucas perguntas e receba uma direção inicial com cidade recomendada, alternativas e próximos passos.';
+      'Responda poucas perguntas e receba uma direção inicial com encaixes de cidade, alternativas e possíveis próximos passos.';
 
   @override
   String get homeEntryDiscoverBadge => 'Caminho mais rápido';
@@ -7154,7 +7156,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'A maioria dos argentinos chega com moradia temporária e assina contrato depois de conhecer os bairros. Esse costuma ser o caminho mais seguro para começar.';
 
   @override
-  String get housingTemporaryBadge => 'Recomendado para chegada';
+  String get housingTemporaryBadge => 'Costuma ajudar na chegada';
 
   @override
   String get housingTemporaryCardTitle => 'Moradia temporária';
@@ -7425,7 +7427,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get citySeasonalityHighAdvice =>
-      'Dica: planeje chegar fora da alta temporada (mai–out). Você terá muito mais opções de moradia de longo prazo e preços razoáveis. Se precisar chegar na alta, reserve moradia com pelo menos 3 meses de antecedência.';
+      'Dica: chegar fora da alta temporada (mai–out) pode abrir mais opções de moradia de longo prazo e preços razoáveis. Se a alta temporada for a sua única janela, reservar moradia com pelo menos 3 meses de antecedência pode ajudar.';
 
   @override
   String get citySeasonalityMediumAdvice =>

@@ -47,8 +47,10 @@ class ChatContextRemoteService {
         'locale': locale,
         if (userContext.migrationGoal != null)
           'migrationGoal': userContext.migrationGoal,
-        if (userContext.recommendedCity != null)
-          'recommendedCityId': _toKebabCase(userContext.recommendedCity!),
+        if (userContext.highlightedCity != null)
+          'highlightedCityId': _toKebabCase(
+            userContext.highlightedCity!,
+          ),
         if (userContext.currentPhase != null)
           'currentPhase': userContext.currentPhase,
         if (userContext.completedItemIds.isNotEmpty)

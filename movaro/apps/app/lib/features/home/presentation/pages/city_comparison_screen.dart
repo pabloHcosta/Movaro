@@ -135,13 +135,6 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
         AppGlassHeader(
           title: context.l10n.cityComparisonTitle,
           onBack: () => Navigator.of(context).pop(),
-          trailing: SizedBox(
-            width: 96,
-            child: TextButton(
-              onPressed: canCompare ? _startComparison : null,
-              child: Text(context.l10n.cityComparisonCompareAction),
-            ),
-          ),
         ),
         const SizedBox(height: 18),
         _ModeToggle(mode: _mode, onModeChanged: _changeMode),
@@ -161,6 +154,13 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
               if (index != _mode - 1) const SizedBox(width: 12),
             ],
           ],
+        ),
+        const SizedBox(height: 16),
+        _SelectionCompareCard(
+          selectedCount: selectedCount,
+          mode: _mode,
+          canCompare: canCompare,
+          onCompare: _startComparison,
         ),
         const SizedBox(height: 16),
         TextField(
@@ -216,7 +216,6 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
     }
     final winner = _winner(cities);
     final compact = cities.length >= 3;
-    final scoredMetricCount = _scoredMetricDefinitions.length;
     final lens = _resolveComparisonLens();
 
     return CustomScrollView(
@@ -288,7 +287,7 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
                 if (cities.any((city) => city.hasBudgetSnapshot)) ...[
                   const SizedBox(height: 16),
                 ],
-                _WinnerBanner(winner: winner, totalMetrics: scoredMetricCount),
+                _WinnerBanner(winner: winner),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () => _startPlanWithWinner(winner.city),
@@ -440,16 +439,19 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
     final requests = <Future<Object?>>[];
     for (final city in cityList) {
       requests.add(widget.citiesController.loadWeatherForCity(city.id));
-      final destinationAirport = FlightRouteContextResolver.resolveDestinationAirport(
-        destinationCityName: city.name,
-        destinationCountryIso: FlightRouteContextResolver.resolveDestinationCountryIso(
-          cityCountryCode: city.countryCode,
-          planDestinationCountry: plan?.destinationCountry,
-        ),
-        destinationLatitude: city.latitude,
-        destinationLongitude: city.longitude,
-      );
-      if (originAirport?.iataCode != null && destinationAirport?.iataCode != null) {
+      final destinationAirport =
+          FlightRouteContextResolver.resolveDestinationAirport(
+            destinationCityName: city.name,
+            destinationCountryIso:
+                FlightRouteContextResolver.resolveDestinationCountryIso(
+                  cityCountryCode: city.countryCode,
+                  planDestinationCountry: plan?.destinationCountry,
+                ),
+            destinationLatitude: city.latitude,
+            destinationLongitude: city.longitude,
+          );
+      if (originAirport?.iataCode != null &&
+          destinationAirport?.iataCode != null) {
         requests.add(
           widget.citiesController.loadTravelInsightForCity(
             city.id,
@@ -472,23 +474,30 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
     if (query.isEmpty) {
       return const [];
     }
-    final scored = catalog
-        .where((city) => !selectedIds.contains(city.id))
-        .map((city) => (city: city, score: CitySearchMatcher.score(query, city.name, city.stateName)))
-        .where((entry) => entry.score > 0)
-        .toList(growable: false)
-      ..sort((a, b) {
-        final scoreCompare = b.score.compareTo(a.score);
-        if (scoreCompare != 0) {
-          return scoreCompare;
-        }
-        return a.city.name.compareTo(b.city.name);
-      });
+    final scored =
+        catalog
+            .where((city) => !selectedIds.contains(city.id))
+            .map(
+              (city) => (
+                city: city,
+                score: CitySearchMatcher.score(
+                  query,
+                  city.name,
+                  city.stateName,
+                ),
+              ),
+            )
+            .where((entry) => entry.score > 0)
+            .toList(growable: false)
+          ..sort((a, b) {
+            final scoreCompare = b.score.compareTo(a.score);
+            if (scoreCompare != 0) {
+              return scoreCompare;
+            }
+            return a.city.name.compareTo(b.city.name);
+          });
 
-    return scored
-        .map((entry) => entry.city)
-        .take(12)
-        .toList(growable: false);
+    return scored.map((entry) => entry.city).take(12).toList(growable: false);
   }
 
   List<City> _quickSuggestions() {
@@ -497,10 +506,7 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
         .map((city) => city.id)
         .toSet();
     final plan = widget.migrationQuestionnaireController.generatedPlan;
-    final candidates = <City>[
-      if (plan?.recommendedCity != null) plan!.recommendedCity!,
-      ...?plan?.candidateCities,
-    ];
+    final candidates = plan?.reviewCities ?? const <City>[];
     final unique = <String, City>{};
     for (final city in candidates) {
       if (!selectedIds.contains(city.id)) {
@@ -537,36 +543,36 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
     final lens = _resolveComparisonLens();
     return _selectedCities
         .whereType<City>()
-        .map(
-          (city) {
-            final destinationAirport = FlightRouteContextResolver.resolveDestinationAirport(
-              destinationCityName: city.name,
-              destinationCountryIso: FlightRouteContextResolver.resolveDestinationCountryIso(
-                cityCountryCode: city.countryCode,
-                planDestinationCountry: plan?.destinationCountry,
-              ),
-              destinationLatitude: city.latitude,
-              destinationLongitude: city.longitude,
-            );
-            return _ComparisonCityData.fromCity(
-              context,
-              city,
-              widget.citiesController.weatherFor(city.id),
-              exchangeRates: _exchangeRates,
-              preferredCountryId: preferredCountryId,
-              detectedLocation: detectedLocation,
-              originAirportIata: originAirport?.iataCode,
-              routeInsight: originAirport?.iataCode == null
-                  ? null
-                  : widget.citiesController.travelInsightFor(
-                      city.id,
-                      originIata: originAirport?.iataCode,
-                      destIata: destinationAirport?.iataCode,
+        .map((city) {
+          final destinationAirport =
+              FlightRouteContextResolver.resolveDestinationAirport(
+                destinationCityName: city.name,
+                destinationCountryIso:
+                    FlightRouteContextResolver.resolveDestinationCountryIso(
+                      cityCountryCode: city.countryCode,
+                      planDestinationCountry: plan?.destinationCountry,
                     ),
-              lens: lens,
-            );
-          },
-        )
+                destinationLatitude: city.latitude,
+                destinationLongitude: city.longitude,
+              );
+          return _ComparisonCityData.fromCity(
+            context,
+            city,
+            widget.citiesController.weatherFor(city.id),
+            exchangeRates: _exchangeRates,
+            preferredCountryId: preferredCountryId,
+            detectedLocation: detectedLocation,
+            originAirportIata: originAirport?.iataCode,
+            routeInsight: originAirport?.iataCode == null
+                ? null
+                : widget.citiesController.travelInsightFor(
+                    city.id,
+                    originIata: originAirport?.iataCode,
+                    destIata: destinationAirport?.iataCode,
+                  ),
+            lens: lens,
+          );
+        })
         .toList(growable: false);
   }
 
@@ -641,7 +647,8 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
 
   _ComparisonLens _resolveComparisonLens() {
     final plan = widget.migrationQuestionnaireController.generatedPlan;
-    if (plan?.travelGroup == 'family_kids' || plan?.travelGroup == 'solo_parent') {
+    if (plan?.travelGroup == 'family_kids' ||
+        plan?.travelGroup == 'solo_parent') {
       return _ComparisonLens.familyStability;
     }
     if (plan?.goal == 'work' ||
@@ -947,6 +954,127 @@ class _SearchResultTile extends StatelessWidget {
   }
 }
 
+class _SelectionCompareCard extends StatelessWidget {
+  const _SelectionCompareCard({
+    required this.selectedCount,
+    required this.mode,
+    required this.canCompare,
+    required this.onCompare,
+  });
+
+  final int selectedCount;
+  final int mode;
+  final bool canCompare;
+  final VoidCallback onCompare;
+
+  @override
+  Widget build(BuildContext context) {
+    return FrostedPanel(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.compare_arrows_rounded,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _title(context),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _body(context),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: canCompare ? onCompare : null,
+              icon: const Icon(Icons.compare_arrows_rounded),
+              label: Text(context.l10n.cityComparisonCompareAction),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _title(BuildContext context) {
+    final languageCode = Localizations.localeOf(context).languageCode;
+    if (canCompare) {
+      return switch (languageCode) {
+        'pt' => 'Tudo pronto para comparar',
+        'es' => 'Todo listo para comparar',
+        _ => 'Ready to compare',
+      };
+    }
+
+    return switch (languageCode) {
+      'pt' => 'Escolha pelo menos 2 cidades',
+      'es' => 'Elegí al menos 2 ciudades',
+      _ => 'Choose at least 2 cities',
+    };
+  }
+
+  String _body(BuildContext context) {
+    final languageCode = Localizations.localeOf(context).languageCode;
+    if (canCompare) {
+      return switch (languageCode) {
+        'pt' =>
+          'Você selecionou $selectedCount de $mode cidades. Compare agora enquanto o contexto da escolha ainda está visível.',
+        'es' =>
+          'Ya seleccionaste $selectedCount de $mode ciudades. Comparalas ahora mientras el contexto de elección todavía está visible.',
+        _ =>
+          'You selected $selectedCount of $mode cities. Compare them now while the selection context is still visible.',
+      };
+    }
+
+    final missing = 2 - selectedCount;
+    return switch (languageCode) {
+      'pt' =>
+        missing == 1
+            ? 'Adicione mais 1 cidade para liberar a comparação.'
+            : 'Adicione mais $missing cidades para liberar a comparação.',
+      'es' =>
+        missing == 1
+            ? 'Agregá 1 ciudad más para habilitar la comparación.'
+            : 'Agregá $missing ciudades más para habilitar la comparación.',
+      _ =>
+        missing == 1
+            ? 'Add 1 more city to unlock comparison.'
+            : 'Add $missing more cities to unlock comparison.',
+    };
+  }
+}
+
 class _ComparisonHeaderDelegate extends SliverPersistentHeaderDelegate {
   const _ComparisonHeaderDelegate({
     required this.minExtentValue,
@@ -1072,13 +1200,14 @@ class _CityHeaderColumn extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     // Compute a composite score 0–100 for the bar
-    final composite = ((city.city.rentScore +
-                city.city.movaroScores.languageAdaptation +
-                city.city.safetyScore +
-                city.city.costOfLivingScore) /
-            4)
-        .clamp(0, 100)
-        .toDouble();
+    final composite =
+        ((city.city.rentScore +
+                    city.city.movaroScores.languageAdaptation +
+                    city.city.safetyScore +
+                    city.city.costOfLivingScore) /
+                4)
+            .clamp(0, 100)
+            .toDouble();
 
     final initials = city.city.name
         .split(' ')
@@ -1091,18 +1220,15 @@ class _CityHeaderColumn extends StatelessWidget {
         ? LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.primary,
-              const Color(0xFF0055EE),
-            ],
+            colors: [AppColors.primary, const Color(0xFF0055EE)],
           )
         : null;
 
     final cardColor = isWinner
         ? null
         : (isDark
-            ? scheme.surfaceContainerHighest.withValues(alpha: 0.72)
-            : scheme.surfaceContainerLow);
+              ? scheme.surfaceContainerHighest.withValues(alpha: 0.72)
+              : scheme.surfaceContainerLow);
 
     final onCard = isWinner ? Colors.white : scheme.onSurface;
     final onCardMuted = isWinner
@@ -1233,7 +1359,7 @@ class _CityHeaderColumn extends StatelessWidget {
               else
                 const SizedBox.shrink(),
               Text(
-                '${composite.round()}',
+                _compositeTierLabel(context, composite),
                 style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
@@ -1468,7 +1594,9 @@ class _MetricRow extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: compact ? 10 : 10.5,
-                            fontWeight: isBest ? FontWeight.w800 : FontWeight.w700,
+                            fontWeight: isBest
+                                ? FontWeight.w800
+                                : FontWeight.w700,
                             color: colors.text,
                             height: 1.1,
                           ),
@@ -1488,10 +1616,42 @@ class _MetricRow extends StatelessWidget {
 }
 
 class _WinnerBanner extends StatelessWidget {
-  const _WinnerBanner({required this.winner, required this.totalMetrics});
+  const _WinnerBanner({required this.winner});
 
   final _CityWinner winner;
-  final int totalMetrics;
+
+  String _tierLabel(BuildContext context) {
+    if (winner.score >= 78) {
+      return _localizedText(
+        context,
+        pt: 'Destaque forte',
+        es: 'Destaque fuerte',
+        en: 'Strong match',
+      );
+    }
+    if (winner.score >= 62) {
+      return _localizedText(
+        context,
+        pt: 'Boa indicação',
+        es: 'Buena opción',
+        en: 'Good match',
+      );
+    }
+    if (winner.score >= 48) {
+      return _localizedText(
+        context,
+        pt: 'Leve vantagem',
+        es: 'Leve ventaja',
+        en: 'Slight edge',
+      );
+    }
+    return _localizedText(
+      context,
+      pt: 'Melhor encaixe por agora',
+      es: 'Mejor encaje por ahora',
+      en: 'Stronger match for now',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1538,11 +1698,21 @@ class _WinnerBanner extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Text(
-            '${winner.score}/$totalMetrics',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: AppColors.success,
-              fontWeight: FontWeight.w800,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: AppColors.success.withValues(alpha: 0.28),
+              ),
+            ),
+            child: Text(
+              _tierLabel(context),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppColors.success,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -1573,6 +1743,25 @@ String _localizedText(
   };
 }
 
+/// Converts a 0–100 composite score to a human-readable tier label.
+String _compositeTierLabel(BuildContext context, double score) {
+  if (score >= 78) {
+    return _localizedText(
+      context,
+      pt: 'Excelente',
+      es: 'Excelente',
+      en: 'Excellent',
+    );
+  }
+  if (score >= 62) {
+    return _localizedText(context, pt: 'Bom', es: 'Bueno', en: 'Good');
+  }
+  if (score >= 48) {
+    return _localizedText(context, pt: 'Regular', es: 'Regular', en: 'Fair');
+  }
+  return _localizedText(context, pt: 'Atenção', es: 'Atención', en: 'Watch');
+}
+
 class _ComparisonIntelligencePanel extends StatelessWidget {
   const _ComparisonIntelligencePanel({
     required this.cities,
@@ -1586,7 +1775,9 @@ class _ComparisonIntelligencePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final winnerData = cities.firstWhere((city) => city.city.id == winner.city.id);
+    final winnerData = cities.firstWhere(
+      (city) => city.city.id == winner.city.id,
+    );
     final topStrengths = _topStrengths(context, winnerData);
     return FrostedPanel(
       padding: const EdgeInsets.all(18),
@@ -1595,9 +1786,9 @@ class _ComparisonIntelligencePanel extends StatelessWidget {
         children: [
           Text(
             _lensTitle(context, lens),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
           Text(
@@ -1670,31 +1861,35 @@ class _ComparisonIntelligencePanel extends StatelessWidget {
     };
   }
 
-  String _lensBody(BuildContext context, _ComparisonLens lens, String winnerName) {
+  String _lensBody(
+    BuildContext context,
+    _ComparisonLens lens,
+    String winnerName,
+  ) {
     return switch (lens) {
       _ComparisonLens.softLanding => _localizedText(
         context,
-        pt: '$winnerName ganhou porque combina entrada mais leve, menor atrito com português e chegada menos pesada.',
-        es: '$winnerName ganó porque combina una llegada más liviana, menos fricción con el portugués y un arranque menos pesado.',
-        en: '$winnerName wins because it combines an easier landing, less Portuguese friction, and a lighter start.',
+        pt: '$winnerName aparece com um encaixe mais forte porque combina entrada mais leve, menor atrito com português e chegada menos pesada.',
+        es: '$winnerName aparece con un encaje más fuerte porque combina una llegada más liviana, menos fricción con el portugués y un arranque menos pesado.',
+        en: '$winnerName appears as a stronger match here because it combines an easier landing, less Portuguese friction, and a lighter start.',
       ),
       _ComparisonLens.familyStability => _localizedText(
         context,
-        pt: '$winnerName ganhou porque entrega combinação melhor de segurança, estabilidade e qualidade de vida para rotina familiar.',
-        es: '$winnerName ganó porque ofrece mejor combinación de seguridad, estabilidad y calidad de vida para una rutina familiar.',
-        en: '$winnerName wins because it offers a better mix of safety, stability, and quality of life for family routines.',
+        pt: '$winnerName aparece com um encaixe mais forte porque entrega combinação melhor de segurança, estabilidade e qualidade de vida para rotina familiar.',
+        es: '$winnerName aparece con un encaje más fuerte porque ofrece mejor combinación de seguridad, estabilidad y calidad de vida para una rutina familiar.',
+        en: '$winnerName appears as a stronger match here because it offers a better mix of safety, stability, and quality of life for family routines.',
       ),
       _ComparisonLens.incomeStart => _localizedText(
         context,
-        pt: '$winnerName ganhou porque junta mercado mais forte, trabalho menos sazonal e melhor chegada para começar a gerar renda.',
-        es: '$winnerName ganó porque combina un mercado más fuerte, trabajo menos estacional y una mejor llegada para empezar a generar ingresos.',
-        en: '$winnerName wins because it combines a stronger market, less seasonal work, and a better setup to start earning.',
+        pt: '$winnerName aparece com um encaixe mais forte porque junta mercado mais forte, trabalho menos sazonal e melhor chegada para começar a gerar renda.',
+        es: '$winnerName aparece con un encaje más fuerte porque combina un mercado más fuerte, trabajo menos estacional y una mejor llegada para empezar a generar ingresos.',
+        en: '$winnerName appears as a stronger match here because it combines a stronger market, less seasonal work, and a better setup to start earning.',
       ),
       _ComparisonLens.balanced => _localizedText(
         context,
-        pt: '$winnerName ganhou no equilíbrio geral entre chegada, segurança, custo e potencial de trabalho.',
-        es: '$winnerName ganó en equilibrio general entre llegada, seguridad, costo y potencial laboral.',
-        en: '$winnerName wins on overall balance across arrival, safety, cost, and work potential.',
+        pt: '$winnerName aparece com um encaixe mais forte no equilíbrio geral entre chegada, segurança, custo e potencial de trabalho.',
+        es: '$winnerName aparece con un encaje más fuerte en equilibrio general entre llegada, seguridad, costo y potencial laboral.',
+        en: '$winnerName appears as a stronger match here on overall balance across arrival, safety, cost, and work potential.',
       ),
     };
   }
@@ -1706,7 +1901,12 @@ class _ComparisonIntelligencePanel extends StatelessWidget {
       if (city.hasBudgetSnapshot) city.salaryCoverageLabel,
       city.languageLabel,
       city.flightPressureLabel == '—'
-          ? _localizedText(context, pt: 'rota aérea sem leitura', es: 'ruta aérea sin lectura', en: 'no flight read')
+          ? _localizedText(
+              context,
+              pt: 'rota aérea sem leitura',
+              es: 'ruta aérea sin lectura',
+              en: 'no flight read',
+            )
           : '${_localizedText(context, pt: 'passagem', es: 'vuelo', en: 'flight')}: ${city.flightPressureLabel.toLowerCase()}',
     ];
   }
@@ -1731,9 +1931,9 @@ class _CostFitOverviewPanel extends StatelessWidget {
               es: 'Salario vs costo real',
               en: 'Salary vs real cost',
             ),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 6),
           Text(
@@ -1749,7 +1949,9 @@ class _CostFitOverviewPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          for (final city in cities.where((item) => item.hasBudgetSnapshot)) ...[
+          for (final city in cities.where(
+            (item) => item.hasBudgetSnapshot,
+          )) ...[
             _CostFitCityRow(city: city),
             if (city != cities.where((item) => item.hasBudgetSnapshot).last)
               const SizedBox(height: 12),
@@ -1770,7 +1972,10 @@ class _ArrivalDecisionPanel extends StatelessWidget {
     final nearestDistance = cities
         .where((city) => city.distanceKm != null)
         .map((city) => city.distanceKm!)
-        .fold<int?>(null, (best, value) => best == null || value < best ? value : best);
+        .fold<int?>(
+          null,
+          (best, value) => best == null || value < best ? value : best,
+        );
 
     return FrostedPanel(
       padding: const EdgeInsets.all(16),
@@ -1784,9 +1989,9 @@ class _ArrivalDecisionPanel extends StatelessWidget {
               es: 'Llegada y desplazamiento',
               en: 'Arrival and distance',
             ),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 6),
           Text(
@@ -1806,7 +2011,8 @@ class _ArrivalDecisionPanel extends StatelessWidget {
             builder: (context, constraints) {
               final wide = constraints.maxWidth >= 860;
               final itemWidth = wide
-                  ? (constraints.maxWidth - ((cities.length - 1) * 12)) / cities.length
+                  ? (constraints.maxWidth - ((cities.length - 1) * 12)) /
+                        cities.length
                   : constraints.maxWidth;
               return Wrap(
                 spacing: 12,
@@ -1824,7 +2030,8 @@ class _ArrivalDecisionPanel extends StatelessWidget {
                             : AppColors.danger,
                         summary: city.arrivalEaseLabel,
                         bullets: [
-                          if (city.distanceKm != null && nearestDistance != null)
+                          if (city.distanceKm != null &&
+                              nearestDistance != null)
                             city.distanceKm == nearestDistance
                                 ? _localizedText(
                                     context,
@@ -1872,9 +2079,9 @@ class _StabilityDecisionPanel extends StatelessWidget {
               es: 'Rutina, idioma y trabajo',
               en: 'Routine, language, and work',
             ),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 6),
           Text(
@@ -1894,7 +2101,8 @@ class _StabilityDecisionPanel extends StatelessWidget {
             builder: (context, constraints) {
               final wide = constraints.maxWidth >= 860;
               final itemWidth = wide
-                  ? (constraints.maxWidth - ((cities.length - 1) * 12)) / cities.length
+                  ? (constraints.maxWidth - ((cities.length - 1) * 12)) /
+                        cities.length
                   : constraints.maxWidth;
               return Wrap(
                 spacing: 12,
@@ -1975,9 +2183,9 @@ class _VisualDecisionCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 6),
           Text(
@@ -2046,13 +2254,16 @@ class _CostFitCityRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   city.city.name,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: progressColor.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(999),
@@ -2209,7 +2420,10 @@ class _CityTradeoffPanel extends StatelessWidget {
               ),
               if (isWinner)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.success.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999),
@@ -2222,7 +2436,7 @@ class _CityTradeoffPanel extends StatelessWidget {
                       context,
                       pt: 'Melhor encaixe agora',
                       es: 'Mejor encaje ahora',
-                      en: 'Best fit now',
+                      en: 'Strong match now',
                     ),
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: AppColors.success,
@@ -2280,44 +2494,54 @@ class _CityTradeoffPanel extends StatelessWidget {
     }
     final parts = <String>[];
     if (city.arrivalEaseScore >= 72) {
-      parts.add(_localizedText(
-        context,
-        pt: 'chegada mais leve',
-        es: 'llegada más liviana',
-        en: 'lighter arrival',
-      ));
+      parts.add(
+        _localizedText(
+          context,
+          pt: 'chegada mais leve',
+          es: 'llegada más liviana',
+          en: 'lighter arrival',
+        ),
+      );
     }
     if (city.jobMarketScore >= 72) {
-      parts.add(_localizedText(
-        context,
-        pt: 'mercado mais forte',
-        es: 'mercado más fuerte',
-        en: 'stronger job market',
-      ));
+      parts.add(
+        _localizedText(
+          context,
+          pt: 'mercado mais forte',
+          es: 'mercado más fuerte',
+          en: 'stronger job market',
+        ),
+      );
     }
     if (city.hasBudgetSnapshot && city.salaryFitScore >= 68) {
-      parts.add(_localizedText(
-        context,
-        pt: 'salário médio cobre melhor o custo',
-        es: 'el salario medio cubre mejor el costo',
-        en: 'average salary covers the cost better',
-      ));
+      parts.add(
+        _localizedText(
+          context,
+          pt: 'salário médio cobre melhor o custo',
+          es: 'el salario medio cubre mejor el costo',
+          en: 'average salary covers the cost better',
+        ),
+      );
     }
     if (city.safetyLevelScore >= 68) {
-      parts.add(_localizedText(
-        context,
-        pt: 'segurança melhor',
-        es: 'mejor seguridad',
-        en: 'better safety',
-      ));
+      parts.add(
+        _localizedText(
+          context,
+          pt: 'segurança melhor',
+          es: 'mejor seguridad',
+          en: 'better safety',
+        ),
+      );
     }
     if (city.languageScore >= 68) {
-      parts.add(_localizedText(
-        context,
-        pt: 'adaptação mais fácil',
-        es: 'adaptación más fácil',
-        en: 'easier adaptation',
-      ));
+      parts.add(
+        _localizedText(
+          context,
+          pt: 'adaptação mais fácil',
+          es: 'adaptación más fácil',
+          en: 'easier adaptation',
+        ),
+      );
     }
     if (parts.isEmpty) {
       return _localizedText(
@@ -2333,36 +2557,44 @@ class _CityTradeoffPanel extends StatelessWidget {
   String _watchouts(BuildContext context) {
     final parts = <String>[];
     if (city.flightAccessScore <= 50) {
-      parts.add(_localizedText(
-        context,
-        pt: 'passagem pesa mais na entrada',
-        es: 'el vuelo pesa más al inicio',
-        en: 'flight weighs more on arrival',
-      ));
+      parts.add(
+        _localizedText(
+          context,
+          pt: 'passagem pesa mais na entrada',
+          es: 'el vuelo pesa más al inicio',
+          en: 'flight weighs more on arrival',
+        ),
+      );
     }
     if (city.jobStabilityScore <= 54) {
-      parts.add(_localizedText(
-        context,
-        pt: 'trabalho oscila ao longo do ano',
-        es: 'el trabajo oscila durante el año',
-        en: 'work fluctuates through the year',
-      ));
+      parts.add(
+        _localizedText(
+          context,
+          pt: 'trabalho oscila ao longo do ano',
+          es: 'el trabajo oscila durante el año',
+          en: 'work fluctuates through the year',
+        ),
+      );
     }
     if (city.costScore <= 52) {
-      parts.add(_localizedText(
-        context,
-        pt: 'custo aperta mais no começo',
-        es: 'el costo aprieta más al inicio',
-        en: 'cost is tighter at the start',
-      ));
+      parts.add(
+        _localizedText(
+          context,
+          pt: 'custo aperta mais no começo',
+          es: 'el costo aprieta más al inicio',
+          en: 'cost is tighter at the start',
+        ),
+      );
     }
     if (city.hasBudgetSnapshot && city.salaryFitScore <= 52) {
-      parts.add(_localizedText(
-        context,
-        pt: 'salário médio local não cobre bem o custo base',
-        es: 'el salario medio local no cubre bien el costo base',
-        en: 'local average salary does not cover the base cost well',
-      ));
+      parts.add(
+        _localizedText(
+          context,
+          pt: 'salário médio local não cobre bem o custo base',
+          es: 'el salario medio local no cubre bien el costo base',
+          en: 'local average salary does not cover the base cost well',
+        ),
+      );
     }
     if (parts.isEmpty) {
       return _localizedText(
@@ -2443,9 +2675,9 @@ class _InsightRow extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 2),
               Text(
@@ -2552,7 +2784,8 @@ class _ComparisonCityData {
     required _ComparisonLens lens,
   }) {
     final budget = city.budgetSnapshot;
-    final monthlyBase = budget?.singlePersonExcludingRent ?? _monthlyBaseEstimate(city);
+    final monthlyBase =
+        budget?.singlePersonExcludingRent ?? _monthlyBaseEstimate(city);
     final flightPressure = routeInsight == null
         ? '—'
         : _flightPressureLabel(
@@ -2581,11 +2814,13 @@ class _ComparisonCityData {
       city: city,
       cityCode: _cityCode(city),
       hasBudgetSnapshot: budget != null,
-      rentEstimateBrl: budget?.cheaperRent ??
-          (monthlyBase * 0.42).round().clamp(1200, 4200),
-      monthlyFoodCostBrl: budget?.singlePersonExcludingRent ??
+      rentEstimateBrl:
+          budget?.cheaperRent ?? (monthlyBase * 0.42).round().clamp(1200, 4200),
+      monthlyFoodCostBrl:
+          budget?.singlePersonExcludingRent ??
           (monthlyBase * 0.24).round().clamp(650, 1700),
-      monthlyTransportCostBrl: budget?.monthlyTransportPass ??
+      monthlyTransportCostBrl:
+          budget?.monthlyTransportPass ??
           (monthlyBase * 0.09).round().clamp(180, 520),
       hdiScore: city.idhmScore,
       currentTempC: weather?.temperatureCelsius,
@@ -2595,9 +2830,10 @@ class _ComparisonCityData {
       jobMarketLabel: _jobLabel(context, city.jobMarketScore),
       economicActivityScore: city.economicActivityScore,
       averageNetSalaryBrl: averageNetSalaryBrl,
-      baseLivingCostBrl: budget?.fairLivingTotal ??
+      baseLivingCostBrl:
+          budget?.fairLivingTotal ??
           (budget?.cheaperRent ??
-              (monthlyBase * 0.42).round().clamp(1200, 4200)) +
+                  (monthlyBase * 0.42).round().clamp(1200, 4200)) +
               (budget?.singlePersonExcludingRent ?? monthlyBase),
       salaryFitScore: salaryFitScore,
       salaryCoverageLabel: budget == null
@@ -2629,7 +2865,10 @@ class _ComparisonCityData {
       communityScore: city.argentinaPopularityScore,
       communityLabel: _communityLabel(context, city.argentinaPopularityScore),
       languageScore: city.movaroScores.languageAdaptation,
-      languageLabel: _languageLabel(context, city.movaroScores.languageAdaptation),
+      languageLabel: _languageLabel(
+        context,
+        city.movaroScores.languageAdaptation,
+      ),
       costScore: city.costOfLivingScore,
       distanceKm: distanceKm,
       distanceLabel: _distanceLabel(context, distanceKm),
@@ -2637,7 +2876,12 @@ class _ComparisonCityData {
       sizeLabel: _sizeLabel(context, city.population),
       flightAccessScore: _flightAccessScore(routeInsight),
       flightRangeLabel: routeInsight == null
-          ? _localizedText(context, pt: 'Sem leitura', es: 'Sin lectura', en: 'No route read')
+          ? _localizedText(
+              context,
+              pt: 'Sem leitura',
+              es: 'Sin lectura',
+              en: 'No route read',
+            )
           : MultiCurrencyAmount.formatRangeFromUsd(
               context: context,
               minUsd: routeInsight.lowUsdMin,
@@ -2807,13 +3051,17 @@ class _ComparisonCityData {
   }
 
   static int? _distanceFromDetected(City city, dynamic detectedLocation) {
-    if (detectedLocation?.latitude == null || detectedLocation?.longitude == null) {
+    if (detectedLocation?.latitude == null ||
+        detectedLocation?.longitude == null) {
       return null;
     }
     return const Distance()
         .as(
           LengthUnit.Kilometer,
-          LatLng(detectedLocation.latitude as double, detectedLocation.longitude as double),
+          LatLng(
+            detectedLocation.latitude as double,
+            detectedLocation.longitude as double,
+          ),
           LatLng(city.latitude, city.longitude),
         )
         .round();
@@ -2844,7 +3092,12 @@ class _ComparisonCityData {
       case 'high':
         return _localizedText(context, pt: 'Pesado', es: 'Pesado', en: 'Heavy');
       case 'medium':
-        return _localizedText(context, pt: 'Atenção', es: 'Atención', en: 'Watch');
+        return _localizedText(
+          context,
+          pt: 'Atenção',
+          es: 'Atención',
+          en: 'Watch',
+        );
       default:
         return _localizedText(context, pt: 'Leve', es: 'Leve', en: 'Light');
     }
@@ -2861,12 +3114,22 @@ class _ComparisonCityData {
 
   static String _jobStabilityLabel(BuildContext context, int score) {
     if (score >= 72) {
-      return _localizedText(context, pt: 'Equilibrado', es: 'Equilibrado', en: 'Year-round');
+      return _localizedText(
+        context,
+        pt: 'Equilibrado',
+        es: 'Equilibrado',
+        en: 'Year-round',
+      );
     }
     if (score >= 55) {
       return _localizedText(context, pt: 'Oscila', es: 'Oscila', en: 'Mixed');
     }
-    return _localizedText(context, pt: 'Sazonal', es: 'Estacional', en: 'Seasonal');
+    return _localizedText(
+      context,
+      pt: 'Sazonal',
+      es: 'Estacional',
+      en: 'Seasonal',
+    );
   }
 
   static String _languageLabel(BuildContext context, int score) {
@@ -2888,7 +3151,12 @@ class _ComparisonCityData {
 
   static String _sizeLabel(BuildContext context, int population) {
     if (population >= 2000000) {
-      return _localizedText(context, pt: 'Muito grande', es: 'Muy grande', en: 'Very large');
+      return _localizedText(
+        context,
+        pt: 'Muito grande',
+        es: 'Muy grande',
+        en: 'Very large',
+      );
     }
     if (population >= 500000) {
       return _localizedText(context, pt: 'Grande', es: 'Grande', en: 'Large');
@@ -2896,7 +3164,12 @@ class _ComparisonCityData {
     if (population >= 200000) {
       return _localizedText(context, pt: 'Média', es: 'Media', en: 'Mid-size');
     }
-    return _localizedText(context, pt: 'Compacta', es: 'Compacta', en: 'Compact');
+    return _localizedText(
+      context,
+      pt: 'Compacta',
+      es: 'Compacta',
+      en: 'Compact',
+    );
   }
 
   static int _arrivalEaseScore(
@@ -2916,11 +3189,11 @@ class _ComparisonCityData {
           };
     final score =
         ((city.rentScore +
-                    city.movaroScores.languageAdaptation +
-                    city.safetyScore +
-                    city.costOfLivingScore) /
-                4) -
-            flightPenalty;
+                city.movaroScores.languageAdaptation +
+                city.safetyScore +
+                city.costOfLivingScore) /
+            4) -
+        flightPenalty;
     return score.round().clamp(0, 100);
   }
 
@@ -2930,12 +3203,27 @@ class _ComparisonCityData {
     _ComparisonLens lens,
   ) {
     if (score >= 74) {
-      return _localizedText(context, pt: 'Entrada leve', es: 'Entrada liviana', en: 'Easy start');
+      return _localizedText(
+        context,
+        pt: 'Entrada leve',
+        es: 'Entrada liviana',
+        en: 'Easy start',
+      );
     }
     if (score >= 58) {
-      return _localizedText(context, pt: 'Exige atenção', es: 'Exige atención', en: 'Needs attention');
+      return _localizedText(
+        context,
+        pt: 'Exige atenção',
+        es: 'Exige atención',
+        en: 'Needs attention',
+      );
     }
-    return _localizedText(context, pt: 'Entrada pesada', es: 'Entrada pesada', en: 'Heavy start');
+    return _localizedText(
+      context,
+      pt: 'Entrada pesada',
+      es: 'Entrada pesada',
+      en: 'Heavy start',
+    );
   }
 }
 
@@ -2957,38 +3245,6 @@ class _MetricDefinition {
   displayValue;
   final String Function(BuildContext context) label;
 
-  static const rent = _MetricDefinition._(
-    key: 'rent',
-    isCompetitive: true,
-    lowerIsBetter: true,
-    numericValue: _rentNumeric,
-    displayValue: _rentDisplay,
-    label: _rentLabel,
-  );
-  static const food = _MetricDefinition._(
-    key: 'food',
-    isCompetitive: true,
-    lowerIsBetter: true,
-    numericValue: _foodNumeric,
-    displayValue: _foodDisplay,
-    label: _foodLabel,
-  );
-  static const transport = _MetricDefinition._(
-    key: 'transport',
-    isCompetitive: true,
-    lowerIsBetter: true,
-    numericValue: _transportNumeric,
-    displayValue: _transportDisplay,
-    label: _transportLabel,
-  );
-  static const salary = _MetricDefinition._(
-    key: 'salary',
-    isCompetitive: true,
-    lowerIsBetter: false,
-    numericValue: _salaryNumeric,
-    displayValue: _salaryDisplay,
-    label: _salaryLabel,
-  );
   static const salaryCoverage = _MetricDefinition._(
     key: 'salary_coverage',
     isCompetitive: true,
@@ -2996,14 +3252,6 @@ class _MetricDefinition {
     numericValue: _salaryCoverageNumeric,
     displayValue: _salaryCoverageDisplay,
     label: _salaryCoverageLabelMetric,
-  );
-  static const hdi = _MetricDefinition._(
-    key: 'hdi',
-    isCompetitive: true,
-    lowerIsBetter: false,
-    numericValue: _hdiNumeric,
-    displayValue: _hdiDisplay,
-    label: _hdiLabel,
   );
   static const safety = _MetricDefinition._(
     key: 'safety',
@@ -3021,14 +3269,6 @@ class _MetricDefinition {
     displayValue: _languageDisplay,
     label: _languageLabel,
   );
-  static const job = _MetricDefinition._(
-    key: 'job',
-    isCompetitive: true,
-    lowerIsBetter: false,
-    numericValue: _jobNumeric,
-    displayValue: _jobDisplay,
-    label: _jobLabel,
-  );
   static const jobStability = _MetricDefinition._(
     key: 'job_stability',
     isCompetitive: true,
@@ -3036,14 +3276,6 @@ class _MetricDefinition {
     numericValue: _jobStabilityNumeric,
     displayValue: _jobStabilityDisplay,
     label: _jobStabilityLabel,
-  );
-  static const community = _MetricDefinition._(
-    key: 'community',
-    isCompetitive: true,
-    lowerIsBetter: false,
-    numericValue: _communityNumeric,
-    displayValue: _communityDisplay,
-    label: _communityLabel,
   );
 
   List<String> bestCityIds(List<_ComparisonCityData> cities) {
@@ -3086,65 +3318,19 @@ class _MetricDefinition {
         .toList(growable: false);
   }
 
-  static double? _rentNumeric(_ComparisonCityData city) =>
-      city.rentEstimateBrl.toDouble();
-  static String _rentDisplay(BuildContext context, _ComparisonCityData city) =>
-      _formatMoney(context, city.rentEstimateBrl, city);
-  static String _rentLabel(BuildContext context) =>
-      context.l10n.cityComparisonRentLabel;
-
-  static double? _foodNumeric(_ComparisonCityData city) =>
-      city.monthlyFoodCostBrl.toDouble();
-  static String _foodDisplay(BuildContext context, _ComparisonCityData city) =>
-      _formatMoney(context, city.monthlyFoodCostBrl, city);
-  static String _foodLabel(BuildContext context) =>
-      context.l10n.cityComparisonFoodLabel;
-
-  static double? _transportNumeric(_ComparisonCityData city) =>
-      city.monthlyTransportCostBrl.toDouble();
-  static String _transportDisplay(
-    BuildContext context,
-    _ComparisonCityData city,
-  ) => _formatMoney(context, city.monthlyTransportCostBrl, city);
-  static String _transportLabel(BuildContext context) =>
-      context.l10n.cityComparisonTransportLabel;
-
-  static double? _salaryNumeric(_ComparisonCityData city) =>
-      city.hasBudgetSnapshot ? city.averageNetSalaryBrl.toDouble() : null;
-  static String _salaryDisplay(BuildContext context, _ComparisonCityData city) =>
-      city.hasBudgetSnapshot
-      ? _formatMoney(context, city.averageNetSalaryBrl, city)
-      : _localizedText(
-          context,
-          pt: 'Sem leitura',
-          es: 'Sin lectura',
-          en: 'No read',
-        );
-  static String _salaryLabel(BuildContext context) => _localizedText(
-    context,
-    pt: 'Salário',
-    es: 'Salario',
-    en: 'Net salary',
-  );
-
   static double? _salaryCoverageNumeric(_ComparisonCityData city) =>
       city.hasBudgetSnapshot ? city.salaryFitScore.toDouble() : null;
   static String _salaryCoverageDisplay(
     BuildContext _,
     _ComparisonCityData city,
   ) => '${city.salaryCoverageLabel} · ${city.salaryBalanceLabel}';
-  static String _salaryCoverageLabelMetric(BuildContext context) => _localizedText(
-    context,
-    pt: 'Peso no mês',
-    es: 'Peso mensual',
-    en: 'Monthly fit',
-  );
-
-  static double? _hdiNumeric(_ComparisonCityData city) => city.hdiScore;
-  static String _hdiDisplay(BuildContext _, _ComparisonCityData city) =>
-      city.hdiScore.toStringAsFixed(3);
-  static String _hdiLabel(BuildContext context) =>
-      context.l10n.cityComparisonHdiLabel;
+  static String _salaryCoverageLabelMetric(BuildContext context) =>
+      _localizedText(
+        context,
+        pt: 'Peso no mês',
+        es: 'Peso mensual',
+        en: 'Monthly fit',
+      );
 
   static double? _safetyNumeric(_ComparisonCityData city) =>
       city.safetyLevelScore.toDouble();
@@ -3164,17 +3350,12 @@ class _MetricDefinition {
     en: 'Portuguese',
   );
 
-  static double? _jobNumeric(_ComparisonCityData city) =>
-      city.jobMarketScore.toDouble();
-  static String _jobDisplay(BuildContext _, _ComparisonCityData city) =>
-      city.jobMarketLabel;
-  static String _jobLabel(BuildContext context) =>
-      context.l10n.cityComparisonJobLabel;
-
   static double? _jobStabilityNumeric(_ComparisonCityData city) =>
       city.jobStabilityScore.toDouble();
-  static String _jobStabilityDisplay(BuildContext _, _ComparisonCityData city) =>
-      city.jobStabilityLabel;
+  static String _jobStabilityDisplay(
+    BuildContext _,
+    _ComparisonCityData city,
+  ) => city.jobStabilityLabel;
   static String _jobStabilityLabel(BuildContext context) => _localizedText(
     context,
     pt: 'Ano inteiro',
@@ -3182,24 +3363,11 @@ class _MetricDefinition {
     en: 'Year-round',
   );
 
-  static double? _communityNumeric(_ComparisonCityData city) =>
-      city.communityScore.toDouble();
-  static String _communityDisplay(BuildContext _, _ComparisonCityData city) =>
-      city.communityLabel;
-  static String _communityLabel(BuildContext context) =>
-      context.l10n.cityComparisonCommunityLabel;
-
   MetricDirection get direction => switch (key) {
-    'rent' || 'food' || 'transport' || 'distance' => MetricDirection.lowerIsBetter,
-    'salary' ||
     'salary_coverage' ||
-    'flight' ||
-    'hdi' ||
     'safety' ||
     'language' ||
-    'job' ||
-    'job_stability' ||
-    'community' => MetricDirection.higherIsBetter,
+    'job_stability' => MetricDirection.higherIsBetter,
     _ => MetricDirection.neutral,
   };
 
@@ -3265,19 +3433,6 @@ class _MetricDefinition {
       default:
         return null;
     }
-  }
-
-  static String _formatMoney(
-    BuildContext context,
-    num amountInBrl,
-    _ComparisonCityData city,
-  ) {
-    return MultiCurrencyAmount.formatPreferredCurrency(
-      context: context,
-      amountInBrl: amountInBrl,
-      exchangeRates: city.exchangeRates,
-      preferredCountryId: city.preferredCountryId,
-    );
   }
 }
 
@@ -3368,18 +3523,6 @@ class _MetricCellColors {
   }
 }
 
-const _scoredMetricDefinitions = <_MetricDefinition>[
-  _MetricDefinition.salary,
-  _MetricDefinition.salaryCoverage,
-  _MetricDefinition.rent,
-  _MetricDefinition.food,
-  _MetricDefinition.transport,
-  _MetricDefinition.hdi,
-  _MetricDefinition.safety,
-  _MetricDefinition.job,
-  _MetricDefinition.community,
-];
-
 class _DashedPainter extends CustomPainter {
   const _DashedPainter({required this.color});
 
@@ -3392,10 +3535,7 @@ class _DashedPainter extends CustomPainter {
       ..strokeWidth = 1.2
       ..style = PaintingStyle.stroke;
     canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Offset.zero & size,
-        const Radius.circular(20),
-      ),
+      RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(20)),
       paint,
     );
   }

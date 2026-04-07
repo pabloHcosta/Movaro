@@ -265,7 +265,7 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomeFocusedDescription.
   ///
   /// In en, this message translates to:
-  /// **'Movaro is currently designed for people evaluating a move from Argentina to Brazil. Instead of showing everything at once, it helps you choose the best first step.'**
+  /// **'Movaro is currently designed for people evaluating a move from Argentina to Brazil. Instead of showing everything at once, it helps you explore useful starting points.'**
   String get publicHomeFocusedDescription;
 
   /// No description provided for @publicHomeSelectedJourneyDescription.
@@ -280,13 +280,13 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomePrimaryQuestionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Start with the main decision'**
+  /// **'Start with a useful question'**
   String get publicHomePrimaryQuestionTitle;
 
   /// No description provided for @publicHomePrimaryQuestionBody.
   ///
   /// In en, this message translates to:
-  /// **'First, decide whether you need a guided plan, a city comparison, or just a quick overview of what the product does.'**
+  /// **'You can begin with a guided plan, a city comparison, or a quick overview of what the product does.'**
   String get publicHomePrimaryQuestionBody;
 
   /// No description provided for @publicHomeTrustFastTitle.
@@ -502,7 +502,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeHeroNoPlanBody.
   ///
   /// In en, this message translates to:
-  /// **'Answer a few quick questions and get a recommended city that fits your profile.'**
+  /// **'Answer a few quick questions and review cities that may fit your profile.'**
   String get homeHeroNoPlanBody;
 
   /// No description provided for @homeHeroStepQuestionnaire.
@@ -514,7 +514,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeHeroStepCity.
   ///
   /// In en, this message translates to:
-  /// **'Get ideal city'**
+  /// **'Review possible cities'**
   String get homeHeroStepCity;
 
   /// No description provided for @homeHeroStepGuide.
@@ -1126,31 +1126,31 @@ abstract class AppLocalizations {
   /// No description provided for @explorePlanDraftTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your plan still needs a decision'**
+  /// **'Your plan still needs a closer review'**
   String get explorePlanDraftTitle;
 
   /// No description provided for @explorePlanDraftBody.
   ///
   /// In en, this message translates to:
-  /// **'You already have a draft. Reopen the result and confirm the city before moving into checklist mode.'**
+  /// **'You already have a draft. Reopen the result and review the city options before moving into checklist mode.'**
   String get explorePlanDraftBody;
 
   /// No description provided for @explorePlanDraftBodyWithCity.
   ///
   /// In en, this message translates to:
-  /// **'{city} is currently leading. Reopen the result, compare it, and confirm it when ready.'**
+  /// **'{city} is one of the leading options right now. Reopen the result and compare it again when you are ready.'**
   String explorePlanDraftBodyWithCity(Object city);
 
   /// No description provided for @exploreRecommendedCityTitle.
   ///
   /// In en, this message translates to:
-  /// **'Leading city right now'**
+  /// **'City to review now'**
   String get exploreRecommendedCityTitle;
 
   /// No description provided for @exploreRecommendedCityBody.
   ///
   /// In en, this message translates to:
-  /// **'Open the city details to validate cost, quality of life, and fit with your plan.'**
+  /// **'Open the city details to review cost, quality of life, and fit with your plan.'**
   String get exploreRecommendedCityBody;
 
   /// No description provided for @exploreOpenCityAction.
@@ -2830,19 +2830,19 @@ abstract class AppLocalizations {
   /// No description provided for @planRecommendedCityTitle.
   ///
   /// In en, this message translates to:
-  /// **'Suggested city to start with'**
+  /// **'City to review first'**
   String get planRecommendedCityTitle;
 
   /// No description provided for @planRecommendedCityDescription.
   ///
   /// In en, this message translates to:
-  /// **'Based on your choices, Movaro suggests looking at {city}, {stateCode} first.'**
+  /// **'Based on your choices, {city}, {stateCode} appears as a useful place to review first.'**
   String planRecommendedCityDescription(String city, String stateCode);
 
   /// No description provided for @planRecommendedCityAction.
   ///
   /// In en, this message translates to:
-  /// **'View this city'**
+  /// **'Review this city'**
   String get planRecommendedCityAction;
 
   /// No description provided for @planSummaryOrigin.
@@ -3298,7 +3298,7 @@ abstract class AppLocalizations {
   /// No description provided for @planStepOpenHousingPointThree.
   ///
   /// In en, this message translates to:
-  /// **'Neighborhood-level analysis still needs a dedicated data layer; for now, use the recommended city as your first filter.'**
+  /// **'Neighborhood-level analysis still needs a dedicated data layer; for now, use the current city match as an initial filter.'**
   String get planStepOpenHousingPointThree;
 
   /// No description provided for @planStepOpenGeneralEyebrow.
@@ -3568,7 +3568,7 @@ abstract class AppLocalizations {
   /// No description provided for @citiesExploreHousingEasyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Best for a lighter landing'**
+  /// **'Good for a lighter landing'**
   String get citiesExploreHousingEasyTitle;
 
   /// No description provided for @citiesExploreHousingPressureTitle.
@@ -3580,25 +3580,25 @@ abstract class AppLocalizations {
   /// No description provided for @citiesExploreSoftLandingTitle.
   ///
   /// In en, this message translates to:
-  /// **'Best for a lower-friction landing'**
+  /// **'Good for a lower-friction landing'**
   String get citiesExploreSoftLandingTitle;
 
   /// No description provided for @citiesExploreFamilyStabilityTitle.
   ///
   /// In en, this message translates to:
-  /// **'Best for a more predictable arrival'**
+  /// **'Good for a more predictable arrival'**
   String get citiesExploreFamilyStabilityTitle;
 
   /// No description provided for @citiesExploreIncomeStartTitle.
   ///
   /// In en, this message translates to:
-  /// **'Best if you need income early'**
+  /// **'Good if you may need income early'**
   String get citiesExploreIncomeStartTitle;
 
   /// No description provided for @citiesExploreCoastalTitle.
   ///
   /// In en, this message translates to:
-  /// **'Best if you want to live near the beach'**
+  /// **'Good if you want to live near the beach'**
   String get citiesExploreCoastalTitle;
 
   /// No description provided for @citiesExploreCoastalSoftLandingTitle.
@@ -3988,25 +3988,25 @@ abstract class AppLocalizations {
   /// No description provided for @cityDetailDecisionSnapshotTitle.
   ///
   /// In en, this message translates to:
-  /// **'Decision snapshot'**
+  /// **'Quick city read'**
   String get cityDetailDecisionSnapshotTitle;
 
   /// No description provided for @cityDetailDecisionSnapshotSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Movaro sees this city as a strong option if you are prioritizing {bestFor}.'**
+  /// **'This city may be more relevant if you are prioritizing {bestFor}.'**
   String cityDetailDecisionSnapshotSubtitle(Object bestFor);
 
   /// No description provided for @cityDetailDecisionSnapshotPlanSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'For your plan, this city stands out if you are prioritizing {bestFor}.'**
+  /// **'For your plan, this city may stand out if you are prioritizing {bestFor}.'**
   String cityDetailDecisionSnapshotPlanSubtitle(Object bestFor);
 
   /// No description provided for @cityDetailDecisionSnapshotRecommendedSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'This city is currently leading in your plan if your focus is {bestFor}.'**
+  /// **'This city is currently one of the stronger matches in your plan if your focus is {bestFor}.'**
   String cityDetailDecisionSnapshotRecommendedSubtitle(Object bestFor);
 
   /// No description provided for @cityDetailWatchoutTitle.
@@ -4672,7 +4672,7 @@ abstract class AppLocalizations {
   /// No description provided for @stageClarityBody.
   ///
   /// In en, this message translates to:
-  /// **'Understand your starting point and choose the best path to begin.'**
+  /// **'Understand your starting point and review useful ways to begin.'**
   String get stageClarityBody;
 
   /// No description provided for @stageClarityAction.
@@ -4684,19 +4684,19 @@ abstract class AppLocalizations {
   /// No description provided for @stageDecisionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Decision'**
+  /// **'Explore options'**
   String get stageDecisionTitle;
 
   /// No description provided for @stageDecisionBody.
   ///
   /// In en, this message translates to:
-  /// **'Get an initial recommendation and validate the city that makes the most sense now.'**
+  /// **'Get an initial shortlist and review the cities that seem most relevant now.'**
   String get stageDecisionBody;
 
   /// No description provided for @stageDecisionAction.
   ///
   /// In en, this message translates to:
-  /// **'Answer and move to the result'**
+  /// **'Answer and view matches'**
   String get stageDecisionAction;
 
   /// No description provided for @stageExecutionTitle.
@@ -4708,13 +4708,13 @@ abstract class AppLocalizations {
   /// No description provided for @stageExecutionBody.
   ///
   /// In en, this message translates to:
-  /// **'Turn the chosen city into concrete next steps.'**
+  /// **'Turn the reviewed city into concrete next steps.'**
   String get stageExecutionBody;
 
   /// No description provided for @stageExecutionAction.
   ///
   /// In en, this message translates to:
-  /// **'Start with the recommended action'**
+  /// **'Start with a suggested action'**
   String get stageExecutionAction;
 
   /// No description provided for @favoritesPageCount.
@@ -4858,7 +4858,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityComparisonBestFitBadge.
   ///
   /// In en, this message translates to:
-  /// **'BEST FIT'**
+  /// **'STRONG MATCH'**
   String get cityComparisonBestFitBadge;
 
   /// No description provided for @cityComparisonTopBadge.
@@ -4954,7 +4954,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityComparisonWinnerLabel.
   ///
   /// In en, this message translates to:
-  /// **'BEST CHOICE FOR YOU'**
+  /// **'CURRENT COMPARISON EDGE'**
   String get cityComparisonWinnerLabel;
 
   /// No description provided for @cityComparisonUnavailable.
@@ -6706,13 +6706,13 @@ abstract class AppLocalizations {
   /// No description provided for @planBeachDecisionCoastalHeadline.
   ///
   /// In en, this message translates to:
-  /// **'The recommendation already points to the coast'**
+  /// **'Your current city match already points to the coast'**
   String get planBeachDecisionCoastalHeadline;
 
   /// No description provided for @planBeachDecisionCoastalBody.
   ///
   /// In en, this message translates to:
-  /// **'{cityName} already fits the coastal-city filter. The next step is understanding whether housing entry and local routine match your current situation.'**
+  /// **'{cityName} already fits the coastal-city filter. A useful next check is whether housing entry and local routine match your current situation.'**
   String planBeachDecisionCoastalBody(Object cityName);
 
   /// No description provided for @planBeachDecisionNotCoastalHeadline.
@@ -7456,7 +7456,7 @@ abstract class AppLocalizations {
   /// No description provided for @housingDecisionSectionBodyWithCity.
   ///
   /// In en, this message translates to:
-  /// **'Before assuming {city} is the best option, validate whether rent, guarantees, and initial setup look viable for your current situation. The risk is not only the price, but the real path to secure housing.'**
+  /// **'Before treating {city} as a strong option, validate whether rent, guarantees, and initial setup look viable for your current situation. The risk is not only the price, but the real path to secure housing.'**
   String housingDecisionSectionBodyWithCity(Object city);
 
   /// No description provided for @housingDecisionGuaranteesTitle.
@@ -8230,7 +8230,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanCopilotResultBody.
   ///
   /// In en, this message translates to:
-  /// **'First, check whether the recommended city really fits your context. When you want to turn that decision into concrete preparation, open the guided layer with a checklist, documents, and an arrival reserve.'**
+  /// **'First, check whether the current city match still fits your context. When you want to turn that exploration into concrete preparation, open the guided layer with a checklist, documents, and an arrival reserve.'**
   String get migrationPlanCopilotResultBody;
 
   /// No description provided for @migrationPlanCopilotStepCounter.
@@ -8344,7 +8344,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanCopilotFallbackActionBody.
   ///
   /// In en, this message translates to:
-  /// **'Open this stage to see the first recommended action.'**
+  /// **'Open this stage to see a useful first action.'**
   String get migrationPlanCopilotFallbackActionBody;
 
   /// No description provided for @migrationPlanCopilotRiskTitle.
@@ -8386,37 +8386,37 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanCopilotRecommendedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Recommended next step'**
+  /// **'Suggested area to review next'**
   String get migrationPlanCopilotRecommendedTitle;
 
   /// No description provided for @migrationPlanCopilotRecommendedReadinessBody.
   ///
   /// In en, this message translates to:
-  /// **'Start with this stage to remove the first blockers and give the rest of the plan a stronger base.'**
+  /// **'This stage may help reduce the first blockers and give the rest of the plan a stronger base.'**
   String get migrationPlanCopilotRecommendedReadinessBody;
 
   /// No description provided for @migrationPlanCopilotRecommendedDocumentsBody.
   ///
   /// In en, this message translates to:
-  /// **'The document layer still deserves attention first. Resolve it now to avoid more expensive blockers later.'**
+  /// **'The document layer may deserve attention first. Reviewing it now can reduce more expensive blockers later.'**
   String get migrationPlanCopilotRecommendedDocumentsBody;
 
   /// No description provided for @migrationPlanCopilotRecommendedBudgetBody.
   ///
   /// In en, this message translates to:
-  /// **'Now it is worth turning the plan into real numbers and reviewing housing entry before arrival gets tight.'**
+  /// **'This may be a good moment to turn the plan into real numbers and review housing entry before arrival gets tight.'**
   String get migrationPlanCopilotRecommendedBudgetBody;
 
   /// No description provided for @migrationPlanCopilotRecommendedArrivalBody.
   ///
   /// In en, this message translates to:
-  /// **'You already have enough base to organize the arrival. Use this stage to move from plan to execution.'**
+  /// **'You may already have enough base to organize the arrival. This stage can help you move from planning into execution.'**
   String get migrationPlanCopilotRecommendedArrivalBody;
 
   /// No description provided for @migrationPlanCopilotRecommendedOpen.
   ///
   /// In en, this message translates to:
-  /// **'Open recommended stage'**
+  /// **'Open suggested stage'**
   String get migrationPlanCopilotRecommendedOpen;
 
   /// No description provided for @migrationPlanCopilotQuickQuestionsTitle.
@@ -8500,19 +8500,19 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanDecisionLabel.
   ///
   /// In en, this message translates to:
-  /// **'City choice'**
+  /// **'City comparison'**
   String get migrationPlanDecisionLabel;
 
   /// No description provided for @migrationPlanDecisionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Now compare the cities that best match {goal}'**
+  /// **'Now compare the cities that may match {goal} more closely'**
   String migrationPlanDecisionTitle(Object goal);
 
   /// No description provided for @migrationPlanDecisionBody.
   ///
   /// In en, this message translates to:
-  /// **'Based on your {timeline} horizon, these options come first because they are closer to the profile you selected.'**
+  /// **'Based on your {timeline} horizon, these options appear first because they are closer to the profile you selected.'**
   String migrationPlanDecisionBody(Object timeline);
 
   /// No description provided for @migrationPlanDecisionSummaryTitle.
@@ -8524,7 +8524,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanDecisionSummaryBody.
   ///
   /// In en, this message translates to:
-  /// **'Choose the city that makes the most sense first. The detailed checklist only comes after that decision.'**
+  /// **'Review the city options first. The detailed checklist becomes more useful after you decide which route to keep exploring.'**
   String get migrationPlanDecisionSummaryBody;
 
   /// No description provided for @migrationPlanHeroTitle.
@@ -8686,25 +8686,25 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanResultPrimaryCtaEyebrow.
   ///
   /// In en, this message translates to:
-  /// **'Next step'**
+  /// **'Possible next move'**
   String get migrationPlanResultPrimaryCtaEyebrow;
 
   /// No description provided for @migrationPlanResultStartPlanTitle.
   ///
   /// In en, this message translates to:
-  /// **'Start my plan'**
+  /// **'Open this route'**
   String get migrationPlanResultStartPlanTitle;
 
   /// No description provided for @migrationPlanResultStartPlanBody.
   ///
   /// In en, this message translates to:
-  /// **'Review {city} with a little more context and confirm it when you are ready to unlock the full guided plan.'**
+  /// **'Review {city} with a little more context and keep exploring it if it still feels relevant for your route.'**
   String migrationPlanResultStartPlanBody(Object city);
 
   /// No description provided for @migrationPlanResultStartPlanAction.
   ///
   /// In en, this message translates to:
-  /// **'Start my plan'**
+  /// **'Open this route'**
   String get migrationPlanResultStartPlanAction;
 
   /// No description provided for @migrationPlanResultOpenPlanTitle.
@@ -8746,7 +8746,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanResultCompatibilityHelpBody.
   ///
   /// In en, this message translates to:
-  /// **'Compatibility combines your priorities, timeline, and migration goal with the signals available for each city. It is a directional match to help you start with the strongest city first.'**
+  /// **'Compatibility combines your priorities, timeline, and migration goal with the signals available for each city. It is a directional match meant to help you compare options and explore a starting point.'**
   String get migrationPlanResultCompatibilityHelpBody;
 
   /// No description provided for @migrationPlanResultUnavailableTitle.
@@ -8758,7 +8758,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanResultUnavailableBody.
   ///
   /// In en, this message translates to:
-  /// **'Try again to reopen your recommendation and continue from the quick questions.'**
+  /// **'Try again to reopen your city matches and continue from the quick questions.'**
   String get migrationPlanResultUnavailableBody;
 
   /// No description provided for @migrationPlanResultBasedOnAnswersTitle.
@@ -9140,7 +9140,7 @@ abstract class AppLocalizations {
   /// No description provided for @bmpDisclaimer.
   ///
   /// In en, this message translates to:
-  /// **'This builds a starting point. It is not legal advice.'**
+  /// **'This builds a starting point. It does not replace professional legal guidance.'**
   String get bmpDisclaimer;
 
   /// No description provided for @bmpProgressStep.
@@ -10919,7 +10919,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationResultRevealEyebrow.
   ///
   /// In en, this message translates to:
-  /// **'Your recommended city'**
+  /// **'Current city match'**
   String get migrationResultRevealEyebrow;
 
   /// No description provided for @migrationResultRevealHeaderTitle.
@@ -11033,13 +11033,13 @@ abstract class AppLocalizations {
   /// No description provided for @homeEntryDiscoverTitle.
   ///
   /// In en, this message translates to:
-  /// **'I want to discover my best city'**
+  /// **'I want to discover possible cities'**
   String get homeEntryDiscoverTitle;
 
   /// No description provided for @homeEntryDiscoverBody.
   ///
   /// In en, this message translates to:
-  /// **'Answer a few questions and get an initial direction with a recommended city, alternatives, and next steps.'**
+  /// **'Answer a few questions and get an initial direction with city matches, alternatives, and possible next steps.'**
   String get homeEntryDiscoverBody;
 
   /// No description provided for @homeEntryDiscoverBadge.
@@ -12023,7 +12023,7 @@ abstract class AppLocalizations {
   /// No description provided for @housingTemporaryBadge.
   ///
   /// In en, this message translates to:
-  /// **'Recommended for arrival'**
+  /// **'Often useful on arrival'**
   String get housingTemporaryBadge;
 
   /// No description provided for @housingTemporaryCardTitle.
@@ -12503,7 +12503,7 @@ abstract class AppLocalizations {
   /// No description provided for @citySeasonalityHighAdvice.
   ///
   /// In en, this message translates to:
-  /// **'Tip: plan to arrive outside peak season (May–Oct). You\'ll find far more long-term rental options at reasonable prices. If you must arrive in peak season, book accommodation at least 3 months in advance.'**
+  /// **'Tip: arriving outside peak season (May–Oct) may open more long-term rental options at reasonable prices. If peak season is your only window, booking accommodation at least 3 months in advance may help.'**
   String get citySeasonalityHighAdvice;
 
   /// No description provided for @citySeasonalityMediumAdvice.

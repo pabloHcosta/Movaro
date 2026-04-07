@@ -105,7 +105,7 @@ class _AssistantPageState extends State<AssistantPage> {
         originCountry: originCountry,
         destinationCountry: destinationCountry,
         locale: locale,
-        recommendedCityId: plan?.recommendedCity?.id,
+        highlightedCityId: plan?.currentPlanCity?.id,
         currentPhase: _resolveCurrentPhase(progressSnapshot.activeItemId),
         completedItemIds: completedItemIds,
         migrationGoal: plan?.goal.isNotEmpty == true ? plan!.goal : null,

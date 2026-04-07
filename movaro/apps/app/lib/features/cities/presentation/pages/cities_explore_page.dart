@@ -111,7 +111,8 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
             (controller.isLoadingCatalog || hasQuery || _quickFilter != null);
 
         final favoriteCities = widget.citiesController.favoriteCities;
-        final canDecide = favoriteCities.length >= 2 &&
+        final canDecide =
+            favoriteCities.length >= 2 &&
             widget.migrationQuestionnaireController != null;
 
         return Scaffold(
@@ -145,7 +146,7 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                     const SizedBox(height: 16),
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 1120),
-                        child: FrostedPanel(
+                      child: FrostedPanel(
                         padding: const EdgeInsets.all(24),
                         gradient: LinearGradient(
                           colors: [
@@ -172,7 +173,9 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                               Text(
                                 l10n.citiesSearchHeadline,
                                 style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(color: AppColors.textPrimaryFor(context)),
+                                    ?.copyWith(
+                                      color: AppColors.textPrimaryFor(context),
+                                    ),
                               ),
                               const SizedBox(height: 8),
                               Text(
@@ -982,74 +985,56 @@ class _CitiesMapCallout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.primary.withValues(alpha: 0.10),
-      borderRadius: BorderRadius.circular(24),
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        child: Container(
+        borderRadius: BorderRadius.circular(18),
+        child: Ink(
           width: double.infinity,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.18),
-            ),
+            borderRadius: BorderRadius.circular(18),
             gradient: LinearGradient(
               colors: [
                 AppColors.primary.withValues(alpha: 0.16),
-                const Color(0xFF2A6FBE).withValues(alpha: 0.14),
+                AppColors.primary.withValues(alpha: 0.08),
               ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.20),
             ),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(
-                  Icons.map_outlined,
-                  color: Colors.white,
-                  size: 26,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      body,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.82),
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
+              Icon(Icons.map_outlined, color: AppColors.primary, size: 20),
+              const SizedBox(width: 10),
+              Flexible(
+                child: Text(
+                  _buttonLabel(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.textPrimaryFor(context),
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
-              const Icon(Icons.arrow_forward_rounded, color: Colors.white),
             ],
           ),
         ),
       ),
     );
+  }
+
+  String _buttonLabel(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => 'Escolher no mapa',
+      'es' => 'Elegir en el mapa',
+      _ => 'Choose on map',
+    };
   }
 }
 
@@ -1546,7 +1531,8 @@ class _FavoritesDecideBar extends StatelessWidget {
     final locale = Localizations.localeOf(context).languageCode;
     final isDark = AppColors.isDark(context);
 
-    final namesLabel = cityNames.take(2).join(' · ') +
+    final namesLabel =
+        cityNames.take(2).join(' · ') +
         (cityNames.length > 2 ? ' +${cityNames.length - 2}' : '');
 
     final label = switch (locale) {

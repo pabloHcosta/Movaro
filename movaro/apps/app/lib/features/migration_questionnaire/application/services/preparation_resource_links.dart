@@ -1,10 +1,7 @@
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 
 class FederalPoliceUnitContact {
-  const FederalPoliceUnitContact({
-    required this.label,
-    required this.email,
-  });
+  const FederalPoliceUnitContact({required this.label, required this.email});
 
   final String label;
   final String email;
@@ -27,9 +24,7 @@ enum TemporaryHousingDuration { oneWeek, oneMonth, twoThreeMonths }
 class PreparationResourceLinks {
   const PreparationResourceLinks._();
 
-  static final Uri officialJobsPortal = Uri.parse(
-    'https://www.vagas.com.br',
-  );
+  static final Uri officialJobsPortal = Uri.parse('https://www.vagas.com.br');
 
   static final Uri publicUniversitiesCatalog = Uri.parse(
     'https://emec.mec.gov.br/',
@@ -52,7 +47,7 @@ class PreparationResourceLinks {
   );
 
   static final Uri argentinaResidenceAgreement = Uri.parse(
-    'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia-resolucao-mercosul',
+    'https://www.gov.br/pf/pt-br/assuntos/carta-de-servicos/migracao/obter-autorizacao-de-residencia',
   );
 
   static final Uri cpfInBrazil = Uri.parse(
@@ -64,7 +59,7 @@ class PreparationResourceLinks {
   );
 
   static final Uri rnMRegistrationGuide = Uri.parse(
-    'https://www.gov.br/pf/pt-br/assuntos/imigracao/duvidas-frequentes/autorizacao-de-residencia-e-registro-nacional-migratorio-rnm/como-devo-realizar-o-registro-de-rnm',
+    'https://www.gov.br/pt-br/servicos/registrar-se-como-estrangeiro-no-brasil',
   );
 
   static final Uri migrantSupportNetwork = Uri.parse(
@@ -213,9 +208,7 @@ class PreparationResourceLinks {
     'https://www.gov.br/saude/pt-br/composicao/sas/cartao-nacional-de-saude',
   );
 
-  static final Uri ansPortal = Uri.parse(
-    'https://www.gov.br/ans/pt-br',
-  );
+  static final Uri ansPortal = Uri.parse('https://www.gov.br/ans/pt-br');
 
   static Uri buildDetranMapSearch(City city) {
     final query = Uri.encodeComponent('DETRAN ${city.name}');
@@ -237,6 +230,10 @@ class PreparationResourceLinks {
 
   static final Uri pfFaq = Uri.parse(
     'https://www.gov.br/pf/pt-br/assuntos/imigracao/pt/duvidas',
+  );
+
+  static final Uri pfRequestTracking = Uri.parse(
+    'https://www.gov.br/pf/pt-br/assuntos/imigracao/outras-informacoes/consultar-requerimento',
   );
 
   static final Uri pfUnitDirectory = Uri.parse(

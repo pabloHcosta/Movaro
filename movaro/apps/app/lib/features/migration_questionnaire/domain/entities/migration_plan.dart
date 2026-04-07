@@ -18,7 +18,7 @@ class MigrationPlan {
     this.confidence = 0,
     this.selectedPriorities = const [],
     this.selectedConstraints = const [],
-    this.recommendedCity,
+    this.highlightedCity,
     this.preferredCity,
     this.candidateCities = const [],
     this.candidateCityMatchScores = const {},
@@ -40,12 +40,43 @@ class MigrationPlan {
   final double confidence;
   final List<String> selectedPriorities;
   final List<String> selectedConstraints;
-  final City? recommendedCity;
+  final City? highlightedCity;
   final City? preferredCity;
   final List<City> candidateCities;
   final Map<String, double> candidateCityMatchScores;
   final List<String> cityRecommendationReasons;
   final bool isCityConfirmed;
+
+  City? get confirmedCity =>
+      isCityConfirmed ? (preferredCity ?? highlightedCity) : null;
+
+  City? get leadingCity =>
+      preferredCity ??
+      highlightedCity ??
+      (candidateCities.isNotEmpty ? candidateCities.first : null);
+
+  City? get currentPlanCity => confirmedCity ?? leadingCity;
+
+  List<City> get reviewCities {
+    final ordered = <City>[];
+    final seenIds = <String>{};
+
+    void addIfNeeded(City? city) {
+      if (city == null || seenIds.contains(city.id)) {
+        return;
+      }
+      seenIds.add(city.id);
+      ordered.add(city);
+    }
+
+    addIfNeeded(preferredCity);
+    addIfNeeded(highlightedCity);
+    for (final city in candidateCities) {
+      addIfNeeded(city);
+    }
+
+    return ordered;
+  }
 
   MigrationPlan copyWith({
     String? originCountry,
@@ -62,7 +93,7 @@ class MigrationPlan {
     double? confidence,
     List<String>? selectedPriorities,
     List<String>? selectedConstraints,
-    City? recommendedCity,
+    City? highlightedCity,
     Object? preferredCity = _migrationPlanNoChange,
     List<City>? candidateCities,
     Map<String, double>? candidateCityMatchScores,
@@ -86,7 +117,7 @@ class MigrationPlan {
       confidence: confidence ?? this.confidence,
       selectedPriorities: selectedPriorities ?? this.selectedPriorities,
       selectedConstraints: selectedConstraints ?? this.selectedConstraints,
-      recommendedCity: recommendedCity ?? this.recommendedCity,
+      highlightedCity: highlightedCity ?? this.highlightedCity,
       preferredCity: identical(preferredCity, _migrationPlanNoChange)
           ? this.preferredCity
           : preferredCity as City?,

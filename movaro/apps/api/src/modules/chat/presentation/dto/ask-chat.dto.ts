@@ -39,7 +39,7 @@ export class AskChatDto {
   @IsOptional()
   @IsString()
   @MaxLength(120)
-  recommendedCityId?: string;
+  highlightedCityId?: string;
 
   @IsOptional()
   @IsString()

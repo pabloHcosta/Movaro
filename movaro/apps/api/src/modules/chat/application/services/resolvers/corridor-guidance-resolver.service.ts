@@ -310,11 +310,12 @@ export class CorridorGuidanceResolverService {
       profile,
     );
 
-    const resolvedCityId = dto.recommendedCityId
-      ? this.citiesCatalogService.resolveCityId(dto.recommendedCityId)
+    const highlightedCityId = dto.highlightedCityId;
+    const resolvedCityId = highlightedCityId
+      ? this.citiesCatalogService.resolveCityId(highlightedCityId)
       : null;
-    const cityName = dto.recommendedCityId
-      ? this.citiesCatalogService.getCityDisplayNameById(dto.recommendedCityId)
+    const cityName = highlightedCityId
+      ? this.citiesCatalogService.getCityDisplayNameById(highlightedCityId)
       : null;
     const city = resolvedCityId
       ? await this.safeGetCityById(resolvedCityId)

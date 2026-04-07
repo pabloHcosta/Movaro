@@ -73,7 +73,7 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: 'Você pode entrar no Brasil sem visto, mas precisa saber quando regularizar sua permanência.',
           es: 'Puedes entrar a Brasil sin visa, pero necesitas saber cuando regularizar tu estadia.',
-          en: 'You can enter Brazil without a visa, but you need to know when to regularize your stay.',
+          en: 'You can enter Brazil without a visa, but it is important to understand when regularization may apply to your stay.',
         ),
         fullContent: null,
         type: GuideActionType.informative,
@@ -131,7 +131,7 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: 'Você sabe até quando precisa iniciar sua regularização e já organizou os próximos passos dentro desse prazo.',
           es: 'Ya sabes hasta cuando debes iniciar tu regularizacion y organizaste los proximos pasos dentro de ese plazo.',
-          en: 'You know by when you must start regularization and have organized the next steps inside that window.',
+          en: 'You understand the likely regularization window and have organized possible next steps inside that period.',
         ),
         tips: _list(
           locale,
@@ -198,17 +198,23 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: [
             'Acesse o site do Registro Nacional de Reincidencia.',
-            'Peça a emissão com antecedência e acompanhe o prazo.',
+            'Se você tem mais de 18 anos e DNI argentino, pode fazer online. Sem DNI argentino, a rota oficial passa a ser presencial.',
+            'Escolha a modalidade disponível para o seu caso: 1 hora, 6 horas, 24 horas ou 5 dias úteis.',
+            'Faça o pagamento e conte o prazo a partir da confirmação dele.',
             'Salve o PDF e leve uma cópia com seus outros documentos.',
           ],
           es: [
             'Entra al sitio del Registro Nacional de Reincidencia.',
-            'Pide la emision con tiempo y sigue el plazo.',
+            'Si tienes mas de 18 años y DNI argentino, puedes hacerlo online. Sin DNI argentino, la ruta oficial pasa a ser presencial.',
+            'Elige la modalidad disponible para tu caso: 1 hora, 6 horas, 24 horas o 5 dias habiles.',
+            'Haz el pago y cuenta el plazo desde la acreditacion.',
             'Guarda el PDF y lleva una copia con tus otros documentos.',
           ],
           en: [
             'Go to the National Recidivism Registry website.',
-            'Request issuance early and track the timeline.',
+            'If you are over 18 and have an Argentine DNI, you can do it online. Without an Argentine DNI, the official path becomes in-person.',
+            'Choose the option available for your case: 1 hour, 6 hours, 24 hours, or 5 business days.',
+            'Make the payment and count the timeline from payment confirmation.',
             'Save the PDF and carry a copy with your other documents.',
           ],
         ),
@@ -222,12 +228,15 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: [
             'A validade é curta. Planeje a emissão perto da sua chegada, sem deixar para depois da viagem.',
+            'Na via online, o FAQ oficial cita Mi Argentina, Banelco, AFIP ou ANSES como formas aceitas de autenticação/pagamento.',
           ],
           es: [
             'La validez es corta. Planifica la emision cerca de tu llegada, sin dejarlo para despues del viaje.',
+            'En la via online, el FAQ oficial menciona Mi Argentina, Banelco, AFIP o ANSES como formas aceptadas de autenticacion/pago.',
           ],
           en: [
             'Validity is short. Time the issue close to your arrival without leaving it for after the trip.',
+            'For the online path, the official FAQ lists Mi Argentina, Banelco, AFIP, or ANSES as accepted authentication/payment routes.',
           ],
         ),
         blockingReason: _t(
@@ -239,9 +248,9 @@ class ArgentinaBrazilGuideDataSource {
         estimatedEffort: GuideEstimatedEffort.fast,
         estimatedTimeLabel: _t(
           locale,
-          pt: '5-15 dias',
-          es: '5-15 dias',
-          en: '5-15 days',
+          pt: '1 hora a 5 dias úteis',
+          es: '1 hora a 5 dias habiles',
+          en: '1 hour to 5 business days',
         ),
         checklistItems: [
           ChecklistSubItem(
@@ -258,9 +267,9 @@ class ArgentinaBrazilGuideDataSource {
             id: 'ante_2',
             title: _t(
               locale,
-              pt: 'Aguardar emissão (5-15 dias úteis)',
-              es: 'Esperar la emision (5-15 dias habiles)',
-              en: 'Wait for issuance (5-15 business days)',
+              pt: 'Aguardar emissão conforme a modalidade escolhida (1 hora, 6 horas, 24 horas ou 5 dias úteis)',
+              es: 'Esperar la emision segun la modalidad elegida (1 hora, 6 horas, 24 horas o 5 dias habiles)',
+              en: 'Wait for issuance based on the chosen option (1 hour, 6 hours, 24 hours, or 5 business days)',
             ),
             isCompleted: false,
           ),
@@ -366,7 +375,7 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: 'Entender o que seu perfil vale no Brasil antes de sair evita surpresas ruins e ajuda a calcular quanto você precisa para se sustentar.',
           es: 'Entender cuanto vale tu perfil en Brasil antes de salir evita malas sorpresas y ayuda a calcular cuanto necesitas para sostenerte.',
-          en: 'Knowing what your profile is worth in Brazil before leaving prevents bad surprises and helps you estimate how much you need to sustain yourself.',
+          en: 'Understanding how your profile may be valued in Brazil before leaving can reduce bad surprises and help you estimate how much support you may need.',
         ),
         fullContent: null,
         type: GuideActionType.informative,
@@ -623,29 +632,28 @@ class ArgentinaBrazilGuideDataSource {
         ),
         primaryActionLabel: _t(
           locale,
-          pt: 'Configurar pagamentos',
-          es: 'Configurar pagos',
-          en: 'Set up payments',
+          pt: 'Escolher opção de pagamento',
+          es: 'Elegir opcion de pago',
+          en: 'Choose payment option',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget: 'https://wise.com',
         steps: _list(
           locale,
           pt: [
             'Verifique se seu cartão argentino funciona para compras e saques internacionais.',
-            'Crie uma conta em um serviço de câmbio (Wise, Payoneer ou similar) antes de viajar.',
+            'Configure pelo menos uma alternativa digital que funcione na rota Argentina → Brasil, como Global66 ou Western Union.',
             'Troque um valor em reais ou dólares em espécie como backup.',
             'Teste pelo menos um pagamento antes de embarcar.',
           ],
           es: [
             'Verifica si tu tarjeta argentina funciona para compras y extracciones internacionales.',
-            'Crea una cuenta en un servicio de cambio (Wise, Payoneer o similar) antes de viajar.',
+            'Configura al menos una alternativa digital que funcione en la ruta Argentina → Brasil, como Global66 o Western Union.',
             'Cambia algo de efectivo en reales o dolares como respaldo.',
             'Prueba al menos un pago antes de embarcar.',
           ],
           en: [
             'Check that your Argentine card works for international purchases and withdrawals.',
-            'Create an account in a transfer service (Wise, Payoneer, or similar) before traveling.',
+            'Set up at least one digital option that works on the Argentina → Brazil route, such as Global66 or Western Union.',
             'Exchange some cash into BRL or USD as a backup.',
             'Test at least one payment before boarding.',
           ],
@@ -675,15 +683,15 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: [
             'Evite câmbio de aeroporto — o spread costuma ser muito alto.',
-            'Wise e serviços similares costumam ter taxas menores que o cartão do banco.',
+            'Não dependa de uma única opção: combine cartão, app de transferência e reserva em espécie.',
           ],
           es: [
             'Evita el cambio del aeropuerto — el spread suele ser muy alto.',
-            'Wise y similares suelen tener tasas menores que la tarjeta del banco.',
+            'No dependas de una sola opcion: combina tarjeta, app de transferencias y respaldo en efectivo.',
           ],
           en: [
             'Avoid airport exchange — the spread is usually very high.',
-            'Wise and similar services often have lower fees than your bank card.',
+            'Do not rely on a single option: combine card, transfer app, and cash backup.',
           ],
         ),
         decisionOptions: [
@@ -716,27 +724,78 @@ class ArgentinaBrazilGuideDataSource {
           GuideDecisionOption(
             title: _t(
               locale,
-              pt: 'Serviço de câmbio (Wise)',
-              es: 'Servicio de cambio (Wise)',
-              en: 'Transfer service (Wise)',
+              pt: 'Conta global (Global66)',
+              es: 'Cuenta global (Global66)',
+              en: 'Global account (Global66)',
             ),
             description: _t(
               locale,
-              pt: 'Transferência com câmbio mais justo e cartão virtual/físico.',
-              es: 'Transferencia con cambio mas justo y tarjeta virtual/fisica.',
-              en: 'Transfer with fairer exchange rate and virtual/physical card.',
+              pt: 'Enviar dinheiro da Argentina ao Brasil e ainda pagar com Pix no país.',
+              es: 'Enviar dinero de Argentina a Brasil y ademas pagar con Pix en el pais.',
+              en: 'Send money from Argentina to Brazil and also pay with Pix in-country.',
             ),
             pros: _list(
               locale,
-              pt: ['Câmbio melhor', 'Cartão multimoeda'],
-              es: ['Cambio mejor', 'Tarjeta multimoneda'],
-              en: ['Better exchange', 'Multi-currency card'],
+              pt: [
+                'Rota ARS → BRL ativa',
+                'Pix no Brasil',
+                'App focado em viajantes',
+              ],
+              es: [
+                'Ruta ARS → BRL activa',
+                'Pix en Brasil',
+                'App pensada para viajeros',
+              ],
+              en: [
+                'Active ARS → BRL route',
+                'Pix in Brazil',
+                'Traveler-focused app',
+              ],
             ),
             cons: _list(
               locale,
               pt: ['Precisa configurar antes', 'Verificação de identidade'],
               es: ['Hay que configurarlo antes', 'Verificacion de identidad'],
               en: ['Needs setup beforehand', 'Identity verification'],
+            ),
+          ),
+          GuideDecisionOption(
+            title: _t(
+              locale,
+              pt: 'Remessa e saque (Western Union)',
+              es: 'Remesa y retiro (Western Union)',
+              en: 'Transfer and pickup (Western Union)',
+            ),
+            description: _t(
+              locale,
+              pt: 'Enviar online ou em agência, com opção de conta bancária ou retirada.',
+              es: 'Enviar online o en agencia, con opcion de cuenta bancaria o retiro.',
+              en: 'Send online or in person, with bank deposit or cash pickup options.',
+            ),
+            pros: _list(
+              locale,
+              pt: [
+                'Presencial ou online',
+                'Saque em espécie',
+                'Rede conhecida',
+              ],
+              es: ['Presencial u online', 'Retiro en efectivo', 'Red conocida'],
+              en: ['In person or online', 'Cash pickup', 'Well-known network'],
+            ),
+            cons: _list(
+              locale,
+              pt: [
+                'Câmbio e tarifa variam',
+                'Pode sair mais caro que opções digitais',
+              ],
+              es: [
+                'Cambio y tarifa varian',
+                'Puede salir mas caro que opciones digitales',
+              ],
+              en: [
+                'Exchange and fees vary',
+                'May cost more than digital options',
+              ],
             ),
           ),
           GuideDecisionOption(
@@ -781,9 +840,9 @@ class ArgentinaBrazilGuideDataSource {
             id: 'money_2',
             title: _t(
               locale,
-              pt: 'Conta Wise ou similar criada',
-              es: 'Cuenta Wise o similar creada',
-              en: 'Wise or similar account created',
+              pt: 'Conta Global66, Western Union ou similar configurada',
+              es: 'Cuenta Global66, Western Union o similar configurada',
+              en: 'Global66, Western Union, or similar account set up',
             ),
             isCompleted: false,
           ),
@@ -944,62 +1003,48 @@ class ArgentinaBrazilGuideDataSource {
         orderIndex: 8,
         isCompleted: false,
         icon: Icons.sim_card_outlined,
-        dependencies: <String>['item_2_1_cpf'],
         context: _t(
           locale,
-          pt: 'Depois de emitir o CPF, ter um número brasileiro ajuda a ativar banco, Pix e apps essenciais já com seu cadastro principal no Brasil.',
-          es: 'Despues de emitir el CPF, tener un numero brasileno ayuda a activar banco, Pix y apps esenciales ya con tu registro principal en Brasil.',
-          en: 'After issuing CPF, having a Brazilian number helps you activate bank access, Pix, and essential apps with your main registration in Brazil.',
+          pt: 'Logo na chegada, ter um número brasileiro ajuda com internet móvel, SMS, apps e contatos locais.',
+          es: 'Apenas llegar, tener un numero brasileno ayuda con internet movil, SMS, apps y contactos locales.',
+          en: 'Right after arrival, having a Brazilian number helps with mobile data, SMS, apps, and local contacts.',
         ),
         whyItMatters: _t(
           locale,
-          pt: 'Com CPF em mãos, o chip vira uma etapa prática de execução para receber SMS, validar cadastros e consolidar sua rotina digital no Brasil.',
-          es: 'Con el CPF en mano, el chip pasa a ser una etapa practica para recibir SMS, validar registros y consolidar tu rutina digital en Brasil.',
-          en: 'With CPF in hand, the SIM becomes a practical execution step to receive SMS, validate registrations, and stabilize your digital routine in Brazil.',
+          pt: 'Sem número local logo no começo, você perde tempo com internet ruim, SMS de validação e contato com serviços no Brasil.',
+          es: 'Sin numero local al comienzo, pierdes tiempo con mala internet, SMS de validacion y contacto con servicios en Brasil.',
+          en: 'Without a local number early on, you lose time with weak connectivity, validation SMS, and contact with services in Brazil.',
         ),
         primaryActionLabel: _t(
           locale,
-          pt: 'Ver operadoras',
-          es: 'Ver operadoras',
-          en: 'See carriers',
+          pt: 'Escolher operadora',
+          es: 'Elegir operadora',
+          en: 'Choose a carrier',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget: 'https://www.claro.com.br/celular/prepago',
         steps: _list(
           locale,
           pt: [
-            'Depois do CPF, compre um chip pré-pago em loja de operadora ou revenda confiável.',
-            'Ative a linha e registre o CPF no atendimento para evitar limitações depois.',
+            'Compre um chip pré-pago em loja oficial da operadora ou ponto confiável logo na chegada.',
+            'Se você ainda não tem CPF, peça ativação com passaporte, DNI/RNE ou outro documento aceito pela operadora.',
             'Teste SMS e internet móvel antes de sair da loja.',
           ],
           es: [
-            'Despues del CPF, compra un chip prepago en tienda de operadora o punto confiable.',
-            'Activa la linea y registra el CPF en la atencion para evitar limites despues.',
+            'Compra un chip prepago en tienda oficial de la operadora o punto confiable apenas llegues.',
+            'Si aun no tienes CPF, pide la activacion con pasaporte, DNI/RNE u otro documento aceptado por la operadora.',
             'Prueba SMS e internet movil antes de salir de la tienda.',
           ],
           en: [
-            'After CPF, buy a prepaid SIM at a carrier store or trusted reseller.',
-            'Activate the line and register your CPF during activation to avoid later limits.',
+            'Buy a prepaid SIM at an official carrier store or trusted point right after arrival.',
+            'If you do not have CPF yet, ask for activation with your passport, DNI/RNE, or another document accepted by the carrier.',
             'Test SMS and mobile data before leaving the store.',
           ],
         ),
         requirements: _list(
           locale,
-          pt: [
-            'CPF emitido',
-            'Documento com foto',
-            'R\$ 20-50 para chip e crédito inicial',
-          ],
-          es: [
-            'CPF emitido',
-            'Documento con foto',
-            'R\$ 20-50 para chip y credito inicial',
-          ],
-          en: [
-            'Issued CPF',
-            'Photo ID',
-            'R\$ 20-50 for the SIM and initial credit',
-          ],
+          pt: ['Documento com foto', 'R\$ 20-50 para chip e crédito inicial'],
+          es: ['Documento con foto', 'R\$ 20-50 para chip y credito inicial'],
+          en: ['Photo ID', 'R\$ 20-50 for the SIM and initial credit'],
         ),
         doneCriteria: _t(
           locale,
@@ -1011,14 +1056,17 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: [
             'No aeroporto, os chips costumam ser mais caros. Se puder, compre em loja na cidade.',
+            'TIM e Claro têm orientação pública para estrangeiro sem CPF em atendimento/loja física. Em Vivo, confirme a exigência antes de comprar.',
             'Guarde o número — ele pode virar sua chave Pix depois.',
           ],
           es: [
             'En el aeropuerto los chips suelen ser mas caros. Si puedes, compra en tienda en la ciudad.',
+            'TIM y Claro tienen orientacion publica para extranjeros sin CPF en atencion/tienda fisica. En Vivo, confirma el requisito antes de comprar.',
             'Guarda el numero — sera tu clave Pix despues.',
           ],
           en: [
             'At the airport, SIMs tend to cost more. If you can, buy at a store in the city.',
+            'TIM and Claro have public guidance for foreigners without CPF through store support. For Vivo, confirm the requirement before buying.',
             'Save the number — it will become your Pix key later.',
           ],
         ),
@@ -1039,9 +1087,18 @@ class ArgentinaBrazilGuideDataSource {
             ),
             cons: _list(
               locale,
-              pt: ['Preço intermediário'],
-              es: ['Precio intermedio'],
-              en: ['Mid-range price'],
+              pt: [
+                'Preço intermediário',
+                'Sem CPF, a ativação costuma ir para loja física',
+              ],
+              es: [
+                'Precio intermedio',
+                'Sin CPF, la activacion suele ir a tienda fisica',
+              ],
+              en: [
+                'Mid-range price',
+                'Without CPF, activation usually goes through a physical store',
+              ],
             ),
           ),
           GuideDecisionOption(
@@ -1060,9 +1117,18 @@ class ArgentinaBrazilGuideDataSource {
             ),
             cons: _list(
               locale,
-              pt: ['Pode ser um pouco mais caro'],
-              es: ['Puede ser un poco mas caro'],
-              en: ['Can be slightly more expensive'],
+              pt: [
+                'Pode ser um pouco mais caro',
+                'Confirme a exigência de CPF antes de comprar o pré-pago',
+              ],
+              es: [
+                'Puede ser un poco mas caro',
+                'Confirma la exigencia de CPF antes de comprar el prepago',
+              ],
+              en: [
+                'Can be slightly more expensive',
+                'Confirm CPF requirements before buying prepaid',
+              ],
             ),
           ),
           GuideDecisionOption(
@@ -1075,9 +1141,21 @@ class ArgentinaBrazilGuideDataSource {
             ),
             pros: _list(
               locale,
-              pt: ['Preço mais baixo', 'Bons pacotes de dados'],
-              es: ['Precio mas bajo', 'Buenos paquetes de datos'],
-              en: ['Lower price', 'Good data plans'],
+              pt: [
+                'Preço mais baixo',
+                'Bons pacotes de dados',
+                'Tem orientação para estrangeiro no Brasil',
+              ],
+              es: [
+                'Precio mas bajo',
+                'Buenos paquetes de datos',
+                'Tiene orientacion para extranjeros en Brasil',
+              ],
+              en: [
+                'Lower price',
+                'Good data plans',
+                'Has guidance for foreigners in Brazil',
+              ],
             ),
             cons: _list(
               locale,
@@ -1085,6 +1163,7 @@ class ArgentinaBrazilGuideDataSource {
               es: ['La cobertura puede variar fuera de capitales'],
               en: ['Coverage can vary outside capitals'],
             ),
+            recommended: true,
           ),
         ],
         checklistItems: [
@@ -1112,9 +1191,9 @@ class ArgentinaBrazilGuideDataSource {
             id: 'chip_3',
             title: _t(
               locale,
-              pt: 'CPF registrado na operadora',
-              es: 'CPF registrado en la operadora',
-              en: 'CPF registered with the carrier',
+              pt: 'SMS e internet testados',
+              es: 'SMS e internet probados',
+              en: 'SMS and mobile data tested',
             ),
             isCompleted: false,
           ),
@@ -1144,7 +1223,7 @@ class ArgentinaBrazilGuideDataSource {
         fullContent: null,
         type: GuideActionType.tool,
         toolType: GuideToolType.housing,
-        phase: GuidePhase.housing,
+        phase: GuidePhase.preparation,
         orderIndex: 6,
         isCompleted: false,
         icon: Icons.house_outlined,
@@ -1349,7 +1428,7 @@ class ArgentinaBrazilGuideDataSource {
             '"Busca grupos de argentinos en Brasil en Facebook — hay gente alquilando habitacion directo sin burocracia."',
           ],
           en: [
-            '"Monthly Airbnb discount was the best option — covers address for CPF and is easy to cancel."',
+            '"A monthly Airbnb discount worked well for me — it covered an address for CPF and was easy to cancel."',
             '"Look for Argentine groups in Brazil on Facebook — people rent rooms directly without bureaucracy."',
           ],
         ),
@@ -1856,26 +1935,29 @@ class ArgentinaBrazilGuideDataSource {
         ),
         primaryActionLabel: _t(
           locale,
-          pt: 'Escolher banco',
-          es: 'Elegir banco',
-          en: 'Choose a bank',
+          pt: 'Abrir opções de banco',
+          es: 'Abrir opciones de banco',
+          en: 'Open bank options',
         ),
         steps: _list(
           locale,
           pt: [
+            'Comece comparando bancos digitais como Inter, C6 Bank e Nubank antes de decidir.',
             'Decida entre banco digital, banco tradicional ou conta focada em câmbio.',
             'Separe CPF, documento e selfie para abrir pelo app.',
-            'Depois da aprovação, ative Pix e peça o cartão físico.',
+            'Depois da aprovação, confirme acesso ao app e peça o cartão físico.',
           ],
           es: [
+            'Empieza comparando bancos digitales como Inter, C6 Bank y Nubank antes de decidir.',
             'Decide entre banco digital, banco tradicional o cuenta enfocada en cambio.',
             'Separa CPF, documento y selfie para abrirla por la app.',
-            'Despues de la aprobacion, activa Pix y pide la tarjeta fisica.',
+            'Despues de la aprobacion, confirma acceso a la app y pide la tarjeta fisica.',
           ],
           en: [
+            'Start by comparing digital banks such as Inter, C6 Bank, and Nubank before deciding.',
             'Decide between a digital bank, a traditional bank, or a foreign-exchange focused account.',
             'Prepare CPF, ID, and selfie to open it in the app.',
-            'After approval, activate Pix and request the physical card.',
+            'After approval, confirm app access and request the physical card.',
           ],
         ),
         doneCriteria: _t(
@@ -1887,14 +1969,17 @@ class ArgentinaBrazilGuideDataSource {
         tips: _list(
           locale,
           pt: [
+            'Inter, C6 Bank e Nubank são caminhos digitais comuns para começar.',
             'Bancos digitais costumam aprovar mais rápido no início.',
             'Se você recebe do exterior, vale comparar uma conta comum com uma solução de câmbio.',
           ],
           es: [
+            'Inter, C6 Bank y Nubank son caminos digitales comunes para empezar.',
             'Los bancos digitales suelen aprobar mas rapido al inicio.',
             'Si cobras del exterior, vale comparar una cuenta comun con una solucion de cambio.',
           ],
           en: [
+            'Inter, C6 Bank, and Nubank are common digital routes to get started.',
             'Digital banks usually approve faster at the start.',
             'If you receive money from abroad, compare a regular account with a foreign-exchange solution.',
           ],
@@ -1903,30 +1988,45 @@ class ArgentinaBrazilGuideDataSource {
           GuideDecisionOption(
             title: _t(
               locale,
-              pt: 'C6 Bank ou Inter (recomendado para estrangeiros)',
-              es: 'C6 Bank o Inter (recomendado para extranjeros)',
-              en: 'C6 Bank or Inter (recommended for foreigners)',
+              pt: 'Inter, C6 Bank ou Nubank',
+              es: 'Inter, C6 Bank o Nubank',
+              en: 'Inter, C6 Bank, or Nubank',
             ),
             description: _t(
               locale,
-              pt: 'Aceitam DNI/passaporte estrangeiro mais facilmente que a maioria dos digitais.',
-              es: 'Aceptan DNI/pasaporte extranjero mas facilmente que la mayoria de los digitales.',
-              en: 'Accept foreign ID/passport more easily than most digital banks.',
+              pt: 'São as rotas digitais mais simples para comparar abertura, app e integração com Pix.',
+              es: 'Son las rutas digitales mas simples para comparar apertura, app e integracion con Pix.',
+              en: 'These are the simplest digital routes to compare onboarding, app experience, and Pix integration.',
             ),
             pros: _list(
               locale,
               pt: [
-                'Menor rejeição para estrangeiros',
                 'Processo 100% pelo app',
+                'Você consegue comparar aprovação e experiência sem ir a agência',
               ],
-              es: ['Menor rechazo para extranjeros', 'Proceso 100% por app'],
-              en: ['Lower rejection rate for foreigners', '100% app process'],
+              es: [
+                'Proceso 100% por app',
+                'Puedes comparar aprobacion y experiencia sin ir a una sucursal',
+              ],
+              en: [
+                '100% app process',
+                'You can compare approval and app experience without visiting a branch',
+              ],
             ),
             cons: _list(
               locale,
-              pt: ['Suporte presencial limitado'],
-              es: ['Soporte presencial limitado'],
-              en: ['Limited in-person support'],
+              pt: [
+                'Suporte presencial limitado',
+                'A aprovação pode variar entre bancos e perfis',
+              ],
+              es: [
+                'Soporte presencial limitado',
+                'La aprobacion puede variar entre bancos y perfiles',
+              ],
+              en: [
+                'Limited in-person support',
+                'Approval can vary across banks and profiles',
+              ],
             ),
             recommended: true,
           ),
@@ -1995,9 +2095,9 @@ class ArgentinaBrazilGuideDataSource {
             id: 'bank_1',
             title: _t(
               locale,
-              pt: 'Escolher banco digital (C6 Bank ou Inter — melhor para estrangeiros)',
-              es: 'Elegir banco digital (C6 Bank o Inter — mejor para extranjeros)',
-              en: 'Choose a digital bank (C6 Bank or Inter — best for foreigners)',
+              pt: 'Comparar Inter, C6 Bank e Nubank e escolher o melhor para você',
+              es: 'Comparar Inter, C6 Bank y Nubank y elegir el mejor para ti',
+              en: 'Compare Inter, C6 Bank, and Nubank and choose the best fit',
             ),
             isCompleted: false,
           ),
@@ -2015,9 +2115,9 @@ class ArgentinaBrazilGuideDataSource {
             id: 'bank_3',
             title: _t(
               locale,
-              pt: 'Configurar chave Pix',
-              es: 'Configurar clave Pix',
-              en: 'Set up Pix key',
+              pt: 'Acesso ao app confirmado e cartão físico solicitado',
+              es: 'Acceso a la app confirmado y tarjeta fisica solicitada',
+              en: 'App access confirmed and physical card requested',
             ),
             isCompleted: false,
           ),
@@ -2307,18 +2407,18 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: [
             'Entre no app da sua conta.',
-            'Cadastre uma chave Pix, de preferência o CPF.',
-            'Faça um teste pequeno para garantir que está funcionando.',
+            'Ative o Pix na conta e, se quiser facilitar recebimentos, cadastre uma chave.',
+            'Faça um teste pequeno para garantir que enviar e receber está funcionando.',
           ],
           es: [
             'Entra en la app de tu cuenta.',
-            'Registra una clave Pix, de preferencia el CPF.',
-            'Haz una prueba pequena para confirmar que funciona.',
+            'Activa Pix en la cuenta y, si quieres facilitar cobros, registra una clave.',
+            'Haz una prueba pequena para confirmar que enviar y recibir funciona.',
           ],
           en: [
             'Open your banking app.',
-            'Register a Pix key, preferably your CPF.',
-            'Run a small test transfer to confirm it works.',
+            'Enable Pix in the account and, if you want easier inbound payments, register a key.',
+            'Run a small test to confirm both sending and receiving work.',
           ],
         ),
         doneCriteria: _t(
@@ -2329,9 +2429,18 @@ class ArgentinaBrazilGuideDataSource {
         ),
         tips: _list(
           locale,
-          pt: ['Além do Pix, aprenda a pagar boleto pelo app do banco.'],
-          es: ['Ademas de Pix, aprende a pagar boleto desde la app del banco.'],
-          en: ['Besides Pix, learn how to pay boletos in your banking app.'],
+          pt: [
+            'A chave Pix facilita receber, mas você ainda pode usar Pix com os dados da conta.',
+            'Além do Pix, aprenda a pagar boleto pelo app do banco.',
+          ],
+          es: [
+            'La clave Pix facilita cobrar, pero aun puedes usar Pix con los datos de la cuenta.',
+            'Ademas de Pix, aprende a pagar boleto desde la app del banco.',
+          ],
+          en: [
+            'A Pix key makes receiving easier, but you can still use Pix with account details.',
+            'Besides Pix, learn how to pay boletos in your banking app.',
+          ],
         ),
         blockingReason: _t(
           locale,
@@ -2344,9 +2453,9 @@ class ArgentinaBrazilGuideDataSource {
             id: 'pix_1',
             title: _t(
               locale,
-              pt: 'Chave Pix cadastrada (CPF)',
-              es: 'Clave Pix registrada (CPF)',
-              en: 'Pix key registered (CPF)',
+              pt: 'Pix ativado na conta',
+              es: 'Pix activado en la cuenta',
+              en: 'Pix enabled on the account',
             ),
             isCompleted: false,
           ),
@@ -2581,15 +2690,15 @@ class ArgentinaBrazilGuideDataSource {
         id: 'item_4_1_cnh',
         title: _t(
           locale,
-          pt: 'Converter carteira argentina para CNH',
-          es: 'Convertir licencia argentina a CNH',
-          en: 'Convert Argentine license to CNH',
+          pt: 'Regularize sua licença argentina no Brasil',
+          es: 'Regulariza tu licencia argentina en Brasil',
+          en: 'Regularize your Argentine license in Brazil',
         ),
         shortDescription: _t(
           locale,
-          pt: 'Se você vai dirigir no Brasil, a conversão evita recomeçar do zero.',
-          es: 'Si vas a manejar en Brasil, la conversion evita empezar de cero.',
-          en: 'If you plan to drive in Brazil, conversion keeps you from starting from scratch.',
+          pt: 'A habilitação estrangeira válida costuma servir por até 180 dias. Depois disso, você precisa seguir o processo brasileiro.',
+          es: 'La licencia extranjera valida suele servir hasta 180 dias. Despues de eso, debes seguir el proceso brasileno.',
+          en: 'A valid foreign license is usually accepted for up to 180 days. After that, you need to follow the Brazilian process.',
         ),
         fullContent: null,
         type: GuideActionType.external,
@@ -2600,15 +2709,15 @@ class ArgentinaBrazilGuideDataSource {
         dependencies: <String>['item_2_2_residencia'],
         context: _t(
           locale,
-          pt: 'A conversão permite que você dirija legalmente no Brasil usando sua experiência argentina.',
-          es: 'La conversion permite que manejes legalmente en Brasil usando tu experiencia argentina.',
-          en: 'Conversion lets you drive legally in Brazil using your Argentine driving experience.',
+          pt: 'O processo depende do DETRAN do seu estado, da validade da licença argentina e da sua situação migratória no Brasil.',
+          es: 'El proceso depende del DETRAN de tu estado, de la validez de la licencia argentina y de tu situacion migratoria en Brasil.',
+          en: 'The process depends on your state DETRAN, the validity of your Argentine license, and your migration status in Brazil.',
         ),
         whyItMatters: _t(
           locale,
-          pt: 'Dirigir com carteira vencida ou estrangeira sem conversão pode gerar multa e apreensão do veículo.',
-          es: 'Manejar con licencia vencida o extranjera sin conversion puede generar multa y detencion del vehiculo.',
-          en: 'Driving with an expired or unconverted foreign license can result in fines and vehicle seizure.',
+          pt: 'Depois da janela inicial de uso da licença estrangeira, continuar dirigindo sem regularizar a situação pode gerar multa e bloqueios.',
+          es: 'Despues de la ventana inicial de uso de la licencia extranjera, seguir manejando sin regularizar puede generar multas y bloqueos.',
+          en: 'After the initial foreign-license window, continuing to drive without regularizing can lead to fines and restrictions.',
         ),
         primaryActionLabel: _t(
           locale,
@@ -2617,28 +2726,33 @@ class ArgentinaBrazilGuideDataSource {
           en: 'Find DETRAN',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget: 'https://www.detran.sp.gov.br',
         steps: _list(
           locale,
           pt: [
-            'Verifique se sua carteira argentina está válida e dentro do prazo aceito para conversão.',
-            'Reúna CPF, residência, carteira argentina original e tradução juramentada.',
+            'Verifique se sua licença argentina está válida, foi emitida há mais de 12 meses e ainda está dentro da janela de uso no Brasil.',
+            'Confirme no DETRAN do seu estado qual é o procedimento para habilitação estrangeira.',
+            'Reúna CPF, documento migratório regular, comprovante de endereço, licença original e tradução juramentada.',
+            'Se o DETRAN pedir, providencie também certidão/declaração consular para habilitação da América do Sul.',
             'Agende atendimento no DETRAN do seu estado.',
-            'Faça exame médico e psicotécnico no local indicado.',
+            'Faça os exames exigidos pelo seu estado. Em geral há exame médico e psicológico, e podem existir exigências extras conforme o caso.',
             'Pague as taxas e aguarde a emissão da CNH.',
           ],
           es: [
-            'Verifica si tu licencia argentina esta valida y dentro del plazo aceptado para conversion.',
-            'Reune CPF, residencia, licencia argentina original y traduccion jurada.',
+            'Verifica si tu licencia argentina esta valida, fue emitida hace mas de 12 meses y aun esta dentro de la ventana de uso en Brasil.',
+            'Confirma en el DETRAN de tu estado cual es el procedimiento para licencia extranjera.',
+            'Reune CPF, documento migratorio regular, comprobante de domicilio, licencia original y traduccion jurada.',
+            'Si el DETRAN lo pide, consigue tambien certificado/declaracion consular para licencias de America del Sur.',
             'Agenda turno en el DETRAN de tu estado.',
-            'Haz examen medico y psicotecnico en el lugar indicado.',
+            'Haz los examenes exigidos por tu estado. En general hay examen medico y psicologico, y pueden existir exigencias extra segun el caso.',
             'Paga las tasas y espera la emision de la CNH.',
           ],
           en: [
-            'Check that your Argentine license is valid and within the accepted conversion window.',
-            'Gather CPF, residency, original Argentine license, and sworn translation.',
+            'Check that your Argentine license is valid, was issued more than 12 months ago, and is still inside the Brazilian usage window.',
+            'Confirm with your state DETRAN which process applies to foreign licenses.',
+            'Gather CPF, regular migration document, proof of address, the original license, and a sworn translation.',
+            'If DETRAN asks for it, obtain a consular certificate/declaration for a South American license.',
             'Schedule an appointment at your state DETRAN.',
-            'Take the medical and psychological exams at the indicated location.',
+            'Take the exams required by your state. In general these include medical and psychological evaluation, and extra requirements may apply.',
             'Pay the fees and wait for the CNH to be issued.',
           ],
         ),
@@ -2646,73 +2760,98 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: [
             'CPF',
-            'Residência regular',
-            'Carteira de motorista argentina válida',
+            'RNM/RNE ou protocolo migratório aceito pelo DETRAN',
+            'Comprovante de endereço',
+            'Carteira de motorista argentina válida e emitida há mais de 12 meses',
             'Tradução juramentada da carteira',
-            'Exame médico e psicotécnico aprovados',
+            'Exames exigidos pelo DETRAN aprovados',
           ],
           es: [
             'CPF',
-            'Residencia regular',
-            'Licencia de conducir argentina valida',
+            'RNM/RNE o protocolo migratorio aceptado por el DETRAN',
+            'Comprobante de domicilio',
+            'Licencia de conducir argentina valida y emitida hace mas de 12 meses',
             'Traduccion jurada de la licencia',
-            'Examen medico y psicotecnico aprobados',
+            'Examenes exigidos por el DETRAN aprobados',
           ],
           en: [
             'CPF',
-            'Regular residency',
-            'Valid Argentine driver license',
+            'RNM/RNE or migration protocol accepted by DETRAN',
+            'Proof of address',
+            'Valid Argentine driver license issued more than 12 months ago',
             'Sworn translation of the license',
-            'Approved medical and psychological exams',
+            'Approved DETRAN-required exams',
           ],
         ),
         doneCriteria: _t(
           locale,
-          pt: 'Você já tem a CNH brasileira emitida ou o processo no DETRAN iniciado.',
-          es: 'Ya tienes la CNH brasilena emitida o el proceso en DETRAN iniciado.',
-          en: 'You already have the Brazilian CNH issued or the DETRAN process started.',
+          pt: 'Você já confirmou o procedimento do seu estado e iniciou corretamente a regularização da habilitação.',
+          es: 'Ya confirmaste el procedimiento de tu estado e iniciaste correctamente la regularizacion de la licencia.',
+          en: 'You have confirmed your state procedure and correctly started the license regularization process.',
         ),
         tips: _list(
           locale,
           pt: [
-            'O processo varia entre estados. Consulte o DETRAN da sua cidade antes de começar.',
-            'A tradução juramentada precisa ser feita por tradutor registrado na junta comercial.',
+            'O processo varia bastante entre estados. Não comece por relatos genéricos; comece pelo DETRAN do seu estado.',
+            'A tradução juramentada precisa ser feita por tradutor oficial registrado na junta comercial.',
+            'Para Argentina e outros países da América do Sul, alguns estados podem pedir certidão/declaração consular além da tradução.',
           ],
           es: [
-            'El proceso varia entre estados. Consulta el DETRAN de tu ciudad antes de empezar.',
-            'La traduccion jurada debe ser hecha por traductor registrado.',
+            'El proceso varia bastante entre estados. No empieces por relatos genericos; empieza por el DETRAN de tu estado.',
+            'La traduccion jurada debe ser hecha por traductor oficial registrado.',
+            'Para Argentina y otros paises de America del Sur, algunos estados pueden pedir certificado/declaracion consular ademas de la traduccion.',
           ],
           en: [
-            'The process varies by state. Check your city DETRAN before starting.',
-            'The sworn translation must be done by a registered translator.',
+            'The process varies a lot by state. Do not start from generic advice; start with your state DETRAN.',
+            'The sworn translation must be done by an official registered translator.',
+            'For Argentina and other South American countries, some states may request a consular certificate/declaration in addition to the translation.',
           ],
         ),
         decisionOptions: [
           GuideDecisionOption(
             title: _t(
               locale,
-              pt: 'Converter carteira existente',
-              es: 'Convertir licencia existente',
-              en: 'Convert existing license',
+              pt: 'Regularizar a habilitação estrangeira',
+              es: 'Regularizar la licencia extranjera',
+              en: 'Regularize the foreign license',
             ),
             description: _t(
               locale,
-              pt: 'Usa sua carteira argentina como base para obter a CNH.',
-              es: 'Usa tu licencia argentina como base para obtener la CNH.',
-              en: 'Use your Argentine license as a base to get the CNH.',
+              pt: 'É o caminho para quem já dirige e quer seguir o procedimento aceito pelo DETRAN do estado.',
+              es: 'Es el camino para quien ya maneja y quiere seguir el procedimiento aceptado por el DETRAN del estado.',
+              en: 'This is the route for someone who already drives and wants to follow the procedure accepted by the state DETRAN.',
             ),
             pros: _list(
               locale,
-              pt: ['Sem autoescola', 'Mais rápido'],
-              es: ['Sin autoescuela', 'Mas rapido'],
-              en: ['No driving school', 'Faster'],
+              pt: [
+                'Aproveita sua habilitação atual',
+                'Pode evitar parte do processo de primeira habilitação',
+              ],
+              es: [
+                'Aprovecha tu licencia actual',
+                'Puede evitar parte del proceso de primera licencia',
+              ],
+              en: [
+                'Leverages your current license',
+                'May avoid part of the first-license process',
+              ],
             ),
             cons: _list(
               locale,
-              pt: ['Precisa de tradução juramentada', 'Taxas do DETRAN'],
-              es: ['Necesita traduccion jurada', 'Tasas del DETRAN'],
-              en: ['Needs sworn translation', 'DETRAN fees'],
+              pt: [
+                'Depende das regras do seu estado',
+                'Pode exigir documento consular, tradução e exames',
+              ],
+              es: [
+                'Depende de las reglas de tu estado',
+                'Puede exigir documento consular, traduccion y examenes',
+              ],
+              en: [
+                'Depends on your state rules',
+                'May require consular documents, translation, and exams',
+              ],
             ),
+            recommended: true,
           ),
           GuideDecisionOption(
             title: _t(
@@ -2866,6 +3005,13 @@ class ArgentinaBrazilGuideDataSource {
           pt: 'Você já sabe qual será sua cobertura inicial e como acessá-la se precisar.',
           es: 'Ya sabes cual sera tu cobertura inicial y como acceder a ella si la necesitas.',
           en: 'You already know what your initial coverage will be and how to access it if needed.',
+        ),
+        urgencyLevel: GuideUrgencyLevel.urgent,
+        urgencySignal: _t(
+          locale,
+          pt: 'Organize isso logo nas primeiras semanas. Você não depende do cartão para urgência, mas não deve deixar sua cobertura básica para o fim.',
+          es: 'Organiza esto en las primeras semanas. No dependes de la tarjeta para urgencias, pero no debes dejar tu cobertura basica para el final.',
+          en: 'Organize this in your first weeks. You do not depend on the card for urgent care, but you should not leave your basic coverage setup to the end.',
         ),
         tips: _list(
           locale,
@@ -3035,9 +3181,9 @@ class ArgentinaBrazilGuideDataSource {
         ),
         primaryActionLabel: _t(
           locale,
-          pt: 'Ver registro RNM',
-          es: 'Ver registro RNM',
-          en: 'See RNM registration',
+          pt: 'Abrir registro oficial',
+          es: 'Abrir registro oficial',
+          en: 'Open official registration',
         ),
         primaryActionType: GuidePrimaryActionType.external,
         primaryActionTarget: PreparationResourceLinks.rnMRegistrationGuide
@@ -3045,19 +3191,22 @@ class ArgentinaBrazilGuideDataSource {
         steps: _list(
           locale,
           pt: [
-            'Acompanhe quando a autorização de residência for concedida ou publicada.',
-            'Confira a orientação oficial do RNM/CRNM e o prazo aplicável ao seu caso.',
-            'Faça o registro na janela correta e guarde o protocolo/cartão emitido.',
+            'Confirme se sua autorização de residência já foi deferida ou publicada.',
+            'Abra o serviço oficial de registro de estrangeiro no Brasil.',
+            'Preencha o pedido de registro, faça o agendamento e compareça à unidade da Polícia Federal.',
+            'Depois, acompanhe a confecção da CRNM e agende a retirada quando o sistema liberar.',
           ],
           es: [
-            'Sigue cuando la autorizacion de residencia sea concedida o publicada.',
-            'Revisa la orientacion oficial del RNM/CRNM y el plazo que aplica a tu caso.',
-            'Haz el registro en la ventana correcta y guarda el protocolo/tarjeta emitida.',
+            'Confirma si tu autorizacion de residencia ya fue concedida o publicada.',
+            'Abre el servicio oficial de registro de extranjero en Brasil.',
+            'Completa el pedido de registro, agenda la cita y comparece en la unidad de la Policia Federal.',
+            'Despues, sigue la confeccion de la CRNM y agenda el retiro cuando el sistema lo habilite.',
           ],
           en: [
-            'Track when residence authorization is granted or published.',
-            'Check the official RNM/CRNM guidance and the deadline that applies to your case.',
-            'Complete the registration in the correct window and keep the issued protocol/card.',
+            'Confirm that your residence authorization has already been granted or published.',
+            'Open the official foreign registration service in Brazil.',
+            'Submit the registration request, book the appointment, and attend the Federal Police unit.',
+            'Then track CRNM production and book the pickup once the system allows it.',
           ],
         ),
         doneCriteria: _t(
@@ -3069,16 +3218,19 @@ class ArgentinaBrazilGuideDataSource {
         tips: _list(
           locale,
           pt: [
-            'O protocolo da residência já ajuda no meio do caminho, então você não depende de um cartão instantâneo.',
-            'Quando a autorização for concedida já no Brasil, o registro costuma ter prazo próprio de 30 dias.',
+            'O serviço oficial informa que o registro gera coleta biométrica, número RNM e depois a emissão da CRNM.',
+            'Quando a autorização é deferida no Brasil, o registro costuma ter prazo próprio de 30 dias.',
+            'A consulta de status da carteira acontece no sistema da PF antes da retirada.',
           ],
           es: [
-            'El protocolo de residencia ya ayuda en el camino, asi que no dependes de una tarjeta instantanea.',
-            'Cuando la autorizacion se concede ya en Brasil, el registro suele tener un plazo propio de 30 dias.',
+            'El servicio oficial informa que el registro incluye biometria, numero RNM y luego la emision de la CRNM.',
+            'Cuando la autorizacion se concede en Brasil, el registro suele tener un plazo propio de 30 dias.',
+            'La consulta del estado de la tarjeta ocurre en el sistema de la PF antes del retiro.',
           ],
           en: [
-            'The residency protocol already helps in the meantime, so you do not depend on an instant card.',
+            'The official service states that registration includes biometrics, the RNM number, and then CRNM issuance.',
             'When authorization is granted in Brazil, registration usually has its own 30-day deadline.',
+            'Card status is checked in the PF system before pickup.',
           ],
         ),
         estimatedEffort: GuideEstimatedEffort.fast,
@@ -3091,9 +3243,9 @@ class ArgentinaBrazilGuideDataSource {
         urgencyLevel: GuideUrgencyLevel.watch,
         urgencySignal: _t(
           locale,
-          pt: 'Essa etapa só entra depois da autorização concedida, mas não deixe passar se o portal da PF abrir a janela do RNM.',
-          es: 'Este paso solo entra despues de la autorizacion concedida, pero no lo dejes pasar si el portal de la PF abre la ventana del RNM.',
-          en: 'This step only applies after residence is granted, but do not miss it if the PF portal opens your RNM window.',
+          pt: 'Essa etapa só começa depois do deferimento da residência. Se a PF abrir a janela do registro, faça isso dentro do prazo.',
+          es: 'Este paso solo empieza despues de la concesion de la residencia. Si la PF abre la ventana del registro, hazlo dentro del plazo.',
+          en: 'This step only starts after residence is granted. If PF opens your registration window, complete it within the deadline.',
         ),
       ),
       GuideActionItem(
@@ -3121,7 +3273,7 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: 'A residência temporária Mercosul tem validade de 2 anos. Antes do vencimento, você precisa pedir a permanente.',
           es: 'La residencia temporaria Mercosur tiene validez de 2 anos. Antes del vencimiento, debes pedir la permanente.',
-          en: 'Mercosur temporary residence is valid for 2 years. Before it expires, you must apply for permanent residence.',
+          en: 'Mercosur temporary residence is valid for 2 years. Before it expires, permanent residence may need to be requested, depending on the route and current rules.',
         ),
         whyItMatters: _t(
           locale,
@@ -3131,31 +3283,36 @@ class ArgentinaBrazilGuideDataSource {
         ),
         primaryActionLabel: _t(
           locale,
-          pt: 'Acessar portal PF',
-          es: 'Acceder al portal PF',
-          en: 'Access PF portal',
+          pt: 'Abrir serviço oficial',
+          es: 'Abrir servicio oficial',
+          en: 'Open official service',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget: PreparationResourceLinks.pfPortal.toString(),
+        primaryActionTarget: PreparationResourceLinks
+            .argentinaResidenceAgreement
+            .toString(),
         steps: _list(
           locale,
           pt: [
             'Verifique a data de vencimento da sua residência temporária.',
-            'Reúna os documentos exigidos (CPF, comprovante de endereço, antecedentes e seus documentos migratórios atualizados).',
-            'Agende atendimento na Polícia Federal para solicitar a transformação.',
-            'Compareça ao atendimento e acompanhe o andamento pelo portal.',
+            'Abra o serviço oficial da PF e confirme a rota de residência por prazo indeterminado aplicável ao seu caso.',
+            'Reúna os documentos exigidos, incluindo comprovante de endereço e documentos migratórios atualizados.',
+            'Emita a GRU quando o serviço exigir, faça o agendamento e protocole o pedido dentro da janela oficial.',
+            'Acompanhe o requerimento no sistema da PF e não deixe a residência temporária vencer antes de regularizar essa etapa.',
           ],
           es: [
             'Verifica la fecha de vencimiento de tu residencia temporaria.',
-            'Reune los documentos requeridos (CPF, comprobante de domicilio, antecedentes y tus documentos migratorios actualizados).',
-            'Agenda turno en la Policia Federal para solicitar la transformacion.',
-            'Asiste al turno y sigue el tramite por el portal.',
+            'Abre el servicio oficial de la PF y confirma la ruta de residencia por plazo indeterminado aplicable a tu caso.',
+            'Reune los documentos requeridos, incluyendo comprobante de domicilio y documentos migratorios actualizados.',
+            'Emite la GRU cuando el servicio lo exija, agenda la cita y presenta la solicitud dentro de la ventana oficial.',
+            'Sigue el requerimiento en el sistema de la PF y no dejes vencer la residencia temporaria antes de regularizar esta etapa.',
           ],
           en: [
             'Check the expiration date of your temporary residence.',
-            'Gather required documents (CPF, proof of address, criminal record, and your updated migration documents).',
-            'Schedule an appointment at the Federal Police to apply for conversion.',
-            'Attend the appointment and track progress through the portal.',
+            'Open the official PF service and confirm the indefinite-term residence route that applies to your case.',
+            'Gather the required documents, including proof of address and updated migration documents.',
+            'Issue the GRU when the service requires it, book the appointment, and file within the official window.',
+            'Track the request in the PF system and do not let the temporary residence expire before regularizing this step.',
           ],
         ),
         requirements: _list(
@@ -3164,22 +3321,22 @@ class ArgentinaBrazilGuideDataSource {
             'CPF',
             'Residência temporária válida ou protocolo',
             'Comprovante de endereço atualizado',
-            'Certidão de antecedentes federais',
-            'Taxa GRU paga',
+            'Documentos migratórios atualizados',
+            'GRU emitida e paga quando exigida pela PF',
           ],
           es: [
             'CPF',
             'Residencia temporaria valida o protocolo',
             'Comprobante de domicilio actualizado',
-            'Certificado de antecedentes federales',
-            'Tasa GRU pagada',
+            'Documentos migratorios actualizados',
+            'GRU emitida y pagada cuando la PF la exija',
           ],
           en: [
             'CPF',
             'Valid temporary residence or protocol',
             'Updated proof of address',
-            'Federal criminal record certificate',
-            'GRU fee paid',
+            'Updated migration documents',
+            'GRU issued and paid when required by PF',
           ],
         ),
         doneCriteria: _t(
@@ -3192,15 +3349,18 @@ class ArgentinaBrazilGuideDataSource {
           locale,
           pt: [
             'Comece a reunir documentos pelo menos 3 meses antes do vencimento.',
-            'Acompanhe o protocolo pelo site da PF para não perder prazos.',
+            'A rota e os documentos podem mudar conforme a base legal da sua residência. Confirme sempre no serviço oficial antes de protocolar.',
+            'Acompanhe o protocolo pelo sistema da PF para não perder prazos.',
           ],
           es: [
             'Empieza a reunir documentos al menos 3 meses antes del vencimiento.',
-            'Sigue el protocolo por el sitio de la PF para no perder plazos.',
+            'La ruta y los documentos pueden cambiar segun la base legal de tu residencia. Confirma siempre en el servicio oficial antes de presentar la solicitud.',
+            'Sigue el protocolo por el sistema de la PF para no perder plazos.',
           ],
           en: [
             'Start gathering documents at least 3 months before expiration.',
-            'Track the protocol on the PF website to avoid missing deadlines.',
+            'The route and required documents can change depending on the legal basis of your residence. Always confirm in the official service before filing.',
+            'Track the protocol in the PF system to avoid missing deadlines.',
           ],
         ),
         checklistItems: [
@@ -3484,7 +3644,7 @@ class ArgentinaBrazilGuideDataSource {
       case 'find_job_br':
         // Sequence: understand rules → base documents and research before travel
         // → optional CPF route before boarding → money/arrival logistics
-        // → residency filing on arrival → work card → bank → Pix → income path
+        // → health base on arrival → residency filing → work card → bank → Pix → income path
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
@@ -3495,21 +3655,21 @@ class ArgentinaBrazilGuideDataSource {
           'item_1_3_money',
           'item_0_4_flight',
           'item_1_2_housing_temporary',
-          'item_2_2_residencia',
           'item_1_1_chip',
+          'item_4_2_saude',
+          'item_2_2_residencia',
           'item_2_3_ctps',
           'item_3_1_conta_bancaria',
           'item_3_3_pix',
           'item_3_4_trabalho',
           'item_3_2_aluguel_fixo',
-          'item_4_2_saude', // get SUS card AFTER arriving
         ];
       case 'remote_income':
       case 'remote_work':
       case 'entrepreneur':
         // Sequence: understand rules → research income model → understand health
         // → optional CPF route before boarding → money/logistics
-        // → bank/Pix/MEI → residency filing → work definition → rent
+        // → health base on arrival → bank/Pix/MEI → residency filing → work definition → rent
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
@@ -3520,19 +3680,19 @@ class ArgentinaBrazilGuideDataSource {
           'item_1_3_money',
           'item_0_4_flight',
           'item_1_2_housing_temporary',
+          'item_1_1_chip',
+          'item_4_2_saude',
           'item_3_1_conta_bancaria',
           'item_3_3_pix',
           'item_4_4_mei',
           'item_2_2_residencia',
-          'item_1_1_chip',
           'item_3_4_trabalho',
           'item_3_2_aluguel_fixo',
-          'item_4_2_saude', // get SUS card AFTER arriving
         ];
       case 'study':
         // Sequence: understand rules → research job market (part-time context)
         // → understand health → optional CPF route before travel
-        // → money/arrival logistics → residency → work card → bank → Pix → rent
+        // → money/arrival logistics → health base on arrival → residency → work card → bank → Pix → rent
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
@@ -3543,13 +3703,13 @@ class ArgentinaBrazilGuideDataSource {
           'item_1_3_money',
           'item_0_4_flight',
           'item_1_2_housing_temporary',
-          'item_2_2_residencia',
           'item_1_1_chip',
+          'item_4_2_saude',
+          'item_2_2_residencia',
           'item_2_3_ctps',
           'item_3_1_conta_bancaria',
           'item_3_3_pix',
           'item_3_2_aluguel_fixo',
-          'item_4_2_saude', // get SUS card AFTER arriving
         ];
       case 'family_partner':
       case 'quality_of_life':
@@ -3557,7 +3717,7 @@ class ArgentinaBrazilGuideDataSource {
       case 'fresh_start':
         // Sequence: understand rules → research local economy → understand health
         // → optional CPF route before travel → money/arrival logistics
-        // → residency → bank → Pix → rent → get SUS card
+        // → health base on arrival → residency → bank → Pix → rent
         return const [
           'item_0_1_rule_90_days',
           'item_0_2_antecedentes',
@@ -3568,12 +3728,12 @@ class ArgentinaBrazilGuideDataSource {
           'item_1_3_money',
           'item_0_4_flight',
           'item_1_2_housing_temporary',
-          'item_2_2_residencia',
           'item_1_1_chip',
+          'item_4_2_saude',
+          'item_2_2_residencia',
           'item_3_1_conta_bancaria',
           'item_3_3_pix',
           'item_3_2_aluguel_fixo',
-          'item_4_2_saude', // get SUS card AFTER arriving
         ];
       default:
         return const [];
@@ -3586,7 +3746,7 @@ class ArgentinaBrazilGuideDataSource {
     LocationData? currentLocation,
     String locale,
   ) {
-    return switch (item.id) {
+    final contextualized = switch (item.id) {
       'item_2_1_cpf' => item.copyWith(
         costInfo: _t(
           locale,
@@ -3776,9 +3936,11 @@ class ArgentinaBrazilGuideDataSource {
         externalOfficialLinks: [
           GuideSupportLink(label: 'Nubank', url: 'https://nubank.com.br'),
           GuideSupportLink(label: 'Inter', url: 'https://inter.co'),
+          GuideSupportLink(label: 'C6 Bank', url: 'https://www.c6bank.com.br'),
         ],
       ),
       'item_2_3_ctps' => item.copyWith(
+        applicabilityConditions: const <String>['formal_work_goal'],
         costInfo: _t(locale, pt: 'Gratuito', es: 'Gratis', en: 'Free'),
         requirements: _list(
           locale,
@@ -3911,6 +4073,17 @@ class ArgentinaBrazilGuideDataSource {
           en: 'Varies by exchange rate and chosen service.',
         ),
         executionModes: const [GuideExecutionMode.online],
+        externalOfficialLinks: [
+          GuideSupportLink(
+            label: 'Global66',
+            url: 'https://www.global66.com/ar/',
+          ),
+          GuideSupportLink(
+            label: 'Western Union',
+            url: 'https://www.westernunion.com/ar/es/home.html',
+          ),
+          GuideSupportLink(label: 'Wise', url: 'https://wise.com/'),
+        ],
       ),
       'item_1_1_chip' => item.copyWith(
         costInfo: _t(
@@ -3920,6 +4093,22 @@ class ArgentinaBrazilGuideDataSource {
           en: 'R\$ 20-50 (SIM + initial credit)',
         ),
         executionModes: const [GuideExecutionMode.inPerson],
+        externalOfficialLinks: [
+          GuideSupportLink(
+            label: 'TIM',
+            url:
+                'https://www.tim.com.br/para-voce/atendimento/perguntas-frequentes/para-estrangeiros-no-brasil',
+          ),
+          GuideSupportLink(
+            label: 'Claro',
+            url: 'https://www.claro.com.br/celular/prepago',
+          ),
+          GuideSupportLink(
+            label: 'Vivo',
+            url:
+                'https://vivo.com.br/para-voce/produtos-e-servicos/para-o-celular/pre-pago',
+          ),
+        ],
       ),
       'item_4_1_cnh' => item.copyWith(
         costInfo: _t(
@@ -3932,6 +4121,11 @@ class ArgentinaBrazilGuideDataSource {
           GuideExecutionMode.inPerson,
           GuideExecutionMode.online,
         ],
+        primaryActionTarget: plan.currentPlanCity != null
+            ? PreparationResourceLinks.buildDetranMapSearch(
+                plan.currentPlanCity!,
+              ).toString()
+            : null,
         locationAwareOptions: [
           GuideLocationAwareOption(
             title: _t(
@@ -3946,17 +4140,26 @@ class ArgentinaBrazilGuideDataSource {
               es: 'Buscar en Google Maps',
               en: 'Search on Google Maps',
             ),
-            mapUrl: plan.recommendedCity != null
+            mapUrl: plan.currentPlanCity != null
                 ? PreparationResourceLinks.buildDetranMapSearch(
-                    plan.recommendedCity!,
+                    plan.currentPlanCity!,
                   ).toString()
                 : null,
           ),
         ],
         externalOfficialLinks: [
           GuideSupportLink(
-            label: 'DETRAN',
-            url: 'https://www.detran.sp.gov.br',
+            label: _t(
+              locale,
+              pt: 'Abrir DETRAN no mapa',
+              es: 'Abrir DETRAN en el mapa',
+              en: 'Open DETRAN on the map',
+            ),
+            url: plan.currentPlanCity != null
+                ? PreparationResourceLinks.buildDetranMapSearch(
+                    plan.currentPlanCity!,
+                  ).toString()
+                : 'https://www.google.com/maps/search/DETRAN+Brasil',
           ),
         ],
       ),
@@ -3985,9 +4188,9 @@ class ArgentinaBrazilGuideDataSource {
               es: 'Buscar en Google Maps',
               en: 'Search on Google Maps',
             ),
-            mapUrl: plan.recommendedCity != null
+            mapUrl: plan.currentPlanCity != null
                 ? PreparationResourceLinks.buildUpaMapSearch(
-                    plan.recommendedCity!,
+                    plan.currentPlanCity!,
                   ).toString()
                 : null,
           ),
@@ -4014,13 +4217,9 @@ class ArgentinaBrazilGuideDataSource {
           GuideExecutionMode.inPerson,
           GuideExecutionMode.online,
         ],
-        locationAwareOptions: _registrationOptions(
-          plan,
-          currentLocation,
-          locale,
-        ),
+        locationAwareOptions: _residencyOptions(plan, currentLocation, locale),
         mapLinks: _residencyMapLinks(plan, currentLocation, locale),
-        externalOfficialLinks: _pfRegistrationSupportLinks(
+        externalOfficialLinks: _pfOfficialSupportLinks(
           plan,
           currentLocation,
           locale,
@@ -4054,13 +4253,9 @@ class ArgentinaBrazilGuideDataSource {
         ),
         requirements: _list(
           locale,
-          pt: [
-            'Conta bancária ativa',
-            'App do banco',
-            'CPF ou outra chave Pix',
-          ],
-          es: ['Cuenta activa', 'App del banco', 'CPF u otra clave Pix'],
-          en: ['Active bank account', 'Bank app', 'CPF or another Pix key'],
+          pt: ['Conta bancária ativa', 'App do banco', 'Acesso ao celular'],
+          es: ['Cuenta activa', 'App del banco', 'Acceso al celular'],
+          en: ['Active bank account', 'Bank app', 'Phone access'],
         ),
         estimatedTime: _t(
           locale,
@@ -4071,6 +4266,7 @@ class ArgentinaBrazilGuideDataSource {
         executionModes: const [GuideExecutionMode.online],
       ),
       'item_3_4_trabalho' => item.copyWith(
+        applicabilityConditions: const <String>['income_strategy_goal'],
         costInfo: _t(
           locale,
           pt: 'Depende do caminho escolhido.',
@@ -4094,6 +4290,7 @@ class ArgentinaBrazilGuideDataSource {
         ],
       ),
       'item_4_4_mei' => item.copyWith(
+        applicabilityConditions: const <String>['self_employed_goal'],
         costInfo: _t(
           locale,
           pt: 'Abertura gratuita. Guia mensal ~R\$ 70.',
@@ -4108,6 +4305,9 @@ class ArgentinaBrazilGuideDataSource {
           ),
         ],
       ),
+      'item_3_5_revalidacao_estudos' => item.copyWith(
+        applicabilityConditions: const <String>['study_goal'],
+      ),
       'item_0_5_mercado_trabalho' => item.copyWith(
         costInfo: _t(
           locale,
@@ -4115,6 +4315,13 @@ class ArgentinaBrazilGuideDataSource {
           es: 'Gratis — solo tiempo de investigacion.',
           en: 'Free — research time only.',
         ),
+        primaryActionLabel: _t(
+          locale,
+          pt: 'Escolher plataforma de vagas',
+          es: 'Elegir plataforma de vacantes',
+          en: 'Choose a job platform',
+        ),
+        primaryActionTarget: null,
         executionModes: const [GuideExecutionMode.online],
         externalOfficialLinks: [
           GuideSupportLink(
@@ -4149,6 +4356,55 @@ class ArgentinaBrazilGuideDataSource {
       ),
       _ => item,
     };
+
+    return _sanitizeCostInfo(contextualized, locale);
+  }
+
+  static GuideActionItem _sanitizeCostInfo(
+    GuideActionItem item,
+    String locale,
+  ) {
+    final costInfo = item.costInfo;
+    if (costInfo == null || costInfo.trim().isEmpty) {
+      return item;
+    }
+
+    if (!_looksLikeUnverifiedPrice(costInfo)) {
+      return item;
+    }
+
+    final hasOfficialReference =
+        (item.externalOfficialLinks?.isNotEmpty ?? false) ||
+        (item.primaryActionTarget?.trim().isNotEmpty ?? false) ||
+        (item.externalUrl?.trim().isNotEmpty ?? false);
+
+    return item.copyWith(
+      costInfo: hasOfficialReference
+          ? _t(
+              locale,
+              pt: 'Consulte taxas e valores atualizados no canal oficial antes de avançar.',
+              es: 'Consulta tasas y valores actualizados en el canal oficial antes de avanzar.',
+              en: 'Check current fees and prices in the official channel before moving forward.',
+            )
+          : _t(
+              locale,
+              pt: 'Os custos podem mudar. Confirme o valor atualizado antes de seguir.',
+              es: 'Los costos pueden cambiar. Confirma el valor actualizado antes de seguir.',
+              en: 'Costs can change. Confirm the current amount before proceeding.',
+            ),
+    );
+  }
+
+  static bool _looksLikeUnverifiedPrice(String text) {
+    final normalized = text.toLowerCase();
+    final hasNumericPrice = RegExp(
+      r'(\br\$ ?\d|\b\d+[.,]?\d* ?(ars|brl|usd|pesos?|reais?|dolares?))|(\b\d{2,}\b)',
+    ).hasMatch(normalized);
+    final hasFreeOrFeeClaim = RegExp(
+      r'\b(gratuito|gratis|free|taxa baixa|small fee|tasa baja|sem mensalidade)\b',
+    ).hasMatch(normalized);
+
+    return hasNumericPrice || hasFreeOrFeeClaim;
   }
 
   static String _locale([String? localeCode]) {
@@ -4552,6 +4808,22 @@ class ArgentinaBrazilGuideDataSource {
       GuideLocationAwareOption(
         title: _t(
           locale,
+          pt: 'Acompanhar requerimento',
+          es: 'Seguir requerimiento',
+          en: 'Track request',
+        ),
+        subtitle: _t(
+          locale,
+          pt: 'Use isso para consultar o andamento depois do protocolo',
+          es: 'Usa esto para consultar el avance despues del protocolo',
+          en: 'Use this to check progress after your protocol is issued',
+        ),
+        officialUrl: PreparationResourceLinks.pfRequestTracking.toString(),
+        officialLabel: 'PF',
+      ),
+      GuideLocationAwareOption(
+        title: _t(
+          locale,
           pt: inDestination
               ? 'Unidade migratória da PF'
               : 'Unidade migratória de referência',
@@ -4592,7 +4864,7 @@ class ArgentinaBrazilGuideDataSource {
     LocationData? currentLocation,
     String locale,
   ) {
-    final city = plan.recommendedCity ?? plan.preferredCity;
+    final city = plan.currentPlanCity;
     final contact = city == null
         ? null
         : PreparationResourceLinks.resolvePfUnitContact(city);
@@ -4644,7 +4916,7 @@ class ArgentinaBrazilGuideDataSource {
     LocationData? currentLocation,
     String locale,
   ) {
-    final city = plan.recommendedCity ?? plan.preferredCity;
+    final city = plan.currentPlanCity;
     final contact = city == null
         ? null
         : PreparationResourceLinks.resolvePfUnitContact(city);
@@ -4658,6 +4930,15 @@ class ArgentinaBrazilGuideDataSource {
           en: 'RNM / CRNM registration',
         ),
         url: PreparationResourceLinks.rnMRegistrationGuide.toString(),
+      ),
+      GuideSupportLink(
+        label: _t(
+          locale,
+          pt: 'Consultar requerimento',
+          es: 'Consultar requerimiento',
+          en: 'Track request',
+        ),
+        url: PreparationResourceLinks.pfRequestTracking.toString(),
       ),
       GuideSupportLink(
         label: _t(
@@ -4702,18 +4983,18 @@ class ArgentinaBrazilGuideDataSource {
       GuideLocationAwareOption(
         title: _t(
           locale,
-          pt: 'Abrir conta pelo celular',
-          es: 'Abrir cuenta por el celular',
-          en: 'Open account on your phone',
+          pt: 'Comparar bancos digitais no celular',
+          es: 'Comparar bancos digitales en el celular',
+          en: 'Compare digital banks on your phone',
         ),
         subtitle: _t(
           locale,
-          pt: 'Mais rápido para começar agora',
-          es: 'Lo mas rapido para empezar ahora',
-          en: 'Fastest path to start now',
+          pt: 'Inter, C6 Bank e Nubank para começar sem agência',
+          es: 'Inter, C6 Bank y Nubank para empezar sin sucursal',
+          en: 'Inter, C6 Bank, and Nubank to get started without a branch',
         ),
-        officialUrl: 'https://nubank.com.br',
-        officialLabel: 'Nubank',
+        officialUrl: 'https://inter.co',
+        officialLabel: 'Inter / C6 / Nubank',
       ),
       GuideLocationAwareOption(
         title: _t(
@@ -4745,14 +5026,14 @@ class ArgentinaBrazilGuideDataSource {
     MigrationPlan plan,
     String locale,
   ) {
-    final city = plan.recommendedCity == null
+    final city = plan.currentPlanCity == null
         ? _t(
             locale,
             pt: 'sua cidade de destino',
             es: 'tu ciudad de destino',
             en: 'your destination city',
           )
-        : '${plan.recommendedCity!.name}, ${plan.recommendedCity!.stateName}';
+        : '${plan.currentPlanCity!.name}, ${plan.currentPlanCity!.stateName}';
     return [
       GuideLocationAwareOption(
         title: _t(
@@ -4785,7 +5066,7 @@ class ArgentinaBrazilGuideDataSource {
           : location.stateName.trim();
       return region.isNotEmpty ? '$city, $region' : city;
     }
-    final destinationCity = plan.recommendedCity;
+    final destinationCity = plan.currentPlanCity;
     if (destinationCity != null) {
       return '${destinationCity.name}, ${destinationCity.stateName}';
     }
@@ -4798,7 +5079,7 @@ class ArgentinaBrazilGuideDataSource {
   }
 
   static int? _distanceKm(MigrationPlan plan, LocationData? currentLocation) {
-    final destinationCity = plan.recommendedCity;
+    final destinationCity = plan.currentPlanCity;
     if (!_isInDestinationCountry(currentLocation, plan) ||
         currentLocation == null ||
         destinationCity == null) {

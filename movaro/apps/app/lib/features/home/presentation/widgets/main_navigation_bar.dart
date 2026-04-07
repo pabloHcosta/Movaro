@@ -148,7 +148,7 @@ class MainNavigationBar extends StatelessWidget {
       );
       return;
     }
-    final hasConfirmedCity = plan?.isCityConfirmed == true;
+    final hasConfirmedCity = plan?.confirmedCity != null;
     final route = switch (slot) {
       0 => AppRoutes.publicHome,
       1 => AppRoutes.explore,

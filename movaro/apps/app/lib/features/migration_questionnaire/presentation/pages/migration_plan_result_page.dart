@@ -61,7 +61,7 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
   }
 
   void _prefetchWeather() {
-    final cityId = widget.controller.generatedPlan?.recommendedCity?.id;
+    final cityId = widget.controller.generatedPlan?.currentPlanCity?.id;
     if (cityId == null || cityId == _weatherRequestedFor) {
       return;
     }
@@ -198,7 +198,7 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
       builder: (context, _) {
         final l10n = context.l10n;
         final plan = widget.controller.generatedPlan;
-        final city = plan?.recommendedCity;
+        final city = plan?.currentPlanCity;
 
         if (widget.controller.isInitializing) {
           return Scaffold(
@@ -242,7 +242,7 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
 
         _prefetchWeather();
         final weather = widget.citiesController.weatherFor(city.id);
-        final alternativeCities = plan.candidateCities
+        final alternativeCities = plan.reviewCities
             .where((candidate) => candidate.id != city.id)
             .toList(growable: false);
 

@@ -20,6 +20,8 @@ import 'package:movaro_app/features/cities/application/services/city_seasonality
 import 'package:movaro_app/features/home/application/city_feed_datasource.dart';
 import 'package:movaro_app/features/home/domain/city_feed_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({
@@ -209,7 +211,7 @@ class _ExplorePageState extends State<ExplorePage> {
                           child: _ExploreInsightsSection(
                             locale: locale,
                             stage: stage,
-                            cityCode: plan?.recommendedCity?.id,
+                            cityCode: plan?.currentPlanCity?.id,
                             onTapCity: (city) => Navigator.pushNamed(
                               context,
                               AppRoutes.cityDetail(city.id),
@@ -309,7 +311,7 @@ class _ExplorePageState extends State<ExplorePage> {
     MigrationQuestionnaireController migrationQuestionnaireController,
   ) {
     final plan = migrationQuestionnaireController.generatedPlan;
-    if (plan?.isCityConfirmed == true) {
+    if (plan?.confirmedCity != null) {
       return AppRoutes.migrationPlanCopilot;
     }
     if (plan != null) {
@@ -333,8 +335,8 @@ class _ExploreHeroPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
-    final leadCity = plan?.recommendedCity;
-    final planReady = plan?.isCityConfirmed == true;
+    final leadCity = plan?.currentPlanCity;
+    final planReady = plan?.confirmedCity != null;
     final statusLabel = plan == null
         ? context.l10n.explorePlanEmptyTitle
         : planReady
@@ -560,10 +562,10 @@ class _PlanSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final leadCity = plan?.recommendedCity;
+    final leadCity = plan?.currentPlanCity;
     final title = plan == null
         ? l10n.explorePlanEmptyTitle
-        : plan!.isCityConfirmed
+        : plan!.confirmedCity != null
         ? l10n.explorePlanReadyTitle
         : l10n.explorePlanDraftTitle;
 
@@ -573,7 +575,7 @@ class _PlanSection extends StatelessWidget {
         _PlanFocusCard(
           title: title,
           city: leadCity,
-          isConfirmed: plan?.isCityConfirmed == true,
+          isConfirmed: plan?.confirmedCity != null,
           onOpenPlan: onOpenPlan,
         ),
         if (leadCity != null) ...[
@@ -930,12 +932,18 @@ class _CityMiniCard extends StatelessWidget {
       metrics: [
         CompareCardMetric(
           label: context.l10n.cityDetailAffordabilityTitle,
-          value: city.rentScore.toString(),
+          value: CityHousingViabilityPresenter.resolve(
+            context,
+            rentScore: city.rentScore,
+          ).headline,
           icon: Icons.home_work_outlined,
         ),
         CompareCardMetric(
           label: context.l10n.cityDetailQualityLabel,
-          value: city.idhmScore.toStringAsFixed(2),
+          value: CityIdhmPresentation.resolve(
+            context,
+            value: city.idhmScore,
+          ).headline,
           icon: Icons.favorite_outline_rounded,
         ),
       ],
@@ -989,10 +997,13 @@ class _CitySignalMetric extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '$score',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            tone.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: tone.color,
+              fontWeight: FontWeight.w800,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -1001,16 +1012,6 @@ class _CitySignalMetric extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSoftFor(context),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            tone.label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: tone.color,
-              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -1115,7 +1116,7 @@ class _ContentTopicCard extends StatelessWidget {
 //
 // Shows curated CityFeedDatasource items as vertical cards inside the Explore
 // page. Works without a plan — general content (no city filter) is shown to
-// explorers, city-specific content when a recommended city is known.
+// explorers, city-specific content when a current plan city is known.
 
 class _ExploreInsightsSection extends StatelessWidget {
   const _ExploreInsightsSection({

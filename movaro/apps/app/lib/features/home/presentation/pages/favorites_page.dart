@@ -141,10 +141,10 @@ class FavoritesPage extends StatelessWidget {
     MigrationQuestionnaireController controller,
   ) {
     final plan = controller.generatedPlan;
-    if (plan == null || !plan.isCityConfirmed) {
+    if (plan == null || plan.confirmedCity == null) {
       return null;
     }
-    return plan.recommendedCity?.id;
+    return plan.confirmedCity?.id;
   }
 
   void _openComparison(

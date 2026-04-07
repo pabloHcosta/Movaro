@@ -38,7 +38,7 @@ class SplashPage extends StatefulWidget {
 enum SplashStatus { loading, offline }
 
 class _SplashPageState extends State<SplashPage> {
-  static const _minimumBrandExposure = Duration(milliseconds: 1500);
+  static const _minimumBrandExposure = Duration(milliseconds: 2400);
 
   bool _started = false;
   SplashStatus _status = SplashStatus.loading;

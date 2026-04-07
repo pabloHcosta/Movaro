@@ -13,11 +13,11 @@ class MigrationPlanGenerator {
 
   final CitiesRepository _citiesRepository;
 
-  // ── Anti-deception: cities that Argentinians expect to see in results ─────
+  // ── Shortlist balancing: familiar reference cities for Argentinian users ──
   //
-  // Based on behavioural research (March 2026): when none of these appear,
-  // users feel the app "doesn't understand them". At least one must always
-  // surface in the top-3 results.
+  // When none of these appear, the shortlist can feel disconnected from the
+  // user's mental model. We keep at least one visible in the shortlist, but
+  // avoid forcing a deterministic #1 result around it.
   static const _anchorCityIds = {
     'florianopolis-sc',
     'rio-de-janeiro-rj',
@@ -207,7 +207,7 @@ class MigrationPlanGenerator {
       confidence: recommendation.confidence,
       selectedPriorities: priorities,
       selectedConstraints: constraints,
-      recommendedCity: recommendation.topCities.isEmpty
+      highlightedCity: recommendation.topCities.isEmpty
           ? null
           : recommendation.topCities.first.city,
       candidateCities: recommendation.topCities
@@ -286,13 +286,11 @@ class MigrationPlanGenerator {
       priorities: priorities,
     );
 
-    final reasons = topCities.isEmpty
-        ? const <String>[]
-        : _buildReasons(
-            city: topCities.first.city,
-            weights: weights,
-            constraints: constraints,
-          );
+    final reasons = _buildShortlistReasons(
+      topCities: topCities,
+      weights: weights,
+      constraints: constraints,
+    );
     final confidence = _calcConfidence(
       funding: funding,
       priorities: priorities,
@@ -304,46 +302,39 @@ class MigrationPlanGenerator {
     return (topCities: topCities, reasons: reasons, confidence: confidence);
   }
 
-  /// Ensures the top-3 result set is emotionally correct for Argentinian users.
-  ///
-  /// Rules (based on behavioural research, March 2026):
-  ///  1. If no anchor city (Floripa/Rio/SP/BC/Curitiba) is in the top 3,
-  ///     the highest-ranked anchor replaces position 3.
-  ///  2. If intent is lifestyle/remote and Florianópolis is missing → inject.
-  ///  3. If intent is job/career and São Paulo is missing → inject.
-  ///
-  /// Rules 2 and 3 override rule 1 only at position 3 (never the #1 result).
+  /// Balances the shortlist so it includes familiar comparison anchors without
+  /// turning the first ranked city into a definitive answer.
   List<_ScoredCity> _applyAntiDeceptionRules({
     required List<_ScoredCity> ranked,
     required String archetypeKey,
     required List<String> priorities,
   }) {
-    final top = ranked.take(3).toList();
+    final shortlist = ranked.take(3).toList();
 
-    // ── RULE 2: lifestyle/remote → Florianópolis ─────────────────────────
+    // ── lifestyle/remote → consider Florianópolis ────────────────────────
     final isLifestyle =
         archetypeKey.contains('remote') ||
         priorities.any((p) => p == 'warm_climate_beach' || p == 'nature');
     if (isLifestyle) {
-      final hasFloripa = top.any((c) => c.city.id == 'florianopolis-sc');
+      final hasFloripa = shortlist.any((c) => c.city.id == 'florianopolis-sc');
       if (!hasFloripa) {
         final floripa = _findById(ranked, 'florianopolis-sc');
-        if (floripa != null) _replaceAtPosition(top, floripa, 2);
+        if (floripa != null) _mergeShortlistCity(shortlist, floripa);
       }
     }
 
-    // ── RULE 3: job/career → São Paulo ───────────────────────────────────
+    // ── job/career → consider São Paulo ──────────────────────────────────
     final isCareer = archetypeKey.startsWith('job_hunter');
     if (isCareer) {
-      final hasSp = top.any((c) => c.city.id == 'sao-paulo-sp');
+      final hasSp = shortlist.any((c) => c.city.id == 'sao-paulo-sp');
       if (!hasSp) {
         final sp = _findById(ranked, 'sao-paulo-sp');
-        if (sp != null) _replaceAtPosition(top, sp, 2);
+        if (sp != null) _mergeShortlistCity(shortlist, sp);
       }
     }
 
-    // ── RULE 1: At least 1 anchor city must survive ───────────────────────
-    final hasAnchor = top.any((c) => _anchorCityIds.contains(c.city.id));
+    // ── Keep at least one familiar anchor in the shortlist ────────────────
+    final hasAnchor = shortlist.any((c) => _anchorCityIds.contains(c.city.id));
     if (!hasAnchor) {
       _ScoredCity? best;
       for (final candidate in ranked) {
@@ -352,10 +343,11 @@ class MigrationPlanGenerator {
           break;
         }
       }
-      if (best != null) _replaceAtPosition(top, best, 2);
+      if (best != null) _mergeShortlistCity(shortlist, best);
     }
 
-    return top;
+    shortlist.sort((a, b) => b.score.compareTo(a.score));
+    return shortlist.take(3).toList(growable: false);
   }
 
   _ScoredCity? _findById(List<_ScoredCity> ranked, String id) {
@@ -365,16 +357,24 @@ class MigrationPlanGenerator {
     return null;
   }
 
-  void _replaceAtPosition(
-    List<_ScoredCity> top,
-    _ScoredCity city,
-    int position,
-  ) {
-    if (top.length > position) {
-      top[position] = city;
-    } else {
-      top.add(city);
+  void _mergeShortlistCity(List<_ScoredCity> shortlist, _ScoredCity city) {
+    final alreadyPresent = shortlist.any((item) => item.city.id == city.city.id);
+    if (alreadyPresent) {
+      return;
     }
+
+    if (shortlist.length < 3) {
+      shortlist.add(city);
+      return;
+    }
+
+    var weakestIndex = 0;
+    for (var index = 1; index < shortlist.length; index++) {
+      if (shortlist[index].score < shortlist[weakestIndex].score) {
+        weakestIndex = index;
+      }
+    }
+    shortlist[weakestIndex] = city;
   }
 
   /// Resolves archetype taking into account explicit work arrangement.
@@ -580,38 +580,40 @@ class MigrationPlanGenerator {
     return multiplier;
   }
 
-  List<String> _buildReasons({
-    required City city,
+  List<String> _buildShortlistReasons({
+    required List<_ScoredCity> topCities,
     required Map<String, double> weights,
     required List<String> constraints,
   }) {
-    final dims = _cityDimensions(city);
-    final rankedReasons = <({String id, double score})>[];
-
-    for (final entry in weights.entries) {
-      rankedReasons.add((
-        id: _reasonForDimension(entry.key, constraints),
-        score: (dims[entry.key] ?? 0) * entry.value,
-      ));
+    if (topCities.isEmpty) {
+      return const <String>[];
     }
 
-    rankedReasons.sort((a, b) => b.score.compareTo(a.score));
-    final unique = <String>[];
-
-    for (final reason in rankedReasons) {
-      if (!unique.contains(reason.id)) {
-        unique.add(reason.id);
-      }
-      if (unique.length == 3) {
-        break;
+    final aggregated = <String, double>{};
+    for (final item in topCities) {
+      final dims = _cityDimensions(item.city);
+      for (final entry in weights.entries) {
+        final reasonId = _reasonForDimension(entry.key, constraints);
+        final contribution =
+            (dims[entry.key] ?? 0) * entry.value * item.score.clamp(0, 1);
+        aggregated.update(
+          reasonId,
+          (value) => value + contribution,
+          ifAbsent: () => contribution,
+        );
       }
     }
 
-    if (unique.isEmpty) {
-      unique.add('plan_reason_balanced_profile');
-    }
+    final rankedReasons = aggregated.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final reasons = rankedReasons
+        .take(3)
+        .map((entry) => entry.key)
+        .toList(growable: false);
 
-    return unique;
+    return reasons.isEmpty
+        ? const ['plan_reason_balanced_profile']
+        : reasons;
   }
 
   String _reasonForDimension(String dimension, List<String> constraints) {
@@ -698,13 +700,17 @@ class MigrationPlanGenerator {
     }
 
     final completeness = (1 - penalty).clamp(0.28, 1).toDouble();
-    final delta = topCities.length < 2
-        ? 0.08
-        : topCities.first.score - topCities[1].score;
-    final separation = (delta / 0.15).clamp(0, 1).toDouble();
+    final shortlistBase = topCities.isEmpty
+        ? 0.18
+        : (topCities
+                    .map((city) => city.score)
+                    .reduce((sum, value) => sum + value) /
+                topCities.length)
+            .clamp(0, 1)
+            .toDouble();
 
-    return (0.6 * completeness +
-            0.4 * separation -
+    return (0.65 * completeness +
+            0.35 * shortlistBase -
             (conflictFlags.isNotEmpty ? 0.1 : 0))
         .clamp(0, 1)
         .toDouble();

@@ -34,7 +34,7 @@ class UserMigrationContext {
   const UserMigrationContext({
     this.journeyState = 'not_started',
     this.migrationGoal,
-    this.recommendedCity,
+    this.highlightedCity,
     this.currentPhase,
     this.currentItemTitle,
     this.completedItemIds = const [],
@@ -51,8 +51,8 @@ class UserMigrationContext {
   /// e.g. 'work', 'study', 'retire', 'family'
   final String? migrationGoal;
 
-  /// Human-readable city name from the plan.
-  final String? recommendedCity;
+  /// Human-readable city name from the current plan context.
+  final String? highlightedCity;
 
   /// Current copilot phase: preparation | documents | housing | work | arrival
   final String? currentPhase;
@@ -333,7 +333,7 @@ APP DATA is the source of truth. Rules — NO EXCEPTIONS:
    - Names of offices or institutions
    - Legal requirements or rules
 4. When uncertain, use safe language:
-   - PT: "Segundo os dados do app..." / "Essa informação pode variar. Te recomendo verificar na seção do app."
+   - PT: "Segundo os dados do app..." / "Essa informação pode variar. Vale verificar na seção do app."
    - ES: "Según los datos de la app..." / "Esta información puede variar."
    - EN: "According to the app's data..." / "This may vary — I recommend checking the app."
 5. NEVER say "based on my knowledge" or "I think" for factual claims. Either cite the app data or disclaim.
@@ -343,7 +343,7 @@ APP DATA is the source of truth. Rules — NO EXCEPTIONS:
 Only reference features that ACTUALLY exist in the app:
 - Journey Setup (origin/destination selection)
 - Migration Questionnaire
-- Migration Plan Result (with recommended city)
+- Migration Plan Result (with a highlighted city and alternatives)
 - Copilot / Guia — step-by-step guide with phases: preparation → documents → housing → work → arrival
 - Explore — city catalog and comparison
 - Info / Documentation guides
@@ -418,8 +418,8 @@ ${curatedContent.isNotEmpty ? '--- APP DATA (source of truth) ---\n$curatedConte
     if (ctx.migrationGoal != null) {
       lines.writeln('migration_goal: ${ctx.migrationGoal}');
     }
-    if (ctx.recommendedCity != null) {
-      lines.writeln('recommended_city: ${ctx.recommendedCity}');
+    if (ctx.highlightedCity != null) {
+      lines.writeln('current_plan_city: ${ctx.highlightedCity}');
     }
     if (ctx.planTimeline != null) {
       lines.writeln('plan_timeline: ${ctx.planTimeline}');
@@ -455,21 +455,21 @@ ${curatedContent.isNotEmpty ? '--- APP DATA (source of truth) ---\n$curatedConte
       case 'destination_selected':
       case 'questionnaire_in_progress':
         lines.writeln(
-          'The user is setting up their plan. Encourage them to complete the Migration Questionnaire to get a personalised guide.',
+          'The user is setting up their plan. Encourage them to complete the Migration Questionnaire to unlock a more organized guide.',
         );
       case 'plan_generated':
         lines.writeln(
-          'The user has a plan with recommended city "${ctx.recommendedCity ?? "unknown"}". '
-          'They have not yet confirmed their city. Help them understand their plan and decide.',
+          'The user has a generated plan centered on "${ctx.highlightedCity ?? "unknown"}". '
+          'They may still be comparing options. Help them understand the tradeoffs and explore their plan.',
         );
       case 'copilot_active':
-        final city = ctx.recommendedCity ?? 'their destination';
+        final city = ctx.highlightedCity ?? 'their destination';
         final phase = ctx.currentPhase ?? 'preparation';
         lines.writeln(
           'The user is actively following their copilot guide for $city. '
           'Current phase: $phase. '
           '${ctx.currentItemTitle != null ? 'The next pending item is: "${ctx.currentItemTitle}". ' : ''}'
-          'When relevant, reference their current phase and next step. '
+          'When relevant, reference their current phase and common next steps. '
           'Do NOT list items they have already completed (IDs listed above).',
         );
       default:

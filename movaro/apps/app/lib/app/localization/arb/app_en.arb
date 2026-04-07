@@ -44,7 +44,7 @@
   "publicHomeHeadline": "Plan your move with more clarity",
   "publicHomeDescription": "Understand your options in a few steps before deciding what to save.",
   "publicHomeScopeBadge": "Today: Argentina -> Brazil",
-  "publicHomeFocusedDescription": "Movaro is currently designed for people evaluating a move from Argentina to Brazil. Instead of showing everything at once, it helps you choose the best first step.",
+  "publicHomeFocusedDescription": "Movaro is currently designed for people evaluating a move from Argentina to Brazil. Instead of showing everything at once, it helps you explore useful starting points.",
   "publicHomeSelectedJourneyDescription": "Movaro will organize your experience for the {origin} -> {destination} journey. You start with what matters now and go deeper only when it helps.",
   "@publicHomeSelectedJourneyDescription": {
     "placeholders": {
@@ -56,8 +56,8 @@
       }
     }
   },
-  "publicHomePrimaryQuestionTitle": "Start with the main decision",
-  "publicHomePrimaryQuestionBody": "First, decide whether you need a guided plan, a city comparison, or just a quick overview of what the product does.",
+  "publicHomePrimaryQuestionTitle": "Start with a useful question",
+  "publicHomePrimaryQuestionBody": "You can begin with a guided plan, a city comparison, or a quick overview of what the product does.",
   "publicHomeTrustFastTitle": "Fast start",
   "publicHomeTrustFastBody": "You can get started without a long form or an initial barrier.",
   "publicHomeTrustGuestTitle": "No login for now",
@@ -118,9 +118,9 @@
   "homeHeroOriginLabel": "Origin",
   "homeHeroDestinationLabel": "Destination",
   "homeHeroNoPlanTitle": "Your migration plan in 3 steps",
-  "homeHeroNoPlanBody": "Answer a few quick questions and get a recommended city that fits your profile.",
+  "homeHeroNoPlanBody": "Answer a few quick questions and review cities that may fit your profile.",
   "homeHeroStepQuestionnaire": "Answer quick questions",
-  "homeHeroStepCity": "Get ideal city",
+  "homeHeroStepCity": "Review possible cities",
   "homeHeroStepGuide": "Execute with guide",
   "homeHeroStartAction": "Build my plan -> takes ~5 min",
   "homeHeroPlanActiveBadge": "Active plan",
@@ -248,16 +248,16 @@
       "city": {}
     }
   },
-  "explorePlanDraftTitle": "Your plan still needs a decision",
-  "explorePlanDraftBody": "You already have a draft. Reopen the result and confirm the city before moving into checklist mode.",
-  "explorePlanDraftBodyWithCity": "{city} is currently leading. Reopen the result, compare it, and confirm it when ready.",
+  "explorePlanDraftTitle": "Your plan still needs a closer review",
+  "explorePlanDraftBody": "You already have a draft. Reopen the result and review the city options before moving into checklist mode.",
+  "explorePlanDraftBodyWithCity": "{city} is one of the leading options right now. Reopen the result and compare it again when you are ready.",
   "@explorePlanDraftBodyWithCity": {
     "placeholders": {
       "city": {}
     }
   },
-  "exploreRecommendedCityTitle": "Leading city right now",
-  "exploreRecommendedCityBody": "Open the city details to validate cost, quality of life, and fit with your plan.",
+  "exploreRecommendedCityTitle": "City to review now",
+  "exploreRecommendedCityBody": "Open the city details to review cost, quality of life, and fit with your plan.",
   "exploreOpenCityAction": "Open city",
   "exploreOpenContentAction": "Open guide",
   "explorePlanDocsBody": "Documents usually unlock the next part of the move faster than more comparison.",
@@ -628,8 +628,8 @@
   "generatePlanAction": "See my plan",
   "migrationPlanPageTitle": "Your first plan",
   "migrationPlanSummaryTitle": "What you told us",
-  "planRecommendedCityTitle": "Suggested city to start with",
-  "planRecommendedCityDescription": "Based on your choices, Movaro suggests looking at {city}, {stateCode} first.",
+  "planRecommendedCityTitle": "City to review first",
+  "planRecommendedCityDescription": "Based on your choices, {city}, {stateCode} appears as a useful place to review first.",
   "@planRecommendedCityDescription": {
     "placeholders": {
       "city": {
@@ -640,7 +640,7 @@
       }
     }
   },
-  "planRecommendedCityAction": "View this city",
+  "planRecommendedCityAction": "Review this city",
   "planSummaryOrigin": "Origin: {value}",
   "@planSummaryOrigin": {
     "placeholders": {
@@ -768,7 +768,7 @@
   },
   "planStepOpenHousingPointOne": "Prioritize neighborhoods that connect well to what you need: work, transport, and services.",
   "planStepOpenHousingPointTwo": "Use the city cost reading as a starting point, but confirm rent and contract details before deciding.",
-  "planStepOpenHousingPointThree": "Neighborhood-level analysis still needs a dedicated data layer; for now, use the recommended city as your first filter.",
+  "planStepOpenHousingPointThree": "Neighborhood-level analysis still needs a dedicated data layer; for now, use the current city match as an initial filter.",
   "planStepOpenGeneralEyebrow": "Guided checklist",
   "planStepOpenGeneralSummary": "This step works best as a practical validation within your move preparation.",
   "planStepOpenGeneralPointOne": "Solve the essentials first so you do not open too many fronts at the same time.",
@@ -830,12 +830,12 @@
   "citiesExploreLanguageTitle": "Easier for people who still rely on Spanish",
   "citiesExploreEconomicalTitle": "Good options if cost matters more",
   "citiesExploreWorkTitle": "Good options if you are looking for work",
-  "citiesExploreHousingEasyTitle": "Best for a lighter landing",
+  "citiesExploreHousingEasyTitle": "Good for a lighter landing",
   "citiesExploreHousingPressureTitle": "Need more cash upfront",
-  "citiesExploreSoftLandingTitle": "Best for a lower-friction landing",
-  "citiesExploreFamilyStabilityTitle": "Best for a more predictable arrival",
-  "citiesExploreIncomeStartTitle": "Best if you need income early",
-  "citiesExploreCoastalTitle": "Best if you want to live near the beach",
+  "citiesExploreSoftLandingTitle": "Good for a lower-friction landing",
+  "citiesExploreFamilyStabilityTitle": "Good for a more predictable arrival",
+  "citiesExploreIncomeStartTitle": "Good if you may need income early",
+  "citiesExploreCoastalTitle": "Good if you want to live near the beach",
   "citiesExploreCoastalSoftLandingTitle": "Beach cities with a lighter landing",
   "citiesExploreCoastalBalancedTitle": "Beach cities with a better routine balance",
   "citiesHighlightPopularLabel": "Among the cities analyzed by Movaro",
@@ -914,20 +914,20 @@
   "cityDetailEmptyTitle": "City unavailable",
   "cityDetailEmptyDescription": "We could not find details for this city right now.",
   "cityDetailContextNote": "Use these indicators as a starting point, not as absolute truth.",
-  "cityDetailDecisionSnapshotTitle": "Decision snapshot",
-  "cityDetailDecisionSnapshotSubtitle": "Movaro sees this city as a strong option if you are prioritizing {bestFor}.",
+  "cityDetailDecisionSnapshotTitle": "Quick city read",
+  "cityDetailDecisionSnapshotSubtitle": "This city may be more relevant if you are prioritizing {bestFor}.",
   "@cityDetailDecisionSnapshotSubtitle": {
     "placeholders": {
       "bestFor": {}
     }
   },
-  "cityDetailDecisionSnapshotPlanSubtitle": "For your plan, this city stands out if you are prioritizing {bestFor}.",
+  "cityDetailDecisionSnapshotPlanSubtitle": "For your plan, this city may stand out if you are prioritizing {bestFor}.",
   "@cityDetailDecisionSnapshotPlanSubtitle": {
     "placeholders": {
       "bestFor": {}
     }
   },
-  "cityDetailDecisionSnapshotRecommendedSubtitle": "This city is currently leading in your plan if your focus is {bestFor}.",
+  "cityDetailDecisionSnapshotRecommendedSubtitle": "This city is currently one of the stronger matches in your plan if your focus is {bestFor}.",
   "@cityDetailDecisionSnapshotRecommendedSubtitle": {
     "placeholders": {
       "bestFor": {}
@@ -1109,14 +1109,14 @@
   "favoritesEmptyHint": "Explore cities, save the strongest ones, and come back here whenever you want to resume.",
   "favoritesPageTitle": "Favorites",
   "stageClarityTitle": "Clarity",
-  "stageClarityBody": "Understand your starting point and choose the best path to begin.",
+  "stageClarityBody": "Understand your starting point and review useful ways to begin.",
   "stageClarityAction": "Choose one path below",
-  "stageDecisionTitle": "Decision",
-  "stageDecisionBody": "Get an initial recommendation and validate the city that makes the most sense now.",
-  "stageDecisionAction": "Answer and move to the result",
+  "stageDecisionTitle": "Explore options",
+  "stageDecisionBody": "Get an initial shortlist and review the cities that seem most relevant now.",
+  "stageDecisionAction": "Answer and view matches",
   "stageExecutionTitle": "Execution",
-  "stageExecutionBody": "Turn the chosen city into concrete next steps.",
-  "stageExecutionAction": "Start with the recommended action",
+  "stageExecutionBody": "Turn the reviewed city into concrete next steps.",
+  "stageExecutionAction": "Start with a suggested action",
   "favoritesPageCount": "{current} of {total}",
   "@favoritesPageCount": {
     "placeholders": {
@@ -1157,7 +1157,7 @@
   "cityComparisonAddAction": "Add",
   "cityComparisonSearchPlaceholder": "Search city to compare...",
   "cityComparisonHeaderLabel": "Metric",
-  "cityComparisonBestFitBadge": "BEST FIT",
+  "cityComparisonBestFitBadge": "STRONG MATCH",
   "cityComparisonTopBadge": "TOP",
   "cityComparisonGroupCost": "Cost of living",
   "cityComparisonGroupQuality": "Quality of life",
@@ -1173,7 +1173,7 @@
   "cityComparisonCommunityLarge": "Large",
   "cityComparisonCommunityMedium": "Medium",
   "cityComparisonCommunitySmall": "Small",
-  "cityComparisonWinnerLabel": "BEST CHOICE FOR YOU",
+  "cityComparisonWinnerLabel": "CURRENT COMPARISON EDGE",
   "cityComparisonUnavailable": "—",
   "cityComparisonStartPlanAction": "Start plan in {city} →",
   "@cityComparisonStartPlanAction": {
@@ -1552,8 +1552,8 @@
   "planStepDescriptionDecisionCriteria": "Organize priorities such as cost, paperwork, and quality of life.",
   "planBeachDecisionTitle": "Coastline in the decision",
   "planBeachDecisionIntro": "If beach and coast are part of your criteria, do not look only at beauty or tourism. The real filter is housing entry, city pace, and soft landing.",
-  "planBeachDecisionCoastalHeadline": "The recommendation already points to the coast",
-  "planBeachDecisionCoastalBody": "{cityName} already fits the coastal-city filter. The next step is understanding whether housing entry and local routine match your current situation.",
+  "planBeachDecisionCoastalHeadline": "Your current city match already points to the coast",
+  "planBeachDecisionCoastalBody": "{cityName} already fits the coastal-city filter. A useful next check is whether housing entry and local routine match your current situation.",
   "@planBeachDecisionCoastalBody": {
     "placeholders": {
       "cityName": {}
@@ -1692,7 +1692,7 @@
     }
   },
   "housingDecisionSectionBody": "Before choosing the city, understand how rent and guarantees work in Brazil. The biggest risk is not only the monthly price: it is landing without a viable path for the contract, neighborhood, and initial setup.",
-  "housingDecisionSectionBodyWithCity": "Before assuming {city} is the best option, validate whether rent, guarantees, and initial setup look viable for your current situation. The risk is not only the price, but the real path to secure housing.",
+  "housingDecisionSectionBodyWithCity": "Before treating {city} as a strong option, validate whether rent, guarantees, and initial setup look viable for your current situation. The risk is not only the price, but the real path to secure housing.",
   "@housingDecisionSectionBodyWithCity": {
     "placeholders": {
       "city": {}
@@ -1904,7 +1904,7 @@
       }
     }
   },
-  "migrationPlanCopilotResultBody": "First, check whether the recommended city really fits your context. When you want to turn that decision into concrete preparation, open the guided layer with a checklist, documents, and an arrival reserve.",
+  "migrationPlanCopilotResultBody": "First, check whether the current city match still fits your context. When you want to turn that exploration into concrete preparation, open the guided layer with a checklist, documents, and an arrival reserve.",
   "migrationPlanCopilotStepCounter": "Step {current} of {total}",
   "@migrationPlanCopilotStepCounter": {
     "placeholders": {
@@ -1934,19 +1934,19 @@
   "migrationPlanCopilotNextActionDocuments": "Put documents in motion",
   "migrationPlanCopilotNextActionBudget": "Review reserve and housing entry",
   "migrationPlanCopilotNextActionBudgetBody": "Estimate your first reserve and understand how housing entry may weigh on arrival.",
-  "migrationPlanCopilotFallbackActionBody": "Open this stage to see the first recommended action.",
+  "migrationPlanCopilotFallbackActionBody": "Open this stage to see a useful first action.",
   "migrationPlanCopilotRiskTitle": "Main risk now",
   "migrationPlanCopilotRiskDocuments": "The document layer is still the biggest risk. If it stays loose, later steps may feel blocked even with city and budget already decided.",
   "migrationPlanCopilotRiskReadiness": "The move still needs a stronger starting base. Resolve the first practical blockers before investing more energy in details.",
   "migrationPlanCopilotRiskHousing": "Housing entry can still create friction on arrival. Review reserve, guarantees, and fallback strategy before treating the move as operational.",
   "migrationPlanCopilotStagesTitle": "Open a guided stage",
   "migrationPlanCopilotStagesBody": "You can jump directly to the stage you need, but Movaro keeps the order clear so the move does not lose priority.",
-  "migrationPlanCopilotRecommendedTitle": "Recommended next step",
-  "migrationPlanCopilotRecommendedReadinessBody": "Start with this stage to remove the first blockers and give the rest of the plan a stronger base.",
-  "migrationPlanCopilotRecommendedDocumentsBody": "The document layer still deserves attention first. Resolve it now to avoid more expensive blockers later.",
-  "migrationPlanCopilotRecommendedBudgetBody": "Now it is worth turning the plan into real numbers and reviewing housing entry before arrival gets tight.",
-  "migrationPlanCopilotRecommendedArrivalBody": "You already have enough base to organize the arrival. Use this stage to move from plan to execution.",
-  "migrationPlanCopilotRecommendedOpen": "Open recommended stage",
+  "migrationPlanCopilotRecommendedTitle": "Suggested area to review next",
+  "migrationPlanCopilotRecommendedReadinessBody": "This stage may help reduce the first blockers and give the rest of the plan a stronger base.",
+  "migrationPlanCopilotRecommendedDocumentsBody": "The document layer may deserve attention first. Reviewing it now can reduce more expensive blockers later.",
+  "migrationPlanCopilotRecommendedBudgetBody": "This may be a good moment to turn the plan into real numbers and review housing entry before arrival gets tight.",
+  "migrationPlanCopilotRecommendedArrivalBody": "You may already have enough base to organize the arrival. This stage can help you move from planning into execution.",
+  "migrationPlanCopilotRecommendedOpen": "Open suggested stage",
   "migrationPlanCopilotQuickQuestionsTitle": "Quick questions",
   "migrationPlanCopilotQuickQuestionsBody": "Use these short answers when a practical doubt shows up before you move forward.",
   "migrationPlanCopilotQuickQuestionDocumentsTitle": "Which documents should I move first?",
@@ -1960,21 +1960,21 @@
   "migrationPlanCopilotOverviewAction": "Start guided preparation",
   "migrationPlanCopilotOverviewBackAction": "Back to overview",
   "migrationPlanCopilotFinishAction": "Finish for now",
-  "migrationPlanDecisionLabel": "City choice",
-  "migrationPlanDecisionTitle": "Now compare the cities that best match {goal}",
+  "migrationPlanDecisionLabel": "City comparison",
+  "migrationPlanDecisionTitle": "Now compare the cities that may match {goal} more closely",
   "@migrationPlanDecisionTitle": {
     "placeholders": {
       "goal": {}
     }
   },
-  "migrationPlanDecisionBody": "Based on your {timeline} horizon, these options come first because they are closer to the profile you selected.",
+  "migrationPlanDecisionBody": "Based on your {timeline} horizon, these options appear first because they are closer to the profile you selected.",
   "@migrationPlanDecisionBody": {
     "placeholders": {
       "timeline": {}
     }
   },
   "migrationPlanDecisionSummaryTitle": "How to use this step",
-  "migrationPlanDecisionSummaryBody": "Choose the city that makes the most sense first. The detailed checklist only comes after that decision.",
+  "migrationPlanDecisionSummaryBody": "Review the city options first. The detailed checklist becomes more useful after you decide which route to keep exploring.",
   "migrationPlanHeroTitle": "{city} is your strongest starting city for now",
   "@migrationPlanHeroTitle": {
     "placeholders": {
@@ -2058,24 +2058,24 @@
       "city": {}
     }
   },
-  "migrationPlanResultPrimaryCtaEyebrow": "Next step",
-  "migrationPlanResultStartPlanTitle": "Start my plan",
-  "migrationPlanResultStartPlanBody": "Review {city} with a little more context and confirm it when you are ready to unlock the full guided plan.",
+  "migrationPlanResultPrimaryCtaEyebrow": "Possible next move",
+  "migrationPlanResultStartPlanTitle": "Open this route",
+  "migrationPlanResultStartPlanBody": "Review {city} with a little more context and keep exploring it if it still feels relevant for your route.",
   "@migrationPlanResultStartPlanBody": {
     "placeholders": {
       "city": {}
     }
   },
-  "migrationPlanResultStartPlanAction": "Start my plan",
+  "migrationPlanResultStartPlanAction": "Open this route",
   "migrationPlanResultOpenPlanTitle": "View full plan",
   "migrationPlanResultOpenPlanAction": "View full plan",
   "migrationPlanResultCompatibilityHigh": "High compatibility",
   "migrationPlanResultCompatibilityMedium": "Good compatibility",
   "migrationPlanResultCompatibilityInitial": "Initial compatibility",
   "migrationPlanResultCompatibilityHelpTitle": "How compatibility works",
-  "migrationPlanResultCompatibilityHelpBody": "Compatibility combines your priorities, timeline, and migration goal with the signals available for each city. It is a directional match to help you start with the strongest city first.",
+  "migrationPlanResultCompatibilityHelpBody": "Compatibility combines your priorities, timeline, and migration goal with the signals available for each city. It is a directional match meant to help you compare options and explore a starting point.",
   "migrationPlanResultUnavailableTitle": "We could not load your city result.",
-  "migrationPlanResultUnavailableBody": "Try again to reopen your recommendation and continue from the quick questions.",
+  "migrationPlanResultUnavailableBody": "Try again to reopen your city matches and continue from the quick questions.",
   "migrationPlanResultBasedOnAnswersTitle": "Based on your answers",
   "migrationPlanResultCityDataTitle": "City data",
   "migrationPlanResultOtherCitiesTitle": "Other compatible cities",
@@ -2224,7 +2224,7 @@
   "migrationPlanHousingCompareAction": "Compare cities",
   "migrationPlanScrollHint": "See more",
   "languageSelectorSystem": "System",
-  "bmpDisclaimer": "This builds a starting point. It is not legal advice.",
+  "bmpDisclaimer": "This builds a starting point. It does not replace professional legal guidance.",
   "bmpProgressStep": "Step {current} of {total}",
   "@bmpProgressStep": {
     "placeholders": {
@@ -2598,7 +2598,7 @@
   "aiChatUnavailable": "Assistant unavailable",
   "aiChatRetry": "The assistant is still loading. Please try again in a moment.",
   "aiChatNetworkError": "Connection error. Check your internet and try again.",
-  "migrationResultRevealEyebrow": "Your recommended city",
+  "migrationResultRevealEyebrow": "Current city match",
   "migrationResultRevealHeaderTitle": "Recommendation",
   "migrationResultRevealRedoAction": "Answer quick questions again",
   "migrationResultRevealCompatibilityLabel": "{pct}% compatible",
@@ -2637,8 +2637,8 @@
   "homeEntryTitleHighlight": "how to start",
   "homeEntrySubtitle": "Get an initial direction in a few minutes or validate a city you are already considering before moving into execution mode.",
   "homeEntrySupportLine": "Initial direction in about 2 minutes",
-  "homeEntryDiscoverTitle": "I want to discover my best city",
-  "homeEntryDiscoverBody": "Answer a few questions and get an initial direction with a recommended city, alternatives, and next steps.",
+  "homeEntryDiscoverTitle": "I want to discover possible cities",
+  "homeEntryDiscoverBody": "Answer a few questions and get an initial direction with city matches, alternatives, and possible next steps.",
   "homeEntryDiscoverBadge": "Fastest path",
   "homeEntryDiscoverAction": "Get my initial direction",
   "homeEntryKnownCityTitle": "I already have a city in mind",
@@ -2924,7 +2924,7 @@
     }
   },
   "housingPlanCityBannerBody": "Most Argentine movers start with temporary housing and only sign a long contract after learning the neighborhoods. That is usually the safest path.",
-  "housingTemporaryBadge": "Recommended for arrival",
+  "housingTemporaryBadge": "Often useful on arrival",
   "housingTemporaryCardTitle": "Temporary housing",
   "housingTemporaryCardBody": "For the first 30 to 90 days. No long contract, no guarantor, and time to understand the city before deciding.",
   "housingTemporaryStatDurationValue": "1-3 months",
@@ -3040,7 +3040,7 @@
   "citySeasonalityHousingTitle": "Housing during peak season",
   "citySeasonalityJobsTitle": "Job market",
   "citySeasonalityPopulationPrefix": "population",
-  "citySeasonalityHighAdvice": "Tip: plan to arrive outside peak season (May–Oct). You'll find far more long-term rental options at reasonable prices. If you must arrive in peak season, book accommodation at least 3 months in advance.",
+  "citySeasonalityHighAdvice": "Tip: arriving outside peak season (May–Oct) may open more long-term rental options at reasonable prices. If peak season is your only window, booking accommodation at least 3 months in advance may help.",
   "citySeasonalityMediumAdvice": "Tip: sign a long-term lease before the peak season starts. This locks in a stable price even when tourist demand rises.",
   "citySeasonalityCardBadgeHigh": "Peak season",
   "citySeasonalityCardBadgeMedium": "Seasonal"

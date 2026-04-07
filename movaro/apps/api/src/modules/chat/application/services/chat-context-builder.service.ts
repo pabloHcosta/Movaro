@@ -37,9 +37,10 @@ export class ChatContextBuilderService {
     const sections: string[] = [];
 
     // ── City data ────────────────────────────────────────────────────────────
-    if (dto.recommendedCityId) {
+    const highlightedCityId = dto.highlightedCityId;
+    if (highlightedCityId) {
       const citySection = await this.buildCitySection(
-        dto.recommendedCityId,
+        highlightedCityId,
         dto.locale,
       );
       if (citySection) sections.push(citySection);
@@ -98,10 +99,10 @@ export class ChatContextBuilderService {
     const lang = locale ?? 'pt';
     const header =
       lang === 'pt'
-        ? `### Dados da cidade recomendada: ${city.name} (${city.stateName})`
+        ? `### Contexto atual da cidade: ${city.name} (${city.stateName})`
         : lang === 'es'
-          ? `### Datos de la ciudad recomendada: ${city.name} (${city.stateName})`
-          : `### Recommended city data: ${city.name} (${city.stateName})`;
+          ? `### Contexto actual de la ciudad: ${city.name} (${city.stateName})`
+          : `### Current city context: ${city.name} (${city.stateName})`;
 
     const lines: string[] = [header];
 
@@ -122,7 +123,7 @@ export class ChatContextBuilderService {
     // Movaro scores summary
     lines.push(this.scoresLabel(lang, city));
 
-    // Recommendation reasons
+    // Reasons this city may be relevant in the current plan context
     if (city.recommendationReasons.length > 0) {
       lines.push(this.reasonsLabel(lang, city.recommendationReasons));
     }
@@ -187,10 +188,10 @@ export class ChatContextBuilderService {
   private reasonsLabel(lang: string, reasons: string[]): string {
     const list = reasons.map((r) => `  • ${r}`).join('\n');
     return lang === 'pt'
-      ? `- Motivos da recomendação:\n${list}`
+      ? `- Motivos pelos quais esta cidade pode ser relevante:\n${list}`
       : lang === 'es'
-        ? `- Razones de la recomendación:\n${list}`
-        : `- Recommendation reasons:\n${list}`;
+        ? `- Razones por las que esta ciudad puede ser relevante:\n${list}`
+        : `- Reasons this city may be relevant:\n${list}`;
   }
 
   private dataNote(lang: string, updatedAt: string): string {

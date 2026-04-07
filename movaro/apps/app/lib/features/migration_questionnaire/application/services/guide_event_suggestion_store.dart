@@ -162,7 +162,7 @@ class GuideEventSuggestionStore {
       plan.destinationCountry,
       plan.goal,
       plan.timeline,
-      plan.recommendedCity?.id ?? 'no-city',
+      plan.currentPlanCity?.id ?? 'no-city',
     ].join('::');
   }
 

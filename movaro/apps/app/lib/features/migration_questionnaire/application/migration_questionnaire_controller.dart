@@ -479,7 +479,8 @@ class MigrationQuestionnaireController extends ChangeNotifier {
 
   MigrationPlan? findSavedPlanForCity(String cityId) {
     for (final plan in _savedPlans) {
-      if (plan.recommendedCity?.id == cityId || plan.preferredCity?.id == cityId) {
+      if (plan.currentPlanCity?.id == cityId ||
+          plan.reviewCities.any((city) => city.id == cityId)) {
         return plan;
       }
     }
@@ -524,10 +525,11 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       return;
     }
 
-    _generatedPlan = plan.copyWith(
-      recommendedCity: city,
-      isCityConfirmed: true,
-    );
+      _generatedPlan = plan.copyWith(
+        preferredCity: city,
+        highlightedCity: city,
+        isCityConfirmed: true,
+      );
     notifyListeners();
     await _migrationPlanRepository.setCurrentPlan(_generatedPlan);
     if (_generatedPlan != null) {

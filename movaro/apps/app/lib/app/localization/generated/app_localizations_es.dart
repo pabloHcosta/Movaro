@@ -103,7 +103,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get publicHomeFocusedDescription =>
-      'Hoy, Movaro está diseñado para quienes están evaluando una mudanza de Argentina a Brasil. En vez de mostrar todo de una sola vez, te ayuda a elegir el mejor primer paso.';
+      'Hoy, Movaro está diseñado para quienes están evaluando una mudanza de Argentina a Brasil. En vez de mostrar todo de una sola vez, te ayuda a explorar puntos de partida útiles.';
 
   @override
   String publicHomeSelectedJourneyDescription(
@@ -114,12 +114,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get publicHomePrimaryQuestionTitle =>
-      'Empezá por la decisión principal';
+  String get publicHomePrimaryQuestionTitle => 'Empezá por una pregunta útil';
 
   @override
   String get publicHomePrimaryQuestionBody =>
-      'Primero, definí si necesitás un plan guiado, comparar ciudades o solo una vista rápida de lo que resuelve el producto.';
+      'Podés empezar con un plan guiado, una comparación de ciudades o una vista rápida de lo que resuelve el producto.';
 
   @override
   String get publicHomeTrustFastTitle => 'Entrada rápida';
@@ -246,13 +245,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeHeroNoPlanBody =>
-      'Respondé el cuestionario y recibí una ciudad recomendada para tu perfil.';
+      'Respondé el cuestionario y revisá ciudades que podrían encajar con tu perfil.';
 
   @override
   String get homeHeroStepQuestionnaire => 'Responder cuestionario';
 
   @override
-  String get homeHeroStepCity => 'Recibir ciudad ideal';
+  String get homeHeroStepCity => 'Revisar ciudades posibles';
 
   @override
   String get homeHeroStepGuide => 'Ejecutar con guía';
@@ -608,37 +607,38 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get explorePlanDraftTitle => 'Your plan still needs a decision';
+  String get explorePlanDraftTitle =>
+      'Tu plan todavía necesita una revisión más cercana';
 
   @override
   String get explorePlanDraftBody =>
-      'You already have a draft. Reopen the result and confirm the city before moving into checklist mode.';
+      'Ya tenés un borrador. Volvé a abrir el resultado y revisá las opciones de ciudad antes de entrar en modo checklist.';
 
   @override
   String explorePlanDraftBodyWithCity(Object city) {
-    return '$city is currently leading. Reopen the result, compare it, and confirm it when ready.';
+    return '$city aparece entre las opciones más fuertes por ahora. Volvé a abrir el resultado y comparala de nuevo cuando quieras.';
   }
 
   @override
-  String get exploreRecommendedCityTitle => 'Leading city right now';
+  String get exploreRecommendedCityTitle => 'Ciudad para revisar ahora';
 
   @override
   String get exploreRecommendedCityBody =>
-      'Open the city details to validate cost, quality of life, and fit with your plan.';
+      'Abrí el detalle de la ciudad para revisar costo, calidad de vida y encaje con tu plan.';
 
   @override
-  String get exploreOpenCityAction => 'Open city';
+  String get exploreOpenCityAction => 'Abrir ciudad';
 
   @override
-  String get exploreOpenContentAction => 'Open guide';
+  String get exploreOpenContentAction => 'Abrir guía';
 
   @override
   String get explorePlanDocsBody =>
-      'Documents usually unlock the next part of the move faster than more comparison.';
+      'Los documentos suelen destrabar la siguiente parte de la mudanza más rápido que seguir comparando.';
 
   @override
   String get exploreContentDocumentsBody =>
-      'See CPF, registration, banking, and legal stay with less noise and clearer routing.';
+      'Mirá CPF, registro, banco y estadía legal con menos ruido y un recorrido más claro.';
 
   @override
   String get exploreContentHousingBody =>
@@ -1952,7 +1952,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get planStepOpenHousingPointThree =>
-      'El análisis por barrio todavía necesita una base dedicada; por ahora, usá la ciudad recomendada como filtro inicial.';
+      'El análisis por barrio todavía necesita una base dedicada; por ahora, usá la coincidencia de ciudad actual como filtro inicial.';
 
   @override
   String get planStepOpenGeneralEyebrow => 'Checklist guiada';
@@ -2906,7 +2906,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cityComparisonCommunitySmall => 'Pequeña';
 
   @override
-  String get cityComparisonWinnerLabel => 'MEJOR OPCIÓN PARA VOS';
+  String get cityComparisonWinnerLabel => 'VENTAJA ACTUAL EN LA COMPARACIÓN';
 
   @override
   String get cityComparisonUnavailable => '—';
@@ -4407,7 +4407,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String housingDecisionSectionBodyWithCity(Object city) {
-    return 'Antes de asumir que $city es la mejor opción, validá si el alquiler, las garantías y la instalación inicial parecen viables para tu momento. El riesgo no está solo en el precio, sino en el camino real para cerrar vivienda.';
+    return 'Antes de tratar $city como una opción fuerte, validá si el alquiler, las garantías y la instalación inicial parecen viables para tu momento. El riesgo no está solo en el precio, sino en el camino real para cerrar vivienda.';
   }
 
   @override
@@ -4904,7 +4904,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get migrationPlanCopilotResultBody =>
-      'Primero mirá si la ciudad recomendada realmente encaja con tu contexto. Cuando quieras convertir esa decisión en preparación concreta, abrí la capa guiada con checklist, documentos y reserva de llegada.';
+      'Primero mirá si la coincidencia de ciudad actual realmente encaja con tu contexto. Cuando quieras convertir esa exploración en preparación concreta, abrí la capa guiada con checklist, documentos y reserva de llegada.';
 
   @override
   String migrationPlanCopilotStepCounter(Object current, Object total) {
@@ -5006,26 +5006,26 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get migrationPlanCopilotRecommendedTitle =>
-      'Siguiente paso recomendado';
+      'Área sugerida para revisar ahora';
 
   @override
   String get migrationPlanCopilotRecommendedReadinessBody =>
-      'Empezá por esta etapa para destrabar los primeros bloqueos y darle una base real al resto del plan.';
+      'Esta etapa puede ayudar a destrabar los primeros bloqueos y darle una base más sólida al resto del plan.';
 
   @override
   String get migrationPlanCopilotRecommendedDocumentsBody =>
-      'La capa documental todavía merece atención primero. Resolvela ahora para evitar trabas más caras después.';
+      'La capa documental podría merecer atención primero. Revisarla ahora puede reducir trabas más costosas después.';
 
   @override
   String get migrationPlanCopilotRecommendedBudgetBody =>
-      'Ahora conviene convertir el plan en números reales y revisar la entrada a vivienda antes de que la llegada se vuelva ajustada.';
+      'Este puede ser un buen momento para convertir el plan en números reales y revisar la entrada a vivienda antes de que la llegada se vuelva más ajustada.';
 
   @override
   String get migrationPlanCopilotRecommendedArrivalBody =>
-      'Ya tenés base suficiente para organizar la llegada. Usá esta etapa para pasar del plan a la ejecución.';
+      'Quizás ya tengas base suficiente para organizar la llegada. Esta etapa puede ayudarte a pasar de la planificación a la ejecución.';
 
   @override
-  String get migrationPlanCopilotRecommendedOpen => 'Abrir etapa recomendada';
+  String get migrationPlanCopilotRecommendedOpen => 'Abrir etapa sugerida';
 
   @override
   String get migrationPlanCopilotQuickQuestionsTitle => 'Dudas rápidas';
@@ -5198,18 +5198,19 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get migrationPlanResultPrimaryCtaEyebrow => 'Siguiente paso';
+  String get migrationPlanResultPrimaryCtaEyebrow =>
+      'Posible próximo movimiento';
 
   @override
-  String get migrationPlanResultStartPlanTitle => 'Empezar mi plan';
+  String get migrationPlanResultStartPlanTitle => 'Abrir esta ruta';
 
   @override
   String migrationPlanResultStartPlanBody(Object city) {
-    return 'Revisá $city con un poco más de contexto y confirmala cuando estés listo para desbloquear el plan guiado completo.';
+    return 'Revisá $city con un poco más de contexto y seguí explorándola si todavía parece relevante para tu ruta.';
   }
 
   @override
-  String get migrationPlanResultStartPlanAction => 'Empezar mi plan';
+  String get migrationPlanResultStartPlanAction => 'Abrir esta ruta';
 
   @override
   String get migrationPlanResultOpenPlanTitle => 'Ver plan completo';
@@ -5233,7 +5234,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get migrationPlanResultCompatibilityHelpBody =>
-      'La compatibilidad combina tus prioridades, tu plazo y tu objetivo de mudanza con las señales disponibles de cada ciudad. Es una lectura orientativa para empezar por la ciudad más fuerte para vos.';
+      'La compatibilidad combina tus prioridades, tu plazo y tu objetivo de mudanza con las señales disponibles de cada ciudad. Es una lectura orientativa pensada para comparar opciones y explorar un punto de partida.';
 
   @override
   String get migrationPlanResultUnavailableTitle =>
@@ -5241,7 +5242,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get migrationPlanResultUnavailableBody =>
-      'Intentá de nuevo para abrir tu recomendación y seguir desde el cuestionario.';
+      'Intentá de nuevo para abrir tus ciudades sugeridas y seguir desde el cuestionario.';
 
   @override
   String get migrationPlanResultBasedOnAnswersTitle =>
@@ -5481,7 +5482,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get bmpDisclaimer =>
-      'Es para armar un punto de partida. No es asesoría legal.';
+      'Sirve para armar un punto de partida. No reemplaza orientación jurídica profesional.';
 
   @override
   String bmpProgressStep(Object current, Object total) {
@@ -6519,7 +6520,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Error de conexión. Verifica tu internet e intenta de nuevo.';
 
   @override
-  String get migrationResultRevealEyebrow => 'Tu ciudad recomendada';
+  String get migrationResultRevealEyebrow => 'Coincidencia de ciudad actual';
 
   @override
   String get migrationResultRevealHeaderTitle => 'Recomendación';
@@ -6588,11 +6589,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeEntrySupportLine => 'Dirección inicial en cerca de 2 minutos';
 
   @override
-  String get homeEntryDiscoverTitle => 'Quiero descubrir mi mejor ciudad';
+  String get homeEntryDiscoverTitle => 'Quiero descubrir ciudades posibles';
 
   @override
   String get homeEntryDiscoverBody =>
-      'Respondé pocas preguntas y recibí una dirección inicial con ciudad recomendada, alternativas y próximos pasos.';
+      'Respondé pocas preguntas y recibí una dirección inicial con coincidencias de ciudad, alternativas y posibles próximos pasos.';
 
   @override
   String get homeEntryDiscoverBadge => 'Camino más rápido';
@@ -7153,7 +7154,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'La mayoría de los argentinos llega con vivienda temporal y firma contrato después de conocer los barrios. Suele ser el camino más seguro para arrancar.';
 
   @override
-  String get housingTemporaryBadge => 'Recomendado para llegar';
+  String get housingTemporaryBadge => 'Suele servir al llegar';
 
   @override
   String get housingTemporaryCardTitle => 'Vivienda temporal';
@@ -7424,7 +7425,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get citySeasonalityHighAdvice =>
-      'Consejo: planifica llegar fuera de la temporada alta (may–oct). Tendrás muchas más opciones de alquiler a largo plazo y precios razonables. Si necesitas llegar en temporada alta, reserva alojamiento con al menos 3 meses de anticipación.';
+      'Consejo: llegar fuera de la temporada alta (may–oct) puede abrir más opciones de alquiler a largo plazo y precios razonables. Si tu única ventana es la temporada alta, reservar alojamiento con al menos 3 meses de anticipación puede ayudar.';
 
   @override
   String get citySeasonalityMediumAdvice =>

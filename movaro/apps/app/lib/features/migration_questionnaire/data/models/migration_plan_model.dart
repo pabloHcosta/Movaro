@@ -20,7 +20,7 @@ class MigrationPlanModel {
     this.confidence = 0,
     this.selectedPriorities = const [],
     this.selectedConstraints = const [],
-    this.recommendedCity,
+    this.highlightedCity,
     this.preferredCity,
     this.candidateCities = const [],
     this.candidateCityMatchScores = const {},
@@ -56,10 +56,12 @@ class MigrationPlanModel {
             (item) => MigrationStepModel.fromJson(item as Map<String, dynamic>),
           )
           .toList(),
-      recommendedCity: json['recommendedCity'] == null
+      highlightedCity:
+          (json['highlightedCity'] ?? json['recommendedCity']) == null
           ? null
           : CityModel.fromJson(
-              json['recommendedCity'] as Map<String, dynamic>,
+              (json['highlightedCity'] ?? json['recommendedCity'])
+                  as Map<String, dynamic>,
             ).toEntity(),
       preferredCity: json['preferredCity'] == null
           ? null
@@ -105,7 +107,7 @@ class MigrationPlanModel {
       selectedPriorities: plan.selectedPriorities,
       selectedConstraints: plan.selectedConstraints,
       steps: plan.steps.map(MigrationStepModel.fromEntity).toList(),
-      recommendedCity: plan.recommendedCity,
+      highlightedCity: plan.highlightedCity,
       preferredCity: plan.preferredCity,
       candidateCities: plan.candidateCities,
       candidateCityMatchScores: plan.candidateCityMatchScores,
@@ -128,7 +130,7 @@ class MigrationPlanModel {
   final List<String> selectedPriorities;
   final List<String> selectedConstraints;
   final List<MigrationStepModel> steps;
-  final City? recommendedCity;
+  final City? highlightedCity;
   final City? preferredCity;
   final List<City> candidateCities;
   final Map<String, double> candidateCityMatchScores;
@@ -150,9 +152,9 @@ class MigrationPlanModel {
     'selectedPriorities': selectedPriorities,
     'selectedConstraints': selectedConstraints,
     'steps': steps.map((step) => step.toJson()).toList(),
-    'recommendedCity': recommendedCity == null
+    'highlightedCity': highlightedCity == null
         ? null
-        : CityModel.fromEntity(recommendedCity!).toJson(),
+        : CityModel.fromEntity(highlightedCity!).toJson(),
     'preferredCity': preferredCity == null
         ? null
         : CityModel.fromEntity(preferredCity!).toJson(),
@@ -179,7 +181,7 @@ class MigrationPlanModel {
     selectedPriorities: selectedPriorities,
     selectedConstraints: selectedConstraints,
     steps: steps.map((step) => step.toEntity()).toList(),
-    recommendedCity: recommendedCity,
+    highlightedCity: highlightedCity,
     preferredCity: preferredCity,
     candidateCities: candidateCities,
     candidateCityMatchScores: candidateCityMatchScores,

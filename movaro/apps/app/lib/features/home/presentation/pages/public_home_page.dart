@@ -172,9 +172,7 @@ class _PublicHomePageState extends State<PublicHomePage>
             builder: (context, _) {
               final plan =
                   widget.migrationQuestionnaireController.generatedPlan;
-              final city = plan?.isCityConfirmed == true
-                  ? plan?.recommendedCity
-                  : null;
+              final city = plan?.confirmedCity;
               final hasActivePlan = city != null;
               final hasPlanDraft = plan != null && city == null;
               final guideState = city == null || plan == null
@@ -236,7 +234,7 @@ class _PublicHomePageState extends State<PublicHomePage>
                                         AppRoutes.migrationResultReveal,
                                       ),
                                       onCompareCities: () {
-                                        final candidates = plan.candidateCities;
+                                        final candidates = plan.reviewCities;
                                         if (candidates.isEmpty) return;
                                         Navigator.push(
                                           context,
@@ -320,7 +318,7 @@ class _PublicHomePageState extends State<PublicHomePage>
 
   Future<void> _syncPlanState() async {
     final plan = widget.migrationQuestionnaireController.generatedPlan;
-    final city = plan?.isCityConfirmed == true ? plan?.recommendedCity : null;
+    final city = plan?.confirmedCity;
 
     if (plan == null || city == null) {
       if (!mounted) {
@@ -387,7 +385,7 @@ class _PublicHomePageState extends State<PublicHomePage>
 
     if (isFreshPlanLoad) {
       final locale = Localizations.localeOf(context).languageCode;
-      final compareTo = plan.candidateCities
+      final compareTo = plan.reviewCities
           .where((candidate) => candidate.id != city.id)
           .map((candidate) => candidate.id)
           .take(2)
@@ -528,7 +526,7 @@ class _PublicHomePageState extends State<PublicHomePage>
       currentCityName: widget
           .migrationQuestionnaireController
           .generatedPlan
-          ?.recommendedCity
+          ?.currentPlanCity
           ?.name,
     );
     if (!context.mounted || choice == null) {
@@ -1216,7 +1214,7 @@ class _ActiveHomeState extends StatelessWidget {
       goal: planGoal,
       timeline: planTimeline,
     );
-    final compareTo = plan.candidateCities
+    final compareTo = plan.reviewCities
         .where((candidate) => candidate.id != city.id)
         .map((candidate) => candidate.id)
         .take(2)

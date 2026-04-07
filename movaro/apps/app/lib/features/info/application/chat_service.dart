@@ -60,7 +60,7 @@ class ChatService {
     required String originCountry,
     required String destinationCountry,
     required String locale,
-    this.recommendedCityId,
+    this.highlightedCityId,
     this.currentPhase,
     this.migrationGoal,
     this.planTimeline,
@@ -74,7 +74,7 @@ class ChatService {
   final String _originCountry;
   final String _destinationCountry;
   final String _locale;
-  final String? recommendedCityId;
+  final String? highlightedCityId;
   final String? currentPhase;
   final String? migrationGoal;
   final String? planTimeline;
@@ -145,7 +145,7 @@ class ChatService {
       'originCountry': _originCountry,
       'destinationCountry': _destinationCountry,
       'locale': _locale,
-      if (recommendedCityId != null) 'recommendedCityId': recommendedCityId,
+      if (highlightedCityId != null) 'highlightedCityId': highlightedCityId,
       if (currentPhase != null) 'currentPhase': currentPhase,
       if (migrationGoal != null) 'migrationGoal': migrationGoal,
       if (planTimeline != null) 'planTimeline': planTimeline,

@@ -64,6 +64,11 @@ class DefaultMigrationGuideBuilder {
           orderIndex: orderIndex++,
           isCompleted: completedIds.contains(item.id),
           icon: item.icon,
+          applicabilityConditions: switch (item.id) {
+            'goal_layer' ||
+            'cpf_bank' => const <String>['income_strategy_goal'],
+            _ => const <String>[],
+          },
         ),
       );
     }
@@ -86,6 +91,11 @@ class DefaultMigrationGuideBuilder {
           phase: GuidePhase.documents,
           orderIndex: orderIndex++,
           isCompleted: completedIds.contains(item.id),
+          applicabilityConditions: switch (item.id) {
+            'carteira_trabalho' => const <String>['formal_work_goal'],
+            'docs_criancas' => const <String>['family_with_kids'],
+            _ => const <String>[],
+          },
         ),
       );
     }

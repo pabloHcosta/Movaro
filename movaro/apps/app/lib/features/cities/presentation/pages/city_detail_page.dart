@@ -701,6 +701,19 @@ class _CityDetailPageState extends State<CityDetailPage> {
                           ),
                           const SizedBox(height: 12),
 
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1160),
+                            child: _MoreAboutCityCard(
+                              cityName: city.name,
+                              onExploreMore: () => _navigateToSection(
+                                _secondaryContentKey,
+                                expandSecondary: true,
+                              ),
+                              onJumpToAnalysis: _openAnalysisSection,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
                           // ── Secondary sections (progressive disclosure) ──
                           _SecondaryContentSection(
                             key: _secondaryContentKey,
@@ -800,7 +813,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                       widget
                                           .migrationQuestionnaireController
                                           ?.generatedPlan
-                                          ?.recommendedCity
+                                          ?.currentPlanCity
                                           ?.id ==
                                       city.id,
                                   onOpenMap: () => _openCityMapSheet(city),
@@ -1020,8 +1033,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
 
   Future<void> _handlePrimaryPlanAction(BuildContext context, City city) async {
     final plan = widget.migrationQuestionnaireController?.generatedPlan;
-    final isConfirmedCity =
-        plan?.isCityConfirmed == true && plan?.recommendedCity?.id == city.id;
+    final isConfirmedCity = plan?.confirmedCity?.id == city.id;
     if (isConfirmedCity) {
       final choice = await _showSameCityPlanDialog(city: city, plan: plan!);
       if (!context.mounted || choice == null) {
@@ -1060,9 +1072,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
       return;
     }
 
-    final savedPlan = widget.migrationQuestionnaireController?.findSavedPlanForCity(
-      city.id,
-    );
+    final savedPlan = widget.migrationQuestionnaireController
+        ?.findSavedPlanForCity(city.id);
     if (savedPlan != null) {
       final choice = await _showSameCityPlanDialog(city: city, plan: savedPlan);
       if (!context.mounted || choice == null) {
@@ -1106,11 +1117,11 @@ class _CityDetailPageState extends State<CityDetailPage> {
     }
 
     if (plan != null) {
-      final isSamePlanCity = plan.recommendedCity?.id == city.id;
+      final isSamePlanCity = plan.currentPlanCity?.id == city.id;
       if (!isSamePlanCity) {
         final choice = await showPlanResetDialog(
           context,
-          currentCityName: plan.recommendedCity?.name,
+          currentCityName: plan.currentPlanCity?.name,
         );
         if (!context.mounted || choice != PlanResetChoice.rebuild) {
           return;
@@ -1176,8 +1187,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
       return null;
     }
 
-    final isRecommended = plan.recommendedCity?.id == city.id;
-    final isCandidate = plan.candidateCities.any(
+    final isRecommended = plan.currentPlanCity?.id == city.id;
+    final isCandidate = plan.reviewCities.any(
       (candidate) => candidate.id == city.id,
     );
     if (!isRecommended && !isCandidate) {
@@ -1232,15 +1243,16 @@ class _CityDetailPageState extends State<CityDetailPage> {
     if (target is! RenderBox || !target.hasSize) return;
 
     // Find the ListView's RenderObject so we can calculate relative offset.
-    final listRO = _scrollController.position.context
-        .storageContext
+    final listRO = _scrollController.position.context.storageContext
         .findRenderObject();
     if (listRO is! RenderBox) return;
 
     // y-offset of the target's top edge relative to the viewport's top.
     final relativeOffset = target.localToGlobal(Offset.zero, ancestor: listRO);
-    final newOffset = (_scrollController.offset + relativeOffset.dy)
-        .clamp(0.0, _scrollController.position.maxScrollExtent);
+    final newOffset = (_scrollController.offset + relativeOffset.dy).clamp(
+      0.0,
+      _scrollController.position.maxScrollExtent,
+    );
 
     await _scrollController.animateTo(
       newOffset,
@@ -1283,37 +1295,46 @@ class _CityDetailPageState extends State<CityDetailPage> {
     final totalCount = guideItems.length;
     final isComplete = totalCount > 0 && completedCount >= totalCount;
     final title = switch (locale) {
-      'pt' => isComplete
-          ? 'Já existe um plano concluído para ${city.name}'
-          : 'Já existe um plano em andamento para ${city.name}',
-      'es' => isComplete
-          ? 'Ya existe un plan completado para ${city.name}'
-          : 'Ya existe un plan en curso para ${city.name}',
-      _ => isComplete
-          ? 'There is already a completed plan for ${city.name}'
-          : 'There is already an active plan for ${city.name}',
+      'pt' =>
+        isComplete
+            ? 'Já existe um plano concluído para ${city.name}'
+            : 'Já existe um plano em andamento para ${city.name}',
+      'es' =>
+        isComplete
+            ? 'Ya existe un plan completado para ${city.name}'
+            : 'Ya existe un plan en curso para ${city.name}',
+      _ =>
+        isComplete
+            ? 'There is already a completed plan for ${city.name}'
+            : 'There is already an active plan for ${city.name}',
     };
     final body = switch (locale) {
-      'pt' => isComplete
-          ? 'Detectamos que esta cidade já tem um plano finalizado. Você pode revisar o que já foi feito ou começar tudo de novo do zero.'
-          : 'Detectamos que esta cidade já tem um plano com progresso salvo. Você pode continuar de onde parou ou recomeçar do zero.',
-      'es' => isComplete
-          ? 'Detectamos que esta ciudad ya tiene un plan finalizado. Puedes revisar lo que ya hiciste o empezar otra vez desde cero.'
-          : 'Detectamos que esta ciudad ya tiene un plan con progreso guardado. Puedes seguir donde lo dejaste o empezar desde cero.',
-      _ => isComplete
-          ? 'We found a finished plan for this city. You can review what is already done or start over from zero.'
-          : 'We found saved progress for this city. You can continue where you left off or start over from zero.',
+      'pt' =>
+        isComplete
+            ? 'Detectamos que esta cidade já tem um plano finalizado. Você pode revisar o que já foi feito ou começar tudo de novo do zero.'
+            : 'Detectamos que esta cidade já tem um plano com progresso salvo. Você pode continuar de onde parou ou recomeçar do zero.',
+      'es' =>
+        isComplete
+            ? 'Detectamos que esta ciudad ya tiene un plan finalizado. Puedes revisar lo que ya hiciste o empezar otra vez desde cero.'
+            : 'Detectamos que esta ciudad ya tiene un plan con progreso guardado. Puedes seguir donde lo dejaste o empezar desde cero.',
+      _ =>
+        isComplete
+            ? 'We found a finished plan for this city. You can review what is already done or start over from zero.'
+            : 'We found saved progress for this city. You can continue where you left off or start over from zero.',
     };
     final progressLabel = switch (locale) {
-      'pt' => isComplete
-          ? 'Plano concluído'
-          : '$completedCount de $totalCount etapas concluídas',
-      'es' => isComplete
-          ? 'Plan completado'
-          : '$completedCount de $totalCount etapas completadas',
-      _ => isComplete
-          ? 'Plan completed'
-          : '$completedCount of $totalCount steps completed',
+      'pt' =>
+        isComplete
+            ? 'Plano concluído'
+            : '$completedCount de $totalCount etapas concluídas',
+      'es' =>
+        isComplete
+            ? 'Plan completado'
+            : '$completedCount de $totalCount etapas completadas',
+      _ =>
+        isComplete
+            ? 'Plan completed'
+            : '$completedCount of $totalCount steps completed',
     };
 
     return showDialog<_SameCityPlanChoice>(
@@ -1388,10 +1409,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
                       Text(
                         body,
                         style: Theme.of(dialogContext).textTheme.bodyLarge
-                            ?.copyWith(
-                              color: bodyColor,
-                              height: 1.5,
-                            ),
+                            ?.copyWith(color: bodyColor, height: 1.5),
                       ),
                       const SizedBox(height: 10),
                       Container(
@@ -1497,8 +1515,9 @@ class _CityDetailPageState extends State<CityDetailPage> {
                               'es' => 'Cancelar',
                               _ => 'Cancel',
                             },
-                            style: Theme.of(dialogContext).textTheme.bodyMedium
-                                ?.copyWith(color: bodyColor),
+                            style: Theme.of(
+                              dialogContext,
+                            ).textTheme.bodyMedium?.copyWith(color: bodyColor),
                           ),
                         ),
                       ),
@@ -1744,11 +1763,9 @@ class _CityDetailPageState extends State<CityDetailPage> {
       return const <City>[];
     }
 
-    final candidates = <City>[
-      if (plan.recommendedCity != null && plan.recommendedCity!.id != city.id)
-        plan.recommendedCity!,
-      ...plan.candidateCities.where((candidate) => candidate.id != city.id),
-    ];
+    final candidates = plan.reviewCities.where(
+      (candidate) => candidate.id != city.id,
+    );
 
     final seen = <String>{};
     final unique = <City>[];
@@ -1864,17 +1881,28 @@ class _SecondaryContentSectionState extends State<_SecondaryContentSection> {
 
   static String _expandLabel(BuildContext context, String cityName) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => 'Ver mais sobre $cityName',
-      'es' => 'Ver más sobre $cityName',
-      _ => 'See more about $cityName',
+      'pt' => 'Abrir análise extra de $cityName',
+      'es' => 'Abrir análisis extra de $cityName',
+      _ => 'Open extra analysis for $cityName',
     };
   }
 
   static String _collapseLabel(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => 'Ver menos',
-      'es' => 'Ver menos',
-      _ => 'See less',
+      'pt' => 'Fechar análise extra',
+      'es' => 'Cerrar análisis extra',
+      _ => 'Close extra analysis',
+    };
+  }
+
+  static String _description(BuildContext context, String cityName) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' =>
+        'Mapa, clima por temporada, opinião local, voos e fontes para validar $cityName com mais profundidade.',
+      'es' =>
+        'Mapa, clima por temporada, opinión local, vuelos y fuentes para validar $cityName con más profundidad.',
+      _ =>
+        'Map, seasonal climate, local opinion, flights, and sources to validate $cityName in more depth.',
     };
   }
 
@@ -1902,24 +1930,38 @@ class _SecondaryContentSectionState extends State<_SecondaryContentSection> {
               ),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  _expanded
-                      ? _collapseLabel(context)
-                      : _expandLabel(context, widget.cityName),
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: AppColors.textSoftFor(context),
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _expanded
+                            ? _collapseLabel(context)
+                            : _expandLabel(context, widget.cityName),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: AppColors.textPrimaryFor(context),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _description(context, widget.cityName),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSoftFor(context),
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 12),
                 AnimatedRotation(
                   turns: _expanded ? 0.5 : 0.0,
                   duration: const Duration(milliseconds: 250),
                   child: Icon(
                     Icons.keyboard_arrow_down_rounded,
-                    size: 18,
+                    size: 20,
                     color: AppColors.textSoftFor(context),
                   ),
                 ),
@@ -1942,6 +1984,96 @@ class _SecondaryContentSectionState extends State<_SecondaryContentSection> {
         ),
       ],
     );
+  }
+}
+
+class _MoreAboutCityCard extends StatelessWidget {
+  const _MoreAboutCityCard({
+    required this.cityName,
+    required this.onExploreMore,
+    required this.onJumpToAnalysis,
+  });
+
+  final String cityName;
+  final VoidCallback onExploreMore;
+  final VoidCallback onJumpToAnalysis;
+
+  @override
+  Widget build(BuildContext context) {
+    return FrostedPanel(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _title(context),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _body(context),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              FilledButton.icon(
+                onPressed: onExploreMore,
+                icon: const Icon(Icons.explore_outlined),
+                label: Text(_primaryAction(context)),
+              ),
+              OutlinedButton.icon(
+                onPressed: onJumpToAnalysis,
+                icon: const Icon(Icons.analytics_outlined),
+                label: Text(_secondaryAction(context)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _title(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => 'Quer ir mais fundo em $cityName?',
+      'es' => 'Quieres profundizar más en $cityName?',
+      _ => 'Want to go deeper on $cityName?',
+    };
+  }
+
+  String _body(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' =>
+        'Abra mapa, clima por temporada, voos, opinião local e fontes sem precisar caçar essas informações no fim da página.',
+      'es' =>
+        'Abre mapa, clima por temporada, vuelos, opinión local y fuentes sin tener que buscar todo al final de la página.',
+      _ =>
+        'Open maps, seasonal climate, flights, local opinion, and sources without hunting for them at the end of the page.',
+    };
+  }
+
+  String _primaryAction(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => 'Explorar mais sobre $cityName',
+      'es' => 'Explorar más sobre $cityName',
+      _ => 'Explore more about $cityName',
+    };
+  }
+
+  String _secondaryAction(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => 'Ir para análise',
+      'es' => 'Ir al análisis',
+      _ => 'Jump to analysis',
+    };
   }
 }
 
@@ -2139,7 +2271,6 @@ class _ResultBarCelebration extends StatelessWidget {
 
 // ─── End of migration result bar ──────────────────────────────────────────────
 
-
 class _PlanCityContext {
   const _PlanCityContext({
     required this.isRecommended,
@@ -2179,9 +2310,9 @@ class _DetailHeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heroHeight = (MediaQuery.of(context).size.height * 0.30).clamp(
-      220.0,
-      300.0,
+    final heroHeight = (MediaQuery.of(context).size.height * 0.34).clamp(
+      260.0,
+      340.0,
     );
     final weather = citiesController.weatherFor(city.id);
     final isFav = citiesController.isFavorite(city.id);
@@ -2194,7 +2325,11 @@ class _DetailHeroSection extends StatelessWidget {
       scrollController: scrollController,
       title: city.name,
       subtitle: '${city.stateName} · ${city.stateCode}',
+      metaBelowTitle: true,
+      showCollapseControl: false,
       maxHeight: heroHeight,
+      topContentInset: 88,
+      bottomContentOffset: -10,
       meta: Row(
         children: [
           _LifestyleBadge(city: city),
@@ -3067,7 +3202,7 @@ class _ExploreMediaCardState extends State<_ExploreMediaCard> {
   }
 
   final estimate = LandingBudgetEstimator.build(
-    plan: plan.copyWith(recommendedCity: city),
+    plan: plan.copyWith(highlightedCity: city),
   );
   final selectedScenario = switch (plan.availableCapital) {
     'low' => LandingBudgetScenario.lean,
@@ -4506,7 +4641,7 @@ String _detailActionLabel(BuildContext context) {
 String _detailBasisLabel(BuildContext context) {
   switch (Localizations.localeOf(context).languageCode) {
     case 'es':
-      return 'Como isso foi lido';
+      return 'Cómo se interpretó esto';
     case 'en':
       return 'How this was read';
     default:
@@ -4611,18 +4746,12 @@ class _SecondaryActionChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(
-              color: AppColors.borderFor(context),
-            ),
+            border: Border.all(color: AppColors.borderFor(context)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: 16,
-                color: AppColors.primary,
-              ),
+              Icon(icon, size: 16, color: AppColors.primary),
               const SizedBox(width: 6),
               Text(
                 label,
@@ -6736,25 +6865,12 @@ class _OverallScoreChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: tint.withValues(alpha: 0.28)),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '$score',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: tint,
-            ),
-          ),
-          const SizedBox(width: 5),
-          Text(
-            _label(context),
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: tint,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
+      child: Text(
+        _label(context),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: tint,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -6899,10 +7015,7 @@ class _AnalysisIndicatorsSection extends StatelessWidget {
 // ── Section 2: Financial reality ─────────────────────────────────────────────
 
 class _AnalysisFinancialSection extends StatelessWidget {
-  const _AnalysisFinancialSection({
-    required this.budget,
-    required this.city,
-  });
+  const _AnalysisFinancialSection({required this.budget, required this.city});
 
   final CityBudgetSnapshot budget;
   final City city;
@@ -7028,9 +7141,7 @@ class _AnalysisFinancialSection extends StatelessWidget {
             decoration: BoxDecoration(
               color: coverageColor.withValues(alpha: 0.07),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: coverageColor.withValues(alpha: 0.25),
-              ),
+              border: Border.all(color: coverageColor.withValues(alpha: 0.25)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -7142,30 +7253,36 @@ class _AnalysisWorkSection extends StatelessWidget {
                 color: unemploymentTint.withValues(alpha: 0.18),
               ),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.query_stats_rounded,
-                  size: 17,
-                  color: unemploymentTint,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    context.l10n.cityDetailUnemploymentLabel,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSoftFor(context),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.query_stats_rounded,
+                      size: 17,
+                      color: unemploymentTint,
                     ),
-                  ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        context.l10n.cityDetailUnemploymentLabel,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSoftFor(context),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      '${city.unemploymentRate.toStringAsFixed(1)}%',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: unemploymentTint,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  '${city.unemploymentRate.toStringAsFixed(1)}%',
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: unemploymentTint,
-                  ),
-                ),
-                const SizedBox(width: 7),
+                const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 7,
@@ -7198,24 +7315,24 @@ class _AnalysisWorkSection extends StatelessWidget {
               ),
               headline: city.economicActivityScore >= 70
                   ? _cityDetailLocalizedText(
-                    context,
-                    pt: 'Forte',
-                    es: 'Fuerte',
-                    en: 'Strong',
-                  )
+                      context,
+                      pt: 'Forte',
+                      es: 'Fuerte',
+                      en: 'Strong',
+                    )
                   : city.economicActivityScore >= 50
                   ? _cityDetailLocalizedText(
-                    context,
-                    pt: 'Moderada',
-                    es: 'Moderada',
-                    en: 'Moderate',
-                  )
+                      context,
+                      pt: 'Moderada',
+                      es: 'Moderada',
+                      en: 'Moderate',
+                    )
                   : _cityDetailLocalizedText(
-                    context,
-                    pt: 'Limitada',
-                    es: 'Limitada',
-                    en: 'Limited',
-                  ),
+                      context,
+                      pt: 'Limitada',
+                      es: 'Limitada',
+                      en: 'Limited',
+                    ),
               score: city.economicActivityScore,
               tint: ecoTint,
             ),
@@ -7224,9 +7341,9 @@ class _AnalysisWorkSection extends StatelessWidget {
             const SizedBox(height: 14),
             Text(
               context.l10n.cityDetailIndustriesTitle,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -7265,10 +7382,7 @@ class _AnalysisWorkSection extends StatelessWidget {
 // ── Section 4: City context ───────────────────────────────────────────────────
 
 class _AnalysisContextSection extends StatelessWidget {
-  const _AnalysisContextSection({
-    required this.city,
-    required this.localeName,
-  });
+  const _AnalysisContextSection({required this.city, required this.localeName});
 
   final City city;
   final String localeName;
@@ -7285,17 +7399,12 @@ class _AnalysisContextSection extends StatelessWidget {
         ? _cityDetailLocalizedText(context, pt: 'Alta', es: 'Alta', en: 'High')
         : popularityScore >= 60
         ? _cityDetailLocalizedText(
-          context,
-          pt: 'Moderada',
-          es: 'Moderada',
-          en: 'Moderate',
-        )
-        : _cityDetailLocalizedText(
-          context,
-          pt: 'Baixa',
-          es: 'Baja',
-          en: 'Low',
-        );
+            context,
+            pt: 'Moderada',
+            es: 'Moderada',
+            en: 'Moderate',
+          )
+        : _cityDetailLocalizedText(context, pt: 'Baixa', es: 'Baja', en: 'Low');
 
     return _AnalysisBlock(
       icon: Icons.location_city_rounded,
@@ -7349,24 +7458,24 @@ class _AnalysisContextSection extends StatelessWidget {
               ),
               headline: city.spanishSupportScore >= 75
                   ? _cityDetailLocalizedText(
-                    context,
-                    pt: 'Bom',
-                    es: 'Bueno',
-                    en: 'Good',
-                  )
+                      context,
+                      pt: 'Bom',
+                      es: 'Bueno',
+                      en: 'Good',
+                    )
                   : city.spanishSupportScore >= 55
                   ? _cityDetailLocalizedText(
-                    context,
-                    pt: 'Parcial',
-                    es: 'Parcial',
-                    en: 'Partial',
-                  )
+                      context,
+                      pt: 'Parcial',
+                      es: 'Parcial',
+                      en: 'Partial',
+                    )
                   : _cityDetailLocalizedText(
-                    context,
-                    pt: 'Limitado',
-                    es: 'Limitado',
-                    en: 'Limited',
-                  ),
+                      context,
+                      pt: 'Limitado',
+                      es: 'Limitado',
+                      en: 'Limited',
+                    ),
               score: city.spanishSupportScore,
               tint: city.spanishSupportScore >= 75
                   ? AppColors.success
@@ -7412,36 +7521,39 @@ class _AnalysisContextSection extends StatelessWidget {
                 es: 'Por qué destaca ${city.name}',
                 en: 'Why ${city.name} stands out',
               ),
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
-            ...city.recommendationReasons.take(4).map(
-              (reason) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.check_circle_outline_rounded,
-                      size: 15,
-                      color: AppColors.success,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        reason,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSoftFor(context),
-                          height: 1.4,
+            ...city.recommendationReasons
+                .take(4)
+                .map(
+                  (reason) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline_rounded,
+                          size: 15,
+                          color: AppColors.success,
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            reason,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: AppColors.textSoftFor(context),
+                                  height: 1.4,
+                                ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
           ],
         ],
       ),
@@ -7494,9 +7606,9 @@ class _AnalysisBlock extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
               ),
               if (subtitle != null)
@@ -7623,9 +7735,9 @@ class _AnalysisBudgetRow extends StatelessWidget {
                   fontWeight: FontWeight.w800,
                   color: tint,
                 )
-              : Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+              : Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -7670,9 +7782,9 @@ class _AnalysisInfoRow extends StatelessWidget {
           children: [
             Text(
               value,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
             if (detail != null)
               Text(

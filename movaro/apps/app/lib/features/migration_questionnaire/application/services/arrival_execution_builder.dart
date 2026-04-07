@@ -37,7 +37,7 @@ class ArrivalExecutionBuilder {
     required AppLocalizations l10n,
     required MigrationPlan plan,
   }) {
-    final cityName = plan.recommendedCity?.name;
+    final cityName = plan.currentPlanCity?.name;
 
     return ArrivalExecutionChecklist(
       summary: _summaryForTimeline(l10n, plan.timeline),

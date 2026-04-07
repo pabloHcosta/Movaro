@@ -31,8 +31,7 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
         ? l10n.landingBudgetSectionTitle
         : l10n.landingBudgetSectionTitleWithCity(estimate.cityContext!);
 
-    final cityBudget =
-        plan.recommendedCity?.budgetSnapshot ?? plan.preferredCity?.budgetSnapshot;
+    final cityBudget = plan.currentPlanCity?.budgetSnapshot;
 
     return FrostedPanel(
       child: Column(

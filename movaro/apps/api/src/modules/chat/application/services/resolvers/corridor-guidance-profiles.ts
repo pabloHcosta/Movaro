@@ -120,12 +120,12 @@ ${helpers.phaseHint(locale, context.currentPhase, context.completedItemIds)}`;
         }
         if (locale === 'en') {
           return hasResidence
-            ? `MERCOSUR residency already appears in your progress. The important next step is to use that regularization to move into CRNM, banking, and formal work.`
+            ? `MERCOSUR residency already appears in your progress. A commonly relevant area to review next is how that regularization connects to CRNM, banking, and formal work.`
             : `For the Argentina -> Brazil corridor, the practical path is usually not “tourist visa first”, but reviewing the MERCOSUR residency route:
 
 - Argentinians usually rely on the MERCOSUR path
 - That is different from a generic tourist-visa question
-- If your plan is already moving, this should not be left for the end
+- If your plan is already moving, this topic may be worth reviewing earlier rather than leaving it for the end
 
 ${helpers.phaseHint(locale, context.currentPhase, context.completedItemIds)}`;
         }
@@ -206,7 +206,7 @@ ${context.cityName ? `Se ${context.cityName} continua sendo sua base, avalie ess
 - qué barrios y movilidad hacen sentido para tu llegada
 - si la ciudad combina con tu prioridad principal del plan
 
-No hace falta IA para eso si el app ya tiene ciudad recomendada, contexto de costo y guía de llegada.`
+No hace falta IA para eso si la app ya tiene contexto de ciudad, contexto de costo y guía de llegada.`
             : `“Qué hacer allá” no debería salir como respuesta genérica. Sin ciudad definida, primero conviene cerrar la base del plan y recién después hablar de rutina, barrios y adaptación.`;
         }
         if (locale === 'en') {
@@ -217,7 +217,7 @@ No hace falta IA para eso si el app ya tiene ciudad recomendada, contexto de cos
 - which neighborhoods and mobility patterns fit your arrival
 - whether the city matches your main plan priority
 
-That does not need AI if the app already has recommended city, cost context, and arrival guidance.`
+That does not need AI if the app already has city context, cost context, and arrival guidance.`
             : `“What to do there” should not come back as a generic answer. Without a defined city, the plan should first lock the base and only then talk about routine, neighborhoods, and adaptation.`;
         }
         return context.cityName
@@ -227,7 +227,7 @@ That does not need AI if the app already has recommended city, cost context, and
 - que bairros e mobilidade combinam com sua chegada
 - se a cidade conversa com a prioridade principal do seu plano
 
-Isso não precisa de IA se o app já tem cidade recomendada, contexto de custo e guia de chegada.`
+Isso não precisa de IA se o app já tem contexto de cidade, contexto de custo e guia de chegada.`
           : `“O que fazer lá” não deveria voltar como uma resposta genérica. Sem cidade definida, primeiro vale fechar a base do plano e só depois falar de rotina, bairros e adaptação.`;
 
       case 'best_time':

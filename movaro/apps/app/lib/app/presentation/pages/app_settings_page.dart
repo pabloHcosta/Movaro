@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/currency/currency_controller.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/localization/locale_controller.dart';
+import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/theme_controller.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class AppSettingsPage extends StatelessWidget {
@@ -33,175 +33,225 @@ class AppSettingsPage extends StatelessWidget {
         final currentOverride = localeController.locale?.languageCode;
         final currentTheme = themeController.themeMode;
         final currentCurrency = currencyController.currencyCode;
+        final currentLanguageLabel = currentOverride == null
+            ? context.l10n.settingsLanguageSystem(
+                _localeName(context, activeLocale),
+              )
+            : _languageLabel(context, currentOverride);
+        final currentThemeLabel = switch (currentTheme) {
+          ThemeMode.dark => context.l10n.settingsThemeDark(),
+          ThemeMode.light => context.l10n.settingsThemeLight(),
+          ThemeMode.system => context.l10n.settingsThemeSystem(),
+        };
+        final currentCurrencyLabel = currentCurrency == null
+            ? context.l10n.settingsCurrencyAuto()
+            : _currencyOptions
+                      .where((entry) => entry.code == currentCurrency)
+                      .firstOrNull
+                      ?.label ??
+                  currentCurrency;
+        final settingsIntro = _settingsIntro(context);
+        final settingsEyebrow = _settingsEyebrow(context);
 
         return Scaffold(
+          backgroundColor: AppColors.backgroundFor(context),
           body: Stack(
             children: [
               const AmbientBackground(),
               SafeArea(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-                  children: [
-                    AppGlassHeader(
-                      title: context.l10n.settingsTitle(),
-                      onBack: () => Navigator.maybePop(context),
-                    ),
-                    const SizedBox(height: 18),
-                    FrostedPanel(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.settingsThemeTitle(),
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            context.l10n.settingsThemeBody(),
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context).hintColor,
-                                  height: 1.4,
-                                ),
-                          ),
-                          const SizedBox(height: 14),
-                          _OptionTile(
-                            label: context.l10n.settingsThemeDark(),
-                            selected: currentTheme == ThemeMode.dark,
-                            onTap: () =>
-                                themeController.setThemeMode(ThemeMode.dark),
-                          ),
-                          const SizedBox(height: 10),
-                          _OptionTile(
-                            label: context.l10n.settingsThemeLight(),
-                            selected: currentTheme == ThemeMode.light,
-                            onTap: () =>
-                                themeController.setThemeMode(ThemeMode.light),
-                          ),
-                          const SizedBox(height: 10),
-                          _OptionTile(
-                            label: context.l10n.settingsThemeSystem(),
-                            selected: currentTheme == ThemeMode.system,
-                            onTap: () =>
-                                themeController.setThemeMode(ThemeMode.system),
-                          ),
-                        ],
+                child: CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+                      sliver: SliverToBoxAdapter(
+                        child: AppGlassHeader(
+                          title: context.l10n.settingsTitle(),
+                          onBack: () => Navigator.maybePop(context),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    FrostedPanel(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+                      sliver: SliverList.list(
                         children: [
-                          Text(
-                            context.l10n.settingsLanguageTitle(),
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            context.l10n.settingsLanguageBody(),
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context).hintColor,
-                                  height: 1.4,
-                                ),
-                          ),
-                          const SizedBox(height: 14),
-                          _OptionTile(
-                            label: context.l10n.settingsLanguageSystem(
-                              _localeName(context, activeLocale),
+                          _EntranceReveal(
+                            delayIndex: 0,
+                            child: _SettingsHeroCard(
+                              eyebrow: settingsEyebrow,
+                              intro: settingsIntro,
+                              currentThemeLabel: currentThemeLabel,
+                              currentLanguageLabel: currentLanguageLabel,
+                              currentCurrencyLabel: currentCurrencyLabel,
                             ),
-                            selected: currentOverride == null,
-                            onTap: localeController.useSystemLocale,
-                          ),
-                          const SizedBox(height: 10),
-                          _OptionTile(
-                            label: context.l10n.languageOptionSpanishArgentina,
-                            selected: currentOverride == 'es',
-                            onTap: () =>
-                                localeController.setLocale(const Locale('es')),
-                          ),
-                          const SizedBox(height: 10),
-                          _OptionTile(
-                            label: context.l10n.languageOptionEnglish,
-                            selected: currentOverride == 'en',
-                            onTap: () =>
-                                localeController.setLocale(const Locale('en')),
-                          ),
-                          const SizedBox(height: 10),
-                          _OptionTile(
-                            label: context.l10n.languageOptionPortuguese,
-                            selected: currentOverride == 'pt',
-                            onTap: () =>
-                                localeController.setLocale(const Locale('pt')),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    FrostedPanel(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.settingsCurrencyTitle(),
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            context.l10n.settingsCurrencyBody(),
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context).hintColor,
-                                  height: 1.4,
-                                ),
                           ),
                           const SizedBox(height: 14),
-                          _OptionTile(
-                            label: context.l10n.settingsCurrencyAuto(),
-                            selected: currentCurrency == null,
-                            onTap: currencyController.clearCurrency,
-                          ),
-                          const SizedBox(height: 10),
-                          for (final entry in _currencyOptions)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: _OptionTile(
-                                label: entry.$1,
-                                selected: currentCurrency == entry.$2,
-                                onTap: () =>
-                                    currencyController.setCurrency(entry.$2),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    FrostedPanel(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.settingsSystemLanguageTitle(),
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            context.l10n.settingsSystemLanguageBody(),
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context).hintColor,
-                                  height: 1.4,
-                                ),
-                          ),
-                          const SizedBox(height: 14),
-                          FilledButton(
-                            onPressed: openAppSettings,
-                            child: Text(context.l10n.settingsOpenAction()),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final compact = constraints.maxWidth < 760;
+                              return Wrap(
+                                spacing: 14,
+                                runSpacing: 14,
+                                children: [
+                                  SizedBox(
+                                    width: compact
+                                        ? constraints.maxWidth
+                                        : (constraints.maxWidth - 14) / 2,
+                                    child: _EntranceReveal(
+                                      delayIndex: 1,
+                                      child: _SettingCard(
+                                        icon: Icons.palette_outlined,
+                                        title: context.l10n
+                                            .settingsThemeTitle(),
+                                        description: context.l10n
+                                            .settingsThemeBody(),
+                                        trailingLabel: currentThemeLabel,
+                                        accentColor: const Color(0xFF0071E3),
+                                        child:
+                                            _SegmentedSettingGroup<ThemeMode>(
+                                              value: currentTheme,
+                                              segments: [
+                                                _SettingSegment(
+                                                  value: ThemeMode.dark,
+                                                  label: context.l10n
+                                                      .settingsThemeDark(),
+                                                ),
+                                                _SettingSegment(
+                                                  value: ThemeMode.light,
+                                                  label: context.l10n
+                                                      .settingsThemeLight(),
+                                                ),
+                                                _SettingSegment(
+                                                  value: ThemeMode.system,
+                                                  label: context.l10n
+                                                      .settingsThemeSystem(),
+                                                ),
+                                              ],
+                                              onChanged:
+                                                  themeController.setThemeMode,
+                                            ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: compact
+                                        ? constraints.maxWidth
+                                        : (constraints.maxWidth - 14) / 2,
+                                    child: _EntranceReveal(
+                                      delayIndex: 2,
+                                      child: _SettingCard(
+                                        icon: Icons.language_rounded,
+                                        title: context.l10n
+                                            .settingsLanguageTitle(),
+                                        description: context.l10n
+                                            .settingsLanguageBody(),
+                                        trailingLabel: currentLanguageLabel,
+                                        accentColor: const Color(0xFF0B8F78),
+                                        child: _SegmentedSettingGroup<String?>(
+                                          value: currentOverride,
+                                          segments: [
+                                            _SettingSegment<String?>(
+                                              value: null,
+                                              label: context.l10n
+                                                  .settingsLanguageSystem(
+                                                    _localeName(
+                                                      context,
+                                                      activeLocale,
+                                                    ),
+                                                  ),
+                                            ),
+                                            _SettingSegment<String?>(
+                                              value: 'es',
+                                              label: context
+                                                  .l10n
+                                                  .languageOptionSpanishArgentina,
+                                            ),
+                                            _SettingSegment<String?>(
+                                              value: 'en',
+                                              label: context
+                                                  .l10n
+                                                  .languageOptionEnglish,
+                                            ),
+                                            _SettingSegment<String?>(
+                                              value: 'pt',
+                                              label: context
+                                                  .l10n
+                                                  .languageOptionPortuguese,
+                                            ),
+                                          ],
+                                          onChanged: (value) {
+                                            if (value == null) {
+                                              localeController
+                                                  .useSystemLocale();
+                                              return;
+                                            }
+                                            localeController.setLocale(
+                                              Locale(value),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: compact
+                                        ? constraints.maxWidth
+                                        : (constraints.maxWidth - 14) / 2,
+                                    child: _EntranceReveal(
+                                      delayIndex: 3,
+                                      child: _SettingCard(
+                                        icon: Icons.payments_outlined,
+                                        title: context.l10n
+                                            .settingsCurrencyTitle(),
+                                        description: context.l10n
+                                            .settingsCurrencyBody(),
+                                        trailingLabel: currentCurrencyLabel,
+                                        accentColor: const Color(0xFFE38B00),
+                                        child: _CurrencySelector(
+                                          value: currentCurrency,
+                                          onChanged: (value) {
+                                            if (value == null) {
+                                              return;
+                                            }
+                                            if (value == _autoCurrencyValue) {
+                                              currencyController
+                                                  .clearCurrency();
+                                              return;
+                                            }
+                                            currencyController.setCurrency(
+                                              value,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: compact
+                                        ? constraints.maxWidth
+                                        : (constraints.maxWidth - 14) / 2,
+                                    child: _EntranceReveal(
+                                      delayIndex: 4,
+                                      child: _SettingCard(
+                                        icon: Icons.tune_rounded,
+                                        title: context.l10n
+                                            .settingsSystemLanguageTitle(),
+                                        description: context.l10n
+                                            .settingsSystemLanguageBody(),
+                                        accentColor: const Color(0xFF7C8DFF),
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: _SystemSettingsAction(
+                                            label: context.l10n
+                                                .settingsOpenAction(),
+                                            onTap: openAppSettings,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -226,24 +276,436 @@ class AppSettingsPage extends StatelessWidget {
         return context.l10n.languageOptionEnglish;
     }
   }
+
+  String _languageLabel(BuildContext context, String code) {
+    switch (code) {
+      case 'es':
+        return context.l10n.languageOptionSpanishArgentina;
+      case 'pt':
+        return context.l10n.languageOptionPortuguese;
+      default:
+        return context.l10n.languageOptionEnglish;
+    }
+  }
+
+  String _settingsIntro(BuildContext context) {
+    switch (Localizations.localeOf(context).languageCode) {
+      case 'es':
+        return 'Preferencias clave, organizadas para cambiar rápido sin perder tiempo en una pantalla larga.';
+      case 'en':
+        return 'Core preferences, reorganized to be faster to scan and quicker to change.';
+      default:
+        return 'Preferências centrais, organizadas para você ajustar rápido sem perder tempo numa tela longa.';
+    }
+  }
+
+  String _settingsEyebrow(BuildContext context) {
+    switch (Localizations.localeOf(context).languageCode) {
+      case 'es':
+        return 'Experiencia del app';
+      case 'en':
+        return 'App experience';
+      default:
+        return 'Experiência do app';
+    }
+  }
 }
 
-/// (label, currencyCode) pairs shown in the settings currency selector.
+const _autoCurrencyValue = '__auto__';
+
 const _currencyOptions = [
-  ('US Dollar (USD)', 'USD'),
-  ('Euro (EUR)', 'EUR'),
-  ('Real Brasileiro (BRL)', 'BRL'),
-  ('Peso Argentino (ARS)', 'ARS'),
-  ('Peso Chileno (CLP)', 'CLP'),
-  ('Peso Uruguayo (UYU)', 'UYU'),
-  ('Peso Colombiano (COP)', 'COP'),
-  ('Sol Peruano (PEN)', 'PEN'),
-  ('Guaraní Paraguayo (PYG)', 'PYG'),
-  ('Boliviano (BOB)', 'BOB'),
+  _CurrencyOption(label: 'US Dollar (USD)', code: 'USD'),
+  _CurrencyOption(label: 'Euro (EUR)', code: 'EUR'),
+  _CurrencyOption(label: 'Real Brasileiro (BRL)', code: 'BRL'),
+  _CurrencyOption(label: 'Peso Argentino (ARS)', code: 'ARS'),
+  _CurrencyOption(label: 'Peso Chileno (CLP)', code: 'CLP'),
+  _CurrencyOption(label: 'Peso Uruguayo (UYU)', code: 'UYU'),
+  _CurrencyOption(label: 'Peso Colombiano (COP)', code: 'COP'),
+  _CurrencyOption(label: 'Sol Peruano (PEN)', code: 'PEN'),
+  _CurrencyOption(label: 'Guaraní Paraguayo (PYG)', code: 'PYG'),
+  _CurrencyOption(label: 'Boliviano (BOB)', code: 'BOB'),
 ];
 
-class _OptionTile extends StatelessWidget {
-  const _OptionTile({
+class _CurrencyOption {
+  const _CurrencyOption({required this.label, required this.code});
+
+  final String label;
+  final String code;
+}
+
+class _SettingsHeroCard extends StatelessWidget {
+  const _SettingsHeroCard({
+    required this.eyebrow,
+    required this.intro,
+    required this.currentThemeLabel,
+    required this.currentLanguageLabel,
+    required this.currentCurrencyLabel,
+  });
+
+  final String eyebrow;
+  final String intro;
+  final String currentThemeLabel;
+  final String currentLanguageLabel;
+  final String currentCurrencyLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.10),
+            blurRadius: 34,
+            offset: const Offset(0, 18),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isDark
+                        ? [
+                            const Color(0xFF101827),
+                            const Color(0xFF173150),
+                            const Color(0xFF22558A),
+                          ]
+                        : [
+                            const Color(0xFFF7FBFF),
+                            const Color(0xFFEAF2FF),
+                            const Color(0xFFDCEBFF),
+                          ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  border: Border.all(color: AppColors.borderFor(context)),
+                ),
+              ),
+            ),
+            Positioned(
+              right: -28,
+              top: -20,
+              child: Container(
+                width: 122,
+                height: 122,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: isDark ? 0.07 : 0.35),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 36,
+              top: 28,
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: isDark ? 0.24 : 0.70),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(
+                        alpha: isDark ? 0.08 : 0.66,
+                      ),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: Colors.white.withValues(
+                          alpha: isDark ? 0.10 : 0.82,
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      eyebrow,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    context.l10n.settingsTitle(),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.7,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: Text(
+                      intro,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.78)
+                            : const Color(0xFF4B5A72),
+                        height: 1.45,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      _CurrentSettingPill(
+                        icon: Icons.palette_outlined,
+                        label: currentThemeLabel,
+                      ),
+                      _CurrentSettingPill(
+                        icon: Icons.language_rounded,
+                        label: currentLanguageLabel,
+                      ),
+                      _CurrentSettingPill(
+                        icon: Icons.payments_outlined,
+                        label: currentCurrencyLabel,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CurrentSettingPill extends StatelessWidget {
+  const _CurrentSettingPill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOutCubic,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.white.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.10)
+              : Colors.white.withValues(alpha: 0.9),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: AppColors.primary),
+          const SizedBox(width: 8),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 180),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingCard extends StatelessWidget {
+  const _SettingCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.child,
+    required this.accentColor,
+    this.trailingLabel,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final Widget child;
+  final Color accentColor;
+  final String? trailingLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOutCubic,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.frostedBackgroundFor(context),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.frostedBorderFor(context)),
+        boxShadow: AppColors.frostedShadowFor(context),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, size: 20, color: accentColor),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      description,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (trailingLabel != null) ...[
+                const SizedBox(width: 10),
+                Flexible(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: ScaleTransition(
+                        scale: Tween<double>(begin: 0.96, end: 1).animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                          ),
+                        ),
+                        child: child,
+                      ),
+                    ),
+                    child: _SelectionBadge(
+                      key: ValueKey(trailingLabel),
+                      label: trailingLabel!,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _SelectionBadge extends StatelessWidget {
+  const _SelectionBadge({required this.label, super.key});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceFor(context).withValues(alpha: 0.74),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppColors.borderFor(context)),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimaryFor(context),
+        ),
+      ),
+    );
+  }
+}
+
+class _SegmentedSettingGroup<T> extends StatelessWidget {
+  const _SegmentedSettingGroup({
+    required this.value,
+    required this.segments,
+    required this.onChanged,
+  });
+
+  final T value;
+  final List<_SettingSegment<T>> segments;
+  final ValueChanged<T> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: segments
+          .map(
+            (segment) => _ChoicePill(
+              label: segment.label,
+              selected: value == segment.value,
+              onTap: () => onChanged(segment.value),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
+class _SettingSegment<T> {
+  const _SettingSegment({required this.value, required this.label});
+
+  final T value;
+  final String label;
+}
+
+class _ChoicePill extends StatelessWidget {
+  const _ChoicePill({
     required this.label,
     required this.selected,
     required this.onTap,
@@ -258,40 +720,229 @@ class _OptionTile extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
         onTap: onTap,
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
+        borderRadius: BorderRadius.circular(16),
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          scale: selected ? 1.0 : 0.985,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
               color: selected
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).dividerColor,
+                  ? AppColors.primary.withValues(alpha: 0.12)
+                  : AppColors.surfaceMutedFor(context),
+              border: Border.all(
+                color: selected
+                    ? AppColors.primary
+                    : AppColors.borderFor(context),
+              ),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.10),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ]
+                  : const [],
             ),
-            color: selected
-                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.08)
-                : Colors.transparent,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 180),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeOutCubic,
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(scale: animation, child: child),
+                  ),
+                  child: selected
+                      ? Row(
+                          key: const ValueKey('selected'),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_rounded,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                        )
+                      : const SizedBox(key: ValueKey('empty')),
+                ),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                      color: selected
+                          ? AppColors.textPrimaryFor(context)
+                          : AppColors.textSoftFor(context),
+                    ),
                   ),
                 ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CurrencySelector extends StatelessWidget {
+  const _CurrencySelector({required this.value, required this.onChanged});
+
+  final String? value;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final quickCodes = <String?>[null, 'USD', 'BRL', 'ARS'];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: quickCodes
+              .map(
+                (code) => _ChoicePill(
+                  label: code == null
+                      ? context.l10n.settingsCurrencyAuto()
+                      : _currencyOptions
+                            .firstWhere((entry) => entry.code == code)
+                            .code,
+                  selected: value == code,
+                  onTap: () => onChanged(code ?? _autoCurrencyValue),
+                ),
+              )
+              .toList(growable: false),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<String>(
+          initialValue: value ?? _autoCurrencyValue,
+          isExpanded: true,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: AppColors.surfaceMutedFor(context),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(color: AppColors.borderFor(context)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(color: AppColors.borderFor(context)),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(18)),
+              borderSide: BorderSide(color: AppColors.primary, width: 1.4),
+            ),
+          ),
+          items: [
+            DropdownMenuItem(
+              value: _autoCurrencyValue,
+              child: Text(context.l10n.settingsCurrencyAuto()),
+            ),
+            ..._currencyOptions.map(
+              (entry) =>
+                  DropdownMenuItem(value: entry.code, child: Text(entry.label)),
+            ),
+          ],
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+}
+
+class _SystemSettingsAction extends StatelessWidget {
+  const _SystemSettingsAction({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceMutedFor(context),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppColors.borderFor(context)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7C8DFF).withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.open_in_new_rounded,
+                  size: 16,
+                  color: Color(0xFF5D6DFF),
+                ),
               ),
-              Icon(
-                selected
-                    ? Icons.radio_button_checked_rounded
-                    : Icons.radio_button_off_rounded,
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _EntranceReveal extends StatelessWidget {
+  const _EntranceReveal({required this.delayIndex, required this.child});
+
+  final int delayIndex;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final begin = 0.92 + (delayIndex * 0.01);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: begin.clamp(0.9, 0.98), end: 1),
+      duration: Duration(milliseconds: 320 + (delayIndex * 70)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, builtChild) {
+        return Opacity(
+          opacity: ((value - begin) / (1 - begin)).clamp(0, 1),
+          child: Transform.translate(
+            offset: Offset(0, (1 - value) * 28),
+            child: builtChild,
+          ),
+        );
+      },
+      child: child,
     );
   }
 }

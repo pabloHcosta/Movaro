@@ -116,7 +116,7 @@ class DocumentChecklistAdapter {
           l10n,
           pt: 'Com o DNI, voce pode ficar no Brasil por ate 90 dias como turista. Para morar de forma regular, a regularizacao deve ser iniciada dentro desse prazo e isso e feito ja no Brasil.',
           es: 'Con el DNI podes quedarte en Brasil hasta 90 dias como turista. Para vivir de forma regular, la regularizacion debe iniciarse dentro de ese plazo y se hace ya en Brasil.',
-          en: 'With your DNI, you can stay in Brazil for up to 90 days as a tourist. To live there regularly, you need to start regularization within that period, and that happens after arrival in Brazil.',
+          en: 'With your DNI, you can stay in Brazil for up to 90 days as a tourist. If you plan to live there regularly, regularization often needs to begin within that period, usually after arrival in Brazil.',
         ),
         timeEstimate: _text(
           l10n,

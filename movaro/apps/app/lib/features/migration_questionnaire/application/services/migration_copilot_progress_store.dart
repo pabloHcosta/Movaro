@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:movaro_app/core/storage/versioned_json_file_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 typedef CopilotDirectoryProvider = Future<Directory> Function();
@@ -14,6 +15,8 @@ class MigrationCopilotProgressSnapshot {
     this.arrivalCompletedIds = const <String>{},
     this.activeItemId,
     this.completedAtById = const <String, String>{},
+    this.prioritizedItemIds = const <String>{},
+    this.dismissedReasonsById = const <String, GuideDismissReason>{},
   });
 
   final Set<String> readinessCompletedIds;
@@ -21,6 +24,8 @@ class MigrationCopilotProgressSnapshot {
   final Set<String> arrivalCompletedIds;
   final String? activeItemId;
   final Map<String, String> completedAtById;
+  final Set<String> prioritizedItemIds;
+  final Map<String, GuideDismissReason> dismissedReasonsById;
 
   Set<String> getAllCompletedIds() => <String>{
     ...readinessCompletedIds,
@@ -63,6 +68,10 @@ class MigrationCopilotProgressStore {
         arrivalCompletedIds: _readStringSet(value['arrivalCompletedIds']),
         activeItemId: value['activeItemId'] as String?,
         completedAtById: _readStringMap(value['completedAtById']),
+        prioritizedItemIds: _readStringSet(value['prioritizedItemIds']),
+        dismissedReasonsById: _readDismissReasons(
+          value['dismissedReasonsById'],
+        ),
       );
     } catch (_) {
       return const MigrationCopilotProgressSnapshot();
@@ -86,6 +95,8 @@ class MigrationCopilotProgressStore {
     required Set<String> arrivalCompletedIds,
     String? activeItemId,
     Map<String, String>? completedAtById,
+    Set<String>? prioritizedItemIds,
+    Map<String, GuideDismissReason>? dismissedReasonsById,
   }) async {
     final file = await _file();
     Map<String, dynamic> current = <String, dynamic>{};
@@ -94,12 +105,26 @@ class MigrationCopilotProgressStore {
       current = existing;
     }
 
+    final existingPlanState = current[_planKey(plan)];
+    final existingMap = existingPlanState is Map<String, dynamic>
+        ? existingPlanState
+        : const <String, dynamic>{};
+
     current[_planKey(plan)] = <String, dynamic>{
       'readinessCompletedIds': readinessCompletedIds.toList()..sort(),
       'documentCompletedIds': documentCompletedIds.toList()..sort(),
       'arrivalCompletedIds': arrivalCompletedIds.toList()..sort(),
       'activeItemId': activeItemId,
       'completedAtById': completedAtById ?? const <String, String>{},
+      'prioritizedItemIds':
+          (prioritizedItemIds ??
+                  _readStringSet(existingMap['prioritizedItemIds']))
+              .toList()
+            ..sort(),
+      'dismissedReasonsById': _encodeDismissReasons(
+        dismissedReasonsById ??
+            _readDismissReasons(existingMap['dismissedReasonsById']),
+      ),
       'updatedAt': DateTime.now().toIso8601String(),
     };
 
@@ -150,6 +175,36 @@ class MigrationCopilotProgressStore {
     return rawValue.whereType<String>().toSet();
   }
 
+  Map<String, GuideDismissReason> _readDismissReasons(Object? rawValue) {
+    if (rawValue is! Map) {
+      return <String, GuideDismissReason>{};
+    }
+
+    final result = <String, GuideDismissReason>{};
+    rawValue.forEach((key, value) {
+      if (key is! String || value is! String) {
+        return;
+      }
+      for (final reason in GuideDismissReason.values) {
+        if (reason.name == value) {
+          result[key] = reason;
+          break;
+        }
+      }
+    });
+    return result;
+  }
+
+  Map<String, String> _encodeDismissReasons(
+    Map<String, GuideDismissReason> dismissedReasonsById,
+  ) {
+    final result = <String, String>{};
+    dismissedReasonsById.forEach((key, value) {
+      result[key] = value.name;
+    });
+    return result;
+  }
+
   Set<String> getAllCompletedIds(MigrationCopilotProgressSnapshot snapshot) {
     return snapshot.getAllCompletedIds();
   }
@@ -170,7 +225,7 @@ class MigrationCopilotProgressStore {
   }
 
   String _planKey(MigrationPlan plan) {
-    final cityId = plan.recommendedCity?.id ?? 'no-city';
+    final cityId = plan.currentPlanCity?.id ?? 'no-city';
     return [
       plan.originCountry,
       plan.destinationCountry,
