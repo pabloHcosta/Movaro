@@ -8,6 +8,7 @@ import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/practical_info_disclaimer.dart';
 import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
@@ -2110,6 +2111,8 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            const PracticalInfoDisclaimer(compact: true),
+                            const SizedBox(height: 16),
                             if (!hasConfirmedCity) ...[
                               JourneyStageBanner(
                                 title: l10n.stageDecisionTitle,

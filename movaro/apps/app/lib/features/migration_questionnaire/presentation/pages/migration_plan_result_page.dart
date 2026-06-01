@@ -7,6 +7,7 @@ import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/practical_info_disclaimer.dart';
 import 'package:movaro_app/core/widgets/error_state_widget.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
@@ -266,6 +267,11 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
                           ),
                         ),
                         const SizedBox(height: 20),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                          child: PracticalInfoDisclaimer(compact: true),
+                        ),
+                        const SizedBox(height: 12),
                         _PlanHero(
                           city: city,
                           weather: weather,
