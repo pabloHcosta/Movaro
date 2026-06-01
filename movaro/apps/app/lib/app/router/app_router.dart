@@ -16,6 +16,7 @@ import 'package:movaro_app/features/home/presentation/pages/home_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/public_home_page.dart';
 import 'package:movaro_app/features/info/presentation/pages/assistant_page.dart';
 import 'package:movaro_app/features/intro/presentation/pages/intro_page.dart';
+import 'package:movaro_app/features/language/presentation/pages/portuguese_phrasebook_page.dart';
 import 'package:movaro_app/features/journey/presentation/pages/journey_setup_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_copilot_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_save_page.dart';
@@ -334,6 +335,8 @@ class AppRouter {
             args: args,
           ),
         );
+      case AppRoutes.phrasebook:
+        return _buildRoute(settings, const PortuguesePhrasebookPage());
       case AppRoutes.settings:
         return _buildRoute(
           settings,

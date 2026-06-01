@@ -10,6 +10,7 @@ import 'package:movaro_app/features/journey/journey_country_metadata.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/practical_info_disclaimer.dart';
 import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
@@ -275,6 +276,10 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                               : _showGuideModal,
                         ),
                       if (!widget.embedded) const SizedBox(height: 20),
+                      if (!widget.embedded) ...[
+                        const PracticalInfoDisclaimer(),
+                        const SizedBox(height: 16),
+                      ],
                       if (!widget.embedded) ...[
                         JourneyStageBanner(
                           title: isExecutionStage

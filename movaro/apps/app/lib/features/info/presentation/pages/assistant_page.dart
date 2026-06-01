@@ -10,6 +10,7 @@ import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/network/network_client.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/practical_info_disclaimer.dart';
 import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
@@ -270,6 +271,11 @@ class _AssistantPageState extends State<AssistantPage> {
                         null,
                     onModeChanged: (mode) => setState(() => _mode = mode),
                   ),
+                ),
+                const SizedBox(height: 8),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: PracticalInfoDisclaimer(compact: true),
                 ),
                 const SizedBox(height: 8),
                 Expanded(

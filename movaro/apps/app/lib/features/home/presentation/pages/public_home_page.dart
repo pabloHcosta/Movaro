@@ -281,6 +281,11 @@ class _PublicHomePageState extends State<PublicHomePage>
                                             arguments: DocumentationGuideSection
                                                 .documents,
                                           ),
+                                      onLearnPortugueseTap: () =>
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.phrasebook,
+                                          ),
                                     ),
                             ),
                           ),
@@ -821,6 +826,7 @@ class _EmptyHomeState extends StatelessWidget {
     required this.onExploreCitiesTap,
     required this.onOpenCostsTap,
     required this.onOpenDocumentsTap,
+    required this.onLearnPortugueseTap,
     super.key,
   });
 
@@ -829,6 +835,7 @@ class _EmptyHomeState extends StatelessWidget {
   final VoidCallback onExploreCitiesTap;
   final VoidCallback onOpenCostsTap;
   final VoidCallback onOpenDocumentsTap;
+  final VoidCallback onLearnPortugueseTap;
 
   @override
   Widget build(BuildContext context) {
@@ -838,6 +845,7 @@ class _EmptyHomeState extends StatelessWidget {
       onExploreCitiesTap: onExploreCitiesTap,
       onOpenCostsTap: onOpenCostsTap,
       onOpenDocumentsTap: onOpenDocumentsTap,
+      onLearnPortugueseTap: onLearnPortugueseTap,
     );
   }
 }

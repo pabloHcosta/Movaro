@@ -333,65 +333,65 @@ class ChatService {
     if (has(['cpf', 'documento', 'document', 'rne', 'rnm', 'crnm', 'pasaporte', 'passaporte', 'passport'])) {
       return _tr(
         locale,
-        es: 'Para sacar el CPF siendo argentino podés hacerlo gratis en una agencia de Correios, Banco do Brasil o Caixa con tu DNI/pasaporte — o incluso desde Argentina, en un consulado de Brasil. Es el primer documento que vas a necesitar para casi todo (banco, alquiler, trabajo). Abrí la pestaña Guías › Documentos para el paso a paso.',
-        pt: 'Para tirar o CPF sendo argentino, dá para fazer de graça numa agência dos Correios, Banco do Brasil ou Caixa com seu DNI/passaporte — ou até da Argentina, num consulado do Brasil. É o primeiro documento que você precisa para quase tudo (banco, aluguel, trabalho). Abra a aba Guias › Documentos para o passo a passo.',
-        en: 'To get your CPF as an Argentine, you can do it for free at a Correios, Banco do Brasil or Caixa branch with your DNI/passport — or even from Argentina at a Brazilian consulate. It is the first document you need for almost everything (bank, rent, work). Open Guides › Documents for the step-by-step.',
+        es: 'Según fuentes oficiales, el CPF normalmente se tramita gratis (Correios, Banco do Brasil o Caixa, o en un consulado de Brasil) y suele ser lo primero que piden para banco, alquiler y trabajo. Te oriento por acá: abrí Guías › Documentos y confirmá el procedimiento en gov.br.',
+        pt: 'Segundo as fontes oficiais, o CPF normalmente é gratuito (Correios, Banco do Brasil ou Caixa, ou num consulado do Brasil) e costuma ser o primeiro pedido para banco, aluguel e trabalho. Posso te orientar: abra Guias › Documentos e confirme o procedimento no gov.br.',
+        en: 'According to official sources, the CPF is usually free (Correios, Banco do Brasil or Caixa, or at a Brazilian consulate) and is typically the first thing required for bank, rent and work. I can point you there: open Guides › Documents and confirm the procedure on gov.br.',
       );
     }
     if (has(['residencia', 'residencia', 'residency', 'mercosur', 'mercosul', 'visto', 'visa', 'radicar', 'radicacion'])) {
       return _tr(
         locale,
-        es: 'Como argentino entrás por el Acuerdo Mercosur: tenés hasta 90 días desde el ingreso para iniciar la residencia temporaria (hasta 2 años, después convertible en permanente) en la Polícia Federal. Llevá pasaporte/DNI, certificado de antecedentes y comprobantes. Mirá Guías › Documentos y trámites.',
-        pt: 'Como argentino você entra pelo Acordo Mercosul: tem até 90 dias da entrada para iniciar a residência temporária (até 2 anos, depois convertível em permanente) na Polícia Federal. Leve passaporte/DNI, certidão de antecedentes e comprovantes. Veja Guias › Documentos.',
-        en: 'As an Argentine you enter under the Mercosur Agreement: you have up to 90 days from entry to start temporary residency (up to 2 years, later convertible to permanent) at the Federal Police. Bring passport/DNI, criminal-record certificate and proof documents. See Guides › Documents.',
+        es: 'Como argentino, normalmente entrás por el Acuerdo Mercosur y suele haber un plazo de 90 días desde el ingreso para iniciar la residencia temporaria en la Polícia Federal. Te oriento en Guías › Documentos; confirmá requisitos y plazos en gov.br / Polícia Federal.',
+        pt: 'Como argentino, você normalmente entra pelo Acordo Mercosul e costuma haver um prazo de 90 dias da entrada para iniciar a residência temporária na Polícia Federal. Te oriento em Guias › Documentos; confirme requisitos e prazos no gov.br / Polícia Federal.',
+        en: 'As an Argentine you usually enter under the Mercosur Agreement, and there is typically a 90-day window from entry to start temporary residency at the Federal Police. I can point you in Guides › Documents; confirm requirements and deadlines on gov.br / Federal Police.',
       );
     }
     if (has(['banco', 'conta', 'cuenta', 'bank', 'nubank', 'pix'])) {
       return _tr(
         locale,
-        es: 'Para abrir una cuenta bancaria necesitás CPF y comprobante de domicilio. Los bancos digitales (Nubank, Inter, C6) suelen ser los más fáciles para recién llegados y permiten Pix. Mirá Guías › Documentos.',
-        pt: 'Para abrir conta bancária você precisa de CPF e comprovante de endereço. Os bancos digitais (Nubank, Inter, C6) costumam ser os mais fáceis para recém-chegados e já têm Pix. Veja Guias › Documentos.',
-        en: 'To open a bank account you need a CPF and proof of address. Digital banks (Nubank, Inter, C6) are usually easiest for newcomers and support Pix. See Guides › Documents.',
+        es: 'Para abrir una cuenta, normalmente piden CPF y comprobante de domicilio; los bancos digitales (Nubank, Inter, C6) suelen ser más simples para recién llegados. Te oriento en Guías › Documentos; confirmá las condiciones con cada banco.',
+        pt: 'Para abrir conta, normalmente pedem CPF e comprovante de endereço; os bancos digitais (Nubank, Inter, C6) costumam ser mais simples para recém-chegados. Te oriento em Guias › Documentos; confirme as condições com cada banco.',
+        en: 'To open an account, banks usually ask for a CPF and proof of address; digital banks (Nubank, Inter, C6) tend to be simplest for newcomers. I can point you in Guides › Documents; confirm the conditions with each bank.',
       );
     }
     if (has(['alquiler', 'aluguel', 'rent', 'vivienda', 'moradia', 'fiador', 'housing'])) {
       return _tr(
         locale,
-        es: 'Para alquilar sin fiador, buscá opciones con seguro-fiança o depósito y portales como QuintoAndar o Zap. Conviene arrancar con algo temporario los primeros días. Mirá Guías › Vivienda y llegada.',
-        pt: 'Para alugar sem fiador, procure opções com seguro-fiança ou depósito e portais como QuintoAndar ou Zap. Vale começar com algo temporário nos primeiros dias. Veja Guias › Moradia e chegada.',
-        en: 'To rent without a guarantor, look for rental-insurance or deposit options and portals like QuintoAndar or Zap. Start with something temporary for the first days. See Guides › Housing and arrival.',
+        es: 'Para alquilar, suele haber opciones con seguro de alquiler o depósito en lugar de garante, y portales como QuintoAndar. Te oriento en Guías › Vivienda; confirmá las condiciones con la inmobiliaria.',
+        pt: 'Para alugar, costuma haver opções com seguro-fiança ou depósito no lugar de fiador, e portais como QuintoAndar. Te oriento em Guias › Moradia; confirme as condições com a imobiliária.',
+        en: 'To rent, there are usually rental-insurance or deposit options instead of a guarantor, and portals like QuintoAndar. I can point you in Guides › Housing; confirm the conditions with the rental agency.',
       );
     }
     if (has(['costo', 'custo', 'cost', 'salario', 'sueldo', 'presupuesto', 'orcamento', 'plata', 'dinero'])) {
       return _tr(
         locale,
-        es: 'Los costos varían mucho por ciudad. En la ficha de cada ciudad tenés "¿Se puede vivir con el sueldo de acá?", donde podés comparar el costo de vida típico con tu propio sueldo. Andá a Explorar y elegí una ciudad.',
-        pt: 'Os custos variam muito por cidade. Na ficha de cada cidade há "Dá pra viver com o salário daqui?", onde você compara o custo de vida típico com o seu próprio salário. Vá em Explorar e escolha uma cidade.',
-        en: 'Costs vary a lot by city. Each city page has "Can you live on the local salary?", where you can compare the typical cost of living with your own income. Go to Explore and pick a city.',
+        es: 'Los costos varían por ciudad. En cada ciudad hay una comparación de referencia entre el costo de vida típico y el salario medio (es referencia, no asesoría). Andá a Explorar y elegí una ciudad.',
+        pt: 'Os custos variam por cidade. Em cada cidade há uma comparação de referência entre o custo de vida típico e o salário médio (é referência, não aconselhamento). Vá em Explorar e escolha uma cidade.',
+        en: 'Costs vary by city. Each city shows a reference comparison between the typical cost of living and the average salary (a reference, not advice). Go to Explore and pick a city.',
       );
     }
     if (has(['sus', 'salud', 'saude', 'health', 'medico', 'hospital'])) {
       return _tr(
         locale,
-        es: 'La salud pública (SUS) es gratuita y universal, también para inmigrantes. Para usarla conviene sacar el Cartão SUS en una unidad de salud con un documento y comprobante de domicilio. Mirá Guías › Salud.',
-        pt: 'A saúde pública (SUS) é gratuita e universal, inclusive para imigrantes. Para usar, vale tirar o Cartão SUS numa unidade de saúde com documento e comprovante de endereço. Veja Guias › Saúde.',
-        en: 'Public health (SUS) is free and universal, including for immigrants. To use it, get your SUS card at a health unit with an ID and proof of address. See Guides › Health.',
+        es: 'Según fuentes oficiales, el SUS es gratuito y universal, también para inmigrantes; para usarlo suele pedirse el Cartão SUS. Te oriento en Guías › Salud; confirmá en gov.br o en la unidad de salud.',
+        pt: 'Segundo as fontes oficiais, o SUS é gratuito e universal, inclusive para imigrantes; para usar costuma-se tirar o Cartão SUS. Te oriento em Guias › Saúde; confirme no gov.br ou na unidade de saúde.',
+        en: 'According to official sources, SUS is free and universal, including for immigrants; you usually get a SUS card to use it. I can point you in Guides › Health; confirm on gov.br or at the health unit.',
       );
     }
     if (has(['portugues', 'portuguese', 'idioma', 'language', 'hablar', 'falar'])) {
       return _tr(
         locale,
-        es: 'El portugués es la barrera nº1 para trabajo y trámites. Enfocate en frases prácticas: en cada paso de las Guías hay frases en portugués para usar en el banco, la inmobiliaria o el hospital.',
-        pt: 'O português é a barreira nº1 para trabalho e burocracia. Foque em frases práticas: em cada passo das Guias há frases em português para usar no banco, na imobiliária ou no hospital.',
-        en: 'Portuguese is the #1 barrier for work and paperwork. Focus on practical phrases: each step in the Guides includes Portuguese phrases to use at the bank, rental office or hospital.',
+        es: 'El portugués es la barrera nº1. Tenés frases prácticas en "Portugués esencial" para usar en el banco, la inmobiliaria, la Polícia Federal o el hospital.',
+        pt: 'O português é a barreira nº1. Há frases prontas em "Português essencial" para usar no banco, na imobiliária, na Polícia Federal ou no hospital.',
+        en: 'Portuguese is the #1 barrier. There are ready-to-use phrases in “Essential Portuguese” for the bank, rental office, Federal Police or hospital.',
       );
     }
 
     return _tr(
       locale,
-      es: 'Ahora no pude conectar con el asistente en vivo. Mientras tanto, abrí la pestaña Guías para CPF, residencia Mercosur, banco, vivienda, salud (SUS), conducir y costos — con fuentes oficiales. O probá de nuevo en un momento.',
-      pt: 'Agora não consegui conectar com o assistente ao vivo. Enquanto isso, abra a aba Guias para CPF, residência Mercosul, banco, moradia, saúde (SUS), direção e custos — com fontes oficiais. Ou tente de novo em instantes.',
-      en: 'I could not reach the live assistant right now. Meanwhile, open the Guides tab for CPF, Mercosur residency, bank, housing, health (SUS), driving and costs — with official sources. Or try again in a moment.',
+      es: 'No pude conectar con el asistente en vivo ahora. Te oriento mientras tanto: abrí las Guías (CPF, residencia Mercosur, banco, vivienda, salud, conducir, costos), con enlaces a fuentes oficiales. O probá de nuevo en un momento.',
+      pt: 'Não consegui conectar com o assistente ao vivo agora. Te oriento enquanto isso: abra as Guias (CPF, residência Mercosul, banco, moradia, saúde, direção, custos), com links para fontes oficiais. Ou tente de novo em instantes.',
+      en: 'I could not reach the live assistant right now. Meanwhile, I can point you to the Guides (CPF, Mercosur residency, bank, housing, health, driving, costs), with links to official sources. Or try again in a moment.',
     );
   }
 

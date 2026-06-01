@@ -8,6 +8,7 @@ class HomeVisualLayout extends StatelessWidget {
     required this.onExploreCitiesTap,
     required this.onOpenCostsTap,
     required this.onOpenDocumentsTap,
+    required this.onLearnPortugueseTap,
     super.key,
   });
 
@@ -16,6 +17,7 @@ class HomeVisualLayout extends StatelessWidget {
   final VoidCallback onExploreCitiesTap;
   final VoidCallback onOpenCostsTap;
   final VoidCallback onOpenDocumentsTap;
+  final VoidCallback onLearnPortugueseTap;
 
   @override
   Widget build(BuildContext context) {
@@ -197,10 +199,17 @@ class HomeVisualLayout extends StatelessWidget {
     bool isCompact,
   ) {
     final l10n = context.l10n;
+    final portugueseLabel =
+        switch (Localizations.localeOf(context).languageCode) {
+          'es' => 'Aprender portugués',
+          'en' => 'Learn Portuguese',
+          _ => 'Aprender português',
+        };
     final items = [
       (Icons.explore_outlined, l10n.homeEntryExploreCitiesAction, onExploreCitiesTap),
       (Icons.attach_money_rounded, l10n.homeVisualCostsAction, onOpenCostsTap),
       (Icons.description_outlined, l10n.homeVisualDocumentsAction, onOpenDocumentsTap),
+      (Icons.translate_rounded, portugueseLabel, onLearnPortugueseTap),
     ];
 
     return Wrap(

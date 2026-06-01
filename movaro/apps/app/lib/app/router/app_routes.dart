@@ -26,6 +26,7 @@ class AppRoutes {
   static const authenticatedHome = '/profile';
   static const communityCreate = '/community/create';
   static const migrationSave = '/migration/save';
+  static const phrasebook = '/language/phrasebook';
 
   static const publicPaths = <String>{
     splash,
@@ -48,6 +49,7 @@ class AppRoutes {
     migrationPlanResult,
     migrationResultReveal,
     migrationPlanCopilot,
+    phrasebook,
   };
 
   static const privatePaths = <String>{

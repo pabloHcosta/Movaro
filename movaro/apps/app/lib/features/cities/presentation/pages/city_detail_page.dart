@@ -23,6 +23,7 @@ import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/core/utils/share_card_service.dart';
+import 'package:movaro_app/core/widgets/practical_info_disclaimer.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
@@ -1793,27 +1794,27 @@ class _CityDetailPageState extends State<CityDetailPage> {
           AppColors.success,
           _cityDetailLocalizedText(
             context,
-            pt: 'Salário médio local: $income — sobra ~$amount/mês.',
-            es: 'Sueldo promedio local: $income — sobran ~$amount/mes.',
-            en: 'Local average salary: $income — about $amount/mo left.',
+            pt: 'Salário médio: $income · acima do custo típico (~$amount/mês). Referência.',
+            es: 'Sueldo promedio: $income · por encima del costo típico (~$amount/mes). Referencia.',
+            en: 'Average salary: $income · above typical cost (~$amount/mo). Reference.',
           ),
         ),
         AffordabilityVerdict.tight => (
           AppColors.warning,
           _cityDetailLocalizedText(
             context,
-            pt: 'Salário médio local: $income — sobra pouco (~$amount/mês).',
-            es: 'Sueldo promedio local: $income — sobra poco (~$amount/mes).',
-            en: 'Local average salary: $income — little left (~$amount/mo).',
+            pt: 'Salário médio: $income · perto do custo típico (~$amount/mês). Referência.',
+            es: 'Sueldo promedio: $income · cerca del costo típico (~$amount/mes). Referencia.',
+            en: 'Average salary: $income · near typical cost (~$amount/mo). Reference.',
           ),
         ),
         AffordabilityVerdict.insufficient => (
           AppColors.danger,
           _cityDetailLocalizedText(
             context,
-            pt: 'Salário médio local: $income — faltam ~$amount/mês.',
-            es: 'Sueldo promedio local: $income — faltan ~$amount/mes.',
-            en: 'Local average salary: $income — short ~$amount/mo.',
+            pt: 'Salário médio: $income · abaixo do custo típico (~$amount/mês). Referência.',
+            es: 'Sueldo promedio: $income · por debajo del costo típico (~$amount/mes). Referencia.',
+            en: 'Average salary: $income · below typical cost (~$amount/mo). Reference.',
           ),
         ),
       };
@@ -6928,35 +6929,37 @@ class _AffordabilityNoteState extends State<_AffordabilityNote> {
             en: 'On $incomeLabel per month, ',
           );
 
+    // Neutral, reference-style comparison (not a verdict / not advice). The
+    // color is just a visual cue; the wording stays descriptive.
     final (Color color, IconData icon, String body) = switch (result.verdict) {
       AffordabilityVerdict.comfortable => (
         AppColors.success,
-        Icons.check_circle_outline_rounded,
+        Icons.trending_up_rounded,
         _cityDetailLocalizedText(
           context,
-          pt: 'sobra cerca de $amount por mês depois do custo de vida típico.',
-          es: 'sobran unos $amount por mes después del costo de vida típico.',
-          en: 'about $amount is left each month after a typical cost of living.',
+          pt: 'fica acima do custo de vida típico (referência: ~$amount/mês de margem).',
+          es: 'queda por encima del costo de vida típico (referencia: ~$amount/mes de margen).',
+          en: 'is above the typical cost of living (reference: ~$amount/mo margin).',
         ),
       ),
       AffordabilityVerdict.tight => (
         AppColors.warning,
-        Icons.warning_amber_rounded,
+        Icons.trending_flat_rounded,
         _cityDetailLocalizedText(
           context,
-          pt: 'sobra pouco (cerca de $amount por mês) depois do custo de vida típico.',
-          es: 'sobra poco (unos $amount por mes) después del costo de vida típico.',
-          en: 'little is left (about $amount per month) after a typical cost of living.',
+          pt: 'fica perto do custo de vida típico (referência: ~$amount/mês de margem).',
+          es: 'queda cerca del costo de vida típico (referencia: ~$amount/mes de margen).',
+          en: 'is close to the typical cost of living (reference: ~$amount/mo margin).',
         ),
       ),
       AffordabilityVerdict.insufficient => (
         AppColors.danger,
-        Icons.error_outline_rounded,
+        Icons.trending_down_rounded,
         _cityDetailLocalizedText(
           context,
-          pt: 'não cobre o custo de vida típico — faltam cerca de $amount por mês.',
-          es: 'no cubre el costo de vida típico: faltan unos $amount por mes.',
-          en: 'it does not cover a typical cost of living — about $amount short per month.',
+          pt: 'fica abaixo do custo de vida típico (referência: diferença de ~$amount/mês).',
+          es: 'queda por debajo del costo de vida típico (referencia: diferencia de ~$amount/mes).',
+          en: 'is below the typical cost of living (reference: ~$amount/mo gap).',
         ),
       ),
     };
@@ -7020,6 +7023,8 @@ class _AffordabilityNoteState extends State<_AffordabilityNote> {
               border: const OutlineInputBorder(),
             ),
           ),
+          const SizedBox(height: 12),
+          const PracticalInfoDisclaimer(compact: true),
         ],
       ),
     );
