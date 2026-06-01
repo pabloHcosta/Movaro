@@ -22,12 +22,14 @@ import 'package:movaro_app/core/widgets/error_state_widget.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
+import 'package:movaro_app/core/utils/share_card_service.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
 import 'package:movaro_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
 import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
+import 'package:movaro_app/features/cities/application/services/city_affordability_check.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
 import 'package:movaro_app/features/cities/application/services/city_seasonality_conflict_service.dart';
 import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
@@ -44,6 +46,7 @@ import 'package:movaro_app/features/cities/presentation/widgets/city_metric_pres
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_public_opinion_section.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_seasonality_section.dart';
+import 'package:movaro_app/features/cities/presentation/widgets/city_share_card.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_sources_section.dart';
 import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
 import 'package:movaro_app/features/city_insights/domain/entities/city_insight_entity.dart';
@@ -590,6 +593,11 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                 budget: budget,
                                 preferredCountryId: plan?.originCountry,
                               ),
+                            ),
+                            const SizedBox(height: 12),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 1160),
+                              child: _AffordabilityNote(city: city),
                             ),
                             const SizedBox(height: 12),
                           ],
@@ -1753,8 +1761,103 @@ class _CityDetailPageState extends State<CityDetailPage> {
       ),
     ];
 
+    actions.add(
+      _DetailQuickAction(
+        icon: Icons.ios_share_rounded,
+        label: _cityDetailLocalizedText(
+          context,
+          pt: 'Compartilhar',
+          es: 'Compartir',
+          en: 'Share',
+        ),
+        onTap: () => unawaited(_shareCityCard(context, city)),
+        priority: 90,
+      ),
+    );
+
     actions.sort((a, b) => a.priority.compareTo(b.priority));
     return actions;
+  }
+
+  Future<void> _shareCityCard(BuildContext context, City city) async {
+    final l10n = context.l10n;
+    final affordability = CityAffordabilityCheck.forLocalSalary(city);
+
+    String? verdictLine;
+    Color? verdictColor;
+    if (affordability != null) {
+      final amount = _formatBrl(affordability.gap.abs());
+      final income = _formatBrl(affordability.monthlyIncome);
+      (verdictColor, verdictLine) = switch (affordability.verdict) {
+        AffordabilityVerdict.comfortable => (
+          AppColors.success,
+          _cityDetailLocalizedText(
+            context,
+            pt: 'Salário médio local: $income — sobra ~$amount/mês.',
+            es: 'Sueldo promedio local: $income — sobran ~$amount/mes.',
+            en: 'Local average salary: $income — about $amount/mo left.',
+          ),
+        ),
+        AffordabilityVerdict.tight => (
+          AppColors.warning,
+          _cityDetailLocalizedText(
+            context,
+            pt: 'Salário médio local: $income — sobra pouco (~$amount/mês).',
+            es: 'Sueldo promedio local: $income — sobra poco (~$amount/mes).',
+            en: 'Local average salary: $income — little left (~$amount/mo).',
+          ),
+        ),
+        AffordabilityVerdict.insufficient => (
+          AppColors.danger,
+          _cityDetailLocalizedText(
+            context,
+            pt: 'Salário médio local: $income — faltam ~$amount/mês.',
+            es: 'Sueldo promedio local: $income — faltan ~$amount/mes.',
+            en: 'Local average salary: $income — short ~$amount/mo.',
+          ),
+        ),
+      };
+    }
+
+    final region = city.regionName;
+    final subtitle = (region == null || region.isEmpty)
+        ? city.stateName
+        : '${city.stateName} · $region';
+
+    final card = CityShareCard(
+      cityName: city.name,
+      subtitle: subtitle,
+      verdictLine: verdictLine,
+      verdictColor: verdictColor,
+      areasTitle: _cityDetailLocalizedText(
+        context,
+        pt: 'Áreas que empregam',
+        es: 'Áreas que emplean',
+        en: 'Industries hiring',
+      ),
+      areas: city.topIndustries.take(3).map(l10n.workAreaLabel).toList(),
+      footer: _cityDetailLocalizedText(
+        context,
+        pt: 'Custo, trabalho e trâmites para morar no Brasil — app Movaro.',
+        es: 'Costo, trabajo y trámites para vivir en Brasil — app Movaro.',
+        en: 'Cost, work, and paperwork to live in Brazil — Movaro app.',
+      ),
+    );
+
+    final caption = _cityDetailLocalizedText(
+      context,
+      pt: 'Pensando em morar em ${city.name}/${city.stateCode}? Veja custo e trabalho no Movaro.',
+      es: '¿Pensás vivir en ${city.name}/${city.stateCode}? Mirá costo y trabajo en Movaro.',
+      en: 'Thinking of moving to ${city.name}/${city.stateCode}? See cost and work on Movaro.',
+    );
+
+    await ShareCardService.shareWidget(
+      context: context,
+      card: card,
+      logicalSize: const Size(340, 440),
+      caption: caption,
+      fileName: 'movaro_${city.id}.png',
+    );
   }
 
   List<City> _comparisonCitiesFor(City city) {
@@ -5039,14 +5142,21 @@ class _DecisionSnapshotPanel extends StatelessWidget {
               ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 10),
-            for (final watchout in watchouts) ...[
+            for (final (index, watchout) in watchouts.indexed) ...[
               InsightCard(
-                title: context.l10n.cityDetailWatchoutTitle,
+                title: index == 0
+                    ? context.l10n.cityDetailWatchoutTitle
+                    : _cityDetailLocalizedText(
+                        context,
+                        pt: 'Outro ponto a validar',
+                        es: 'Otro punto a validar',
+                        en: 'Also worth checking',
+                      ),
                 body: watchout,
                 icon: Icons.warning_amber_rounded,
                 tint: AppColors.warning,
               ),
-              if (watchout != watchouts.last) const SizedBox(height: 8),
+              if (index < watchouts.length - 1) const SizedBox(height: 8),
             ],
           ],
         ],
@@ -6753,6 +6863,167 @@ String _cityDetailLocalizedText(
     'en' => en,
     _ => pt,
   };
+}
+
+/// "Dá pra viver com o salário daqui?" — compact, always-on affordability
+/// verdict comparing a monthly net income against a typical monthly cost of
+/// living. Defaults to the city's local average salary and lets the user try
+/// their own income. Renders nothing when the city has no budget data.
+class _AffordabilityNote extends StatefulWidget {
+  const _AffordabilityNote({required this.city});
+
+  final City? city;
+
+  @override
+  State<_AffordabilityNote> createState() => _AffordabilityNoteState();
+}
+
+class _AffordabilityNoteState extends State<_AffordabilityNote> {
+  final TextEditingController _incomeController = TextEditingController();
+  int? _customIncome;
+
+  @override
+  void dispose() {
+    _incomeController.dispose();
+    super.dispose();
+  }
+
+  void _onIncomeChanged(String value) {
+    final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+    final parsed = int.tryParse(digits);
+    setState(() {
+      _customIncome = (parsed != null && parsed > 0) ? parsed : null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final city = widget.city;
+    if (city == null || !CityAffordabilityCheck.isAvailable(city)) {
+      return const SizedBox.shrink();
+    }
+
+    final income = _customIncome;
+    final result = income != null
+        ? CityAffordabilityCheck.forIncome(city, income)
+        : CityAffordabilityCheck.forLocalSalary(city);
+    if (result == null) {
+      return const SizedBox.shrink();
+    }
+
+    final amount = _formatBrl(result.gap.abs());
+    final incomeLabel = _formatBrl(result.monthlyIncome);
+
+    final incomeLead = result.usesLocalAverageSalary
+        ? _cityDetailLocalizedText(
+            context,
+            pt: 'Com o salário médio local ($incomeLabel), ',
+            es: 'Con el salario promedio local ($incomeLabel), ',
+            en: 'On the local average salary ($incomeLabel), ',
+          )
+        : _cityDetailLocalizedText(
+            context,
+            pt: 'Com $incomeLabel por mês, ',
+            es: 'Con $incomeLabel por mes, ',
+            en: 'On $incomeLabel per month, ',
+          );
+
+    final (Color color, IconData icon, String body) = switch (result.verdict) {
+      AffordabilityVerdict.comfortable => (
+        AppColors.success,
+        Icons.check_circle_outline_rounded,
+        _cityDetailLocalizedText(
+          context,
+          pt: 'sobra cerca de $amount por mês depois do custo de vida típico.',
+          es: 'sobran unos $amount por mes después del costo de vida típico.',
+          en: 'about $amount is left each month after a typical cost of living.',
+        ),
+      ),
+      AffordabilityVerdict.tight => (
+        AppColors.warning,
+        Icons.warning_amber_rounded,
+        _cityDetailLocalizedText(
+          context,
+          pt: 'sobra pouco (cerca de $amount por mês) depois do custo de vida típico.',
+          es: 'sobra poco (unos $amount por mes) después del costo de vida típico.',
+          en: 'little is left (about $amount per month) after a typical cost of living.',
+        ),
+      ),
+      AffordabilityVerdict.insufficient => (
+        AppColors.danger,
+        Icons.error_outline_rounded,
+        _cityDetailLocalizedText(
+          context,
+          pt: 'não cobre o custo de vida típico — faltam cerca de $amount por mês.',
+          es: 'no cubre el costo de vida típico: faltan unos $amount por mes.',
+          en: 'it does not cover a typical cost of living — about $amount short per month.',
+        ),
+      ),
+    };
+
+    final title = _cityDetailLocalizedText(
+      context,
+      pt: 'Dá pra viver com o salário daqui?',
+      es: '¿Se puede vivir con el sueldo de acá?',
+      en: 'Can you live on the local salary?',
+    );
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: color, size: 22),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$incomeLead$body',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _incomeController,
+            keyboardType: TextInputType.number,
+            onChanged: _onIncomeChanged,
+            decoration: InputDecoration(
+              isDense: true,
+              prefixText: 'R\$ ',
+              labelText: _cityDetailLocalizedText(
+                context,
+                pt: 'Ver com o meu salário (por mês)',
+                es: 'Ver con mi sueldo (por mes)',
+                en: 'Try my own salary (per month)',
+              ),
+              border: const OutlineInputBorder(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 String _salaryCoverageSupporting(

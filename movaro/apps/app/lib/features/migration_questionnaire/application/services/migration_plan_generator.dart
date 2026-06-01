@@ -15,13 +15,24 @@ class MigrationPlanGenerator {
 
   // ── Shortlist balancing: familiar reference cities for Argentinian users ──
   //
-  // When none of these appear, the shortlist can feel disconnected from the
-  // user's mental model. We keep at least one visible in the shortlist, but
-  // avoid forcing a deterministic #1 result around it.
-  static const _anchorCityIds = {
+  // We keep one familiar reference visible so the shortlist feels grounded,
+  // without forcing a deterministic #1 result around it. The reference is
+  // chosen by ICP: the PRIMARY profile is the economic migrant (work/cost
+  // driven), so for those profiles we anchor to a familiar *job hub* (South,
+  // interior or a major metro) — not a beach town. The SECONDARY lifestyle
+  // profile anchors to familiar coastal/quality-of-life cities instead.
+  static const _workAnchorCityIds = {
+    'porto-alegre-rs',
+    'curitiba-pr',
+    'joinville-sc',
+    'caxias-do-sul-rs',
+    'campinas-sp',
+    'sao-paulo-sp',
+  };
+
+  static const _lifestyleAnchorCityIds = {
     'florianopolis-sc',
     'rio-de-janeiro-rj',
-    'sao-paulo-sp',
     'balneario-camboriu-sc',
     'curitiba-pr',
   };
@@ -143,16 +154,21 @@ class MigrationPlanGenerator {
     'buenos_aires': {'job_market': 0.15},
   };
 
+  // Low-signal default ("balanced_unsure"). Leans gently toward the PRIMARY
+  // ICP (economic migrant): affordability, job market and proximity to
+  // Argentina are weighted slightly above lifestyle dimensions, so an
+  // undecided user is nudged toward practical, work-viable cities rather than
+  // beach towns — without overriding any explicit preference they do give.
   static const Map<String, double> _balancedPreset = {
-    'affordability': 0.3,
-    'job_market': 0.3,
-    'safety': 0.3,
-    'climate_warmth': 0.3,
-    'transit_infra': 0.3,
-    'nature': 0.3,
-    'university': 0.3,
-    'community': 0.3,
-    'proximity_argentina': 0.3,
+    'affordability': 0.34,
+    'job_market': 0.34,
+    'safety': 0.30,
+    'climate_warmth': 0.28,
+    'transit_infra': 0.30,
+    'nature': 0.28,
+    'university': 0.30,
+    'community': 0.30,
+    'proximity_argentina': 0.34,
   };
 
   Future<MigrationPlan> generate({
@@ -333,12 +349,20 @@ class MigrationPlanGenerator {
       }
     }
 
-    // ── Keep at least one familiar anchor in the shortlist ────────────────
-    final hasAnchor = shortlist.any((c) => _anchorCityIds.contains(c.city.id));
+    // ── Keep one familiar anchor, chosen by ICP ──────────────────────────
+    // Primary ICP (economic migrant) anchors to a familiar job hub; the
+    // secondary lifestyle profile anchors to a familiar coastal city. This
+    // stops the engine from forcing a beach town into a work-seeker's result.
+    final preferredAnchors = isLifestyle
+        ? _lifestyleAnchorCityIds
+        : _workAnchorCityIds;
+    final hasAnchor = shortlist.any(
+      (c) => preferredAnchors.contains(c.city.id),
+    );
     if (!hasAnchor) {
       _ScoredCity? best;
       for (final candidate in ranked) {
-        if (_anchorCityIds.contains(candidate.city.id)) {
+        if (preferredAnchors.contains(candidate.city.id)) {
           best = candidate;
           break;
         }

@@ -83,9 +83,9 @@ class _SplashLoadingViewState extends State<SplashLoadingView>
 
   String _tagline(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'es' => 'Tu guia para explorar ciudades con más claridad.',
-      'en' => 'Your guide to explore cities with more clarity.',
-      _ => 'Seu guia para explorar cidades com mais clareza.',
+      'es' => 'Tu guía para mudarte a Brasil y arrancar con el pie derecho.',
+      'en' => 'Your guide to moving to Brazil and starting on the right foot.',
+      _ => 'Seu guia para mudar para o Brasil e começar com o pé direito.',
     };
   }
 

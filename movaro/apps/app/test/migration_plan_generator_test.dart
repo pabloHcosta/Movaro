@@ -56,7 +56,7 @@ void main() {
           ],
         );
 
-        expect(plan.recommendedCity?.id, 'curitiba');
+        expect(plan.highlightedCity?.id, 'curitiba');
         expect(plan.candidateCities.take(3).map((city) => city.id), [
           'curitiba',
           'porto_alegre',
@@ -153,6 +153,12 @@ class _FakeCitiesRepository implements CitiesRepository {
 
   final List<City> cities;
 
+  // City-detail payload methods are not exercised here; route any
+  // unimplemented repository member to a clear failure instead of breaking
+  // compilation when the interface grows.
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+
   @override
   Future<List<City>> getCities({
     String? category,
@@ -201,6 +207,7 @@ const _source = CitySource(
   description: 'Mock source',
   isOfficial: true,
   url: null,
+  sourceType: 'official',
 );
 
 const _sources = CitySources(

@@ -48,6 +48,7 @@ flutter:
     - assets/brand/
     - assets/illustrations/
     - assets/seed/
+    - assets/seed/snapshots/
 
 flutter_launcher_icons:
   android: true

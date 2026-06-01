@@ -8,7 +8,9 @@ import 'package:movaro_app/app/localization/locale_scope.dart';
 import 'package:movaro_app/app/router/app_router.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_theme.dart';
+import 'package:movaro_app/app/currency/currency_controller.dart';
 import 'package:movaro_app/app/theme/theme_controller.dart';
+import 'package:movaro_app/core/exchange_rates/exchange_rates_controller.dart';
 import 'package:movaro_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
 import 'package:movaro_app/features/catalog/data/repositories/catalog_repository_impl.dart';
 import 'package:movaro_app/core/environment/api_source.dart';
@@ -219,7 +221,7 @@ void main() {
     final city = harness
         .migrationQuestionnaireController
         .generatedPlan!
-        .recommendedCity!;
+        .highlightedCity!;
     await harness.migrationQuestionnaireController.confirmPlanCity(city);
 
     await tester.pumpWidget(
@@ -243,7 +245,7 @@ void main() {
     final city = harness
         .migrationQuestionnaireController
         .generatedPlan!
-        .recommendedCity!;
+        .highlightedCity!;
     await harness.migrationQuestionnaireController.confirmPlanCity(city);
 
     await tester.pumpWidget(
@@ -269,7 +271,7 @@ void main() {
     final city = harness
         .migrationQuestionnaireController
         .generatedPlan!
-        .recommendedCity!;
+        .highlightedCity!;
     await harness.migrationQuestionnaireController.confirmPlanCity(city);
 
     await tester.pumpWidget(
@@ -301,7 +303,7 @@ void main() {
     final city = harness
         .migrationQuestionnaireController
         .generatedPlan!
-        .recommendedCity!;
+        .highlightedCity!;
     await harness.migrationQuestionnaireController.confirmPlanCity(city);
 
     await tester.pumpWidget(
@@ -414,6 +416,10 @@ class _AppTestHarness {
     final localeController = LocaleController();
     localeController.setLocale(const Locale('pt'));
     final themeController = ThemeController();
+    final currencyController = CurrencyController();
+    final exchangeRatesController = ExchangeRatesController(
+      service: copilotExchangeRatesService,
+    );
 
     await journeyContextController.initialize();
     await journeyContextController.markIntroSeen();
@@ -442,6 +448,8 @@ class _AppTestHarness {
         locationController: locationController,
         localeController: localeController,
         themeController: themeController,
+        currencyController: currencyController,
+        exchangeRatesController: exchangeRatesController,
       ),
       tempDirectory: tempDirectory,
     );
@@ -492,6 +500,9 @@ class _AppTestHarness {
 
 class _FakeCitiesRepository implements CitiesRepository {
   const _FakeCitiesRepository();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 
   @override
   Future<CityHighlights> getHighlights() async {
@@ -648,6 +659,13 @@ class _FakeCopilotExchangeRatesService extends CopilotExchangeRatesService {
       arsToBrl: 0.0052,
       usdToArs: 969.0,
       arsToUsd: 0.00103,
+      brlToEur: 0.17,
+      brlToClp: 170.0,
+      brlToUyu: 7.5,
+      brlToCop: 720.0,
+      brlToPen: 0.66,
+      brlToPyg: 1350.0,
+      brlToBob: 1.2,
       fetchedAt: '2026-03-12T12:00:00Z',
       source: 'test',
       sources: ['test'],

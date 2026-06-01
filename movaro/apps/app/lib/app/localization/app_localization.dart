@@ -532,39 +532,39 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String introRedesignCityTitle() => _localizedText(
-    pt: 'Descubra qual cidade faz mais sentido para você',
-    es: 'Descubrí qué ciudad tiene más sentido para vos',
-    en: 'Discover which city makes the most sense for you',
+    pt: 'Ache a cidade certa para trabalhar e recomeçar',
+    es: 'Encontrá la ciudad ideal para trabajar y arrancar de nuevo',
+    en: 'Find the right city to work and start over',
   );
 
   String introRedesignCityDescription() => _localizedText(
-    pt: 'A gente compara custo, trabalho e qualidade de vida para te ajudar a decidir com mais segurança.',
-    es: 'Comparamos costo, trabajo y calidad de vida para ayudarte a decidir con más seguridad.',
-    en: 'We compare cost, work, and quality of life to help you decide with more confidence.',
+    pt: 'Comparamos trabalho, custo de vida e distância da Argentina para você escolher com segurança — mesmo começando com pouco.',
+    es: 'Comparamos trabajo, costo de vida y distancia con Argentina para que elijas con seguridad, incluso si arrancás con poco.',
+    en: 'We compare jobs, cost of living, and distance from Argentina so you can choose with confidence — even if you are starting with little.',
   );
 
   String introRedesignPlanTitle() => _localizedText(
-    pt: 'Em poucos passos, você já sabe o que fazer',
-    es: 'En pocos pasos, ya sabés qué hacer',
-    en: 'In just a few steps, you will know what to do',
+    pt: 'Um plano claro do que fazer primeiro',
+    es: 'Un plan claro de qué hacer primero',
+    en: 'A clear plan of what to do first',
   );
 
   String introRedesignPlanDescription() => _localizedText(
-    pt: 'A gente transforma suas respostas em um plano claro para você revisar e organizar sua jornada.',
-    es: 'Transformamos tus respuestas en un plan claro para que revises y organices tu camino.',
-    en: 'We turn your answers into a clear plan you can review and use to organize your journey.',
+    pt: 'Suas respostas viram um passo a passo prático: cidade, documentos e os primeiros 90 dias no Brasil.',
+    es: 'Tus respuestas se vuelven un paso a paso práctico: ciudad, documentos y los primeros 90 días en Brasil.',
+    en: 'Your answers become a practical step-by-step: city, documents, and your first 90 days in Brazil.',
   );
 
   String introRedesignGuideTitle() => _localizedText(
-    pt: 'Entenda o que costuma valer revisar antes de chegar',
-    es: 'Entendé qué suele valer la pena revisar antes de llegar',
-    en: 'Understand what is commonly worth reviewing before you arrive',
+    pt: 'Resolva a papelada sem se perder',
+    es: 'Resolvé los trámites sin perderte',
+    en: 'Handle the paperwork without getting lost',
   );
 
   String introRedesignGuideDescription() => _localizedText(
-    pt: 'Documentos, moradia e primeiros passos organizados para você não se perder.',
-    es: 'Documentos, vivienda y primeros pasos organizados para que no te pierdas.',
-    en: 'Documents, housing, and first steps organized so you do not get lost.',
+    pt: 'CPF, residência Mercosul, conta no banco e aluguel — na ordem certa, com fontes oficiais.',
+    es: 'CPF, residencia Mercosur, cuenta bancaria y alquiler — en el orden correcto y con fuentes oficiales.',
+    en: 'CPF, Mercosur residency, bank account, and rent — in the right order, with official sources.',
   );
 
   String introRedesignLocationTitle() => _localizedText(
@@ -578,6 +578,145 @@ extension AppLocalizationsFormatting on AppLocalizations {
     es: 'Con tu ubicación, ajustamos costos, documentos y recomendaciones.',
     en: 'With your location, we can tailor costs, documents, and recommendations.',
   );
+
+  String citiesWorkAreaFilterLabel() => _localizedText(
+    pt: 'Filtrar por área de trabalho',
+    es: 'Filtrar por área de trabajo',
+    en: 'Filter by work area',
+  );
+
+  /// Localized display label for a work area (industry) coming from the city
+  /// catalog (stored in Portuguese). Falls back to the raw label when unknown,
+  /// so new industries still render instead of breaking.
+  String workAreaLabel(String area) {
+    switch (_normalizeWorkArea(area)) {
+      case 'servicos':
+        return _localizedText(pt: 'Serviços', es: 'Servicios', en: 'Services');
+      case 'turismo':
+        return _localizedText(pt: 'Turismo', es: 'Turismo', en: 'Tourism');
+      case 'comercio':
+        return _localizedText(pt: 'Comércio', es: 'Comercio', en: 'Commerce');
+      case 'tecnologia':
+        return _localizedText(
+          pt: 'Tecnologia',
+          es: 'Tecnología',
+          en: 'Technology',
+        );
+      case 'hospedagem':
+        return _localizedText(
+          pt: 'Hospedagem',
+          es: 'Hospedaje',
+          en: 'Hospitality',
+        );
+      case 'porto':
+        return _localizedText(pt: 'Porto', es: 'Puerto', en: 'Port');
+      case 'saude':
+        return _localizedText(pt: 'Saúde', es: 'Salud', en: 'Healthcare');
+      case 'agronegocio':
+        return _localizedText(
+          pt: 'Agronegócio',
+          es: 'Agronegocio',
+          en: 'Agribusiness',
+        );
+      case 'logistica':
+        return _localizedText(
+          pt: 'Logística',
+          es: 'Logística',
+          en: 'Logistics',
+        );
+      case 'industria':
+        return _localizedText(pt: 'Indústria', es: 'Industria', en: 'Industry');
+      case 'energia':
+        return _localizedText(pt: 'Energia', es: 'Energía', en: 'Energy');
+      case 'construcao':
+        return _localizedText(
+          pt: 'Construção',
+          es: 'Construcción',
+          en: 'Construction',
+        );
+      case 'gastronomia':
+        return _localizedText(
+          pt: 'Gastronomia',
+          es: 'Gastronomía',
+          en: 'Gastronomy',
+        );
+      case 'transporte maritimo':
+        return _localizedText(
+          pt: 'Transporte marítimo',
+          es: 'Transporte marítimo',
+          en: 'Maritime transport',
+        );
+      case 'agroindustria':
+        return _localizedText(
+          pt: 'Agroindústria',
+          es: 'Agroindustria',
+          en: 'Agro-industry',
+        );
+      case 'frigorificos':
+        return _localizedText(
+          pt: 'Frigoríficos',
+          es: 'Frigoríficos',
+          en: 'Meat processing',
+        );
+      case 'industria metal-mecanica':
+        return _localizedText(
+          pt: 'Indústria metal-mecânica',
+          es: 'Industria metalmecánica',
+          en: 'Metalworking',
+        );
+      case 'autopecas':
+        return _localizedText(
+          pt: 'Autopeças',
+          es: 'Autopartes',
+          en: 'Auto parts',
+        );
+      case 'educacao':
+        return _localizedText(
+          pt: 'Educação',
+          es: 'Educación',
+          en: 'Education',
+        );
+      case 'financas':
+        return _localizedText(pt: 'Finanças', es: 'Finanzas', en: 'Finance');
+      case 'administracao publica':
+        return _localizedText(
+          pt: 'Administração pública',
+          es: 'Administración pública',
+          en: 'Public administration',
+        );
+      case 'universidades':
+        return _localizedText(
+          pt: 'Universidades',
+          es: 'Universidades',
+          en: 'Universities',
+        );
+      case 'biotecnologia':
+        return _localizedText(
+          pt: 'Biotecnologia',
+          es: 'Biotecnología',
+          en: 'Biotech',
+        );
+      default:
+        return area;
+    }
+  }
+
+  String _normalizeWorkArea(String value) {
+    const accents = {
+      'á': 'a', 'à': 'a', 'ã': 'a', 'â': 'a',
+      'é': 'e', 'ê': 'e',
+      'í': 'i',
+      'ó': 'o', 'ô': 'o', 'õ': 'o',
+      'ú': 'u',
+      'ç': 'c',
+    };
+    final lower = value.trim().toLowerCase();
+    final buffer = StringBuffer();
+    for (final ch in lower.split('')) {
+      buffer.write(accents[ch] ?? ch);
+    }
+    return buffer.toString();
+  }
 
   String commonNextAction() =>
       _localizedText(pt: 'Continuar', es: 'Continuar', en: 'Continue');

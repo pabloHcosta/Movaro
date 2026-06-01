@@ -21,6 +21,7 @@ import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
+import 'package:movaro_app/features/cities/application/services/city_work_area_lens.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_arrival_profile_ranker.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_card.dart';
@@ -55,6 +56,7 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
   late final ScrollController _scrollController;
   Timer? _searchDebounce;
   _CityQuickFilter? _quickFilter;
+  String? _workArea;
   int _visibleCount = _pageSize;
   bool _didTryAutoHelp = false;
 
@@ -96,19 +98,24 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
         final visibleCities = _visibleCities(controller);
         final pagedCities = visibleCities.take(_visibleCount).toList();
         final suggestions = _autocompleteSuggestions(controller);
-        final shouldShowResults = hasQuery || _quickFilter != null;
+        final isCatalogBootstrapping =
+            controller.catalog.isEmpty && controller.catalogError == null;
+        // Default surface shows the full catalog — no empty landing. Results
+        // are visible whenever there is a query, a filter, a loaded catalog,
+        // a catalog still loading, or a catalog error to surface.
+        final shouldShowResults =
+            hasQuery ||
+            _quickFilter != null ||
+            controller.catalog.isNotEmpty ||
+            isCatalogBootstrapping ||
+            controller.catalogError != null;
         final isLoadingResults = hasQuery
             ? controller.isSearching
-            : _quickFilter != null && controller.isLoadingCatalog;
+            : (_quickFilter != null || controller.catalog.isEmpty) &&
+                  controller.isLoadingCatalog;
         final resultsError = hasQuery
             ? controller.searchError
-            : _quickFilter != null
-            ? controller.catalogError
-            : null;
-        final isCatalogBootstrapping =
-            controller.catalog.isEmpty &&
-            controller.catalogError == null &&
-            (controller.isLoadingCatalog || hasQuery || _quickFilter != null);
+            : controller.catalogError;
 
         final favoriteCities = widget.citiesController.favoriteCities;
         final canDecide =
@@ -218,6 +225,18 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                               onSelected: _handleQuickFilterSelection,
                               clearLabel: l10n.citiesFilterClear,
                             ),
+                            if (_quickFilter == _CityQuickFilter.work) ...[
+                              const SizedBox(height: 12),
+                              _WorkAreaRail(
+                                areas: CityWorkAreaLens.availableAreas(
+                                  widget.citiesController.catalog,
+                                ),
+                                selectedArea: _workArea,
+                                label: l10n.citiesWorkAreaFilterLabel(),
+                                labelBuilder: l10n.workAreaLabel,
+                                onSelected: _handleWorkAreaSelection,
+                              ),
+                            ],
                             const SizedBox(height: 14),
                             _CitiesMapCallout(
                               title: l10n.citiesMapOpenAction,
@@ -295,7 +314,14 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                           children: [
                             _ResultsHeader(
                               title: l10n.citiesResultsTitle,
-                              body: l10n.citiesResultsBody(pagedCities.length),
+                              body: (!hasQuery && _quickFilter == null)
+                                  ? _exploreText(
+                                      context,
+                                      pt: '${visibleCities.length} cidades no catálogo para explorar.',
+                                      es: '${visibleCities.length} ciudades en el catálogo para explorar.',
+                                      en: '${visibleCities.length} cities in the catalog to explore.',
+                                    )
+                                  : l10n.citiesResultsBody(visibleCities.length),
                             ),
                             const SizedBox(height: 16),
                             for (final city in pagedCities) ...[
@@ -460,11 +486,37 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
   Future<void> _handleQuickFilterSelection(_CityQuickFilter? filter) async {
     setState(() {
       _quickFilter = _quickFilter == filter ? null : filter;
+      if (_quickFilter != _CityQuickFilter.work) {
+        _workArea = null;
+      }
       _visibleCount = _pageSize;
     });
 
     if (_quickFilter != null && widget.citiesController.catalog.isEmpty) {
       await widget.citiesController.loadCatalog();
+    }
+  }
+
+  void _handleWorkAreaSelection(String? area) {
+    setState(() {
+      _workArea = area;
+      _visibleCount = _pageSize;
+    });
+  }
+
+  String _exploreText(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) {
+    switch (Localizations.localeOf(context).languageCode) {
+      case 'es':
+        return es;
+      case 'en':
+        return en;
+      default:
+        return pt;
     }
   }
 
@@ -570,9 +622,7 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                 ? controller.catalog
                 : controller.searchResults,
           )
-        : _quickFilter != null
-        ? List<City>.from(controller.catalog)
-        : <City>[];
+        : List<City>.from(controller.catalog);
 
     if (source.isEmpty) {
       return const [];
@@ -620,12 +670,7 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
         );
         return activeCities;
       case _CityQuickFilter.work:
-        activeCities.sort(
-          (a, b) => b.movaroScores.workOpportunity.compareTo(
-            a.movaroScores.workOpportunity,
-          ),
-        );
-        return activeCities;
+        return CityWorkAreaLens.applyWorkLens(activeCities, area: _workArea);
       case _CityQuickFilter.language:
         activeCities.sort(
           (a, b) => b.movaroScores.languageAdaptation.compareTo(
@@ -1397,6 +1442,60 @@ enum _CityQuickFilter {
   metropolis,
   inland,
   border,
+}
+
+/// Horizontal row of work-area (industry) chips for the "Trabalho" jobs lens.
+/// Lets the economic-migrant ICP narrow the catalog to "where can I work in my
+/// field?". Tapping a selected chip clears the filter.
+class _WorkAreaRail extends StatelessWidget {
+  const _WorkAreaRail({
+    required this.areas,
+    required this.selectedArea,
+    required this.label,
+    required this.labelBuilder,
+    required this.onSelected,
+  });
+
+  final List<String> areas;
+  final String? selectedArea;
+  final String label;
+  final String Function(String area) labelBuilder;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (areas.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final selected = selectedArea?.toLowerCase();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(label, style: Theme.of(context).textTheme.labelMedium),
+        ),
+        SizedBox(
+          height: 40,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: areas.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final area = areas[index];
+              final isSelected = selected != null &&
+                  selected == area.toLowerCase();
+              return ChoiceChip(
+                label: Text(labelBuilder(area)),
+                selected: isSelected,
+                onSelected: (_) => onSelected(isSelected ? null : area),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 String _normalizeSearch(String value) {

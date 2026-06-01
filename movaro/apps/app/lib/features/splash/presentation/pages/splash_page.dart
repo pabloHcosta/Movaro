@@ -9,7 +9,6 @@ import 'package:movaro_app/features/auth/application/auth_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/splash/presentation/pages/splash_loading_view.dart';
-import 'package:movaro_app/features/splash/presentation/pages/splash_offline_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({
@@ -35,13 +34,10 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-enum SplashStatus { loading, offline }
-
 class _SplashPageState extends State<SplashPage> {
   static const _minimumBrandExposure = Duration(milliseconds: 2400);
 
   bool _started = false;
-  SplashStatus _status = SplashStatus.loading;
 
   @override
   void didChangeDependencies() {
@@ -55,32 +51,34 @@ class _SplashPageState extends State<SplashPage> {
   Future<void> _initialize() async {
     final startedAt = DateTime.now();
 
-    if (mounted) {
-      setState(() {
-        _status = SplashStatus.loading;
-      });
-    }
+    // The backend is treated as an enhancement, not a gate. A failed health
+    // check (no connection, slow network, cold backend, blocked origin) must
+    // never brick the app at launch: we still boot into the public experience
+    // and let each surface degrade gracefully (cached data, seed fallback or a
+    // local inline retry). This protects the "explore in seconds, no account"
+    // promise even when the API is temporarily unreachable.
+    await _runStep('api_health_check', () => widget.apiHealthService.check());
 
-    try {
-      await widget.apiHealthService.check();
-    } catch (_) {
-      if (!mounted) return;
-
-      setState(() {
-        _status = SplashStatus.offline;
-      });
-      return;
-    }
-
-    await widget.journeyContextController.initialize();
-    await widget.locationController.initialize();
-    await widget.authController.initialize();
-    await widget.citiesController.initialize(
-      preloadData: widget.journeyContextController.hasSelectedJourney,
+    // Each initialization step is best-effort and isolated: a failure in one
+    // (e.g. a network-backed call while offline) must not abort the boot.
+    await _runStep(
+      'journey_context',
+      () => widget.journeyContextController.initialize(),
+    );
+    await _runStep('location', () => widget.locationController.initialize());
+    await _runStep('auth', () => widget.authController.initialize());
+    await _runStep(
+      'cities',
+      () => widget.citiesController.initialize(
+        preloadData: widget.journeyContextController.hasSelectedJourney,
+      ),
     );
 
     if (widget.journeyContextController.hasSelectedJourney) {
-      await widget.migrationQuestionnaireController.initialize();
+      await _runStep(
+        'migration_questionnaire',
+        () => widget.migrationQuestionnaireController.initialize(),
+      );
     }
 
     final elapsed = DateTime.now().difference(startedAt);
@@ -116,19 +114,23 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 
+  /// Runs a single boot step, swallowing (but logging) any failure so that a
+  /// degraded dependency never blocks the launch sequence.
+  Future<void> _runStep(String label, Future<void> Function() step) async {
+    try {
+      await step();
+    } catch (error) {
+      debugPrint('Splash: boot step "$label" failed, continuing: $error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    switch (_status) {
-      case SplashStatus.offline:
-        return SplashOfflinePage(onRetry: _initialize);
-
-      case SplashStatus.loading:
-        return SplashLoadingView(
-          loadingLabel: l10n.splashLoadingLabel,
-          initializingLabel: l10n.splashInitializingLabel,
-        );
-    }
+    return SplashLoadingView(
+      loadingLabel: l10n.splashLoadingLabel,
+      initializingLabel: l10n.splashInitializingLabel,
+    );
   }
 }

@@ -44,8 +44,12 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Environment / secret files — never commit these
+# Environment / secret files — never commit these.
+# Only *.example templates (placeholder values) stay tracked.
 .env
 .env.*
 *.env
 .env.*.json
+!.env.example
+!.env.*.example
+!.env.example.json

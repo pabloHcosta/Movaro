@@ -3,6 +3,7 @@ import 'package:movaro_app/app/currency/currency_controller.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/localization/locale_controller.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/app/presentation/pages/trust_and_support_page.dart';
 import 'package:movaro_app/app/theme/theme_controller.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -249,6 +250,48 @@ class AppSettingsPage extends StatelessWidget {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(
+                                    width: compact
+                                        ? constraints.maxWidth
+                                        : (constraints.maxWidth - 14) / 2,
+                                    child: _EntranceReveal(
+                                      delayIndex: 5,
+                                      child: _SettingCard(
+                                        icon: Icons.verified_user_outlined,
+                                        title: _settingsText(
+                                          context,
+                                          pt: 'Confiança e apoio',
+                                          es: 'Confianza y apoyo',
+                                          en: 'Trust & support',
+                                        ),
+                                        description: _settingsText(
+                                          context,
+                                          pt: 'Fontes, metodologia e apoio oficial gratuito.',
+                                          es: 'Fuentes, metodología y apoyo oficial gratuito.',
+                                          en: 'Sources, methodology and free official support.',
+                                        ),
+                                        accentColor: const Color(0xFF2E9E6B),
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: _SystemSettingsAction(
+                                            label: _settingsText(
+                                              context,
+                                              pt: 'Abrir',
+                                              es: 'Abrir',
+                                              en: 'Open',
+                                            ),
+                                            onTap: () => Navigator.of(context)
+                                                .push(
+                                                  MaterialPageRoute<void>(
+                                                    builder: (_) =>
+                                                        const TrustAndSupportPage(),
+                                                  ),
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               );
                             },
@@ -325,6 +368,19 @@ const _currencyOptions = [
   _CurrencyOption(label: 'Guaraní Paraguayo (PYG)', code: 'PYG'),
   _CurrencyOption(label: 'Boliviano (BOB)', code: 'BOB'),
 ];
+
+String _settingsText(
+  BuildContext context, {
+  required String pt,
+  required String es,
+  required String en,
+}) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'es' => es,
+    'en' => en,
+    _ => pt,
+  };
+}
 
 class _CurrencyOption {
   const _CurrencyOption({required this.label, required this.code});

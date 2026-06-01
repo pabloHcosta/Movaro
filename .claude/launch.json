@@ -12,6 +12,18 @@
       "runtimeExecutable": "bash",
       "runtimeArgs": ["-c", "cd movaro/apps/api && npm run start:dev"],
       "port": 3000
+    },
+    {
+      "name": "movaro-web",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd movaro/apps/app && flutter run -d web-server --web-port=8090 --web-hostname=127.0.0.1 -t lib/main_production.dart --dart-define-from-file=.env.production.json --dart-define=API_SOURCE=railway"],
+      "port": 8090
+    },
+    {
+      "name": "movaro-seo-static",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd movaro/apps/web/public && python3 -m http.server 8091 --bind 127.0.0.1"],
+      "port": 8091
     }
   ]
 }

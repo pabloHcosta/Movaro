@@ -1,0 +1,19 @@
+# Root safety net for the Movaro monorepo.
+# Per-app .gitignore files add more specific rules (apps/app, apps/api).
+
+# OS / editor cruft
+.DS_Store
+*.swp
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# Environment & secret files — NEVER commit real secrets anywhere in the repo.
+# Templates use the .example suffix and stay tracked.
+**/.env
+**/.env.*
+**/*.env
+!**/.env.example
+!**/.env.*.example

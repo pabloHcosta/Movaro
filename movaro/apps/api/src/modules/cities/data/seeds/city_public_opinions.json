@@ -14,7 +14,7 @@
       "qualidade de vida no dia a dia",
       "pressão entre salário médio e custo mensal"
     ],
-    "collectedAt": "2026-04-04T16:23:55.209Z"
+    "collectedAt": "2026-06-01T08:51:41.793Z"
   },
   {
     "cityId": "balneario-camboriu-sc",
@@ -29,7 +29,36 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:42.695Z"
+    "collectedAt": "2026-06-01T08:51:29.047Z"
+  },
+  {
+    "cityId": "belo-horizonte-mg",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Belo Horizonte",
+    "placeUrl": "https://livingcost.org/cost/brazil/belo-horizonte",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Belo Horizonte com quality of life 64. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-06-01T08:51:55.805Z"
+  },
+  {
+    "cityId": "brasilia-df",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Brasilia",
+    "placeUrl": "https://livingcost.org/cost/brazil/brasilia",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Brasilia com quality of life 62. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Excellent.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal"
+    ],
+    "collectedAt": "2026-06-01T08:51:57.217Z"
   },
   {
     "cityId": "cabo-frio-rj",
@@ -46,7 +75,22 @@
       "qualidade de vida no dia a dia",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:46.352Z"
+    "collectedAt": "2026-06-01T08:51:32.845Z"
+  },
+  {
+    "cityId": "campinas-sp",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Campinas",
+    "placeUrl": "https://livingcost.org/cost/brazil/campinas",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Campinas com quality of life 64. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-06-01T08:51:56.433Z"
   },
   {
     "cityId": "campo-grande-ms",
@@ -61,7 +105,38 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:58.060Z"
+    "collectedAt": "2026-06-01T08:51:44.633Z"
+  },
+  {
+    "cityId": "caxias-do-sul-rs",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Caxias do Sul",
+    "placeUrl": "https://livingcost.org/cost/brazil/caxias-do-sul",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Caxias do Sul com quality of life 58. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-06-01T08:51:53.761Z"
+  },
+  {
+    "cityId": "chapeco-sc",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Chapeco",
+    "placeUrl": "https://livingcost.org/cost/brazil/chapeco",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Chapeco com quality of life 38. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "qualidade de vida no dia a dia",
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-06-01T08:51:54.392Z"
   },
   {
     "cityId": "curitiba-pr",
@@ -78,7 +153,7 @@
     "criticalPoints": [
       "pressão entre salário médio e custo mensal"
     ],
-    "collectedAt": "2026-04-04T16:23:47.782Z"
+    "collectedAt": "2026-06-01T08:51:34.258Z"
   },
   {
     "cityId": "florianopolis-sc",
@@ -93,7 +168,7 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:42.065Z"
+    "collectedAt": "2026-06-01T08:51:28.416Z"
   },
   {
     "cityId": "foz-do-iguacu-pr",
@@ -110,7 +185,7 @@
       "qualidade de vida no dia a dia",
       "pressão entre salário médio e custo mensal"
     ],
-    "collectedAt": "2026-04-04T16:23:48.412Z"
+    "collectedAt": "2026-06-01T08:51:34.882Z"
   },
   {
     "cityId": "goiania-go",
@@ -126,7 +201,7 @@
     "criticalPoints": [
       "pressão entre salário médio e custo mensal"
     ],
-    "collectedAt": "2026-04-04T16:23:56.010Z"
+    "collectedAt": "2026-06-01T08:51:42.580Z"
   },
   {
     "cityId": "guaruja-sp",
@@ -142,7 +217,7 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:24:02.619Z"
+    "collectedAt": "2026-06-01T08:51:49.671Z"
   },
   {
     "cityId": "itajai-sc",
@@ -158,7 +233,7 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:50.467Z"
+    "collectedAt": "2026-06-01T08:51:36.915Z"
   },
   {
     "cityId": "joao-pessoa-pb",
@@ -172,7 +247,7 @@
     "criticalPoints": [
       "pressão entre salário médio e custo mensal"
     ],
-    "collectedAt": "2026-04-04T16:23:53.157Z"
+    "collectedAt": "2026-06-01T08:51:39.744Z"
   },
   {
     "cityId": "joinville-sc",
@@ -187,7 +262,22 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:49.042Z"
+    "collectedAt": "2026-06-01T08:51:35.503Z"
+  },
+  {
+    "cityId": "londrina-pr",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Londrina",
+    "placeUrl": "https://livingcost.org/cost/brazil/londrina",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Londrina com quality of life 55. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-06-01T08:51:57.840Z"
   },
   {
     "cityId": "maceio-al",
@@ -202,7 +292,7 @@
       "qualidade de vida no dia a dia",
       "pressão entre salário médio e custo mensal"
     ],
-    "collectedAt": "2026-04-04T16:23:51.893Z"
+    "collectedAt": "2026-06-01T08:51:38.329Z"
   },
   {
     "cityId": "natal-rn",
@@ -216,7 +306,7 @@
     "criticalPoints": [
       "pressão entre salário médio e custo mensal"
     ],
-    "collectedAt": "2026-04-04T16:23:54.579Z"
+    "collectedAt": "2026-06-01T08:51:41.161Z"
   },
   {
     "cityId": "niteroi-rj",
@@ -233,7 +323,24 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:46.980Z"
+    "collectedAt": "2026-06-01T08:51:33.467Z"
+  },
+  {
+    "cityId": "passo-fundo-rs",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Passo Fundo",
+    "placeUrl": "https://livingcost.org/cost/brazil/passo-fundo",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Passo Fundo com quality of life 40. O salário líquido mediano cobre o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [
+      "salário médio cobre o custo mensal"
+    ],
+    "criticalPoints": [
+      "qualidade de vida no dia a dia",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-06-01T08:51:55.012Z"
   },
   {
     "cityId": "porto-alegre-rs",
@@ -250,7 +357,7 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:51.266Z"
+    "collectedAt": "2026-06-01T08:51:37.703Z"
   },
   {
     "cityId": "porto-seguro-ba",
@@ -266,7 +373,7 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:57.434Z"
+    "collectedAt": "2026-06-01T08:51:44.011Z"
   },
   {
     "cityId": "recife-pe",
@@ -282,7 +389,22 @@
     "criticalPoints": [
       "pressão entre salário médio e custo mensal"
     ],
-    "collectedAt": "2026-04-04T16:23:53.954Z"
+    "collectedAt": "2026-06-01T08:51:40.533Z"
+  },
+  {
+    "cityId": "ribeirao-preto-sp",
+    "provider": "Livingcost Quality of Life",
+    "placeName": "Ribeirao Preto",
+    "placeUrl": "https://livingcost.org/cost/brazil/ribeirao-preto",
+    "rating": null,
+    "userRatingCount": null,
+    "summary": "Livingcost coloca Ribeirao Preto com quality of life 54. O salário líquido mediano não cobre sozinho o custo mensal estimado. Leitura pública de ar: Moderate.",
+    "positivePoints": [],
+    "criticalPoints": [
+      "pressão entre salário médio e custo mensal",
+      "qualidade do ar"
+    ],
+    "collectedAt": "2026-06-01T08:51:58.463Z"
   },
   {
     "cityId": "rio-de-janeiro-rj",
@@ -299,7 +421,7 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:44.300Z"
+    "collectedAt": "2026-06-01T08:51:30.635Z"
   },
   {
     "cityId": "salvador-ba",
@@ -314,7 +436,7 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:56.807Z"
+    "collectedAt": "2026-06-01T08:51:43.373Z"
   },
   {
     "cityId": "santos-sp",
@@ -329,7 +451,7 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:58.686Z"
+    "collectedAt": "2026-06-01T08:51:45.261Z"
   },
   {
     "cityId": "sao-paulo-sp",
@@ -346,7 +468,7 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:43.497Z"
+    "collectedAt": "2026-06-01T08:51:29.846Z"
   },
   {
     "cityId": "ubatuba-sp",
@@ -362,6 +484,6 @@
       "pressão entre salário médio e custo mensal",
       "qualidade do ar"
     ],
-    "collectedAt": "2026-04-04T16:23:59.312Z"
+    "collectedAt": "2026-06-01T08:51:45.888Z"
   }
 ]

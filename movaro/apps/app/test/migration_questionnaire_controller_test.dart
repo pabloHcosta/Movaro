@@ -176,6 +176,7 @@ const _testSource = CitySource(
   description: 'Mock source',
   isOfficial: true,
   url: null,
+  sourceType: 'official',
 );
 
 const _testSources = CitySources(
@@ -188,6 +189,12 @@ const _testSources = CitySources(
 
 class _FakeCitiesRepository implements CitiesRepository {
   const _FakeCitiesRepository();
+
+  // City-detail payload methods are not exercised by these tests; route any
+  // unimplemented repository member to a clear failure instead of breaking
+  // compilation when the interface grows.
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 
   @override
   Future<List<City>> getCities({
