@@ -20,7 +20,7 @@ class LocationService {
 
   Future<LocationData?> reverseGeocode(Position position) async {
     try {
-      final placemarks = await placemarkFromCoordinates(
+      final placemarks = await Geocoding().placemarkFromCoordinates(
         position.latitude,
         position.longitude,
       );

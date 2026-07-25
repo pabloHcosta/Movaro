@@ -15,7 +15,7 @@ class SupabaseBootstrap {
 
     await Supabase.initialize(
       url: environment.supabaseUrl!,
-      anonKey: environment.supabaseAnonKey!,
+      publishableKey: environment.supabaseAnonKey!,
       debug: environment.isDevelopment,
       authOptions: const FlutterAuthClientOptions(autoRefreshToken: true),
       realtimeClientOptions: RealtimeClientOptions(
