@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
@@ -115,6 +116,7 @@ class CityFeedWidget extends StatelessWidget {
             itemBuilder: (context, index) => _FeedCard(
               item: items[index],
               width: cardWidth,
+              isFeatured: index == 0,
               onOpenGuideItem: onOpenGuideItem,
             ),
           ),
@@ -140,11 +142,13 @@ class _FeedCard extends StatelessWidget {
   const _FeedCard({
     required this.item,
     required this.width,
+    required this.isFeatured,
     this.onOpenGuideItem,
   });
 
   final CityFeedItem item;
   final double width;
+  final bool isFeatured;
   final ValueChanged<String?>? onOpenGuideItem;
 
   @override
@@ -156,15 +160,49 @@ class _FeedCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _showExpandedCard(context, onOpenGuideItem),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          _showExpandedCard(context, onOpenGuideItem);
+        },
         borderRadius: BorderRadius.circular(14),
         child: Ink(
           width: width,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.surfaceFor(context),
+            gradient: isFeatured
+                ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDark
+                        ? [
+                            color.withValues(alpha: 0.15),
+                            AppColors.surfaceFor(context),
+                            AppColors.surfaceFor(context),
+                          ]
+                        : [
+                            color.withValues(alpha: 0.10),
+                            AppColors.surfaceFor(context),
+                            AppColors.surfaceFor(context),
+                          ],
+                    stops: const [0, 0.42, 1],
+                  )
+                : null,
+            color: isFeatured ? null : AppColors.surfaceFor(context),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.borderFor(context)),
+            border: Border.all(
+              color: isFeatured
+                  ? color.withValues(alpha: 0.24)
+                  : AppColors.borderFor(context),
+            ),
+            boxShadow: isFeatured
+                ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.08),
+                      blurRadius: 16,
+                      offset: const Offset(0, 7),
+                    ),
+                  ]
+                : null,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

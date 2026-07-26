@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
@@ -90,7 +91,10 @@ class JourneyStepperWidget extends StatelessWidget {
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: onTapSeeMore ?? onTapActiveTask,
+              onTap: () {
+                HapticFeedback.selectionClick();
+                (onTapSeeMore ?? onTapActiveTask)?.call();
+              },
               borderRadius: BorderRadius.circular(14),
               child: Ink(
                 padding: const EdgeInsets.all(13),
@@ -128,16 +132,21 @@ class JourneyStepperWidget extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(99),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 5,
-                        backgroundColor: isDark
-                            ? const Color(0xFF1A2840)
-                            : const Color(0xFFE2E8F0),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          AppColors.primary,
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: progress),
+                      duration: const Duration(milliseconds: 850),
+                      curve: Curves.easeOutCubic,
+                      builder: (context, value, _) => ClipRRect(
+                        borderRadius: BorderRadius.circular(99),
+                        child: LinearProgressIndicator(
+                          value: value,
+                          minHeight: 5,
+                          backgroundColor: isDark
+                              ? const Color(0xFF1A2840)
+                              : const Color(0xFFE2E8F0),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.primary,
+                          ),
                         ),
                       ),
                     ),

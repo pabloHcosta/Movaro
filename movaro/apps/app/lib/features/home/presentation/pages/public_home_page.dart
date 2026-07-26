@@ -1514,19 +1514,44 @@ class _PrimaryActionCard extends StatelessWidget {
     final tagBorder = item.preArrivalRequired
         ? const Color(0xFFE24B4A).withValues(alpha: 0.35)
         : _badgeBorder(context);
+    final nextStepLabel = _localizedText(
+      context,
+      pt: 'PRÓXIMO PASSO',
+      es: 'PRÓXIMO PASO',
+      en: 'NEXT STEP',
+    );
+    final timeLabel = item.estimatedTimeLabel ?? item.estimatedTime;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap?.call();
+        },
         borderRadius: BorderRadius.circular(14),
         child: Ink(
           width: double.infinity,
           padding: const EdgeInsets.all(13),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF0E1825) : Colors.white,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark
+                  ? const [Color(0xFF111F30), Color(0xFF0B1522)]
+                  : const [Colors.white, Color(0xFFF4F9FF)],
+            ),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: _cardBorder(context)),
+            border: Border.all(
+              color: tagColor.withValues(alpha: isDark ? 0.24 : 0.18),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: tagColor.withValues(alpha: isDark ? 0.09 : 0.06),
+                blurRadius: 18,
+                offset: const Offset(0, 7),
+              ),
+            ],
           ),
           child: Row(
             children: [
@@ -1547,10 +1572,11 @@ class _PrimaryActionCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      phaseTag,
+                      '$nextStepLabel  ·  $phaseTag',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: tagColor,
+                        letterSpacing: 0.25,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1569,15 +1595,43 @@ class _PrimaryActionCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 3),
-                    Text(
-                      item.shortDescription,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: 13,
-                        color: _secondaryText(context),
-                        height: 1.3,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.shortDescription,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  fontSize: 13,
+                                  color: _secondaryText(context),
+                                  height: 1.3,
+                                ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (timeLabel != null && timeLabel.isNotEmpty) ...[
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.schedule_rounded,
+                            size: 12,
+                            color: _secondaryText(context),
+                          ),
+                          const SizedBox(width: 3),
+                          Flexible(
+                            child: Text(
+                              timeLabel,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: _secondaryText(context),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
@@ -1589,8 +1643,19 @@ class _PrimaryActionCard extends StatelessWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF3B7CC8),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF168BFF), Color(0xFF15B8FF)],
+                  ),
                   borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF168BFF).withValues(alpha: 0.28),
+                      blurRadius: 12,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1641,120 +1706,185 @@ class _ActiveHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
     final stateLabel = city.stateName.isNotEmpty
         ? city.stateName
         : city.stateCode;
 
-    return SizedBox(
-      height: height,
-      child: Stack(
-        children: [
-          Positioned.fill(child: _HeroCityImage(city: city)),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Color(0x55000000),
-                    Color(0xCC000000),
-                  ],
-                  stops: [0.0, 0.45, 1.0],
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 850),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) => Opacity(
+        opacity: value,
+        child: Transform.translate(
+          offset: Offset(0, 8 * (1 - value)),
+          child: child,
+        ),
+      ),
+      child: SizedBox(
+        height: height,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 1.045, end: 1),
+                duration: const Duration(milliseconds: 1400),
+                curve: Curves.easeOutCubic,
+                builder: (context, scale, image) =>
+                    Transform.scale(scale: scale, child: image),
+                child: _HeroCityImage(city: city),
+              ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.08),
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.50),
+                      Colors.black.withValues(alpha: 0.92),
+                    ],
+                    stops: const [0.0, 0.34, 0.68, 1.0],
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
-            left: 14,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: _badgeBackground(context),
-                border: Border.all(color: _badgeBorder(context)),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.34),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.72],
+                  ),
+                ),
               ),
-              child: Row(
+            ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              left: 14,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.black.withValues(alpha: 0.28),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.18),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF38BDF8),
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      context.l10n.stageExecutionTitle,
+                      style: AppTypography.compactBadge.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white.withValues(alpha: 0.92),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 6,
+              right: 14,
+              child: _SettingsButton(onTap: onOpenSettings),
+            ),
+            Positioned(
+              left: 14,
+              right: 14,
+              bottom: 14,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isDark
-                          ? const Color(0xFF38BDF8)
-                          : const Color(0xFF0284C7),
-                    ),
-                  ),
-                  const SizedBox(width: 5),
                   Text(
-                    context.l10n.stageExecutionTitle,
-                    style: AppTypography.compactBadge.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: _accentText(context),
+                    city.name,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.9,
+                      color: Colors.white,
+                      height: 1.02,
+                      shadows: const [
+                        Shadow(blurRadius: 14, color: Color(0x99000000)),
+                      ],
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: [
+                      _HeroMetaChip(
+                        icon: Icons.location_on_outlined,
+                        label:
+                            '$stateLabel, ${context.l10n.countryLabel(city.countryCode)}',
+                      ),
+                      _HeroMetaChip(
+                        icon: weather == null
+                            ? Icons.cloud_outlined
+                            : Icons.wb_sunny_outlined,
+                        label: weather == null
+                            ? '--'
+                            : '${weather!.temperatureCelsius.round()}°C',
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 6,
-            right: 14,
-            child: _SettingsButton(onTap: onOpenSettings),
-          ),
-          Positioned(
-            left: 14,
-            right: 14,
-            bottom: 12,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        city.name,
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(
-                              fontSize: 30,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.6,
-                              color: Colors.white,
-                              shadows: const [
-                                Shadow(blurRadius: 8, color: Color(0x80000000)),
-                              ],
-                            ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '$stateLabel, ${context.l10n.countryLabel(city.countryCode)}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white.withValues(alpha: 0.65),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  weather == null
-                      ? '--'
-                      : '${weather!.temperatureCelsius.round()}°C',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white.withValues(alpha: 0.75),
-                  ),
-                ),
-              ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroMetaChip extends StatelessWidget {
+  const _HeroMetaChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.28),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: Colors.white.withValues(alpha: 0.72)),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Colors.white.withValues(alpha: 0.82),
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -1775,14 +1905,22 @@ class _SecondaryActionRow extends StatelessWidget {
   final VoidCallback onViewCity;
   final VoidCallback onNewPlan;
 
-  /// When true renders compact horizontal icon+label chips instead of vertical
-  /// icon-over-label chips. Used by the Focus Mode layout.
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
+        Expanded(
+          child: _ActionChip(
+            icon: Icons.location_city_outlined,
+            label: context.l10n.homeActionViewCity,
+            onTap: onViewCity,
+            compact: compact,
+            emphasized: true,
+          ),
+        ),
+        const SizedBox(width: 7),
         Expanded(
           child: _ActionChip(
             icon: Icons.compare_arrows_rounded,
@@ -1792,21 +1930,39 @@ class _SecondaryActionRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 7),
-        Expanded(
-          child: _ActionChip(
-            icon: Icons.location_city_outlined,
-            label: context.l10n.homeActionViewCity,
-            onTap: onViewCity,
-            compact: compact,
-          ),
-        ),
-        const SizedBox(width: 7),
-        Expanded(
-          child: _ActionChip(
-            icon: Icons.restart_alt_rounded,
-            label: context.l10n.homeActionNewPlan,
-            onTap: onNewPlan,
-            compact: compact,
+        PopupMenuButton<int>(
+          tooltip: context.l10n.homeActionNewPlan,
+          onSelected: (_) {
+            HapticFeedback.selectionClick();
+            onNewPlan();
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem<int>(
+              value: 0,
+              child: Row(
+                children: [
+                  const Icon(Icons.restart_alt_rounded, size: 18),
+                  const SizedBox(width: 9),
+                  Text(context.l10n.homeActionNewPlan),
+                ],
+              ),
+            ),
+          ],
+          child: Container(
+            width: 42,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceMutedFor(context),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.borderFor(context),
+                width: 0.5,
+              ),
+            ),
+            child: Icon(
+              Icons.more_horiz_rounded,
+              color: AppColors.textSoftFor(context),
+            ),
           ),
         ),
       ],
@@ -1820,11 +1976,13 @@ class _ActionChip extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.compact = false,
+    this.emphasized = false,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool emphasized;
 
   /// Compact mode renders a horizontal Row(icon, label) chip with reduced
   /// padding — fits in the Focus Mode "Tu Jornada" quick-actions row.
@@ -1837,28 +1995,51 @@ class _ActionChip extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
-          onTap: onTap,
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
           child: Ink(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
             decoration: BoxDecoration(
-              color: AppColors.surfaceMutedFor(context),
+              gradient: emphasized
+                  ? LinearGradient(
+                      colors: AppColors.isDark(context)
+                          ? const [Color(0xFF152B42), Color(0xFF102238)]
+                          : const [Color(0xFFEAF5FF), Color(0xFFF4FAFF)],
+                    )
+                  : null,
+              color: emphasized ? null : AppColors.surfaceMutedFor(context),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: AppColors.borderFor(context),
-                width: 0.5,
+                color: emphasized
+                    ? AppColors.primary.withValues(alpha: 0.28)
+                    : AppColors.borderFor(context),
+                width: emphasized ? 0.8 : 0.5,
               ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 14, color: AppColors.textSoftFor(context)),
+                Icon(
+                  icon,
+                  size: 14,
+                  color: emphasized
+                      ? AppColors.primary
+                      : AppColors.textSoftFor(context),
+                ),
                 const SizedBox(width: 5),
                 Flexible(
                   child: Text(
                     label,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.textPrimaryFor(context),
+                      color: emphasized
+                          ? AppColors.primary
+                          : AppColors.textPrimaryFor(context),
+                      fontWeight: emphasized
+                          ? FontWeight.w700
+                          : FontWeight.w600,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1891,7 +2072,10 @@ class _ActionChip extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(13),
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
         child: Ink(
           padding: EdgeInsets.symmetric(
             vertical: verticalPadding,

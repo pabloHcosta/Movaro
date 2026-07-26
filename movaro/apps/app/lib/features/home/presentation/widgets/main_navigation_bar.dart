@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
@@ -31,33 +32,31 @@ class MainNavigationBar extends StatelessWidget {
 
     return Container(
       color: Colors.transparent,
-      padding: EdgeInsets.fromLTRB(16, 8, 16, bottomPadding + 14),
+      padding: EdgeInsets.fromLTRB(14, 6, 14, bottomPadding + 10),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
           child: Container(
             decoration: BoxDecoration(
-              color: isDark
-                  ? const Color(0xF20E1628)
-                  : const Color(0xEFFFFFFF),
-              borderRadius: BorderRadius.circular(28),
+              color: isDark ? const Color(0xE60B1322) : const Color(0xE8FFFFFF),
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.06)
-                    : Colors.black.withValues(alpha: 0.08),
+                    ? Colors.white.withValues(alpha: 0.10)
+                    : Colors.white.withValues(alpha: 0.75),
               ),
               boxShadow: [
                 BoxShadow(
                   color: isDark
-                      ? Colors.black.withValues(alpha: 0.24)
-                      : Colors.black.withValues(alpha: 0.08),
-                  blurRadius: isDark ? 24 : 20,
-                  offset: const Offset(0, 10),
+                      ? Colors.black.withValues(alpha: 0.34)
+                      : const Color(0xFF24415F).withValues(alpha: 0.12),
+                  blurRadius: 28,
+                  offset: const Offset(0, 12),
                 ),
               ],
             ),
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 4),
             child: Row(
               children: [
                 for (final item in items)
@@ -139,10 +138,8 @@ class MainNavigationBar extends StatelessWidget {
               'es' => 'Crear plan',
               _ => 'Create plan',
             },
-            onPressed: () => Navigator.pushNamed(
-              context,
-              AppRoutes.migrationQuestionnaire,
-            ),
+            onPressed: () =>
+                Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire),
           ),
         ),
       );
@@ -202,34 +199,41 @@ class _NavTab extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(16),
         splashColor: isDark
             ? Colors.white.withValues(alpha: 0.08)
             : Colors.black.withValues(alpha: 0.05),
         highlightColor: Colors.transparent,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 260),
           curve: const Cubic(0.4, 0, 0.2, 1),
-          padding: EdgeInsets.symmetric(
-            horizontal: isActive ? 10 : 6,
-            vertical: 8,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
           decoration: BoxDecoration(
             gradient: isActive
-                ? const LinearGradient(
+                ? LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFF0088FF), Color(0xFF00BBFF)],
+                    colors: isDark
+                        ? const [Color(0x2E168BFF), Color(0x1814B8FF)]
+                        : const [Color(0x18168BFF), Color(0x0D14B8FF)],
                   )
                 : null,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
+            border: isActive
+                ? Border.all(
+                    color: const Color(0xFF1B9CFF).withValues(alpha: 0.25),
+                  )
+                : null,
             boxShadow: isActive
                 ? [
                     BoxShadow(
-                      color: const Color(0xFF0088FF).withValues(alpha: 0.30),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
+                      color: const Color(0xFF0088FF).withValues(alpha: 0.12),
+                      blurRadius: 12,
+                      offset: const Offset(0, 3),
                     ),
                   ]
                 : null,
@@ -237,26 +241,42 @@ class _NavTab extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                isActive ? activeIcon : icon,
-                size: 22,
-                color: isActive
-                    ? Colors.white
-                    : (isDark
-                        ? Colors.white.withValues(alpha: 0.4)
-                        : AppColors.textSoft.withValues(alpha: 0.85)),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 260),
+                width: 30,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? const Color(0xFF139DFF).withValues(alpha: 0.14)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  isActive ? activeIcon : icon,
+                  size: 20,
+                  color: isActive
+                      ? const Color(0xFF32B5FF)
+                      : (isDark
+                            ? Colors.white.withValues(alpha: 0.42)
+                            : AppColors.textSoft.withValues(alpha: 0.85)),
+                ),
               ),
-              const SizedBox(height: 3),
+              const SizedBox(height: 2),
               Text(
                 label,
                 maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: context.textStyles.navLabel.copyWith(
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                  fontSize: 11,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                   color: isActive
-                      ? Colors.white
+                      ? (isDark
+                            ? Colors.white.withValues(alpha: 0.92)
+                            : const Color(0xFF0F4C81))
                       : (isDark
-                          ? Colors.white.withValues(alpha: 0.4)
-                          : AppColors.textSoft.withValues(alpha: 0.92)),
+                            ? Colors.white.withValues(alpha: 0.42)
+                            : AppColors.textSoft.withValues(alpha: 0.92)),
                 ),
               ),
             ],
