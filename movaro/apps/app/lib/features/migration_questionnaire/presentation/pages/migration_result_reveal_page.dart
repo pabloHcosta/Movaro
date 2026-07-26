@@ -15,6 +15,7 @@ import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
+import 'package:movaro_app/features/flight_search/domain/services/flight_logistics_assessment_service.dart';
 import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
@@ -23,6 +24,7 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
+import 'package:movaro_app/features/location/location_controller.dart';
 
 /// Shown immediately after the questionnaire completes.
 ///
@@ -33,11 +35,13 @@ class MigrationResultRevealPage extends StatefulWidget {
   const MigrationResultRevealPage({
     required this.controller,
     required this.citiesController,
+    required this.locationController,
     super.key,
   });
 
   final MigrationQuestionnaireController controller;
   final CitiesController citiesController;
+  final LocationController locationController;
 
   @override
   State<MigrationResultRevealPage> createState() =>
@@ -293,20 +297,23 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
       return;
     }
 
-    final destinationAirport = FlightRouteContextResolver.resolveDestinationAirport(
-      destinationCityName: primaryCity.name,
-      destinationCountryIso: FlightRouteContextResolver.resolveDestinationCountryIso(
-        cityCountryCode: primaryCity.countryCode,
-        planDestinationCountry: plan.destinationCountry,
-      ),
-      destinationLatitude: primaryCity.latitude,
-      destinationLongitude: primaryCity.longitude,
-    );
+    final destinationAirport =
+        FlightRouteContextResolver.resolveDestinationAirport(
+          destinationCityName: primaryCity.name,
+          destinationCountryIso:
+              FlightRouteContextResolver.resolveDestinationCountryIso(
+                cityCountryCode: primaryCity.countryCode,
+                planDestinationCountry: plan.destinationCountry,
+              ),
+          destinationLatitude: primaryCity.latitude,
+          destinationLongitude: primaryCity.longitude,
+        );
     final originCountryIso = FlightRouteContextResolver.resolveOriginCountryIso(
+      savedCountryCode: widget.locationController.savedLocation?.countryCode,
       planOriginCountry: plan.originCountry,
     );
     final originAirport = FlightRouteContextResolver.resolveOriginAirport(
-      savedLocation: null,
+      savedLocation: widget.locationController.savedLocation,
       originCountryIso: originCountryIso,
     );
     final originIata = originAirport?.iataCode;
@@ -321,15 +328,17 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
         ),
       );
       for (final city in plan.reviewCities) {
-        final altDestination = FlightRouteContextResolver.resolveDestinationAirport(
-          destinationCityName: city.name,
-          destinationCountryIso: FlightRouteContextResolver.resolveDestinationCountryIso(
-            cityCountryCode: city.countryCode,
-            planDestinationCountry: plan.destinationCountry,
-          ),
-          destinationLatitude: city.latitude,
-          destinationLongitude: city.longitude,
-        );
+        final altDestination =
+            FlightRouteContextResolver.resolveDestinationAirport(
+              destinationCityName: city.name,
+              destinationCountryIso:
+                  FlightRouteContextResolver.resolveDestinationCountryIso(
+                    cityCountryCode: city.countryCode,
+                    planDestinationCountry: plan.destinationCountry,
+                  ),
+              destinationLatitude: city.latitude,
+              destinationLongitude: city.longitude,
+            );
         if (altDestination?.iataCode == null) {
           continue;
         }
@@ -434,15 +443,17 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
             );
         final originCountryIso =
             FlightRouteContextResolver.resolveOriginCountryIso(
+              savedCountryCode:
+                  widget.locationController.savedLocation?.countryCode,
               planOriginCountry: plan.originCountry,
             );
         final originAirport = FlightRouteContextResolver.resolveOriginAirport(
-          savedLocation: null,
+          savedLocation: widget.locationController.savedLocation,
           originCountryIso: originCountryIso,
         );
         final originIata = originAirport?.iataCode;
-        final primaryRoute = originIata == null ||
-                destinationAirport?.iataCode == null
+        final primaryRoute =
+            originIata == null || destinationAirport?.iataCode == null
             ? null
             : widget.citiesController.travelInsightFor(
                 primaryCity.id,
@@ -455,6 +466,11 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
           planDestinationCountry: plan.destinationCountry,
           highlightedCity: primaryCity,
           alternatives: alternatives,
+        );
+        final logisticsAssessment = FlightLogisticsAssessmentService.assess(
+          originLocation: widget.locationController.savedLocation,
+          originAirport: originAirport,
+          destinationAirport: destinationAirport,
         );
         return Scaffold(
           body: FadeTransition(
@@ -515,6 +531,14 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               destIata: destinationAirport?.iataCode,
                               routeInsight: primaryRoute,
                             ),
+                            if (logisticsAssessment?.shouldHighlight ==
+                                true) ...[
+                              const SizedBox(height: 12),
+                              _OriginLogisticsAlert(
+                                assessment: logisticsAssessment!,
+                                destinationCityName: primaryCity.name,
+                              ),
+                            ],
                             if (alternativeTradeoff != null) ...[
                               const SizedBox(height: 12),
                               _FlightTradeoffCard(data: alternativeTradeoff),
@@ -559,8 +583,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                       onViewDetails: () => _openCityDetail(primaryCity),
                       onCompare: () =>
                           _compareAlternatives(primaryCity, alternatives),
-                      onStartPreparation: () =>
-                          _startPreparation(primaryCity),
+                      onStartPreparation: () => _startPreparation(primaryCity),
                     ),
                   ),
                   SafeArea(
@@ -650,16 +673,17 @@ class _FlightTradeoffData {
     City? cheapestCity;
     TravelRouteInsight? cheapestRoute;
     for (final city in alternatives) {
-      final altDestination = FlightRouteContextResolver.resolveDestinationAirport(
-        destinationCityName: city.name,
-        destinationCountryIso:
-            FlightRouteContextResolver.resolveDestinationCountryIso(
-              cityCountryCode: city.countryCode,
-              planDestinationCountry: planDestinationCountry,
-            ),
-        destinationLatitude: city.latitude,
-        destinationLongitude: city.longitude,
-      );
+      final altDestination =
+          FlightRouteContextResolver.resolveDestinationAirport(
+            destinationCityName: city.name,
+            destinationCountryIso:
+                FlightRouteContextResolver.resolveDestinationCountryIso(
+                  cityCountryCode: city.countryCode,
+                  planDestinationCountry: planDestinationCountry,
+                ),
+            destinationLatitude: city.latitude,
+            destinationLongitude: city.longitude,
+          );
       final route = citiesController.travelInsightFor(
         city.id,
         originIata: primaryRoute.originIata,
@@ -741,6 +765,129 @@ class _FlightTradeoffCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _OriginLogisticsAlert extends StatelessWidget {
+  const _OriginLogisticsAlert({
+    required this.assessment,
+    required this.destinationCityName,
+  });
+
+  final FlightLogisticsAssessment assessment;
+  final String destinationCityName;
+
+  @override
+  Widget build(BuildContext context) {
+    final isHigh =
+        assessment.connectionPressure == FlightConnectionPressure.high;
+    final tint = isHigh ? AppColors.danger : AppColors.warning;
+    final originIata = assessment.originAirport.iataCode;
+    final destinationIata = assessment.destinationAirport.iataCode;
+
+    return FrostedPanel(
+      backgroundColor: tint.withValues(alpha: 0.08),
+      borderColor: tint.withValues(alpha: 0.24),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: tint.withValues(alpha: 0.14),
+            ),
+            child: Icon(Icons.connecting_airports_rounded, color: tint),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _title(context),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  _body(
+                    context,
+                    originIata: originIata,
+                    destinationIata: destinationIata,
+                  ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.45,
+                  ),
+                ),
+                if (assessment.airportAccessKm >= 80) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    _airportAccess(context),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: tint,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _title(BuildContext context) => _localized(
+    context,
+    pt: 'Atenção à saída de ${assessment.originCity}',
+    es: 'Atención a la salida desde ${assessment.originCity}',
+    en: 'Travel alert from ${assessment.originCity}',
+  );
+
+  String _body(
+    BuildContext context, {
+    required String originIata,
+    required String destinationIata,
+  }) {
+    final high = assessment.connectionPressure == FlightConnectionPressure.high;
+    if (high) {
+      return _localized(
+        context,
+        pt: 'Para chegar a $destinationCityName ($destinationIata) saindo de $originIata, a rota tende a depender de conexão e pode pesar mais no orçamento inicial. Compare também as cidades alternativas do plano e confirme datas e escalas no preço ao vivo.',
+        es: 'Para llegar a $destinationCityName ($destinationIata) saliendo de $originIata, la ruta suele depender de conexión y puede pesar más en el presupuesto inicial. Compará también las ciudades alternativas del plan y confirmá fechas y escalas con precios en vivo.',
+        en: 'Reaching $destinationCityName ($destinationIata) from $originIata will often involve a connection and may weigh more on the initial budget. Compare the plan alternatives and confirm dates and stops with live pricing.',
+      );
+    }
+    return _localized(
+      context,
+      pt: 'A rota $originIata → $destinationIata merece comparação: a oferta pode variar por temporada e uma conexão pode mudar bastante o custo total. Use a faixa como referência e confirme no preço ao vivo.',
+      es: 'Conviene comparar la ruta $originIata → $destinationIata: la oferta puede variar por temporada y una conexión puede cambiar bastante el costo total. Usá el rango como referencia y confirmá el precio en vivo.',
+      en: 'The $originIata → $destinationIata route is worth comparing: seasonal supply and a connection can materially change the total cost. Use the range as a guide and confirm with live pricing.',
+    );
+  }
+
+  String _airportAccess(BuildContext context) => _localized(
+    context,
+    pt: 'Aeroporto sugerido: ${assessment.originAirport.chipLabel}, a cerca de ${assessment.airportAccessKm} km da origem informada.',
+    es: 'Aeropuerto sugerido: ${assessment.originAirport.chipLabel}, a unos ${assessment.airportAccessKm} km del origen informado.',
+    en: 'Suggested airport: ${assessment.originAirport.chipLabel}, about ${assessment.airportAccessKm} km from the confirmed origin.',
+  );
+
+  String _localized(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => pt,
+      'es' => es,
+      _ => en,
+    };
   }
 }
 

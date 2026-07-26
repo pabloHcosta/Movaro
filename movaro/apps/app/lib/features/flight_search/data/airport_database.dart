@@ -446,6 +446,17 @@ class AirportDatabase {
   static List<Airport> forCountry(String countryIso) =>
       airportsByCountry[countryIso.toUpperCase()] ?? const [];
 
+  /// Returns the airport matching [iataCode], regardless of country.
+  static Airport? forIata(String iataCode) {
+    final normalized = iataCode.trim().toUpperCase();
+    for (final airports in airportsByCountry.values) {
+      for (final airport in airports) {
+        if (airport.iataCode == normalized) return airport;
+      }
+    }
+    return null;
+  }
+
   /// Returns the main international hub for [countryIso], or null.
   static Airport? mainHubFor(String countryIso) {
     final airports = forCountry(countryIso);

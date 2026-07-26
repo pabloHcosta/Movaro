@@ -352,6 +352,7 @@ class AppRouter {
           MigrationResultRevealPage(
             controller: dependencies.migrationQuestionnaireController,
             citiesController: dependencies.citiesController,
+            locationController: dependencies.locationController,
           ),
         );
       case AppRoutes.migrationResultReveal:
@@ -360,6 +361,7 @@ class AppRouter {
           MigrationResultRevealPage(
             controller: dependencies.migrationQuestionnaireController,
             citiesController: dependencies.citiesController,
+            locationController: dependencies.locationController,
           ),
         );
       case AppRoutes.migrationPlanCopilot:
@@ -374,6 +376,7 @@ class AppRouter {
             MigrationResultRevealPage(
               controller: dependencies.migrationQuestionnaireController,
               citiesController: dependencies.citiesController,
+              locationController: dependencies.locationController,
             ),
           );
         }

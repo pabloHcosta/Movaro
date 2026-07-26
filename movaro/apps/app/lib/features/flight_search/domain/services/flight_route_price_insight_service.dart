@@ -304,6 +304,33 @@ class FlightRoutePriceInsightService {
     return resolveRoute(originIata: originIata, destIata: resolvedDest);
   }
 
+  static TravelRouteInsight? resolveTravelRoute({
+    required String? originIata,
+    required String? destIata,
+  }) {
+    final route = resolveRoute(originIata: originIata, destIata: destIata);
+    if (route == null) return null;
+
+    return TravelRouteInsight(
+      originIata: route.originIata,
+      destIata: route.destIata,
+      months: route.months
+          .map(
+            (level) => switch (level) {
+              FlightRoutePriceLevel.low => TravelRoutePriceLevel.low,
+              FlightRoutePriceLevel.mid => TravelRoutePriceLevel.mid,
+              FlightRoutePriceLevel.high => TravelRoutePriceLevel.high,
+            },
+          )
+          .toList(growable: false),
+      lowUsdMin: route.lowUsdMin,
+      lowUsdMax: route.lowUsdMax,
+      sourceLabel: 'Movaro route estimate',
+      sourceType: 'modeled_estimate',
+      seasonalWarningKey: route.seasonalWarningKey,
+    );
+  }
+
   static FlightRoutePricePressure classifyPressure({
     required TravelRouteInsight route,
     int? baseArrivalBudgetBrl,

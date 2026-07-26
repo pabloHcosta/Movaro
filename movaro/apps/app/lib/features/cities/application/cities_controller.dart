@@ -5,6 +5,7 @@ import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
 import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
+import 'package:movaro_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
 
@@ -51,12 +52,12 @@ class CitiesController extends ChangeNotifier {
   final Map<String, Future<CityWeather?>> _pendingWeatherRequests = {};
   final Map<String, Future<TravelRouteInsight?>> _pendingTravelInsightRequests =
       {};
-  final Map<String, Future<CityDetailSocialProof?>> _pendingSocialProofRequests =
-      {};
+  final Map<String, Future<CityDetailSocialProof?>>
+  _pendingSocialProofRequests = {};
   final Map<String, Future<CityDetailClimateSummary?>>
   _pendingClimateSummaryRequests = {};
-  final Map<String, Future<CityDetailArrivalStory?>> _pendingArrivalStoryRequests =
-      {};
+  final Map<String, Future<CityDetailArrivalStory?>>
+  _pendingArrivalStoryRequests = {};
   final Map<String, Future<CityDetailComparison?>> _pendingComparisonRequests =
       {};
 
@@ -86,15 +87,17 @@ class CitiesController extends ChangeNotifier {
     String cityId, {
     String? originIata,
     String? destIata,
-  }) => _travelInsightCache[_travelInsightKey(
-    cityId,
-    originIata: originIata,
-    destIata: destIata,
-  )];
+  }) =>
+      _travelInsightCache[_travelInsightKey(
+        cityId,
+        originIata: originIata,
+        destIata: destIata,
+      )];
   CityDetailSocialProof? socialProofFor(String key) => _socialProofCache[key];
   CityDetailClimateSummary? climateSummaryFor(String key) =>
       _climateSummaryCache[key];
-  CityDetailArrivalStory? arrivalStoryFor(String key) => _arrivalStoryCache[key];
+  CityDetailArrivalStory? arrivalStoryFor(String key) =>
+      _arrivalStoryCache[key];
   CityDetailComparison? comparisonFor(String key) => _comparisonCache[key];
 
   Future<void> initialize({bool preloadData = false}) async {
@@ -305,13 +308,27 @@ class CitiesController extends ChangeNotifier {
         originIata: originIata,
         destIata: destIata,
       );
-      if (insight != null) {
-        _travelInsightCache[cacheKey] = insight;
+      final resolved =
+          insight ??
+          FlightRoutePriceInsightService.resolveTravelRoute(
+            originIata: originIata,
+            destIata: destIata,
+          );
+      if (resolved != null) {
+        _travelInsightCache[cacheKey] = resolved;
         notifyListeners();
       }
-      return insight;
+      return resolved;
     } catch (_) {
-      return null;
+      final fallback = FlightRoutePriceInsightService.resolveTravelRoute(
+        originIata: originIata,
+        destIata: destIata,
+      );
+      if (fallback != null) {
+        _travelInsightCache[cacheKey] = fallback;
+        notifyListeners();
+      }
+      return fallback;
     } finally {
       _pendingTravelInsightRequests.remove(cacheKey);
     }
@@ -321,7 +338,8 @@ class CitiesController extends ChangeNotifier {
     String cityId, {
     String? originIata,
     String? destIata,
-  }) => '${cityId.toLowerCase()}|${originIata?.toUpperCase() ?? ''}|${destIata?.toUpperCase() ?? ''}';
+  }) =>
+      '${cityId.toLowerCase()}|${originIata?.toUpperCase() ?? ''}|${destIata?.toUpperCase() ?? ''}';
 
   String cityDetailContextKey(
     String cityId, {
@@ -409,7 +427,11 @@ class CitiesController extends ChangeNotifier {
     }
     final pending = _pendingClimateSummaryRequests[key];
     if (pending != null) return pending;
-    final request = _performLoadClimateSummary(cityId, key: key, locale: locale);
+    final request = _performLoadClimateSummary(
+      cityId,
+      key: key,
+      locale: locale,
+    );
     _pendingClimateSummaryRequests[key] = request;
     return request;
   }

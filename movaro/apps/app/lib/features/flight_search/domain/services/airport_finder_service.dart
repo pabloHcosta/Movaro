@@ -31,6 +31,15 @@ class AirportFinderService {
     return scored.take(maxResults).map((e) => e.airport).toList();
   }
 
+  double distanceKm({
+    required double fromLatitude,
+    required double fromLongitude,
+    required double toLatitude,
+    required double toLongitude,
+  }) {
+    return _haversineKm(fromLatitude, fromLongitude, toLatitude, toLongitude);
+  }
+
   /// Haversine great-circle distance in kilometres.
   double _haversineKm(double lat1, double lng1, double lat2, double lng2) {
     final dLat = _toRad(lat2 - lat1);
