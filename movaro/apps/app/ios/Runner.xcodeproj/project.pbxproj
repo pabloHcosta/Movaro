@@ -227,6 +227,7 @@
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
+				A6F32710A41D4C789E200001 /* Sign Flutter Native Assets */,
 				4744854160690B7C5D048002 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
@@ -314,6 +315,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "export TARGET_DEVICE_OS_VERSION=${TARGET_DEVICE_OS_VERSION:-$IPHONEOS_DEPLOYMENT_TARGET}\n/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
+		};
+		A6F32710A41D4C789E200001 /* Sign Flutter Native Assets */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Sign Flutter Native Assets";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"${PROJECT_DIR}/Runner/Scripts/sign_flutter_native_assets.sh\"";
 		};
 		4744854160690B7C5D048002 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;

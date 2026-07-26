@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/location/argentina_origin_classifier.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
@@ -530,11 +531,11 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       return;
     }
 
-      _generatedPlan = plan.copyWith(
-        preferredCity: city,
-        highlightedCity: city,
-        isCityConfirmed: true,
-      );
+    _generatedPlan = plan.copyWith(
+      preferredCity: city,
+      highlightedCity: city,
+      isCityConfirmed: true,
+    );
     notifyListeners();
     await _migrationPlanRepository.setCurrentPlan(_generatedPlan);
     if (_generatedPlan != null) {
@@ -740,11 +741,19 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   }
 
   void _syncJourneyAnswers() {
+    final detectedLocation = _journeyContextController.detectedLocation;
+    final hasArgentineOriginCity =
+        detectedLocation?.city?.trim().isNotEmpty == true &&
+        (_journeyContextController.originCountryId == 'argentina' ||
+            detectedLocation?.countryId == 'argentina');
     final nextAnswers = _answers
         .where(
           (answer) =>
               answer.questionId != 'origin_country' &&
-              answer.questionId != 'destination_country',
+              answer.questionId != 'destination_country' &&
+              (!hasArgentineOriginCity ||
+                  (answer.questionId != 'origin_city' &&
+                      answer.questionId != 'argentina_origin')),
         )
         .toList();
 
@@ -765,6 +774,24 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       nextAnswers.add(
         Answer(questionId: 'destination_country', values: [destinationValue]),
       );
+    }
+
+    if (hasArgentineOriginCity) {
+      final city = detectedLocation!.city!.trim();
+      final province = detectedLocation.region?.trim() ?? '';
+      nextAnswers
+        ..add(Answer(questionId: 'origin_city', values: [city]))
+        ..add(
+          Answer(
+            questionId: 'argentina_origin',
+            values: [
+              ArgentinaOriginClassifier.classify(
+                city: city,
+                province: province,
+              ),
+            ],
+          ),
+        );
     }
 
     _answers = nextAnswers;

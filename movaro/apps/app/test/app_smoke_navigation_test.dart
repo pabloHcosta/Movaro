@@ -19,6 +19,7 @@ import 'package:movaro_app/core/environment/app_flavor.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/journey/journey_preferences_store.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
+import 'package:movaro_app/features/location/location_data.dart';
 import 'package:movaro_app/core/network/api_health_service.dart';
 import 'package:movaro_app/features/auth/application/auth_controller.dart';
 import 'package:movaro_app/features/auth/data/datasources/fake_auth_data_source.dart';
@@ -100,7 +101,7 @@ void main() {
     },
   );
 
-  testWidgets('public home discover action opens the lean questionnaire', (
+  testWidgets('public home discover action confirms the origin city first', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1170, 2532);
@@ -120,20 +121,16 @@ void main() {
     await tester.tap(discoverAction);
     await _pumpScreen(tester);
 
-    final dismissHelp = find.byIcon(Icons.close);
-    if (dismissHelp.evaluate().isNotEmpty) {
-      await tester.tap(dismissHelp.first);
-      await _pumpScreen(tester);
-    }
-
-    expect(find.text('O que você busca nessa mudança agora?'), findsOneWidget);
-    expect(find.textContaining('1 de 3'), findsOneWidget);
+    expect(find.text('Encontramos sua cidade'), findsOneWidget);
+    expect(find.text('San Rafael'), findsOneWidget);
+    expect(find.text('Sim, esta é minha cidade'), findsOneWidget);
+    expect(find.text('Quero escolher outra'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
   });
 
-  testWidgets('public home known-city action opens city search', (
+  testWidgets('public home known-city action confirms the origin city first', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1170, 2532);
@@ -153,12 +150,9 @@ void main() {
     await tester.tap(knownCityAction);
     await _pumpScreen(tester);
 
-    expect(find.text('Buscar cidades'), findsOneWidget);
-    expect(
-      find.text('Valide uma cidade antes de assumir um plano'),
-      findsOneWidget,
-    );
-    expect(find.text('Qual cidade você quer validar?'), findsOneWidget);
+    expect(find.text('Encontramos sua cidade'), findsOneWidget);
+    expect(find.text('San Rafael'), findsOneWidget);
+    expect(find.text('Sim, esta é minha cidade'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
@@ -175,13 +169,8 @@ void main() {
     });
 
     await tester.pumpWidget(
-      harness.buildApp(initialRoute: AppRoutes.publicHome),
+      harness.buildApp(initialRoute: AppRoutes.citiesSearch),
     );
-    await _pumpScreen(tester);
-
-    final knownCityAction = find.text('Validar uma cidade');
-    await tester.ensureVisible(knownCityAction);
-    await tester.tap(knownCityAction);
     await _pumpScreen(tester);
 
     await tester.enterText(find.byType(TextField).first, 'poa');
@@ -578,6 +567,16 @@ class _SmokeCitiesController extends CitiesController {
 
 class _FakeLocationController extends LocationController {
   _FakeLocationController({required super.journeyContextController});
+
+  @override
+  LocationData? get savedLocation => const LocationData(
+    cityName: 'San Rafael',
+    stateName: 'Mendoza',
+    countryName: 'Argentina',
+    countryCode: 'AR',
+    latitude: -34.61,
+    longitude: -68.33,
+  );
 
   @override
   Future<void> initialize() async {}

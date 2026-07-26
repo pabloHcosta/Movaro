@@ -11,6 +11,7 @@ import 'package:movaro_app/features/city_insights/application/city_insight_contr
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/journey/presentation/pages/journey_setup_page.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
+import 'package:movaro_app/features/location/presentation/widgets/origin_city_flow_sheet.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_seasonality_conflict_service.dart';
@@ -260,9 +261,9 @@ class _PublicHomePageState extends State<PublicHomePage>
                                   : _EmptyHomeState(
                                       key: const ValueKey('empty-home'),
                                       onDiscoverDirectionTap: () =>
-                                          _startPlanFlow(context),
+                                          _startPlanFlow(),
                                       onKnownCityTap: () =>
-                                          _startKnownCityFlow(context),
+                                          _startKnownCityFlow(),
                                       onExploreCitiesTap: () =>
                                           Navigator.pushNamed(
                                             context,
@@ -440,27 +441,37 @@ class _PublicHomePageState extends State<PublicHomePage>
       // city. Rescheduled on every fresh plan load so it stays current.
       final cityLabel = city.name;
       unawaited(
-        PlanNotificationService.instance.scheduleCityContentReminder(cityLabel),
+        PlanNotificationService.instance
+            .scheduleCityContentReminder(cityLabel)
+            .catchError((_) {}),
       );
     }
   }
 
-  Future<void> _startPlanFlow(BuildContext context) async {
+  Future<void> _startPlanFlow() async {
+    final hasOriginCity = await _confirmOriginCity();
+    if (!hasOriginCity || !mounted) {
+      return;
+    }
     await widget.migrationQuestionnaireController.initializeForQuestionnaire(
       variant: QuestionnaireVariant.lean,
     );
-    if (!context.mounted) {
+    if (!mounted) {
       return;
     }
     Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire);
   }
 
-  Future<void> _startKnownCityFlow(BuildContext context) async {
+  Future<void> _startKnownCityFlow() async {
+    final hasOriginCity = await _confirmOriginCity();
+    if (!hasOriginCity || !mounted) {
+      return;
+    }
     await widget.journeyContextController.initialize();
     final journey = widget.journeyContextController;
 
     if (journey.isJourneyReadyForPlanning) {
-      if (!context.mounted) {
+      if (!mounted) {
         return;
       }
       Navigator.pushNamed(context, AppRoutes.citiesSearch);
@@ -487,7 +498,7 @@ class _PublicHomePageState extends State<PublicHomePage>
           originCountryId: compatibleOrigins.first.id,
           destinationCountryId: destination.id,
         );
-        if (!context.mounted) {
+        if (!mounted) {
           return;
         }
         Navigator.pushNamed(context, AppRoutes.citiesSearch);
@@ -495,7 +506,7 @@ class _PublicHomePageState extends State<PublicHomePage>
       }
     }
 
-    if (!context.mounted) {
+    if (!mounted) {
       return;
     }
     Navigator.pushNamed(
@@ -505,6 +516,23 @@ class _PublicHomePageState extends State<PublicHomePage>
         continueRoute: AppRoutes.citiesSearch,
       ),
     );
+  }
+
+  Future<bool> _confirmOriginCity() async {
+    await widget.journeyContextController.initialize();
+    if (!mounted) return false;
+
+    final confirmed = await showOriginCityFlowSheet(
+      context: context,
+      locationController: widget.locationController,
+    );
+    if (!confirmed || !mounted) return false;
+
+    await widget.journeyContextController.completeJourney(
+      originCountryId: 'argentina',
+      destinationCountryId: 'brasil',
+    );
+    return true;
   }
 
   void _openSettings() {
@@ -635,9 +663,9 @@ class _PublicHomePageState extends State<PublicHomePage>
     // app again before then, this call reschedules it — so the notification
     // only fires after a true 7-day absence.
     unawaited(
-      PlanNotificationService.instance.scheduleReEngagementReminder(
-        DateTime.now(),
-      ),
+      PlanNotificationService.instance
+          .scheduleReEngagementReminder(DateTime.now())
+          .catchError((_) {}),
     );
   }
 

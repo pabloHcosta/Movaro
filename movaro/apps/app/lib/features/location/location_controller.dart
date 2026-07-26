@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart';
 import 'package:movaro_app/features/journey/detected_location.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
+import 'package:movaro_app/features/location/argentina_locality.dart';
 import 'package:movaro_app/features/location/location_data.dart';
 import 'package:movaro_app/features/location/location_service.dart';
 import 'package:movaro_app/features/location/location_storage.dart';
@@ -168,6 +169,22 @@ class LocationController extends ChangeNotifier {
   }
 
   Future<void> openAppSettings() => Geolocator.openAppSettings();
+
+  Future<LocationData> selectOriginLocality(ArgentinaLocality locality) async {
+    final location = LocationData(
+      cityName: locality.name,
+      stateName: locality.province,
+      countryName: 'Argentina',
+      countryCode: 'AR',
+      latitude: locality.latitude,
+      longitude: locality.longitude,
+    );
+    _savedLocation = location;
+    await _storage.saveLocation(location);
+    await _syncDetectedLocation();
+    notifyListeners();
+    return location;
+  }
 
   String? fallbackPreferredCountryId(String? explicitCountryId) {
     return explicitCountryId ?? matchedCountryId;
