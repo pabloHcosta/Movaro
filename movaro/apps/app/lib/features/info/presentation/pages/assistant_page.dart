@@ -17,7 +17,7 @@ import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/info/application/chat_service.dart';
-import 'package:movaro_app/features/info/application/gemini_chat_service.dart';
+import 'package:movaro_app/features/info/domain/entities/chat_message.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
@@ -112,12 +112,10 @@ class _AssistantPageState extends State<AssistantPage> {
         migrationGoal: plan?.goal.isNotEmpty == true ? plan!.goal : null,
         planTimeline: plan?.timeline.isNotEmpty == true ? plan!.timeline : null,
       );
-      try {
-        _starterPrompts = await _chatService!.fetchStarterPrompts();
-      } catch (e) {
-        dev.log('[AssistantPage] Starter prompts unavailable: $e');
-        _starterPrompts = null;
-      }
+      // Prompts and answers are available immediately on device. The
+      // assistant must never wait for the API or an AI provider to become
+      // usable.
+      _starterPrompts = _chatService!.localStarterPrompts();
       dev.log('[AssistantPage] ChatService ready ✓');
     } catch (e) {
       dev.log('[AssistantPage] ChatService init failed: $e');

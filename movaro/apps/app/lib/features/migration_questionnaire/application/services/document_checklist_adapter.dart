@@ -83,9 +83,9 @@ class DocumentChecklistAdapter {
         ),
         description: _text(
           l10n,
-          pt: 'Com o DNI voce ja entra no Brasil. Nao precisa de passaporte. Argentina e Brasil fazem parte do Mercosul. Verifique se a foto ainda esta reconhecivel e se o documento nao venceu.',
-          es: 'Con el DNI ya podes entrar a Brasil. No hace falta pasaporte. Argentina y Brasil forman parte del Mercosur. Verifica que la foto siga siendo reconocible y que el documento no este vencido.',
-          en: 'Your DNI is enough to enter Brazil. You do not need a passport. Argentina and Brazil are part of Mercosur. Check that the photo is still recognizable and that the document is not expired.',
+          pt: 'O DNI físico vigente pode ser aceito em viagens no Mercosul, mas a finalidade, a transportadora e a orientação oficial atual importam. Confirme antes do embarque; passaporte válido continua sendo uma alternativa.',
+          es: 'El DNI físico vigente puede aceptarse en viajes Mercosur, pero importan la finalidad, el transportista y la orientación oficial actual. Confirmá antes de embarcar; el pasaporte válido sigue siendo una alternativa.',
+          en: 'A current physical DNI may be accepted for Mercosur travel, but purpose, carrier, and current official guidance matter. Confirm before boarding; a valid passport remains an alternative.',
         ),
         timeEstimate: _text(
           l10n,
@@ -108,15 +108,15 @@ class DocumentChecklistAdapter {
         icon: '📅',
         title: _text(
           l10n,
-          pt: 'Entender a regra dos 90 dias',
-          es: 'Entender la regla de los 90 dias',
-          en: 'Understand the 90-day rule',
+          pt: 'Diferenciar visita e residência',
+          es: 'Diferenciar visita y residencia',
+          en: 'Separate visitor stay and residence',
         ),
         description: _text(
           l10n,
-          pt: 'Com o DNI, voce pode ficar no Brasil por ate 90 dias como turista. Para morar de forma regular, a regularizacao deve ser iniciada dentro desse prazo e isso e feito ja no Brasil.',
-          es: 'Con el DNI podes quedarte en Brasil hasta 90 dias como turista. Para vivir de forma regular, la regularizacion debe iniciarse dentro de ese plazo y se hace ya en Brasil.',
-          en: 'With your DNI, you can stay in Brazil for up to 90 days as a tourist. If you plan to live there regularly, regularization often needs to begin within that period, usually after arrival in Brazil.',
+          pt: 'A estada como visitante e o pedido de residência são temas diferentes. Argentinos elegíveis podem usar o acordo bilateral Brasil–Argentina para residência permanente. Confirme sua rota na Polícia Federal.',
+          es: 'La estadía como visitante y la residencia son temas distintos. Argentinos elegibles pueden usar el acuerdo bilateral Brasil–Argentina para residencia permanente. Confirmá tu ruta en la Policía Federal.',
+          en: 'Visitor stay and residence are separate matters. Eligible Argentines may use the Brazil–Argentina bilateral route to permanent residence. Confirm your route with Federal Police.',
         ),
         timeEstimate: _text(
           l10n,
@@ -145,9 +145,9 @@ class DocumentChecklistAdapter {
         ),
         timeEstimate: _text(
           l10n,
-          pt: '30 min · gratuito',
-          es: '30 min · gratis',
-          en: '30 min · free',
+          pt: 'Prazo variável',
+          es: 'Plazo variable',
+          en: 'Timing varies',
         ),
         tip: _text(
           l10n,
@@ -165,15 +165,15 @@ class DocumentChecklistAdapter {
         icon: '🏛️',
         title: _text(
           l10n,
-          pt: 'Residencia pelo Acordo Mercosul',
-          es: 'Residencia por el Acuerdo Mercosur',
-          en: 'Residence under the Mercosur Agreement',
+          pt: 'Residência pelo Acordo Brasil–Argentina',
+          es: 'Residencia por el Acuerdo Brasil–Argentina',
+          en: 'Residence under the Brazil–Argentina Agreement',
         ),
         description: _text(
           l10n,
-          pt: 'Argentinos podem pedir residencia no Brasil pelo Acordo Mercosul. O protocolo precisa acontecer dentro do prazo de 90 dias, e o registro RNM/CRNM depois aparece como etapa separada.',
-          es: 'Los argentinos pueden pedir residencia en Brasil por el Acuerdo Mercosur. El tramite debe entrar dentro del plazo de 90 dias y el registro RNM/CRNM aparece despues como etapa separada.',
-          en: 'Argentine citizens can apply for residence in Brazil under the Mercosur Agreement. The filing must happen within the 90-day period, and RNM/CRNM registration appears later as a separate step.',
+          pt: 'Argentinos elegíveis podem pedir residência permanente pelo acordo bilateral. Confirme requisitos e base legal na página atual da Polícia Federal; o RNM/CRNM aparece como etapa própria.',
+          es: 'Argentinos elegibles pueden pedir residencia permanente por el acuerdo bilateral. Confirmá requisitos y base legal en la página vigente de la Policía Federal; el RNM/CRNM es un paso propio.',
+          en: 'Eligible Argentines may request permanent residence under the bilateral agreement. Confirm current requirements and legal basis on the Federal Police page; RNM/CRNM is a separate step.',
         ),
         timeEstimate: _text(
           l10n,
@@ -183,12 +183,12 @@ class DocumentChecklistAdapter {
         ),
         tip: _text(
           l10n,
-          pt: 'Em cidades com fila, agendar cedo ajuda. Mas o ponto central e nao deixar o protocolo para a reta final dos 90 dias.',
-          es: 'En ciudades con cola, agendar temprano ayuda. Pero el punto central es no dejar el tramite para la recta final de los 90 dias.',
-          en: 'In cities with long queues, booking early helps. But the key point is not leaving the filing to the final stretch of the 90 days.',
+          pt: 'Agendar cedo pode ajudar, mas não é um prazo legal universal. Use a página oficial para decidir a rota.',
+          es: 'Agendar temprano puede ayudar, pero no es un plazo legal universal. Usá la página oficial para elegir la ruta.',
+          en: 'Booking early may help, but it is not a universal legal deadline. Use the official page to choose the route.',
         ),
         link:
-            'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia-resolucao-mercosul',
+            'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia/acordo-de-residencia-brasil-e-argentina',
         isOptional: false,
       ),
     ];

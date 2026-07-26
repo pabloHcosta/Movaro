@@ -801,6 +801,14 @@ class _QuestionPageState extends State<QuestionPage> {
           'avoid_expensive' => Icons.price_change_outlined,
           _ => Icons.adjust_rounded,
         };
+      case 'support_needs':
+        return switch (value) {
+          'children_school' => Icons.family_restroom_rounded,
+          'travel_with_pet' => Icons.pets_outlined,
+          'continuous_medication' => Icons.medication_outlined,
+          'foreign_income' => Icons.public_rounded,
+          _ => Icons.check_circle_outline_rounded,
+        };
       case 'preferred_city':
         return switch (value) {
           'choose_on_map' => Icons.map_outlined,
@@ -2735,7 +2743,6 @@ class _RefineMiniCard extends StatelessWidget {
     );
   }
 }
-
 
 class _QuestionLocationDialog extends StatelessWidget {
   const _QuestionLocationDialog({

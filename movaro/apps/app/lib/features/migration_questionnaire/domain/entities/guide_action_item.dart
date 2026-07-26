@@ -16,6 +16,29 @@ enum GuideItemTier { critical, recommended, optional }
 
 enum GuideDismissReason { alreadyDone, notApplicable, later }
 
+enum GuideEvidenceType { official, derived, marketReference, movaroGuidance }
+
+/// Traceability attached to a practical claim.
+///
+/// Legal, migration, health and money guidance must expose where it came from
+/// and when Movaro last checked it. This is intentionally part of the domain
+/// model so every presentation surface can render the same trust information.
+class GuideEvidence {
+  const GuideEvidence({
+    required this.type,
+    required this.sourceLabel,
+    required this.sourceUrl,
+    required this.lastVerified,
+    this.scopeNote,
+  });
+
+  final GuideEvidenceType type;
+  final String sourceLabel;
+  final String sourceUrl;
+  final DateTime lastVerified;
+  final String? scopeNote;
+}
+
 /// Urgency level for guide items — drives visual indicators.
 enum GuideUrgencyLevel {
   /// Normal flow — no urgency.
@@ -158,6 +181,7 @@ class GuideActionItem {
     this.warningFlags,
     this.survivalPhrases,
     this.communityTips,
+    this.evidence,
   });
 
   final String id;
@@ -231,9 +255,10 @@ class GuideActionItem {
   /// hospital). Drives the "Como falar isso em português" survival layer.
   final List<SurvivalPhrase>? survivalPhrases;
 
-  /// Curated first-person tips from real migration cases.
-  /// Drives the "Dica de quem já fez isso" community layer.
+  /// Curated practical scenarios. These are not represented as testimonials
+  /// unless a separately verified source is attached.
   final List<String>? communityTips;
+  final GuideEvidence? evidence;
 
   bool get hasWarningFlags => warningFlags != null && warningFlags!.isNotEmpty;
   bool get hasSurvivalPhrases =>
@@ -343,6 +368,7 @@ class GuideActionItem {
     List<String>? warningFlags,
     List<SurvivalPhrase>? survivalPhrases,
     List<String>? communityTips,
+    GuideEvidence? evidence,
   }) {
     return GuideActionItem(
       id: id ?? this.id,
@@ -395,6 +421,7 @@ class GuideActionItem {
       warningFlags: warningFlags ?? this.warningFlags,
       survivalPhrases: survivalPhrases ?? this.survivalPhrases,
       communityTips: communityTips ?? this.communityTips,
+      evidence: evidence ?? this.evidence,
     );
   }
 }

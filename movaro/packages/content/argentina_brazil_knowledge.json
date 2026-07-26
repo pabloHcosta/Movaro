@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "2026.07.26",
+  "corridor": "AR-BR",
+  "reviewedAt": "2026-07-26",
+  "reviewPolicy": {
+    "criticalReviewDays": 90,
+    "standardReviewDays": 180
+  },
+  "entries": [
+    {
+      "id": "residence_mercosur",
+      "topic": "residence",
+      "critical": true,
+      "authority": "Polícia Federal",
+      "title": "Autorização de residência por Acordo de Residência do Mercosul",
+      "url": "https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia",
+      "verifiedAt": "2026-07-26"
+    },
+    {
+      "id": "cpf_foreigner",
+      "topic": "documents",
+      "critical": true,
+      "authority": "Receita Federal",
+      "title": "Inscrição no CPF para residente no exterior",
+      "url": "https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf/inscricao-no-cpf",
+      "verifiedAt": "2026-07-26"
+    },
+    {
+      "id": "sus_foreigner",
+      "topic": "health",
+      "critical": true,
+      "authority": "Ministério da Saúde",
+      "title": "Saúde para migrantes, refugiados e apátridas",
+      "url": "https://www.gov.br/saude/pt-br/composicao/saps/equidade-em-saude/saude-de-migrantes-refugiados-e-apatridas",
+      "verifiedAt": "2026-07-26"
+    },
+    {
+      "id": "medication_travel",
+      "topic": "medicines",
+      "critical": true,
+      "authority": "Anvisa",
+      "title": "Medicamentos em viagens internacionais",
+      "url": "https://www.gov.br/anvisa/pt-br/assuntos/medicamentos/controlados/medicamentos-em-viagens-internacionais",
+      "verifiedAt": "2026-07-26"
+    },
+    {
+      "id": "pet_entry",
+      "topic": "pets",
+      "critical": true,
+      "authority": "Ministério da Agricultura e Pecuária",
+      "title": "Ingresso de cães e gatos no Brasil",
+      "url": "https://www.gov.br/agricultura/pt-br/assuntos/vigilancia-agropecuaria/animais-estimacao/entrar-no-brasil",
+      "verifiedAt": "2026-07-26"
+    },
+    {
+      "id": "foreign_income_tax",
+      "topic": "tax",
+      "critical": true,
+      "authority": "Receita Federal",
+      "title": "Residência fiscal e saída definitiva",
+      "url": "https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda",
+      "verifiedAt": "2026-07-26"
+    },
+    {
+      "id": "school_enrollment",
+      "topic": "school",
+      "critical": false,
+      "authority": "Ministério da Educação",
+      "title": "Educação para migrantes e refugiados",
+      "url": "https://www.gov.br/mec/pt-br/assuntos/noticias",
+      "verifiedAt": "2026-07-26"
+    },
+    {
+      "id": "emergency_numbers",
+      "topic": "emergency",
+      "critical": true,
+      "authority": "Governo do Brasil",
+      "title": "Telefones de emergência no Brasil",
+      "url": "https://www.gov.br/pt-br/servicos/acionar-servicos-de-emergencia",
+      "verifiedAt": "2026-07-26"
+    },
+    {
+      "id": "consumer_rights",
+      "topic": "housing",
+      "critical": false,
+      "authority": "Ministério da Justiça e Segurança Pública",
+      "title": "Consumidor.gov.br",
+      "url": "https://www.consumidor.gov.br/",
+      "verifiedAt": "2026-07-26"
+    }
+  ]
+}

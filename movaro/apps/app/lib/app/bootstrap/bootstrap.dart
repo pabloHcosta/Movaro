@@ -30,6 +30,7 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
@@ -101,6 +102,9 @@ Future<AppDependencies> buildAppDependencies({
     planGenerator: MigrationPlanGenerator(citiesRepository: citiesRepository),
     journeyContextController: journeyContextController,
     flowDraftStore: flowDraftStore,
+    planResetService: MigrationPlanResetService(
+      copilotProgressStore: copilotProgressStore,
+    ),
   );
   final copilotExchangeRatesService = CopilotExchangeRatesService(
     remoteDataSource: CopilotExchangeRatesRemoteDataSource(

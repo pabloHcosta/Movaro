@@ -1,9 +1,8 @@
 /**
  * Curated guide items for the Argentina → Brasil corridor.
  *
- * This is the backend source of truth for guide content injected into the
- * AI system prompt. Mirrors the Flutter-side ArgentinaBrazilGuideDataSource
- * in terms of IDs and phases so completedItemIds from the client align.
+ * Reviewed deterministic knowledge for backend resolvers. It is not an AI
+ * prompt and must not contain unsupported time, price, or approval claims.
  *
  * Phases (in order): preparation → documents → housing → work → arrival
  */
@@ -31,7 +30,7 @@ export const ARGENTINA_BRAZIL_GUIDE_ITEMS: GuideItem[] = [
     phase: 'preparation',
     title: 'Calcular orçamento de mudança',
     summary: 'Estimar gastos da mudança: frete, passagens, primeiro mês de aluguel e caução.',
-    notes: 'Caução costuma ser 2-3 meses de aluguel. Incluir reserva de emergência de 3 meses.',
+    notes: 'A Lei do Inquilinato limita a caução em dinheiro e não permite acumular mais de uma modalidade de garantia no mesmo contrato. A reserva é uma decisão pessoal.',
   },
   {
     id: 'prep-03',
@@ -54,14 +53,14 @@ export const ARGENTINA_BRAZIL_GUIDE_ITEMS: GuideItem[] = [
     phase: 'documents',
     title: 'Obter CPF na Receita Federal',
     summary: 'Cadastro de Pessoa Física — o documento mais importante para se estabelecer no Brasil.',
-    notes: 'Pode ser solicitado presencialmente em agências da Receita Federal ou pelos Correios. Argentinos com passaporte válido podem solicitar. Sem CPF não é possível abrir conta bancária, assinar contrato de aluguel ou trabalhar formalmente.',
+    notes: 'Pode ser solicitado pelos canais oficiais no Brasil ou no exterior. O serviço público é gratuito; unidades conveniadas podem cobrar a tarifa publicada. Documentos e prazo variam por canal.',
   },
   {
     id: 'doc-02',
     phase: 'documents',
-    title: 'Solicitar residência pelo acordo MERCOSUL',
-    summary: 'Regularizar situação migratória via acordo de residência do MERCOSUL.',
-    notes: 'Argentinos têm direito à residência temporária (2 anos) facilmente renovável para permanente. Solicitar na Polícia Federal. Documentos necessários: passaporte válido, comprovante de renda ou vínculo empregatício, certidão de antecedentes criminais apostilada.',
+    title: 'Confirmar residência pelo acordo Brasil–Argentina',
+    summary: 'Avaliar a rota bilateral de residência permanente para argentinos elegíveis.',
+    notes: 'A Polícia Federal mantém uma página específica do acordo bilateral Brasil–Argentina. A estada como visitante não deve ser tratada como prazo universal para pedir residência. Confirmar elegibilidade e requisitos na versão atual do serviço.',
   },
   {
     id: 'doc-03',
@@ -75,7 +74,7 @@ export const ARGENTINA_BRAZIL_GUIDE_ITEMS: GuideItem[] = [
     phase: 'documents',
     title: 'Traduzir documentos oficiais',
     summary: 'Tradução juramentada de documentos argentinos para uso em contratos e processos brasileiros.',
-    notes: 'Tradutores juramentados são credenciados pela Junta Comercial de cada estado. Custo médio: R$ 150-300 por documento.',
+    notes: 'Tradutores públicos são registrados conforme a regra aplicável. Preço e necessidade de tradução variam; confirmar com o órgão que receberá o documento.',
   },
 
   // ── HOUSING ────────────────────────────────────────────────────────────────
@@ -91,7 +90,7 @@ export const ARGENTINA_BRAZIL_GUIDE_ITEMS: GuideItem[] = [
     phase: 'housing',
     title: 'Pesquisar bairros e modalidades de aluguel',
     summary: 'Entender a cidade: bairros, transporte e perfil de cada região.',
-    notes: 'No Brasil o aluguel exige fiador (garantidor) com imóvel quitado, ou seguro fiança (custo ~1.5x aluguel/mês), ou caução (3 meses antecipados), ou título de capitalização.',
+    notes: 'A garantia depende do contrato e da Lei do Inquilinato. Não há exigência universal de fiador. O contrato não deve acumular mais de uma garantia; caução em dinheiro tem limite legal.',
   },
   {
     id: 'hou-03',
@@ -107,7 +106,7 @@ export const ARGENTINA_BRAZIL_GUIDE_ITEMS: GuideItem[] = [
     phase: 'work',
     title: 'Abrir conta bancária no Brasil',
     summary: 'Ter conta em banco brasileiro para receber salário e pagar contas.',
-    notes: 'Bancos digitais (Nubank, Inter, C6) aceitam estrangeiros com passaporte + CPF. Bancos tradicionais podem exigir RNM. Conta digital é o caminho mais rápido.',
+    notes: 'Cada instituição define documentos, análise e disponibilidade. CPF e identificação migratória podem ser solicitados, mas nenhuma combinação garante aprovação.',
   },
   {
     id: 'wor-02',
@@ -128,7 +127,7 @@ export const ARGENTINA_BRAZIL_GUIDE_ITEMS: GuideItem[] = [
     phase: 'work',
     title: 'Atualizar currículo para o mercado brasileiro',
     summary: 'Adaptar formato e linguagem do currículo ao padrão brasileiro.',
-    notes: 'Currículo brasileiro inclui foto, data de nascimento e estado civil (opcional). Usar LinkedIn com perfil em português. Plataformas: LinkedIn, Catho, InfoJobs, Vagas.com.',
+    notes: 'Adaptar idioma e palavras-chave da vaga. Evitar dados pessoais desnecessários; foto, idade e estado civil não são requisitos gerais.',
   },
 
   // ── ARRIVAL ────────────────────────────────────────────────────────────────
@@ -137,21 +136,21 @@ export const ARGENTINA_BRAZIL_GUIDE_ITEMS: GuideItem[] = [
     phase: 'arrival',
     title: 'Obter CRNM (Carteira de Registro Nacional Migratório)',
     summary: 'Documento de identidade do imigrante no Brasil — equivalente ao RG para estrangeiros.',
-    notes: 'Solicitada na Polícia Federal após aprovação da residência MERCOSUL. Tem validade de 2 anos (renovável). Essencial para contratos formais e serviços públicos.',
+    notes: 'O registro e a CRNM seguem a base legal e o prazo indicado no documento. Na rota bilateral, a residência pode ser por prazo indeterminado; confirmar no protocolo e na Polícia Federal.',
   },
   {
     id: 'arr-02',
     phase: 'arrival',
     title: 'Cadastrar no sistema de saúde (SUS)',
     summary: 'Acessar saúde pública brasileira gratuitamente com cadastro no posto de saúde.',
-    notes: 'SUS é gratuito e universal. Cadastro no posto de saúde do bairro com CPF e comprovante de endereço. Plano de saúde privado recomendado se emprego formal não oferecer.',
+    notes: 'Migrantes têm acesso ao SUS. Urgência não deve aguardar CPF ou CNS; para acompanhamento, confirmar documentos na UBS local. Plano privado é escolha individual.',
   },
   {
     id: 'arr-03',
     phase: 'arrival',
     title: 'Transferir ou tirar CNH brasileira',
     summary: 'Converter ou obter Carteira Nacional de Habilitação para dirigir legalmente no Brasil.',
-    notes: 'CNH argentina é válida por 180 dias no Brasil. Para conversão: requerer no DETRAN do estado com passaporte + RNM + CNH argentina apostilada. Processo sem necessidade de nova prova.',
+    notes: 'Validade e procedimento dependem da regra vigente e do DETRAN estadual. Confirmar documentos, tradução e exames no canal oficial antes de dirigir ou converter.',
   },
 ];
 

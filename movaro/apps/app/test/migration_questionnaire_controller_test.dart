@@ -114,7 +114,7 @@ void main() {
     );
 
     test(
-      'strategic refinement starts from funding after core answers',
+      'strategic refinement starts from contextual needs after core answers',
       () async {
         controller.selectVariant(QuestionnaireVariant.lean);
         controller.selectAnswer('intent', 'explore_unsure');
@@ -127,9 +127,10 @@ void main() {
           'intent',
           'timeline',
           'priorities',
+          'support_needs',
           'funding',
         ]);
-        expect(controller.currentQuestion?.id, 'funding');
+        expect(controller.currentQuestion?.id, 'support_needs');
       },
     );
 
@@ -140,6 +141,7 @@ void main() {
         'intent',
         'timeline',
         'priorities',
+        'support_needs',
         'funding',
       ]);
 
@@ -149,6 +151,7 @@ void main() {
         'intent',
         'timeline',
         'priorities',
+        'support_needs',
         'funding',
         'available_capital',
       ]);
@@ -159,8 +162,56 @@ void main() {
         'intent',
         'timeline',
         'priorities',
+        'support_needs',
         'funding',
       ]);
+    });
+
+    test('special-needs none option remains exclusive', () {
+      controller.selectVariant(QuestionnaireVariant.strategic);
+
+      expect(
+        controller.toggleAnswer('support_needs', 'travel_with_pet'),
+        isTrue,
+      );
+      expect(
+        controller.toggleAnswer('support_needs', 'continuous_medication'),
+        isTrue,
+      );
+      expect(
+        controller.answerValuesFor('support_needs'),
+        unorderedEquals(['travel_with_pet', 'continuous_medication']),
+      );
+
+      expect(
+        controller.toggleAnswer('support_needs', 'no_special_needs'),
+        isTrue,
+      );
+      expect(controller.answerValuesFor('support_needs'), ['no_special_needs']);
+    });
+
+    test('starting over clears the previously selected city', () async {
+      final previousCity = await const _FakeCitiesRepository().getCityById(
+        'curitiba',
+      );
+      controller
+        ..setPreferredCity(previousCity)
+        ..selectVariant(QuestionnaireVariant.lean)
+        ..selectAnswer('intent', 'remote_income');
+
+      expect(controller.preferredCity?.id, 'curitiba');
+      expect(controller.answers, isNotEmpty);
+
+      await controller.clearCurrentPlan();
+
+      expect(controller.preferredCity, isNull);
+      expect(controller.generatedPlan, isNull);
+      expect(
+        controller.answers.map((answer) => answer.questionId),
+        unorderedEquals(['origin_country', 'destination_country']),
+      );
+      expect(controller.answerFor('intent'), isNull);
+      expect(controller.selectedVariant, isNull);
     });
   });
 }

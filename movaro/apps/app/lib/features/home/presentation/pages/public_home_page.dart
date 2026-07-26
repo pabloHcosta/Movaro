@@ -2372,9 +2372,9 @@ class _PFAppointmentNudge extends StatelessWidget {
                 Text(
                   _localizedText(
                     context,
-                    pt: 'Se a sua cidade tiver fila, adiantar o agendamento ajuda. O importante é não deixar o protocolo da residência para a reta final dos 90 dias.',
-                    es: 'Si tu ciudad tiene cola, adelantar el turno ayuda. Lo importante es no dejar el tramite de residencia para la recta final de los 90 dias.',
-                    en: 'If your city has long queues, booking earlier helps. What matters is not leaving the residence filing to the final stretch of the 90 days.',
+                    pt: 'Confirme primeiro a base legal da sua residência. Para argentinos elegíveis, o acordo bilateral pode permitir residência permanente direta; agendar cedo é apenas uma recomendação prática.',
+                    es: 'Confirmá primero la base legal de tu residencia. Para argentinos elegibles, el acuerdo bilateral puede permitir residencia permanente directa; agendar temprano es solo una recomendación práctica.',
+                    en: 'Confirm the legal basis for residence first. Eligible Argentines may qualify for direct permanent residence under the bilateral agreement; booking early is only practical guidance.',
                   ),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: isDark

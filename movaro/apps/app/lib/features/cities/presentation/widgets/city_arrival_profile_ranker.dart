@@ -22,22 +22,41 @@ class CityArrivalProfileRanker {
   static int score(City city, {required CityArrivalProfile profile}) {
     switch (profile) {
       case CityArrivalProfile.softLanding:
-        return (city.rentScore * 35) +
-            (city.spanishSupportScore * 30) +
-            (city.costOfLivingScore * 20) +
-            (city.safetyScore * 15);
+        return _weighted([
+          (city.rentScore, 35, true),
+          (city.spanishSupportScore, 30, true),
+          (city.costOfLivingScore, 20, true),
+          (city.safetyScore, 15, city.sources.safety != null),
+        ]);
       case CityArrivalProfile.familyStability:
-        return (city.safetyScore * 35) +
-            (city.rentScore * 25) +
-            (_idhmScore(city) * 25) +
-            (city.spanishSupportScore * 15);
+        return _weighted([
+          (city.safetyScore, 35, city.sources.safety != null),
+          (city.rentScore, 25, true),
+          (_idhmScore(city), 25, true),
+          (city.spanishSupportScore, 15, true),
+        ]);
       case CityArrivalProfile.incomeStart:
-        return (city.jobMarketScore * 40) +
-            (city.economicActivityScore * 25) +
-            (city.rentScore * 20) +
-            (city.argentinaPopularityScore * 15);
+        return _weighted([
+          (city.jobMarketScore, 40, city.sources.employment != null),
+          (city.economicActivityScore, 25, city.sources.employment != null),
+          (city.rentScore, 20, true),
+          (city.argentinaPopularityScore, 15, true),
+        ]);
     }
   }
 
   static int _idhmScore(City city) => (city.idhmScore * 100).round();
+
+  static int _weighted(List<(int, int, bool)> signals) {
+    var weightedScore = 0;
+    var includedWeight = 0;
+    for (final (value, weight, hasSource) in signals) {
+      if (!hasSource) continue;
+      weightedScore += value * weight;
+      includedWeight += weight;
+    }
+    return includedWeight == 0
+        ? 0
+        : (weightedScore * 100 / includedWeight).round();
+  }
 }

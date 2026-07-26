@@ -10661,7 +10661,7 @@ abstract class AppLocalizations {
   /// No description provided for @infoGuideStepThreeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Ask the AI assistant'**
+  /// **'Ask the Movaro assistant'**
   String get infoGuideStepThreeTitle;
 
   /// No description provided for @infoGuideStepThreeBody.

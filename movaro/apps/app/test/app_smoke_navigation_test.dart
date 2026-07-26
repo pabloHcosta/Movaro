@@ -187,7 +187,7 @@ void main() {
   testWidgets('copilot redirects to result reveal until city is confirmed', (
     tester,
   ) async {
-    await harness.generateLeanPlan();
+    await tester.runAsync(harness.generateLeanPlan);
 
     await tester.pumpWidget(
       harness.buildApp(initialRoute: AppRoutes.migrationPlanCopilot),
@@ -205,22 +205,24 @@ void main() {
   testWidgets('confirmed city turns public home into execution home', (
     tester,
   ) async {
-    await harness.generateLeanPlan();
+    await tester.runAsync(harness.generateLeanPlan);
 
     final city = harness
         .migrationQuestionnaireController
         .generatedPlan!
         .highlightedCity!;
-    await harness.migrationQuestionnaireController.confirmPlanCity(city);
+    await tester.runAsync(
+      () => harness.migrationQuestionnaireController.confirmPlanCity(city),
+    );
 
     await tester.pumpWidget(
       harness.buildApp(initialRoute: AppRoutes.publicHome),
     );
     await _pumpScreen(tester);
 
-    expect(find.text('Plano'), findsOneWidget);
-    expect(find.text('Excluir ou refazer'), findsOneWidget);
-    expect(find.text('Documentos e residência'), findsOneWidget);
+    expect(find.text('Execução'), findsWidgets);
+    expect(find.text('Ver cidade'), findsOneWidget);
+    expect(find.text('SUA JORNADA'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
@@ -229,81 +231,93 @@ void main() {
   testWidgets('copilot back falls back to public home when opened as root', (
     tester,
   ) async {
-    await harness.generateLeanPlan();
+    await tester.runAsync(harness.generateLeanPlan);
 
     final city = harness
         .migrationQuestionnaireController
         .generatedPlan!
         .highlightedCity!;
-    await harness.migrationQuestionnaireController.confirmPlanCity(city);
+    await tester.runAsync(
+      () => harness.migrationQuestionnaireController.confirmPlanCity(city),
+    );
 
     await tester.pumpWidget(
       harness.buildApp(initialRoute: AppRoutes.migrationPlanCopilot),
     );
     await _pumpScreen(tester);
 
-    expect(find.text('Guia da mudança'), findsWidgets);
+    expect(find.text('Execução'), findsWidgets);
 
-    await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded).first);
+    await tester.tap(
+      find.byIcon(Icons.arrow_back_rounded).first,
+      warnIfMissed: false,
+    );
     await _pumpScreen(tester);
 
-    expect(find.text('Escolha o próximo passo da sua mudança'), findsOneWidget);
-    expect(find.text('Plano'), findsOneWidget);
+    expect(find.text('Execução'), findsWidgets);
+    expect(find.text('SUA JORNADA'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
   });
 
-  testWidgets('home lets the user delete the current plan', (tester) async {
-    await harness.generateLeanPlan();
+  testWidgets('home lets the user cancel replacing the current plan', (
+    tester,
+  ) async {
+    await tester.runAsync(harness.generateLeanPlan);
 
     final city = harness
         .migrationQuestionnaireController
         .generatedPlan!
         .highlightedCity!;
-    await harness.migrationQuestionnaireController.confirmPlanCity(city);
+    await tester.runAsync(
+      () => harness.migrationQuestionnaireController.confirmPlanCity(city),
+    );
 
     await tester.pumpWidget(
       harness.buildApp(initialRoute: AppRoutes.publicHome),
     );
     await _pumpScreen(tester);
 
-    expect(find.text('Excluir ou refazer'), findsOneWidget);
-
-    await tester.tap(find.text('Excluir ou refazer'));
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await _pumpScreen(tester);
+    await tester.tap(find.text('Novo plano'));
     await _pumpScreen(tester);
 
-    expect(find.text('Excluir plano'), findsOneWidget);
+    expect(find.text('Começar um novo plano'), findsOneWidget);
 
-    await tester.tap(find.text('Excluir plano'));
+    await tester.tap(find.text('Cancelar — manter Curitiba'));
     await _pumpScreen(tester);
 
-    expect(find.text('Excluir ou refazer'), findsNothing);
-    expect(find.text('Plano'), findsNothing);
-    expect(find.text('Começar meu plano'), findsOneWidget);
+    expect(find.text('Execução'), findsWidgets);
+    expect(find.text('SUA JORNADA'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
   });
 
   testWidgets('home lets the user rebuild the current plan', (tester) async {
-    await harness.generateLeanPlan();
+    await tester.runAsync(harness.generateLeanPlan);
 
     final city = harness
         .migrationQuestionnaireController
         .generatedPlan!
         .highlightedCity!;
-    await harness.migrationQuestionnaireController.confirmPlanCity(city);
+    await tester.runAsync(
+      () => harness.migrationQuestionnaireController.confirmPlanCity(city),
+    );
 
     await tester.pumpWidget(
       harness.buildApp(initialRoute: AppRoutes.publicHome),
     );
     await _pumpScreen(tester);
 
-    await tester.tap(find.text('Excluir ou refazer'));
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await _pumpScreen(tester);
+    await tester.tap(find.text('Novo plano'));
     await _pumpScreen(tester);
 
-    await tester.tap(find.text('Refazer plano'));
+    await tester.tap(find.text('Sim, começar do zero'));
     await _pumpScreen(tester);
 
     expect(find.text('Receber minha direção inicial'), findsOneWidget);

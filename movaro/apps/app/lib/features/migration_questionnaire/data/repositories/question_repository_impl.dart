@@ -179,6 +179,40 @@ class QuestionRepositoryImpl implements QuestionRepository {
         ],
       ).toEntity(),
       QuestionModel(
+        id: 'support_needs',
+        title: 'support_needs',
+        type: 'multi_chip',
+        maxSelections: 4,
+        variants: const [QuestionnaireVariant.strategic],
+        options: const [
+          OptionModel(
+            id: 'children_school',
+            label: 'children_school',
+            value: 'children_school',
+          ),
+          OptionModel(
+            id: 'travel_with_pet',
+            label: 'travel_with_pet',
+            value: 'travel_with_pet',
+          ),
+          OptionModel(
+            id: 'continuous_medication',
+            label: 'continuous_medication',
+            value: 'continuous_medication',
+          ),
+          OptionModel(
+            id: 'foreign_income',
+            label: 'foreign_income',
+            value: 'foreign_income',
+          ),
+          OptionModel(
+            id: 'no_special_needs',
+            label: 'no_special_needs',
+            value: 'no_special_needs',
+          ),
+        ],
+      ).toEntity(),
+      QuestionModel(
         id: 'constraints',
         title: 'constraints',
         type: 'multi_chip',

@@ -125,8 +125,8 @@ describe('CorridorGuidanceResolverService', () => {
     });
 
     expect(result.found).toBe(true);
-    expect(result.answer).toContain('90 dias');
-    expect(result.answer).toContain('residência Mercosul');
+    expect(result.answer).toContain('acordo bilateral Brasil–Argentina');
+    expect(result.answer).toContain('não é prazo universal');
   });
 
   it('returns a city-aware best-time answer for exact quick prompts', async () => {

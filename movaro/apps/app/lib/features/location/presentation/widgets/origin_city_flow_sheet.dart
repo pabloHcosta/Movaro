@@ -229,9 +229,9 @@ class _OriginCityFlowSheetState extends State<_OriginCityFlowSheet> {
           const SizedBox(height: 10),
           Text(
             _copy(
-              pt: 'Com sua autorização, usamos a localização uma única vez para sugerir a cidade. Você confirma antes de continuar.',
-              es: 'Con tu permiso, usamos la ubicación una sola vez para sugerir la ciudad. Vos confirmás antes de seguir.',
-              en: 'With your permission, we use location once to suggest the city. You confirm it before continuing.',
+              pt: 'Com sua autorização, usamos a localização para sugerir a cidade. Depois guardamos somente a cidade escolhida e um ponto aproximado do município — nunca a posição GPS exata. Você pode apagar isso nos Ajustes.',
+              es: 'Con tu permiso, usamos la ubicación para sugerir la ciudad. Después guardamos solo la ciudad elegida y un punto aproximado del municipio, nunca la posición GPS exacta. Podés borrarlo en Ajustes.',
+              en: 'With permission, we use location to suggest a city. We then keep only the chosen city and an approximate municipal point, never the exact GPS fix. You can delete it in Settings.',
             ),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(

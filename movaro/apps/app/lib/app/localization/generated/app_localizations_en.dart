@@ -6346,7 +6346,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Use the search bar to find specific answers about CPF, visa, SUS, or any other subject.';
 
   @override
-  String get infoGuideStepThreeTitle => 'Ask the AI assistant';
+  String get infoGuideStepThreeTitle => 'Ask the Movaro assistant';
 
   @override
   String get infoGuideStepThreeBody =>

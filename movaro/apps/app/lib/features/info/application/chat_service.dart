@@ -4,14 +4,14 @@ import 'dart:ui';
 
 import 'package:movaro_app/app/localization/generated/app_localizations.dart';
 import 'package:movaro_app/core/network/network_client.dart';
-import 'package:movaro_app/features/info/application/gemini_chat_service.dart';
+import 'package:movaro_app/features/info/domain/entities/chat_message.dart';
 
 /// The answer source returned by the backend orchestrator.
 enum ChatAnswerSource { appData, ai, unknown }
 
 /// A single message in the conversation history.
 ///
-/// Mirrors [ChatMessage] from [GeminiChatService] for UI compatibility.
+/// Compatibility alias kept for existing presentation code.
 typedef BackendChatMessage = ChatMessage;
 
 /// Result of a single call to [ChatService.ask].
@@ -48,12 +48,13 @@ class ChatStarterPrompts {
 
 /// Backend-mediated chat service.
 ///
-/// Calls `POST /api/v1/chat/ask` on the Movaro API. The backend orchestrator
-/// handles intent detection, structured resolver lookup (city, cost, docs,
-/// plan), and Gemini fallback — so no Gemini API key is needed in the app.
+/// By default, answers come from the deterministic on-device knowledge base.
+/// This keeps the assistant useful offline and prevents a migration or legal
+/// answer from changing with a generative model. Remote structured knowledge
+/// can be enabled explicitly, but generative AI is not required.
 ///
-/// Exposes a [Stream<String>] interface identical to [GeminiChatService.sendMessage]
-/// so the existing chat UI works without changes.
+/// Exposes a streaming interface so the existing chat UI keeps its typewriter
+/// interaction without depending on a generative model.
 class ChatService {
   ChatService({
     required NetworkClient networkClient,
@@ -65,6 +66,7 @@ class ChatService {
     this.migrationGoal,
     this.planTimeline,
     this.completedItemIds = const [],
+    this.useRemoteKnowledge = false,
   }) : _client = networkClient,
        _originCountry = originCountry,
        _destinationCountry = destinationCountry,
@@ -79,6 +81,7 @@ class ChatService {
   final String? migrationGoal;
   final String? planTimeline;
   final List<String> completedItemIds;
+  final bool useRemoteKnowledge;
 
   final List<ChatMessage> _history = [];
 
@@ -87,7 +90,7 @@ class ChatService {
   List<ChatMessage> get history => List.unmodifiable(_history);
 
   /// Send a message and stream the response character by character for a
-  /// typewriter effect. Matches the [GeminiChatService.sendMessage] signature.
+  /// typewriter effect.
   Stream<String> sendMessage(String userMessage) async* {
     final trimmed = userMessage.trim();
     if (trimmed.isEmpty) return;
@@ -100,20 +103,22 @@ class ChatService {
       '[ChatService] ask: "${trimmed.substring(0, trimmed.length.clamp(0, 60))}"',
     );
 
-    String answerText;
-    try {
-      final answer = await _ask(trimmed);
-      answerText = _sanitizeWellFormedUtf16(answer.text);
-      if (answerText.trim().isEmpty) {
-        // Backend reached but returned nothing usable — degrade gracefully.
-        answerText = localFallbackAnswer(trimmed, _locale);
+    var answerText = _enrichLocalAnswer(
+      trimmed,
+      localFallbackAnswer(trimmed, _locale),
+    );
+    if (useRemoteKnowledge) {
+      try {
+        final answer = await _ask(trimmed);
+        final remoteText = _sanitizeWellFormedUtf16(answer.text);
+        if (answer.source == ChatAnswerSource.appData &&
+            answer.confidence >= 0.72 &&
+            remoteText.trim().isNotEmpty) {
+          answerText = remoteText;
+        }
+      } catch (e) {
+        dev.log('[ChatService] structured knowledge unavailable: $e');
       }
-    } catch (e) {
-      // The live assistant is unreachable (network, validation, or backend
-      // failure). Never dead-end the user: answer locally with curated
-      // guidance and a pointer to the in-app Guides.
-      dev.log('[ChatService] ask failed, using local fallback: $e');
-      answerText = localFallbackAnswer(trimmed, _locale);
     }
 
     _history.add(
@@ -136,12 +141,120 @@ class ChatService {
 
   void clearHistory() => _history.clear();
 
+  String _enrichLocalAnswer(String message, String answer) {
+    final normalized = _normalizeMessage(message);
+    final source = _officialSourceFor(normalized);
+    final contextParts = <String>[
+      if (highlightedCityId != null && highlightedCityId!.trim().isNotEmpty)
+        _tr(
+          _locale,
+          pt: 'cidade do plano: ${_humanizeCityId(highlightedCityId!)}',
+          es: 'ciudad del plan: ${_humanizeCityId(highlightedCityId!)}',
+          en: 'plan city: ${_humanizeCityId(highlightedCityId!)}',
+        ),
+      if (currentPhase != null && currentPhase!.trim().isNotEmpty)
+        _tr(
+          _locale,
+          pt: 'fase atual: ${currentPhase!}',
+          es: 'fase actual: ${currentPhase!}',
+          en: 'current phase: ${currentPhase!}',
+        ),
+    ];
+    final contextLine = contextParts.isEmpty
+        ? ''
+        : '\n\n${_tr(_locale, pt: 'Contexto usado', es: 'Contexto usado', en: 'Context used')}: ${contextParts.join(' · ')}.';
+    final sourceLine = source == null
+        ? ''
+        : '\n\n${_tr(_locale, pt: 'Fonte oficial', es: 'Fuente oficial', en: 'Official source')}: $source';
+    return '$answer$contextLine$sourceLine';
+  }
+
+  static String _humanizeCityId(String value) {
+    final words = value
+        .replaceAll(
+          RegExp(
+            r'-(?:ac|al|ap|am|ba|ce|df|es|go|ma|mt|ms|mg|pa|pb|pr|pe|pi|rj|rn|rs|ro|rr|sc|sp|se|to)$',
+          ),
+          '',
+        )
+        .split('-');
+    return words
+        .where((word) => word.isNotEmpty)
+        .map((word) => '${word[0].toUpperCase()}${word.substring(1)}')
+        .join(' ');
+  }
+
+  static String? _officialSourceFor(String message) {
+    if (_containsAny(message, [
+      'residencia',
+      'residency',
+      'mercosur',
+      'mercosul',
+      'visto',
+      'visa',
+    ])) {
+      return 'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia';
+    }
+    if (_containsAny(message, [
+      'cpf',
+      'documento',
+      'document',
+      'rnm',
+      'passport',
+      'passaporte',
+    ])) {
+      return 'https://www.gov.br/receitafederal/pt-br/assuntos/meu-cpf/inscricao-no-cpf';
+    }
+    if (_containsAny(message, [
+      'medicamento',
+      'remedio',
+      'medicacion',
+      'medicine',
+      'receta',
+    ])) {
+      return 'https://www.gov.br/anvisa/pt-br/assuntos/medicamentos/controlados/medicamentos-em-viagens-internacionais';
+    }
+    if (_containsAny(message, [
+      'mascota',
+      'pet',
+      'perro',
+      'gato',
+      'cachorro',
+      'dog',
+      'cat',
+    ])) {
+      return 'https://www.gov.br/agricultura/pt-br/assuntos/vigilancia-agropecuaria/animais-estimacao/entrar-no-brasil';
+    }
+    if (_containsAny(message, [
+      'sus',
+      'salud',
+      'saude',
+      'health',
+      'hospital',
+    ])) {
+      return 'https://www.gov.br/saude/pt-br/composicao/saps/equidade-em-saude/saude-de-migrantes-refugiados-e-apatridas';
+    }
+    if (_containsAny(message, [
+      'impuesto',
+      'imposto',
+      'tax',
+      'receita',
+      'renda exterior',
+      'mei',
+    ])) {
+      return 'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda';
+    }
+    return null;
+  }
+
   Future<ChatServiceAnswer> _ask(String message) async {
     final body = <String, dynamic>{
       'message': message,
       // Default to the validated corridor so the request never fails backend
       // validation when the journey context is not set yet.
-      'originCountry': _originCountry.trim().isEmpty ? 'argentina' : _originCountry,
+      'originCountry': _originCountry.trim().isEmpty
+          ? 'argentina'
+          : _originCountry,
       'destinationCountry': _destinationCountry.trim().isEmpty
           ? 'brasil'
           : _destinationCountry,
@@ -257,10 +370,10 @@ class ChatService {
       dev.log('[ChatService] starter prompts fallback: $e');
     }
 
-    return _buildFallbackStarterPrompts();
+    return localStarterPrompts();
   }
 
-  ChatStarterPrompts _buildFallbackStarterPrompts() {
+  ChatStarterPrompts localStarterPrompts() {
     final l10n = _l10n;
     final destinationLabel = _destinationCountry.trim().isNotEmpty
         ? _destinationCountry.trim()
@@ -328,41 +441,79 @@ class ChatService {
   /// the in-app Guides. [locale] is a 2-letter code ('es' | 'pt' | 'en').
   static String localFallbackAnswer(String message, String locale) {
     final m = _normalizeMessage(message);
-    bool has(List<String> kws) => kws.any(m.contains);
+    bool has(List<String> kws) => _containsAny(m, kws);
 
-    if (has(['cpf', 'documento', 'document', 'rne', 'rnm', 'crnm', 'pasaporte', 'passaporte', 'passport'])) {
+    if (has([
+      'cpf',
+      'documento',
+      'document',
+      'rne',
+      'rnm',
+      'crnm',
+      'pasaporte',
+      'passaporte',
+      'passport',
+    ])) {
       return _tr(
         locale,
-        es: 'Según fuentes oficiales, el CPF normalmente se tramita gratis (Correios, Banco do Brasil o Caixa, o en un consulado de Brasil) y suele ser lo primero que piden para banco, alquiler y trabajo. Te oriento por acá: abrí Guías › Documentos y confirmá el procedimiento en gov.br.',
-        pt: 'Segundo as fontes oficiais, o CPF normalmente é gratuito (Correios, Banco do Brasil ou Caixa, ou num consulado do Brasil) e costuma ser o primeiro pedido para banco, aluguel e trabalho. Posso te orientar: abra Guias › Documentos e confirme o procedimento no gov.br.',
-        en: 'According to official sources, the CPF is usually free (Correios, Banco do Brasil or Caixa, or at a Brazilian consulate) and is typically the first thing required for bank, rent and work. I can point you there: open Guides › Documents and confirm the procedure on gov.br.',
+        es: 'Guía Movaro sin IA: el CPF puede solicitarse por los canales oficiales en Brasil o en el exterior. El servicio público es gratuito; unidades asociadas pueden cobrar la tarifa publicada. Para DNI o pasaporte, confirmá el documento aceptado según tu forma de ingreso. Abrí Guías › Documentos y verificá la fuente oficial vigente.',
+        pt: 'Guia Movaro sem IA: o CPF pode ser solicitado pelos canais oficiais no Brasil ou no exterior. O serviço público é gratuito; unidades conveniadas podem cobrar a tarifa publicada. Para DNI ou passaporte, confirme o documento aceito conforme sua forma de entrada. Abra Guias › Documentos e verifique a fonte oficial vigente.',
+        en: 'Movaro guidance without AI: CPF can be requested through official channels in Brazil or abroad. The public service is free; partner units may charge the published fee. For DNI or passport, confirm what your entry method accepts. Open Guides › Documents and verify the current official source.',
       );
     }
-    if (has(['residencia', 'residencia', 'residency', 'mercosur', 'mercosul', 'visto', 'visa', 'radicar', 'radicacion'])) {
+    if (has([
+      'residencia',
+      'residencia',
+      'residency',
+      'mercosur',
+      'mercosul',
+      'visto',
+      'visa',
+      'radicar',
+      'radicacion',
+    ])) {
       return _tr(
         locale,
-        es: 'Como argentino, normalmente entrás por el Acuerdo Mercosur y suele haber un plazo de 90 días desde el ingreso para iniciar la residencia temporaria en la Polícia Federal. Te oriento en Guías › Documentos; confirmá requisitos y plazos en gov.br / Polícia Federal.',
-        pt: 'Como argentino, você normalmente entra pelo Acordo Mercosul e costuma haver um prazo de 90 dias da entrada para iniciar a residência temporária na Polícia Federal. Te oriento em Guias › Documentos; confirme requisitos e prazos no gov.br / Polícia Federal.',
-        en: 'As an Argentine you usually enter under the Mercosur Agreement, and there is typically a 90-day window from entry to start temporary residency at the Federal Police. I can point you in Guides › Documents; confirm requirements and deadlines on gov.br / Federal Police.',
+        es: 'Guía Movaro sin IA: si sos argentino y cumplís los requisitos, el acuerdo bilateral Brasil–Argentina prevé una ruta de residencia permanente. La estadía como visitante y el pedido de residencia son temas distintos; no usamos 90 días como plazo universal para solicitarla. Abrí Guías › Documentos y confirmá tu elegibilidad en la Policía Federal.',
+        pt: 'Guia Movaro sem IA: se você é argentino e cumpre os requisitos, o acordo bilateral Brasil–Argentina prevê uma rota de residência permanente. A estada como visitante e o pedido de residência são assuntos diferentes; não usamos 90 dias como prazo universal para solicitá-la. Abra Guias › Documentos e confirme sua elegibilidade na Polícia Federal.',
+        en: 'Movaro guidance without AI: eligible Argentine nationals may use the Brazil–Argentina bilateral route to permanent residence. Visitor stay and residence are separate matters; we do not treat 90 days as a universal filing deadline. Open Guides › Documents and confirm eligibility with Federal Police.',
       );
     }
     if (has(['banco', 'conta', 'cuenta', 'bank', 'nubank', 'pix'])) {
       return _tr(
         locale,
-        es: 'Para abrir una cuenta, normalmente piden CPF y comprobante de domicilio; los bancos digitales (Nubank, Inter, C6) suelen ser más simples para recién llegados. Te oriento en Guías › Documentos; confirmá las condiciones con cada banco.',
-        pt: 'Para abrir conta, normalmente pedem CPF e comprovante de endereço; os bancos digitais (Nubank, Inter, C6) costumam ser mais simples para recém-chegados. Te oriento em Guias › Documentos; confirme as condições com cada banco.',
-        en: 'To open an account, banks usually ask for a CPF and proof of address; digital banks (Nubank, Inter, C6) tend to be simplest for newcomers. I can point you in Guides › Documents; confirm the conditions with each bank.',
+        es: 'Guía Movaro sin IA: cada banco define sus documentos y hace su propio análisis. CPF, identificación migratoria y comprobante de domicilio suelen ser relevantes, pero no garantizan aprobación. Compará tarifas, Pix, atención y requisitos en Guías › Dinero, sin asumir que una marca aceptará tu caso.',
+        pt: 'Guia Movaro sem IA: cada banco define seus documentos e faz sua própria análise. CPF, identificação migratória e comprovante de endereço costumam ser relevantes, mas não garantem aprovação. Compare tarifas, Pix, atendimento e requisitos em Guias › Dinheiro, sem presumir que uma marca aceitará seu caso.',
+        en: 'Movaro guidance without AI: each bank sets its documents and performs its own review. CPF, migration ID, and proof of address are often relevant but do not guarantee approval. Compare fees, Pix, support, and requirements in Guides › Money without assuming a specific bank will accept your case.',
       );
     }
-    if (has(['alquiler', 'aluguel', 'rent', 'vivienda', 'moradia', 'fiador', 'housing'])) {
+    if (has([
+      'alquiler',
+      'aluguel',
+      'rent',
+      'vivienda',
+      'moradia',
+      'fiador',
+      'housing',
+    ])) {
       return _tr(
         locale,
-        es: 'Para alquilar, suele haber opciones con seguro de alquiler o depósito en lugar de garante, y portales como QuintoAndar. Te oriento en Guías › Vivienda; confirmá las condiciones con la inmobiliaria.',
-        pt: 'Para alugar, costuma haver opções com seguro-fiança ou depósito no lugar de fiador, e portais como QuintoAndar. Te oriento em Guias › Moradia; confirme as condições com a imobiliária.',
-        en: 'To rent, there are usually rental-insurance or deposit options instead of a guarantor, and portals like QuintoAndar. I can point you in Guides › Housing; confirm the conditions with the rental agency.',
+        es: 'Guía Movaro sin IA: el propietario puede pedir una garantía prevista en la ley, pero no debe acumular más de una en el mismo contrato; el depósito en dinero tiene límite legal. Leé el contrato, no pagues antes de verificar inmueble y titular, y abrí Guías › Vivienda para la fuente oficial.',
+        pt: 'Guia Movaro sem IA: o locador pode pedir uma garantia prevista em lei, mas não deve acumular mais de uma no mesmo contrato; a caução em dinheiro tem limite legal. Leia o contrato, não pague antes de verificar imóvel e titular, e abra Guias › Moradia para a fonte oficial.',
+        en: 'Movaro guidance without AI: a landlord may request one legally permitted guarantee but should not stack multiple guarantees in one contract; cash deposits have a legal cap. Read the contract, verify property and owner before paying, and open Guides › Housing for the official source.',
       );
     }
-    if (has(['costo', 'custo', 'cost', 'salario', 'sueldo', 'presupuesto', 'orcamento', 'plata', 'dinero'])) {
+    if (has([
+      'costo',
+      'custo',
+      'cost',
+      'salario',
+      'sueldo',
+      'presupuesto',
+      'orcamento',
+      'plata',
+      'dinero',
+    ])) {
       return _tr(
         locale,
         es: 'Los costos varían por ciudad. En cada ciudad hay una comparación de referencia entre el costo de vida típico y el salario medio (es referencia, no asesoría). Andá a Explorar y elegí una ciudad.',
@@ -373,12 +524,78 @@ class ChatService {
     if (has(['sus', 'salud', 'saude', 'health', 'medico', 'hospital'])) {
       return _tr(
         locale,
-        es: 'Según fuentes oficiales, el SUS es gratuito y universal, también para inmigrantes; para usarlo suele pedirse el Cartão SUS. Te oriento en Guías › Salud; confirmá en gov.br o en la unidad de salud.',
-        pt: 'Segundo as fontes oficiais, o SUS é gratuito e universal, inclusive para imigrantes; para usar costuma-se tirar o Cartão SUS. Te oriento em Guias › Saúde; confirme no gov.br ou na unidade de saúde.',
-        en: 'According to official sources, SUS is free and universal, including for immigrants; you usually get a SUS card to use it. I can point you in Guides › Health; confirm on gov.br or at the health unit.',
+        es: 'Guía Movaro sin IA: migrantes pueden acceder al SUS; una urgencia no debe esperar a que tengas CPF o Tarjeta SUS. Para seguimiento, buscá la UBS de tu zona y confirmá los documentos locales. Abrí Guías › Salud. En emergencia: SAMU 192.',
+        pt: 'Guia Movaro sem IA: migrantes podem acessar o SUS; uma urgência não deve esperar CPF ou Cartão SUS. Para acompanhamento, procure a UBS da sua região e confirme os documentos locais. Abra Guias › Saúde. Em emergência: SAMU 192.',
+        en: 'Movaro guidance without AI: migrants can access SUS; urgent care should not wait for a CPF or SUS card. For ongoing care, find your local UBS and confirm local documents. Open Guides › Health. In an emergency call SAMU 192.',
       );
     }
-    if (has(['portugues', 'portuguese', 'idioma', 'language', 'hablar', 'falar'])) {
+    if (has([
+      'medicamento',
+      'remedio',
+      'medicacion',
+      'medicine',
+      'prescription',
+      'receta',
+      'controlado',
+    ])) {
+      return _tr(
+        locale,
+        es: 'Guía Movaro sin IA: para viajar con medicamentos, llevá receta y documentación médica compatible con la cantidad. Los controlados tienen orientación específica de Anvisa. Abrí Guías › Medicamentos antes de embarcar.',
+        pt: 'Guia Movaro sem IA: para viajar com medicamentos, leve receita e documentação médica compatível com a quantidade. Controlados têm orientação específica da Anvisa. Abra Guias › Medicamentos antes de embarcar.',
+        en: 'Movaro guidance without AI: carry a prescription and medical documentation matching the quantity. Controlled medicines have specific Anvisa guidance. Open Guides › Medicines before travel.',
+      );
+    }
+    if (has(['mascota', 'pet', 'perro', 'gato', 'cachorro', 'dog', 'cat'])) {
+      return _tr(
+        locale,
+        es: 'Guía Movaro sin IA: perros y gatos deben cumplir requisitos sanitarios vigentes y también las reglas de la aerolínea. Abrí Guías › Viajar con mascota y confirmá todo antes de emitir el pasaje.',
+        pt: 'Guia Movaro sem IA: cães e gatos precisam cumprir requisitos sanitários vigentes e também as regras da transportadora. Abra Guias › Viajar com pet e confirme tudo antes de emitir a passagem.',
+        en: 'Movaro guidance without AI: dogs and cats must meet current health requirements and carrier rules. Open Guides › Traveling with a pet and confirm everything before ticketing.',
+      );
+    }
+    if (has([
+      'impuesto',
+      'imposto',
+      'tax',
+      'afip',
+      'receita',
+      'renta',
+      'renda exterior',
+      'mei',
+    ])) {
+      return _tr(
+        locale,
+        es: 'Guía Movaro sin IA: residencia fiscal, ingresos de Argentina y MEI son temas distintos. Abrir MEI no regulariza automáticamente ingresos del exterior. Revisá Guías › Impuestos y, si tenés ingresos o patrimonio en ambos países, buscá un contador internacional.',
+        pt: 'Guia Movaro sem IA: residência fiscal, renda da Argentina e MEI são assuntos diferentes. Abrir MEI não regulariza automaticamente renda do exterior. Veja Guias › Impostos e, se houver renda ou patrimônio nos dois países, procure contador internacional.',
+        en: 'Movaro guidance without AI: tax residence, Argentine income, and MEI are separate matters. Opening MEI does not automatically settle foreign income. See Guides › Taxes and seek cross-border accounting advice if you have income or assets in both countries.',
+      );
+    }
+    if (has([
+      'escuela',
+      'escola',
+      'hijo',
+      'filho',
+      'nino',
+      'crianca',
+      'school',
+      'child',
+      'familia',
+    ])) {
+      return _tr(
+        locale,
+        es: 'Guía Movaro sin IA: niños y adolescentes migrantes tienen derecho a matrícula. Buscá la Secretaría de Educación local, llevá los documentos disponibles y pedí orientación formal si falta alguno. Abrí Guías › Familia.',
+        pt: 'Guia Movaro sem IA: crianças e adolescentes migrantes têm direito à matrícula. Procure a Secretaria de Educação local, leve os documentos disponíveis e peça orientação formal se faltar algum. Abra Guias › Família.',
+        en: 'Movaro guidance without AI: migrant children and adolescents have a right to school enrollment. Contact the local Education Department, bring available documents, and request formal guidance if one is missing. Open Guides › Family.',
+      );
+    }
+    if (has([
+      'portugues',
+      'portuguese',
+      'idioma',
+      'language',
+      'hablar',
+      'falar',
+    ])) {
       return _tr(
         locale,
         es: 'El portugués es la barrera nº1. Tenés frases prácticas en "Portugués esencial" para usar en el banco, la inmobiliaria, la Polícia Federal o el hospital.',
@@ -389,9 +606,9 @@ class ChatService {
 
     return _tr(
       locale,
-      es: 'No pude conectar con el asistente en vivo ahora. Te oriento mientras tanto: abrí las Guías (CPF, residencia Mercosur, banco, vivienda, salud, conducir, costos), con enlaces a fuentes oficiales. O probá de nuevo en un momento.',
-      pt: 'Não consegui conectar com o assistente ao vivo agora. Te oriento enquanto isso: abra as Guias (CPF, residência Mercosul, banco, moradia, saúde, direção, custos), com links para fontes oficiais. Ou tente de novo em instantes.',
-      en: 'I could not reach the live assistant right now. Meanwhile, I can point you to the Guides (CPF, Mercosur residency, bank, housing, health, driving, costs), with links to official sources. Or try again in a moment.',
+      es: 'Guía Movaro sin IA: puedo orientarte con contenido revisado sobre residencia, CPF, vivienda, salud, dinero, impuestos, familia, mascotas y medicamentos. Escribí uno de esos temas o abrí Guías; para una decisión legal, médica o fiscal, confirmá siempre la fuente oficial o un profesional.',
+      pt: 'Guia Movaro sem IA: posso orientar com conteúdo revisado sobre residência, CPF, moradia, saúde, dinheiro, impostos, família, pets e medicamentos. Escreva um desses temas ou abra Guias; para uma decisão jurídica, médica ou fiscal, confirme sempre a fonte oficial ou um profissional.',
+      en: 'Movaro guidance without AI: I can help with reviewed content on residence, CPF, housing, health, money, taxes, family, pets, and medicines. Type one of those topics or open Guides; for legal, medical, or tax decisions, always confirm the official source or a professional.',
     );
   }
 
@@ -409,11 +626,19 @@ class ChatService {
 
   static String _normalizeMessage(String value) {
     const accents = {
-      'á': 'a', 'à': 'a', 'ã': 'a', 'â': 'a',
-      'é': 'e', 'ê': 'e',
+      'á': 'a',
+      'à': 'a',
+      'ã': 'a',
+      'â': 'a',
+      'é': 'e',
+      'ê': 'e',
       'í': 'i',
-      'ó': 'o', 'ô': 'o', 'õ': 'o',
-      'ú': 'u', 'ç': 'c', 'ñ': 'n',
+      'ó': 'o',
+      'ô': 'o',
+      'õ': 'o',
+      'ú': 'u',
+      'ç': 'c',
+      'ñ': 'n',
     };
     final lower = value.toLowerCase();
     final buffer = StringBuffer();
@@ -421,5 +646,49 @@ class ChatService {
       buffer.write(accents[ch] ?? ch);
     }
     return buffer.toString();
+  }
+
+  static bool _containsAny(String message, List<String> keywords) {
+    if (keywords.any(message.contains)) return true;
+    final words = message
+        .split(RegExp(r'[^a-z0-9]+'))
+        .where((word) => word.length >= 4)
+        .toList(growable: false);
+    for (final keyword in keywords) {
+      if (keyword.contains(' ') || keyword.length < 4) continue;
+      for (final word in words) {
+        if ((word.length - keyword.length).abs() <= 1 &&
+            _editDistanceAtMostOne(word, keyword)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  static bool _editDistanceAtMostOne(String a, String b) {
+    if (a == b) return true;
+    if ((a.length - b.length).abs() > 1) return false;
+    var i = 0;
+    var j = 0;
+    var edits = 0;
+    while (i < a.length && j < b.length) {
+      if (a.codeUnitAt(i) == b.codeUnitAt(j)) {
+        i++;
+        j++;
+        continue;
+      }
+      edits++;
+      if (edits > 1) return false;
+      if (a.length > b.length) {
+        i++;
+      } else if (b.length > a.length) {
+        j++;
+      } else {
+        i++;
+        j++;
+      }
+    }
+    return edits + (a.length - i) + (b.length - j) <= 1;
   }
 }

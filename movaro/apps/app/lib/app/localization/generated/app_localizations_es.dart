@@ -2974,7 +2974,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileJourneyBody =>
-      'Movaro uses this route to keep home, exploration, and content connected to the same move context.';
+      'Movaro usa esta ruta para mantener inicio, exploración y contenido conectados al mismo contexto de mudanza.';
 
   @override
   String profileJourneyValue(Object origin, Object destination) {
@@ -2983,36 +2983,37 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String profileJourneyPendingValue(Object destination) {
-    return 'Destination saved: $destination';
+    return 'Destino guardado: $destination';
   }
 
   @override
-  String get profileJourneyEmptyValue => 'No journey selected yet';
+  String get profileJourneyEmptyValue => 'Todavía no elegiste un recorrido';
 
   @override
-  String get profilePlanTitle => 'Plan status';
+  String get profilePlanTitle => 'Estado del plan';
 
   @override
   String get profilePlanBody =>
-      'Your saved plan stays connected to the journey so you can continue without starting from zero.';
+      'Tu plan guardado sigue conectado al recorrido para que continúes sin empezar de cero.';
 
   @override
-  String get profilePlanEmptyValue => 'No plan generated yet';
+  String get profilePlanEmptyValue => 'Todavía no generaste un plan';
 
   @override
   String profilePlanReadyValue(Object city) {
-    return 'Ready to continue in $city';
+    return 'Listo para continuar en $city';
   }
 
   @override
-  String get profilePlanDraftValue => 'Draft result waiting for confirmation';
+  String get profilePlanDraftValue =>
+      'Resultado preliminar pendiente de confirmación';
 
   @override
-  String get profileSavedCitiesTitle => 'Saved cities';
+  String get profileSavedCitiesTitle => 'Ciudades guardadas';
 
   @override
   String get profileSavedCitiesBody =>
-      'Keep up to 3 cities here so you can compare them again without losing your route or plan context.';
+      'Guardá hasta 3 ciudades para compararlas sin perder la ruta ni el contexto del plan.';
 
   @override
   String get publicHomeJourneyResetAction => 'Elegir otra ruta';
@@ -3524,31 +3525,31 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get journeyEntryDynamicTitle =>
-      'Start with a route that matches where you are and where you want to go';
+      'Empezá con una ruta que conecte tu origen y tu destino';
 
   @override
   String get journeyEntryDynamicBody =>
-      'You can use your current location as a quick hint or choose everything manually. Movaro never locks your origin from device location, and you can always override it.';
+      'Podés usar la ubicación como sugerencia o elegir todo manualmente. Movaro nunca fija tu origen sin confirmación.';
 
   @override
-  String get journeyEntryUseLocationTitle => 'Use my location';
+  String get journeyEntryUseLocationTitle => 'Usar mi ubicación';
 
   @override
   String get journeyEntryUseLocationBody =>
-      'Ask only now, detect your current country if possible, and let you confirm whether it should be used as origin.';
+      'Pedir permiso ahora, detectar tu país si es posible y dejarte confirmar el origen.';
 
   @override
-  String get journeyEntryUseLocationAction => 'Use my location';
+  String get journeyEntryUseLocationAction => 'Usar mi ubicación';
 
   @override
-  String get journeyEntryManualTitle => 'Choose manually';
+  String get journeyEntryManualTitle => 'Elegir manualmente';
 
   @override
   String get journeyEntryManualBody =>
-      'Skip location, set origin and destination yourself, and keep full control over the route.';
+      'Omití la ubicación, definí origen y destino y mantené el control total.';
 
   @override
-  String get journeyEntryManualAction => 'Choose manually';
+  String get journeyEntryManualAction => 'Elegir manualmente';
 
   @override
   String get journeyEntryContinueAction => 'Continuar con preguntas rápidas';
@@ -3581,53 +3582,53 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get journeyLocationPanelTitle =>
-      'Location can save one step, but it never decides for you';
+      'La ubicación ahorra un paso, pero nunca decide por vos';
 
   @override
   String get journeyLocationPanelBody =>
-      'If you allow location, Movaro tries to detect your current country and suggests it as origin. You can reject the suggestion and choose manually instead.';
+      'Con permiso, Movaro sugiere tu país como origen. Podés rechazarlo y elegir manualmente.';
 
   @override
   String get journeyLocationFallbackTitle =>
-      'Location did not resolve a usable country';
+      'No encontramos un país utilizable';
 
   @override
   String get journeyLocationDeniedBody =>
-      'Location permission was denied. You can keep going by choosing origin and destination manually.';
+      'El permiso fue rechazado. Seguí eligiendo origen y destino manualmente.';
 
   @override
   String get journeyLocationDeniedForeverBody =>
-      'Location permission is blocked for this app right now. You can still continue with manual selection.';
+      'La ubicación está bloqueada para esta app. Igual podés elegir manualmente.';
 
   @override
   String get journeyLocationUnavailableBody =>
-      'Location services are off on this device. Turn them on if you want a location hint, or continue manually.';
+      'La ubicación del teléfono está apagada. Activala para una sugerencia o seguí manualmente.';
 
   @override
   String get journeyLocationFailedBody =>
-      'Movaro could not detect your location this time. You can retry or choose manually.';
+      'No pudimos detectar tu ubicación. Probá de nuevo o elegí manualmente.';
 
   @override
-  String get journeyLocationRetryAction => 'Try again';
+  String get journeyLocationRetryAction => 'Intentar de nuevo';
 
   @override
   String journeyDetectedLocationLabel(Object value) {
-    return 'Detected location: $value';
+    return 'Ubicación detectada: $value';
   }
 
   @override
   String journeyDetectedConfirmBody(Object country) {
-    return 'Use $country as your origin? This only sets a suggestion you can edit at any time.';
+    return '¿Usar $country como origen? Es solo una sugerencia que podés editar.';
   }
 
   @override
   String journeyDetectedUnknownBody(Object country) {
-    return 'Movaro detected $country, but it could not match that country to the current route catalog. Choose your origin manually to continue.';
+    return 'Movaro detectó $country, pero no encontró ese país en el catálogo actual. Elegí el origen manualmente.';
   }
 
   @override
   String journeyDetectedConfirmAction(Object country) {
-    return 'Use $country as origin';
+    return 'Usar $country como origen';
   }
 
   @override
@@ -3650,24 +3651,24 @@ class AppLocalizationsEs extends AppLocalizations {
   String get questionnaireOriginUseArgentinaAction => 'Usar Argentina';
 
   @override
-  String get journeyDetectedManualAction => 'Choose origin manually';
+  String get journeyDetectedManualAction => 'Elegir origen manualmente';
 
   @override
-  String get journeyOriginSectionTitle => 'Origin';
+  String get journeyOriginSectionTitle => 'Origen';
 
   @override
   String get journeyOriginSectionBody =>
-      'Optional for now. Confirm it here if you already know it, or skip and answer it in the first questionnaire step.';
+      'Es opcional por ahora. Confirmalo acá o respondelo en la primera etapa.';
 
   @override
-  String get journeyOriginSkipAction => 'Skip for now';
+  String get journeyOriginSkipAction => 'Omitir por ahora';
 
   @override
-  String get journeyDestinationSectionTitle => 'Destination';
+  String get journeyDestinationSectionTitle => 'Destino';
 
   @override
   String get journeyDestinationSectionBody =>
-      'Choose where you want the migration plan to point. Destination is still required before the questionnaire starts.';
+      'Elegí el destino del plan. Es necesario antes de iniciar el cuestionario.';
 
   @override
   String get journeyPickerChooseDestinationTitle => 'Elegir destino';
@@ -3682,72 +3683,73 @@ class AppLocalizationsEs extends AppLocalizations {
   String get journeyPickerNoResults => 'No se encontraron países';
 
   @override
-  String get journeyCoverageFull => 'Full coverage';
+  String get journeyCoverageFull => 'Cobertura completa';
 
   @override
-  String get journeyCoveragePartial => 'Partial coverage';
+  String get journeyCoveragePartial => 'Cobertura parcial';
 
   @override
-  String get journeyCoverageUnsupported => 'Unsupported';
+  String get journeyCoverageUnsupported => 'Sin cobertura';
 
   @override
-  String get journeyCoverageReadyTitle => 'This route is ready for planning';
+  String get journeyCoverageReadyTitle =>
+      'Esta ruta está lista para planificar';
 
   @override
   String journeyCoverageReadyBody(Object origin, Object destination) {
-    return '$origin -> $destination is supported in the current migration flow.';
+    return '$origin -> $destination tiene soporte en el flujo actual.';
   }
 
   @override
   String get journeyCoverageDestinationLimitedTitle =>
-      'Destination coverage is still limited';
+      'La cobertura del destino todavía es limitada';
 
   @override
   String journeyCoverageDestinationLimitedBody(Object destination) {
-    return '$destination does not yet have full destination coverage for the guided migration flow. You can still explore content while the route expands.';
+    return '$destination todavía no tiene cobertura completa. Podés explorar contenido mientras la ruta evoluciona.';
   }
 
   @override
   String get journeyCoverageOriginLimitedTitle =>
-      'Origin coverage is still limited';
+      'La cobertura del origen todavía es limitada';
 
   @override
   String journeyCoverageOriginLimitedBody(Object origin) {
-    return '$origin can be saved as your origin, but the current guided plan does not fully support that starting country yet.';
+    return '$origin puede guardarse como origen, pero el plan guiado todavía no ofrece soporte completo.';
   }
 
   @override
   String get journeyCoverageDetectedUnknownTitle =>
-      'Detected country is outside the current catalog';
+      'El país detectado está fuera del catálogo actual';
 
   @override
   String journeyCoverageDetectedUnknownBody(Object country) {
-    return '$country is not mapped in the current supported-country catalog yet. Choose another origin manually or keep browsing public content.';
+    return '$country todavía no está mapeado. Elegí otro origen o seguí explorando contenido público.';
   }
 
   @override
   String get journeyCoverageUnsupportedTitle =>
-      'Choose a supported route to generate a plan';
+      'Elegí una ruta con soporte para generar el plan';
 
   @override
   String get journeyCoverageUnsupportedBody =>
-      'Movaro can still show cities and practical content, but the guided migration flow is only available on routes with full coverage.';
+      'Movaro todavía muestra ciudades y contenido práctico, pero el plan guiado requiere cobertura completa.';
 
   @override
-  String get journeyCoverageChooseRouteAction => 'Choose another route';
+  String get journeyCoverageChooseRouteAction => 'Elegir otra ruta';
 
   @override
-  String get journeyCoverageBrowseAction => 'Browse explore';
+  String get journeyCoverageBrowseAction => 'Explorar ciudades';
 
   @override
-  String get journeyCoverageContentAction => 'Open content';
+  String get journeyCoverageContentAction => 'Abrir contenido';
 
   @override
-  String get journeyCoverageWaitlistAction => 'Join waitlist';
+  String get journeyCoverageWaitlistAction => 'Sumarme a la lista';
 
   @override
   String get journeyCoverageWaitlistStub =>
-      'Waitlist registration is not live yet, but this route can be tracked safely for future coverage.';
+      'La lista de espera todavía no está activa, pero esta ruta puede seguirse para cobertura futura.';
 
   @override
   String get questionDestinationCountryTitle => '¿A dónde querés ir?';
@@ -6371,7 +6373,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Usá la barra de búsqueda para encontrar respuestas sobre CPF, visa, SUS o cualquier otro asunto.';
 
   @override
-  String get infoGuideStepThreeTitle => 'Preguntale al asistente IA';
+  String get infoGuideStepThreeTitle => 'Preguntale al asistente Movaro';
 
   @override
   String get infoGuideStepThreeBody =>

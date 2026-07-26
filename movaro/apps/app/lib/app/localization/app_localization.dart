@@ -124,6 +124,12 @@ extension AppLocalizationsFormatting on AppLocalizations {
         return qPrioritiesPrompt;
       case 'constraints':
         return qConstraintsPrompt;
+      case 'support_needs':
+        return _localizedText(
+          pt: 'O que precisa entrar no seu plano?',
+          es: '¿Qué necesitás incluir en tu plan?',
+          en: 'What needs to be included in your plan?',
+        );
       case 'available_capital':
         return _localizedText(
           pt: 'Quanto você tem guardado para os primeiros meses?',
@@ -186,6 +192,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
         return priorityLabel(value);
       case 'constraints':
         return constraintLabel(value);
+      case 'support_needs':
+        return supportNeedLabel(value);
       case 'available_capital':
         return availableCapitalLabel(value);
       case 'work_arrangement':
@@ -208,6 +216,37 @@ extension AppLocalizationsFormatting on AppLocalizations {
       default:
         return value;
     }
+  }
+
+  String supportNeedLabel(String value) {
+    return switch (value) {
+      'children_school' => _localizedText(
+        pt: 'Filhos e escola',
+        es: 'Hijos y escuela',
+        en: 'Children and school',
+      ),
+      'travel_with_pet' => _localizedText(
+        pt: 'Viajar com pet',
+        es: 'Viajar con mascota',
+        en: 'Travel with a pet',
+      ),
+      'continuous_medication' => _localizedText(
+        pt: 'Medicamento contínuo',
+        es: 'Medicación continua',
+        en: 'Ongoing medication',
+      ),
+      'foreign_income' => _localizedText(
+        pt: 'Renda do exterior',
+        es: 'Ingresos del exterior',
+        en: 'Foreign income',
+      ),
+      'no_special_needs' => _localizedText(
+        pt: 'Nada disso',
+        es: 'Nada de esto',
+        en: 'None of these',
+      ),
+      _ => value,
+    };
   }
 
   String workArrangementLabel(String value) {
@@ -671,11 +710,7 @@ extension AppLocalizationsFormatting on AppLocalizations {
           en: 'Auto parts',
         );
       case 'educacao':
-        return _localizedText(
-          pt: 'Educação',
-          es: 'Educación',
-          en: 'Education',
-        );
+        return _localizedText(pt: 'Educação', es: 'Educación', en: 'Education');
       case 'financas':
         return _localizedText(pt: 'Finanças', es: 'Finanzas', en: 'Finance');
       case 'administracao publica':
@@ -703,10 +738,16 @@ extension AppLocalizationsFormatting on AppLocalizations {
 
   String _normalizeWorkArea(String value) {
     const accents = {
-      'á': 'a', 'à': 'a', 'ã': 'a', 'â': 'a',
-      'é': 'e', 'ê': 'e',
+      'á': 'a',
+      'à': 'a',
+      'ã': 'a',
+      'â': 'a',
+      'é': 'e',
+      'ê': 'e',
       'í': 'i',
-      'ó': 'o', 'ô': 'o', 'õ': 'o',
+      'ó': 'o',
+      'ô': 'o',
+      'õ': 'o',
       'ú': 'u',
       'ç': 'c',
     };
@@ -1341,6 +1382,12 @@ extension AppLocalizationsFormatting on AppLocalizations {
           es: 'Definí tu capital inicial.',
           en: 'Choose your initial capital.',
         );
+      case 'support_needs':
+        return _localizedText(
+          pt: 'Marque tudo que muda seus próximos passos.',
+          es: 'Marcá todo lo que cambia tus próximos pasos.',
+          en: 'Select everything that changes your next steps.',
+        );
       default:
         return bmpScrollHint;
     }
@@ -1483,6 +1530,35 @@ extension AppLocalizationsFormatting on AppLocalizations {
             pt: 'Aberto',
             es: 'Abierto',
             en: 'Open',
+          ),
+          _ => questionOptionLabel(questionId, value),
+        };
+      case 'support_needs':
+        return switch (value) {
+          'children_school' => _localizedText(
+            pt: 'Filhos',
+            es: 'Hijos',
+            en: 'Children',
+          ),
+          'travel_with_pet' => _localizedText(
+            pt: 'Pet',
+            es: 'Mascota',
+            en: 'Pet',
+          ),
+          'continuous_medication' => _localizedText(
+            pt: 'Medicamentos',
+            es: 'Medicación',
+            en: 'Medicine',
+          ),
+          'foreign_income' => _localizedText(
+            pt: 'Renda exterior',
+            es: 'Ingreso exterior',
+            en: 'Foreign income',
+          ),
+          'no_special_needs' => _localizedText(
+            pt: 'Nada disso',
+            es: 'Nada de esto',
+            en: 'None',
           ),
           _ => questionOptionLabel(questionId, value),
         };

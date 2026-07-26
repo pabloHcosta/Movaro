@@ -2357,7 +2357,7 @@
   "mainNavProfile": "Profile",
   "mainNavPlanNeedsJourney": "Choose your destination first so Movaro can open the right plan step.",
   "profileJourneyTitle": "Journey",
-  "profileJourneyBody": "Movaro uses this route to keep home, exploration, and content connected to the same move context.",
+  "profileJourneyBody": "Movaro usa esta ruta para mantener inicio, exploración y contenido conectados al mismo contexto de mudanza.",
   "profileJourneyValue": "{origin} -> {destination}",
   "@profileJourneyValue": {
     "placeholders": {
@@ -2365,61 +2365,61 @@
       "destination": {}
     }
   },
-  "profileJourneyPendingValue": "Destination saved: {destination}",
+  "profileJourneyPendingValue": "Destino guardado: {destination}",
   "@profileJourneyPendingValue": {
     "placeholders": {
       "destination": {}
     }
   },
-  "profileJourneyEmptyValue": "No journey selected yet",
-  "profilePlanTitle": "Plan status",
-  "profilePlanBody": "Your saved plan stays connected to the journey so you can continue without starting from zero.",
-  "profilePlanEmptyValue": "No plan generated yet",
-  "profilePlanReadyValue": "Ready to continue in {city}",
+  "profileJourneyEmptyValue": "Todavía no elegiste un recorrido",
+  "profilePlanTitle": "Estado del plan",
+  "profilePlanBody": "Tu plan guardado sigue conectado al recorrido para que continúes sin empezar de cero.",
+  "profilePlanEmptyValue": "Todavía no generaste un plan",
+  "profilePlanReadyValue": "Listo para continuar en {city}",
   "@profilePlanReadyValue": {
     "placeholders": {
       "city": {}
     }
   },
-  "profilePlanDraftValue": "Draft result waiting for confirmation",
-  "profileSavedCitiesTitle": "Saved cities",
-  "profileSavedCitiesBody": "Keep up to 3 cities here so you can compare them again without losing your route or plan context.",
-  "journeyEntryDynamicTitle": "Start with a route that matches where you are and where you want to go",
-  "journeyEntryDynamicBody": "You can use your current location as a quick hint or choose everything manually. Movaro never locks your origin from device location, and you can always override it.",
-  "journeyEntryUseLocationTitle": "Use my location",
-  "journeyEntryUseLocationBody": "Ask only now, detect your current country if possible, and let you confirm whether it should be used as origin.",
-  "journeyEntryUseLocationAction": "Use my location",
-  "journeyEntryManualTitle": "Choose manually",
-  "journeyEntryManualBody": "Skip location, set origin and destination yourself, and keep full control over the route.",
-  "journeyEntryManualAction": "Choose manually",
+  "profilePlanDraftValue": "Resultado preliminar pendiente de confirmación",
+  "profileSavedCitiesTitle": "Ciudades guardadas",
+  "profileSavedCitiesBody": "Guardá hasta 3 ciudades para compararlas sin perder la ruta ni el contexto del plan.",
+  "journeyEntryDynamicTitle": "Empezá con una ruta que conecte tu origen y tu destino",
+  "journeyEntryDynamicBody": "Podés usar la ubicación como sugerencia o elegir todo manualmente. Movaro nunca fija tu origen sin confirmación.",
+  "journeyEntryUseLocationTitle": "Usar mi ubicación",
+  "journeyEntryUseLocationBody": "Pedir permiso ahora, detectar tu país si es posible y dejarte confirmar el origen.",
+  "journeyEntryUseLocationAction": "Usar mi ubicación",
+  "journeyEntryManualTitle": "Elegir manualmente",
+  "journeyEntryManualBody": "Omití la ubicación, definí origen y destino y mantené el control total.",
+  "journeyEntryManualAction": "Elegir manualmente",
   "journeyEntryContinueAction": "Continuar con preguntas rápidas",
-  "journeyLocationPanelTitle": "Location can save one step, but it never decides for you",
-  "journeyLocationPanelBody": "If you allow location, Movaro tries to detect your current country and suggests it as origin. You can reject the suggestion and choose manually instead.",
-  "journeyLocationFallbackTitle": "Location did not resolve a usable country",
-  "journeyLocationDeniedBody": "Location permission was denied. You can keep going by choosing origin and destination manually.",
-  "journeyLocationDeniedForeverBody": "Location permission is blocked for this app right now. You can still continue with manual selection.",
-  "journeyLocationUnavailableBody": "Location services are off on this device. Turn them on if you want a location hint, or continue manually.",
-  "journeyLocationFailedBody": "Movaro could not detect your location this time. You can retry or choose manually.",
-  "journeyLocationRetryAction": "Try again",
-  "journeyDetectedLocationLabel": "Detected location: {value}",
+  "journeyLocationPanelTitle": "La ubicación ahorra un paso, pero nunca decide por vos",
+  "journeyLocationPanelBody": "Con permiso, Movaro sugiere tu país como origen. Podés rechazarlo y elegir manualmente.",
+  "journeyLocationFallbackTitle": "No encontramos un país utilizable",
+  "journeyLocationDeniedBody": "El permiso fue rechazado. Seguí eligiendo origen y destino manualmente.",
+  "journeyLocationDeniedForeverBody": "La ubicación está bloqueada para esta app. Igual podés elegir manualmente.",
+  "journeyLocationUnavailableBody": "La ubicación del teléfono está apagada. Activala para una sugerencia o seguí manualmente.",
+  "journeyLocationFailedBody": "No pudimos detectar tu ubicación. Probá de nuevo o elegí manualmente.",
+  "journeyLocationRetryAction": "Intentar de nuevo",
+  "journeyDetectedLocationLabel": "Ubicación detectada: {value}",
   "@journeyDetectedLocationLabel": {
     "placeholders": {
       "value": {}
     }
   },
-  "journeyDetectedConfirmBody": "Use {country} as your origin? This only sets a suggestion you can edit at any time.",
+  "journeyDetectedConfirmBody": "¿Usar {country} como origen? Es solo una sugerencia que podés editar.",
   "@journeyDetectedConfirmBody": {
     "placeholders": {
       "country": {}
     }
   },
-  "journeyDetectedUnknownBody": "Movaro detected {country}, but it could not match that country to the current route catalog. Choose your origin manually to continue.",
+  "journeyDetectedUnknownBody": "Movaro detectó {country}, pero no encontró ese país en el catálogo actual. Elegí el origen manualmente.",
   "@journeyDetectedUnknownBody": {
     "placeholders": {
       "country": {}
     }
   },
-  "journeyDetectedConfirmAction": "Use {country} as origin",
+  "journeyDetectedConfirmAction": "Usar {country} como origen",
   "@journeyDetectedConfirmAction": {
     "placeholders": {
       "country": {}
@@ -2435,55 +2435,55 @@
     }
   },
   "questionnaireOriginUseArgentinaAction": "Usar Argentina",
-  "journeyDetectedManualAction": "Choose origin manually",
-  "journeyOriginSectionTitle": "Origin",
-  "journeyOriginSectionBody": "Optional for now. Confirm it here if you already know it, or skip and answer it in the first questionnaire step.",
-  "journeyOriginSkipAction": "Skip for now",
-  "journeyDestinationSectionTitle": "Destination",
-  "journeyDestinationSectionBody": "Choose where you want the migration plan to point. Destination is still required before the questionnaire starts.",
+  "journeyDetectedManualAction": "Elegir origen manualmente",
+  "journeyOriginSectionTitle": "Origen",
+  "journeyOriginSectionBody": "Es opcional por ahora. Confirmalo acá o respondelo en la primera etapa.",
+  "journeyOriginSkipAction": "Omitir por ahora",
+  "journeyDestinationSectionTitle": "Destino",
+  "journeyDestinationSectionBody": "Elegí el destino del plan. Es necesario antes de iniciar el cuestionario.",
   "journeyPickerChooseDestinationTitle": "Elegir destino",
   "journeyPickerChooseOriginTitle": "Elegir origen",
   "journeyPickerSearchHint": "Buscar país",
   "journeyPickerNoResults": "No se encontraron países",
-  "journeyCoverageFull": "Full coverage",
-  "journeyCoveragePartial": "Partial coverage",
-  "journeyCoverageUnsupported": "Unsupported",
-  "journeyCoverageReadyTitle": "This route is ready for planning",
-  "journeyCoverageReadyBody": "{origin} -> {destination} is supported in the current migration flow.",
+  "journeyCoverageFull": "Cobertura completa",
+  "journeyCoveragePartial": "Cobertura parcial",
+  "journeyCoverageUnsupported": "Sin cobertura",
+  "journeyCoverageReadyTitle": "Esta ruta está lista para planificar",
+  "journeyCoverageReadyBody": "{origin} -> {destination} tiene soporte en el flujo actual.",
   "@journeyCoverageReadyBody": {
     "placeholders": {
       "origin": {},
       "destination": {}
     }
   },
-  "journeyCoverageDestinationLimitedTitle": "Destination coverage is still limited",
-  "journeyCoverageDestinationLimitedBody": "{destination} does not yet have full destination coverage for the guided migration flow. You can still explore content while the route expands.",
+  "journeyCoverageDestinationLimitedTitle": "La cobertura del destino todavía es limitada",
+  "journeyCoverageDestinationLimitedBody": "{destination} todavía no tiene cobertura completa. Podés explorar contenido mientras la ruta evoluciona.",
   "@journeyCoverageDestinationLimitedBody": {
     "placeholders": {
       "destination": {}
     }
   },
-  "journeyCoverageOriginLimitedTitle": "Origin coverage is still limited",
-  "journeyCoverageOriginLimitedBody": "{origin} can be saved as your origin, but the current guided plan does not fully support that starting country yet.",
+  "journeyCoverageOriginLimitedTitle": "La cobertura del origen todavía es limitada",
+  "journeyCoverageOriginLimitedBody": "{origin} puede guardarse como origen, pero el plan guiado todavía no ofrece soporte completo.",
   "@journeyCoverageOriginLimitedBody": {
     "placeholders": {
       "origin": {}
     }
   },
-  "journeyCoverageDetectedUnknownTitle": "Detected country is outside the current catalog",
-  "journeyCoverageDetectedUnknownBody": "{country} is not mapped in the current supported-country catalog yet. Choose another origin manually or keep browsing public content.",
+  "journeyCoverageDetectedUnknownTitle": "El país detectado está fuera del catálogo actual",
+  "journeyCoverageDetectedUnknownBody": "{country} todavía no está mapeado. Elegí otro origen o seguí explorando contenido público.",
   "@journeyCoverageDetectedUnknownBody": {
     "placeholders": {
       "country": {}
     }
   },
-  "journeyCoverageUnsupportedTitle": "Choose a supported route to generate a plan",
-  "journeyCoverageUnsupportedBody": "Movaro can still show cities and practical content, but the guided migration flow is only available on routes with full coverage.",
-  "journeyCoverageChooseRouteAction": "Choose another route",
-  "journeyCoverageBrowseAction": "Browse explore",
-  "journeyCoverageContentAction": "Open content",
-  "journeyCoverageWaitlistAction": "Join waitlist",
-  "journeyCoverageWaitlistStub": "Waitlist registration is not live yet, but this route can be tracked safely for future coverage.",
+  "journeyCoverageUnsupportedTitle": "Elegí una ruta con soporte para generar el plan",
+  "journeyCoverageUnsupportedBody": "Movaro todavía muestra ciudades y contenido práctico, pero el plan guiado requiere cobertura completa.",
+  "journeyCoverageChooseRouteAction": "Elegir otra ruta",
+  "journeyCoverageBrowseAction": "Explorar ciudades",
+  "journeyCoverageContentAction": "Abrir contenido",
+  "journeyCoverageWaitlistAction": "Sumarme a la lista",
+  "journeyCoverageWaitlistStub": "La lista de espera todavía no está activa, pero esta ruta puede seguirse para cobertura futura.",
   "phase_before_travel": "Antes de viajar",
   "phase_first_days": "Primeros días",
   "phase_documentation": "Documentación",
@@ -2528,7 +2528,7 @@
   "infoGuideStepOneBody": "Tocá una tarjeta de sección para ver guías detalladas con fuentes oficiales de cada tema.",
   "infoGuideStepTwoTitle": "Buscá cualquier tema",
   "infoGuideStepTwoBody": "Usá la barra de búsqueda para encontrar respuestas sobre CPF, visa, SUS o cualquier otro asunto.",
-  "infoGuideStepThreeTitle": "Preguntale al asistente IA",
+  "infoGuideStepThreeTitle": "Preguntale al asistente Movaro",
   "infoGuideStepThreeBody": "Tocá el botón azul en la esquina inferior derecha para chatear con nuestro asistente y obtener respuestas personalizadas.",
 
   "aiChatTitle": "Asistente",

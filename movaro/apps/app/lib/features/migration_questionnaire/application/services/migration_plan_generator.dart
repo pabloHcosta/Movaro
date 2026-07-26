@@ -190,7 +190,10 @@ class MigrationPlanGenerator {
     );
     final availableCapital = _firstValue(answerMap['available_capital']);
     final priorities = answerMap['priorities'] ?? const <String>[];
-    final constraints = answerMap['constraints'] ?? const <String>[];
+    final constraints = <String>[
+      ...?answerMap['constraints'],
+      ...?answerMap['support_needs'],
+    ];
     final workArrangement = _firstValue(answerMap['work_arrangement']);
     final argentinaOrigin = _firstValue(answerMap['argentina_origin']);
     final archetypeKey = _resolveArchetype(
@@ -230,8 +233,7 @@ class MigrationPlanGenerator {
           .map((item) => item.city)
           .toList(),
       candidateCityMatchScores: {
-        for (final item in recommendation.topCities)
-          item.city.id: item.score,
+        for (final item in recommendation.topCities) item.city.id: item.score,
       },
       cityRecommendationReasons: recommendation.reasons,
       isCityConfirmed: false,
@@ -382,7 +384,9 @@ class MigrationPlanGenerator {
   }
 
   void _mergeShortlistCity(List<_ScoredCity> shortlist, _ScoredCity city) {
-    final alreadyPresent = shortlist.any((item) => item.city.id == city.city.id);
+    final alreadyPresent = shortlist.any(
+      (item) => item.city.id == city.city.id,
+    );
     if (alreadyPresent) {
       return;
     }
@@ -635,9 +639,7 @@ class MigrationPlanGenerator {
         .map((entry) => entry.key)
         .toList(growable: false);
 
-    return reasons.isEmpty
-        ? const ['plan_reason_balanced_profile']
-        : reasons;
+    return reasons.isEmpty ? const ['plan_reason_balanced_profile'] : reasons;
   }
 
   String _reasonForDimension(String dimension, List<String> constraints) {
@@ -714,7 +716,10 @@ class MigrationPlanGenerator {
   }) {
     var penalty = 0.0;
     if (priorities.contains('balanced_unsure')) {
-      penalty += 0.28;
+      // "I don't know yet" is intentionally a low-signal answer. A polished
+      // shortlist must not be presented as high compatibility when the user
+      // has not supplied real preferences.
+      penalty += 0.53;
     }
     if (constraints.isEmpty || constraints.contains('no_constraints')) {
       penalty += 0.10;
@@ -727,11 +732,11 @@ class MigrationPlanGenerator {
     final shortlistBase = topCities.isEmpty
         ? 0.18
         : (topCities
-                    .map((city) => city.score)
-                    .reduce((sum, value) => sum + value) /
-                topCities.length)
-            .clamp(0, 1)
-            .toDouble();
+                      .map((city) => city.score)
+                      .reduce((sum, value) => sum + value) /
+                  topCities.length)
+              .clamp(0, 1)
+              .toDouble();
 
     return (0.65 * completeness +
             0.35 * shortlistBase -

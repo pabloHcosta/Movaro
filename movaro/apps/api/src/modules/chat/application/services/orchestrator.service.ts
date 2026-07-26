@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { AssistantLanguageService } from './assistant-language.service';
-import { ChatContextBuilderService } from './chat-context-builder.service';
-import { GeminiFallbackService } from './gemini-fallback.service';
 import { ChatIntent, IntentDetectorService } from './intent-detector.service';
 import { CityResolverService } from './resolvers/city-resolver.service';
 import { CorridorGuidanceResolverService } from './resolvers/corridor-guidance-resolver.service';
@@ -22,7 +20,7 @@ export interface OrchestratorAnswer {
   provider?: string;
 }
 
-/** Minimum confidence to return a resolver answer without LLM fallback. */
+/** Minimum confidence to return a structured resolver answer. */
 const CONFIDENCE_THRESHOLD = 0.65;
 
 interface CacheEntry {
@@ -47,8 +45,6 @@ export class OrchestratorService {
     private readonly docResolver: DocResolverService,
     private readonly guideAnswersService: GuideAnswersService,
     private readonly faqResolver: FaqResolverService,
-    private readonly geminiFallback: GeminiFallbackService,
-    private readonly chatContextBuilder: ChatContextBuilderService,
   ) {}
 
   async ask(dto: AskChatDto): Promise<OrchestratorAnswer> {
@@ -214,42 +210,20 @@ export class OrchestratorService {
       return result;
     }
 
-    // ── LLM fallback (Groq → Gemini) ───────────────────────────────────────────
-    this.logger.debug('[Orchestrator] falling back to LLM');
-
-    let appDataBlock = '';
-    try {
-      const context = await this.chatContextBuilder.buildContext({
-        originCountry,
-        destinationCountry,
-        locale,
-        highlightedCityId: dto.highlightedCityId,
-        currentPhase: dto.currentPhase,
-        completedItemIds: dto.completedItemIds,
-        migrationGoal: dto.migrationGoal,
-        planTimeline: dto.planTimeline,
-      });
-      appDataBlock = context.appDataBlock;
-    } catch {
-      this.logger.warn(
-        '[Orchestrator] context build failed — proceeding without app data',
-      );
-    }
-
-    const llmResult = await this.geminiFallback.ask(message, {
-      appDataBlock,
-      originCountry,
-      destinationCountry,
-      locale,
-      history: dto.history ?? [],
-    });
-
+    // ── Deterministic fallback ─────────────────────────────────────────────────
+    // Migration, legal, health, and tax guidance must not be improvised by an
+    // LLM. When no reviewed resolver matches, return a safe navigation answer.
+    this.logger.debug('[Orchestrator] no reviewed resolver match');
+    const fallbackByLocale: Record<string, string> = {
+      es: 'No encontré una respuesta revisada para esa pregunta. Abrí Guías y elegí residencia, documentos, vivienda, salud, dinero, impuestos, familia, mascotas o medicamentos. Para una decisión legal, médica o fiscal, confirmá la fuente oficial o consultá a un profesional.',
+      pt: 'Não encontrei uma resposta revisada para essa pergunta. Abra Guias e escolha residência, documentos, moradia, saúde, dinheiro, impostos, família, pets ou medicamentos. Para uma decisão jurídica, médica ou fiscal, confirme a fonte oficial ou consulte um profissional.',
+      en: 'I did not find a reviewed answer for that question. Open Guides and choose residence, documents, housing, health, money, taxes, family, pets, or medicines. For legal, medical, or tax decisions, confirm the official source or consult a professional.',
+    };
     const result: OrchestratorAnswer = {
-      answer: llmResult.text,
-      source: 'ai',
+      answer: fallbackByLocale[locale] ?? fallbackByLocale.en,
+      source: 'app_data',
       intent: intent.intent,
-      confidence: 0.5,
-      provider: llmResult.provider,
+      confidence: 0.25,
     };
 
     this.putCache(cacheKey, result);

@@ -26,6 +26,7 @@
     "ingest:city-market-data": "node ./scripts/ingest-city-market-data.js",
     "ingest:numbeo-city-snapshots": "node ./scripts/ingest-numbeo-city-snapshots.js",
     "ingest:livingcost-city-data": "node ./scripts/ingest-livingcost-city-data.js",
+    "audit:knowledge": "node ../../scripts/audit-corridor-knowledge.mjs",
     "ingest:osm-city-neighborhoods": "node ./scripts/ingest-osm-city-neighborhoods.js"
   },
   "dependencies": {

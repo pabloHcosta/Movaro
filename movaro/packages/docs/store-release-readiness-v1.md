@@ -10,21 +10,21 @@
 - Replaced template-style launcher names with the production-facing name `Movaro`.
 - Aligned Android and iOS identifiers to a cleaner production pattern.
 - Prepared Android release signing to read `android/key.properties` when available.
-- Kept the app free of privacy-sensitive runtime permissions that aren't currently needed.
+- A localização passou a ser opcional e contextual, com explicação antes do prompt.
 
 ## Permissions actually required today
-- Android: `INTERNET`
-- iOS: no privacy permission prompts are required today.
+- Android: `INTERNET`, `ACCESS_COARSE_LOCATION` e/ou `ACCESS_FINE_LOCATION`
+  conforme o manifesto real.
+- iOS: `NSLocationWhenInUseUsageDescription`.
 
 ## Location and maps
-- The app currently shows city maps using static coordinates and OpenStreetMap tiles.
-- The app does **not** access the user's live location.
-- Because of that, the app should **not** request:
-  - Android `ACCESS_FINE_LOCATION`
-  - Android `ACCESS_COARSE_LOCATION`
-  - iOS `NSLocationWhenInUseUsageDescription`
-  - iOS `NSLocationAlwaysAndWhenInUseUsageDescription`
-- If user location is added later, the permission request must happen only when the feature is used, with a clear explanation of value to the user.
+- The app can request location only when the user asks it to suggest an origin city.
+- After reverse geocoding, it stores locally only the confirmed city and an
+  approximate municipal point. It does not persist the raw GPS fix.
+- The user may choose a city manually, deny permission, and delete the saved
+  city in Settings.
+- Do not request always-on/background location.
+- Store privacy declarations must disclose this optional on-device use.
 
 ## Store metadata draft
 
@@ -36,7 +36,7 @@
   `Movaro helps people who are planning a move understand their first practical options with more clarity. Compare cities with real-world context, review practical documentation, and generate a first migration direction in a few steps.
 
   With Movaro you can:
-  - compare cities by cost, safety, language adaptation, and work signals
+  - compare cities using clearly labeled sourced and curated signals
   - review practical information about documents, health, mobility, and everyday setup in Brazil
   - answer a short guided flow to generate a first migration plan
   - explore without creating an account`
@@ -98,7 +98,7 @@
 ## Review risk notes
 - Do not ship placeholder links, coming soon flows, or misleading store screenshots.
 - Do not add privacy-sensitive permissions before the feature exists.
-- If authentication, analytics, crash reporting, or user location are added later, update:
+- If authentication, analytics, crash reporting, or the location flow changes, update:
   - privacy policy
   - App Privacy details
   - Google Play Data safety

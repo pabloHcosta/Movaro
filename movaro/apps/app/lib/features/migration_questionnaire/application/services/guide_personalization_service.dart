@@ -187,7 +187,8 @@ class GuidePersonalizationService {
     final hasKids =
         plan.travelGroup == 'family_kids' ||
         plan.travelGroup == 'solo_parent' ||
-        (plan.childrenCount ?? 0) > 0;
+        (plan.childrenCount ?? 0) > 0 ||
+        plan.selectedConstraints.contains('children_school');
 
     if (goal == 'find_job_br') {
       conditions.add('job_search_goal');
@@ -213,6 +214,17 @@ class GuidePersonalizationService {
     }
     if (hasKids) {
       conditions.add('family_with_kids');
+    }
+    if (plan.selectedConstraints.contains('travel_with_pet')) {
+      conditions.add('traveling_with_pet');
+    }
+    if (plan.selectedConstraints.contains('continuous_medication')) {
+      conditions.add('continuous_medication');
+    }
+    if (plan.selectedConstraints.contains('foreign_income') ||
+        goal == 'remote_income' ||
+        goal == 'remote_work') {
+      conditions.add('foreign_income');
     }
     if (plan.travelGroup == 'partner' ||
         plan.travelGroup == 'family_kids' ||

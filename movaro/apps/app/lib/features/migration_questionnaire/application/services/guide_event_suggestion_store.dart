@@ -124,6 +124,12 @@ class GuideEventSuggestionStore {
     );
   }
 
+  Future<void> clear() async {
+    final file = await _file();
+    await VersionedJsonFileStore.delete(file);
+    MigrationStateSyncCoordinator.scheduleSync();
+  }
+
   Future<Map<String, dynamic>> _readAll() async {
     final file = await _file();
     final data = await VersionedJsonFileStore.read(file);

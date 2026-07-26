@@ -1095,6 +1095,17 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                   ),
                                   const SizedBox(height: 12),
                                 ],
+                                if (sheetItem.evidence != null) ...[
+                                  _GuideEvidenceCard(
+                                    evidence: sheetItem.evidence!,
+                                    onOpen: (url, label) =>
+                                        _openExternalPreparationLink(
+                                          title: label,
+                                          uri: Uri.parse(url),
+                                        ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
                                 if (!isPreview &&
                                     sheetItem.preArrivalRequired &&
                                     !sheetItem.isCompleted) ...[
@@ -1408,14 +1419,14 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                     (sheetItem.hasSurvivalPhrases ||
                                         sheetItem.hasRequirements))
                                   _QuickReferenceCard(item: sheetItem),
-                                // ── Community Tips (reassurance first) ──
+                                // ── Practical scenarios (not testimonials) ──
                                 if (sheetItem.hasCommunityTips)
                                   _GuideExpandableSection(
                                     title: _localizedText(
                                       sheetContext,
-                                      pt: '💬 Dica de quem já fez isso',
-                                      es: '💬 Consejo de quien ya lo hizo',
-                                      en: '💬 Tip from someone who did this',
+                                      pt: '💡 Situações práticas para considerar',
+                                      es: '💡 Situaciones prácticas a considerar',
+                                      en: '💡 Practical scenarios to consider',
                                     ),
                                     initiallyExpanded: true,
                                     child: _GuideCommunityTipsContent(
@@ -5122,6 +5133,113 @@ class _GuideExpandableSection extends StatelessWidget {
   }
 }
 
+class _GuideEvidenceCard extends StatelessWidget {
+  const _GuideEvidenceCard({required this.evidence, required this.onOpen});
+
+  final GuideEvidence evidence;
+  final void Function(String url, String label) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final official = evidence.type == GuideEvidenceType.official;
+    final color = official ? AppColors.success : AppColors.warning;
+    final date = evidence.lastVerified;
+    final dateLabel =
+        '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/${date.year}';
+    final typeLabel = switch (evidence.type) {
+      GuideEvidenceType.official => _localizedText(
+        context,
+        pt: 'Fonte oficial',
+        es: 'Fuente oficial',
+        en: 'Official source',
+      ),
+      GuideEvidenceType.derived => _localizedText(
+        context,
+        pt: 'Dado derivado',
+        es: 'Dato derivado',
+        en: 'Derived data',
+      ),
+      GuideEvidenceType.marketReference => _localizedText(
+        context,
+        pt: 'Referência de mercado',
+        es: 'Referencia de mercado',
+        en: 'Market reference',
+      ),
+      GuideEvidenceType.movaroGuidance => _localizedText(
+        context,
+        pt: 'Orientação Movaro',
+        es: 'Orientación Movaro',
+        en: 'Movaro guidance',
+      ),
+    };
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.24)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                official ? Icons.verified_rounded : Icons.analytics_outlined,
+                size: 16,
+                color: color,
+              ),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  '$typeLabel · $dateLabel',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            evidence.sourceLabel,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          if (evidence.scopeNote != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              evidence.scopeNote!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.4,
+              ),
+            ),
+          ],
+          const SizedBox(height: 6),
+          TextButton.icon(
+            onPressed: () => onOpen(evidence.sourceUrl, evidence.sourceLabel),
+            icon: const Icon(Icons.open_in_new_rounded, size: 15),
+            label: Text(
+              _localizedText(
+                context,
+                pt: 'Confirmar na fonte',
+                es: 'Confirmar en la fuente',
+                en: 'Confirm at source',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _GuideExecutionContent extends StatelessWidget {
   const _GuideExecutionContent({required this.item, required this.onLinkTap});
 
@@ -6015,7 +6133,7 @@ class _GuideBestOptionBanner extends StatelessWidget {
   }
 }
 
-// ─── Community Tips content ──────────────────────────────────────────────────
+// ─── Practical scenarios content ─────────────────────────────────────────────
 
 class _GuideCommunityTipsContent extends StatelessWidget {
   const _GuideCommunityTipsContent({required this.item});
@@ -6046,18 +6164,19 @@ class _GuideCommunityTipsContent extends StatelessWidget {
                     color: AppColors.primary.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: const Center(
-                    child: Text('👤', style: TextStyle(fontSize: 11)),
+                  child: const Icon(
+                    Icons.lightbulb_outline_rounded,
+                    size: 13,
+                    color: AppColors.primary,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    tip,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      height: 1.45,
-                      fontStyle: FontStyle.italic,
-                    ),
+                    '${_localizedText(context, pt: 'Cenário ilustrativo — não é depoimento: ', es: 'Escenario ilustrativo — no es testimonio: ', en: 'Illustrative scenario — not a testimonial: ')}${tip.replaceAll('"', '')}',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(height: 1.45),
                   ),
                 ),
               ],
@@ -6974,15 +7093,15 @@ class _DocumentsGuideSection extends StatelessWidget {
           tint: AppColors.secondary,
           title: _localizedText(
             context,
-            pt: 'Residencia pelo Mercosul — mais simples do que parece',
-            es: 'Residencia Mercosur — mas simple de lo que parece',
-            en: 'Mercosur residence — simpler than it looks',
+            pt: 'Residência pelo acordo Brasil–Argentina',
+            es: 'Residencia por el acuerdo Brasil–Argentina',
+            en: 'Residence under the Brazil–Argentina agreement',
           ),
           body: _localizedText(
             context,
-            pt: 'Para argentinos, a rota Mercosul costuma ser o caminho principal: voce protocola a residencia na PF dentro da janela legal e depois acompanha o registro RNM/CRNM em etapa propria.',
-            es: 'Para argentinos, la ruta Mercosur suele ser el camino principal: presentas la residencia en la PF dentro de la ventana legal y luego sigues el registro RNM/CRNM en una etapa propia.',
-            en: 'For Argentine citizens, the Mercosur route is usually the main path: you file for residence with the Federal Police within the legal window and then track RNM/CRNM registration as a separate stage.',
+            pt: 'Argentinos elegíveis podem solicitar residência permanente pela rota bilateral. Confirme a base legal e os requisitos atuais na Polícia Federal; o registro RNM/CRNM é uma etapa própria.',
+            es: 'Argentinos elegibles pueden solicitar residencia permanente por la ruta bilateral. Confirmá la base legal y los requisitos vigentes en la Policía Federal; el RNM/CRNM es una etapa propia.',
+            en: 'Eligible Argentines may request permanent residence through the bilateral route. Confirm the legal basis and current requirements with Federal Police; RNM/CRNM registration is a separate step.',
           ),
           onTap: () => onOpenTopic(DocumentationGuideSection.documents),
         ),

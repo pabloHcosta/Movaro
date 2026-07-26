@@ -22,32 +22,38 @@ class PlanNotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
+  bool _available = true;
 
   Future<void> initialize() async {
     if (_initialized) {
       return;
     }
 
-    tzdata.initializeTimeZones();
+    try {
+      tzdata.initializeTimeZones();
 
-    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const ios = DarwinInitializationSettings();
+      const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const ios = DarwinInitializationSettings();
 
-    await _notifications.initialize(
-      settings: const InitializationSettings(android: android, iOS: ios),
-    );
+      await _notifications.initialize(
+        settings: const InitializationSettings(android: android, iOS: ios),
+      );
 
-    await _notifications
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.createNotificationChannel(_channel);
-
-    _initialized = true;
+      await _notifications
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.createNotificationChannel(_channel);
+    } catch (_) {
+      _available = false;
+    } finally {
+      _initialized = true;
+    }
   }
 
   Future<bool> requestPermissions() async {
     await initialize();
+    if (!_available) return false;
     final iosGranted = await _notifications
         .resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin
@@ -63,6 +69,7 @@ class PlanNotificationService {
 
   Future<void> scheduleOnboardingSequence(MigrationPlan plan) async {
     await initialize();
+    if (!_available) return;
     await cancelPlanReminders();
 
     final cityName =
@@ -130,17 +137,18 @@ class PlanNotificationService {
 
   Future<void> cancelPlanReminders() async {
     await initialize();
+    if (!_available) return;
     await _notifications.cancel(id: 1001);
     await _notifications.cancel(id: 1002);
     await _notifications.cancel(id: 1003);
   }
 
-  /// Fires 1 day after plan creation to remind users to schedule their
-  /// Polícia Federal appointment (queues of 60–90 days in SP and RJ).
+  /// Fires 1 day after plan creation to remind users to confirm the correct
+  /// legal basis and review the current Federal Police instructions.
   Future<void> schedulePFAppointmentReminder(MigrationPlan plan) async {
     await initialize();
-    final cityName =
-        plan.currentPlanCity?.name ?? '';
+    if (!_available) return;
+    final cityName = plan.currentPlanCity?.name ?? '';
     final hasMajorCity =
         cityName.contains('São Paulo') ||
         cityName.contains('Rio') ||
@@ -155,14 +163,14 @@ class PlanNotificationService {
       ),
       body: hasMajorCity
           ? _text(
-              pt: 'Se $cityName estiver com fila longa, adiantar a agenda ajuda. O principal é não deixar o protocolo para a reta final dos 90 dias.',
-              es: 'Si $cityName tiene cola larga, adelantar el turno ayuda. Lo principal es no dejar el tramite para la recta final de los 90 dias.',
-              en: 'If $cityName has a long backlog, booking earlier helps. The key is not leaving the filing to the final stretch of the 90 days.',
+              pt: 'Confirme a rota bilateral Brasil–Argentina e veja a agenda atual da PF em $cityName. Agendar cedo é uma recomendação prática, não um prazo universal.',
+              es: 'Confirmá la ruta bilateral Brasil–Argentina y revisá la agenda actual de PF en $cityName. Agendar temprano es una recomendación práctica, no un plazo universal.',
+              en: 'Confirm the Brazil–Argentina bilateral route and review the current PF schedule in $cityName. Booking early is practical guidance, not a universal deadline.',
             )
           : _text(
-              pt: 'Checar cedo a agenda da PF ajuda a evitar corrida no fim do prazo.',
-              es: 'Revisar temprano la agenda de la PF ayuda a evitar correr al final del plazo.',
-              en: 'Checking the PF schedule early helps avoid a rush near the deadline.',
+              pt: 'Confirme sua base legal e os requisitos atuais na página da Polícia Federal.',
+              es: 'Confirmá tu base legal y los requisitos actuales en la página de la Policía Federal.',
+              en: 'Confirm your legal basis and current requirements on the Federal Police page.',
             ),
       scheduledDate: DateTime.now().add(const Duration(days: 1)),
     );
@@ -172,6 +180,7 @@ class PlanNotificationService {
   /// is marked as complete).
   Future<void> cancelPFReminder() async {
     await initialize();
+    if (!_available) return;
     await _notifications.cancel(id: 1201);
   }
 
@@ -179,6 +188,7 @@ class PlanNotificationService {
   /// [lastActivityDate] is the date of the last recorded app interaction.
   Future<void> scheduleReEngagementReminder(DateTime lastActivityDate) async {
     await initialize();
+    if (!_available) return;
     final scheduledDate = lastActivityDate.add(const Duration(days: 7));
     if (!scheduledDate.isAfter(DateTime.now())) return;
 
@@ -201,6 +211,7 @@ class PlanNotificationService {
   /// Schedules a weekly city content notification for active users.
   Future<void> scheduleCityContentReminder(String cityLabel) async {
     await initialize();
+    if (!_available) return;
     await _notifications.cancel(id: 1203);
 
     await _scheduleNotification(
@@ -224,6 +235,7 @@ class PlanNotificationService {
     required DateTime scheduledDate,
   }) async {
     await initialize();
+    if (!_available) return;
     await _notifications.cancel(id: 1103);
     if (!scheduledDate.isAfter(DateTime.now())) {
       return;
@@ -237,9 +249,9 @@ class PlanNotificationService {
         en: 'Deadline is getting close',
       ),
       body: _text(
-        pt: 'Sua residência temporária vence em 30 dias. Solicite a permanente antes.',
-        es: 'Tu residencia temporaria vence en 30 días. Solicitá la permanente antes.',
-        en: 'Your temporary residence expires in 30 days. Apply for permanent residence first.',
+        pt: 'Revise a data registrada e confirme na Polícia Federal qual providência se aplica ao seu caso.',
+        es: 'Revisá la fecha registrada y confirmá en la Policía Federal qué trámite corresponde a tu caso.',
+        en: 'Review the saved date and confirm with Federal Police which action applies to your case.',
       ),
       scheduledDate: scheduledDate,
     );
@@ -253,6 +265,7 @@ class PlanNotificationService {
     required List<Duration> offsets,
   }) async {
     await initialize();
+    if (!_available) return;
     for (final offset in offsets) {
       final scheduledDate = eventDate.subtract(offset);
       if (!scheduledDate.isAfter(DateTime.now())) {
@@ -272,6 +285,7 @@ class PlanNotificationService {
     required List<Duration> offsets,
   }) async {
     await initialize();
+    if (!_available) return;
     for (final offset in offsets) {
       await _notifications.cancel(id: _guideReminderId(reminderKey, offset));
     }

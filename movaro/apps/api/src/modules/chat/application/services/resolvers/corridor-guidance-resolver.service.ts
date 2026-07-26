@@ -617,12 +617,12 @@ export class CorridorGuidanceResolverService {
 
   private buildVisaQuickAnswer(locale: GuidanceLocale): string {
     if (locale === 'es') {
-      return 'No para entrar como visitante: argentinos pueden entrar a Brasil con DNI o pasaporte y quedarse hasta 90 días. Si la idea es vivir en Brasil, el camino usual es la residencia Mercosur, no una visa de turismo.';
+      return 'Para una visita, confirmá en la fuente oficial si tu DNI físico vigente o pasaporte es aceptado por tu forma de ingreso. Para vivir en Brasil, argentinos elegibles pueden evaluar la residencia permanente del acuerdo bilateral Brasil–Argentina. La estadía de visitante no es un plazo universal para pedir residencia.';
     }
     if (locale === 'en') {
-      return 'Not for visitor entry: Argentinians can enter Brazil with DNI or passport and stay for up to 90 days. If the goal is to live in Brazil, the usual path is Mercosur residency, not a tourist visa.';
+      return 'For a visit, confirm in the official source whether a current physical DNI or passport is accepted for your entry method. To live in Brazil, eligible Argentines may evaluate permanent residence under the bilateral Brazil–Argentina agreement. Visitor stay is not a universal residence-filing deadline.';
     }
-    return 'Não para entrar como visitante: argentinos podem entrar no Brasil com DNI ou passaporte e ficar até 90 dias. Se a ideia é morar no Brasil, o caminho usual é a residência Mercosul, não visto de turismo.';
+    return 'Para visita, confirme na fonte oficial se o DNI físico vigente ou passaporte é aceito na sua forma de entrada. Para morar no Brasil, argentinos elegíveis podem avaliar a residência permanente do acordo bilateral Brasil–Argentina. A estada de visitante não é prazo universal para pedir residência.';
   }
 
   private buildCpfQuickAnswer(

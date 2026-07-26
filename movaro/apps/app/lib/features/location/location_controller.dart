@@ -4,6 +4,7 @@ import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart
 import 'package:movaro_app/features/journey/detected_location.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/location/argentina_locality.dart';
+import 'package:movaro_app/features/location/argentina_locality_catalog.dart';
 import 'package:movaro_app/features/location/location_data.dart';
 import 'package:movaro_app/features/location/location_service.dart';
 import 'package:movaro_app/features/location/location_storage.dart';
@@ -14,13 +15,16 @@ class LocationController extends ChangeNotifier {
     required JourneyContextController journeyContextController,
     LocationStorage? storage,
     LocationService? service,
+    ArgentinaLocalityCatalog? localityCatalog,
   }) : _journeyContextController = journeyContextController,
        _storage = storage ?? LocationStorage(),
-       _service = service ?? const LocationService();
+       _service = service ?? const LocationService(),
+       _localityCatalog = localityCatalog ?? ArgentinaLocalityCatalog();
 
   final JourneyContextController _journeyContextController;
   final LocationStorage _storage;
   final LocationService _service;
+  final ArgentinaLocalityCatalog _localityCatalog;
 
   bool _isInitialized = false;
   bool _isBusy = false;
@@ -153,8 +157,9 @@ class LocationController extends ChangeNotifier {
       _lastAskedAt = await _storage.getLastAskedDate();
 
       if (location != null) {
-        _savedLocation = location;
-        await _storage.saveLocation(location);
+        // Persist the selected locality, never the device's raw GPS fix.
+        _savedLocation = await _privacySafeLocality(location);
+        await _storage.saveLocation(_savedLocation!);
       }
 
       await _syncDetectedLocation();
@@ -169,6 +174,13 @@ class LocationController extends ChangeNotifier {
   }
 
   Future<void> openAppSettings() => Geolocator.openAppSettings();
+
+  Future<void> clearSavedLocation() async {
+    _savedLocation = null;
+    await _storage.clearLocation();
+    await _journeyContextController.clearDetectedLocation();
+    notifyListeners();
+  }
 
   Future<LocationData> selectOriginLocality(ArgentinaLocality locality) async {
     final location = LocationData(
@@ -206,6 +218,43 @@ class LocationController extends ChangeNotifier {
         longitude: location.longitude,
         detectedAt: _lastAskedAt,
       ),
+    );
+  }
+
+  Future<LocationData> _privacySafeLocality(LocationData detected) async {
+    if (detected.countryCode.trim().toUpperCase() == 'AR') {
+      try {
+        final localities = await _localityCatalog.load();
+        final matches = _localityCatalog.search(
+          localities,
+          '${detected.cityName} ${detected.stateName}',
+          limit: 12,
+        );
+        if (matches.isNotEmpty) {
+          final locality = matches.first;
+          return LocationData(
+            cityName: locality.name,
+            stateName: locality.province,
+            countryName: 'Argentina',
+            countryCode: 'AR',
+            latitude: locality.latitude,
+            longitude: locality.longitude,
+          );
+        }
+      } catch (_) {
+        // Keep the city result even if the bundled locality catalog is
+        // temporarily unavailable.
+      }
+    }
+
+    double coarse(double value) => (value * 10).roundToDouble() / 10;
+    return LocationData(
+      cityName: detected.cityName,
+      stateName: detected.stateName,
+      countryName: detected.countryName,
+      countryCode: detected.countryCode,
+      latitude: coarse(detected.latitude),
+      longitude: coarse(detected.longitude),
     );
   }
 

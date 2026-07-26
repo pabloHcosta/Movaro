@@ -7,6 +7,7 @@ import 'package:movaro_app/app/presentation/pages/trust_and_support_page.dart';
 import 'package:movaro_app/app/theme/theme_controller.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class AppSettingsPage extends StatelessWidget {
@@ -14,12 +15,14 @@ class AppSettingsPage extends StatelessWidget {
     required this.localeController,
     required this.themeController,
     required this.currencyController,
+    required this.locationController,
     super.key,
   });
 
   final LocaleController localeController;
   final ThemeController themeController;
   final CurrencyController currencyController;
+  final LocationController locationController;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +31,7 @@ class AppSettingsPage extends StatelessWidget {
         localeController,
         themeController,
         currencyController,
+        locationController,
       ]),
       builder: (context, _) {
         final activeLocale = localeController.effectiveLocale;
@@ -280,15 +284,89 @@ class AppSettingsPage extends StatelessWidget {
                                               es: 'Abrir',
                                               en: 'Open',
                                             ),
-                                            onTap: () => Navigator.of(context)
-                                                .push(
-                                                  MaterialPageRoute<void>(
-                                                    builder: (_) =>
-                                                        const TrustAndSupportPage(),
-                                                  ),
-                                                ),
+                                            onTap: () => Navigator.of(context).push(
+                                              MaterialPageRoute<void>(
+                                                builder: (_) =>
+                                                    const TrustAndSupportPage(),
+                                              ),
+                                            ),
                                           ),
                                         ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: compact
+                                        ? constraints.maxWidth
+                                        : (constraints.maxWidth - 14) / 2,
+                                    child: _EntranceReveal(
+                                      delayIndex: 6,
+                                      child: _SettingCard(
+                                        icon: Icons.location_on_outlined,
+                                        title: _settingsText(
+                                          context,
+                                          pt: 'Cidade de origem e privacidade',
+                                          es: 'Ciudad de origen y privacidad',
+                                          en: 'Origin city and privacy',
+                                        ),
+                                        description: _settingsText(
+                                          context,
+                                          pt:
+                                              locationController
+                                                      .savedLocation ==
+                                                  null
+                                              ? 'Nenhuma cidade está salva. O assistente funciona sem localização e sem IA.'
+                                              : 'Salvo no aparelho: ${locationController.savedLocation!.cityName}. A posição GPS exata não é armazenada.',
+                                          es:
+                                              locationController
+                                                      .savedLocation ==
+                                                  null
+                                              ? 'No hay una ciudad guardada. El asistente funciona sin ubicación y sin IA.'
+                                              : 'Guardado en el teléfono: ${locationController.savedLocation!.cityName}. No almacenamos la posición GPS exacta.',
+                                          en:
+                                              locationController
+                                                      .savedLocation ==
+                                                  null
+                                              ? 'No city is saved. The assistant works without location and without AI.'
+                                              : 'Saved on device: ${locationController.savedLocation!.cityName}. The exact GPS fix is not stored.',
+                                        ),
+                                        accentColor: const Color(0xFF8A63D2),
+                                        child:
+                                            locationController.savedLocation ==
+                                                null
+                                            ? Text(
+                                                _settingsText(
+                                                  context,
+                                                  pt: 'Se você autorizar a detecção, guardamos apenas a cidade confirmada e um ponto municipal aproximado.',
+                                                  es: 'Si autorizás la detección, guardamos solo la ciudad confirmada y un punto municipal aproximado.',
+                                                  en: 'If you allow detection, we keep only the confirmed city and an approximate municipal point.',
+                                                ),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.copyWith(
+                                                      color:
+                                                          AppColors.textSoftFor(
+                                                            context,
+                                                          ),
+                                                      height: 1.4,
+                                                    ),
+                                              )
+                                            : Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: _SystemSettingsAction(
+                                                  label: _settingsText(
+                                                    context,
+                                                    pt: 'Apagar cidade salva',
+                                                    es: 'Borrar ciudad guardada',
+                                                    en: 'Delete saved city',
+                                                  ),
+                                                  onTap: () =>
+                                                      _confirmDeleteLocation(
+                                                        context,
+                                                      ),
+                                                ),
+                                              ),
                                       ),
                                     ),
                                   ),
@@ -350,6 +428,57 @@ class AppSettingsPage extends StatelessWidget {
         return 'App experience';
       default:
         return 'Experiência do app';
+    }
+  }
+
+  Future<void> _confirmDeleteLocation(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          _settingsText(
+            dialogContext,
+            pt: 'Apagar cidade de origem?',
+            es: '¿Borrar ciudad de origen?',
+            en: 'Delete origin city?',
+          ),
+        ),
+        content: Text(
+          _settingsText(
+            dialogContext,
+            pt: 'O dado salvo neste aparelho será removido. Você poderá escolher a cidade novamente quando precisar.',
+            es: 'Se eliminará el dato guardado en este teléfono. Podrás elegir la ciudad de nuevo cuando la necesites.',
+            en: 'The data saved on this device will be removed. You can choose the city again when needed.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(
+              _settingsText(
+                dialogContext,
+                pt: 'Cancelar',
+                es: 'Cancelar',
+                en: 'Cancel',
+              ),
+            ),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              _settingsText(
+                dialogContext,
+                pt: 'Apagar',
+                es: 'Borrar',
+                en: 'Delete',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await locationController.clearSavedLocation();
     }
   }
 }

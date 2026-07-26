@@ -73,6 +73,38 @@ class TrustAndSupportPage extends StatelessWidget {
                           ),
                           _point(
                             context,
+                            icon: Icons.memory_outlined,
+                            title: _t(
+                              context,
+                              pt: 'Funciona sem IA generativa',
+                              es: 'Funciona sin IA generativa',
+                              en: 'Works without generative AI',
+                            ),
+                            body: _t(
+                              context,
+                              pt: 'O assistente usa respostas determinísticas e conteúdo revisado no aparelho. Quando não há resposta segura, ele aponta a guia ou a fonte — não inventa.',
+                              es: 'El asistente usa respuestas determinísticas y contenido revisado en el teléfono. Si no hay una respuesta segura, indica la guía o la fuente; no inventa.',
+                              en: 'The assistant uses deterministic answers and reviewed on-device content. When no safe answer exists, it points to a guide or source instead of improvising.',
+                            ),
+                          ),
+                          _point(
+                            context,
+                            icon: Icons.location_off_outlined,
+                            title: _t(
+                              context,
+                              pt: 'Localização sob seu controle',
+                              es: 'Ubicación bajo tu control',
+                              en: 'Location under your control',
+                            ),
+                            body: _t(
+                              context,
+                              pt: 'A localização é opcional. O app guarda no aparelho apenas a cidade confirmada e um ponto municipal aproximado; você pode apagar nos Ajustes.',
+                              es: 'La ubicación es opcional. La app guarda en el teléfono solo la ciudad confirmada y un punto municipal aproximado; podés borrarlo en Ajustes.',
+                              en: 'Location is optional. The app keeps only the confirmed city and an approximate municipal point on device; you can delete it in Settings.',
+                            ),
+                          ),
+                          _point(
+                            context,
                             icon: Icons.insights_outlined,
                             title: _t(
                               context,
@@ -110,6 +142,75 @@ class TrustAndSupportPage extends StatelessWidget {
                         context,
                         title: _t(
                           context,
+                          pt: 'Privacidade e termos operacionais',
+                          es: 'Privacidad y términos operativos',
+                          en: 'Privacy & operational terms',
+                        ),
+                        children: [
+                          _point(
+                            context,
+                            icon: Icons.inventory_2_outlined,
+                            title: _t(
+                              context,
+                              pt: 'O que fica no aparelho',
+                              es: 'Qué queda en el teléfono',
+                              en: 'What stays on your device',
+                            ),
+                            body: _t(
+                              context,
+                              pt: 'Cidade de origem confirmada, preferências, progresso do plano e favoritos. A conversa do assistente existe apenas durante a sessão e pode ser limpa.',
+                              es: 'Ciudad de origen confirmada, preferencias, progreso del plan y favoritos. La conversación del asistente existe solo durante la sesión y puede borrarse.',
+                              en: 'Confirmed origin city, preferences, plan progress, and favorites. Assistant conversation exists only for the session and can be cleared.',
+                            ),
+                          ),
+                          _point(
+                            context,
+                            icon: Icons.rule_folder_outlined,
+                            title: _t(
+                              context,
+                              pt: 'Limites do produto',
+                              es: 'Límites del producto',
+                              en: 'Product limits',
+                            ),
+                            body: _t(
+                              context,
+                              pt: 'As informações são educacionais e comparativas. Não constituem consultoria jurídica, migratória, médica, financeira ou tributária.',
+                              es: 'La información es educativa y comparativa. No constituye asesoría legal, migratoria, médica, financiera o tributaria.',
+                              en: 'Information is educational and comparative. It is not legal, immigration, medical, financial, or tax advice.',
+                            ),
+                          ),
+                          _point(
+                            context,
+                            icon: Icons.update_rounded,
+                            title: _t(
+                              context,
+                              pt: 'Conteúdo revisado e datado',
+                              es: 'Contenido revisado y fechado',
+                              en: 'Reviewed and dated content',
+                            ),
+                            body: _t(
+                              context,
+                              pt: 'Catálogo AR–BR 2026.07.26. Regras críticas são verificadas periodicamente; confirme a data e a fonte antes de agir.',
+                              es: 'Catálogo AR–BR 2026.07.26. Las reglas críticas se verifican periódicamente; confirmá fecha y fuente antes de actuar.',
+                              en: 'AR–BR catalog 2026.07.26. Critical rules are checked periodically; confirm the date and source before acting.',
+                            ),
+                          ),
+                          _disclaimer(
+                            context,
+                            _t(
+                              context,
+                              pt: 'Versão operacional para validação do produto. Política de privacidade e termos públicos devem passar por revisão jurídica profissional antes da publicação comercial.',
+                              es: 'Versión operativa para validar el producto. La política de privacidad y los términos públicos deben tener revisión legal profesional antes de la publicación comercial.',
+                              en: 'Operational product-validation version. Public privacy policy and terms must receive professional legal review before commercial release.',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      _section(
+                        context,
+                        title: _t(
+                          context,
                           pt: 'Apoio oficial e gratuito',
                           es: 'Apoyo oficial y gratuito',
                           en: 'Official, free support',
@@ -128,6 +229,17 @@ class TrustAndSupportPage extends StatelessWidget {
                           ),
                           _linkTile(
                             context,
+                            icon: Icons.privacy_tip_outlined,
+                            title: _t(
+                              context,
+                              pt: 'Seus direitos sobre dados (ANPD)',
+                              es: 'Tus derechos sobre datos (ANPD)',
+                              en: 'Your data rights (ANPD)',
+                            ),
+                            uri: PreparationResourceLinks.privacyRightsGuide,
+                          ),
+                          _linkTile(
+                            context,
                             icon: Icons.account_balance_outlined,
                             title: _t(
                               context,
@@ -135,8 +247,8 @@ class TrustAndSupportPage extends StatelessWidget {
                               es: 'Consulados de Argentina en Brasil',
                               en: 'Argentine consulates in Brazil',
                             ),
-                            uri:
-                                PreparationResourceLinks.argentinaConsulatesBrazil,
+                            uri: PreparationResourceLinks
+                                .argentinaConsulatesBrazil,
                           ),
                           _linkTile(
                             context,
@@ -254,9 +366,9 @@ class TrustAndSupportPage extends StatelessWidget {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 12),
           ...children,
@@ -284,9 +396,9 @@ class TrustAndSupportPage extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 2),
                 Text(body, style: Theme.of(context).textTheme.bodyMedium),
@@ -336,10 +448,7 @@ class TrustAndSupportPage extends StatelessWidget {
         color: AppColors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.bodySmall,
-      ),
+      child: Text(text, style: Theme.of(context).textTheme.bodySmall),
     );
   }
 }

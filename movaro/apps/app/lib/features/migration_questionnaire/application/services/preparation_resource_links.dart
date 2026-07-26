@@ -47,7 +47,15 @@ class PreparationResourceLinks {
   );
 
   static final Uri argentinaResidenceAgreement = Uri.parse(
-    'https://www.gov.br/pf/pt-br/assuntos/carta-de-servicos/migracao/obter-autorizacao-de-residencia',
+    'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia/acordo-de-residencia-brasil-e-argentina',
+  );
+
+  static final Uri federalPoliceMigration = Uri.parse(
+    'https://www.gov.br/pf/pt-br/assuntos/imigracao',
+  );
+
+  static final Uri entryDocumentsGuide = Uri.parse(
+    'https://www.gov.br/pf/pt-br/assuntos/passaporte/suporte/duvidas_/inicio/mercosul',
   );
 
   static final Uri cpfInBrazil = Uri.parse(
@@ -76,6 +84,34 @@ class PreparationResourceLinks {
 
   static final Uri familySchoolGuide = Uri.parse(
     'https://www.gov.br/casacivil/pt-br/assuntos/noticias/2020/novembro/conselho-nacional-de-educacao-garante-direito-de-matricula-de-criancas-e-adolescentes-migrantes-e-refugiados',
+  );
+
+  static final Uri migrantHealthGuide = Uri.parse(
+    'https://www.gov.br/saude/pt-br/composicao/saps/equidade-em-saude/migrantes-refugiadas-e-apatridas',
+  );
+
+  static final Uri petEntryGuide = Uri.parse(
+    'https://www.gov.br/agricultura/pt-br/assuntos/vigilancia-agropecuaria/viajantes-e-bagagens/lista-de-bens-agropecuarios-que-podem-ou-nao-ingressar-no-brasil/animais-vivos/caes-e-gatos',
+  );
+
+  static final Uri medicationTravelGuide = Uri.parse(
+    'https://www.gov.br/anvisa/pt-br/assuntos/paf/regras-de-bagagem/regras-de-bagagem',
+  );
+
+  static final Uri controlledMedicationGuide = Uri.parse(
+    'https://www.gov.br/anvisa/pt-br/assuntos/medicamentos/controlados/importacao',
+  );
+
+  static final Uri foreignIncomeTaxGuide = Uri.parse(
+    'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/pagamento/carne-leao/rendimentos',
+  );
+
+  static final Uri rentalLawGuide = Uri.parse(
+    'https://www.planalto.gov.br/ccivil_03/leis/l8245compilado.htm',
+  );
+
+  static final Uri privacyRightsGuide = Uri.parse(
+    'https://www.gov.br/anpd/pt-br/assuntos/titular-de-dados-1/direito-dos-titulares',
   );
 
   static final Uri rentalScamAlert = Uri.parse(

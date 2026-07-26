@@ -343,26 +343,29 @@ class GuideEventSuggestionEngine {
           isHighPriority: true,
         );
       case 'item_0_1_rule_90_days':
-        final deadline = arrivalDate.add(const Duration(days: 60));
-        final start = _nextBusinessDayAt(deadline, hour: 9);
+        final reviewDate = arrivalDate.subtract(const Duration(days: 14));
+        final start = _nextBusinessDayAt(
+          reviewDate.isBefore(DateTime.now()) ? DateTime.now() : reviewDate,
+          hour: 9,
+        );
         return GuideEventSuggestion(
           id: 'event_${item.id}',
           sourceItemId: item.id,
           type: GuideEventType.deadline,
           title: _text(
-            pt: 'Revisar prazo dos 90 dias',
-            es: 'Revisar plazo de 90 días',
-            en: 'Review 90-day deadline',
+            pt: 'Revisar entrada e rota de residência',
+            es: 'Revisar ingreso y ruta de residencia',
+            en: 'Review entry and residence route',
           ),
           description: _text(
-            pt: 'Use este lembrete para checar se a regularização já está andando antes da reta final.',
-            es: 'Usa este recordatorio para revisar si la regularización ya está encaminhada antes de la recta final.',
-            en: 'Use this reminder to check whether regularization is already moving before the final stretch.',
+            pt: 'Confirme documentos de entrada e a base legal aplicável na página atual da Polícia Federal.',
+            es: 'Confirmá documentos de ingreso y la base legal aplicable en la página vigente de la Policía Federal.',
+            en: 'Confirm entry documents and the applicable legal basis on the current Federal Police page.',
           ),
           assistantCopy: _text(
-            pt: 'É um lembrete de proteção: discreto, mas muito útil para não descobrir o prazo tarde demais.',
-            es: 'Es un recordatorio de protección: discreto, pero muy útil para no descubrir el plazo demasiado tarde.',
-            en: 'This is a protective reminder: quiet, but very useful so the deadline does not surprise you.',
+            pt: 'É uma revisão preventiva, sem transformar orientação prática em prazo legal.',
+            es: 'Es una revisión preventiva, sin convertir una orientación práctica en plazo legal.',
+            en: 'This is a preventive review without turning practical guidance into a legal deadline.',
           ),
           startAt: start,
           endAt: start.add(const Duration(minutes: 20)),

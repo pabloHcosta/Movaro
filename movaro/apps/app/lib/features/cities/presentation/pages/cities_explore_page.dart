@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
@@ -153,53 +154,78 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                     const SizedBox(height: 16),
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 1120),
-                      child: FrostedPanel(
-                        padding: const EdgeInsets.all(24),
-                        gradient: LinearGradient(
-                          colors: [
-                            isDark
-                                ? const Color(0xFF0F1A2A)
-                                : Colors.white.withValues(alpha: 0.88),
-                            isDark
-                                ? const Color(0xFF13243D)
-                                : const Color(0xFFF4F7FF),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: isDark
+                                ? const [Color(0xFF111F31), Color(0xFF0B1625)]
+                                : const [Colors.white, Color(0xFFF3F8FF)],
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.09)
+                                : AppColors.primary.withValues(alpha: 0.10),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isDark
+                                  ? Colors.black.withValues(alpha: 0.22)
+                                  : const Color(
+                                      0xFF315A8A,
+                                    ).withValues(alpha: 0.08),
+                              blurRadius: 24,
+                              offset: const Offset(0, 12),
+                            ),
                           ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
                         ),
-                        backgroundColor: isDark
-                            ? const Color(0xD9111822)
-                            : AppColors.frostedBackgroundFor(context),
-                        borderColor: isDark
-                            ? Colors.white.withValues(alpha: 0.08)
-                            : AppColors.frostedBorderFor(context),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (isValidationMode) ...[
-                              Text(
-                                l10n.citiesSearchHeadline,
-                                style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(
-                                      color: AppColors.textPrimaryFor(context),
+                            _ExplorePanelHeading(
+                              icon: isValidationMode
+                                  ? Icons.location_searching_rounded
+                                  : Icons.travel_explore_rounded,
+                              eyebrow: isValidationMode
+                                  ? l10n.citiesSearchTitle
+                                  : _exploreText(
+                                      context,
+                                      pt: 'DESCUBRA SEU LUGAR',
+                                      es: 'DESCUBRÍ TU LUGAR',
+                                      en: 'FIND YOUR PLACE',
                                     ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                l10n.citiesSearchDescription,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(color: textSoft),
-                              ),
-                              const SizedBox(height: 14),
-                            ],
-                            _CitiesSearchField(
-                              controller: _searchController,
-                              hintText: l10n.citiesSearchHint,
-                              labelText: l10n.citiesSearchFieldLabel,
-                              onChanged: _handleSearchChanged,
-                              onSubmitted: (_) =>
-                                  _handlePrimarySearchAction(suggestions),
-                              onClear: hasQuery ? _clearSearch : null,
+                              title: isValidationMode
+                                  ? l10n.citiesSearchHeadline
+                                  : l10n.citiesExploreHeadline,
+                              body: isValidationMode
+                                  ? l10n.citiesSearchDescription
+                                  : l10n.citiesExploreDescription,
+                            ),
+                            const SizedBox(height: 15),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: _CitiesSearchField(
+                                    controller: _searchController,
+                                    hintText: l10n.citiesSearchHint,
+                                    labelText: l10n.citiesSearchFieldLabel,
+                                    onChanged: _handleSearchChanged,
+                                    onSubmitted: (_) =>
+                                        _handlePrimarySearchAction(suggestions),
+                                    onClear: hasQuery ? _clearSearch : null,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                _CitiesMapCallout(
+                                  title: l10n.citiesMapOpenAction,
+                                  body: l10n.citiesMapSheetBody,
+                                  onTap: () => _openCitiesMapSheet(context),
+                                ),
+                              ],
                             ),
                             if (hasQuery) ...[
                               const SizedBox(height: 12),
@@ -212,7 +238,17 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                                 onTapCity: _openCityDetail,
                               ),
                             ],
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 16),
+                            Text(
+                              l10n.citiesQuickChoicesTitle,
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    color: AppColors.textSoftFor(context),
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.2,
+                                  ),
+                            ),
+                            const SizedBox(height: 9),
                             _CityQuickFilterRail(
                               filters: _CityQuickFilter.values
                                   .where(
@@ -223,7 +259,7 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                               labelBuilder: (filter) =>
                                   _quickFilterLabel(l10n, filter),
                               onSelected: _handleQuickFilterSelection,
-                              clearLabel: l10n.citiesFilterClear,
+                              clearLabel: l10n.citiesQuickFilterAll,
                             ),
                             if (_quickFilter == _CityQuickFilter.work) ...[
                               const SizedBox(height: 12),
@@ -237,12 +273,6 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                                 onSelected: _handleWorkAreaSelection,
                               ),
                             ],
-                            const SizedBox(height: 14),
-                            _CitiesMapCallout(
-                              title: l10n.citiesMapOpenAction,
-                              body: l10n.citiesMapSheetBody,
-                              onTap: () => _openCitiesMapSheet(context),
-                            ),
                           ],
                         ),
                       ),
@@ -259,7 +289,7 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                         ),
                       ),
                     ],
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 18),
                     if (!shouldShowResults)
                       ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 1120),
@@ -314,6 +344,9 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                           children: [
                             _ResultsHeader(
                               title: l10n.citiesResultsTitle,
+                              filterLabel: _quickFilter == null
+                                  ? null
+                                  : _quickFilterLabel(l10n, _quickFilter!),
                               body: (!hasQuery && _quickFilter == null)
                                   ? _exploreText(
                                       context,
@@ -321,9 +354,11 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                                       es: '${visibleCities.length} ciudades en el catálogo para explorar.',
                                       en: '${visibleCities.length} cities in the catalog to explore.',
                                     )
-                                  : l10n.citiesResultsBody(visibleCities.length),
+                                  : l10n.citiesResultsBody(
+                                      visibleCities.length,
+                                    ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 12),
                             for (final city in pagedCities) ...[
                               CityCard(
                                 city: city,
@@ -820,6 +855,85 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
 
 enum CitiesExploreEntryMode { explore, validation }
 
+class _ExplorePanelHeading extends StatelessWidget {
+  const _ExplorePanelHeading({
+    required this.icon,
+    required this.eyebrow,
+    required this.title,
+    required this.body,
+  });
+
+  final IconData icon;
+  final String eyebrow;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF168BFF), Color(0xFF15B8FF)],
+            ),
+            borderRadius: BorderRadius.circular(13),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF168BFF).withValues(alpha: 0.24),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Icon(icon, color: Colors.white, size: 21),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                eyebrow,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.7,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.textPrimaryFor(context),
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.2,
+                  height: 1.15,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                body,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.35,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _CitiesSearchField extends StatelessWidget {
   const _CitiesSearchField({
     required this.controller,
@@ -839,21 +953,64 @@ class _CitiesSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      onChanged: onChanged,
-      onSubmitted: onSubmitted,
-      textInputAction: TextInputAction.search,
-      decoration: InputDecoration(
-        hintText: hintText,
-        labelText: labelText,
-        prefixIcon: const Icon(Icons.search_rounded),
-        suffixIcon: onClear == null
-            ? null
-            : IconButton(
-                onPressed: onClear,
-                icon: const Icon(Icons.close_rounded),
+    final isDark = AppColors.isDark(context);
+    return Container(
+      height: 58,
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.black.withValues(alpha: 0.22)
+            : Colors.white.withValues(alpha: 0.82),
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.11)
+              : AppColors.primary.withValues(alpha: 0.12),
+        ),
+      ),
+      child: TextField(
+        controller: controller,
+        onChanged: onChanged,
+        onSubmitted: onSubmitted,
+        textInputAction: TextInputAction.search,
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: AppColors.textPrimaryFor(context),
+          fontWeight: FontWeight.w600,
+        ),
+        decoration: InputDecoration(
+          hintText: labelText,
+          helperText: null,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 18),
+          prefixIcon: Padding(
+            padding: const EdgeInsets.all(11),
+            child: Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
               ),
+              child: const Icon(
+                Icons.search_rounded,
+                size: 19,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+          prefixIconConstraints: const BoxConstraints(minWidth: 56),
+          suffixIcon: onClear == null
+              ? null
+              : IconButton(
+                  tooltip: hintText,
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    onClear?.call();
+                  },
+                  icon: const Icon(Icons.close_rounded, size: 19),
+                ),
+        ),
       ),
     );
   }
@@ -1008,12 +1165,30 @@ class _CityQuickFilterRail extends StatelessWidget {
           return _QuickFilterChip(
             label: labelBuilder(filter),
             selected: selectedFilter == filter,
+            icon: _filterIcon(filter),
             onTap: () => onSelected(filter),
           );
         },
       ),
     );
   }
+
+  IconData _filterIcon(_CityQuickFilter filter) => switch (filter) {
+    _CityQuickFilter.all => Icons.apps_rounded,
+    _CityQuickFilter.popular => Icons.local_fire_department_outlined,
+    _CityQuickFilter.lowCost => Icons.savings_outlined,
+    _CityQuickFilter.work => Icons.work_outline_rounded,
+    _CityQuickFilter.language => Icons.translate_rounded,
+    _CityQuickFilter.housingEasy => Icons.home_outlined,
+    _CityQuickFilter.housingPressure => Icons.trending_up_rounded,
+    _CityQuickFilter.softLanding => Icons.flight_land_rounded,
+    _CityQuickFilter.familyStability => Icons.family_restroom_rounded,
+    _CityQuickFilter.incomeStart => Icons.payments_outlined,
+    _CityQuickFilter.coastal => Icons.waves_rounded,
+    _CityQuickFilter.metropolis => Icons.apartment_rounded,
+    _CityQuickFilter.inland => Icons.nature_people_outlined,
+    _CityQuickFilter.border => Icons.swap_horiz_rounded,
+  };
 }
 
 class _CitiesMapCallout extends StatelessWidget {
@@ -1029,56 +1204,67 @@ class _CitiesMapCallout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Ink(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            gradient: LinearGradient(
-              colors: [
-                AppColors.primary.withValues(alpha: 0.16),
-                AppColors.primary.withValues(alpha: 0.08),
-              ],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.20),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.map_outlined, color: AppColors.primary, size: 20),
-              const SizedBox(width: 10),
-              Flexible(
-                child: Text(
-                  _buttonLabel(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: AppColors.textPrimaryFor(context),
-                    fontWeight: FontWeight.w800,
-                  ),
+    return Semantics(
+      button: true,
+      label: title,
+      hint: body,
+      child: Tooltip(
+        message: title,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              onTap();
+            },
+            borderRadius: BorderRadius.circular(17),
+            child: Ink(
+              width: 64,
+              height: 58,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(17),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primary.withValues(alpha: 0.18),
+                    AppColors.primary.withValues(alpha: 0.08),
+                  ],
+                ),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.24),
                 ),
               ),
-            ],
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.map_outlined,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _shortLabel(context),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  String _buttonLabel(BuildContext context) {
+  String _shortLabel(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => 'Escolher no mapa',
-      'es' => 'Elegir en el mapa',
-      _ => 'Choose on map',
+      'pt' => 'Mapa',
+      'es' => 'Mapa',
+      _ => 'Map',
     };
   }
 }
@@ -1099,25 +1285,55 @@ class _QuickFilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected
-          ? AppColors.primary
-          : Colors.white.withValues(alpha: 0.08),
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
         borderRadius: BorderRadius.circular(999),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+          decoration: BoxDecoration(
+            gradient: selected
+                ? const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF168BFF), Color(0xFF15B8FF)],
+                  )
+                : null,
+            color: selected
+                ? null
+                : AppColors.surfaceMutedFor(context).withValues(alpha: 0.70),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: selected
+                  ? const Color(0xFF65C8FF).withValues(alpha: 0.35)
+                  : AppColors.borderFor(context),
+            ),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF168BFF).withValues(alpha: 0.20),
+                      blurRadius: 12,
+                      offset: const Offset(0, 5),
+                    ),
+                  ]
+                : null,
+          ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[
                 Icon(
                   icon,
-                  size: 16,
-                  color: selected ? Colors.white : AppColors.textPrimary,
+                  size: 15,
+                  color: selected
+                      ? Colors.white
+                      : AppColors.textSoftFor(context),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
               ],
               Text(
                 label,
@@ -1137,25 +1353,84 @@ class _QuickFilterChip extends StatelessWidget {
 }
 
 class _ResultsHeader extends StatelessWidget {
-  const _ResultsHeader({required this.title, required this.body});
+  const _ResultsHeader({
+    required this.title,
+    required this.body,
+    this.filterLabel,
+  });
 
   final String title;
   final String body;
+  final String? filterLabel;
 
   @override
   Widget build(BuildContext context) {
-    return FrostedPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceFor(context).withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.borderFor(context)),
+      ),
+      child: Row(
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          Text(
-            body,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.view_agenda_outlined,
+              size: 19,
+              color: AppColors.primary,
             ),
           ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: AppColors.textPrimaryFor(context),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  body,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          if (filterLabel != null) ...[
+            const SizedBox(width: 8),
+            Container(
+              constraints: const BoxConstraints(maxWidth: 118),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.11),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                filterLabel!,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1483,8 +1758,8 @@ class _WorkAreaRail extends StatelessWidget {
             separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final area = areas[index];
-              final isSelected = selected != null &&
-                  selected == area.toLowerCase();
+              final isSelected =
+                  selected != null && selected == area.toLowerCase();
               return ChoiceChip(
                 label: Text(labelBuilder(area)),
                 selected: isSelected,

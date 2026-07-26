@@ -8,7 +8,6 @@ import { ReferenceModule } from '../reference/reference.module';
 import { ChatContextBuilderService } from './application/services/chat-context-builder.service';
 import { ChatPromptsService } from './application/services/chat-prompts.service';
 import { GuideAnswersService } from './application/services/guide-answers.service';
-import { GeminiFallbackService } from './application/services/gemini-fallback.service';
 import { IntentDetectorService } from './application/services/intent-detector.service';
 import { OrchestratorService } from './application/services/orchestrator.service';
 import { CityResolverService } from './application/services/resolvers/city-resolver.service';
@@ -34,7 +33,6 @@ import { ChatController } from './presentation/chat.controller';
     CostResolverService,
     DocResolverService,
     FaqResolverService,
-    GeminiFallbackService,
     OrchestratorService,
   ],
 })

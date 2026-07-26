@@ -5,6 +5,7 @@ import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/location/argentina_origin_classifier.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/answer.dart';
@@ -27,17 +28,20 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     required MigrationPlanGenerator planGenerator,
     required JourneyContextController journeyContextController,
     QuestionnaireFlowDraftStore? flowDraftStore,
+    MigrationPlanResetService? planResetService,
   }) : _questionRepository = questionRepository,
        _migrationPlanRepository = migrationPlanRepository,
        _planGenerator = planGenerator,
        _journeyContextController = journeyContextController,
-       _flowDraftStore = flowDraftStore ?? QuestionnaireFlowDraftStore();
+       _flowDraftStore = flowDraftStore ?? QuestionnaireFlowDraftStore(),
+       _planResetService = planResetService;
 
   final QuestionRepository _questionRepository;
   final MigrationPlanRepository _migrationPlanRepository;
   final MigrationPlanGenerator _planGenerator;
   final JourneyContextController _journeyContextController;
   final QuestionnaireFlowDraftStore _flowDraftStore;
+  final MigrationPlanResetService? _planResetService;
 
   List<Question> _questions = const [];
   List<Answer> _answers = const [];
@@ -89,6 +93,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
         'intent',
         'timeline',
         'priorities',
+        'support_needs',
         'funding',
         'constraints',
       ],
@@ -235,6 +240,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _answers = const [];
     _syncJourneyAnswers();
     _generatedPlan = null;
+    _preferredCity = null;
     _selectedVariant = null;
     _currentIndex = 0;
     _showRefinePrompt = false;
@@ -242,6 +248,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _includeConstraints = false;
     await _migrationPlanRepository.setCurrentPlan(null);
     await _flowDraftStore.clear();
+    await _planResetService?.clearPreviousPlanData();
     notifyListeners();
   }
 
@@ -292,7 +299,11 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     }
 
     final currentValues = List<String>.from(answerValuesFor(questionId));
-    const exclusiveValues = {'balanced_unsure', 'no_constraints'};
+    const exclusiveValues = {
+      'balanced_unsure',
+      'no_constraints',
+      'no_special_needs',
+    };
 
     if (currentValues.contains(value)) {
       currentValues.remove(value);
@@ -539,12 +550,18 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     notifyListeners();
     await _migrationPlanRepository.setCurrentPlan(_generatedPlan);
     if (_generatedPlan != null) {
-      await PlanNotificationService.instance.scheduleOnboardingSequence(
-        _generatedPlan!,
-      );
-      await PlanNotificationService.instance.schedulePFAppointmentReminder(
-        _generatedPlan!,
-      );
+      try {
+        await PlanNotificationService.instance.scheduleOnboardingSequence(
+          _generatedPlan!,
+        );
+        await PlanNotificationService.instance.schedulePFAppointmentReminder(
+          _generatedPlan!,
+        );
+      } catch (error) {
+        debugPrint(
+          'Plan reminders unavailable; city confirmation was preserved: $error',
+        );
+      }
     }
   }
 

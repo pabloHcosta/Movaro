@@ -22,7 +22,7 @@ aconselhamento personalizado**. A autoridade é sempre a fonte oficial
 - **ES:** "Información general para orientarte — no es asesoría legal ni financiera. Confirmá siempre en las fuentes oficiales."
 - **EN:** "General information to orient you — not legal or financial advice. Always confirm with official sources."
 
-Superfícies onde aparece hoje: **viabilidade** (detalhe da cidade), **assistente** (IA),
+Superfícies onde aparece hoje: **viabilidade** (detalhe da cidade), **assistente determinístico**,
 **guia prático**. Recomendado adicionar também no **resultado do plano** e no **copiloto**.
 
 ## Esboço de Termos de Uso / Aviso Legal (rascunho p/ advogado)
@@ -41,10 +41,16 @@ Superfícies onde aparece hoje: **viabilidade** (detalhe da cidade), **assistent
 5. **Limitação de responsabilidade.** Na máxima extensão permitida em lei, o
    Movaro não se responsabiliza por perdas decorrentes do uso da informação;
    o usuário deve confirmar tudo nas fontes oficiais.
-6. **Assistente de IA.** As respostas são geradas/curadas para orientação e
-   **podem conter erros**; não são aconselhamento profissional.
-7. **Privacidade.** (Remeter à política de privacidade — a preparar.)
-8. **Jurisdição / contato.** (A definir com o advogado.)
+6. **Assistente sem IA por padrão.** As respostas são determinísticas e curadas.
+   Quando não existe resposta revisada, o produto deve dizer isso e apontar uma
+   guia ou fonte oficial, sem improvisar.
+7. **Privacidade e localização.** A localização é opcional e solicitada no
+   contexto da função. Após a detecção, o app persiste localmente apenas a
+   cidade confirmada e um ponto municipal aproximado, não o ponto GPS bruto.
+   O usuário pode apagar esse dado em Ajustes.
+8. **Metadados de evidência.** Conteúdo sensível expõe tipo de fonte, URL,
+   data da última verificação e nota de escopo.
+9. **Jurisdição / contato.** (A definir com o advogado.)
 
 ## A fazer com apoio jurídico
 - Validar/ajustar o texto acima e a política de privacidade.
