@@ -1295,26 +1295,6 @@ class _ActiveHomeState extends StatelessWidget {
         );
         final heroH = topPad + heroContent;
 
-        // ── Feed card height ──────────────────────────────────────────
-        // Measured heights of every fixed-height section (from render tree):
-        //   primary card wrapper (8 top padding + ~156 card)  : 165
-        //   SizedBox(6) between primary card and stepper       :   6
-        //   JourneyStepperWidget (showTaskCard: false)         :  68
-        //   Padding(5) + compact SecondaryActionRow            :  40
-        //   CityFeed section label + bottom padding            :  22
-        const kFixed = 165.0 + 6.0 + 68.0 + 40.0 + 22.0; // = 301 pt
-
-        // rawRemaining = space available for the feed card + gap above it.
-        final rawRemaining = avail - heroH - kFixed;
-
-        // Reserve at least 6 pt for the gap; feed card gets the rest.
-        // Lower minimum (110 pt) prevents overflow on compact available
-        // heights (e.g. when the location banner is visible on a Pro Max).
-        final feedCardH = (rawRemaining - 6.0).clamp(110.0, 178.0);
-
-        // Remainder becomes the breathing gap — guaranteed no overflow.
-        final paraGap = (rawRemaining - feedCardH).clamp(4.0, 30.0);
-
         // ── Typography scale ──────────────────────────────────────────
         // Enable slightly larger text on phones with avail > 760 pt
         // (iPhone 11 / 14 Pro and above).
@@ -1447,7 +1427,7 @@ class _ActiveHomeState extends StatelessWidget {
                     ),
 
                     // 8. Para Ti — horizontal card carousel
-                    SizedBox(height: paraGap),
+                    const SizedBox(height: 18),
                     CityFeedWidget(
                       cityCode: city.id,
                       stage: stage,
@@ -1459,7 +1439,7 @@ class _ActiveHomeState extends StatelessWidget {
                       arrivalStory: arrivalStory,
                       comparison: comparison,
                       guideCurrentItem: guideState.currentItem,
-                      cardHeight: feedCardH,
+                      cardHeight: 118,
                       onOpenGuideItem: (guideItemId) => Navigator.pushNamed(
                         context,
                         AppRoutes.migrationPlanCopilot,
@@ -1535,88 +1515,110 @@ class _PrimaryActionCard extends StatelessWidget {
         ? const Color(0xFFE24B4A).withValues(alpha: 0.35)
         : _badgeBorder(context);
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(13),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0E1825) : Colors.white,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _cardBorder(context)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Phase tag pill
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: tagBg,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: tagBorder),
-            ),
-            child: Text(
-              phaseTag,
-              style: AppTypography.tinyLabel.copyWith(
-                fontWeight: FontWeight.w700,
-                color: tagColor,
-              ),
-            ),
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.all(13),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF0E1825) : Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: _cardBorder(context)),
           ),
-          const SizedBox(height: 9),
-          // Title — scales from 15 to 16 sp on tall screens
-          Text(
-            item.title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontSize: bigScreen ? 16 : 15,
-              fontWeight: FontWeight.w800,
-              color: _primaryText(context),
-              height: 1.25,
-              letterSpacing: -0.2,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          // Short description — up to 3 lines on tall screens
-          Text(
-            item.shortDescription,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontSize: bigScreen ? 12.5 : null,
-              color: _secondaryText(context),
-              height: bigScreen ? 1.5 : 1.4,
-              fontWeight: FontWeight.w400,
-            ),
-            maxLines: bigScreen ? 3 : 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 11),
-          // Full-width CTA button
-          GestureDetector(
-            onTap: onTap,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 9),
-              decoration: BoxDecoration(
-                color: const Color(0xFF3B7CC8),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: Text(
-                _localizedText(
-                  context,
-                  pt: 'Fazer agora',
-                  es: 'Hacer ahora',
-                  en: 'Do it now',
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: tagBg,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: tagBorder),
                 ),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
+                child: Icon(item.icon, size: 20, color: tagColor),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      phaseTag,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: tagColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      item.title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontSize: bigScreen ? 17 : 16,
+                        fontWeight: FontWeight.w800,
+                        color: _primaryText(context),
+                        height: 1.2,
+                        letterSpacing: -0.15,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      item.shortDescription,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontSize: 13,
+                        color: _secondaryText(context),
+                        height: 1.3,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
-            ),
+              const SizedBox(width: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3B7CC8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _localizedText(
+                        context,
+                        pt: 'Abrir',
+                        es: 'Abrir',
+                        en: 'Open',
+                      ),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 15,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

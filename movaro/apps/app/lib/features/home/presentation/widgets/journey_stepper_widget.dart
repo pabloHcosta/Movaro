@@ -6,8 +6,6 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
-enum _PhaseNodeStatus { done, now, lock }
-
 /// Horizontal phase stepper + active-task card shown on the home screen
 /// when the user has an active migration plan.
 class JourneyStepperWidget extends StatelessWidget {
@@ -46,17 +44,6 @@ class JourneyStepperWidget extends StatelessWidget {
     return GuidePhase.arrival;
   }
 
-  _PhaseNodeStatus _phaseStatus(GuidePhase phase, GuidePhase currentPhase) {
-    final phaseItems = allItems.where((it) => it.phase == phase).toList();
-    if (phaseItems.isNotEmpty && phaseItems.every((it) => it.isCompleted)) {
-      return _PhaseNodeStatus.done;
-    }
-    if (phase == currentPhase && phaseItems.isNotEmpty) {
-      return _PhaseNodeStatus.now;
-    }
-    return _PhaseNodeStatus.lock;
-  }
-
   @override
   Widget build(BuildContext context) {
     final completedCount = allItems.where((it) => it.isCompleted).length;
@@ -84,96 +71,137 @@ class JourneyStepperWidget extends StatelessWidget {
           (it) => it.dependencies.contains('item_2_1_cpf') && !it.isCompleted,
         )
         .length;
+    final currentPhaseIndex = _phases.indexOf(currentPhase);
+    GuidePhase? nextPhase;
+    for (var i = currentPhaseIndex + 1; i < _phases.length; i++) {
+      if (allItems.any((item) => item.phase == _phases[i])) {
+        nextPhase = _phases[i];
+        break;
+      }
+    }
+    final progress = totalCount == 0 ? 0.0 : completedCount / totalCount;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // ── Part 1: Label row ─────────────────────────────────────────
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              Text(
-                context.l10n.homeJourneyTitle,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  letterSpacing: 0.5,
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.35)
-                      : const Color(0xFF64748B),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTapSeeMore ?? onTapActiveTask,
+              borderRadius: BorderRadius.circular(14),
+              child: Ink(
+                padding: const EdgeInsets.all(13),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceFor(context),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.borderFor(context)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          context.l10n.homeJourneyTitle,
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                letterSpacing: 0.5,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textSoftFor(context),
+                              ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          context.l10n.homeStepperProgress(
+                            '$completedCount',
+                            '$totalCount',
+                          ),
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(99),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 5,
+                        backgroundColor: isDark
+                            ? const Color(0xFF1A2840)
+                            : const Color(0xFFE2E8F0),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 11),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _JourneyPhaseSummary(
+                            icon: _phaseIcon(currentPhase),
+                            eyebrow: _localizedText(
+                              context,
+                              pt: 'AGORA',
+                              es: 'AHORA',
+                              en: 'NOW',
+                            ),
+                            label: _phaseLabel(
+                              context,
+                              currentPhase,
+                              journeyStage,
+                            ),
+                            highlighted: true,
+                          ),
+                        ),
+                        if (nextPhase != null) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 17,
+                              color: AppColors.textSoftFor(context),
+                            ),
+                          ),
+                          Expanded(
+                            child: _JourneyPhaseSummary(
+                              icon: _phaseIcon(nextPhase),
+                              eyebrow: _localizedText(
+                                context,
+                                pt: 'DEPOIS',
+                                es: 'DESPUÉS',
+                                en: 'NEXT',
+                              ),
+                              label: _phaseLabel(
+                                context,
+                                nextPhase,
+                                journeyStage,
+                              ),
+                              highlighted: false,
+                            ),
+                          ),
+                        ] else
+                          const Spacer(),
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppColors.textSoftFor(context),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const Spacer(),
-              Text(
-                context.l10n.homeStepperProgress(
-                  '$completedCount',
-                  '$totalCount',
-                ),
-                style: AppTypography.compactBadge.copyWith(
-                  color: isDark
-                      ? const Color(0xFF3B7CC8)
-                      : const Color(0xFF1D4ED8),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
-        const SizedBox(height: 8),
-        // ── Part 2a: Circles + connectors row ────────────────────────
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              for (int i = 0; i < _phases.length; i++) ...[
-                Expanded(
-                  flex: 2,
-                  child: Center(
-                    child: _PhaseNode(
-                      phase: _phases[i],
-                      journeyStage: journeyStage,
-                      status: _phaseStatus(_phases[i], currentPhase),
-                      isDark: isDark,
-                    ),
-                  ),
-                ),
-                if (i < _phases.length - 1)
-                  Expanded(
-                    flex: 1,
-                    child: _PhaseConnector(
-                      isDone:
-                          _phaseStatus(_phases[i], currentPhase) ==
-                          _PhaseNodeStatus.done,
-                      isDark: isDark,
-                    ),
-                  ),
-              ],
-            ],
-          ),
-        ),
-        const SizedBox(height: 5),
-        // ── Part 2b: Labels row — centered under each circle ─────────
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              for (int i = 0; i < _phases.length; i++) ...[
-                Expanded(
-                  flex: 2,
-                  child: _PhaseLabel(
-                    phase: _phases[i],
-                    journeyStage: journeyStage,
-                    isCurrent: _phases[i] == currentPhase,
-                    isDark: isDark,
-                  ),
-                ),
-                if (i < _phases.length - 1)
-                  const Expanded(flex: 1, child: SizedBox.shrink()),
-              ],
-            ],
-          ),
-        ),
-        // ── Part 3: Active task card ──────────────────────────────────
         if (showTaskCard && activeTask != null)
           _ActiveTaskCard(
             item: activeTask,
@@ -189,191 +217,108 @@ class JourneyStepperWidget extends StatelessWidget {
       ],
     );
   }
+
+  static IconData _phaseIcon(GuidePhase phase) => switch (phase) {
+    GuidePhase.preparation => Icons.explore_rounded,
+    GuidePhase.housing => Icons.bed_rounded,
+    GuidePhase.documents => Icons.badge_outlined,
+    GuidePhase.work => Icons.work_outline_rounded,
+    GuidePhase.arrival => Icons.home_rounded,
+  };
+
+  static String _phaseLabel(
+    BuildContext context,
+    GuidePhase phase,
+    UserJourneyStage journeyStage,
+  ) {
+    if (journeyStage == UserJourneyStage.executor) {
+      return switch (phase) {
+        GuidePhase.preparation => context.l10n.homeJourneyPhaseBeforeTravel,
+        GuidePhase.housing => context.l10n.homeJourneyPhaseFirstDays,
+        GuidePhase.documents => context.l10n.homeJourneyPhaseDocumentation,
+        GuidePhase.work => context.l10n.homeJourneyPhaseLifeWorking,
+        GuidePhase.arrival => context.l10n.homeJourneyPhaseIntegration,
+      };
+    }
+    return switch (phase) {
+      GuidePhase.preparation => context.l10n.homeJourneyPhasePreparation,
+      GuidePhase.housing => context.l10n.homeJourneyPhaseHousing,
+      GuidePhase.documents => context.l10n.homeJourneyPhaseDocuments,
+      GuidePhase.work => context.l10n.homeJourneyPhaseWork,
+      GuidePhase.arrival => context.l10n.homeJourneyPhaseArrival,
+    };
+  }
+
+  static String _localizedText(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) => switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 }
 
-// ─── Phase node (circle with icon) ────────────────────────────────────────────
-
-class _PhaseNode extends StatelessWidget {
-  const _PhaseNode({
-    required this.phase,
-    required this.journeyStage,
-    required this.status,
-    required this.isDark,
+class _JourneyPhaseSummary extends StatelessWidget {
+  const _JourneyPhaseSummary({
+    required this.icon,
+    required this.eyebrow,
+    required this.label,
+    required this.highlighted,
   });
 
-  final GuidePhase phase;
-  final UserJourneyStage journeyStage;
-  final _PhaseNodeStatus status;
-  final bool isDark;
+  final IconData icon;
+  final String eyebrow;
+  final String label;
+  final bool highlighted;
 
   @override
   Widget build(BuildContext context) {
-    final phaseSymbol = _phaseSymbol(phase, journeyStage);
-    final (bg, border, textColor, icon) = switch (status) {
-      _PhaseNodeStatus.done =>
-        isDark
-            ? (
-                const Color(0xFF0F3020),
-                const Color(0xFF1D9E75),
-                const Color(0xFF5DCAA5),
-                '✓',
-              )
-            : (
-                const Color(0xFFDCFCE7),
-                const Color(0xFF16A34A),
-                const Color(0xFF166534),
-                '✓',
+    final color = highlighted
+        ? AppColors.primary
+        : AppColors.textSoftFor(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: highlighted ? 0.14 : 0.08),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 17, color: color),
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                eyebrow,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontSize: 10,
+                  letterSpacing: 0.6,
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-      _PhaseNodeStatus.now =>
-        isDark
-            ? (
-                const Color(0xFF1E3A5F),
-                const Color(0xFF3B7CC8),
-                const Color(0xFF90C4F8),
-                phaseSymbol,
-              )
-            : (
-                const Color(0xFFDBEAFE),
-                const Color(0xFF2563EB),
-                const Color(0xFF1D40AF),
-                phaseSymbol,
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: AppColors.textPrimaryFor(context),
+                  fontWeight: highlighted ? FontWeight.w800 : FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-      _PhaseNodeStatus.lock =>
-        isDark
-            ? (
-                const Color(0xFF0A1525),
-                const Color(0xFF1A2840),
-                const Color(0xFF2A3555),
-                phaseSymbol,
-              )
-            : (
-                const Color(0xFFF8FAFC),
-                const Color(0xFFE2E8F0),
-                const Color(0xFFCBD5E1),
-                phaseSymbol,
-              ),
-    };
-
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: bg,
-        shape: BoxShape.circle,
-        border: Border.all(color: border),
-      ),
-      child: Center(
-        child: Text(
-          icon,
-          style: AppTypography.compactBadge.copyWith(
-            color: textColor,
-            height: 1,
+            ],
           ),
         ),
-      ),
-    );
-  }
-
-  static String _phaseSymbol(GuidePhase phase, UserJourneyStage journeyStage) {
-    if (journeyStage == UserJourneyStage.executor) {
-      return switch (phase) {
-        GuidePhase.preparation => '🧭',
-        GuidePhase.housing => '🛏',
-        GuidePhase.documents => '🪪',
-        GuidePhase.work => '💳',
-        GuidePhase.arrival => '🏡',
-      };
-    }
-
-    return switch (phase) {
-      GuidePhase.preparation => '📋',
-      GuidePhase.documents => '📄',
-      GuidePhase.housing => '🏠',
-      GuidePhase.work => '💼',
-      GuidePhase.arrival => '✈',
-    };
-  }
-}
-
-// ─── Phase label (compact text below node) ────────────────────────────────────
-
-class _PhaseLabel extends StatelessWidget {
-  const _PhaseLabel({
-    required this.phase,
-    required this.journeyStage,
-    required this.isCurrent,
-    required this.isDark,
-  });
-
-  final GuidePhase phase;
-  final UserJourneyStage journeyStage;
-  final bool isCurrent;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      _shortLabel(context),
-      style: AppTypography.compactLabel.copyWith(
-        color: isCurrent
-            ? (isDark
-                  ? AppColors.primary.withValues(alpha: 0.9)
-                  : AppColors.primary)
-            : AppColors.textSoftFor(context),
-        fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w600,
-      ),
-      textAlign: TextAlign.center,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  /// Abbreviated labels guaranteed to fit on one line regardless of locale.
-  String _shortLabel(BuildContext context) {
-    if (journeyStage == UserJourneyStage.executor) {
-      return switch (phase) {
-        GuidePhase.preparation => context.l10n.copilotPhaseShortPreparation,
-        GuidePhase.housing => context.l10n.copilotPhaseShortHousing,
-        GuidePhase.documents => context.l10n.copilotPhaseShortDocuments,
-        GuidePhase.work => context.l10n.copilotPhaseShortWork,
-        GuidePhase.arrival => context.l10n.copilotPhaseShortArrival,
-      };
-    }
-
-    final lang = Localizations.localeOf(context).languageCode;
-    return switch (phase) {
-      GuidePhase.preparation => 'Prep.',
-      GuidePhase.housing => switch (lang) {
-        'pt' => 'Mor.',
-        'es' => 'Viv.',
-        _ => 'Hous.',
-      },
-      GuidePhase.documents => 'Docs.',
-      GuidePhase.work => lang == 'en' ? 'Work' : 'Trab.',
-      GuidePhase.arrival => switch (lang) {
-        'pt' => 'Cheg.',
-        'es' => 'Lleg.',
-        _ => 'Arriv.',
-      },
-    };
-  }
-}
-
-// ─── Phase connector (horizontal line between nodes) ──────────────────────────
-
-class _PhaseConnector extends StatelessWidget {
-  const _PhaseConnector({required this.isDone, required this.isDark});
-
-  final bool isDone;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 2,
-      color: isDone
-          ? const Color(0xFF1D9E75)
-          : (isDark ? const Color(0xFF1A2840) : const Color(0xFFE2E8F0)),
+      ],
     );
   }
 }

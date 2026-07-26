@@ -28,7 +28,7 @@ class CityFeedWidget extends StatelessWidget {
     this.arrivalStory,
     this.comparison,
     this.guideCurrentItem,
-    this.cardHeight = 152.0,
+    this.cardHeight = 118.0,
     this.onOpenGuideItem,
     super.key,
   });
@@ -44,10 +44,7 @@ class CityFeedWidget extends StatelessWidget {
   final CityDetailComparison? comparison;
   final GuideActionItem? guideCurrentItem;
 
-  /// Height of the scrollable card row.
-  /// Defaults to 152 pt — enough to show 3 body lines without clipping.
-  /// The Focus Mode layout passes a screen-derived value computed by
-  /// LayoutBuilder (typically 148–178 pt depending on device).
+  /// Fixed height of the compact preview row. Full content opens in a sheet.
   final double cardHeight;
 
   /// Optional: called when the user taps the guide CTA inside an expanded
@@ -56,7 +53,7 @@ class CityFeedWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = CityFeedDatasource.build(
+    final allItems = CityFeedDatasource.build(
       cityCode: cityCode,
       stage: stage,
       locale: locale,
@@ -68,24 +65,44 @@ class CityFeedWidget extends StatelessWidget {
       comparison: comparison,
       guideCurrentItem: guideCurrentItem,
     );
+    final nonDuplicateItems = allItems
+        .where((item) => item.guideItemId != guideCurrentItem?.id)
+        .toList(growable: false);
+    final items = nonDuplicateItems.isEmpty ? allItems : nonDuplicateItems;
 
     if (items.isEmpty) return const SizedBox.shrink();
 
     final isDark = AppColors.isDark(context);
+    final cardWidth = (MediaQuery.sizeOf(context).width - 56).clamp(
+      248.0,
+      300.0,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-          child: Text(
-            _sectionTitle(locale),
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              letterSpacing: 0.6,
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.25)
-                  : const Color(0x590A0F1E),
-            ),
+          child: Row(
+            children: [
+              Text(
+                _sectionTitle(locale),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  letterSpacing: 0.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textSoftFor(context),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                _itemCountLabel(locale, items.length),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.38)
+                      : const Color(0xFF64748B),
+                ),
+              ),
+            ],
           ),
         ),
         SizedBox(
@@ -95,8 +112,11 @@ class CityFeedWidget extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: items.length,
             separatorBuilder: (context, index) => const SizedBox(width: 10),
-            itemBuilder: (context, index) =>
-                _FeedCard(item: items[index], onOpenGuideItem: onOpenGuideItem),
+            itemBuilder: (context, index) => _FeedCard(
+              item: items[index],
+              width: cardWidth,
+              onOpenGuideItem: onOpenGuideItem,
+            ),
           ),
         ),
       ],
@@ -108,12 +128,23 @@ class CityFeedWidget extends StatelessWidget {
     'es' => 'PARA TI',
     _ => 'FOR YOU',
   };
+
+  String _itemCountLabel(String locale, int count) => switch (locale) {
+    'pt' => '$count dicas',
+    'es' => '$count consejos',
+    _ => '$count tips',
+  };
 }
 
 class _FeedCard extends StatelessWidget {
-  const _FeedCard({required this.item, this.onOpenGuideItem});
+  const _FeedCard({
+    required this.item,
+    required this.width,
+    this.onOpenGuideItem,
+  });
 
   final CityFeedItem item;
+  final double width;
   final ValueChanged<String?>? onOpenGuideItem;
 
   @override
@@ -122,104 +153,88 @@ class _FeedCard extends StatelessWidget {
     final color = item.typeColor(isDark);
     final locale = Localizations.localeOf(context).languageCode;
 
-    return GestureDetector(
-      onTap: () => _showExpandedCard(context, onOpenGuideItem),
-      child: Container(
-        width: 240,
-        padding: const EdgeInsets.all(13),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceFor(context),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.borderFor(context)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Type badge row
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: isDark ? 0.18 : 0.12),
-                    borderRadius: BorderRadius.circular(7),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showExpandedCard(context, onOpenGuideItem),
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          width: width,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceFor(context),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.borderFor(context)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: isDark ? 0.18 : 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(item.icon, size: 15, color: color),
                   ),
-                  child: Icon(item.icon, size: 13, color: color),
-                ),
-                const SizedBox(width: 7),
-                Expanded(
-                  child: Text(
-                    item.badge ?? item.typeLabel(locale),
-                    style: AppTypography.compactBadge.copyWith(color: color),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      item.badge ?? item.typeLabel(locale),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 7),
-            // Title
-            Text(
-              item.title,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimaryFor(context),
-                height: 1.3,
+                ],
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            // Body — Flexible so it grows with available card height but
-            // never pushes the timestamp off-screen.
-            Flexible(
-              child: Text(
-                item.body,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  height: 1.45,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.textSoftFor(context),
-                ),
-                maxLines: 5,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            // "Ver mais" affordance — replaces silent ellipsis with a visible
-            // cue when the body is long enough that it might be clipped.
-            if (item.body.length > 100) ...[
-              const SizedBox(height: 2),
-              Text(
-                _verMaisLabel(locale),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-            if (item.updatedAt != null) ...[
-              const SizedBox(height: 4),
-              Align(
-                alignment: Alignment.centerRight,
+              const SizedBox(height: 8),
+              Expanded(
                 child: Text(
-                  item.updatedAt!,
-                  style: AppTypography.tinyLabel.copyWith(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.20)
-                        : const Color(0xFFCBD5E1),
+                  item.title,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimaryFor(context),
+                    height: 1.25,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              Row(
+                children: [
+                  Text(
+                    _verMaisLabel(locale),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: 3),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 14,
+                    color: AppColors.primary,
+                  ),
+                ],
+              ),
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 
   static String _verMaisLabel(String locale) => switch (locale) {
-    'pt' => 'Ver mais →',
-    'es' => 'Ver más →',
-    _ => 'See more →',
+    'pt' => 'Ver dica',
+    'es' => 'Ver consejo',
+    _ => 'View tip',
   };
 
   void _showExpandedCard(
