@@ -179,10 +179,10 @@ export class ChatContextBuilderService {
   private scoresLabel(lang: string, city: CityCardEntity): string {
     const s = city.movaroScores;
     return lang === 'pt'
-      ? `- Scores Movaro — Geral: ${s.overall} | Econômico: ${s.economical} | Trabalho: ${s.workOpportunity} | Popular entre argentinos: ${s.popularForArgentinians} | Adaptação ao espanhol: ${s.languageAdaptation}`
+      ? `- Scores comparativos internos (não oficiais) — Geral: ${s.overall} | Econômico: ${s.economical} | Trabalho: ${s.workOpportunity} | Popular entre argentinos: ${s.popularForArgentinians} | Adaptação ao espanhol: ${s.languageAdaptation}`
       : lang === 'es'
-        ? `- Scores Movaro — General: ${s.overall} | Económico: ${s.economical} | Trabajo: ${s.workOpportunity} | Popular entre argentinos: ${s.popularForArgentinians} | Adaptación al español: ${s.languageAdaptation}`
-        : `- Movaro Scores — Overall: ${s.overall} | Economical: ${s.economical} | Work: ${s.workOpportunity} | Popular for Argentinians: ${s.popularForArgentinians} | Spanish adaptation: ${s.languageAdaptation}`;
+        ? `- Puntajes comparativos internos (no oficiales) — General: ${s.overall} | Económico: ${s.economical} | Trabajo: ${s.workOpportunity} | Popular entre argentinos: ${s.popularForArgentinians} | Adaptación al español: ${s.languageAdaptation}`
+        : `- Internal comparative scores (not official) — Overall: ${s.overall} | Economical: ${s.economical} | Work: ${s.workOpportunity} | Popular for Argentinians: ${s.popularForArgentinians} | Spanish adaptation: ${s.languageAdaptation}`;
   }
 
   private reasonsLabel(lang: string, reasons: string[]): string {

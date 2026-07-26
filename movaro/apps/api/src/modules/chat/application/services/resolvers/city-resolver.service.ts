@@ -64,7 +64,7 @@ export class CityResolverService {
       return (
         `${city.name} (${city.stateName}) es una ciudad ${costLabel} con una población de ` +
         `${this.formatPop(city.population)} habitantes. ` +
-        `Puntuación general Movaro: ${scores?.overall ?? 'N/D'}/10. ` +
+        `Puntuación comparativa interna (no oficial): ${scores?.overall ?? 'N/D'}/10. ` +
         `Costo de vida: ${costLabel}. Seguridad: ${safetyLabel}. ` +
         `Popularidad entre argentinos: ${this.popularityLabel(city.argentinaPopularityScore, locale)}. ` +
         (city.topIndustries?.length
@@ -80,7 +80,7 @@ export class CityResolverService {
       return (
         `${city.name} (${city.stateName}) is a ${costLabel} city with ` +
         `${this.formatPop(city.population)} inhabitants. ` +
-        `Movaro overall score: ${scores?.overall ?? 'N/A'}/10. ` +
+        `Internal comparative score (not official): ${scores?.overall ?? 'N/A'}/10. ` +
         `Cost of living: ${costLabel}. Safety: ${safetyLabel}. ` +
         `Popularity with Argentines: ${this.popularityLabel(city.argentinaPopularityScore, locale)}. ` +
         (city.topIndustries?.length
@@ -96,7 +96,7 @@ export class CityResolverService {
     return (
       `${city.name} (${city.stateName}) é uma cidade ${costLabel} com ` +
       `${this.formatPop(city.population)} habitantes. ` +
-      `Pontuação geral Movaro: ${scores?.overall ?? 'N/D'}/10. ` +
+      `Pontuação comparativa interna (não oficial): ${scores?.overall ?? 'N/D'}/10. ` +
       `Custo de vida: ${costLabel}. Segurança: ${safetyLabel}. ` +
       `Popularidade entre argentinos: ${this.popularityLabel(city.argentinaPopularityScore, locale)}. ` +
       (city.topIndustries?.length
@@ -117,22 +117,35 @@ export class CityResolverService {
 
   private costLabel(score: number | null | undefined, locale: string): string {
     if (score == null) return locale === 'pt' ? 'desconhecido' : 'unknown';
-    if (score >= 7) return locale === 'pt' ? 'acessível' : locale === 'es' ? 'asequible' : 'affordable';
+    if (score >= 7)
+      return locale === 'pt'
+        ? 'acessível'
+        : locale === 'es'
+          ? 'asequible'
+          : 'affordable';
     if (score >= 4) return locale === 'pt' ? 'moderado' : 'moderado';
     return locale === 'pt' ? 'caro' : locale === 'es' ? 'caro' : 'expensive';
   }
 
-  private safetyLabel(score: number | null | undefined, locale: string): string {
+  private safetyLabel(
+    score: number | null | undefined,
+    locale: string,
+  ): string {
     if (score == null) return locale === 'pt' ? 'desconhecida' : 'unknown';
-    if (score >= 7) return locale === 'pt' ? 'boa' : locale === 'es' ? 'buena' : 'good';
+    if (score >= 7)
+      return locale === 'pt' ? 'boa' : locale === 'es' ? 'buena' : 'good';
     if (score >= 4) return locale === 'pt' ? 'moderada' : 'moderada';
     return locale === 'pt' ? 'baixa' : locale === 'es' ? 'baja' : 'low';
   }
 
-  private popularityLabel(score: number | null | undefined, locale: string): string {
+  private popularityLabel(
+    score: number | null | undefined,
+    locale: string,
+  ): string {
     if (score == null) return locale === 'pt' ? 'desconhecida' : 'unknown';
     if (score >= 7) return locale === 'pt' ? 'alta' : 'alta';
-    if (score >= 4) return locale === 'pt' ? 'média' : locale === 'es' ? 'media' : 'medium';
+    if (score >= 4)
+      return locale === 'pt' ? 'média' : locale === 'es' ? 'media' : 'medium';
     return locale === 'pt' ? 'baixa' : locale === 'es' ? 'baja' : 'low';
   }
 }

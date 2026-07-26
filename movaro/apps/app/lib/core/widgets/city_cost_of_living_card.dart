@@ -52,9 +52,9 @@ class CityCostOfLivingCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             copy(
-              pt: 'Para 1 pessoa · base mensal · inclui aluguel',
-              es: 'Para 1 persona · base mensual · incluye alquiler',
-              en: '1 person · monthly basis · includes rent',
+              pt: 'Faixa estimada para 1 pessoa · aluguel e rotina variam por zona',
+              es: 'Rango estimado para 1 persona · alquiler y rutina varían según la zona',
+              en: 'Estimated range for 1 person · rent and routine vary by area',
             ),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSoftFor(context),
@@ -75,9 +75,9 @@ class CityCostOfLivingCard extends StatelessWidget {
                     tone: AppColors.warning,
                     icon: Icons.trending_flat_rounded,
                     label: copy(
-                      pt: 'Viver justo',
-                      es: 'Vivir justo',
-                      en: 'Live fairly',
+                      pt: 'Mais econômico',
+                      es: 'Más económico',
+                      en: 'More economical',
                     ),
                     amountInBrl: budget.fairLivingTotal,
                     preferredCountryId: preferredCountryId,
@@ -89,9 +89,9 @@ class CityCostOfLivingCard extends StatelessWidget {
                     tone: AppColors.success,
                     icon: Icons.trending_up_rounded,
                     label: copy(
-                      pt: 'Viver bem',
-                      es: 'Vivir bien',
-                      en: 'Live well',
+                      pt: 'Mais confortável',
+                      es: 'Más cómodo',
+                      en: 'More comfortable',
                     ),
                     amountInBrl: budget.wellLivingTotal,
                     preferredCountryId: preferredCountryId,
@@ -140,11 +140,11 @@ class CityCostOfLivingCard extends StatelessWidget {
                       child: _BreakdownItem(
                         icon: Icons.home_outlined,
                         label: copy(
-                          pt: '1 quarto fora',
-                          es: '1 amb. fuera',
-                          en: '1-bed outside',
+                          pt: 'Zona mais econômica',
+                          es: 'Zona más económica',
+                          en: 'Lower-cost area',
                         ),
-                        amountInBrl: budget.oneBedroomOutsideCentre,
+                        amountInBrl: budget.planningRentLow,
                         preferredCountryId: preferredCountryId,
                       ),
                     ),
@@ -161,11 +161,11 @@ class CityCostOfLivingCard extends StatelessWidget {
                       child: _BreakdownItem(
                         icon: Icons.apartment_outlined,
                         label: copy(
-                          pt: '1 quarto centro',
-                          es: '1 amb. centro',
-                          en: '1-bed centre',
+                          pt: 'Zona mais disputada',
+                          es: 'Zona más demandada',
+                          en: 'Higher-demand area',
                         ),
-                        amountInBrl: budget.oneBedroomCityCentre,
+                        amountInBrl: budget.planningRentHigh,
                         preferredCountryId: preferredCountryId,
                       ),
                     ),
@@ -206,9 +206,9 @@ class CityCostOfLivingCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   copy(
-                    pt: '${budget.sourceLabel} · atualizado em ${budget.updatedAt}',
-                    es: '${budget.sourceLabel} · actualizado en ${budget.updatedAt}',
-                    en: '${budget.sourceLabel} · updated ${budget.updatedAt}',
+                    pt: 'Referência, não orçamento fechado · ${budget.sourceLabel} · ${budget.updatedAt}',
+                    es: 'Referencia, no presupuesto cerrado · ${budget.sourceLabel} · ${budget.updatedAt}',
+                    en: 'Reference, not a fixed budget · ${budget.sourceLabel} · ${budget.updatedAt}',
                   ),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: AppColors.textSoftFor(context),
@@ -316,11 +316,7 @@ class _BreakdownItem extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(
-              icon,
-              size: 12,
-              color: AppColors.textSoftFor(context),
-            ),
+            Icon(icon, size: 12, color: AppColors.textSoftFor(context)),
             const SizedBox(width: 4),
             Expanded(
               child: Text(

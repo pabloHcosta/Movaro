@@ -114,87 +114,110 @@ class MultiCurrencyAmount extends StatefulWidget {
     String? settingsCurrencyCode,
   }) {
     final effectiveRates = _EffectiveExchangeRates.resolve(exchangeRates);
+    final estimatedBrl = _roundEstimate(amountInBrl.toDouble());
     final optionsByCode = <String, _CurrencyOption>{
       'BRL': _CurrencyOption(
         currencyCode: 'BRL',
-        label: _formatCurrency(
-          locale: fallbackLocale,
-          currencyCode: 'BRL',
-          amount: amountInBrl,
+        label: _estimatedLabel(
+          _formatCurrency(
+            locale: fallbackLocale,
+            currencyCode: 'BRL',
+            amount: estimatedBrl,
+          ),
         ),
       ),
-      'USD': _CurrencyOption(
-        currencyCode: 'USD',
-        label: _formatCurrency(
-          locale: 'en_US',
+      if (effectiveRates != null) ...{
+        'USD': _CurrencyOption(
           currencyCode: 'USD',
-          amount: amountInBrl * effectiveRates.brlToUsd,
+          label: _estimatedLabel(
+            _formatCurrency(
+              locale: 'en_US',
+              currencyCode: 'USD',
+              amount: estimatedBrl * effectiveRates.brlToUsd,
+            ),
+          ),
         ),
-      ),
-      'EUR': _CurrencyOption(
-        currencyCode: 'EUR',
-        label: _formatCurrency(
-          locale: 'en_EU',
+        'EUR': _CurrencyOption(
           currencyCode: 'EUR',
-          amount: amountInBrl * effectiveRates.brlToEur,
+          label: _estimatedLabel(
+            _formatCurrency(
+              locale: 'en_EU',
+              currencyCode: 'EUR',
+              amount: estimatedBrl * effectiveRates.brlToEur,
+            ),
+          ),
         ),
-      ),
-      'ARS': _CurrencyOption(
-        currencyCode: 'ARS',
-        label: _formatCurrency(
-          locale: 'es_AR',
+        'ARS': _CurrencyOption(
           currencyCode: 'ARS',
-          amount: amountInBrl * effectiveRates.brlToArs,
+          label: _estimatedLabel(
+            _formatCurrency(
+              locale: 'es_AR',
+              currencyCode: 'ARS',
+              amount: estimatedBrl * effectiveRates.brlToArs,
+            ),
+          ),
         ),
-      ),
-      'CLP': _CurrencyOption(
-        currencyCode: 'CLP',
-        label: _formatCurrency(
-          locale: 'es_CL',
+        'CLP': _CurrencyOption(
           currencyCode: 'CLP',
-          amount: amountInBrl * effectiveRates.brlToClp,
+          label: _estimatedLabel(
+            _formatCurrency(
+              locale: 'es_CL',
+              currencyCode: 'CLP',
+              amount: estimatedBrl * effectiveRates.brlToClp,
+            ),
+          ),
         ),
-      ),
-      'UYU': _CurrencyOption(
-        currencyCode: 'UYU',
-        label: _formatCurrency(
-          locale: 'es_UY',
+        'UYU': _CurrencyOption(
           currencyCode: 'UYU',
-          amount: amountInBrl * effectiveRates.brlToUyu,
+          label: _estimatedLabel(
+            _formatCurrency(
+              locale: 'es_UY',
+              currencyCode: 'UYU',
+              amount: estimatedBrl * effectiveRates.brlToUyu,
+            ),
+          ),
         ),
-      ),
-      'COP': _CurrencyOption(
-        currencyCode: 'COP',
-        label: _formatCurrency(
-          locale: 'es_CO',
+        'COP': _CurrencyOption(
           currencyCode: 'COP',
-          amount: amountInBrl * effectiveRates.brlToCop,
+          label: _estimatedLabel(
+            _formatCurrency(
+              locale: 'es_CO',
+              currencyCode: 'COP',
+              amount: estimatedBrl * effectiveRates.brlToCop,
+            ),
+          ),
         ),
-      ),
-      'PEN': _CurrencyOption(
-        currencyCode: 'PEN',
-        label: _formatCurrency(
-          locale: 'es_PE',
+        'PEN': _CurrencyOption(
           currencyCode: 'PEN',
-          amount: amountInBrl * effectiveRates.brlToPen,
+          label: _estimatedLabel(
+            _formatCurrency(
+              locale: 'es_PE',
+              currencyCode: 'PEN',
+              amount: estimatedBrl * effectiveRates.brlToPen,
+            ),
+          ),
         ),
-      ),
-      'PYG': _CurrencyOption(
-        currencyCode: 'PYG',
-        label: _formatCurrency(
-          locale: 'es_PY',
+        'PYG': _CurrencyOption(
           currencyCode: 'PYG',
-          amount: amountInBrl * effectiveRates.brlToPyg,
+          label: _estimatedLabel(
+            _formatCurrency(
+              locale: 'es_PY',
+              currencyCode: 'PYG',
+              amount: estimatedBrl * effectiveRates.brlToPyg,
+            ),
+          ),
         ),
-      ),
-      'BOB': _CurrencyOption(
-        currencyCode: 'BOB',
-        label: _formatCurrency(
-          locale: 'es_BO',
+        'BOB': _CurrencyOption(
           currencyCode: 'BOB',
-          amount: amountInBrl * effectiveRates.brlToBob,
+          label: _estimatedLabel(
+            _formatCurrency(
+              locale: 'es_BO',
+              currencyCode: 'BOB',
+              amount: estimatedBrl * effectiveRates.brlToBob,
+            ),
+          ),
         ),
-      ),
+      },
     };
 
     // Priority: explicit settings selection > country-inferred > USD > BRL
@@ -204,7 +227,7 @@ class MultiCurrencyAmount extends StatefulWidget {
             optionsByCode.containsKey(settingsCurrencyCode)
         ? settingsCurrencyCode
         : localCurrencyCode != null &&
-            optionsByCode.containsKey(localCurrencyCode)
+              optionsByCode.containsKey(localCurrencyCode)
         ? localCurrencyCode
         : optionsByCode.containsKey('USD')
         ? 'USD'
@@ -243,7 +266,6 @@ class MultiCurrencyAmount extends StatefulWidget {
       case 'colombia':
       case 'co':
         return 'COP';
-      case 'peru':
       case 'peru':
       case 'pe':
         return 'PEN';
@@ -297,6 +319,19 @@ class MultiCurrencyAmount extends StatefulWidget {
 
     return formatter.format(amount);
   }
+
+  static double _roundEstimate(double amountInBrl) {
+    final increment = amountInBrl.abs() < 1000
+        ? 10
+        : amountInBrl.abs() < 5000
+        ? 50
+        : amountInBrl.abs() < 20000
+        ? 100
+        : 500;
+    return (amountInBrl / increment).round() * increment.toDouble();
+  }
+
+  static String _estimatedLabel(String value) => '≈ $value';
 }
 
 class _MultiCurrencyAmountState extends State<MultiCurrencyAmount> {
@@ -414,22 +449,8 @@ class _EffectiveExchangeRates {
   final double brlToPyg;
   final double brlToBob;
 
-  static const _fallback = _EffectiveExchangeRates(
-    brlToUsd: 0.20,
-    brlToEur: 0.18,
-    brlToArs: 190.0,
-    brlToClp: 185.0,
-    brlToUyu: 8.2,
-    brlToCop: 840.0,
-    brlToPen: 0.75,
-    brlToPyg: 1560.0,
-    brlToBob: 1.38,
-  );
-
-  static _EffectiveExchangeRates resolve(CopilotExchangeRates? liveRates) {
-    if (liveRates == null) {
-      return _fallback;
-    }
+  static _EffectiveExchangeRates? resolve(CopilotExchangeRates? liveRates) {
+    if (liveRates == null || !liveRates.hasValidRates) return null;
     return _EffectiveExchangeRates(
       brlToUsd: liveRates.brlToUsd,
       brlToEur: liveRates.brlToEur,

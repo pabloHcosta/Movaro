@@ -64,11 +64,16 @@ class _SourceItem extends StatelessWidget {
         Theme.of(context).colorScheme.tertiaryContainer,
       ),
       'derived' => (
-        _copy(context, pt: 'Derivado', es: 'Derivado', en: 'Derived'),
+        _copy(
+          context,
+          pt: 'Estimativa derivada',
+          es: 'Estimación derivada',
+          en: 'Derived estimate',
+        ),
         Theme.of(context).colorScheme.secondaryContainer,
       ),
       _ => (
-        _copy(context, pt: 'Curado', es: 'Curado', en: 'Curated'),
+        _copy(context, pt: 'Não oficial', es: 'No oficial', en: 'Not official'),
         Theme.of(context).colorScheme.secondaryContainer,
       ),
     };

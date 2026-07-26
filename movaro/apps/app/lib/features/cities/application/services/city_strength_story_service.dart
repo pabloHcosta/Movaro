@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movaro_app/core/utils/cost_estimate_formatter.dart';
 import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 
@@ -17,113 +18,78 @@ class CityStrengthSignal {
 class CityStrengthStoryService {
   const CityStrengthStoryService._();
 
-  static List<CityStrengthSignal> strongest(
-    BuildContext context,
-    City city,
-  ) {
+  static List<CityStrengthSignal> strongest(BuildContext context, City city) {
     final candidates = <_ScoredSignal>[
-      if (city.costOfLivingScore >= 68) _ScoredSignal(
-        weight: city.costOfLivingScore,
-        signal: CityStrengthSignal(
-          title: _localizedText(
-            context,
-            pt: 'Entrada de custo mais leve',
-            es: 'Entrada de costo más liviana',
-            en: 'Lighter cost of entry',
+      if (city.costOfLivingScore >= 68 &&
+          city.budgetSnapshot?.sourceUrl != null)
+        _ScoredSignal(
+          weight: city.costOfLivingScore,
+          signal: CityStrengthSignal(
+            title: _localizedText(
+              context,
+              pt: 'Entrada de custo mais leve',
+              es: 'Entrada de costo más liviana',
+              en: 'Lighter cost of entry',
+            ),
+            supporting: _budgetSupporting(context, city),
+            sourceLabel: _budgetSource(city)!,
           ),
-          supporting: _budgetSupporting(context, city),
-          sourceLabel: _budgetSource(city) ??
-              city.sources.curatedMetrics.provider,
         ),
-      ),
-      if (city.safetyScore >= 68) _ScoredSignal(
-        weight: city.safetyScore,
-        signal: CityStrengthSignal(
-          title: _localizedText(
-            context,
-            pt: 'Segurança acima da média do catálogo',
-            es: 'Seguridad por encima del promedio del catálogo',
-            en: 'Safety above the catalog average',
+      if (city.safetyScore >= 68 && city.sources.safety != null)
+        _ScoredSignal(
+          weight: city.safetyScore,
+          signal: CityStrengthSignal(
+            title: _localizedText(
+              context,
+              pt: 'Segurança acima da média do catálogo',
+              es: 'Seguridad por encima del promedio del catálogo',
+              en: 'Safety above the catalog average',
+            ),
+            supporting: _localizedText(
+              context,
+              pt: 'A cidade entra melhor para rotina e adaptação no dia a dia.',
+              es: 'La ciudad entra mejor para rutina y adaptación del día a día.',
+              en: 'The city supports day-to-day routine and adaptation better.',
+            ),
+            sourceLabel: city.sources.safety!.provider,
           ),
-          supporting: _localizedText(
-            context,
-            pt: 'A cidade entra melhor para rotina e adaptação no dia a dia.',
-            es: 'La ciudad entra mejor para rutina y adaptación del día a día.',
-            en: 'The city supports day-to-day routine and adaptation better.',
-          ),
-          sourceLabel:
-              city.sources.safety?.provider ?? city.sources.curatedMetrics.provider,
         ),
-      ),
-      if (city.movaroScores.languageAdaptation >= 68 ||
-          city.spanishSupportScore >= 68) _ScoredSignal(
-        weight: city.movaroScores.languageAdaptation,
-        signal: CityStrengthSignal(
-          title: _localizedText(
-            context,
-            pt: 'Português tende a pesar menos no começo',
-            es: 'El portugués tiende a pesar menos al inicio',
-            en: 'Portuguese tends to weigh less at the start',
-          ),
-          supporting: _localizedText(
-            context,
-            pt: 'O catálogo aponta adaptação mais fácil para hispanohablantes nessa cidade.',
-            es: 'El catálogo indica una adaptación más fácil para hispanohablantes en esta ciudad.',
-            en: 'The catalog suggests easier adaptation for Spanish speakers in this city.',
-          ),
-          sourceLabel: city.sources.curatedMetrics.provider,
-        ),
-      ),
       if (city.jobMarketScore >= 70 &&
-          _jobStabilityWeight(city) >= 68) _ScoredSignal(
-        weight: _jobStabilityWeight(city),
-        signal: CityStrengthSignal(
-          title: _localizedText(
-            context,
-            pt: 'Mercado mais estável ao longo do ano',
-            es: 'Mercado más estable durante el año',
-            en: 'More stable job market through the year',
+          _jobStabilityWeight(city) >= 68 &&
+          city.sources.employment != null)
+        _ScoredSignal(
+          weight: _jobStabilityWeight(city),
+          signal: CityStrengthSignal(
+            title: _localizedText(
+              context,
+              pt: 'Mercado mais estável ao longo do ano',
+              es: 'Mercado más estable durante el año',
+              en: 'More stable job market through the year',
+            ),
+            supporting: _jobSupporting(context, city),
+            sourceLabel: city.sources.employment!.provider,
           ),
-          supporting: _jobSupporting(context, city),
-          sourceLabel:
-              city.sources.employment?.provider ??
-              city.sources.curatedMetrics.provider,
         ),
-      ),
-      if (city.argentinaPopularityScore >= 68) _ScoredSignal(
-        weight: city.argentinaPopularityScore,
-        signal: CityStrengthSignal(
-          title: _localizedText(
-            context,
-            pt: 'Rede de apoio mais presente',
-            es: 'Red de apoyo más presente',
-            en: 'Stronger support network',
-          ),
-          supporting: _localizedText(
-            context,
-            pt: 'A cidade aparece com mais referências e presença argentina no catálogo.',
-            es: 'La ciudad aparece con más referencias y presencia argentina en el catálogo.',
-            en: 'The city shows more references and Argentine presence in the catalog.',
-          ),
-          sourceLabel: city.sources.ranking.provider,
-        ),
-      ),
       if (city.publicOpinion != null &&
+          city.publicOpinion!.placeUrl?.isNotEmpty == true &&
           (city.publicOpinion!.rating ?? 0) >= 4.2 &&
-          city.publicOpinion!.positivePoints.isNotEmpty) _ScoredSignal(
-        weight: ((city.publicOpinion!.rating ?? 0) * 20).round(),
-        signal: CityStrengthSignal(
-          title: _localizedText(
-            context,
-            pt: 'Leitura pública mais favorável',
-            es: 'Lectura pública más favorable',
-            en: 'More favorable public sentiment',
+          city.publicOpinion!.positivePoints.isNotEmpty)
+        _ScoredSignal(
+          weight: ((city.publicOpinion!.rating ?? 0) * 20).round(),
+          signal: CityStrengthSignal(
+            title: _localizedText(
+              context,
+              pt: 'Leitura pública mais favorável',
+              es: 'Lectura pública más favorable',
+              en: 'More favorable public sentiment',
+            ),
+            supporting: city.publicOpinion!.positivePoints.first,
+            sourceLabel: city.publicOpinion!.provider,
           ),
-          supporting: city.publicOpinion!.positivePoints.first,
-          sourceLabel: city.publicOpinion!.provider,
         ),
-      ),
-      if (city.economicActivityScore >= 72 && city.topIndustries.isNotEmpty)
+      if (city.economicActivityScore >= 72 &&
+          city.topIndustries.isNotEmpty &&
+          city.sources.employment != null)
         _ScoredSignal(
           weight: city.economicActivityScore,
           signal: CityStrengthSignal(
@@ -135,19 +101,20 @@ class CityStrengthStoryService {
             ),
             supporting: _localizedText(
               context,
-            pt: 'Setores fortes: ${city.topIndustries.take(2).join(', ')}.',
-            es: 'Sectores fuertes: ${city.topIndustries.take(2).join(', ')}.',
-            en: 'Stronger sectors: ${city.topIndustries.take(2).join(', ')}.',
-          ),
-            sourceLabel:
-                city.sources.employment?.provider ??
-                city.sources.curatedMetrics.provider,
+              pt: 'Setores fortes: ${city.topIndustries.take(2).join(', ')}.',
+              es: 'Sectores fuertes: ${city.topIndustries.take(2).join(', ')}.',
+              en: 'Stronger sectors: ${city.topIndustries.take(2).join(', ')}.',
+            ),
+            sourceLabel: city.sources.employment!.provider,
           ),
         ),
     ];
 
     candidates.sort((a, b) => b.weight.compareTo(a.weight));
-    return candidates.take(3).map((item) => item.signal).toList(growable: false);
+    return candidates
+        .take(3)
+        .map((item) => item.signal)
+        .toList(growable: false);
   }
 
   static String _budgetSupporting(BuildContext context, City city) {
@@ -162,9 +129,9 @@ class CityStrengthStoryService {
     }
     return _localizedText(
       context,
-      pt: 'Custo base de uma pessoa fica em torno de R\$${budget.fairLivingTotal}/mês.',
-      es: 'El costo base de una persona queda cerca de R\$${budget.fairLivingTotal}/mes.',
-      en: 'The base cost for one person is around R\$${budget.fairLivingTotal}/month.',
+      pt: 'Faixa de planejamento para uma pessoa: ${CostEstimateFormatter.brlRange(budget.fairLivingTotal, budget.wellLivingTotal)}/mês.',
+      es: 'Rango de planificación para una persona: ${CostEstimateFormatter.brlRange(budget.fairLivingTotal, budget.wellLivingTotal, locale: 'es_AR')}/mes.',
+      en: 'Planning range for one person: ${CostEstimateFormatter.brlRange(budget.fairLivingTotal, budget.wellLivingTotal, locale: 'en_US')}/month.',
     );
   }
 

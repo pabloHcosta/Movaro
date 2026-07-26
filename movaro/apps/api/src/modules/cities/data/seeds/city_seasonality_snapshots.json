@@ -15,7 +15,7 @@
     "jobNotesEn": "Tourism, food & beverage, and retail see a surge of seasonal jobs in summer. Off-season, tech and services dominate a more stable job market.",
     "populationMultiplierNote": "×2",
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -35,7 +35,7 @@
     "jobNotesEn": "Hotels, bars, and beach retail absorb most jobs Dec–Feb. The rest of the year sees much lower demand, concentrated in construction and real estate.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -55,7 +55,7 @@
     "jobNotesEn": "The local economy is almost entirely seasonal: guesthouses, diving, and food service in summer. Off-season the town quiets down and formal opportunities are very limited.",
     "populationMultiplierNote": "×100",
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -75,7 +75,7 @@
     "jobNotesEn": "Tourism and services accelerate in peak periods, but the city keeps a broader job base than highly seasonal destinations.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -95,7 +95,7 @@
     "jobNotesEn": "Tourism, services, and retail react better in peak season, but the city still keeps a large urban base through the year.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -115,7 +115,7 @@
     "jobNotesEn": "Tourism, hospitality, and services accelerate in summer peaks, while the broader urban base keeps opportunities alive through the year.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -135,7 +135,7 @@
     "jobNotesEn": "Hospitality, food service, and retail rise sharply in summer. Outside those months, the city depends more on seasonal income.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -155,7 +155,7 @@
     "jobNotesEn": "Tours, lodging, food service, and seasonal retail surge in summer. Off-season, the market narrows.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -175,7 +175,7 @@
     "jobNotesEn": "Tourism, retail, and hospitality respond best in high season, with less traction outside it.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -195,7 +195,7 @@
     "jobNotesEn": "Tourism and services improve in high season, but the city keeps a relevant urban base year-round.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -215,7 +215,7 @@
     "jobNotesEn": "Tours, lodging, and food service grow in season. Outside it, the market becomes narrower and more tourism-dependent.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -235,7 +235,7 @@
     "jobNotesEn": "Tourism and services react during peaks, but João Pessoa keeps a relatively stable urban routine throughout the year.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -255,7 +255,7 @@
     "jobNotesEn": "Tourism, tours, and services react better during holiday peaks, with more moderate stability the rest of the year.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -275,7 +275,7 @@
     "jobNotesEn": "Tourism, entertainment, and retail become much stronger in seasonal peaks than outside them.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -295,7 +295,7 @@
     "jobNotesEn": "Cultural tourism, lodging, and food service gain traction in specific windows, with less stability outside them.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -315,7 +315,7 @@
     "jobNotesEn": "Lodging, food service, and tourism pull strongly in summer. Outside peak season, the formal income base is much more limited.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -335,7 +335,7 @@
     "jobNotesEn": "Tourism, lodging, and local experiences grow strongly in season. Outside it, income depends more on tourism flow.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -355,7 +355,7 @@
     "jobNotesEn": "Tourism, bars, restaurants, and lodging gain weight in summer, with less traction outside the season.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -375,7 +375,7 @@
     "jobNotesEn": "Tourism-linked services grow substantially in season, but the rest of the year is leaner.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -395,7 +395,7 @@
     "jobNotesEn": "Lodging, food service, and local experiences depend heavily on seasonal tourism flow.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   },
@@ -415,7 +415,7 @@
     "jobNotesEn": "Tourism, lodging, and local transport respond strongly to seasonality.",
     "populationMultiplierNote": null,
     "updatedAt": "2026-03-31",
-    "sourceLabel": "Movaro curated tourism seasonality dataset",
+    "sourceLabel": "Cenario sazonal estimado (nao oficial)",
     "sourceUrl": null,
     "sourceType": "curated"
   }

@@ -70,10 +70,13 @@ class _PracticalCostEstimatorState extends State<PracticalCostEstimator> {
                 ),
                 child: Text(
                   hasExchange
-                      ? l10n.documentationCostsUpdatedAt(
-                          _formatUpdatedAt(context, exchange.fetchedAt),
-                        )
-                      : l10n.documentationCostsUnavailable,
+                      ? _exchangeStatus(context, exchange)
+                      : _localizedText(
+                          context,
+                          pt: 'Conversão indisponível agora · valores mantidos em reais, sem usar cotação antiga',
+                          es: 'Conversión no disponible ahora · valores en reales, sin usar una cotización antigua',
+                          en: 'Conversion unavailable now · values remain in BRL instead of using an old rate',
+                        ),
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: textSoft),
@@ -169,7 +172,31 @@ class _PracticalCostEstimatorState extends State<PracticalCostEstimator> {
       return rawValue;
     }
 
-    return DateFormat('dd/MM HH:mm', localeName).format(parsed.toLocal());
+    final pattern = rawValue.contains('T') ? 'dd/MM HH:mm' : 'dd/MM/yyyy';
+    return DateFormat(pattern, localeName).format(parsed.toLocal());
+  }
+
+  String _exchangeStatus(BuildContext context, CopilotExchangeRates exchange) {
+    final reference = exchange.referenceDate ?? exchange.fetchedAt;
+    return _localizedText(
+      context,
+      pt: 'Câmbio indicativo BCB + BCRA · referência ${_formatUpdatedAt(context, reference)} · valores arredondados',
+      es: 'Cambio indicativo BCB + BCRA · referencia ${_formatUpdatedAt(context, reference)} · valores redondeados',
+      en: 'Indicative BCB + BCRA exchange · reference ${_formatUpdatedAt(context, reference)} · rounded values',
+    );
+  }
+
+  String _localizedText(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => pt,
+      'es' => es,
+      _ => en,
+    };
   }
 }
 

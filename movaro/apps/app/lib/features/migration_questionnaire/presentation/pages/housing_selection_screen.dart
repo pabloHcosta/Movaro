@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:movaro_app/core/utils/cost_estimate_formatter.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -158,9 +158,8 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
         description: context.l10n.housingLongTermPortalQuintoAndar,
         bgColor: const Color(0xFF17120A),
         borderColor: const Color(0xFF5A451B),
-        urlBuilder: (city, _) => PreparationResourceLinks.buildQuintoAndarSearch(
-          city,
-        ),
+        urlBuilder: (city, _) =>
+            PreparationResourceLinks.buildQuintoAndarSearch(city),
       ),
       _TemporaryPortal(
         name: 'Viva Real',
@@ -922,12 +921,7 @@ class _LongTermHeader extends StatelessWidget {
       1200,
       3200,
     );
-    final formatted = NumberFormat.currency(
-      locale: 'pt_BR',
-      symbol: 'R\$',
-      decimalDigits: 0,
-    ).format(estimate);
-    return '$formatted/mes';
+    return '${CostEstimateFormatter.brl(estimate, increment: 100)}/mês';
   }
 }
 
@@ -1082,8 +1076,8 @@ class _ForeignTipsCard extends StatelessWidget {
             children: [
               const Text('💡', style: TextStyle(fontSize: 12)),
               const SizedBox(width: 6),
-                Text(
-                  context.l10n.housingForeignTipsTitle,
+              Text(
+                context.l10n.housingForeignTipsTitle,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: const Color(0xFFF59E0B),
                   fontWeight: FontWeight.w700,
@@ -1092,18 +1086,10 @@ class _ForeignTipsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          _TipRow(
-            text: context.l10n.housingForeignTipOne,
-          ),
-          _TipRow(
-            text: context.l10n.housingForeignTipTwo,
-          ),
-          _TipRow(
-            text: context.l10n.housingForeignTipThree,
-          ),
-          _TipRow(
-            text: context.l10n.housingForeignTipFour,
-          ),
+          _TipRow(text: context.l10n.housingForeignTipOne),
+          _TipRow(text: context.l10n.housingForeignTipTwo),
+          _TipRow(text: context.l10n.housingForeignTipThree),
+          _TipRow(text: context.l10n.housingForeignTipFour),
         ],
       ),
     );

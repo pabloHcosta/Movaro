@@ -14,6 +14,7 @@ import 'package:movaro_app/features/location/presentation/pages/location_permiss
 import 'package:movaro_app/features/location/presentation/widgets/location_banner_widget.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/utils/number_formatters.dart';
+import 'package:movaro_app/core/utils/cost_estimate_formatter.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/core/widgets/city_cost_of_living_card.dart';
@@ -6123,8 +6124,17 @@ class _NeighborhoodGuidance {
   CityWeather? weather,
   CityDetailClimateSummary? climateSummary,
 ) {
-  final Object? seasonality =
+  final Object? rawSeasonality =
       climateSummary?.seasonality ?? city.seasonalitySnapshot;
+  final Object? seasonality = switch (rawSeasonality) {
+    CityDetailClimateSeasonality details
+        when details.sourceUrl?.isNotEmpty == true =>
+      details,
+    CitySeasonalitySnapshot snapshot
+        when snapshot.sourceUrl?.isNotEmpty == true =>
+      snapshot,
+    _ => null,
+  };
   final liveWeather = climateSummary?.currentWeather;
   final currentTemp =
       liveWeather?.temperatureCelsius ?? weather?.temperatureCelsius;
@@ -8079,9 +8089,5 @@ class _AnalysisInfoRow extends StatelessWidget {
 // ── BRL currency formatter ────────────────────────────────────────────────────
 
 String _formatBrl(int amount) {
-  return NumberFormat.currency(
-    locale: 'pt_BR',
-    symbol: 'R\$ ',
-    decimalDigits: 0,
-  ).format(amount);
+  return CostEstimateFormatter.brl(amount);
 }

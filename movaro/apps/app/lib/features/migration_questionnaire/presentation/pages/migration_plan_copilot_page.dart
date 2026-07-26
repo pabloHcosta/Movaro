@@ -5168,9 +5168,9 @@ class _GuideEvidenceCard extends StatelessWidget {
       ),
       GuideEvidenceType.movaroGuidance => _localizedText(
         context,
-        pt: 'Orientação Movaro',
-        es: 'Orientación Movaro',
-        en: 'Movaro guidance',
+        pt: 'Orientação geral não oficial',
+        es: 'Orientación general no oficial',
+        en: 'General non-official guidance',
       ),
     };
 

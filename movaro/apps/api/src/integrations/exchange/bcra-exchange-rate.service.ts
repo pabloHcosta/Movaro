@@ -16,8 +16,16 @@ type BcraQuotationResponse = {
   };
 };
 
-export type BcraBrlArsSnapshot = {
+export type BcraRegionalRatesSnapshot = {
   brlToArs: number;
+  brlToEur: number;
+  brlToClp: number;
+  brlToUyu: number;
+  brlToCop: number;
+  brlToPen: number;
+  brlToPyg: number;
+  brlToBob: number;
+  usdReferenceToArs: number;
   referenceDate: string;
 };
 
@@ -28,7 +36,7 @@ export class BcraExchangeRateService {
   private readonly quotationsUrl =
     'https://api.bcra.gob.ar/estadisticascambiarias/v1.0/Cotizaciones';
 
-  async getBrlToArs(): Promise<BcraBrlArsSnapshot> {
+  async getRegionalRates(): Promise<BcraRegionalRatesSnapshot> {
     const controller = new AbortController();
     const timeout = setTimeout(
       () => controller.abort(),
@@ -51,16 +59,40 @@ export class BcraExchangeRateService {
 
       const payload = (await response.json()) as BcraQuotationResponse;
       const detail = payload.results?.detalle ?? [];
-      const brlQuote = detail.find((item) => item.codigoMoneda === 'BRL');
-      if (brlQuote?.tipoCotizacion == null || !payload.results?.fecha) {
+      const quote = (code: string): number => {
+        const value = detail.find(
+          (item) => item.codigoMoneda === code,
+        )?.tipoCotizacion;
+        if (
+          typeof value !== 'number' ||
+          !Number.isFinite(value) ||
+          value <= 0
+        ) {
+          throw AppErrorFactory.networkError(
+            `BCRA exchange response does not include a valid ${code} quotation.`,
+          );
+        }
+        return value;
+      };
+      const referenceDate = payload.results?.fecha;
+      if (!referenceDate) {
         throw AppErrorFactory.networkError(
-          'BCRA exchange response does not include the latest BRL/ARS value.',
+          'BCRA exchange response does not include a reference date.',
         );
       }
+      const brlInArs = quote('BRL');
 
       return {
-        brlToArs: brlQuote.tipoCotizacion,
-        referenceDate: payload.results.fecha,
+        brlToArs: brlInArs,
+        brlToEur: brlInArs / quote('EUR'),
+        brlToClp: brlInArs / quote('CLP'),
+        brlToUyu: brlInArs / quote('UYU'),
+        brlToCop: brlInArs / quote('COP'),
+        brlToPen: brlInArs / quote('PEN'),
+        brlToPyg: brlInArs / quote('PYG'),
+        brlToBob: brlInArs / quote('BOB'),
+        usdReferenceToArs: quote('REF'),
+        referenceDate,
       };
     } catch (error) {
       if (error instanceof Error && 'getPayload' in error) {

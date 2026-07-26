@@ -51,8 +51,7 @@ class LandingBudgetEstimator {
   const LandingBudgetEstimator._();
 
   static LandingBudgetEstimate build({required MigrationPlan plan}) {
-    final cityBudget =
-        plan.currentPlanCity?.budgetSnapshot;
+    final cityBudget = plan.currentPlanCity?.budgetSnapshot;
     final monthlyBase = _resolveMonthlyBase(plan, cityBudget);
 
     return LandingBudgetEstimate(
@@ -196,14 +195,15 @@ class LandingBudgetEstimator {
       return switch (scenario) {
         LandingBudgetScenario.lean => (balancedMonthlyBase * 0.88).round(),
         LandingBudgetScenario.balanced => balancedMonthlyBase,
-        LandingBudgetScenario.comfortable => (balancedMonthlyBase * 1.12).round(),
+        LandingBudgetScenario.comfortable =>
+          (balancedMonthlyBase * 1.12).round(),
       };
     }
 
     return switch (scenario) {
       LandingBudgetScenario.lean =>
         cityBudget.singlePersonExcludingRent +
-            (cityBudget.cheaperRent * 0.72).round(),
+            (cityBudget.planningRentLow * 0.72).round(),
       LandingBudgetScenario.balanced => cityBudget.fairLivingTotal,
       LandingBudgetScenario.comfortable =>
         cityBudget.singlePersonExcludingRent +

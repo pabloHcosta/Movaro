@@ -96,7 +96,9 @@ class _CityMetricInsightSheet extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).maybePop(),
-                    tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                    tooltip: MaterialLocalizations.of(
+                      context,
+                    ).closeButtonTooltip,
                     visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.close_rounded),
                   ),
@@ -389,12 +391,9 @@ class _CityMetricInsightContent {
           tint: housing.tint,
           whyThisCity: _localizedText(
             context,
-            pt:
-                'Em ${city.name}, essa leitura cruza moradia ${city.rentScore}/100 com custo geral ${city.movaroScores.economical}/100. Quanto mais altos esses dois sinais, mais leve tende a ser o aluguel de 1 quarto e o peso do dia a dia.',
-            es:
-                'En ${city.name}, esta lectura cruza vivienda ${city.rentScore}/100 con costo general ${city.movaroScores.economical}/100. Cuanto más altos sean esos dos indicadores, más liviano tiende a ser el alquiler de 1 dormitorio y el peso del día a día.',
-            en:
-                'In ${city.name}, this reading combines housing ${city.rentScore}/100 with overall cost ${city.movaroScores.economical}/100. The higher those two signals are, the lighter 1-bedroom rent and day-to-day costs tend to feel.',
+            pt: 'Em ${city.name}, essa leitura cruza moradia ${city.rentScore}/100 com custo geral ${city.movaroScores.economical}/100. Quanto mais altos esses dois sinais, mais leve tende a ser o aluguel de 1 quarto e o peso do dia a dia.',
+            es: 'En ${city.name}, esta lectura cruza vivienda ${city.rentScore}/100 con costo general ${city.movaroScores.economical}/100. Cuanto más altos sean esos dos indicadores, más liviano tiende a ser el alquiler de 1 dormitorio y el peso del día a día.',
+            en: 'In ${city.name}, this reading combines housing ${city.rentScore}/100 with overall cost ${city.movaroScores.economical}/100. The higher those two signals are, the lighter 1-bedroom rent and day-to-day costs tend to feel.',
           ),
           meaning: l10n.cityMetricInsightHousingMeaning,
           method: l10n.cityMetricInsightHousingMethod,
@@ -443,12 +442,9 @@ class _CityMetricInsightContent {
           tint: safety.tint,
           whyThisCity: _localizedText(
             context,
-            pt:
-                'Em ${city.name}, a segurança entrou como ${safety.headline.toLowerCase()} porque o sinal atual está em ${city.safetyScore}/100. Esse score é comparado com faixas de referência para separar contextos mais estáveis, intermediários ou de maior atenção.',
-            es:
-                'En ${city.name}, la seguridad salió como ${safety.headline.toLowerCase()} porque la señal actual está en ${city.safetyScore}/100. Ese puntaje se compara con rangos de referencia para separar contextos más estables, intermedios o de mayor atención.',
-            en:
-                'In ${city.name}, safety came out as ${safety.headline.toLowerCase()} because the current signal is ${city.safetyScore}/100. That score is compared against reference bands to separate more stable, middle, or higher-attention contexts.',
+            pt: 'Em ${city.name}, a segurança entrou como ${safety.headline.toLowerCase()} porque o sinal atual está em ${city.safetyScore}/100. Esse score é comparado com faixas de referência para separar contextos mais estáveis, intermediários ou de maior atenção.',
+            es: 'En ${city.name}, la seguridad salió como ${safety.headline.toLowerCase()} porque la señal actual está en ${city.safetyScore}/100. Ese puntaje se compara con rangos de referencia para separar contextos más estables, intermedios o de mayor atención.',
+            en: 'In ${city.name}, safety came out as ${safety.headline.toLowerCase()} because the current signal is ${city.safetyScore}/100. That score is compared against reference bands to separate more stable, middle, or higher-attention contexts.',
           ),
           meaning: l10n.cityMetricInsightSafetyMeaning,
           method: l10n.cityMetricInsightSafetyMethod,
@@ -494,12 +490,9 @@ class _CityMetricInsightContent {
           tint: work.tint,
           whyThisCity: _localizedText(
             context,
-            pt:
-                'Em ${city.name}, a leitura de trabalho junta oportunidade ${city.movaroScores.workOpportunity}/100, mercado ${city.jobMarketScore}/100, atividade econômica ${city.economicActivityScore}/100 e desemprego em ${city.unemploymentRate.toStringAsFixed(1)}%. Ela tenta mostrar consistência ao longo do ano, não só vagas pontuais.',
-            es:
-                'En ${city.name}, la lectura de trabajo combina oportunidad ${city.movaroScores.workOpportunity}/100, mercado ${city.jobMarketScore}/100, actividad económica ${city.economicActivityScore}/100 y desempleo de ${city.unemploymentRate.toStringAsFixed(1)}%. Intenta mostrar consistencia durante el año, no solo vacantes puntuales.',
-            en:
-                'In ${city.name}, the work reading combines opportunity ${city.movaroScores.workOpportunity}/100, market ${city.jobMarketScore}/100, economic activity ${city.economicActivityScore}/100, and unemployment at ${city.unemploymentRate.toStringAsFixed(1)}%. It aims to show year-round consistency, not just isolated openings.',
+            pt: 'Em ${city.name}, a leitura de trabalho junta oportunidade ${city.movaroScores.workOpportunity}/100, mercado ${city.jobMarketScore}/100, atividade econômica ${city.economicActivityScore}/100 e desemprego em ${city.unemploymentRate.toStringAsFixed(1)}%. Ela tenta mostrar consistência ao longo do ano, não só vagas pontuais.',
+            es: 'En ${city.name}, la lectura de trabajo combina oportunidad ${city.movaroScores.workOpportunity}/100, mercado ${city.jobMarketScore}/100, actividad económica ${city.economicActivityScore}/100 y desempleo de ${city.unemploymentRate.toStringAsFixed(1)}%. Intenta mostrar consistencia durante el año, no solo vacantes puntuales.',
+            en: 'In ${city.name}, the work reading combines opportunity ${city.movaroScores.workOpportunity}/100, market ${city.jobMarketScore}/100, economic activity ${city.economicActivityScore}/100, and unemployment at ${city.unemploymentRate.toStringAsFixed(1)}%. It aims to show year-round consistency, not just isolated openings.',
           ),
           meaning: l10n.cityMetricInsightWorkMeaning,
           method: l10n.cityMetricInsightWorkMethod,
@@ -570,12 +563,9 @@ class _CityMetricInsightContent {
           tint: language.tint,
           whyThisCity: _localizedText(
             context,
-            pt:
-                'Em ${city.name}, a facilidade com português considera linguagem ${city.movaroScores.languageAdaptation}/100, apoio ao espanhol ${city.spanishSupportScore}/100 e recorrência de argentinos em ${city.argentinaPopularityScore}/100. Quanto menores esses sinais, mais autônoma tende a ser a adaptação inicial.',
-            es:
-                'En ${city.name}, la facilidad con el portugués considera lenguaje ${city.movaroScores.languageAdaptation}/100, apoyo al español ${city.spanishSupportScore}/100 y recurrencia de argentinos en ${city.argentinaPopularityScore}/100. Cuanto menores sean esas señales, más autónoma tiende a ser la adaptación inicial.',
-            en:
-                'In ${city.name}, ease with Portuguese considers language ${city.movaroScores.languageAdaptation}/100, Spanish support ${city.spanishSupportScore}/100, and how often Argentinians show up at ${city.argentinaPopularityScore}/100. The lower those signals are, the more self-directed early adaptation tends to be.',
+            pt: 'Em ${city.name}, a facilidade com português considera linguagem ${city.movaroScores.languageAdaptation}/100, apoio ao espanhol ${city.spanishSupportScore}/100 e recorrência de argentinos em ${city.argentinaPopularityScore}/100. Quanto menores esses sinais, mais autônoma tende a ser a adaptação inicial.',
+            es: 'En ${city.name}, la facilidad con el portugués considera lenguaje ${city.movaroScores.languageAdaptation}/100, apoyo al español ${city.spanishSupportScore}/100 y recurrencia de argentinos en ${city.argentinaPopularityScore}/100. Cuanto menores sean esas señales, más autónoma tiende a ser la adaptación inicial.',
+            en: 'In ${city.name}, ease with Portuguese considers language ${city.movaroScores.languageAdaptation}/100, Spanish support ${city.spanishSupportScore}/100, and how often Argentinians show up at ${city.argentinaPopularityScore}/100. The lower those signals are, the more self-directed early adaptation tends to be.',
           ),
           meaning: l10n.cityMetricInsightLanguageMeaning,
           method: l10n.cityMetricInsightLanguageMethod,
@@ -610,7 +600,12 @@ class _CityMetricInsightContent {
             ),
             _InsightSource(
               title: l10n.cityMetricInsightLanguageCurrentBaseTitle,
-              provider: 'Movaro',
+              provider: _localizedText(
+                context,
+                pt: 'Mapeamento interno não oficial',
+                es: 'Mapeo interno no oficial',
+                en: 'Internal non-official mapping',
+              ),
               description: l10n.cityMetricInsightLanguageMappedSource,
               badge: l10n.cityMetricInsightMappedBaseBadge,
               isOfficial: false,

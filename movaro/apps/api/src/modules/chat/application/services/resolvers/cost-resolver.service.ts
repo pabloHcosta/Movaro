@@ -17,12 +17,17 @@ export class CostResolverService {
     try {
       const rates = await this.exchangeRatesService.getCurrentRates();
 
-      const arsToBrl = rates.arsToBrl.toFixed(4);
-      const brlToArs = rates.brlToArs.toFixed(2);
+      const thousandArsToBrl = (rates.arsToBrl * 1000).toFixed(0);
+      const brlToArs = rates.brlToArs.toFixed(0);
       const usdToBrl = rates.usdToBrl.toFixed(2);
 
       const summary = this.buildSummary(
-        { arsToBrl, brlToArs, usdToBrl },
+        {
+          thousandArsToBrl,
+          brlToArs,
+          usdToBrl,
+          referenceDate: rates.referenceDate,
+        },
         locale,
       );
 
@@ -37,88 +42,75 @@ export class CostResolverService {
   }
 
   private buildSummary(
-    rates: { arsToBrl: string; brlToArs: string; usdToBrl: string },
+    rates: {
+      thousandArsToBrl: string;
+      brlToArs: string;
+      usdToBrl: string;
+      referenceDate: string;
+    },
     locale: string,
   ): string {
     if (locale === 'es') {
       return (
-        `📊 **Tipo de cambio actual (fuente oficial):**\n` +
-        `• 1 ARS = ${rates.arsToBrl} BRL\n` +
-        `• 1 BRL = ${rates.brlToArs} ARS\n` +
-        `• 1 USD = ${rates.usdToBrl} BRL\n\n` +
-        `**Costos de vida estimados en Brasil (referencia para argentinos):**\n` +
-        `• Alquiler 1 dorm. en ciudad mediana: R$ 1.000–1.800/mes\n` +
-        `• Alquiler 1 dorm. en São Paulo / Florianópolis: R$ 2.000–3.500/mes\n` +
-        `• Comida (supermercado mensual, 1 persona): R$ 600–900\n` +
-        `• Transporte público mensual: R$ 150–250\n` +
-        `• Internet + servicios básicos: R$ 200–350/mes\n\n` +
-        `⚠️ Los valores son estimaciones. El tipo de cambio ARS/BRL fluctúa — ` +
-        `verificar siempre antes de tomar decisiones financieras.`
+        `📊 **Cambio indicativo (${rates.referenceDate}, BCB + BCRA):**\n` +
+        `• R$ 1 ≈ AR$ ${rates.brlToArs}\n` +
+        `• AR$ 1.000 ≈ R$ ${rates.thousandArsToBrl}\n` +
+        `• US$ 1 ≈ R$ ${rates.usdToBrl}\n\n` +
+        `El costo real depende de la ciudad, la zona, la vivienda y tu estilo de vida. ` +
+        `Usá la franja económica y la franja con más comodidad de la ciudad elegida; ` +
+        `si el presupuesto queda ajustado, compará una zona más económica o una ciudad alternativa.\n\n` +
+        `⚠️ Son referencias para planificar, no una cotización bancaria ni una promesa de costo.`
       );
     }
 
     if (locale === 'en') {
       return (
-        `📊 **Current exchange rates (official source):**\n` +
-        `• 1 ARS = ${rates.arsToBrl} BRL\n` +
-        `• 1 BRL = ${rates.brlToArs} ARS\n` +
-        `• 1 USD = ${rates.usdToBrl} BRL\n\n` +
-        `**Estimated cost of living in Brazil:**\n` +
-        `• 1-bedroom apartment in mid-size city: R$ 1,000–1,800/month\n` +
-        `• 1-bedroom in São Paulo / Florianópolis: R$ 2,000–3,500/month\n` +
-        `• Groceries (1 person/month): R$ 600–900\n` +
-        `• Monthly public transport: R$ 150–250\n` +
-        `• Internet + utilities: R$ 200–350/month\n\n` +
-        `⚠️ These are estimates. The ARS/BRL rate fluctuates — always verify ` +
-        `before making financial decisions.`
+        `📊 **Indicative exchange (${rates.referenceDate}, BCB + BCRA):**\n` +
+        `• R$1 ≈ AR$${rates.brlToArs}\n` +
+        `• AR$1,000 ≈ R$${rates.thousandArsToBrl}\n` +
+        `• US$1 ≈ R$${rates.usdToBrl}\n\n` +
+        `Actual cost depends on the city, area, housing and lifestyle. Use the chosen ` +
+        `city's economical and more-comfortable ranges; if the budget is tight, compare ` +
+        `a lower-cost area or an alternative city.\n\n` +
+        `⚠️ These are planning references, not a bank quote or a cost guarantee.`
       );
     }
 
     // pt (default)
     return (
-      `📊 **Câmbio atual (fonte oficial):**\n` +
-      `• 1 ARS = ${rates.arsToBrl} BRL\n` +
-      `• 1 BRL = ${rates.brlToArs} ARS\n` +
-      `• 1 USD = ${rates.usdToBrl} BRL\n\n` +
-      `**Custos estimados de vida no Brasil:**\n` +
-      `• Aluguel 1 quarto em cidade média: R$ 1.000–1.800/mês\n` +
-      `• Aluguel 1 quarto em São Paulo / Florianópolis: R$ 2.000–3.500/mês\n` +
-      `• Alimentação (supermercado mensal, 1 pessoa): R$ 600–900\n` +
-      `• Transporte público mensal: R$ 150–250\n` +
-      `• Internet + contas básicas: R$ 200–350/mês\n\n` +
-      `⚠️ Esses valores são estimativas. O câmbio ARS/BRL oscila — ` +
-      `verifique sempre antes de tomar decisões financeiras.`
+      `📊 **Câmbio indicativo (${rates.referenceDate}, BCB + BCRA):**\n` +
+      `• R$ 1 ≈ AR$ ${rates.brlToArs}\n` +
+      `• AR$ 1.000 ≈ R$ ${rates.thousandArsToBrl}\n` +
+      `• US$ 1 ≈ R$ ${rates.usdToBrl}\n\n` +
+      `O custo real depende da cidade, da zona, da moradia e do estilo de vida. ` +
+      `Use as faixas econômica e mais confortável da cidade escolhida; se o orçamento ` +
+      `ficar apertado, compare uma zona mais econômica ou uma cidade alternativa.\n\n` +
+      `⚠️ São referências de planejamento, não cotação bancária nem promessa de custo.`
     );
   }
 
   private staticSummary(locale: string): string {
     if (locale === 'es') {
       return (
-        `Los costos de vida en Brasil varían según la ciudad. En general:\n` +
-        `• Alquiler 1 dorm.: R$ 1.000–3.500/mes según la ciudad\n` +
-        `• Comida mensual (1 persona): R$ 600–900\n` +
-        `• Transporte mensual: R$ 150–250\n\n` +
-        `No pude obtener el tipo de cambio actual. ` +
-        `Verificá en el Banco Central de Argentina (BCRA) o BCB para el cambio ARS/BRL.`
+        `Los costos varían según la ciudad, la zona y el estilo de vida. ` +
+        `Consultá las franjas de la ciudad en Movaro para comparar una opción económica ` +
+        `con otra más cómoda.\n\nNo pude validar el cambio ahora; los valores permanecen ` +
+        `en reales hasta obtener una referencia oficial del BCB y BCRA.`
       );
     }
     if (locale === 'en') {
       return (
-        `Cost of living in Brazil varies by city. General estimates:\n` +
-        `• 1-bedroom rent: R$ 1,000–3,500/month depending on city\n` +
-        `• Monthly groceries (1 person): R$ 600–900\n` +
-        `• Monthly transport: R$ 150–250\n\n` +
-        `Could not fetch current exchange rates. ` +
-        `Check BCRA or BCB for the current ARS/BRL rate.`
+        `Costs vary by city, area and lifestyle. Use Movaro's city ranges to compare ` +
+        `an economical option with a more comfortable one.\n\nI could not validate the ` +
+        `exchange rate now; amounts remain in BRL until an official BCB and BCRA ` +
+        `reference is available.`
       );
     }
     return (
-      `Os custos de vida no Brasil variam por cidade. Estimativas gerais:\n` +
-      `• Aluguel 1 quarto: R$ 1.000–3.500/mês dependendo da cidade\n` +
-      `• Alimentação mensal (1 pessoa): R$ 600–900\n` +
-      `• Transporte mensal: R$ 150–250\n\n` +
-      `Não consegui buscar o câmbio atual. ` +
-      `Verifique no Banco Central (BCB) ou BCRA para o câmbio ARS/BRL.`
+      `Os custos variam por cidade, zona e estilo de vida. Use as faixas da cidade ` +
+      `no Movaro para comparar uma opção econômica com outra mais confortável.\n\n` +
+      `Não consegui validar o câmbio agora; os valores permanecem em reais até haver ` +
+      `uma referência oficial do BCB e do BCRA.`
     );
   }
 }

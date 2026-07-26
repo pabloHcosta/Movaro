@@ -114,7 +114,7 @@ class MigrationDocumentReadinessBuilder {
           priority: MigrationDocumentReadinessPriority.prepare,
           risk: MigrationDocumentReadinessRisk.caution,
           reviewMoment: MigrationDocumentReadinessReviewMoment.closeToMove,
-          sourceLabel: l10n.sourceProviderBancoCentralBrasil,
+          sourceLabel: l10n.sourceProviderMovaro,
           icon: Icons.house_siding_outlined,
           title: l10n.documentReadinessHousingProofTitle,
           description: l10n.documentReadinessHousingProofBodyBrazil,

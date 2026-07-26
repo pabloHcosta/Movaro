@@ -31,6 +31,7 @@ import 'package:movaro_app/features/migration_questionnaire/domain/entities/guid
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
+import 'package:movaro_app/core/utils/cost_estimate_formatter.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/home/presentation/widgets/city_feed_widget.dart';
@@ -2660,11 +2661,20 @@ class _ExplorerStageCard extends StatelessWidget {
     final isDark = AppColors.isDark(context);
     final budget = cityBudget;
 
+    final locale = Localizations.localeOf(context).toString();
     final rentLabel = budget != null
-        ? 'R\$${budget.cheaperRent}–${budget.pricierRent}'
+        ? CostEstimateFormatter.brlRange(
+            budget.planningRentLow,
+            budget.planningRentHigh,
+            locale: locale,
+          )
         : 'R\$1.800–3.500';
     final totalLabel = budget != null
-        ? 'R\$${budget.fairLivingTotal}–${budget.wellLivingTotal}'
+        ? CostEstimateFormatter.brlRange(
+            budget.fairLivingTotal,
+            budget.wellLivingTotal,
+            locale: locale,
+          )
         : 'R\$4.000–6.000';
 
     return Row(

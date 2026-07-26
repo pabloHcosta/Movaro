@@ -325,7 +325,7 @@ class FlightRoutePriceInsightService {
           .toList(growable: false),
       lowUsdMin: route.lowUsdMin,
       lowUsdMax: route.lowUsdMax,
-      sourceLabel: 'Movaro route estimate',
+      sourceLabel: 'Estimativa de rota modelada (não oficial)',
       sourceType: 'modeled_estimate',
       seasonalWarningKey: route.seasonalWarningKey,
     );

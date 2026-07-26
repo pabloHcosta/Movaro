@@ -17,10 +17,14 @@ class CopilotExchangeRatesService {
     try {
       final response = await _remoteDataSource.getCurrentRates();
       final snapshot = CopilotExchangeRatesModel.fromJson(response).toEntity();
+      if (!snapshot.isFresh()) {
+        throw const FormatException('Exchange-rate snapshot is not current.');
+      }
       await _store.write(snapshot);
       return snapshot;
     } catch (_) {
-      return _store.read();
+      final cached = await _store.read();
+      return cached?.isFresh() == true ? cached : null;
     }
   }
 }

@@ -2093,7 +2093,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get citiesMethodologyNote =>
-      'Rankings baseados em dados públicos e na metodologia do Movaro.';
+      'Comparação baseada em dados públicos quando disponíveis. Scores internos são estimativas não oficiais.';
 
   @override
   String get citiesExplorePopularTitle => 'Mais escolhidas por argentinos';
@@ -2142,7 +2142,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get citiesHighlightPopularLabel =>
-      'Entre as cidades analisadas pelo Movaro';
+      'Entre as cidades do catálogo atual';
 
   @override
   String get citiesHighlightLanguageLabel =>
@@ -2518,7 +2518,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cityDetailIndustriesTitle => 'Setores fortes';
 
   @override
-  String get cityDetailReasonsTitle => 'Por que o Movaro recomenda';
+  String get cityDetailReasonsTitle => 'Por que pode combinar com você';
 
   @override
   String get cityDetailSourcesTitle => 'Fontes dos dados';
@@ -2607,14 +2607,14 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get citySourceCuratedMetricsDescription =>
-      'Hoje, vêm do dataset curado do Movaro. As substituições oficiais prioritárias são Atlas da Violência (segurança), Novo Caged (emprego), FipeZAP (aluguel) e IBGE PIB dos Municípios (atividade econômica).';
+      'Estimativa comparativa interna, sem valor oficial. Quando não houver fonte externa por métrica, use este sinal apenas como apoio à exploração.';
 
   @override
   String get citySourceRankingTitle => 'Metodologia de score';
 
   @override
   String get citySourceRankingDescription =>
-      'Scores do Movaro calculados com base em dados públicos e dataset curado.';
+      'Cálculo comparativo interno sobre dados públicos disponíveis e sinais estimados. Não é ranking oficial.';
 
   @override
   String get citySourcePublicReviewsTitle => 'Percepção pública da localidade';
@@ -3406,7 +3406,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get cityMetricInsightSafetyMethod =>
-      'Hoje o card usa o safetyScore do catálogo Movaro. Abaixo de 55, a leitura sobe para cautela; entre 55 e 69, ela fica moderada; a partir de 70, fica mais favorável.';
+      'Quando há indicador oficial de segurança, ele é mostrado com sua fonte. Sem fonte oficial por cidade, o score interno é apenas uma estimativa comparativa.';
 
   @override
   String get cityMetricInsightSafetyValidate =>
@@ -4108,11 +4108,12 @@ class AppLocalizationsPt extends AppLocalizations {
       'Atlas do Desenvolvimento Humano no Brasil (PNUD, Ipea e FJP)';
 
   @override
-  String get sourceProviderMovaroDataset => 'Dataset Curado do Movaro v1';
+  String get sourceProviderMovaroDataset =>
+      'Base comparativa interna (não oficial)';
 
   @override
   String get sourceProviderMovaroRanking =>
-      'Metodologia de Ranking do Movaro v1';
+      'Metodologia comparativa interna (não oficial)';
 
   @override
   String get sourceProviderGoogleMaps => 'Google Maps';
@@ -4176,7 +4177,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get sourceProviderBancoCentralBrasil => 'Banco Central do Brasil';
 
   @override
-  String get sourceProviderMovaro => 'Movaro';
+  String get sourceProviderMovaro =>
+      'Checklist baseado nas suas respostas (não oficial)';
 
   @override
   String get documentReadinessSectionTitle =>

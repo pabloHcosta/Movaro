@@ -33,7 +33,10 @@ export class CityMergeService {
       cityId: metrics.id,
       ibgeCode: metrics.ibgeCode,
     });
-    const resolvedMetrics = this.applyOfficialOverrides(metrics, officialMetrics);
+    const resolvedMetrics = this.applyOfficialOverrides(
+      metrics,
+      officialMetrics,
+    );
     const [ibgeData, populationEstimate] = await Promise.all([
       this.ibgeLocalitiesService.getMunicipalityByIbgeCode(metrics.ibgeCode),
       this.ibgePopulationService.getPopulationEstimateByIbgeCode(
@@ -42,7 +45,10 @@ export class CityMergeService {
     ]);
     const scores = this.cityRankingService.calculateScores(resolvedMetrics);
     const recommendationReasons =
-      this.cityRankingService.buildRecommendationReasons(resolvedMetrics, scores);
+      this.cityRankingService.buildRecommendationReasons(
+        resolvedMetrics,
+        scores,
+      );
     const officialName =
       ibgeData.officialName?.trim() || metrics.displayName || metrics.name;
     const stateCode =
@@ -60,7 +66,8 @@ export class CityMergeService {
         stateName,
       )) ?? this.cityPublicOpinionSeedService.findByCityId(resolvedMetrics.id);
     const budgetSnapshot = this.resolveBudgetSnapshot(resolvedMetrics);
-    const seasonalitySnapshot = this.resolveSeasonalitySnapshot(resolvedMetrics);
+    const seasonalitySnapshot =
+      this.resolveSeasonalitySnapshot(resolvedMetrics);
     const sourcesWithOpinion = publicOpinion
       ? new CitySourcesEntity(
           sources.territorialIdentity,
@@ -231,41 +238,41 @@ export class CityMergeService {
         'human_development',
         'Desenvolvimento humano',
         officialMetrics?.development?.sourceLabel ??
-            'Atlas do Desenvolvimento Humano no Brasil (PNUD, Ipea e FJP)',
+          'Atlas do Desenvolvimento Humano no Brasil (PNUD, Ipea e FJP)',
         officialMetrics?.development != null
-            ? 'Indicador oficial ingerido para desenvolvimento humano municipal.'
-            : 'IDHM municipal oficial com referencia no Censo 2010.',
+          ? 'Indicador oficial ingerido para desenvolvimento humano municipal.'
+          : 'IDHM municipal oficial com referencia no Censo 2010.',
         true,
         officialMetrics?.development?.sourceUrl ??
-            'https://www.undp.org/pt/brazil/idhm-municipios-2010',
+          'https://www.undp.org/pt/brazil/idhm-municipios-2010',
         officialMetrics?.development?.sourceType ?? 'official',
       ),
       officialMetrics?.employment == null
-          ? null
-          : new CitySourceEntity(
-              'employment',
-              'Emprego formal',
-              officialMetrics.employment.sourceLabel,
-              'Indicadores oficiais ingeridos para desemprego, dinamica laboral e sinais de mercado.',
-              officialMetrics.employment.sourceType === 'official',
-              officialMetrics.employment.sourceUrl ?? null,
-              officialMetrics.employment.sourceType ?? 'official',
-            ),
+        ? null
+        : new CitySourceEntity(
+            'employment',
+            'Emprego formal',
+            officialMetrics.employment.sourceLabel,
+            'Indicadores oficiais ingeridos para desemprego, dinamica laboral e sinais de mercado.',
+            officialMetrics.employment.sourceType === 'official',
+            officialMetrics.employment.sourceUrl ?? null,
+            officialMetrics.employment.sourceType ?? 'official',
+          ),
       officialMetrics?.safety == null
-          ? null
-          : new CitySourceEntity(
-              'safety',
-              'Seguranca publica',
-              officialMetrics.safety.sourceLabel,
-              'Indicador oficial ingerido para leitura de seguranca da localidade.',
-              officialMetrics.safety.sourceType === 'official',
-              officialMetrics.safety.sourceUrl ?? null,
-              officialMetrics.safety.sourceType ?? 'official',
-            ),
+        ? null
+        : new CitySourceEntity(
+            'safety',
+            'Seguranca publica',
+            officialMetrics.safety.sourceLabel,
+            'Indicador oficial ingerido para leitura de seguranca da localidade.',
+            officialMetrics.safety.sourceType === 'official',
+            officialMetrics.safety.sourceUrl ?? null,
+            officialMetrics.safety.sourceType ?? 'official',
+          ),
       new CitySourceEntity(
         'curated_metrics',
         'Metricas interpretativas do produto',
-        'Movaro curated city model',
+        'Metodologia comparativa interna (nao oficial)',
         'Indicadores internos e heuristicas do produto. Servem para leitura comparativa, mas nao substituem fontes oficiais por metrica individual.',
         false,
         null,
@@ -274,7 +281,7 @@ export class CityMergeService {
       new CitySourceEntity(
         'ranking',
         'Metodologia de score',
-        'Movaro Ranking Methodology v1',
+        'Metodologia comparativa interna v1 (nao oficial)',
         'Scores derivados da metodologia do produto sobre dados publicos e sinais curados. Nao representam um indicador oficial unico.',
         false,
         null,

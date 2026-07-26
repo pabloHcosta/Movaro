@@ -18,6 +18,8 @@ class CopilotExchangeRatesModel {
     required this.fetchedAt,
     required this.source,
     required this.sources,
+    this.referenceDate,
+    this.isIndicative = true,
   });
 
   factory CopilotExchangeRatesModel.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,8 @@ class CopilotExchangeRatesModel {
       fetchedAt: json['fetchedAt'] as String,
       source: json['source'] as String,
       sources: (json['sources'] as List<dynamic>).whereType<String>().toList(),
+      referenceDate: json['referenceDate'] as String?,
+      isIndicative: json['isIndicative'] as bool? ?? true,
     );
   }
 
@@ -60,6 +64,8 @@ class CopilotExchangeRatesModel {
   final String fetchedAt;
   final String source;
   final List<String> sources;
+  final String? referenceDate;
+  final bool isIndicative;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'usdToBrl': usdToBrl,
@@ -78,6 +84,8 @@ class CopilotExchangeRatesModel {
     'fetchedAt': fetchedAt,
     'source': source,
     'sources': sources,
+    'referenceDate': referenceDate,
+    'isIndicative': isIndicative,
   };
 
   CopilotExchangeRates toEntity() => CopilotExchangeRates(
@@ -97,6 +105,8 @@ class CopilotExchangeRatesModel {
     fetchedAt: fetchedAt,
     source: source,
     sources: sources,
+    referenceDate: referenceDate,
+    isIndicative: isIndicative,
   );
 
   static CopilotExchangeRatesModel fromEntity(CopilotExchangeRates entity) =>
@@ -117,5 +127,7 @@ class CopilotExchangeRatesModel {
         fetchedAt: entity.fetchedAt,
         source: entity.source,
         sources: entity.sources,
+        referenceDate: entity.referenceDate,
+        isIndicative: entity.isIndicative,
       );
 }

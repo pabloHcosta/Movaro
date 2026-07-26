@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/utils/cost_estimate_formatter.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
 import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
@@ -280,11 +280,12 @@ class CityCard extends StatelessWidget {
     final budget = city.budgetSnapshot;
     if (budget == null) return '${city.movaroScores.economical}/100';
     final locale = Localizations.localeOf(context).toString();
-    return NumberFormat.compactCurrency(
+    return CostEstimateFormatter.brlRange(
+      budget.fairLivingTotal,
+      budget.wellLivingTotal,
       locale: locale,
-      symbol: 'R\$',
-      decimalDigits: 1,
-    ).format(budget.fairLivingTotal);
+      compact: true,
+    );
   }
 
   String _detailsLabel(BuildContext context) {

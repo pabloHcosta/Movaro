@@ -33,8 +33,19 @@ class CityBudgetSnapshot {
       ? oneBedroomOutsideCentre
       : oneBedroomCityCentre;
 
-  int get fairLivingTotal => singlePersonExcludingRent + cheaperRent;
-  int get wellLivingTotal => singlePersonExcludingRent + pricierRent;
+  /// Prevents a single implausible source observation from making the whole
+  /// city look artificially cheap. It does not replace the raw value shown in
+  /// the source breakdown; it is only the safer planning baseline.
+  bool get hasSuspiciousRentSpread =>
+      cheaperRent < (pricierRent * 0.35).round();
+
+  int get planningRentLow =>
+      hasSuspiciousRentSpread ? (pricierRent * 0.65).round() : cheaperRent;
+
+  int get planningRentHigh => pricierRent;
+
+  int get fairLivingTotal => singlePersonExcludingRent + planningRentLow;
+  int get wellLivingTotal => singlePersonExcludingRent + planningRentHigh;
   int get fairLivingGap => averageMonthlyNetSalary - fairLivingTotal;
   double get fairLivingCoverageRatio =>
       fairLivingTotal == 0 ? 0 : averageMonthlyNetSalary / fairLivingTotal;

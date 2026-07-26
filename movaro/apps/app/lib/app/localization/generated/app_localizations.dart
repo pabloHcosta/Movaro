@@ -3538,7 +3538,7 @@ abstract class AppLocalizations {
   /// No description provided for @citiesMethodologyNote.
   ///
   /// In en, this message translates to:
-  /// **'Rankings based on public data and the Movaro methodology.'**
+  /// **'Comparison based on public data when available. Internal scores are non-official estimates.'**
   String get citiesMethodologyNote;
 
   /// No description provided for @citiesExplorePopularTitle.
@@ -3616,7 +3616,7 @@ abstract class AppLocalizations {
   /// No description provided for @citiesHighlightPopularLabel.
   ///
   /// In en, this message translates to:
-  /// **'Among the cities analyzed by Movaro'**
+  /// **'Among cities in the current catalog'**
   String get citiesHighlightPopularLabel;
 
   /// No description provided for @citiesHighlightLanguageLabel.
@@ -4282,7 +4282,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityDetailReasonsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Why Movaro recommends it'**
+  /// **'Why it may fit your priorities'**
   String get cityDetailReasonsTitle;
 
   /// No description provided for @cityDetailSourcesTitle.
@@ -4414,7 +4414,7 @@ abstract class AppLocalizations {
   /// No description provided for @citySourceCuratedMetricsDescription.
   ///
   /// In en, this message translates to:
-  /// **'It currently comes from Movaro\'s curated dataset. The priority official replacements are Atlas da Violência (safety), Novo Caged (jobs), FipeZAP (rent), and IBGE PIB dos Municípios (economic activity).'**
+  /// **'Internal comparative estimate with no official status. Where no external source exists for a metric, use it only as exploration support.'**
   String get citySourceCuratedMetricsDescription;
 
   /// No description provided for @citySourceRankingTitle.
@@ -4426,7 +4426,7 @@ abstract class AppLocalizations {
   /// No description provided for @citySourceRankingDescription.
   ///
   /// In en, this message translates to:
-  /// **'Movaro scores calculated from public data and a curated dataset.'**
+  /// **'Internal comparative calculation over available public data and estimated signals. It is not an official ranking.'**
   String get citySourceRankingDescription;
 
   /// No description provided for @citySourcePublicReviewsTitle.
@@ -5788,7 +5788,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricInsightSafetyMethod.
   ///
   /// In en, this message translates to:
-  /// **'Today the card uses Movaro\'s catalog safetyScore. Below 55, the read becomes caution; between 55 and 69 it stays moderate; from 70 onward it becomes more favorable.'**
+  /// **'When an official safety indicator exists, it is shown with its source. Without a city-level official source, the internal score is only a comparative estimate.'**
   String get cityMetricInsightSafetyMethod;
 
   /// No description provided for @cityMetricInsightSafetyValidate.
@@ -6970,13 +6970,13 @@ abstract class AppLocalizations {
   /// No description provided for @sourceProviderMovaroDataset.
   ///
   /// In en, this message translates to:
-  /// **'Movaro Curated Dataset v1'**
+  /// **'Internal comparative dataset (not official)'**
   String get sourceProviderMovaroDataset;
 
   /// No description provided for @sourceProviderMovaroRanking.
   ///
   /// In en, this message translates to:
-  /// **'Movaro Ranking Methodology v1'**
+  /// **'Internal comparative methodology (not official)'**
   String get sourceProviderMovaroRanking;
 
   /// No description provided for @sourceProviderGoogleMaps.
@@ -7096,7 +7096,7 @@ abstract class AppLocalizations {
   /// No description provided for @sourceProviderMovaro.
   ///
   /// In en, this message translates to:
-  /// **'Movaro'**
+  /// **'Checklist based on your answers (not official)'**
   String get sourceProviderMovaro;
 
   /// No description provided for @documentReadinessSectionTitle.
