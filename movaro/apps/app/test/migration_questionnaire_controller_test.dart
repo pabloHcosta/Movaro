@@ -85,6 +85,35 @@ void main() {
     });
 
     test(
+      'lean flow asks for origin and generates a plan when the journey is missing',
+      () async {
+        await journeyContextController.clearJourney();
+        await controller.resetFlow();
+        await controller.initializeForQuestionnaire();
+
+        expect(controller.activeQuestions.map((question) => question.id), [
+          'origin_country',
+          'intent',
+          'timeline',
+          'priorities',
+        ]);
+        expect(controller.currentQuestion?.id, 'origin_country');
+
+        controller.selectAnswer('origin_country', 'argentina');
+        expect(await controller.goNext(), isFalse);
+        controller.selectAnswer('intent', 'remote_income');
+        expect(await controller.goNext(), isFalse);
+        controller.selectAnswer('timeline', 'in_3_6m');
+        expect(await controller.goNext(), isFalse);
+        controller.setAnswerValues('priorities', ['low_cost', 'safety']);
+
+        expect(await controller.goNext(), isTrue);
+        expect(controller.generatedPlan, isNotNull);
+        expect(journeyContextController.isJourneyReadyForPlanning, isTrue);
+      },
+    );
+
+    test(
       'strategic refinement starts from funding after core answers',
       () async {
         controller.selectVariant(QuestionnaireVariant.lean);

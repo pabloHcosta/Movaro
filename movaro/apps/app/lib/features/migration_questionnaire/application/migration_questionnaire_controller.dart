@@ -82,7 +82,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       return const [];
     }
 
-    final orderedQuestionIds = switch (variant) {
+    final profileQuestionIds = switch (variant) {
       QuestionnaireVariant.lean => const ['intent', 'timeline', 'priorities'],
       QuestionnaireVariant.strategic => const [
         'intent',
@@ -92,6 +92,11 @@ class MigrationQuestionnaireController extends ChangeNotifier {
         'constraints',
       ],
     };
+    final orderedQuestionIds = [
+      if (!_journeyContextController.isJourneyReadyForPlanning)
+        'origin_country',
+      ...profileQuestionIds,
+    ];
 
     final questionById = {
       for (final question in _questions) question.id: question,
