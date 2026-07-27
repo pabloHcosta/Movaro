@@ -4032,6 +4032,8 @@ class ArgentinaBrazilGuideDataSource {
       );
     }
 
+    items.addAll(_reviewAdditions(locale));
+
     final priorityIds = _priorityOrder(plan.goal);
     final priorityRanks = <String, int>{
       for (var index = 0; index < priorityIds.length; index++)
@@ -4054,109 +4056,458 @@ class ArgentinaBrazilGuideDataSource {
 
     return reordered
         .map((item) => _contextualizeItem(item, plan, currentLocation, locale))
+        .map((item) => _applySafetyReview(item, locale))
         .toList(growable: false);
   }
 
+  static List<GuideActionItem> _reviewAdditions(String locale) {
+    return [
+      GuideActionItem(
+        id: 'item_0_2_document_folder',
+        title: _t(
+          locale,
+          pt: 'Monte sua pasta migratória',
+          es: 'Arma tu carpeta migratoria',
+          en: 'Build your migration document folder',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'Reúna a documentação civil e confira as regras antes de viajar.',
+          es: 'Reúne la documentación civil y revisa las reglas antes de viajar.',
+          en: 'Gather civil records and confirm the rules before traveling.',
+        ),
+        type: GuideActionType.external,
+        phase: GuidePhase.preparation,
+        orderIndex: 1,
+        isCompleted: false,
+        icon: Icons.folder_copy_outlined,
+        primaryActionLabel: _t(
+          locale,
+          pt: 'Ver documentos oficiais',
+          es: 'Ver documentos oficiales',
+          en: 'See official documents',
+        ),
+        primaryActionType: GuidePrimaryActionType.external,
+        primaryActionTarget: PreparationResourceLinks
+            .argentinaResidenceAgreement
+            .toString(),
+        context: _t(
+          locale,
+          pt: 'O acordo Brasil–Argentina tem uma lista própria. Não use uma checklist genérica de redes sociais.',
+          es: 'El acuerdo Brasil–Argentina tiene una lista propia. No uses una lista genérica de redes sociales.',
+          en: 'The Brazil–Argentina agreement has its own list. Do not rely on a generic social-media checklist.',
+        ),
+        whyItMatters: _t(
+          locale,
+          pt: 'Filiação ausente no documento, certidões de outros países ou formalidades documentais podem deixar o pedido incompleto.',
+          es: 'La falta de filiación, certificados de otros países o formalidades documentales pueden dejar la solicitud incompleta.',
+          en: 'Missing parentage, certificates from other countries, or document formalities can leave the application incomplete.',
+        ),
+        steps: _list(
+          locale,
+          pt: [
+            'Abra a lista vigente do acordo Brasil–Argentina.',
+            'Confira se seu DNI ou passaporte mostra filiação; se não mostrar, separe certidão de nascimento, casamento ou certidão consular.',
+            'Liste todos os países onde viveu nos cinco anos anteriores para identificar os antecedentes exigidos.',
+            'Separe o comprovante de entrada, a declaração pessoal exigida e os comprovantes de taxas quando aplicáveis.',
+            'Confirme apostilamento, legalização e tradução para o uso específico do documento; a dispensa migratória de tradução não vale automaticamente para outros usos.',
+          ],
+          es: [
+            'Abre la lista vigente del acuerdo Brasil–Argentina.',
+            'Revisa si tu DNI o pasaporte muestra filiación; si no, separa partida de nacimiento, matrimonio o certificado consular.',
+            'Lista todos los países donde viviste en los cinco años anteriores para identificar los antecedentes exigidos.',
+            'Separa el comprobante de entrada, la declaración personal exigida y los comprobantes de tasas cuando correspondan.',
+            'Confirma apostilla, legalización y traducción para el uso específico; la exención migratoria de traducción no se extiende automáticamente a otros usos.',
+          ],
+          en: [
+            'Open the current Brazil–Argentina agreement checklist.',
+            'Check whether your ID or passport shows parentage; otherwise prepare a birth, marriage, or consular certificate.',
+            'List every country where you lived in the previous five years to identify required criminal records.',
+            'Prepare entry proof, the required personal declaration, and fee receipts when applicable.',
+            'Confirm apostille, legalization, and translation for the document’s specific use; the migration translation waiver does not automatically extend to other uses.',
+          ],
+        ),
+        doneCriteria: _t(
+          locale,
+          pt: 'Sua pasta corresponde à lista oficial vigente e cobre todos os países onde você viveu nos últimos cinco anos.',
+          es: 'Tu carpeta coincide con la lista oficial vigente y cubre todos los países donde viviste en los últimos cinco años.',
+          en: 'Your folder matches the current official list and covers every country where you lived in the last five years.',
+        ),
+        checklistItems: [
+          ChecklistSubItem(
+            id: 'folder_identity_parentage',
+            title: _t(
+              locale,
+              pt: 'Identidade e comprovação de filiação conferidas',
+              es: 'Identidad y comprobación de filiación revisadas',
+              en: 'Identity and parentage evidence checked',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'folder_countries',
+            title: _t(
+              locale,
+              pt: 'Países de residência dos últimos cinco anos listados',
+              es: 'Países de residencia de los últimos cinco años listados',
+              en: 'Countries of residence from the last five years listed',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'folder_formalities',
+            title: _t(
+              locale,
+              pt: 'Regras de legalização e tradução confirmadas',
+              es: 'Reglas de legalización y traducción confirmadas',
+              en: 'Legalization and translation rules confirmed',
+            ),
+            isCompleted: false,
+          ),
+        ],
+        preArrivalRequired: true,
+        urgencyLevel: GuideUrgencyLevel.critical,
+        tier: GuideItemTier.critical,
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Polícia Federal · Acordo Brasil–Argentina',
+          sourceUrl: PreparationResourceLinks.argentinaResidenceAgreement
+              .toString(),
+          lastVerified: DateTime(2026, 7, 26),
+        ),
+        externalOfficialLinks: [
+          GuideSupportLink(
+            label: _t(
+              locale,
+              pt: 'Lista do acordo Brasil–Argentina',
+              es: 'Lista del acuerdo Brasil–Argentina',
+              en: 'Brazil–Argentina agreement checklist',
+            ),
+            url: PreparationResourceLinks.argentinaResidenceAgreement
+                .toString(),
+          ),
+          GuideSupportLink(
+            label: _t(
+              locale,
+              pt: 'Legalização e tradução',
+              es: 'Legalización y traducción',
+              en: 'Legalization and translation',
+            ),
+            url: PreparationResourceLinks.migrationDocumentRules.toString(),
+          ),
+        ],
+      ),
+      GuideActionItem(
+        id: 'item_1_0_entry_proof',
+        title: _t(
+          locale,
+          pt: 'Guarde a prova da sua entrada no Brasil',
+          es: 'Guarda la prueba de tu entrada a Brasil',
+          en: 'Keep proof of your entry into Brazil',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'A data de entrada é usada em etapas migratórias e de trânsito.',
+          es: 'La fecha de entrada se usa en trámites migratorios y de tránsito.',
+          en: 'Your entry date is used in migration and driving procedures.',
+        ),
+        type: GuideActionType.checklist,
+        phase: GuidePhase.arrival,
+        orderIndex: 8,
+        isCompleted: false,
+        icon: Icons.login_rounded,
+        steps: _list(
+          locale,
+          pt: [
+            'Guarde o comprovante migratório recebido na entrada, quando houver.',
+            'Registre a data exata de entrada e mantenha cópia offline.',
+            'Guarde também passagem, cartão de embarque ou outro documento que ajude a comprovar a data.',
+          ],
+          es: [
+            'Guarda el comprobante migratorio recibido al ingresar, cuando exista.',
+            'Registra la fecha exacta de entrada y conserva una copia sin conexión.',
+            'Guarda también pasaje, tarjeta de embarque u otro documento que ayude a probar la fecha.',
+          ],
+          en: [
+            'Keep the immigration receipt received at entry, when available.',
+            'Record the exact entry date and keep an offline copy.',
+            'Also keep the ticket, boarding pass, or another document that helps prove the date.',
+          ],
+        ),
+        checklistItems: [
+          ChecklistSubItem(
+            id: 'entry_date',
+            title: _t(
+              locale,
+              pt: 'Data de entrada registrada',
+              es: 'Fecha de entrada registrada',
+              en: 'Entry date recorded',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'entry_copy',
+            title: _t(
+              locale,
+              pt: 'Comprovante salvo offline',
+              es: 'Comprobante guardado sin conexión',
+              en: 'Proof saved offline',
+            ),
+            isCompleted: false,
+          ),
+        ],
+        urgencyLevel: GuideUrgencyLevel.urgent,
+        tier: GuideItemTier.critical,
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Polícia Federal · Acordo Brasil–Argentina',
+          sourceUrl: PreparationResourceLinks.argentinaResidenceAgreement
+              .toString(),
+          lastVerified: DateTime(2026, 7, 26),
+        ),
+      ),
+      GuideActionItem(
+        id: 'item_2_1_govbr',
+        title: _t(
+          locale,
+          pt: 'Crie e proteja sua conta Gov.br',
+          es: 'Crea y protege tu cuenta Gov.br',
+          en: 'Create and secure your Gov.br account',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'Depois do CPF, esse login abre os principais serviços digitais.',
+          es: 'Después del CPF, este acceso abre los principales servicios digitales.',
+          en: 'After CPF, this login unlocks key digital public services.',
+        ),
+        type: GuideActionType.external,
+        phase: GuidePhase.documents,
+        orderIndex: 10,
+        isCompleted: false,
+        icon: Icons.verified_user_outlined,
+        dependencies: const <String>['item_2_1_cpf'],
+        primaryActionLabel: _t(
+          locale,
+          pt: 'Criar conta Gov.br',
+          es: 'Crear cuenta Gov.br',
+          en: 'Create Gov.br account',
+        ),
+        primaryActionType: GuidePrimaryActionType.external,
+        primaryActionTarget: PreparationResourceLinks.govBrAccountGuide
+            .toString(),
+        steps: _list(
+          locale,
+          pt: [
+            'Crie a conta usando seu CPF.',
+            'Confirme e-mail e telefone aos quais você continuará tendo acesso.',
+            'Ative a verificação em duas etapas e guarde os meios de recuperação.',
+            'Aumente o nível da conta apenas quando o serviço que você precisa exigir.',
+          ],
+          es: [
+            'Crea la cuenta usando tu CPF.',
+            'Confirma correo y teléfono a los que seguirás teniendo acceso.',
+            'Activa la verificación en dos pasos y guarda los medios de recuperación.',
+            'Aumenta el nivel de la cuenta solo cuando el servicio que necesitas lo exija.',
+          ],
+          en: [
+            'Create the account using your CPF.',
+            'Confirm an email and phone number you will continue to access.',
+            'Enable two-step verification and keep recovery methods.',
+            'Increase the account level only when a service you need requires it.',
+          ],
+        ),
+        doneCriteria: _t(
+          locale,
+          pt: 'Você entra na conta com segurança e consegue recuperar o acesso.',
+          es: 'Puedes entrar de forma segura y recuperar el acceso.',
+          en: 'You can sign in securely and recover access.',
+        ),
+        tier: GuideItemTier.recommended,
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Gov.br · Criar sua conta',
+          sourceUrl: PreparationResourceLinks.govBrAccountGuide.toString(),
+          lastVerified: DateTime(2026, 7, 26),
+        ),
+      ),
+      GuideActionItem(
+        id: 'item_3_4_work_rights',
+        title: _t(
+          locale,
+          pt: 'Conheça seus direitos e evite vagas falsas',
+          es: 'Conoce tus derechos y evita ofertas falsas',
+          en: 'Know your rights and avoid fake jobs',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'Use canais oficiais e reconheça cobranças ou propostas abusivas.',
+          es: 'Usa canales oficiales y reconoce cobros o propuestas abusivas.',
+          en: 'Use official channels and recognize abusive fees or offers.',
+        ),
+        type: GuideActionType.external,
+        phase: GuidePhase.work,
+        orderIndex: 18,
+        isCompleted: false,
+        icon: Icons.shield_outlined,
+        applicabilityConditions: const <String>['income_strategy_goal'],
+        primaryActionLabel: _t(
+          locale,
+          pt: 'Abrir serviços do trabalhador',
+          es: 'Abrir servicios del trabajador',
+          en: 'Open worker services',
+        ),
+        primaryActionType: GuidePrimaryActionType.external,
+        primaryActionTarget: PreparationResourceLinks.migrantWorkerGuide
+            .toString(),
+        steps: _list(
+          locale,
+          pt: [
+            'Use Carteira de Trabalho Digital, Emprega Brasil ou SINE para consultar vagas públicas.',
+            'Não pague para participar de seleção ou receber promessa de contratação.',
+            'Não entregue senha, código de autenticação nem documento original para retenção.',
+            'Antes de aceitar trabalho informal, entenda remuneração, jornada, local e responsável.',
+          ],
+          es: [
+            'Usa Carteira de Trabalho Digital, Emprega Brasil o SINE para consultar vacantes públicas.',
+            'No pagues para participar de una selección ni por una promesa de contratación.',
+            'No entregues contraseña, código de autenticación ni documento original para retención.',
+            'Antes de aceptar trabajo informal, entiende pago, jornada, lugar y responsable.',
+          ],
+          en: [
+            'Use Digital Work Card, Emprega Brasil, or SINE to browse public listings.',
+            'Do not pay to join a selection process or receive a job promise.',
+            'Do not hand over passwords, authentication codes, or original documents for retention.',
+            'Before accepting informal work, understand pay, hours, location, and the responsible party.',
+          ],
+        ),
+        doneCriteria: _t(
+          locale,
+          pt: 'Você conhece um canal oficial de vagas e os principais sinais de fraude.',
+          es: 'Conoces un canal oficial de empleo y las principales señales de fraude.',
+          en: 'You know an official job channel and the main fraud warning signs.',
+        ),
+        tier: GuideItemTier.recommended,
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Ministério do Trabalho e Emprego',
+          sourceUrl: PreparationResourceLinks.migrantWorkerGuide.toString(),
+          lastVerified: DateTime(2026, 7, 26),
+        ),
+      ),
+      GuideActionItem(
+        id: 'item_0_7_family_documents',
+        title: _t(
+          locale,
+          pt: 'Prepare os documentos da mudança com crianças',
+          es: 'Prepara los documentos de la mudanza con niños',
+          en: 'Prepare documents for moving with children',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'Organize viagem, filiação, guarda, saúde e histórico escolar antes do embarque.',
+          es: 'Organiza viaje, filiación, custodia, salud e historial escolar antes de viajar.',
+          en: 'Organize travel, parentage, custody, health, and school records before departure.',
+        ),
+        type: GuideActionType.checklist,
+        phase: GuidePhase.preparation,
+        orderIndex: 7,
+        isCompleted: false,
+        icon: Icons.family_restroom_outlined,
+        applicabilityConditions: const <String>['family_with_kids'],
+        steps: _list(
+          locale,
+          pt: [
+            'Confira as autorizações de viagem e residência exigidas para cada criança e responsável.',
+            'Separe certidão de nascimento, documentos dos responsáveis e decisões de guarda quando existirem.',
+            'Leve histórico escolar e carteira de vacinação disponíveis.',
+            'Guarde contatos e autorizações em versão física e offline.',
+          ],
+          es: [
+            'Revisa las autorizaciones de viaje y residencia exigidas para cada niño y responsable.',
+            'Separa partida de nacimiento, documentos de responsables y decisiones de custodia cuando existan.',
+            'Lleva historial escolar y carnet de vacunación disponibles.',
+            'Guarda contactos y autorizaciones en versión física y sin conexión.',
+          ],
+          en: [
+            'Check travel and residence authorizations required for each child and guardian.',
+            'Prepare birth certificates, guardian documents, and custody decisions when applicable.',
+            'Bring available school and vaccination records.',
+            'Keep contacts and authorizations in physical and offline form.',
+          ],
+        ),
+        doneCriteria: _t(
+          locale,
+          pt: 'A documentação de cada criança e responsável foi conferida para viagem e chegada.',
+          es: 'La documentación de cada niño y responsable fue revisada para el viaje y la llegada.',
+          en: 'Documents for each child and guardian have been checked for travel and arrival.',
+        ),
+        preArrivalRequired: true,
+        tier: GuideItemTier.critical,
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Conselho Nacional de Educação · Migrantes',
+          sourceUrl: PreparationResourceLinks.familySchoolGuide.toString(),
+          lastVerified: DateTime(2026, 7, 26),
+          scopeNote: _t(
+            locale,
+            pt: 'Autorizações de viagem e guarda dependem da composição familiar; confirme também com a autoridade argentina competente.',
+            es: 'Las autorizaciones de viaje y custodia dependen de la composición familiar; confirma también con la autoridad argentina competente.',
+            en: 'Travel and custody authorizations depend on family circumstances; also confirm with the relevant Argentine authority.',
+          ),
+        ),
+      ),
+    ];
+  }
+
   static List<String> _priorityOrder(String goal) {
-    switch (goal) {
-      case 'work':
-      case 'find_job_br':
-        // Sequence: understand rules → base documents and research before travel
-        // → optional CPF route before boarding → money/arrival logistics
-        // → health base on arrival → residency filing → work card → bank → Pix → income path
-        return const [
-          'item_0_1_rule_90_days',
-          'item_0_2_antecedentes',
-          'item_0_3_budget',
-          'item_0_5_mercado_trabalho', // research BEFORE leaving
-          'item_0_6_saude_entender', // understand health BEFORE leaving
-          'item_2_1_cpf', // can be done before travel or on arrival
-          'item_1_3_money',
-          'item_0_4_flight',
-          'item_1_2_housing_temporary',
-          'item_1_1_chip',
-          'item_4_2_saude',
-          'item_2_2_residencia',
-          'item_2_3_ctps',
-          'item_3_1_conta_bancaria',
-          'item_3_3_pix',
-          'item_3_4_trabalho',
-          'item_3_2_aluguel_fixo',
-        ];
-      case 'remote_income':
-      case 'remote_work':
-      case 'entrepreneur':
-        // Sequence: understand rules → research income model → understand health
-        // → optional CPF route before boarding → money/logistics
-        // → health base on arrival → bank/Pix/MEI → residency filing → work definition → rent
-        return const [
-          'item_0_1_rule_90_days',
-          'item_0_2_antecedentes',
-          'item_0_3_budget',
-          'item_0_5_mercado_trabalho', // research BEFORE leaving
-          'item_0_6_saude_entender', // understand health BEFORE leaving
-          'item_2_1_cpf',
-          'item_1_3_money',
-          'item_0_4_flight',
-          'item_1_2_housing_temporary',
-          'item_1_1_chip',
-          'item_4_2_saude',
-          'item_3_1_conta_bancaria',
-          'item_3_3_pix',
-          'item_4_4_mei',
-          'item_2_2_residencia',
-          'item_3_4_trabalho',
-          'item_3_2_aluguel_fixo',
-        ];
-      case 'study':
-        // Sequence: understand rules → research job market (part-time context)
-        // → understand health → optional CPF route before travel
-        // → money/arrival logistics → health base on arrival → residency → work card → bank → Pix → rent
-        return const [
-          'item_0_1_rule_90_days',
-          'item_0_2_antecedentes',
-          'item_0_3_budget',
-          'item_0_5_mercado_trabalho', // understand part-time/internship market
-          'item_0_6_saude_entender', // understand health BEFORE leaving
-          'item_2_1_cpf',
-          'item_1_3_money',
-          'item_0_4_flight',
-          'item_1_2_housing_temporary',
-          'item_1_1_chip',
-          'item_4_2_saude',
-          'item_2_2_residencia',
-          'item_2_3_ctps',
-          'item_3_1_conta_bancaria',
-          'item_3_3_pix',
-          'item_3_2_aluguel_fixo',
-        ];
-      case 'family_partner':
-      case 'quality_of_life':
-      case 'beach_life':
-      case 'fresh_start':
-        // Sequence: understand rules → research local economy → understand health
-        // → optional CPF route before travel → money/arrival logistics
-        // → health base on arrival → residency → bank → Pix → rent
-        return const [
-          'item_0_1_rule_90_days',
-          'item_0_2_antecedentes',
-          'item_0_3_budget',
-          'item_0_5_mercado_trabalho', // understand local economy before deciding
-          'item_0_6_saude_entender', // understand health BEFORE leaving
-          'item_2_1_cpf',
-          'item_1_3_money',
-          'item_0_4_flight',
-          'item_1_2_housing_temporary',
-          'item_1_1_chip',
-          'item_4_2_saude',
-          'item_2_2_residencia',
-          'item_3_1_conta_bancaria',
-          'item_3_3_pix',
-          'item_3_2_aluguel_fixo',
-        ];
-      default:
-        return const [];
-    }
+    final goalSpecific = switch (goal) {
+      'work' || 'find_job_br' => const [
+        'item_0_5_mercado_trabalho',
+        'item_2_3_ctps',
+        'item_3_4_work_rights',
+        'item_3_4_trabalho',
+      ],
+      'remote_income' || 'remote_work' || 'entrepreneur' => const [
+        'item_2_6_impostos_exterior',
+        'item_3_4_trabalho',
+        'item_4_4_mei',
+        'item_3_4_work_rights',
+      ],
+      'study' => const [
+        'item_3_5_revalidacao_estudos',
+        'item_3_6_familia_escola',
+      ],
+      _ => const <String>[],
+    };
+
+    return [
+      'item_0_1_rule_90_days',
+      'item_0_2_document_folder',
+      'item_0_2_antecedentes',
+      'item_2_1_cpf',
+      'item_0_3_budget',
+      'item_1_3_money',
+      'item_3_3_pix',
+      'item_0_6_saude_entender',
+      'item_0_6_medicamentos',
+      'item_0_7_family_documents',
+      'item_1_5_animais',
+      'item_0_4_flight',
+      'item_1_2_housing_temporary',
+      'item_1_0_entry_proof',
+      'item_4_7_seguranca_emergencia',
+      'item_1_1_chip',
+      'item_2_1_govbr',
+      'item_2_2_residencia',
+      'item_4_2_saude',
+      'item_4_5_registro_rnm',
+      'item_3_1_conta_bancaria',
+      'item_3_2_aluguel_fixo',
+      ...goalSpecific,
+      'item_3_6_familia_escola',
+      'item_4_1_cnh',
+      'item_4_3_permanencia',
+    ];
   }
 
   static GuideActionItem _contextualizeItem(
@@ -4820,6 +5171,1310 @@ class ArgentinaBrazilGuideDataSource {
     };
 
     return _sanitizeCostInfo(contextualized, locale);
+  }
+
+  static GuideActionItem _applySafetyReview(
+    GuideActionItem item,
+    String locale,
+  ) {
+    return switch (item.id) {
+      'item_0_2_antecedentes' => item.copyWith(
+        shortDescription: _t(
+          locale,
+          pt: 'Peça os certificados dos países onde viveu nos cinco anos anteriores, conforme a lista vigente da Polícia Federal.',
+          es: 'Pide los certificados de los países donde viviste en los cinco años anteriores, según la lista vigente de la Policía Federal.',
+          en: 'Request certificates from countries where you lived in the previous five years, following the current Federal Police list.',
+        ),
+        dependencies: const <String>['item_0_2_document_folder'],
+        context: _t(
+          locale,
+          pt: 'O certificado argentino cobre a Argentina. Se você viveu em outro país nos últimos cinco anos, confira também a exigência daquele país.',
+          es: 'El certificado argentino cubre Argentina. Si viviste en otro país durante los últimos cinco años, revisa también ese requisito.',
+          en: 'The Argentine certificate covers Argentina. If you lived elsewhere in the last five years, check that country’s requirement too.',
+        ),
+        steps: _list(
+          locale,
+          pt: [
+            'Liste todos os países onde você viveu nos cinco anos anteriores ao pedido.',
+            'Para a Argentina, use o Registro Nacional de Reincidencia e escolha uma modalidade disponível.',
+            'Para outros países, abra a autoridade oficial correspondente e confirme emissão e formalidades.',
+            'Baixe o PDF, verifique a assinatura digital e mantenha cópia offline.',
+            'Planeje a emissão perto do protocolo e confirme a aceitação atual com a Polícia Federal.',
+          ],
+          es: [
+            'Lista todos los países donde viviste en los cinco años anteriores a la solicitud.',
+            'Para Argentina, usa el Registro Nacional de Reincidencia y elige una modalidad disponible.',
+            'Para otros países, abre la autoridad oficial correspondiente y confirma emisión y formalidades.',
+            'Descarga el PDF, revisa la firma digital y conserva una copia sin conexión.',
+            'Planifica la emisión cerca de la presentación y confirma la aceptación vigente con la Policía Federal.',
+          ],
+          en: [
+            'List every country where you lived in the five years before applying.',
+            'For Argentina, use the National Recidivism Registry and choose an available service speed.',
+            'For other countries, use the relevant official authority and confirm issuance and formalities.',
+            'Download the PDF, verify its digital signature, and keep an offline copy.',
+            'Time issuance close to filing and confirm current acceptance with Federal Police.',
+          ],
+        ),
+        doneCriteria: _t(
+          locale,
+          pt: 'Você possui os certificados aplicáveis e confirmou que estarão adequados na data do protocolo.',
+          es: 'Tienes los certificados aplicables y confirmaste que estarán adecuados al presentar.',
+          en: 'You have the applicable certificates and confirmed they will be suitable when filing.',
+        ),
+        tips: _list(
+          locale,
+          pt: [
+            'O RNR permite baixar o certificado durante 90 dias; isso não deve ser apresentado como uma validade universal definida pelo órgão argentino.',
+            'A Polícia Federal usa 90 dias como referência e informa que a aceitação de certidão fora desse período fica a critério da autoridade.',
+          ],
+          es: [
+            'El RNR permite descargar el certificado durante 90 días; eso no debe presentarse como una vigencia universal definida por el organismo argentino.',
+            'La Policía Federal usa 90 días como referencia e informa que aceptar un certificado fuera de ese período queda a criterio de la autoridad.',
+          ],
+          en: [
+            'RNR lets you download the certificate for 90 days; that should not be presented as a universal validity period defined by Argentina.',
+            'Federal Police uses 90 days as a reference and states that accepting an older certificate is at the authority’s discretion.',
+          ],
+        ),
+        warningFlags: _list(
+          locale,
+          pt: [
+            'Não peça apenas o certificado argentino se viveu em outro país nos últimos cinco anos.',
+            'Não confunda o período de download do RNR com garantia de aceitação pela Polícia Federal.',
+          ],
+          es: [
+            'No pidas solo el certificado argentino si viviste en otro país durante los últimos cinco años.',
+            'No confundas el período de descarga del RNR con una garantía de aceptación de la Policía Federal.',
+          ],
+          en: [
+            'Do not request only the Argentine certificate if you lived in another country during the last five years.',
+            'Do not confuse the RNR download period with guaranteed Federal Police acceptance.',
+          ],
+        ),
+        costInfo: _t(
+          locale,
+          pt: 'O RNR oferece modalidades e preços próprios. Confira o valor vigente no momento da solicitação.',
+          es: 'El RNR ofrece modalidades y precios propios. Revisa el valor vigente al solicitar.',
+          en: 'RNR offers different service speeds and prices. Check the current amount when requesting.',
+        ),
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'RNR Argentina e Polícia Federal',
+          sourceUrl:
+              'https://www.argentina.gob.ar/justicia/reincidencia/antecedentespenales/preguntas-frecuentes',
+          lastVerified: DateTime(2026, 7, 26),
+          scopeNote: _t(
+            locale,
+            pt: 'A decisão final sobre aceitação documental pertence à Polícia Federal.',
+            es: 'La decisión final sobre aceptación documental corresponde a la Policía Federal.',
+            en: 'Federal Police makes the final document-acceptance decision.',
+          ),
+        ),
+      ),
+      'item_2_2_residencia' => item.copyWith(
+        dependencies: const <String>[
+          'item_0_2_document_folder',
+          'item_0_2_antecedentes',
+          'item_1_0_entry_proof',
+        ],
+        requirements: _list(
+          locale,
+          pt: [
+            'Passaporte ou documento de identidade válido para ingresso',
+            'Certidão civil ou consular quando o documento não mostrar filiação',
+            'Antecedentes dos países onde residiu nos cinco anos anteriores, quando aplicável',
+            'Declaração pessoal de ausência de antecedentes nos cinco anos anteriores',
+            'Comprovante de ingresso no Brasil',
+            'Comprovantes das taxas oficiais, quando aplicáveis',
+          ],
+          es: [
+            'Pasaporte o documento de identidad válido para ingresar',
+            'Partida civil o certificado consular cuando el documento no muestre filiación',
+            'Antecedentes de los países donde residiste en los cinco años anteriores, cuando corresponda',
+            'Declaración personal de ausencia de antecedentes en los cinco años anteriores',
+            'Comprobante de ingreso a Brasil',
+            'Comprobantes de tasas oficiales, cuando correspondan',
+          ],
+          en: [
+            'Passport or identity document valid for entry',
+            'Civil or consular certificate when the ID does not show parentage',
+            'Criminal records from countries of residence in the previous five years, when applicable',
+            'Personal declaration of no criminal record in the previous five years',
+            'Proof of entry into Brazil',
+            'Official fee receipts, when applicable',
+          ],
+        ),
+        checklistItems: [
+          ChecklistSubItem(
+            id: 'res_route',
+            title: _t(
+              locale,
+              pt: 'Base legal Brasil–Argentina confirmada',
+              es: 'Base legal Brasil–Argentina confirmada',
+              en: 'Brazil–Argentina legal basis confirmed',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'res_documents',
+            title: _t(
+              locale,
+              pt: 'Lista oficial vigente conferida item por item',
+              es: 'Lista oficial vigente revisada punto por punto',
+              en: 'Current official list checked item by item',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'res_form',
+            title: _t(
+              locale,
+              pt: 'Formulário, taxas aplicáveis e agendamento concluídos',
+              es: 'Formulario, tasas aplicables y turno completados',
+              en: 'Form, applicable fees, and appointment completed',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'res_protocol',
+            title: _t(
+              locale,
+              pt: 'Protocolo recebido e salvo',
+              es: 'Protocolo recibido y guardado',
+              en: 'Protocol received and saved',
+            ),
+            isCompleted: false,
+          ),
+        ],
+        blockingReason: _t(
+          locale,
+          pt: 'A regularização migratória é a base para viver e trabalhar no Brasil com segurança jurídica; cada serviço posterior mantém requisitos próprios.',
+          es: 'La regularización migratoria es la base para vivir y trabajar en Brasil con seguridad jurídica; cada servicio posterior mantiene requisitos propios.',
+          en: 'Migration regularization is the foundation for living and working in Brazil lawfully; later services keep their own requirements.',
+        ),
+        communityTips: const <String>[],
+      ),
+      'item_2_3_ctps' => item.copyWith(
+        title: _t(
+          locale,
+          pt: 'Acesse e valide sua Carteira de Trabalho Digital',
+          es: 'Accede y valida tu Carteira de Trabalho Digital',
+          en: 'Access and validate your Digital Work Card',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'A CTPS Digital é identificada pelo CPF; acesse pelo Gov.br e confira seus dados.',
+          es: 'La CTPS Digital se identifica por el CPF; accede con Gov.br y revisa tus datos.',
+          en: 'The Digital Work Card is identified by CPF; access it through Gov.br and check your data.',
+        ),
+        dependencies: const <String>['item_2_1_govbr'],
+        context: _t(
+          locale,
+          pt: 'A CTPS Digital é emitida automaticamente para inscritos no CPF. O passo prático é habilitar o acesso e validar os dados.',
+          es: 'La CTPS Digital se emite automáticamente para personas inscritas en el CPF. El paso práctico es habilitar el acceso y validar los datos.',
+          en: 'The Digital Work Card is automatically issued to CPF holders. The practical step is enabling access and validating data.',
+        ),
+        whyItMatters: _t(
+          locale,
+          pt: 'Ela permite acompanhar vínculos e informações trabalhistas registradas pelo empregador.',
+          es: 'Permite seguir los vínculos y datos laborales registrados por el empleador.',
+          en: 'It lets you track employment relationships and information registered by employers.',
+        ),
+        steps: _list(
+          locale,
+          pt: [
+            'Confirme que seu CPF está regular e acesse sua conta Gov.br.',
+            'Abra a Carteira de Trabalho Digital pelo aplicativo ou pela web.',
+            'Confira nome, CPF e qualificação civil.',
+            'Se houver divergência, use o canal oficial indicado antes da contratação.',
+          ],
+          es: [
+            'Confirma que tu CPF está regular y accede a tu cuenta Gov.br.',
+            'Abre la Carteira de Trabalho Digital en la app o web.',
+            'Revisa nombre, CPF y datos civiles.',
+            'Si hay divergencias, usa el canal oficial indicado antes de la contratación.',
+          ],
+          en: [
+            'Confirm your CPF is regular and access your Gov.br account.',
+            'Open the Digital Work Card in the app or on the web.',
+            'Check your name, CPF, and civil information.',
+            'If data differs, use the official correction channel before hiring.',
+          ],
+        ),
+        requirements: _list(
+          locale,
+          pt: ['CPF regular', 'Conta Gov.br'],
+          es: ['CPF regular', 'Cuenta Gov.br'],
+          en: ['Regular CPF', 'Gov.br account'],
+        ),
+        doneCriteria: _t(
+          locale,
+          pt: 'Você consegue acessar a CTPS Digital e seus dados estão corretos.',
+          es: 'Puedes acceder a la CTPS Digital y tus datos están correctos.',
+          en: 'You can access the Digital Work Card and your data is correct.',
+        ),
+        checklistItems: [
+          ChecklistSubItem(
+            id: 'ctps_access',
+            title: _t(
+              locale,
+              pt: 'Acesso à CTPS Digital confirmado',
+              es: 'Acceso a la CTPS Digital confirmado',
+              en: 'Digital Work Card access confirmed',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'ctps_data',
+            title: _t(
+              locale,
+              pt: 'Dados civis conferidos',
+              es: 'Datos civiles revisados',
+              en: 'Civil data checked',
+            ),
+            isCompleted: false,
+          ),
+        ],
+        tips: const <String>[],
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Ministério do Trabalho · CTPS Digital',
+          sourceUrl:
+              'https://www.gov.br/trabalho-e-emprego/pt-br/servicos/trabalhador/carteira-de-trabalho/carteira-de-trabalho-e-previdencia-social-ctps-1',
+          lastVerified: DateTime(2026, 7, 26),
+        ),
+      ),
+      'item_0_5_mercado_trabalho' => item.copyWith(
+        preArrivalRequired: false,
+        tier: GuideItemTier.recommended,
+        applicabilityConditions: const <String>['income_strategy_goal'],
+        primaryActionLabel: _t(
+          locale,
+          pt: 'Consultar Emprega Brasil e SINE',
+          es: 'Consultar Emprega Brasil y SINE',
+          en: 'Check Emprega Brasil and SINE',
+        ),
+        primaryActionTarget: PreparationResourceLinks.officialJobsPortal
+            .toString(),
+        steps: _list(
+          locale,
+          pt: [
+            'Pesquise vagas comparáveis por cidade, senioridade e tipo de contrato.',
+            'Diferencie salário bruto, descontos e benefícios antes de estimar o líquido.',
+            'Compare a renda líquida estimada com uma faixa de custo de vida da cidade.',
+            'Use Carteira de Trabalho Digital, Emprega Brasil/SINE e plataformas privadas como fontes distintas.',
+          ],
+          es: [
+            'Busca vacantes comparables por ciudad, experiencia y tipo de contrato.',
+            'Diferencia salario bruto, descuentos y beneficios antes de estimar el neto.',
+            'Compara el ingreso neto estimado con un rango de costo de vida de la ciudad.',
+            'Usa Carteira de Trabalho Digital, Emprega Brasil/SINE y plataformas privadas como fuentes distintas.',
+          ],
+          en: [
+            'Research comparable openings by city, seniority, and contract type.',
+            'Separate gross salary, deductions, and benefits before estimating take-home pay.',
+            'Compare estimated take-home pay with a city cost-of-living range.',
+            'Use Digital Work Card, Emprega Brasil/SINE, and private platforms as distinct sources.',
+          ],
+        ),
+        tips: _list(
+          locale,
+          pt: [
+            'Salário anunciado costuma ser bruto, salvo indicação expressa em contrário.',
+            'MEI, PJ e CLT têm obrigações e proteções diferentes; não compare apenas o valor mensal.',
+          ],
+          es: [
+            'El salario anunciado suele ser bruto, salvo indicación expresa en contrario.',
+            'MEI, PJ y CLT tienen obligaciones y protecciones diferentes; no compares solo el valor mensual.',
+          ],
+          en: [
+            'Advertised salary is usually gross unless expressly stated otherwise.',
+            'MEI, contractor, and formal employment have different obligations and protections; do not compare only monthly amounts.',
+          ],
+        ),
+        communityTips: const <String>[],
+        externalOfficialLinks: [
+          GuideSupportLink(
+            label: 'Emprega Brasil / SINE',
+            url: PreparationResourceLinks.officialJobsPortal.toString(),
+          ),
+        ],
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Ministério do Trabalho · Emprega Brasil/SINE',
+          sourceUrl: PreparationResourceLinks.officialJobsPortal.toString(),
+          lastVerified: DateTime(2026, 7, 26),
+        ),
+      ),
+      'item_3_4_trabalho' => item.copyWith(
+        dependencies: const <String>[],
+        primaryActionTarget: PreparationResourceLinks.officialJobsPortal
+            .toString(),
+        requirements: _list(
+          locale,
+          pt: [
+            'Caminho de renda escolhido',
+            'Documentos exigidos para esse caminho',
+            'Análise tributária quando houver renda exterior ou atividade própria',
+          ],
+          es: [
+            'Camino de ingresos elegido',
+            'Documentos exigidos para ese camino',
+            'Análisis fiscal cuando haya ingresos del exterior o actividad propia',
+          ],
+          en: [
+            'Chosen income path',
+            'Documents required for that path',
+            'Tax review for foreign income or self-employment',
+          ],
+        ),
+        tips: _list(
+          locale,
+          pt: [
+            'Para CLT, priorize CPF, Gov.br, CTPS Digital e regularização migratória.',
+            'Para atividade própria, confirme se a ocupação pode ser MEI e como a renda exterior será tratada.',
+          ],
+          es: [
+            'Para empleo formal, prioriza CPF, Gov.br, CTPS Digital y regularización migratoria.',
+            'Para actividad propia, confirma si la ocupación puede ser MEI y cómo se tratarán los ingresos del exterior.',
+          ],
+          en: [
+            'For formal work, prioritize CPF, Gov.br, Digital Work Card, and migration regularization.',
+            'For self-employment, confirm MEI eligibility and how foreign income will be treated.',
+          ],
+        ),
+        communityTips: const <String>[],
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Ministério do Trabalho e Receita Federal',
+          sourceUrl: PreparationResourceLinks.officialJobsPortal.toString(),
+          lastVerified: DateTime(2026, 7, 26),
+          scopeNote: _t(
+            locale,
+            pt: 'A escolha do regime e a tributação são individuais; o app não calcula enquadramento.',
+            es: 'La elección del régimen y la tributación son individuales; la app no calcula el encuadre.',
+            en: 'Work structure and taxation are individual; the app does not calculate classification.',
+          ),
+        ),
+      ),
+      'item_3_2_aluguel_fixo' => item.copyWith(
+        whyItMatters: _t(
+          locale,
+          pt: 'Uma moradia estável facilita a rotina, mas não é requisito universal para matrícula escolar ou contratação.',
+          es: 'Una vivienda estable facilita la rutina, pero no es requisito universal para matrícula escolar o contratación.',
+          en: 'Stable housing helps daily life but is not a universal requirement for school enrollment or hiring.',
+        ),
+        requirements: _list(
+          locale,
+          pt: [
+            'Documento e CPF conforme a análise do locador',
+            'Comprovação de renda, quando solicitada',
+            'Uma modalidade de garantia prevista no contrato',
+          ],
+          es: [
+            'Documento y CPF según el análisis del locador',
+            'Comprobante de ingresos, cuando se solicite',
+            'Una modalidad de garantía prevista en el contrato',
+          ],
+          en: [
+            'ID and CPF according to the landlord’s review',
+            'Proof of income when requested',
+            'One guarantee type stated in the contract',
+          ],
+        ),
+        warningFlags: _list(
+          locale,
+          pt: [
+            'A Lei do Inquilinato proíbe mais de uma modalidade de garantia no mesmo contrato.',
+            'Caução em dinheiro não pode superar três meses de aluguel e deve seguir a forma prevista em lei.',
+            'Não pague depósito antes de verificar imóvel, responsável e contrato.',
+            'Tradução automática ajuda a compreender, mas não valida cláusulas jurídicas.',
+          ],
+          es: [
+            'La ley brasileña prohíbe más de una modalidad de garantía en el mismo contrato.',
+            'La garantía en dinero no puede superar tres meses de alquiler y debe seguir la forma legal.',
+            'No pagues depósito antes de verificar inmueble, responsable y contrato.',
+            'La traducción automática ayuda a comprender, pero no valida cláusulas jurídicas.',
+          ],
+          en: [
+            'Brazilian tenancy law prohibits more than one guarantee type in the same lease.',
+            'Cash security may not exceed three months’ rent and must follow the legal form.',
+            'Do not pay a deposit before verifying the property, responsible party, and contract.',
+            'Machine translation can aid understanding but does not validate legal clauses.',
+          ],
+        ),
+        communityTips: const <String>[],
+      ),
+      'item_0_6_saude_entender' => item.copyWith(
+        preArrivalRequired: false,
+        tier: GuideItemTier.recommended,
+        steps: _list(
+          locale,
+          pt: [
+            'Entenda que o SUS atende pessoas no país independentemente da situação migratória.',
+            'Diferencie UBS, UPA, SAMU e hospital e localize as referências da cidade.',
+            'Se quiser plano privado, consulte a ANS e peça cotação para sua idade, cidade, cobertura, carência e coparticipação.',
+            'Se usa medicamento contínuo, confira a regra da Anvisa e leve receita e documentação compatíveis com a quantidade.',
+          ],
+          es: [
+            'Entiende que el SUS atiende a personas en el país independientemente de la situación migratoria.',
+            'Diferencia UBS, UPA, SAMU y hospital y ubica las referencias de la ciudad.',
+            'Si quieres plan privado, consulta ANS y pide cotización para tu edad, ciudad, cobertura, carencia y copago.',
+            'Si usas medicación continua, revisa la regla de Anvisa y lleva receta y documentación compatibles con la cantidad.',
+          ],
+          en: [
+            'Understand that SUS serves people in the country regardless of migration status.',
+            'Distinguish UBS, UPA, SAMU, and hospitals and find the city’s reference services.',
+            'If considering private insurance, check ANS and request a quote for your age, city, coverage, waiting periods, and copay.',
+            'For ongoing medication, check Anvisa rules and carry prescriptions and records matching the quantity.',
+          ],
+        ),
+        tips: _list(
+          locale,
+          pt: [
+            'Urgência não deve esperar CPF ou Cartão SUS.',
+            'Preço, rede, carência e inclusão de dependentes variam por plano e contrato.',
+          ],
+          es: [
+            'Una urgencia no debe esperar CPF o Tarjeta SUS.',
+            'Precio, red, carencia e inclusión de dependientes varían por plan y contrato.',
+          ],
+          en: [
+            'Urgent care should not wait for CPF or a SUS card.',
+            'Price, network, waiting periods, and dependent coverage vary by plan and contract.',
+          ],
+        ),
+        communityTips: const <String>[],
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Ministério da Saúde · Saúde de migrantes',
+          sourceUrl: PreparationResourceLinks.migrantHealthGuide.toString(),
+          lastVerified: DateTime(2026, 7, 26),
+        ),
+      ),
+      'item_4_2_saude' => item.copyWith(
+        decisionOptions: [
+          GuideDecisionOption(
+            title: 'SUS',
+            description: _t(
+              locale,
+              pt: 'Sistema público disponível a todas as pessoas no país; organize a UBS de referência para acompanhamento.',
+              es: 'Sistema público disponible para todas las personas en el país; organiza la UBS de referencia para seguimiento.',
+              en: 'Public system available to everyone in the country; identify your reference UBS for ongoing care.',
+            ),
+          ),
+          GuideDecisionOption(
+            title: _t(
+              locale,
+              pt: 'SUS + cobertura privada',
+              es: 'SUS + cobertura privada',
+              en: 'SUS + private coverage',
+            ),
+            description: _t(
+              locale,
+              pt: 'Compare operadoras registradas na ANS, rede, carências, coparticipação e dependentes.',
+              es: 'Compara operadoras registradas en ANS, red, carencias, copago y dependientes.',
+              en: 'Compare ANS-registered providers, networks, waiting periods, copays, and dependents.',
+            ),
+          ),
+          GuideDecisionOption(
+            title: _t(
+              locale,
+              pt: 'Benefício do empregador',
+              es: 'Beneficio del empleador',
+              en: 'Employer benefit',
+            ),
+            description: _t(
+              locale,
+              pt: 'Confirme custo, coparticipação, carência, rede e regras para dependentes diretamente com o empregador.',
+              es: 'Confirma costo, copago, carencia, red y reglas para dependientes directamente con el empleador.',
+              en: 'Confirm cost, copay, waiting periods, network, and dependent rules with the employer.',
+            ),
+          ),
+        ],
+        communityTips: const <String>[],
+      ),
+      'item_4_1_cnh' => item.copyWith(
+        shortDescription: _t(
+          locale,
+          pt: 'A regra nacional permite dirigir por até 180 dias nas condições oficiais; depois, confirme o processo no DETRAN.',
+          es: 'La regla nacional permite conducir hasta 180 días bajo las condiciones oficiales; después, confirma el proceso en DETRAN.',
+          en: 'The national rule allows driving for up to 180 days under official conditions; then confirm the DETRAN process.',
+        ),
+        dependencies: const <String>['item_1_0_entry_proof'],
+        tier: GuideItemTier.optional,
+        context: _t(
+          locale,
+          pt: 'Este passo só importa para quem pretende dirigir. A Resolução CONTRAN nº 1.020/2025 é a referência nacional, e a documentação operacional é confirmada no DETRAN estadual.',
+          es: 'Este paso solo importa a quien pretende conducir. La Resolución CONTRAN 1.020/2025 es la referencia nacional y la documentación operativa se confirma en DETRAN.',
+          en: 'This step only matters if you plan to drive. CONTRAN Resolution 1,020/2025 is the national reference, while operational documents are confirmed with the state DETRAN.',
+        ),
+        primaryActionLabel: _t(
+          locale,
+          pt: 'Ver regra nacional atual',
+          es: 'Ver regla nacional actual',
+          en: 'See current national rule',
+        ),
+        primaryActionTarget: PreparationResourceLinks.foreignDrivingGuide
+            .toString(),
+        steps: _list(
+          locale,
+          pt: [
+            'Antes de dirigir, confirme que a habilitação argentina está válida.',
+            'Porte a habilitação, a PID quando aplicável, documento de identificação e prova da data de entrada.',
+            'Conte o prazo de 180 dias a partir da entrada no Brasil.',
+            'Se pretende continuar dirigindo, consulte o DETRAN do seu domicílio antes do fim do prazo.',
+            'Use a lista do DETRAN para confirmar documentos, traduções, exames, taxas e agendamento.',
+          ],
+          es: [
+            'Antes de conducir, confirma que la licencia argentina está vigente.',
+            'Lleva licencia, PID cuando corresponda, documento de identidad y prueba de la fecha de entrada.',
+            'Cuenta el plazo de 180 días desde el ingreso a Brasil.',
+            'Si quieres seguir conduciendo, consulta DETRAN de tu domicilio antes del final del plazo.',
+            'Usa la lista de DETRAN para confirmar documentos, traducciones, exámenes, tasas y turno.',
+          ],
+          en: [
+            'Before driving, confirm the Argentine license is valid.',
+            'Carry the license, an IDP when applicable, identification, and proof of entry date.',
+            'Count the 180-day period from entry into Brazil.',
+            'If you plan to keep driving, check your local DETRAN before the period ends.',
+            'Use the DETRAN list to confirm documents, translations, exams, fees, and booking.',
+          ],
+        ),
+        requirements: _list(
+          locale,
+          pt: [
+            'Habilitação estrangeira válida',
+            'PID quando aplicável',
+            'Documento de identificação',
+            'Comprovante da data de entrada',
+            'Exigências do DETRAN estadual para obtenção da CNH após o prazo',
+          ],
+          es: [
+            'Licencia extranjera vigente',
+            'PID cuando corresponda',
+            'Documento de identidad',
+            'Comprobante de la fecha de entrada',
+            'Requisitos de DETRAN estatal para obtener CNH después del plazo',
+          ],
+          en: [
+            'Valid foreign license',
+            'IDP when applicable',
+            'Identification document',
+            'Proof of entry date',
+            'State DETRAN requirements for obtaining a CNH after the period',
+          ],
+        ),
+        tips: const <String>[],
+        decisionOptions: const <GuideDecisionOption>[],
+        communityTips: const <String>[],
+        costInfo: _t(
+          locale,
+          pt: 'Taxas, exames e documentos variam por estado; consulte o DETRAN do seu domicílio.',
+          es: 'Tasas, exámenes y documentos varían por estado; consulta DETRAN de tu domicilio.',
+          en: 'Fees, exams, and documents vary by state; check your local DETRAN.',
+        ),
+        externalOfficialLinks: [
+          GuideSupportLink(
+            label: 'Senatran · Habilitação estrangeira',
+            url: PreparationResourceLinks.foreignDrivingGuide.toString(),
+          ),
+        ],
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Senatran · Resolução CONTRAN nº 1.020/2025',
+          sourceUrl: PreparationResourceLinks.foreignDrivingGuide.toString(),
+          lastVerified: DateTime(2026, 7, 26),
+        ),
+      ),
+      'item_4_5_registro_rnm' => item.copyWith(
+        whyItMatters: _t(
+          locale,
+          pt: 'O registro gera o RNM e a CRNM depois da autorização ou do visto aplicável, inclusive em rotas permanentes.',
+          es: 'El registro genera RNM y CRNM después de la autorización o visa aplicable, incluso en rutas permanentes.',
+          en: 'Registration creates the RNM and CRNM after the applicable authorization or visa, including permanent routes.',
+        ),
+        requirements: _list(
+          locale,
+          pt: [
+            'Visto temporário ou autorização de residência aprovada, conforme o caso',
+            'Documentação indicada no serviço oficial para a modalidade',
+            'Formulário e agendamento da Polícia Federal',
+            'Taxa de emissão da CRNM quando aplicável',
+          ],
+          es: [
+            'Visa temporaria o autorización de residencia aprobada, según el caso',
+            'Documentación indicada en el servicio oficial para la modalidad',
+            'Formulario y turno de la Policía Federal',
+            'Tasa de emisión de CRNM cuando corresponda',
+          ],
+          en: [
+            'Temporary visa or approved residence authorization, as applicable',
+            'Documents listed by the official service for the route',
+            'Federal Police form and appointment',
+            'CRNM issuance fee when applicable',
+          ],
+        ),
+        tips: _list(
+          locale,
+          pt: [
+            'Visto temporário: o serviço oficial informa prazo de 90 dias após a entrada.',
+            'Autorização de residência publicada: o serviço oficial informa prazo de 30 dias após a publicação no DOU.',
+            'Acompanhe a confecção e só agende a retirada quando o sistema indicar que a carteira está pronta.',
+          ],
+          es: [
+            'Visa temporaria: el servicio oficial informa 90 días después del ingreso.',
+            'Autorización de residencia publicada: el servicio oficial informa 30 días después de la publicación en DOU.',
+            'Sigue la fabricación y agenda el retiro solo cuando el sistema indique que la tarjeta está lista.',
+          ],
+          en: [
+            'Temporary visa: the official service states 90 days after entry.',
+            'Published residence authorization: the official service states 30 days after DOU publication.',
+            'Track production and book pickup only when the system shows the card is ready.',
+          ],
+        ),
+        urgencySignal: _t(
+          locale,
+          pt: 'Use o prazo correspondente ao seu caso: 90 dias após a entrada com visto temporário ou 30 dias após a publicação da autorização.',
+          es: 'Usa el plazo de tu caso: 90 días después del ingreso con visa temporaria o 30 días después de la publicación de la autorización.',
+          en: 'Use the deadline for your case: 90 days after entry with a temporary visa or 30 days after authorization publication.',
+        ),
+        costInfo: _t(
+          locale,
+          pt: 'A emissão da CRNM possui taxa oficial quando aplicável; confirme o valor vigente no serviço antes de gerar a GRU.',
+          es: 'La emisión de CRNM tiene tasa oficial cuando corresponde; confirma el valor vigente antes de generar la GRU.',
+          en: 'CRNM issuance has an official fee when applicable; confirm the current amount before generating the GRU.',
+        ),
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Polícia Federal · Registro e CRNM',
+          sourceUrl: PreparationResourceLinks.rnMRegistrationGuide.toString(),
+          lastVerified: DateTime(2026, 7, 26),
+        ),
+      ),
+      'item_4_3_permanencia' => item.copyWith(
+        applicabilityConditions: const <String>['temporary_residence_route'],
+        tier: GuideItemTier.optional,
+      ),
+      'item_4_4_mei' => item.copyWith(
+        dependencies: const <String>['item_2_1_govbr'],
+        steps: _list(
+          locale,
+          pt: [
+            'Confirme se sua atividade consta na lista vigente do MEI e se você atende aos demais requisitos.',
+            'Confira se CPF e dados civis estão corretos antes da formalização.',
+            'Acesse somente o Portal do Empreendedor e revise declarações e obrigações.',
+            'Antes de faturar renda da Argentina ou de outro país, entenda o tratamento tributário dessa renda.',
+          ],
+          es: [
+            'Confirma si tu actividad está en la lista vigente del MEI y si cumples los demás requisitos.',
+            'Revisa que CPF y datos civiles estén correctos antes de formalizar.',
+            'Accede solo al Portal do Empreendedor y revisa declaraciones y obligaciones.',
+            'Antes de facturar ingresos de Argentina u otro país, entiende el tratamiento fiscal.',
+          ],
+          en: [
+            'Confirm your activity is on the current MEI list and that you meet the other requirements.',
+            'Check CPF and civil data before formalizing.',
+            'Use only the Entrepreneur Portal and review declarations and obligations.',
+            'Before invoicing Argentine or other foreign income, understand its tax treatment.',
+          ],
+        ),
+        warningFlags: _list(
+          locale,
+          pt: [
+            'Abrir MEI não resolve automaticamente residência fiscal, renda exterior ou dupla tributação.',
+            'A formalização oficial é gratuita; desconfie de boletos e sites que imitam o governo.',
+          ],
+          es: [
+            'Abrir MEI no resuelve automáticamente residencia fiscal, ingresos del exterior ni doble tributación.',
+            'La formalización oficial es gratuita; desconfía de facturas y sitios que imitan al gobierno.',
+          ],
+          en: [
+            'Opening a MEI does not automatically resolve tax residence, foreign income, or double taxation.',
+            'Official registration is free; beware of invoices and websites imitating the government.',
+          ],
+        ),
+        communityTips: const <String>[],
+      ),
+      'item_1_3_money' => item.copyWith(
+        shortDescription: _t(
+          locale,
+          pt: 'Você pode chegar com Pix para pagamentos, mesmo antes de abrir uma conta brasileira.',
+          es: 'Puedes llegar con Pix para pagos, incluso antes de abrir una cuenta brasileña.',
+          en: 'You can arrive ready to pay with Pix, even before opening a Brazilian account.',
+        ),
+        context: _t(
+          locale,
+          pt: 'Algumas carteiras disponíveis na Argentina já pagam Pix a comerciantes no Brasil por QR ou chave. Isso resolve pagamentos, mas não cria uma conta nem uma chave Pix brasileira.',
+          es: 'Algunas billeteras disponibles en Argentina ya pagan Pix a comercios en Brasil por QR o clave. Esto resuelve pagos, pero no crea una cuenta ni una clave Pix brasileña.',
+          en: 'Some wallets available in Argentina can already pay Brazilian merchants through Pix QR codes or keys. This enables payments but does not create a Brazilian Pix account or key.',
+        ),
+        steps: _list(
+          locale,
+          pt: [
+            'Veja se a função de pagar Pix no Brasil está disponível na sua carteira; Mercado Pago, Prex e Belo são exemplos documentados, não recomendações.',
+            'Compare o total debitado em pesos, dólares ou outro saldo, o valor recebido em reais, a cotação, tarifas, impostos, limites e suporte a estorno.',
+            'Ative e valide a carteira antes da viagem; se fizer um teste, use um destinatário ou comércio confiável e um valor pequeno.',
+            'Mantenha um cartão internacional ou outra forma independente de pagamento como contingência.',
+          ],
+          es: [
+            'Revisa si la función para pagar Pix en Brasil está disponible en tu billetera; Mercado Pago, Prex y Belo son ejemplos documentados, no recomendaciones.',
+            'Compara el total debitado en pesos, dólares u otro saldo, el importe recibido en reales, el tipo de cambio, comisiones, impuestos, límites y soporte para devoluciones.',
+            'Activa y valida la billetera antes del viaje; si haces una prueba, usa un destinatario o comercio confiable y un importe pequeño.',
+            'Mantén una tarjeta internacional u otro medio de pago independiente como respaldo.',
+          ],
+          en: [
+            'Check whether Pix payments in Brazil are available in your wallet; Mercado Pago, Prex, and Belo are documented examples, not endorsements.',
+            'Compare the total charged in pesos, dollars, or another balance, the BRL received, exchange rate, fees, taxes, limits, and refund support.',
+            'Enable and verify the wallet before travelling; if you test it, use a trusted recipient or merchant and a small amount.',
+            'Keep an international card or another independent payment method as backup.',
+          ],
+        ),
+        requirements: _list(
+          locale,
+          pt: [
+            'Carteira compatível ou cartão habilitado para uso internacional',
+            'Conta verificada e saldo compatível com a forma escolhida',
+            'Segundo meio de pagamento independente',
+          ],
+          es: [
+            'Billetera compatible o tarjeta habilitada para uso internacional',
+            'Cuenta verificada y saldo compatible con la opción elegida',
+            'Segundo medio de pago independiente',
+          ],
+          en: [
+            'Compatible wallet or international-enabled card',
+            'Verified account and a balance supported by the chosen option',
+            'A second independent payment method',
+          ],
+        ),
+        doneCriteria: _t(
+          locale,
+          pt: 'Você confirmou uma forma de pagar Pix no Brasil ou outra opção principal e mantém um segundo meio independente.',
+          es: 'Confirmaste una forma de pagar Pix en Brasil u otra opción principal y mantienes un segundo medio independiente.',
+          en: 'You confirmed a way to pay with Pix in Brazil or another primary option and retain a second independent method.',
+        ),
+        checklistItems: [
+          ChecklistSubItem(
+            id: 'money_pix_wallet',
+            title: _t(
+              locale,
+              pt: 'Disponibilidade, saldo, câmbio e limites conferidos',
+              es: 'Disponibilidad, saldo, cambio y límites revisados',
+              en: 'Availability, balance, exchange rate, and limits checked',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'money_recipient_check',
+            title: _t(
+              locale,
+              pt: 'Fluxo de conferência do destinatário entendido',
+              es: 'Flujo para revisar al destinatario entendido',
+              en: 'Recipient-check flow understood',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'money_backup',
+            title: _t(
+              locale,
+              pt: 'Segundo meio de pagamento preparado',
+              es: 'Segundo medio de pago preparado',
+              en: 'Second payment method prepared',
+            ),
+            isCompleted: false,
+          ),
+        ],
+        decisionOptions: [
+          GuideDecisionOption(
+            title: _t(
+              locale,
+              pt: 'Carteira argentina com Pix no Brasil',
+              es: 'Billetera argentina con Pix en Brasil',
+              en: 'Argentina-based wallet with Pix in Brazil',
+            ),
+            description: _t(
+              locale,
+              pt: 'Pague QR ou chave Pix com o saldo aceito pela carteira, sem esperar a abertura de conta brasileira.',
+              es: 'Paga un QR o una clave Pix con el saldo admitido por la billetera, sin esperar a abrir una cuenta brasileña.',
+              en: 'Pay a Pix QR code or key with a wallet-supported balance without waiting for a Brazilian account.',
+            ),
+            pros: _list(
+              locale,
+              pt: [
+                'Pode funcionar antes da viagem',
+                'Aceito onde o comércio recebe Pix',
+              ],
+              es: [
+                'Puede funcionar antes del viaje',
+                'Sirve donde el comercio recibe Pix',
+              ],
+              en: [
+                'May work before travel',
+                'Works where the merchant receives Pix',
+              ],
+            ),
+            cons: _list(
+              locale,
+              pt: [
+                'Não equivale a uma conta Pix brasileira',
+                'Câmbio, limites e disponibilidade variam',
+              ],
+              es: [
+                'No equivale a una cuenta Pix brasileña',
+                'Cambio, límites y disponibilidad varían',
+              ],
+              en: [
+                'Not equivalent to a Brazilian Pix account',
+                'Rates, limits, and availability vary',
+              ],
+            ),
+            recommended: true,
+          ),
+          GuideDecisionOption(
+            title: _t(
+              locale,
+              pt: 'Cartão habilitado para uso internacional',
+              es: 'Tarjeta habilitada para uso internacional',
+              en: 'International-enabled card',
+            ),
+            description: _t(
+              locale,
+              pt: 'Confirme câmbio, impostos, saque, limites e bloqueios com o emissor.',
+              es: 'Confirma cambio, impuestos, retiro, límites y bloqueos con el emisor.',
+              en: 'Confirm exchange, taxes, withdrawals, limits, and blocks with the issuer.',
+            ),
+          ),
+          GuideDecisionOption(
+            title: _t(
+              locale,
+              pt: 'Serviço regulado de remessa ou câmbio',
+              es: 'Servicio regulado de remesa o cambio',
+              en: 'Regulated transfer or FX service',
+            ),
+            description: _t(
+              locale,
+              pt: 'Compare valor final em reais, tarifa, prazo, limite e forma de retirada.',
+              es: 'Compara valor final en reales, tarifa, plazo, límite y forma de retiro.',
+              en: 'Compare final BRL amount, fee, timing, limit, and pickup method.',
+            ),
+          ),
+          GuideDecisionOption(
+            title: _t(
+              locale,
+              pt: 'Reserva pequena em espécie',
+              es: 'Reserva pequeña en efectivo',
+              en: 'Small cash reserve',
+            ),
+            description: _t(
+              locale,
+              pt: 'Serve como contingência, com atenção a segurança e regras aduaneiras.',
+              es: 'Sirve como contingencia, con atención a seguridad y reglas aduaneras.',
+              en: 'A contingency option, subject to safety and customs rules.',
+            ),
+          ),
+        ],
+        tips: _list(
+          locale,
+          pt: [
+            'No comércio, você pode dizer que pagará com Pix mesmo usando uma carteira estrangeira.',
+            'Antes de confirmar, confira nome do destinatário, valor em reais e total que será debitado.',
+            'Compare pelo valor líquido que chega em reais, não apenas pela cotação anunciada.',
+            'Tenha duas formas independentes de pagamento e confirme as condições novamente perto da viagem.',
+          ],
+          es: [
+            'En el comercio, puedes decir que pagarás con Pix aunque uses una billetera extranjera.',
+            'Antes de confirmar, revisa el nombre del destinatario, el importe en reales y el total que se debitará.',
+            'Compara por el valor neto que llega en reales, no solo por la cotización anunciada.',
+            'Ten dos medios de pago independientes y confirma las condiciones cerca del viaje.',
+          ],
+          en: [
+            'At the merchant, you can say you will pay with Pix even when using a foreign wallet.',
+            'Before confirming, check the recipient name, BRL amount, and total to be charged.',
+            'Compare the net BRL received, not only the advertised exchange rate.',
+            'Keep two independent payment methods and reconfirm conditions close to travel.',
+          ],
+        ),
+        warningFlags: _list(
+          locale,
+          pt: [
+            'Tarifas, câmbio, limites e disponibilidade podem mudar; a liberação de algumas funções pode ser gradual.',
+            'Pix costuma ser imediato e pode não permitir cancelamento depois da confirmação.',
+            'Não dependa de uma única empresa, cartão ou conta.',
+          ],
+          es: [
+            'Comisiones, cambio, límites y disponibilidad pueden cambiar; la habilitación de algunas funciones puede ser gradual.',
+            'Pix suele ser inmediato y puede no permitir cancelación después de confirmar.',
+            'No dependas de una sola empresa, tarjeta o cuenta.',
+          ],
+          en: [
+            'Fees, rates, limits, and availability can change; some features may roll out gradually.',
+            'Pix is usually immediate and may not be cancellable after confirmation.',
+            'Do not rely on one company, card, or account.',
+          ],
+        ),
+        supportLinks: [
+          GuideSupportLink(
+            label: 'Mercado Pago · termos sobre Pix internacional',
+            url: PreparationResourceLinks.mercadoPagoPixArgentina.toString(),
+          ),
+          GuideSupportLink(
+            label: 'Prex · Pix Brasil',
+            url: PreparationResourceLinks.prexPixBrazil.toString(),
+          ),
+          GuideSupportLink(
+            label: 'Belo · pagamentos Pix no Brasil',
+            url: PreparationResourceLinks.beloPixBrazil.toString(),
+          ),
+        ],
+        externalOfficialLinks: [
+          GuideSupportLink(
+            label: 'Mercado Pago · Pix internacional',
+            url: PreparationResourceLinks.mercadoPagoPixArgentina.toString(),
+          ),
+          GuideSupportLink(
+            label: 'Prex · Pix Brasil',
+            url: PreparationResourceLinks.prexPixBrazil.toString(),
+          ),
+          GuideSupportLink(
+            label: 'Belo · Pix no Brasil',
+            url: PreparationResourceLinks.beloPixBrazil.toString(),
+          ),
+        ],
+        primaryActionType: GuidePrimaryActionType.none,
+        costInfo: _t(
+          locale,
+          pt: 'Sem valor fixo: confira no app a cotação, as tarifas, os impostos e o total debitado antes de confirmar.',
+          es: 'Sin valor fijo: revisa en la app el cambio, las comisiones, los impuestos y el total debitado antes de confirmar.',
+          en: 'No fixed amount: check the rate, fees, taxes, and total charge in the app before confirming.',
+        ),
+        communityTips: const <String>[],
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.marketReference,
+          sourceLabel: 'Documentação dos produtos · verificação cruzada',
+          sourceUrl: PreparationResourceLinks.mercadoPagoPixArgentina
+              .toString(),
+          lastVerified: DateTime(2026, 7, 26),
+          scopeNote: _t(
+            locale,
+            pt: 'As marcas são exemplos de funções documentadas, não recomendações. Compare disponibilidade e condições atuais na sua própria conta.',
+            es: 'Las marcas son ejemplos de funciones documentadas, no recomendaciones. Compara disponibilidad y condiciones vigentes en tu propia cuenta.',
+            en: 'Brands are examples of documented features, not endorsements. Compare current availability and terms in your own account.',
+          ),
+        ),
+      ),
+      'item_3_1_conta_bancaria' => item.copyWith(
+        requirements: _list(
+          locale,
+          pt: [
+            'CPF',
+            'Documento de identificação aceito pela instituição',
+            'Dados de contato e outras comprovações solicitadas na análise individual',
+          ],
+          es: [
+            'CPF',
+            'Documento de identidad aceptado por la institución',
+            'Datos de contacto y otros comprobantes solicitados en el análisis individual',
+          ],
+          en: [
+            'CPF',
+            'Identification accepted by the institution',
+            'Contact details and other evidence requested in the individual review',
+          ],
+        ),
+        checklistItems: [
+          ChecklistSubItem(
+            id: 'bank_compare',
+            title: _t(
+              locale,
+              pt: 'Instituição confirmada no Banco Central',
+              es: 'Institución confirmada en Banco Central',
+              en: 'Institution confirmed with Central Bank',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'bank_requirements',
+            title: _t(
+              locale,
+              pt: 'Documentos e tarifas confirmados diretamente',
+              es: 'Documentos y tarifas confirmados directamente',
+              en: 'Documents and fees confirmed directly',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'bank_access',
+            title: _t(
+              locale,
+              pt: 'Conta aprovada e acesso protegido',
+              es: 'Cuenta aprobada y acceso protegido',
+              en: 'Account approved and access secured',
+            ),
+            isCompleted: false,
+          ),
+        ],
+        communityTips: const <String>[],
+      ),
+      'item_3_3_pix' => item.copyWith(
+        title: _t(
+          locale,
+          pt: 'Configure o Pix antes de chegar',
+          es: 'Configura Pix antes de llegar',
+          en: 'Set up Pix before you arrive',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'Escolha entre pagar Pix por uma carteira estrangeira agora e ativar o Pix completo numa conta brasileira depois.',
+          es: 'Elige entre pagar Pix con una billetera extranjera ahora y activar Pix completo en una cuenta brasileña después.',
+          en: 'Choose between paying Pix through a foreign wallet now and enabling full Pix through a Brazilian account later.',
+        ),
+        phase: GuidePhase.preparation,
+        dependencies: const <String>['item_1_3_money'],
+        context: _t(
+          locale,
+          pt: 'Existem duas rotas diferentes: a carteira estrangeira pode pagar um Pix brasileiro por QR ou chave; uma conta brasileira permite, conforme a instituição, enviar, receber, cadastrar chave e pagar boletos.',
+          es: 'Hay dos rutas distintas: una billetera extranjera puede pagar un Pix brasileño por QR o clave; una cuenta brasileña permite, según la institución, enviar, recibir, registrar una clave y pagar boletos.',
+          en: 'There are two different routes: a foreign wallet can pay a Brazilian Pix QR code or key; a Brazilian account may let you send, receive, register a key, and pay boletos, depending on the institution.',
+        ),
+        whyItMatters: _t(
+          locale,
+          pt: 'Você pode pagar como um morador desde o primeiro dia sem confundir essa conveniência com ter uma conta bancária brasileira completa.',
+          es: 'Puedes pagar como un residente desde el primer día sin confundir esa comodidad con tener una cuenta bancaria brasileña completa.',
+          en: 'You can pay like a local from day one without confusing that convenience with a full Brazilian bank account.',
+        ),
+        steps: _list(
+          locale,
+          pt: [
+            'Escolha a rota inicial: carteira estrangeira para pagar Pix ou conta brasileira para a experiência completa.',
+            'Na carteira estrangeira, confirme disponibilidade, saldo aceito, câmbio, tarifas, impostos e limites.',
+            'Ao escanear um QR ou informar uma chave, confira nome do beneficiário e valor em reais antes de confirmar.',
+            'Depois de abrir uma conta brasileira, ative o Pix local e cadastre uma chave apenas se isso for útil para receber.',
+          ],
+          es: [
+            'Elige la ruta inicial: billetera extranjera para pagar Pix o cuenta brasileña para la experiencia completa.',
+            'En la billetera extranjera, confirma disponibilidad, saldo admitido, cambio, comisiones, impuestos y límites.',
+            'Al escanear un QR o ingresar una clave, revisa el nombre del beneficiario y el importe en reales antes de confirmar.',
+            'Después de abrir una cuenta brasileña, activa Pix local y registra una clave solo si te sirve para recibir.',
+          ],
+          en: [
+            'Choose your starting route: a foreign wallet for Pix payments or a Brazilian account for the full experience.',
+            'In the foreign wallet, confirm availability, supported balance, rate, fees, taxes, and limits.',
+            'When scanning a QR code or entering a key, check the beneficiary name and BRL amount before confirming.',
+            'After opening a Brazilian account, enable local Pix and register a key only if receiving through one is useful.',
+          ],
+        ),
+        requirements: _list(
+          locale,
+          pt: [
+            'Para pagar antes: carteira habilitada, conta verificada e saldo aceito',
+            'Para Pix completo: conta brasileira aprovada e acesso seguro ao aplicativo',
+          ],
+          es: [
+            'Para pagar antes: billetera habilitada, cuenta verificada y saldo admitido',
+            'Para Pix completo: cuenta brasileña aprobada y acceso seguro a la app',
+          ],
+          en: [
+            'For early payments: enabled wallet, verified account, and supported balance',
+            'For full Pix: approved Brazilian account and secure app access',
+          ],
+        ),
+        doneCriteria: _t(
+          locale,
+          pt: 'Você tem uma forma inicial de pagar Pix preparada e sabe se ela é somente para pagamentos ou se oferece a experiência completa de uma conta brasileira.',
+          es: 'Tienes una forma inicial de pagar Pix preparada y sabes si sirve solo para pagos o si ofrece la experiencia completa de una cuenta brasileña.',
+          en: 'You have an initial Pix payment method ready and know whether it is payment-only or provides the full Brazilian-account experience.',
+        ),
+        checklistItems: [
+          ChecklistSubItem(
+            id: 'pix_route',
+            title: _t(
+              locale,
+              pt: 'Rota de Pix escolhida',
+              es: 'Ruta de Pix elegida',
+              en: 'Pix route selected',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'pix_costs',
+            title: _t(
+              locale,
+              pt: 'Câmbio, tarifas, impostos e limites conferidos',
+              es: 'Cambio, comisiones, impuestos y límites revisados',
+              en: 'Rate, fees, taxes, and limits checked',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'pix_recipient',
+            title: _t(
+              locale,
+              pt: 'Conferência do destinatário entendida',
+              es: 'Verificación del destinatario entendida',
+              en: 'Recipient verification understood',
+            ),
+            isCompleted: false,
+          ),
+        ],
+        decisionOptions: [
+          GuideDecisionOption(
+            title: _t(
+              locale,
+              pt: 'Pagar Pix por carteira estrangeira',
+              es: 'Pagar Pix con billetera extranjera',
+              en: 'Pay Pix through a foreign wallet',
+            ),
+            description: _t(
+              locale,
+              pt: 'Boa ponte para chegada: paga QR ou chave, mas normalmente não cria chave Pix brasileira nem habilita recebimentos.',
+              es: 'Buen puente para la llegada: paga QR o clave, pero normalmente no crea una clave Pix brasileña ni habilita cobros.',
+              en: 'A useful arrival bridge: it pays QR codes or keys but normally does not create a Brazilian Pix key or enable receiving.',
+            ),
+            recommended: true,
+          ),
+          GuideDecisionOption(
+            title: _t(
+              locale,
+              pt: 'Pix completo em conta brasileira',
+              es: 'Pix completo en cuenta brasileña',
+              en: 'Full Pix through a Brazilian account',
+            ),
+            description: _t(
+              locale,
+              pt: 'Depois da aprovação da conta, use os recursos oferecidos pela instituição para enviar, receber e cadastrar chave.',
+              es: 'Después de aprobar la cuenta, usa las funciones de la institución para enviar, recibir y registrar una clave.',
+              en: 'After account approval, use the institution’s features to send, receive, and register a key.',
+            ),
+          ),
+        ],
+        tips: _list(
+          locale,
+          pt: [
+            'Mercado Pago, Prex e Belo são exemplos documentados; não existe uma opção universalmente melhor.',
+            'O recebedor vê um Pix em reais; o seu app mostra de qual saldo sairá o pagamento e a conversão aplicável.',
+          ],
+          es: [
+            'Mercado Pago, Prex y Belo son ejemplos documentados; no existe una opción universalmente mejor.',
+            'El destinatario recibe un Pix en reales; tu app muestra de qué saldo saldrá el pago y la conversión aplicable.',
+          ],
+          en: [
+            'Mercado Pago, Prex, and Belo are documented examples; no option is universally best.',
+            'The recipient receives BRL through Pix; your app shows the funding balance and applicable conversion.',
+          ],
+        ),
+        warningFlags: _list(
+          locale,
+          pt: [
+            'Uma carteira estrangeira para pagar Pix não cria uma conta ou chave Pix brasileira e pode não permitir receber Pix.',
+            'Confira destinatário e valor antes de confirmar: pagamentos Pix costumam ser imediatos e podem não ser canceláveis.',
+            'Disponibilidade, moedas aceitas, câmbio, tarifas e limites mudam; valide tudo no app no dia do uso.',
+          ],
+          es: [
+            'Una billetera extranjera para pagar Pix no crea una cuenta o clave Pix brasileña y puede no permitir recibir Pix.',
+            'Revisa destinatario e importe antes de confirmar: los pagos Pix suelen ser inmediatos y pueden no poder cancelarse.',
+            'Disponibilidad, monedas admitidas, cambio, comisiones y límites cambian; valida todo en la app el día de uso.',
+          ],
+          en: [
+            'A foreign wallet for Pix payments does not create a Brazilian Pix account or key and may not support receiving Pix.',
+            'Check the recipient and amount before confirming: Pix payments are usually immediate and may not be cancellable.',
+            'Availability, supported currencies, rates, fees, and limits change; verify them in-app on the day of use.',
+          ],
+        ),
+        supportLinks: [
+          GuideSupportLink(
+            label: 'Mercado Pago · termos sobre Pix internacional',
+            url: PreparationResourceLinks.mercadoPagoPixArgentina.toString(),
+          ),
+          GuideSupportLink(
+            label: 'Prex · Pix Brasil',
+            url: PreparationResourceLinks.prexPixBrazil.toString(),
+          ),
+          GuideSupportLink(
+            label: 'Belo · pagamentos Pix no Brasil',
+            url: PreparationResourceLinks.beloPixBrazil.toString(),
+          ),
+        ],
+        costInfo: _t(
+          locale,
+          pt: 'Sem preço universal: o aplicativo deve mostrar a conversão e o total antes da confirmação.',
+          es: 'Sin precio universal: la app debe mostrar la conversión y el total antes de confirmar.',
+          en: 'No universal price: the app should show the conversion and total before confirmation.',
+        ),
+        estimatedTime: _t(
+          locale,
+          pt: '10–15 minutos',
+          es: '10–15 minutos',
+          en: '10–15 minutes',
+        ),
+        executionModes: const [GuideExecutionMode.online],
+        tier: GuideItemTier.recommended,
+        preArrivalRequired: false,
+        communityTips: const <String>[],
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.marketReference,
+          sourceLabel: 'Mercado Pago, Prex e Belo · documentação dos produtos',
+          sourceUrl: PreparationResourceLinks.mercadoPagoPixArgentina
+              .toString(),
+          lastVerified: DateTime(2026, 7, 26),
+          scopeNote: _t(
+            locale,
+            pt: 'Referências comerciais demonstram a função disponível; não substituem a conferência das condições atuais da sua conta.',
+            es: 'Las referencias comerciales demuestran la función disponible; no reemplazan revisar las condiciones vigentes de tu cuenta.',
+            en: 'Commercial references demonstrate the available feature; they do not replace checking the current terms of your account.',
+          ),
+        ),
+      ),
+      'item_0_3_budget' => item.copyWith(
+        preArrivalRequired: false,
+        tier: GuideItemTier.recommended,
+      ),
+      'item_0_6_medicamentos' => item.copyWith(
+        warningFlags: _list(
+          locale,
+          pt: [
+            'Não use uma quantidade fixa como regra; leve volume compatível com receita, laudo e normas da Anvisa.',
+            'Medicamentos controlados podem exigir documentação ou procedimento específico.',
+          ],
+          es: [
+            'No uses una cantidad fija como regla; lleva volumen compatible con receta, informe y normas de Anvisa.',
+            'Los medicamentos controlados pueden exigir documentación o procedimiento específico.',
+          ],
+          en: [
+            'Do not use a fixed quantity as a rule; carry an amount supported by prescriptions, records, and Anvisa rules.',
+            'Controlled medicines may require specific documents or procedures.',
+          ],
+        ),
+      ),
+      'item_2_6_impostos_exterior' => item.copyWith(
+        phase: GuidePhase.preparation,
+        dependencies: const <String>[],
+        preArrivalRequired: false,
+        tier: GuideItemTier.recommended,
+        warningFlags: _list(
+          locale,
+          pt: [
+            'MEI, conta brasileira ou nota fiscal não resolvem automaticamente renda recebida do exterior.',
+            'A data em que você passa a ser residente fiscal altera o tratamento dos rendimentos.',
+          ],
+          es: [
+            'MEI, cuenta brasileña o factura no resuelven automáticamente ingresos del exterior.',
+            'La fecha en que pasas a ser residente fiscal cambia el tratamiento de los ingresos.',
+          ],
+          en: [
+            'MEI, a Brazilian account, or an invoice does not automatically resolve foreign income.',
+            'The date you become tax resident changes the treatment of income.',
+          ],
+        ),
+      ),
+      'item_4_7_seguranca_emergencia' => item.copyWith(
+        urgencyLevel: GuideUrgencyLevel.urgent,
+        tier: GuideItemTier.recommended,
+      ),
+      _ => item,
+    };
   }
 
   static GuideActionItem _sanitizeCostInfo(

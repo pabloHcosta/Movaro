@@ -24,7 +24,25 @@ enum TemporaryHousingDuration { oneWeek, oneMonth, twoThreeMonths }
 class PreparationResourceLinks {
   const PreparationResourceLinks._();
 
-  static final Uri officialJobsPortal = Uri.parse('https://www.vagas.com.br');
+  static final Uri officialJobsPortal = Uri.parse(
+    'https://www.gov.br/trabalho-e-emprego/pt-br/servicos/trabalhador/carteira-de-trabalho',
+  );
+
+  static final Uri govBrAccountGuide = Uri.parse(
+    'https://www.gov.br/pt-br/servicos/criar-sua-conta-gov.br',
+  );
+
+  static final Uri migrationDocumentRules = Uri.parse(
+    'https://www.gov.br/pf/pt-br/assuntos/imigracao/pt/duvidas',
+  );
+
+  static final Uri foreignDrivingGuide = Uri.parse(
+    'https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/carteira-internacional/',
+  );
+
+  static final Uri migrantWorkerGuide = Uri.parse(
+    'https://www.gov.br/trabalho-e-emprego/pt-br/servicos/trabalhador',
+  );
 
   static final Uri publicUniversitiesCatalog = Uri.parse(
     'https://emec.mec.gov.br/',
@@ -44,6 +62,18 @@ class PreparationResourceLinks {
 
   static final Uri financialGuide = Uri.parse(
     'https://www.bcb.gov.br/detalhenoticia/450/noticia',
+  );
+
+  static final Uri mercadoPagoPixArgentina = Uri.parse(
+    'https://www.mercadolibre.com.ar/ayuda/terminos-y-condiciones_299',
+  );
+
+  static final Uri prexPixBrazil = Uri.parse(
+    'https://www.prexcard.com.ar/pix-brasil',
+  );
+
+  static final Uri beloPixBrazil = Uri.parse(
+    'https://help.belo.app/en/articles/6076271-what-qr-codes-can-you-scan-with-belo',
   );
 
   static final Uri argentinaResidenceAgreement = Uri.parse(

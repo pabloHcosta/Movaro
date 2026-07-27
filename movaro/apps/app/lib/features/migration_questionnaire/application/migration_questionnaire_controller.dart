@@ -6,6 +6,7 @@ import 'package:movaro_app/features/location/argentina_origin_classifier.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/answer.dart';
@@ -29,12 +30,14 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     required JourneyContextController journeyContextController,
     QuestionnaireFlowDraftStore? flowDraftStore,
     MigrationPlanResetService? planResetService,
+    GuideFlowMetricsStore? metricsStore,
   }) : _questionRepository = questionRepository,
        _migrationPlanRepository = migrationPlanRepository,
        _planGenerator = planGenerator,
        _journeyContextController = journeyContextController,
        _flowDraftStore = flowDraftStore ?? QuestionnaireFlowDraftStore(),
-       _planResetService = planResetService;
+       _planResetService = planResetService,
+       _metricsStore = metricsStore ?? GuideFlowMetricsStore.instance;
 
   final QuestionRepository _questionRepository;
   final MigrationPlanRepository _migrationPlanRepository;
@@ -42,6 +45,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   final JourneyContextController _journeyContextController;
   final QuestionnaireFlowDraftStore _flowDraftStore;
   final MigrationPlanResetService? _planResetService;
+  final GuideFlowMetricsStore _metricsStore;
 
   List<Question> _questions = const [];
   List<Answer> _answers = const [];
@@ -220,6 +224,12 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _currentIndex = _firstUnansweredQuestionIndex();
     notifyListeners();
     _persistDraft();
+    unawaited(
+      _metricsStore.record(
+        GuideFlowMetric.questionnaireStarted,
+        stepIndex: _currentIndex + 1,
+      ),
+    );
   }
 
   Future<void> resetFlow() async {
@@ -602,6 +612,12 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       _generatedPlan = plan;
       await _migrationPlanRepository.setCurrentPlan(_generatedPlan);
       await _flowDraftStore.clear();
+      unawaited(
+        _metricsStore.record(
+          GuideFlowMetric.planGenerated,
+          stepIndex: _activeQuestions.length,
+        ),
+      );
       notifyListeners();
       return true;
     } finally {
@@ -714,6 +730,13 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _answers = nextAnswers;
     _syncConditionalAnswers(questionId, values);
     _clampCurrentIndex();
+    unawaited(
+      _metricsStore.record(
+        GuideFlowMetric.questionAnswered,
+        referenceId: questionId,
+        stepIndex: _currentIndex + 1,
+      ),
+    );
     notifyListeners();
     _persistDraft();
   }

@@ -190,7 +190,7 @@ class GuidePersonalizationService {
         (plan.childrenCount ?? 0) > 0 ||
         plan.selectedConstraints.contains('children_school');
 
-    if (goal == 'find_job_br') {
+    if (goal == 'find_job_br' || goal == 'work') {
       conditions.add('job_search_goal');
     }
     if (goal == 'study') {
@@ -202,10 +202,11 @@ class GuidePersonalizationService {
       conditions.add('self_employed_goal');
       conditions.add('remote_income_goal');
     }
-    if (goal == 'find_job_br' || goal == 'study') {
+    if (goal == 'find_job_br' || goal == 'work' || goal == 'study') {
       conditions.add('formal_work_goal');
     }
     if (goal == 'find_job_br' ||
+        goal == 'work' ||
         goal == 'study' ||
         goal == 'remote_income' ||
         goal == 'remote_work' ||
@@ -225,6 +226,9 @@ class GuidePersonalizationService {
         goal == 'remote_income' ||
         goal == 'remote_work') {
       conditions.add('foreign_income');
+    }
+    if (plan.selectedConstraints.contains('temporary_residence_route')) {
+      conditions.add('temporary_residence_route');
     }
     if (plan.travelGroup == 'partner' ||
         plan.travelGroup == 'family_kids' ||

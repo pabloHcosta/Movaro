@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_focus_engine.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
@@ -19,8 +21,10 @@ class GuideGpsController extends ChangeNotifier {
     Map<String, GuideDismissReason> dismissedReasonsById =
         const <String, GuideDismissReason>{},
     String? activeItemId,
+    GuideFlowMetricsStore? metricsStore,
   }) : _plan = plan,
        _progressStore = progressStore,
+       _metricsStore = metricsStore ?? GuideFlowMetricsStore.instance,
        _readinessCompletedIds = Set<String>.from(readinessCompletedIds),
        _documentCompletedIds = Set<String>.from(documentCompletedIds),
        _arrivalCompletedIds = Set<String>.from(arrivalCompletedIds),
@@ -37,6 +41,7 @@ class GuideGpsController extends ChangeNotifier {
 
   final MigrationPlan _plan;
   final MigrationCopilotProgressStore _progressStore;
+  final GuideFlowMetricsStore _metricsStore;
 
   Set<String> _readinessCompletedIds;
   Set<String> _documentCompletedIds;
@@ -66,36 +71,21 @@ class GuideGpsController extends ChangeNotifier {
       if (item.isCompleted) item.id,
   };
 
-  int get completedCount => allCompletedIds.length;
-  int get totalItems => _items.length;
-  int get remainingCount => totalItems - completedCount;
-  double get progress =>
-      totalItems == 0 ? 0 : (completedCount / totalItems).clamp(0, 1);
-  int get progressPercent => (progress * 100).round();
+  GuideFocusSnapshot get focusSnapshot => GuideFocusEngine.build(
+    plan: _plan,
+    items: _items,
+    activeItemId: _activeItemId,
+  );
 
-  GuideActionItem? get currentItem {
-    final availableItems = _rankedAvailablePendingItems();
-    if (availableItems.isEmpty) {
-      return null;
-    }
-    if (_activeItemId == null) {
-      return availableItems.first;
-    }
-    return availableItems.firstWhere(
-      (item) => item.id == _activeItemId,
-      orElse: () => availableItems.first,
-    );
-  }
+  int get completedCount => focusSnapshot.coreCompletedCount;
+  int get totalItems => focusSnapshot.coreTotalCount;
+  int get remainingCount => focusSnapshot.coreRemainingCount;
+  double get progress => focusSnapshot.coreProgress;
+  int get progressPercent => focusSnapshot.coreProgressPercent;
 
-  List<GuideActionItem> get upcomingItems {
-    final current = currentItem;
-    final excludedIds = current == null
-        ? const <String>{}
-        : <String>{current.id};
-    return _rankedAvailablePendingItems(
-      excludeIds: excludedIds,
-    ).take(3).toList(growable: false);
-  }
+  GuideActionItem? get currentItem => focusSnapshot.current;
+
+  List<GuideActionItem> get upcomingItems => focusSnapshot.upcoming;
 
   List<GuideActionItem> itemsForPhase(GuidePhase phase) {
     final phaseItems = _items.where((item) => item.phase == phase).toList();
@@ -127,6 +117,12 @@ class GuideGpsController extends ChangeNotifier {
     _activeItemId = currentItem!.id;
     _currentItemStarted = true;
     notifyListeners();
+    unawaited(
+      _metricsStore.record(
+        GuideFlowMetric.taskStarted,
+        referenceId: currentItem!.id,
+      ),
+    );
     unawaited(_persist());
   }
 
@@ -164,6 +160,9 @@ class GuideGpsController extends ChangeNotifier {
     _awaitingConfirmation = false;
     _activeItemId = null;
     notifyListeners();
+    unawaited(
+      _metricsStore.record(GuideFlowMetric.taskCompleted, referenceId: item.id),
+    );
     await _persist();
   }
 
@@ -179,6 +178,9 @@ class GuideGpsController extends ChangeNotifier {
     _currentItemStarted = false;
     _awaitingConfirmation = false;
     notifyListeners();
+    unawaited(
+      _metricsStore.record(GuideFlowMetric.taskSelected, referenceId: item.id),
+    );
     await _persist();
   }
 
@@ -383,18 +385,6 @@ class GuideGpsController extends ChangeNotifier {
         isUserPrioritized: _prioritizedItemIds.contains(item.id),
       );
     }
-  }
-
-  List<GuideActionItem> _rankedAvailablePendingItems({
-    Set<String> excludeIds = const <String>{},
-  }) {
-    final pendingItems = _items.where((item) {
-      return !item.isCompleted &&
-          !excludeIds.contains(item.id) &&
-          isItemUnlocked(item);
-    }).toList();
-    pendingItems.sort(_comparePriorityDescending);
-    return pendingItems;
   }
 
   int _compareItemsForDisplay(GuideActionItem a, GuideActionItem b) {

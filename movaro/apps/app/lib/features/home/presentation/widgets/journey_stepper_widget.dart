@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_focus_engine.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
@@ -15,6 +16,7 @@ class JourneyStepperWidget extends StatelessWidget {
     required this.allItems,
     this.onTapActiveTask,
     this.onTapSeeMore,
+    this.onTapItem,
     this.showTaskCard = true,
     super.key,
   });
@@ -23,33 +25,18 @@ class JourneyStepperWidget extends StatelessWidget {
   final List<GuideActionItem> allItems;
   final VoidCallback? onTapActiveTask;
   final VoidCallback? onTapSeeMore;
+  final ValueChanged<GuideActionItem>? onTapItem;
 
   /// When false the active-task card is omitted — used by the Focus Mode
   /// layout where the card is rendered separately as a primary action card.
   final bool showTaskCard;
 
-  static const _phases = [
-    GuidePhase.preparation,
-    GuidePhase.housing,
-    GuidePhase.documents,
-    GuidePhase.work,
-    GuidePhase.arrival,
-  ];
-
-  GuidePhase _currentPhase() {
-    for (final phase in _phases) {
-      final phaseItems = allItems.where((it) => it.phase == phase).toList();
-      if (phaseItems.isEmpty) continue;
-      if (!phaseItems.every((it) => it.isCompleted)) return phase;
-    }
-    return GuidePhase.arrival;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final completedCount = allItems.where((it) => it.isCompleted).length;
-    final totalCount = allItems.length;
-    final currentPhase = _currentPhase();
+    final focus = GuideFocusEngine.build(plan: plan, items: allItems);
+    final completedCount = focus.coreCompletedCount;
+    final totalCount = focus.coreTotalCount;
+    final currentPhase = focus.current?.phase ?? GuidePhase.arrival;
     final journeyStage = UserJourneyStageDetector.detect(
       timeline: plan.timeline,
       completedSteps: completedCount,
@@ -57,29 +44,14 @@ class JourneyStepperWidget extends StatelessWidget {
     );
     final isDark = AppColors.isDark(context);
 
-    final currentPhaseItems =
-        allItems.where((it) => it.phase == currentPhase).toList()
-          ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
-
-    final activeTask = currentPhaseItems
-        .where((it) => !it.isCompleted)
-        .firstOrNull;
-    final remainingInPhase = currentPhaseItems
-        .where((it) => !it.isCompleted)
-        .length;
+    final activeTask = focus.current;
+    final remainingInPhase = focus.upcoming.length + focus.later.length;
     final cpfUnlockCount = allItems
         .where(
           (it) => it.dependencies.contains('item_2_1_cpf') && !it.isCompleted,
         )
         .length;
-    final currentPhaseIndex = _phases.indexOf(currentPhase);
-    GuidePhase? nextPhase;
-    for (var i = currentPhaseIndex + 1; i < _phases.length; i++) {
-      if (allItems.any((item) => item.phase == _phases[i])) {
-        nextPhase = _phases[i];
-        break;
-      }
-    }
+    final nextPhase = focus.upcoming.firstOrNull?.phase;
     final progress = totalCount == 0 ? 0.0 : completedCount / totalCount;
 
     return Column(
@@ -205,6 +177,23 @@ class JourneyStepperWidget extends StatelessWidget {
                         ),
                       ],
                     ),
+                    if (focus.upcoming.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Divider(height: 1, color: AppColors.borderFor(context)),
+                      const SizedBox(height: 6),
+                      for (
+                        var index = 0;
+                        index < focus.upcoming.length;
+                        index++
+                      )
+                        _CompactUpcomingRow(
+                          item: focus.upcoming[index],
+                          index: index + 1,
+                          onTap: onTapItem == null
+                              ? onTapSeeMore
+                              : () => onTapItem!(focus.upcoming[index]),
+                        ),
+                    ],
                   ],
                 ),
               ),
@@ -268,6 +257,75 @@ class JourneyStepperWidget extends StatelessWidget {
     'es' => es,
     _ => en,
   };
+}
+
+class _CompactUpcomingRow extends StatelessWidget {
+  const _CompactUpcomingRow({
+    required this.item,
+    required this.index,
+    required this.onTap,
+  });
+
+  final GuideActionItem item;
+  final int index;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+        child: Row(
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.10),
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                '${index + 1}',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Text(
+                item.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ),
+            if (item.estimatedTimeLabel != null) ...[
+              const SizedBox(width: 8),
+              Text(
+                item.estimatedTimeLabel!,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                ),
+              ),
+            ],
+            const SizedBox(width: 4),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 17,
+              color: AppColors.textSoftFor(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _JourneyPhaseSummary extends StatelessWidget {

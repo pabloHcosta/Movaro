@@ -25,6 +25,7 @@ import 'package:movaro_app/features/explore/presentation/pages/documentation_gui
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/guide_gps_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/arrival_execution_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/calendar_event_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
@@ -1095,17 +1096,6 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                   ),
                                   const SizedBox(height: 12),
                                 ],
-                                if (sheetItem.evidence != null) ...[
-                                  _GuideEvidenceCard(
-                                    evidence: sheetItem.evidence!,
-                                    onOpen: (url, label) =>
-                                        _openExternalPreparationLink(
-                                          title: label,
-                                          uri: Uri.parse(url),
-                                        ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                ],
                                 if (!isPreview &&
                                     sheetItem.preArrivalRequired &&
                                     !sheetItem.isCompleted) ...[
@@ -1418,7 +1408,15 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                 if (!sheetItem.isCompleted &&
                                     (sheetItem.hasSurvivalPhrases ||
                                         sheetItem.hasRequirements))
-                                  _QuickReferenceCard(item: sheetItem),
+                                  _GuideExpandableSection(
+                                    title: _localizedText(
+                                      sheetContext,
+                                      pt: 'O que preparar',
+                                      es: 'Qué preparar',
+                                      en: 'What to prepare',
+                                    ),
+                                    child: _QuickReferenceCard(item: sheetItem),
+                                  ),
                                 // ── Practical scenarios (not testimonials) ──
                                 if (sheetItem.hasCommunityTips)
                                   _GuideExpandableSection(
@@ -1428,7 +1426,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                       es: '💡 Situaciones prácticas a considerar',
                                       en: '💡 Practical scenarios to consider',
                                     ),
-                                    initiallyExpanded: true,
+                                    initiallyExpanded: false,
                                     child: _GuideCommunityTipsContent(
                                       item: sheetItem,
                                     ),
@@ -1590,9 +1588,8 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                     ),
                                   ),
                                 ],
-                                // ── Details: Requirements + Cost + Time ──
-                                if (sheetItem.hasRequirements ||
-                                    sheetItem.costInfo != null ||
+                                // ── Details: Cost + Time ──
+                                if (sheetItem.costInfo != null ||
                                     sheetItem.estimatedTime != null)
                                   _GuideExpandableSection(
                                     title: _localizedText(
@@ -1605,12 +1602,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        if (sheetItem.hasRequirements)
-                                          _GuideRequirementsContent(
-                                            item: sheetItem,
-                                          ),
                                         if (sheetItem.costInfo != null) ...[
-                                          const SizedBox(height: 8),
                                           _GuideDetailRow(
                                             label: _localizedText(
                                               sheetContext,
@@ -1635,6 +1627,23 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                           ),
                                         ],
                                       ],
+                                    ),
+                                  ),
+                                if (sheetItem.evidence != null)
+                                  _GuideExpandableSection(
+                                    title: _localizedText(
+                                      sheetContext,
+                                      pt: 'Fonte e verificação',
+                                      es: 'Fuente y verificación',
+                                      en: 'Source and verification',
+                                    ),
+                                    child: _GuideEvidenceCard(
+                                      evidence: sheetItem.evidence!,
+                                      onOpen: (url, label) =>
+                                          _openExternalPreparationLink(
+                                            title: label,
+                                            uri: Uri.parse(url),
+                                          ),
                                     ),
                                   ),
                                 if (sheetItem.hasTips ||
@@ -2157,8 +2166,6 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                               ),
                               const SizedBox(height: 20),
                             ] else ...[
-                              _GuideContextBand(controller: gpsController),
-                              const SizedBox(height: 12),
                               _GuideUnifiedProgressBar(
                                 controller: gpsController,
                               ),
@@ -2273,7 +2280,6 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                 onTap: () => _showFullPlanSheet(
                                   context,
                                   controller: gpsController,
-                                  plan: plan,
                                 ),
                               ),
                             ],
@@ -2328,11 +2334,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                     ),
                     onTap: () {
                       Navigator.of(sheetContext).pop();
-                      _showFullPlanSheet(
-                        context,
-                        controller: controller,
-                        plan: plan,
-                      );
+                      _showFullPlanSheet(context, controller: controller);
                     },
                   ),
                   _GuideMenuAction(
@@ -2373,13 +2375,71 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   Future<void> _showFullPlanSheet(
     BuildContext context, {
     required GuideGpsController controller,
-    required MigrationPlan plan,
   }) {
-    final orderedPhases = _orderedGuidePhases(plan, controller);
-    final groupedItems = <GuidePhase, List<GuideActionItem>>{};
-    for (final phase in orderedPhases) {
-      groupedItems[phase] = controller.itemsForPhase(phase);
-    }
+    unawaited(
+      GuideFlowMetricsStore.instance.record(GuideFlowMetric.fullPlanOpened),
+    );
+    final focus = controller.focusSnapshot;
+    final groups =
+        <
+          ({
+            String label,
+            List<GuideActionItem> items,
+            bool collapsed,
+            int visibleCount,
+          })
+        >[
+          (
+            label: _localizedText(context, pt: 'Agora', es: 'Ahora', en: 'Now'),
+            items: focus.now,
+            collapsed: false,
+            visibleCount: 3,
+          ),
+          (
+            label: _localizedText(
+              context,
+              pt: 'Depois',
+              es: 'Después',
+              en: 'Later',
+            ),
+            items: focus.later,
+            collapsed: false,
+            visibleCount: 5,
+          ),
+          (
+            label: _localizedText(
+              context,
+              pt: 'Quando chegar',
+              es: 'Cuando llegues',
+              en: 'When you arrive',
+            ),
+            items: focus.onArrival,
+            collapsed: false,
+            visibleCount: 5,
+          ),
+          (
+            label: _localizedText(
+              context,
+              pt: 'Se fizer sentido',
+              es: 'Si tiene sentido',
+              en: 'If it applies',
+            ),
+            items: focus.optional,
+            collapsed: true,
+            visibleCount: 4,
+          ),
+          (
+            label: _localizedText(
+              context,
+              pt: 'Concluídos',
+              es: 'Completados',
+              en: 'Completed',
+            ),
+            items: focus.completed,
+            collapsed: true,
+            visibleCount: 4,
+          ),
+        ];
     return showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -2416,279 +2476,49 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    for (final phase in orderedPhases) ...[
-                      _GuidePlanGroup(
-                        phaseLabel: _guidePhaseName(context, phase),
-                        items: groupedItems[phase] ?? const [],
-                        completedIds: controller.allCompletedIds,
-                        currentItemId: controller.currentItem?.id,
-                        isUnlocked: controller.isItemUnlocked,
-                        visibleItemCount: 5,
-                        onBulkCompletePhase: () async {
-                          Navigator.of(sheetContext).pop();
-                          await _showPhaseBulkCompleteSheet(
-                            context,
-                            controller: controller,
-                            phase: phase,
-                          );
-                        },
-                        onTapItem: (item) async {
-                          Navigator.of(sheetContext).pop();
-                          await controller.jumpToItem(item.id);
-                          if (!mounted) {
-                            return;
-                          }
-                          setState(() {
-                            _showExpandedContent = false;
-                          });
-                        },
+                    Text(
+                      _localizedText(
+                        context,
+                        pt: 'O plano inteiro continua aqui, organizado pelo momento certo de agir.',
+                        es: 'El plan completo sigue aquí, organizado por el momento adecuado para actuar.',
+                        en: 'Your full plan remains here, organized by the right time to act.',
                       ),
-                      const SizedBox(height: 12),
-                    ],
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        height: 1.45,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    for (final group in groups)
+                      if (group.items.isNotEmpty) ...[
+                        _GuidePlanGroup(
+                          phaseLabel: group.label,
+                          items: group.items,
+                          completedIds: controller.allCompletedIds,
+                          currentItemId: controller.currentItem?.id,
+                          isUnlocked: controller.isItemUnlocked,
+                          visibleItemCount: group.visibleCount,
+                          initiallyCollapsed: group.collapsed,
+                          onTapItem: (item) async {
+                            Navigator.of(sheetContext).pop();
+                            if (!item.isCompleted) {
+                              await controller.jumpToItem(item.id);
+                            }
+                            if (!mounted) {
+                              return;
+                            }
+                            setState(() {
+                              _showExpandedContent = false;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                   ],
                 ),
               ),
             ),
           ),
-        );
-      },
-    );
-  }
-
-  List<GuidePhase> _orderedGuidePhases(
-    MigrationPlan plan,
-    GuideGpsController controller,
-  ) {
-    final phaseScores = <GuidePhase, int>{
-      for (final phase in GuidePhase.values) phase: 0,
-    };
-
-    final currentPhase = controller.currentItem?.phase;
-    if (currentPhase != null) {
-      phaseScores[currentPhase] = (phaseScores[currentPhase] ?? 0) + 200;
-    }
-
-    switch (plan.timeline) {
-      case 'in_0_3m':
-        phaseScores[GuidePhase.documents] =
-            (phaseScores[GuidePhase.documents] ?? 0) + 90;
-        phaseScores[GuidePhase.housing] =
-            (phaseScores[GuidePhase.housing] ?? 0) + 80;
-        phaseScores[GuidePhase.preparation] =
-            (phaseScores[GuidePhase.preparation] ?? 0) + 60;
-      case 'in_3_6m':
-        phaseScores[GuidePhase.preparation] =
-            (phaseScores[GuidePhase.preparation] ?? 0) + 80;
-        phaseScores[GuidePhase.documents] =
-            (phaseScores[GuidePhase.documents] ?? 0) + 70;
-        phaseScores[GuidePhase.housing] =
-            (phaseScores[GuidePhase.housing] ?? 0) + 50;
-      default:
-        phaseScores[GuidePhase.preparation] =
-            (phaseScores[GuidePhase.preparation] ?? 0) + 40;
-    }
-
-    for (final priority in plan.selectedPriorities) {
-      switch (priority) {
-        case 'job_opportunities':
-          phaseScores[GuidePhase.work] =
-              (phaseScores[GuidePhase.work] ?? 0) + 70;
-        case 'low_cost':
-          phaseScores[GuidePhase.preparation] =
-              (phaseScores[GuidePhase.preparation] ?? 0) + 35;
-          phaseScores[GuidePhase.housing] =
-              (phaseScores[GuidePhase.housing] ?? 0) + 35;
-        case 'safety':
-          phaseScores[GuidePhase.housing] =
-              (phaseScores[GuidePhase.housing] ?? 0) + 45;
-          phaseScores[GuidePhase.arrival] =
-              (phaseScores[GuidePhase.arrival] ?? 0) + 15;
-        case 'university':
-          phaseScores[GuidePhase.documents] =
-              (phaseScores[GuidePhase.documents] ?? 0) + 35;
-          phaseScores[GuidePhase.work] =
-              (phaseScores[GuidePhase.work] ?? 0) + 20;
-        default:
-          break;
-      }
-    }
-
-    switch (plan.goal) {
-      case 'find_job_br':
-        phaseScores[GuidePhase.work] = (phaseScores[GuidePhase.work] ?? 0) + 80;
-      case 'study':
-        phaseScores[GuidePhase.documents] =
-            (phaseScores[GuidePhase.documents] ?? 0) + 70;
-        phaseScores[GuidePhase.work] = (phaseScores[GuidePhase.work] ?? 0) + 30;
-      case 'remote_income':
-      case 'remote_work':
-      case 'entrepreneur':
-        phaseScores[GuidePhase.work] = (phaseScores[GuidePhase.work] ?? 0) + 75;
-      case 'family_partner':
-      case 'fresh_start':
-        phaseScores[GuidePhase.housing] =
-            (phaseScores[GuidePhase.housing] ?? 0) + 55;
-        phaseScores[GuidePhase.arrival] =
-            (phaseScores[GuidePhase.arrival] ?? 0) + 25;
-      default:
-        break;
-    }
-
-    final phases = List<GuidePhase>.from(GuidePhase.values);
-    phases.sort((a, b) {
-      final scoreCompare = (phaseScores[b] ?? 0).compareTo(phaseScores[a] ?? 0);
-      if (scoreCompare != 0) {
-        return scoreCompare;
-      }
-      return GuidePhase.values
-          .indexOf(a)
-          .compareTo(GuidePhase.values.indexOf(b));
-    });
-    return phases;
-  }
-
-  Future<void> _showPhaseBulkCompleteSheet(
-    BuildContext context, {
-    required GuideGpsController controller,
-    required GuidePhase phase,
-  }) async {
-    final candidates = controller
-        .itemsForPhase(phase)
-        .where(
-          (item) =>
-              !item.isCompleted &&
-              item.isDismissible &&
-              controller.isItemUnlocked(item),
-        )
-        .toList(growable: false);
-    if (candidates.isEmpty) {
-      return;
-    }
-
-    final selectedIds = <String>{};
-
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (sheetContext, setSheetState) {
-            return SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: FrostedPanel(
-                  padding: const EdgeInsets.all(18),
-                  borderRadius: BorderRadius.circular(28),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _localizedText(
-                                context,
-                                pt: 'Já fez esses itens?',
-                                es: 'Ya hiciste estos pasos?',
-                                en: 'Already did these steps?',
-                              ),
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () => Navigator.of(sheetContext).pop(),
-                            icon: const Icon(Icons.close_rounded),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        _localizedText(
-                          context,
-                          pt: 'Selecione o que você já resolveu fora do app. Esses itens serão marcados como concluídos e deixam de bloquear o plano.',
-                          es: 'Selecciona lo que ya resolviste fuera de la app. Estos pasos se marcaran como completados y dejaran de bloquear el plan.',
-                          en: 'Select what you already handled outside the app. These steps will be marked complete and will stop blocking the plan.',
-                        ),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSoftFor(context),
-                          height: 1.45,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Flexible(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              for (final item in candidates)
-                                CheckboxListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  value: selectedIds.contains(item.id),
-                                  title: Text(item.title),
-                                  subtitle: _GuideItemSubtitle(
-                                    item: item,
-                                    context: context,
-                                  ),
-                                  onChanged: (value) {
-                                    setSheetState(() {
-                                      if (value ?? false) {
-                                        selectedIds.add(item.id);
-                                      } else {
-                                        selectedIds.remove(item.id);
-                                      }
-                                    });
-                                  },
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          onPressed: selectedIds.isEmpty
-                              ? null
-                              : () async {
-                                  final completedPhasesBefore =
-                                      _completedGuidePhases(controller);
-                                  await controller.dismissItems(
-                                    selectedIds,
-                                    GuideDismissReason.alreadyDone,
-                                  );
-                                  if (!mounted) {
-                                    return;
-                                  }
-                                  setState(() {
-                                    _showExpandedContent = false;
-                                    _syncFromGpsController(controller);
-                                  });
-                                  if (sheetContext.mounted) {
-                                    Navigator.of(sheetContext).pop();
-                                  }
-                                  await _maybeShowPhaseCelebration(
-                                    completedPhasesBefore:
-                                        completedPhasesBefore,
-                                    controller: controller,
-                                  );
-                                },
-                          child: Text(
-                            _localizedText(
-                              context,
-                              pt: 'Marcar como já fiz',
-                              es: 'Marcar como ya hecho',
-                              en: 'Mark as already done',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
         );
       },
     );
@@ -4392,15 +4222,14 @@ class _GuideGpsHeader extends StatelessWidget {
   }
 }
 
-class _GuideContextBand extends StatelessWidget {
-  const _GuideContextBand({required this.controller});
+class _GuideUnifiedProgressBar extends StatelessWidget {
+  const _GuideUnifiedProgressBar({required this.controller});
 
   final GuideGpsController controller;
 
   @override
   Widget build(BuildContext context) {
-    final phase = controller.currentPhase;
-    final phaseIndex = GuidePhase.values.indexOf(phase);
+    final focus = controller.focusSnapshot;
     return FrostedPanel(
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -4410,95 +4239,33 @@ class _GuideContextBand extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  _guidePhaseName(context, phase),
+                  _localizedText(
+                    context,
+                    pt: 'Prioridades essenciais',
+                    es: 'Prioridades esenciales',
+                    en: 'Essential priorities',
+                  ),
                   style: Theme.of(
                     context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: AppColors.success.withValues(alpha: 0.22),
+              if (focus.pendingBeforeTravelCount > 0)
+                Text(
+                  _localizedText(
+                    context,
+                    pt: '${focus.pendingBeforeTravelCount} antes da viagem',
+                    es: '${focus.pendingBeforeTravelCount} antes del viaje',
+                    en: '${focus.pendingBeforeTravelCount} before travel',
                   ),
-                ),
-                child: Text(
-                  '${controller.completedCount}/${controller.totalItems}',
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: AppColors.success,
+                    color: AppColors.warning,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              for (var i = 0; i < GuidePhase.values.length; i++) ...[
-                Expanded(
-                  child: Container(
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: i < phaseIndex
-                          ? AppColors.success
-                          : i == phaseIndex
-                          ? AppColors.primary
-                          : AppColors.surfaceMutedFor(context),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                if (i < GuidePhase.values.length - 1) const SizedBox(width: 4),
-              ],
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              for (var i = 0; i < GuidePhase.values.length; i++) ...[
-                Expanded(
-                  child: Text(
-                    _guidePhaseShortName(context, GuidePhase.values[i]),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontSize: 9,
-                      color: i <= phaseIndex
-                          ? null
-                          : AppColors.textSoftFor(context),
-                      fontWeight: i == phaseIndex
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _GuideUnifiedProgressBar extends StatelessWidget {
-  const _GuideUnifiedProgressBar({required this.controller});
-
-  final GuideGpsController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return FrostedPanel(
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
           TweenAnimationBuilder<double>(
             tween: Tween<double>(begin: 0, end: controller.progress),
             duration: const Duration(milliseconds: 400),
@@ -4517,14 +4284,14 @@ class _GuideUnifiedProgressBar extends StatelessWidget {
           Row(
             children: [
               Text(
-                '${controller.progressPercent}% ${context.l10n.copilotProgressCompletedLabel}',
+                '${controller.completedCount} ${_localizedText(context, pt: 'resolvidas', es: 'resueltas', en: 'resolved')}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSoftFor(context),
                 ),
               ),
               const Spacer(),
               Text(
-                '${controller.remainingCount} ${context.l10n.copilotProgressRemainingLabel}',
+                '${controller.remainingCount} ${_localizedText(context, pt: 'restantes', es: 'restantes', en: 'remaining')}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSoftFor(context),
                 ),
@@ -5510,9 +5277,9 @@ class _MoneySetupQuickStartBlock extends StatelessWidget {
           Text(
             _localizedText(
               context,
-              pt: 'Escolha uma rota para levar dinheiro nos primeiros dias. Depois volte e confirme o que já configurou.',
-              es: 'Elige una ruta para llevar dinero en los primeros dias. Despues vuelve y confirma lo que ya configuraste.',
-              en: 'Choose a route to access money in your first days. Then come back and confirm what you have already set up.',
+              pt: 'Compare carteiras que documentam pagamento Pix no Brasil. Confirme disponibilidade, conversão e limites na sua conta antes de escolher.',
+              es: 'Compara billeteras que documentan pagos Pix en Brasil. Confirma disponibilidad, conversión y límites en tu cuenta antes de elegir.',
+              en: 'Compare wallets that document Pix payments in Brazil. Confirm availability, conversion, and limits in your account before choosing.',
             ),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSoftFor(context),
@@ -5535,9 +5302,9 @@ class _MoneySetupQuickStartBlock extends StatelessWidget {
           Text(
             _localizedText(
               context,
-              pt: 'Sugestão: configure mais de uma opção para não depender de um único meio de pagamento.',
-              es: 'Sugerencia: configura mas de una opcion para no depender de un solo medio de pago.',
-              en: 'Suggestion: set up more than one option so you do not rely on a single payment method.',
+              pt: 'Esses links comprovam a função, mas não são recomendação comercial. Prepare também um segundo meio independente.',
+              es: 'Estos enlaces comprueban la función, pero no son una recomendación comercial. Prepara también un segundo medio independiente.',
+              en: 'These links document the feature but are not commercial endorsements. Prepare a second independent payment method too.',
             ),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSoftFor(context),
@@ -5741,42 +5508,6 @@ class _GuideLocationOptionCard extends StatelessWidget {
 
   Future<void> _openExternal(String url) async {
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-  }
-}
-
-class _GuideRequirementsContent extends StatelessWidget {
-  const _GuideRequirementsContent({required this.item});
-
-  final GuideActionItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (var index = 0; index < item.requirements!.length; index++) ...[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 1),
-                child: Icon(Icons.check_circle_outline_rounded, size: 16),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  item.requirements![index],
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(height: 1.45),
-                ),
-              ),
-            ],
-          ),
-          if (index < item.requirements!.length - 1) const SizedBox(height: 10),
-        ],
-      ],
-    );
   }
 }
 
@@ -6399,25 +6130,15 @@ class _GuideUpcomingSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    // Group upcoming items by phase while preserving phase order.
-    final Map<GuidePhase, List<GuideActionItem>> grouped = {};
-    for (final phase in GuidePhase.values) {
-      final phaseItems = items.where((i) => i.phase == phase).toList();
-      if (phaseItems.isNotEmpty) grouped[phase] = phaseItems;
-    }
-
-    // Track sequential index across all phases (current item is #1, so start at 2).
-    var overallIndex = 2;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           _localizedText(
             context,
-            pt: 'A SEGUIR',
-            es: 'A CONTINUACION',
-            en: 'UP NEXT',
+            pt: 'DEPOIS DISSO',
+            es: 'DESPUÉS DE ESTO',
+            en: 'AFTER THIS',
           ),
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
             color: AppColors.textSoftFor(context),
@@ -6426,86 +6147,17 @@ class _GuideUpcomingSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        for (final entry in grouped.entries) ...[
-          // Phase header — mirrors _GuideAllItemsList
-          _UpcomingPhaseHeader(phase: entry.key),
-          const SizedBox(height: 6),
-          for (var i = 0; i < entry.value.length; i++) ...[
-            _UpcomingGuideItemTile(
-              indexLabel: '${overallIndex++}',
-              item: entry.value[i],
-              unlocked: controller.isItemUnlocked(entry.value[i]),
-              onTap: controller.isItemUnlocked(entry.value[i])
-                  ? () => onSelectItem(entry.value[i].id)
-                  : null,
-            ),
-            if (i != entry.value.length - 1) const SizedBox(height: 8),
-          ],
-          const SizedBox(height: 14),
+        for (var i = 0; i < items.length; i++) ...[
+          _UpcomingGuideItemTile(
+            indexLabel: '${i + 2}',
+            item: items[i],
+            unlocked: controller.isItemUnlocked(items[i]),
+            onTap: controller.isItemUnlocked(items[i])
+                ? () => onSelectItem(items[i].id)
+                : null,
+          ),
+          if (i != items.length - 1) const SizedBox(height: 8),
         ],
-      ],
-    );
-  }
-}
-
-/// Compact phase divider used in [_GuideUpcomingSection].
-/// Uses the same color map and label logic as [_GuideAllItemsList].
-class _UpcomingPhaseHeader extends StatelessWidget {
-  const _UpcomingPhaseHeader({required this.phase});
-
-  final GuidePhase phase;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = _GuideAllItemsList._phaseColor[phase] ?? AppColors.primary;
-    final locale = Localizations.localeOf(context).languageCode;
-    final label = switch (phase) {
-      GuidePhase.preparation => switch (locale) {
-        'pt' => 'Preparação',
-        'es' => 'Preparación',
-        _ => 'Preparation',
-      },
-      GuidePhase.housing => switch (locale) {
-        'pt' => 'Moradia',
-        'es' => 'Vivienda',
-        _ => 'Housing',
-      },
-      GuidePhase.documents => switch (locale) {
-        'pt' => 'Documentos',
-        'es' => 'Documentos',
-        _ => 'Documents',
-      },
-      GuidePhase.work => switch (locale) {
-        'pt' => 'Trabalho',
-        'es' => 'Trabajo',
-        _ => 'Work',
-      },
-      GuidePhase.arrival => switch (locale) {
-        'pt' => 'Chegada',
-        'es' => 'Llegada',
-        _ => 'Arrival',
-      },
-    };
-
-    return Row(
-      children: [
-        Container(
-          width: 4,
-          height: 14,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 7),
-        Text(
-          label.toUpperCase(),
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: color,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.6,
-          ),
-        ),
       ],
     );
   }
@@ -6765,7 +6417,7 @@ class _GuidePlanGroup extends StatefulWidget {
     required this.currentItemId,
     required this.isUnlocked,
     this.visibleItemCount = 5,
-    this.onBulkCompletePhase,
+    this.initiallyCollapsed = false,
     required this.onTapItem,
   });
 
@@ -6775,7 +6427,7 @@ class _GuidePlanGroup extends StatefulWidget {
   final String? currentItemId;
   final bool Function(GuideActionItem item) isUnlocked;
   final int visibleItemCount;
-  final Future<void> Function()? onBulkCompletePhase;
+  final bool initiallyCollapsed;
   final ValueChanged<GuideActionItem> onTapItem;
 
   @override
@@ -6784,6 +6436,13 @@ class _GuidePlanGroup extends StatefulWidget {
 
 class _GuidePlanGroupState extends State<_GuidePlanGroup> {
   bool _showAll = false;
+  late bool _isCollapsed;
+
+  @override
+  void initState() {
+    super.initState();
+    _isCollapsed = widget.initiallyCollapsed;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -6794,96 +6453,119 @@ class _GuidePlanGroupState extends State<_GuidePlanGroup> {
         _showAll || widget.items.length <= widget.visibleItemCount
         ? widget.items
         : widget.items.take(widget.visibleItemCount).toList(growable: false);
-    final bulkEligibleCount = widget.items
-        .where((item) => !item.isCompleted && item.isDismissible)
-        .length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                '${widget.phaseLabel} · $completedCount ${_localizedText(context, pt: 'de', es: 'de', en: 'of')} ${widget.items.length}',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              setState(() {
+                _isCollapsed = !_isCollapsed;
+              });
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${widget.phaseLabel} · ${widget.items.length}',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    _isCollapsed
+                        ? Icons.expand_more_rounded
+                        : Icons.expand_less_rounded,
+                    color: AppColors.textSoftFor(context),
+                  ),
+                ],
               ),
             ),
-            if (widget.onBulkCompletePhase != null && bulkEligibleCount > 0)
-              TextButton(
-                onPressed: () => widget.onBulkCompletePhase!(),
+          ),
+        ),
+        if (!_isCollapsed) ...[
+          const SizedBox(height: 6),
+          if (completedCount == widget.items.length &&
+              widget.items.isNotEmpty) ...[
+            Text(
+              _localizedText(
+                context,
+                pt: 'Tudo resolvido neste grupo',
+                es: 'Todo resuelto en este grupo',
+                en: 'Everything in this group is resolved',
+              ),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: AppColors.success,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 6),
+          ],
+          for (final item in visibleItems) ...[
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(
+                item.isDismissed
+                    ? Icons.remove_circle_outline_rounded
+                    : widget.completedIds.contains(item.id)
+                    ? Icons.check_circle_rounded
+                    : widget.currentItemId == item.id
+                    ? Icons.arrow_forward_rounded
+                    : widget.isUnlocked(item)
+                    ? Icons.arrow_forward_rounded
+                    : Icons.lock_outline_rounded,
+                color: item.isDismissed
+                    ? AppColors.warning
+                    : widget.completedIds.contains(item.id)
+                    ? AppColors.success
+                    : widget.currentItemId == item.id
+                    ? AppColors.primary
+                    : widget.isUnlocked(item)
+                    ? AppColors.primary
+                    : AppColors.textSoftFor(context),
+              ),
+              title: Text(
+                item.title,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  decoration:
+                      widget.completedIds.contains(item.id) && !item.isDismissed
+                      ? TextDecoration.lineThrough
+                      : null,
+                ),
+              ),
+              subtitle: _GuideItemSubtitle(item: item, context: context),
+              onTap: widget.completedIds.contains(item.id) && !item.isDismissed
+                  ? null
+                  : !widget.isUnlocked(item) && !item.isDismissed
+                  ? null
+                  : () => widget.onTapItem(item),
+            ),
+          ],
+          if (!_showAll && widget.items.length > widget.visibleItemCount)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    _showAll = true;
+                  });
+                },
                 child: Text(
                   _localizedText(
                     context,
-                    pt: 'Já fiz esses?',
-                    es: 'Ya hice estos?',
-                    en: 'Already did some?',
+                    pt: 'Ver todos (${widget.items.length})',
+                    es: 'Ver todos (${widget.items.length})',
+                    en: 'View all (${widget.items.length})',
                   ),
                 ),
               ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        for (final item in visibleItems) ...[
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: Icon(
-              item.isDismissed
-                  ? Icons.remove_circle_outline_rounded
-                  : widget.completedIds.contains(item.id)
-                  ? Icons.check_circle_rounded
-                  : widget.currentItemId == item.id
-                  ? Icons.arrow_forward_rounded
-                  : widget.isUnlocked(item)
-                  ? Icons.arrow_forward_rounded
-                  : Icons.lock_outline_rounded,
-              color: item.isDismissed
-                  ? AppColors.warning
-                  : widget.completedIds.contains(item.id)
-                  ? AppColors.success
-                  : widget.currentItemId == item.id
-                  ? AppColors.primary
-                  : widget.isUnlocked(item)
-                  ? AppColors.primary
-                  : AppColors.textSoftFor(context),
             ),
-            title: Text(
-              item.title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                decoration:
-                    widget.completedIds.contains(item.id) && !item.isDismissed
-                    ? TextDecoration.lineThrough
-                    : null,
-              ),
-            ),
-            subtitle: _GuideItemSubtitle(item: item, context: context),
-            onTap: widget.completedIds.contains(item.id) && !item.isDismissed
-                ? null
-                : !widget.isUnlocked(item) && !item.isDismissed
-                ? null
-                : () => widget.onTapItem(item),
-          ),
         ],
-        if (!_showAll && widget.items.length > widget.visibleItemCount)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: () {
-                setState(() {
-                  _showAll = true;
-                });
-              },
-              child: Text(
-                _localizedText(
-                  context,
-                  pt: 'Ver todos (${widget.items.length})',
-                  es: 'Ver todos (${widget.items.length})',
-                  en: 'View all (${widget.items.length})',
-                ),
-              ),
-            ),
-          ),
       ],
     );
   }

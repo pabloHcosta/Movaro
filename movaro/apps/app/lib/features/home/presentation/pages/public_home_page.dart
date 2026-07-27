@@ -24,6 +24,7 @@ import 'package:movaro_app/features/home/presentation/pages/city_comparison_scre
 import 'package:movaro_app/features/home/presentation/home_visual_layout.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_focus_engine.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
@@ -602,57 +603,24 @@ class _PublicHomePageState extends State<PublicHomePage>
         .where((item) => item.isCompleted)
         .map((item) => item.id)
         .toSet();
-
-    final activeCandidate = snapshot.activeItemId == null
-        ? null
-        : items.cast<GuideActionItem?>().firstWhere(
-            (item) => item?.id == snapshot.activeItemId,
-            orElse: () => null,
-          );
-
-    GuideActionItem? currentItem;
-    if (activeCandidate != null &&
-        !activeCandidate.isCompleted &&
-        activeCandidate.dependencies.every(completedIds.contains)) {
-      currentItem = activeCandidate;
-    }
-
-    currentItem ??= () {
-      for (final item in items) {
-        final unlocked = item.dependencies.every(completedIds.contains);
-        if (!item.isCompleted && unlocked) {
-          return item;
-        }
-      }
-      return null;
-    }();
-
-    currentItem ??= items.firstWhere(
-      (item) => !item.isCompleted,
-      orElse: () => const GuideActionItem(
-        id: 'completed',
-        title: '',
-        shortDescription: '',
-        type: GuideActionType.informative,
-        phase: GuidePhase.arrival,
-        orderIndex: 0,
-        isCompleted: true,
-      ),
+    final focus = GuideFocusEngine.build(
+      plan: plan,
+      items: items,
+      activeItemId: snapshot.activeItemId,
     );
+    final currentItem = focus.current;
 
-    final currentPhaseIndex = currentItem.id == 'completed'
+    final currentPhaseIndex = currentItem == null
         ? GuidePhase.values.length
         : GuidePhase.values.indexOf(currentItem.phase) + 1;
 
     return _HomeGuideState(
       items: items,
       completedIds: completedIds,
-      currentItem: currentItem.id == 'completed' ? null : currentItem,
-      completedCount: completedIds.length,
-      totalItems: items.length,
-      progressPercent: items.isEmpty
-          ? 0
-          : ((completedIds.length / items.length) * 100).round(),
+      currentItem: currentItem,
+      completedCount: focus.coreCompletedCount,
+      totalItems: focus.coreTotalCount,
+      progressPercent: focus.coreProgressPercent,
       currentPhaseIndex: currentPhaseIndex,
       totalPhases: GuidePhase.values.length,
     );
@@ -1416,6 +1384,7 @@ class _ActiveHomeState extends StatelessWidget {
                       onTapSeeMore: guideState.currentItem != null
                           ? () => onViewAction(guideState.currentItem!)
                           : null,
+                      onTapItem: onViewAction,
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 5, 16, 0),
