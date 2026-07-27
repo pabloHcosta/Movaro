@@ -19,7 +19,6 @@ import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
-import 'package:movaro_app/features/home/application/streak_service.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/home_visual_layout.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
@@ -27,6 +26,7 @@ import 'package:movaro_app/features/migration_questionnaire/application/migratio
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_focus_engine.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
@@ -73,7 +73,6 @@ class _PublicHomePageState extends State<PublicHomePage>
     with WidgetsBindingObserver, RouteAware {
   final MigrationCopilotProgressStore _progressStore =
       MigrationCopilotProgressStore();
-  final StreakService _streakService = StreakService();
   MigrationCopilotProgressSnapshot _progressSnapshot =
       const MigrationCopilotProgressSnapshot();
   String? _loadedPlanKey;
@@ -97,7 +96,6 @@ class _PublicHomePageState extends State<PublicHomePage>
     widget.citiesController.addListener(_handleControllerUpdate);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_syncPlanState());
-      unawaited(_recordStreak());
       final msg = widget.redirectMessage;
       if (msg != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -358,6 +356,15 @@ class _PublicHomePageState extends State<PublicHomePage>
       _loadedPlanKey = planKey;
       _progressSnapshot = snapshot;
     });
+    final currentItem = _buildGuideState(plan, snapshot).currentItem;
+    unawaited(
+      PlanNotificationService.instance
+          .scheduleContextualResumeReminder(
+            plan: plan,
+            currentItem: currentItem,
+          )
+          .catchError((_) {}),
+    );
 
     // ── Stage transition detection ───────────────────────────────────────
     // Skip on the very first load (user already in that state, not advancing).
@@ -438,15 +445,6 @@ class _PublicHomePageState extends State<PublicHomePage>
           ),
         );
       }
-
-      // Schedule a weekly city-content reminder now that we know the confirmed
-      // city. Rescheduled on every fresh plan load so it stays current.
-      final cityLabel = city.name;
-      unawaited(
-        PlanNotificationService.instance
-            .scheduleCityContentReminder(cityLabel)
-            .catchError((_) {}),
-      );
     }
   }
 
@@ -626,26 +624,12 @@ class _PublicHomePageState extends State<PublicHomePage>
     );
   }
 
-  Future<void> _recordStreak() async {
-    await _streakService.recordActivity();
-    // Schedule a re-engagement nudge 7 days from now. If the user opens the
-    // app again before then, this call reschedules it — so the notification
-    // only fires after a true 7-day absence.
-    unawaited(
-      PlanNotificationService.instance
-          .scheduleReEngagementReminder(DateTime.now())
-          .catchError((_) {}),
-    );
-  }
-
   /// Force-refreshes the progress snapshot from disk (e.g. after returning
   /// from the guide page where the user may have completed items).
   Future<void> _refreshProgress() async {
     final plan = widget.migrationQuestionnaireController.generatedPlan;
     if (plan == null) return;
 
-    // Record activity — user was actively using the guide.
-    await _streakService.recordActivity();
     final snapshot = await _progressStore.read(plan);
     if (!mounted) return;
 
@@ -806,13 +790,7 @@ class _PublicHomePageState extends State<PublicHomePage>
   }
 
   String _planKey(MigrationPlan plan) {
-    return [
-      plan.originCountry,
-      plan.destinationCountry,
-      plan.goal,
-      plan.timeline,
-      plan.currentPlanCity?.id ?? 'no-city',
-    ].join('::');
+    return MigrationPlanIdentity.storageKeyFor(plan);
   }
 }
 
@@ -1294,6 +1272,10 @@ class _ActiveHomeState extends StatelessWidget {
                   !guideState.completedIds.contains(it.id),
             )
             .length;
+        final showPreArrivalWarning =
+            !showPFNudge &&
+            stage == UserJourneyStage.executor &&
+            preArrivalCount > 0;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1348,14 +1330,14 @@ class _ActiveHomeState extends StatelessWidget {
                     ],
 
                     // 5. Seasonality conflict warning (only for critical timing)
-                    _SeasonalityConflictBanner(
-                      city: city,
-                      planTimeline: planTimeline,
-                    ),
+                    if (!showPFNudge && !showPreArrivalWarning)
+                      _SeasonalityConflictBanner(
+                        city: city,
+                        planTimeline: planTimeline,
+                      ),
 
                     // 6. Pre-arrival warning banner — executor stage, pending steps
-                    if (stage == UserJourneyStage.executor &&
-                        preArrivalCount > 0)
+                    if (showPreArrivalWarning)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
                         child: _PreArrivalWarningBanner(
@@ -1900,42 +1882,253 @@ class _SecondaryActionRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 7),
-        PopupMenuButton<int>(
-          tooltip: context.l10n.homeActionNewPlan,
-          onSelected: (_) {
-            HapticFeedback.selectionClick();
-            onNewPlan();
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem<int>(
-              value: 0,
-              child: Row(
-                children: [
-                  const Icon(Icons.restart_alt_rounded, size: 18),
-                  const SizedBox(width: 9),
-                  Text(context.l10n.homeActionNewPlan),
-                ],
+        Semantics(
+          button: true,
+          label: context.l10n.planMenuTitle,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () async {
+                HapticFeedback.selectionClick();
+                final shouldStartNewPlan = await _showPlanOptionsSheet(context);
+                if (shouldStartNewPlan == true) {
+                  onNewPlan();
+                }
+              },
+              child: Ink(
+                width: 42,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMutedFor(context),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.borderFor(context),
+                    width: 0.5,
+                  ),
+                ),
+                child: Icon(
+                  Icons.more_horiz_rounded,
+                  color: AppColors.textSoftFor(context),
+                ),
               ),
-            ),
-          ],
-          child: Container(
-            width: 42,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceMutedFor(context),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: AppColors.borderFor(context),
-                width: 0.5,
-              ),
-            ),
-            child: Icon(
-              Icons.more_horiz_rounded,
-              color: AppColors.textSoftFor(context),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Future<bool?> _showPlanOptionsSheet(BuildContext context) {
+    return showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.68),
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetContext) {
+        final theme = Theme.of(sheetContext);
+        final isDark = AppColors.isDark(sheetContext);
+        final border = AppColors.borderFor(sheetContext);
+
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceFor(sheetContext),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+            border: Border(top: BorderSide(color: border)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.46 : 0.14),
+                blurRadius: 40,
+                offset: const Offset(0, -12),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.textSoftFor(
+                      sheetContext,
+                    ).withValues(alpha: 0.28),
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF238BFF), Color(0xFF0068E8)],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.28),
+                          blurRadius: 18,
+                          offset: const Offset(0, 7),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.route_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          sheetContext.l10n.planMenuTitle,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: AppColors.textPrimaryFor(sheetContext),
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.35,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          sheetContext.l10n.planMenuSubtitle,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSoftFor(sheetContext),
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: sheetContext.l10n.planResetCancelLabel,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: AppColors.textSoftFor(sheetContext),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.of(sheetContext).pop(true);
+                  },
+                  child: Ink(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.tintedSurfaceFor(
+                        sheetContext,
+                        tint: AppColors.primary,
+                        lightColor: const Color(0xFFF1F7FF),
+                        darkAlpha: 0.12,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.tintedBorderFor(
+                          sheetContext,
+                          tint: AppColors.primary,
+                          lightColor: const Color(0xFFBCD8FF),
+                          darkAlpha: 0.32,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 46,
+                          height: 46,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(
+                              alpha: isDark ? 0.22 : 0.10,
+                            ),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: const Icon(
+                            Icons.restart_alt_rounded,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                sheetContext.l10n.homeActionNewPlan,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: AppColors.textPrimaryFor(sheetContext),
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                sheetContext.l10n.planMenuNewPlanBody,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.textSoftFor(sheetContext),
+                                  height: 1.35,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.shield_outlined,
+                    size: 17,
+                    color: AppColors.textSoftFor(sheetContext),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      sheetContext.l10n.planMenuSafetyNote,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(sheetContext),
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

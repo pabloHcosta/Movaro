@@ -40,20 +40,20 @@ class CitySeasonalitySnapshot {
   final String sourceType;
 
   String visitorsLabel(String locale) => switch (locale) {
-        'pt' => visitorsLabelPt,
-        'es' => visitorsLabelEs,
-        _ => visitorsLabelEn,
-      };
+    'pt' => visitorsLabelPt,
+    'es' => visitorsLabelEs,
+    _ => visitorsLabelEn,
+  };
 
   String rentNotes(String locale) => switch (locale) {
-        'pt' => rentNotesPt,
-        'es' => rentNotesEs,
-        _ => rentNotesEn,
-      };
+    'pt' => rentNotesPt,
+    'es' => rentNotesEs,
+    _ => rentNotesEn,
+  };
 
   String jobNotes(String locale) => switch (locale) {
-        'pt' => jobNotesPt,
-        'es' => jobNotesEs,
-        _ => jobNotesEn,
-      };
+    'pt' => jobNotesPt,
+    'es' => jobNotesEs,
+    _ => jobNotesEn,
+  };
 }

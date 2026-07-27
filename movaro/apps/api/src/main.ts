@@ -34,6 +34,13 @@ const routeLimitRules: RouteLimitRule[] = [
     windowMs: 10 * 60 * 1000,
   },
   {
+    key: 'product-analytics',
+    path: `/${APP_GLOBAL_PREFIX}/v${API_VERSION}/product-analytics/events`,
+    methods: ['POST'],
+    max: 30,
+    windowMs: 10 * 60 * 1000,
+  },
+  {
     key: 'city-search',
     path: `/${APP_GLOBAL_PREFIX}/v${API_VERSION}/cities/search`,
     methods: ['GET'],

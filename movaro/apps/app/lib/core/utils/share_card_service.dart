@@ -59,9 +59,7 @@ class ShareCardService {
 
       await SharePlus.instance.share(
         ShareParams(
-          files: [
-            XFile.fromData(bytes, name: fileName, mimeType: 'image/png'),
-          ],
+          files: [XFile.fromData(bytes, name: fileName, mimeType: 'image/png')],
           text: caption,
         ),
       );

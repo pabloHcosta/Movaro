@@ -29,6 +29,9 @@ void main() {
 
   test('covers the core bureaucracy situations', () {
     final keys = PortuguesePhrasebook.groups.map((g) => g.key).toSet();
-    expect(keys.containsAll({'documents', 'bank', 'rental', 'health', 'work'}), isTrue);
+    expect(
+      keys.containsAll({'documents', 'bank', 'rental', 'health', 'work'}),
+      isTrue,
+    );
   });
 }

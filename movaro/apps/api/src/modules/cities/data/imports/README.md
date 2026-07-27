@@ -35,3 +35,18 @@ npm run ingest:official-city-metrics
 
 That script regenerates:
 - `src/modules/cities/data/seeds/official_city_metrics.json`
+
+## Safety
+
+Safety uses the municipal registered-homicide series from Atlas da Violencia /
+Ipea (SIM/MS). Refresh it with:
+
+```bash
+npm run sync:ipea-safety
+```
+
+The importer uses the latest three-year municipal window to reduce annual
+volatility. It converts that rate into a bounded lethal-violence signal and
+blends it with a smaller share of the broader curated score. The result is a
+derived comparison signal, not an official safety ranking. It does not cover
+property crime, harassment, neighborhood differences, or personal routine.

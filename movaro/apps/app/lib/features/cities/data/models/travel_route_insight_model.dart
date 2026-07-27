@@ -18,11 +18,13 @@ class TravelRouteInsightModel {
       originIata: json['originIata'] as String,
       destIata: json['destIata'] as String,
       months: (json['months'] as List<dynamic>)
-          .map((item) => switch (item as String) {
-                'low' => TravelRoutePriceLevel.low,
-                'mid' => TravelRoutePriceLevel.mid,
-                _ => TravelRoutePriceLevel.high,
-              })
+          .map(
+            (item) => switch (item as String) {
+              'low' => TravelRoutePriceLevel.low,
+              'mid' => TravelRoutePriceLevel.mid,
+              _ => TravelRoutePriceLevel.high,
+            },
+          )
           .toList(),
       lowUsdMin: json['lowUsdMin'] as int,
       lowUsdMax: json['lowUsdMax'] as int,

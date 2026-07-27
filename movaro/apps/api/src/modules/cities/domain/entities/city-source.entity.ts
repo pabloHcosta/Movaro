@@ -11,5 +11,9 @@ export class CitySourceEntity {
     public readonly sourceType: CityDataSourceType = isOfficial
       ? 'official'
       : 'curated',
+    public readonly referenceValue: number | null = null,
+    public readonly referenceUnit: string | null = null,
+    public readonly referencePeriod: string | null = null,
+    public readonly updatedAt: string | null = null,
   ) {}
 }

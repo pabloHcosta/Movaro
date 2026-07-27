@@ -4033,6 +4033,7 @@ class ArgentinaBrazilGuideDataSource {
     }
 
     items.addAll(_reviewAdditions(locale));
+    items.addAll(_settlingAdditions(locale));
 
     final priorityIds = _priorityOrder(plan.goal);
     final priorityRanks = <String, int>{
@@ -4454,6 +4455,163 @@ class ArgentinaBrazilGuideDataSource {
             es: 'Las autorizaciones de viaje y custodia dependen de la composición familiar; confirma también con la autoridad argentina competente.',
             en: 'Travel and custody authorizations depend on family circumstances; also confirm with the relevant Argentine authority.',
           ),
+        ),
+      ),
+    ];
+  }
+
+  static List<GuideActionItem> _settlingAdditions(String locale) {
+    return [
+      GuideActionItem(
+        id: 'item_4_8_revisao_custo_real',
+        title: _t(
+          locale,
+          pt: 'Compare seu custo real após 30 dias',
+          es: 'Compara tu costo real después de 30 días',
+          en: 'Compare your real cost after 30 days',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'Troque estimativas por seus gastos reais antes de assumir um aluguel ou compromisso maior.',
+          es: 'Reemplazá estimaciones por tus gastos reales antes de asumir un alquiler o compromiso mayor.',
+          en: 'Replace estimates with your real spending before taking on a larger lease or commitment.',
+        ),
+        type: GuideActionType.tool,
+        toolType: GuideToolType.budget,
+        phase: GuidePhase.arrival,
+        orderIndex: 90,
+        isCompleted: false,
+        icon: Icons.receipt_long_outlined,
+        primaryActionLabel: _t(
+          locale,
+          pt: 'Revisar meu orçamento',
+          es: 'Revisar mi presupuesto',
+          en: 'Review my budget',
+        ),
+        primaryActionType: GuidePrimaryActionType.tool,
+        doneCriteria: _t(
+          locale,
+          pt: 'Você registrou moradia, alimentação, transporte, saúde e câmbio reais e ajustou sua faixa de orçamento.',
+          es: 'Registraste vivienda, comida, transporte, salud y cambio reales, y ajustaste tu rango de presupuesto.',
+          en: 'You recorded real housing, food, transport, health, and exchange costs and adjusted your budget range.',
+        ),
+        estimatedEffort: GuideEstimatedEffort.fast,
+        tier: GuideItemTier.recommended,
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.movaroGuidance,
+          sourceLabel: 'Movaro · Revisão do próprio orçamento',
+          sourceUrl: PreparationResourceLinks.consumerFinancialEducation
+              .toString(),
+          lastVerified: DateTime(2026, 7, 26),
+          scopeNote: _t(
+            locale,
+            pt: 'A comparação usa os valores inseridos por você; não é uma previsão financeira.',
+            es: 'La comparación usa los valores ingresados por vos; no es una previsión financiera.',
+            en: 'The comparison uses values entered by you; it is not a financial forecast.',
+          ),
+        ),
+      ),
+      GuideActionItem(
+        id: 'item_4_9_reavaliar_bairro',
+        title: _t(
+          locale,
+          pt: 'Reavalie o bairro com sua rotina real',
+          es: 'Reevaluá el barrio con tu rutina real',
+          en: 'Reassess the neighborhood using your real routine',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'Antes de renovar contrato, compare deslocamento, aluguel, serviços e como você se sente na região.',
+          es: 'Antes de renovar contrato, compará traslado, alquiler, servicios y cómo te sentís en la zona.',
+          en: 'Before renewing a lease, compare commute, rent, services, and how the area works for you.',
+        ),
+        type: GuideActionType.tool,
+        toolType: GuideToolType.housing,
+        phase: GuidePhase.arrival,
+        orderIndex: 91,
+        isCompleted: false,
+        icon: Icons.location_city_outlined,
+        primaryActionLabel: _t(
+          locale,
+          pt: 'Comparar opções de moradia',
+          es: 'Comparar opciones de vivienda',
+          en: 'Compare housing options',
+        ),
+        primaryActionType: GuidePrimaryActionType.tool,
+        checklistItems: [
+          ChecklistSubItem(
+            id: 'settling_commute',
+            title: _t(
+              locale,
+              pt: 'Tempo e custo do deslocamento conferidos',
+              es: 'Tiempo y costo de traslado revisados',
+              en: 'Commute time and cost checked',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'settling_services',
+            title: _t(
+              locale,
+              pt: 'Saúde, mercado e transporte próximos conferidos',
+              es: 'Salud, mercado y transporte cercanos revisados',
+              en: 'Nearby health, groceries, and transport checked',
+            ),
+            isCompleted: false,
+          ),
+          ChecklistSubItem(
+            id: 'settling_contract',
+            title: _t(
+              locale,
+              pt: 'Custo total do próximo contrato comparado',
+              es: 'Costo total del próximo contrato comparado',
+              en: 'Total cost of the next lease compared',
+            ),
+            isCompleted: false,
+          ),
+        ],
+        tier: GuideItemTier.optional,
+      ),
+      GuideActionItem(
+        id: 'item_4_10_revisao_documental',
+        title: _t(
+          locale,
+          pt: 'Crie sua revisão anual de documentos',
+          es: 'Creá tu revisión anual de documentos',
+          en: 'Create your annual document review',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'Registre vencimentos e confira na fonte oficial o que realmente precisa ser renovado.',
+          es: 'Registrá vencimientos y confirmá en la fuente oficial qué realmente necesita renovación.',
+          en: 'Record expiry dates and confirm at the official source what actually needs renewal.',
+        ),
+        type: GuideActionType.external,
+        phase: GuidePhase.arrival,
+        orderIndex: 92,
+        isCompleted: false,
+        icon: Icons.event_repeat_rounded,
+        primaryActionLabel: _t(
+          locale,
+          pt: 'Revisar serviços da Polícia Federal',
+          es: 'Revisar servicios de Policía Federal',
+          en: 'Review Federal Police services',
+        ),
+        primaryActionType: GuidePrimaryActionType.external,
+        primaryActionTarget: PreparationResourceLinks.rnMRegistrationGuide
+            .toString(),
+        doneCriteria: _t(
+          locale,
+          pt: 'As datas relevantes estão registradas e os lembretes foram criados sem presumir um prazo universal.',
+          es: 'Las fechas relevantes están registradas y los recordatorios fueron creados sin asumir un plazo universal.',
+          en: 'Relevant dates are recorded and reminders were created without assuming one universal deadline.',
+        ),
+        tier: GuideItemTier.recommended,
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Polícia Federal · Serviços migratórios',
+          sourceUrl: PreparationResourceLinks.rnMRegistrationGuide.toString(),
+          lastVerified: DateTime(2026, 7, 26),
         ),
       ),
     ];

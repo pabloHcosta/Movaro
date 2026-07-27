@@ -239,8 +239,7 @@ class _JourneySetupPageState extends State<JourneySetupPage> {
                                 _IntroHero(
                                   selectedDestination: selectedDestination,
                                   selectedOrigin: selectedOrigin,
-                                  detectedLocation:
-                                      controller.detectedLocation,
+                                  detectedLocation: controller.detectedLocation,
                                 ),
                                 const SizedBox(height: 16),
                                 _SelectorPanel(
@@ -525,7 +524,9 @@ class _IntroHero extends StatelessWidget {
           Text(
             detectedLocation == null
                 ? l10n.journeySetupManualChangeHint
-                : l10n.journeySetupDetectedOriginHint(detectedLocation!.countryName),
+                : l10n.journeySetupDetectedOriginHint(
+                    detectedLocation!.countryName,
+                  ),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSoftFor(context),
             ),

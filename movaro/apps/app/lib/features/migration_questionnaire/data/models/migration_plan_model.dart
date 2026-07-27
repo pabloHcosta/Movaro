@@ -11,6 +11,8 @@ class MigrationPlanModel {
     required this.goal,
     required this.timeline,
     required this.steps,
+    this.id,
+    this.createdAt,
     this.variant = QuestionnaireVariant.lean,
     this.funding = '',
     this.travelGroup = '',
@@ -30,6 +32,8 @@ class MigrationPlanModel {
 
   factory MigrationPlanModel.fromJson(Map<String, dynamic> json) {
     return MigrationPlanModel(
+      id: json['id'] as String?,
+      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),
       originCountry: json['originCountry'] as String,
       destinationCountry: json['destinationCountry'] as String,
       goal: json['goal'] as String,
@@ -78,10 +82,7 @@ class MigrationPlanModel {
           (json['candidateCityMatchScores'] as Map<String, dynamic>? ??
                   const <String, dynamic>{})
               .map(
-                (key, value) => MapEntry(
-                  key,
-                  (value as num?)?.toDouble() ?? 0,
-                ),
+                (key, value) => MapEntry(key, (value as num?)?.toDouble() ?? 0),
               ),
       cityRecommendationReasons:
           (json['cityRecommendationReasons'] as List<dynamic>? ?? const [])
@@ -93,6 +94,8 @@ class MigrationPlanModel {
 
   factory MigrationPlanModel.fromEntity(MigrationPlan plan) {
     return MigrationPlanModel(
+      id: plan.id,
+      createdAt: plan.createdAt,
       originCountry: plan.originCountry,
       destinationCountry: plan.destinationCountry,
       goal: plan.goal,
@@ -120,6 +123,8 @@ class MigrationPlanModel {
   final String destinationCountry;
   final String goal;
   final String timeline;
+  final String? id;
+  final DateTime? createdAt;
   final QuestionnaireVariant variant;
   final String funding;
   final String travelGroup;
@@ -138,6 +143,8 @@ class MigrationPlanModel {
   final bool isCityConfirmed;
 
   Map<String, dynamic> toJson() => {
+    'id': id,
+    'createdAt': createdAt?.toUtc().toIso8601String(),
     'originCountry': originCountry,
     'destinationCountry': destinationCountry,
     'goal': goal,
@@ -167,6 +174,8 @@ class MigrationPlanModel {
   };
 
   MigrationPlan toEntity() => MigrationPlan(
+    id: id,
+    createdAt: createdAt,
     originCountry: originCountry,
     destinationCountry: destinationCountry,
     goal: goal,

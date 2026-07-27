@@ -9,6 +9,7 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final preferences = await SharedPreferences.getInstance();
     final store = GuideFlowMetricsStore(preferences: preferences);
+    await store.setConsent(ProductAnalyticsConsent.granted);
 
     await store.record(
       GuideFlowMetric.questionAnswered,
@@ -32,4 +33,48 @@ void main() {
     expect(raw, isNot(contains('Argentina')));
     expect(raw, isNot(contains('answerValue')));
   });
+
+  test('does not retain events when consent is denied', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final preferences = await SharedPreferences.getInstance();
+    final store = GuideFlowMetricsStore(preferences: preferences);
+
+    await store.setConsent(ProductAnalyticsConsent.denied);
+    await store.record(GuideFlowMetric.planGenerated);
+
+    expect(await store.read(), isEmpty);
+  });
+
+  test('uploads only anonymous funnel metadata', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final preferences = await SharedPreferences.getInstance();
+    final sink = _RecordingSink();
+    final store = GuideFlowMetricsStore(preferences: preferences, sink: sink);
+
+    await store.setConsent(ProductAnalyticsConsent.granted);
+    await store.record(
+      GuideFlowMetric.taskStarted,
+      referenceId: 'item_sensitive_document_name',
+      stepIndex: 4,
+    );
+
+    expect(sink.events, hasLength(1));
+    expect(sink.events.single.metric, GuideFlowMetric.taskStarted);
+    expect(sink.installationToken, hasLength(48));
+  });
+}
+
+class _RecordingSink implements GuideFlowMetricsSink {
+  String? installationToken;
+  List<GuideFlowUploadEvent> events = const [];
+
+  @override
+  Future<Set<String>> upload({
+    required String installationToken,
+    required List<GuideFlowUploadEvent> events,
+  }) async {
+    this.installationToken = installationToken;
+    this.events = events;
+    return events.map((event) => event.eventId).toSet();
+  }
 }

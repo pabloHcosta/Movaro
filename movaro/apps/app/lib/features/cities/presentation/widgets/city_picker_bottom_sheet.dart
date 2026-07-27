@@ -127,7 +127,11 @@ class _CityPickerBottomSheetState extends State<CityPickerBottomSheet>
 
     final scored = <(City, int)>[];
     for (final city in cities) {
-      final s = CitySearchMatcher.score(_searchQuery, city.name, city.stateName);
+      final s = CitySearchMatcher.score(
+        _searchQuery,
+        city.name,
+        city.stateName,
+      );
       if (s > 0) scored.add((city, s));
     }
     scored.sort((a, b) => b.$2.compareTo(a.$2));
@@ -171,9 +175,9 @@ class _CityPickerBottomSheetState extends State<CityPickerBottomSheet>
               const SizedBox(height: 8),
               Text(
                 widget.subtitle!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: textSoft,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: textSoft),
               ),
             ],
 
@@ -195,9 +199,9 @@ class _CityPickerBottomSheetState extends State<CityPickerBottomSheet>
                 dividerColor: Colors.transparent,
                 labelColor: AppColors.primary,
                 unselectedLabelColor: textSoft,
-                labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+                labelStyle: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
                 tabs: [
                   Tab(
                     child: Row(
@@ -331,7 +335,9 @@ class _RegionFilterRow extends StatelessWidget {
                     : AppColors.surfaceMutedFor(context),
                 borderRadius: BorderRadius.circular(12),
                 border: isSelected
-                    ? Border.all(color: AppColors.primary.withValues(alpha: 0.3))
+                    ? Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                      )
                     : null,
               ),
               child: Text(
@@ -420,8 +426,9 @@ class _MapTabState extends State<_MapTab> {
     }
     _mapController.fitCamera(
       CameraFit.coordinates(
-        coordinates:
-            cities.map((c) => LatLng(c.latitude, c.longitude)).toList(),
+        coordinates: cities
+            .map((c) => LatLng(c.latitude, c.longitude))
+            .toList(),
         padding: const EdgeInsets.all(60),
       ),
     );
@@ -469,8 +476,9 @@ class _MapTabState extends State<_MapTab> {
                         name: city.name,
                         selected: city.id == widget.selectedCity?.id,
                         onTap: () => setState(() {
-                          _tooltipCity =
-                              _tooltipCity?.id == city.id ? null : city;
+                          _tooltipCity = _tooltipCity?.id == city.id
+                              ? null
+                              : city;
                         }),
                         onLongPress: () {
                           setState(() => _tooltipCity = null);
@@ -521,8 +529,10 @@ class _MapTabState extends State<_MapTab> {
             right: 0,
             child: Center(
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(20),
@@ -940,8 +950,9 @@ class _PreviewCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         '${city!.stateName} (${city!.stateCode})',
-                        style: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(color: AppColors.textSoftFor(context)),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSoftFor(context),
+                        ),
                       ),
                     ],
                   )

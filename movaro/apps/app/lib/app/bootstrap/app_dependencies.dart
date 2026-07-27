@@ -12,6 +12,7 @@ import 'package:movaro_app/features/auth/application/auth_controller.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
 
 class AppDependencies {
   const AppDependencies({
@@ -29,6 +30,7 @@ class AppDependencies {
     required this.themeController,
     required this.currencyController,
     required this.exchangeRatesController,
+    required this.guideFlowMetricsStore,
   });
 
   final AppEnvironment environment;
@@ -45,4 +47,5 @@ class AppDependencies {
   final ThemeController themeController;
   final CurrencyController currencyController;
   final ExchangeRatesController exchangeRatesController;
+  final GuideFlowMetricsStore guideFlowMetricsStore;
 }

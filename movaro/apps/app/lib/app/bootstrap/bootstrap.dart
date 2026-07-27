@@ -33,6 +33,8 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/data/datasources/guide_flow_metrics_remote_sink.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/repositories/question_repository_impl.dart';
@@ -49,6 +51,10 @@ Future<AppDependencies> buildAppDependencies({
 }) async {
   final environment = AppEnvironment.fromDartDefines(
     defaultFlavor: defaultFlavor,
+  );
+  final guideFlowMetricsStore = GuideFlowMetricsStore.instance;
+  await guideFlowMetricsStore.initialize(
+    sink: GuideFlowMetricsRemoteSink(environment: environment),
   );
   debugPrint(
     'Movaro API source: ${environment.apiSource.name} '
@@ -148,5 +154,6 @@ Future<AppDependencies> buildAppDependencies({
     themeController: themeController,
     currencyController: currencyController,
     exchangeRatesController: exchangeRatesController,
+    guideFlowMetricsStore: guideFlowMetricsStore,
   );
 }

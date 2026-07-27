@@ -132,8 +132,7 @@ class _ExplorePageState extends State<ExplorePage> {
                       plan,
                       citiesController.catalog,
                     );
-                    final locale =
-                        Localizations.localeOf(context).languageCode;
+                    final locale = Localizations.localeOf(context).languageCode;
                     final stage = _journeyStage(plan);
                     final seasonalCities = suggestedCities
                         .where(CitySeasonalityProfile.hasSeason)
@@ -1195,8 +1194,8 @@ class _ExploreFeedCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             item.typeLabel(locale),
-                            style:
-                                Theme.of(context).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
                                   color: typeColor,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -1205,8 +1204,8 @@ class _ExploreFeedCard extends StatelessWidget {
                         if (item.updatedAt != null)
                           Text(
                             item.updatedAt!,
-                            style:
-                                Theme.of(context).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
                                   color: AppColors.textSoftFor(context),
                                   fontSize: 10,
                                 ),
@@ -1397,11 +1396,7 @@ class _SeasonalityAlertCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 6),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 12,
-              color: accentColor,
-            ),
+            Icon(Icons.arrow_forward_ios_rounded, size: 12, color: accentColor),
           ],
         ),
       ),
@@ -1410,8 +1405,18 @@ class _SeasonalityAlertCard extends StatelessWidget {
 
   String _peakLabel(List<int> months) {
     const names = [
-      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez',
     ];
     if (months.isEmpty) return '';
     return months.map((m) => names[m - 1]).join(', ');

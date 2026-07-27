@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:movaro_app/core/storage/versioned_json_file_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
@@ -17,6 +18,7 @@ class MigrationCopilotProgressSnapshot {
     this.completedAtById = const <String, String>{},
     this.prioritizedItemIds = const <String>{},
     this.dismissedReasonsById = const <String, GuideDismissReason>{},
+    this.taskStatesById = const <String, GuideTaskState>{},
   });
 
   final Set<String> readinessCompletedIds;
@@ -26,6 +28,14 @@ class MigrationCopilotProgressSnapshot {
   final Map<String, String> completedAtById;
   final Set<String> prioritizedItemIds;
   final Map<String, GuideDismissReason> dismissedReasonsById;
+  final Map<String, GuideTaskState> taskStatesById;
+
+  GuideTaskState stateFor(String itemId) {
+    if (getAllCompletedIds().contains(itemId)) {
+      return GuideTaskState.completed;
+    }
+    return taskStatesById[itemId] ?? GuideTaskState.notStarted;
+  }
 
   Set<String> getAllCompletedIds() => <String>{
     ...readinessCompletedIds,
@@ -56,7 +66,7 @@ class MigrationCopilotProgressStore {
         return const MigrationCopilotProgressSnapshot();
       }
 
-      final key = _planKey(plan);
+      final key = MigrationPlanIdentity.storageKeyFor(plan);
       final value = decoded[key];
       if (value is! Map<String, dynamic>) {
         return const MigrationCopilotProgressSnapshot();
@@ -72,6 +82,7 @@ class MigrationCopilotProgressStore {
         dismissedReasonsById: _readDismissReasons(
           value['dismissedReasonsById'],
         ),
+        taskStatesById: _readTaskStates(value['taskStatesById']),
       );
     } catch (_) {
       return const MigrationCopilotProgressSnapshot();
@@ -97,6 +108,7 @@ class MigrationCopilotProgressStore {
     Map<String, String>? completedAtById,
     Set<String>? prioritizedItemIds,
     Map<String, GuideDismissReason>? dismissedReasonsById,
+    Map<String, GuideTaskState>? taskStatesById,
   }) async {
     final file = await _file();
     Map<String, dynamic> current = <String, dynamic>{};
@@ -105,12 +117,13 @@ class MigrationCopilotProgressStore {
       current = existing;
     }
 
-    final existingPlanState = current[_planKey(plan)];
+    final planKey = MigrationPlanIdentity.storageKeyFor(plan);
+    final existingPlanState = current[planKey];
     final existingMap = existingPlanState is Map<String, dynamic>
         ? existingPlanState
         : const <String, dynamic>{};
 
-    current[_planKey(plan)] = <String, dynamic>{
+    current[planKey] = <String, dynamic>{
       'readinessCompletedIds': readinessCompletedIds.toList()..sort(),
       'documentCompletedIds': documentCompletedIds.toList()..sort(),
       'arrivalCompletedIds': arrivalCompletedIds.toList()..sort(),
@@ -124,6 +137,9 @@ class MigrationCopilotProgressStore {
       'dismissedReasonsById': _encodeDismissReasons(
         dismissedReasonsById ??
             _readDismissReasons(existingMap['dismissedReasonsById']),
+      ),
+      'taskStatesById': _encodeTaskStates(
+        taskStatesById ?? _readTaskStates(existingMap['taskStatesById']),
       ),
       'updatedAt': DateTime.now().toIso8601String(),
     };
@@ -205,6 +221,32 @@ class MigrationCopilotProgressStore {
     return result;
   }
 
+  Map<String, GuideTaskState> _readTaskStates(Object? rawValue) {
+    if (rawValue is! Map) {
+      return <String, GuideTaskState>{};
+    }
+    final result = <String, GuideTaskState>{};
+    rawValue.forEach((key, value) {
+      if (key is! String || value is! String) {
+        return;
+      }
+      final state = GuideTaskState.values.cast<GuideTaskState?>().firstWhere(
+        (candidate) => candidate?.name == value,
+        orElse: () => null,
+      );
+      if (state != null) {
+        result[key] = state;
+      }
+    });
+    return result;
+  }
+
+  Map<String, String> _encodeTaskStates(
+    Map<String, GuideTaskState> taskStatesById,
+  ) => <String, String>{
+    for (final entry in taskStatesById.entries) entry.key: entry.value.name,
+  };
+
   Set<String> getAllCompletedIds(MigrationCopilotProgressSnapshot snapshot) {
     return snapshot.getAllCompletedIds();
   }
@@ -222,17 +264,6 @@ class MigrationCopilotProgressStore {
     required int totalItems,
   }) {
     return snapshot.getProgressPercent(totalItems);
-  }
-
-  String _planKey(MigrationPlan plan) {
-    final cityId = plan.currentPlanCity?.id ?? 'no-city';
-    return [
-      plan.originCountry,
-      plan.destinationCountry,
-      plan.goal,
-      plan.timeline,
-      cityId,
-    ].join('::');
   }
 
   Future<File> _file() async {

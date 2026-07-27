@@ -7,6 +7,7 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
+import 'package:movaro_app/core/trust/source_freshness_policy.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/core/widgets/practical_info_disclaimer.dart';
 import 'package:movaro_app/core/widgets/contextual_help.dart';
@@ -35,6 +36,7 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_event_suggestion_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_personalization_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_readiness_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
@@ -98,6 +100,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   Set<String> _prioritizedItemIds = <String>{};
   Map<String, GuideDismissReason> _dismissedReasonsById =
       <String, GuideDismissReason>{};
+  Map<String, GuideTaskState> _taskStatesById = <String, GuideTaskState>{};
   String? _loadedProgressKey;
   String? _loadedActiveItemId;
   GuideGpsController? _gpsController;
@@ -220,6 +223,9 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       _dismissedReasonsById = Map<String, GuideDismissReason>.from(
         snapshot.dismissedReasonsById,
       );
+      _taskStatesById = Map<String, GuideTaskState>.from(
+        snapshot.taskStatesById,
+      );
     });
   }
 
@@ -261,6 +267,11 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
               .toList()
             ..sort())
           .join(','),
+      (_taskStatesById.entries
+              .map((entry) => '${entry.key}:${entry.value.name}')
+              .toList()
+            ..sort())
+          .join(','),
     ].join('::');
 
     if (_gpsControllerKey == signature && _gpsController != null) {
@@ -277,6 +288,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       completedAtById: _completedAtById,
       prioritizedItemIds: _prioritizedItemIds,
       dismissedReasonsById: _dismissedReasonsById,
+      taskStatesById: _taskStatesById,
       activeItemId: _loadedActiveItemId,
     );
     _gpsControllerKey = signature;
@@ -343,16 +355,13 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     _dismissedReasonsById = Map<String, GuideDismissReason>.from(
       controller.dismissedReasonsById,
     );
+    _taskStatesById = Map<String, GuideTaskState>.from(
+      controller.taskStatesById,
+    );
   }
 
   String _planKey(MigrationPlan plan) {
-    return [
-      plan.originCountry,
-      plan.destinationCountry,
-      plan.goal,
-      plan.timeline,
-      plan.currentPlanCity?.id ?? 'no-city',
-    ].join('::');
+    return MigrationPlanIdentity.storageKeyFor(plan);
   }
 
   void _openDocumentationTopic(DocumentationGuideSection section) {
@@ -679,7 +688,11 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     MigrationPlan plan,
     City? city,
   ) async {
-    controller.startCurrentItem();
+    if (controller.stateFor(item.id) == GuideTaskState.waiting) {
+      await controller.resumeCurrentItem();
+    } else {
+      controller.startCurrentItem();
+    }
     await _showExecutionSheet(controller, item, plan, city);
   }
 
@@ -1800,37 +1813,70 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                             ),
                           )
                         else
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton(
-                              onPressed: sheetItem.isDismissed
-                                  ? null
-                                  : canComplete
-                                  ? handleComplete
-                                  : null,
-                              child: Text(
-                                sheetItem.isDismissed
-                                    ? _localizedText(
-                                        sheetContext,
-                                        pt: 'Etapa dispensada',
-                                        es: 'Paso descartado',
-                                        en: 'Step dismissed',
-                                      )
-                                    : canComplete
-                                    ? _localizedText(
-                                        sheetContext,
-                                        pt: 'Concluir etapa',
-                                        es: 'Completar etapa',
-                                        en: 'Complete step',
-                                      )
-                                    : _localizedText(
-                                        sheetContext,
-                                        pt: 'Conclua o checklist para continuar',
-                                        es: 'Completa el checklist para continuar',
-                                        en: 'Finish the checklist to continue',
-                                      ),
+                          Column(
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                child: FilledButton(
+                                  onPressed: sheetItem.isDismissed
+                                      ? null
+                                      : canComplete
+                                      ? handleComplete
+                                      : null,
+                                  child: Text(
+                                    sheetItem.isDismissed
+                                        ? _localizedText(
+                                            sheetContext,
+                                            pt: 'Etapa dispensada',
+                                            es: 'Paso descartado',
+                                            en: 'Step dismissed',
+                                          )
+                                        : canComplete
+                                        ? _localizedText(
+                                            sheetContext,
+                                            pt: 'Concluir etapa',
+                                            es: 'Completar etapa',
+                                            en: 'Complete step',
+                                          )
+                                        : _localizedText(
+                                            sheetContext,
+                                            pt: 'Conclua o checklist para continuar',
+                                            es: 'Completa el checklist para continuar',
+                                            en: 'Finish the checklist to continue',
+                                          ),
+                                  ),
+                                ),
                               ),
-                            ),
+                              if (!sheetItem.isDismissed &&
+                                  !sheetItem.isCompleted) ...[
+                                const SizedBox(height: 8),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: TextButton.icon(
+                                    onPressed: () async {
+                                      Navigator.of(sheetContext).pop();
+                                      await controller.markCurrentItemWaiting();
+                                      if (!mounted) return;
+                                      setState(() {
+                                        _syncFromGpsController(controller);
+                                      });
+                                    },
+                                    icon: const Icon(
+                                      Icons.hourglass_top_rounded,
+                                      size: 18,
+                                    ),
+                                    label: Text(
+                                      _localizedText(
+                                        sheetContext,
+                                        pt: 'Estou aguardando uma resposta',
+                                        es: 'Estoy esperando una respuesta',
+                                        en: 'I am waiting for a response',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                       ],
                     ),
@@ -2176,6 +2222,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                 showExpandedContent: _showExpandedContent,
                                 awaitingConfirmation:
                                     gpsController.awaitingConfirmation,
+                                taskState: gpsController.currentTaskState,
                                 cityName: city.name,
                                 onPrimaryTap: (item) => _handleCurrentActionTap(
                                   gpsController,
@@ -4310,6 +4357,7 @@ class _GuideDominantActionCard extends StatelessWidget {
     required this.showCelebration,
     required this.showExpandedContent,
     required this.awaitingConfirmation,
+    required this.taskState,
     required this.onPrimaryTap,
     required this.onChecklistToggle,
     required this.onPrioritizeToggle,
@@ -4323,6 +4371,7 @@ class _GuideDominantActionCard extends StatelessWidget {
   final bool showCelebration;
   final bool showExpandedContent;
   final bool awaitingConfirmation;
+  final GuideTaskState taskState;
   final Future<void> Function(GuideActionItem item) onPrimaryTap;
   final Future<void> Function(String itemId, String subItemId)
   onChecklistToggle;
@@ -4446,6 +4495,30 @@ class _GuideDominantActionCard extends StatelessWidget {
                     _GuideMetaChip(
                       label: _guidePhaseShortName(context, item!.phase),
                     ),
+                    if (taskState != GuideTaskState.notStarted)
+                      _GuideMetaChip(
+                        label: switch (taskState) {
+                          GuideTaskState.inProgress => _localizedText(
+                            context,
+                            pt: 'Em andamento',
+                            es: 'En progreso',
+                            en: 'In progress',
+                          ),
+                          GuideTaskState.waiting => _localizedText(
+                            context,
+                            pt: 'Aguardando resposta',
+                            es: 'Esperando respuesta',
+                            en: 'Waiting for response',
+                          ),
+                          GuideTaskState.completed => _localizedText(
+                            context,
+                            pt: 'Concluído',
+                            es: 'Completado',
+                            en: 'Completed',
+                          ),
+                          GuideTaskState.notStarted => '',
+                        },
+                      ),
                     if (item!.estimatedTimeLabel != null)
                       _GuideMetaChip(label: item!.estimatedTimeLabel!),
                     if (item!.estimatedEffort != null)
@@ -4519,12 +4592,19 @@ class _GuideDominantActionCard extends StatelessWidget {
                         ? null
                         : () => onPrimaryTap(item!),
                     child: Text(
-                      _guideButtonLabel(
-                        context,
-                        item!,
-                        showExpandedContent,
-                        awaitingConfirmation: awaitingConfirmation,
-                      ),
+                      taskState == GuideTaskState.waiting
+                          ? _localizedText(
+                              context,
+                              pt: 'Retomar etapa',
+                              es: 'Retomar etapa',
+                              en: 'Resume step',
+                            )
+                          : _guideButtonLabel(
+                              context,
+                              item!,
+                              showExpandedContent,
+                              awaitingConfirmation: awaitingConfirmation,
+                            ),
                     ),
                   ),
                 ),
@@ -4909,7 +4989,13 @@ class _GuideEvidenceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final official = evidence.type == GuideEvidenceType.official;
-    final color = official ? AppColors.success : AppColors.warning;
+    final freshness = SourceFreshnessPolicy.assessEvidence(evidence);
+    final needsReview = freshness.requiresWarning;
+    final color = needsReview
+        ? AppColors.warning
+        : official
+        ? AppColors.success
+        : AppColors.warning;
     final date = evidence.lastVerified;
     final dateLabel =
         '${date.day.toString().padLeft(2, '0')}/'
@@ -4986,6 +5072,44 @@ class _GuideEvidenceCard extends StatelessWidget {
                 color: AppColors.textSoftFor(context),
                 height: 1.4,
               ),
+            ),
+          ],
+          if (freshness.status != SourceFreshnessStatus.current) ...[
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  needsReview
+                      ? Icons.warning_amber_rounded
+                      : Icons.update_rounded,
+                  size: 16,
+                  color: color,
+                ),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: Text(
+                    needsReview
+                        ? _localizedText(
+                            context,
+                            pt: 'Esta informação passou da janela de revisão. Use-a apenas como orientação e confirme a regra vigente na fonte.',
+                            es: 'Esta información superó la ventana de revisión. Usala solo como orientación y confirmá la regla vigente en la fuente.',
+                            en: 'This information is past its review window. Use it only as orientation and confirm the current rule at the source.',
+                          )
+                        : _localizedText(
+                            context,
+                            pt: 'Revisão editorial próxima. Confirme a página original antes de agir.',
+                            es: 'Revisión editorial próxima. Confirmá la página original antes de actuar.',
+                            en: 'Editorial review is due soon. Confirm the original page before acting.',
+                          ),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: color,
+                      height: 1.35,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
           const SizedBox(height: 6),

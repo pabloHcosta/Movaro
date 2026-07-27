@@ -66,16 +66,16 @@ class SeasonalityConflict {
   // ── Personalized conflict messages ────────────────────────────────────────
 
   String conflictMessage(String locale) => switch (locale) {
-        'pt' => _messagePt(),
-        'es' => _messageEs(),
-        _ => _messageEn(),
-      };
+    'pt' => _messagePt(),
+    'es' => _messageEs(),
+    _ => _messageEn(),
+  };
 
   String conflictHeadline(String locale) => switch (locale) {
-        'pt' => _headlinePt(),
-        'es' => _headlineEs(),
-        _ => _headlineEn(),
-      };
+    'pt' => _headlinePt(),
+    'es' => _headlineEs(),
+    _ => _headlineEn(),
+  };
 
   String _headlinePt() {
     final label = overlapLabel('pt');
@@ -149,19 +149,49 @@ class SeasonalityConflict {
   // ── Month name tables ─────────────────────────────────────────────────────
 
   static List<String> _monthNames(String locale) => switch (locale) {
-        'es' => const [
-            'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-            'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
-          ],
-        'en' => const [
-            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-          ],
-        _ => const [
-            'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-            'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
-          ],
-      };
+    'es' => const [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ],
+    'en' => const [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ],
+    _ => const [
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez',
+    ],
+  };
 }
 
 // ─── Service ───────────────────────────────────────────────────────────────────

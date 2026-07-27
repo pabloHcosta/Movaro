@@ -403,7 +403,9 @@ class _IntroSlidePage extends StatelessWidget {
                               fontSize: veryTight
                                   ? (descriptionStyle.fontSize ?? 17) - 2
                                   : descriptionStyle.fontSize,
-                              height: veryTight ? 1.25 : descriptionStyle.height,
+                              height: veryTight
+                                  ? 1.25
+                                  : descriptionStyle.height,
                             ),
                           ),
                         ),

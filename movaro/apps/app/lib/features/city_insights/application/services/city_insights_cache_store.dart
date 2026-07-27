@@ -72,7 +72,9 @@ class CityInsightsCacheStore {
     await prefs.setString('$_prefix$key', payload);
   }
 
-  Future<List<CityInsightExplorePlaceModel>?> readExploreFresh(String key) async {
+  Future<List<CityInsightExplorePlaceModel>?> readExploreFresh(
+    String key,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString('$_prefix.explore.$key');
     if (raw == null || raw.isEmpty) {

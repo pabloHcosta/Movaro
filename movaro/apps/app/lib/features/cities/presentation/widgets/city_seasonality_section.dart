@@ -65,8 +65,9 @@ class _CitySeasonalitySectionState extends State<CitySeasonalitySection> {
         : (isDark ? const Color(0xFFFF8F00) : const Color(0xFFFFE0B2));
 
     final severityColor = isHigh ? AppColors.danger : AppColors.caution;
-    final severityIcon =
-        isHigh ? Icons.warning_amber_rounded : Icons.info_outline_rounded;
+    final severityIcon = isHigh
+        ? Icons.warning_amber_rounded
+        : Icons.info_outline_rounded;
 
     final l10n = context.l10n;
 
@@ -87,9 +88,9 @@ class _CitySeasonalitySectionState extends State<CitySeasonalitySection> {
               Text(
                 l10n.citySeasonalityTitle,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.textPrimaryFor(context),
-                      fontWeight: FontWeight.w700,
-                    ),
+                  color: AppColors.textPrimaryFor(context),
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
@@ -129,17 +130,17 @@ class _CitySeasonalitySectionState extends State<CitySeasonalitySection> {
                           ? l10n.citySeasonalityHighSeverityLabel
                           : l10n.citySeasonalityMediumSeverityLabel,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: severityColor,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        color: severityColor,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       data.visitorsLabel(widget.locale),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textPrimaryFor(context),
-                            fontWeight: FontWeight.w500,
-                          ),
+                        color: AppColors.textPrimaryFor(context),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     if (data.populationMultiplierNote != null) ...[
                       const SizedBox(height: 6),
@@ -180,9 +181,9 @@ class _CitySeasonalitySectionState extends State<CitySeasonalitySection> {
                     ? l10n.citySeasonalityHideDetails
                     : l10n.citySeasonalityShowDetails,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(width: 4),
               AnimatedRotation(
@@ -227,10 +228,7 @@ class _CitySeasonalitySectionState extends State<CitySeasonalitySection> {
                 ),
                 const SizedBox(height: 10),
                 // Advice row
-                _AdviceCard(
-                  isHigh: isHigh,
-                  isDark: isDark,
-                ),
+                _AdviceCard(isHigh: isHigh, isDark: isDark),
               ],
             ),
           ),
@@ -257,28 +255,59 @@ class _MonthCalendar extends StatelessWidget {
   final String locale;
   final Color severityColor;
   final bool isDark;
+
   /// Months the user plans to arrive, derived from their plan timeline.
   /// When set, arrival months are highlighted with a blue dot in the calendar.
   final List<int>? arrivalMonths;
 
   static const _monthsPt = [
-    'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+    'Jan',
+    'Fev',
+    'Mar',
+    'Abr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Set',
+    'Out',
+    'Nov',
+    'Dez',
   ];
   static const _monthsEs = [
-    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+    'Ene',
+    'Feb',
+    'Mar',
+    'Abr',
+    'May',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dic',
   ];
   static const _monthsEn = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
 
   List<String> get _months => switch (locale) {
-        'es' => _monthsEs,
-        'en' => _monthsEn,
-        _ => _monthsPt,
-      };
+    'es' => _monthsEs,
+    'en' => _monthsEn,
+    _ => _monthsPt,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -322,6 +351,7 @@ class _MonthChip extends StatelessWidget {
   final bool isLow;
   final Color peakColor;
   final bool isDark;
+
   /// True when this month falls within the user's planned arrival window.
   final bool isArrival;
 
@@ -354,8 +384,8 @@ class _MonthChip extends StatelessWidget {
     final resolvedBorderColor = (isArrival && isPeak)
         ? peakColor
         : isArrival
-            ? AppColors.primary.withValues(alpha: 0.5)
-            : borderColor;
+        ? AppColors.primary.withValues(alpha: 0.5)
+        : borderColor;
     final borderWidth = (isArrival && isPeak) ? 1.5 : 1.0;
 
     return Container(
@@ -373,10 +403,10 @@ class _MonthChip extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: textColor,
-                  fontWeight: fontWeight,
-                  fontSize: 10,
-                ),
+              color: textColor,
+              fontWeight: fontWeight,
+              fontSize: 10,
+            ),
           ),
           if (isPeak || isArrival) ...[
             const SizedBox(height: 3),
@@ -441,10 +471,10 @@ class _PopulationPill extends StatelessWidget {
           Text(
             '${context.l10n.citySeasonalityPopulationPrefix} $label',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 11,
-                ),
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
+            ),
           ),
         ],
       ),
@@ -499,17 +529,17 @@ class _ImpactCard extends StatelessWidget {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: AppColors.textPrimaryFor(context),
-                        fontWeight: FontWeight.w700,
-                      ),
+                    color: AppColors.textPrimaryFor(context),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 5),
                 Text(
                   body,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSoftFor(context),
-                        height: 1.5,
-                      ),
+                    color: AppColors.textSoftFor(context),
+                    height: 1.5,
+                  ),
                 ),
               ],
             ),
@@ -523,10 +553,7 @@ class _ImpactCard extends StatelessWidget {
 // ─── Advice card ───────────────────────────────────────────────────────────────
 
 class _AdviceCard extends StatelessWidget {
-  const _AdviceCard({
-    required this.isHigh,
-    required this.isDark,
-  });
+  const _AdviceCard({required this.isHigh, required this.isDark});
 
   final bool isHigh;
   final bool isDark;
@@ -561,9 +588,9 @@ class _AdviceCard extends StatelessWidget {
             child: Text(
               advice,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textPrimaryFor(context),
-                    height: 1.5,
-                  ),
+                color: AppColors.textPrimaryFor(context),
+                height: 1.5,
+              ),
             ),
           ),
         ],
@@ -619,9 +646,7 @@ class _PersonalizedConflictBanner extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(
-                isCritical
-                    ? Icons.warning_rounded
-                    : Icons.schedule_rounded,
+                isCritical ? Icons.warning_rounded : Icons.schedule_rounded,
                 color: color,
                 size: 20,
               ),
@@ -630,10 +655,10 @@ class _PersonalizedConflictBanner extends StatelessWidget {
                 child: Text(
                   headline,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: color,
-                        fontWeight: FontWeight.w800,
-                        height: 1.3,
-                      ),
+                    color: color,
+                    fontWeight: FontWeight.w800,
+                    height: 1.3,
+                  ),
                 ),
               ),
             ],
@@ -644,11 +669,11 @@ class _PersonalizedConflictBanner extends StatelessWidget {
             child: Text(
               body,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: isDark
-                        ? color.withValues(alpha: 0.9)
-                        : AppColors.textPrimaryFor(context),
-                    height: 1.55,
-                  ),
+                color: isDark
+                    ? color.withValues(alpha: 0.9)
+                    : AppColors.textPrimaryFor(context),
+                height: 1.55,
+              ),
             ),
           ),
           const SizedBox(height: 10),
@@ -682,23 +707,53 @@ class _ArrivalMonthsRow extends StatelessWidget {
   final bool isDark;
 
   static const _ptMonths = [
-    'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+    'Jan',
+    'Fev',
+    'Mar',
+    'Abr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Set',
+    'Out',
+    'Nov',
+    'Dez',
   ];
   static const _esMonths = [
-    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+    'Ene',
+    'Feb',
+    'Mar',
+    'Abr',
+    'May',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dic',
   ];
   static const _enMonths = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
 
   List<String> get _names => switch (locale) {
-        'es' => _esMonths,
-        'en' => _enMonths,
-        _ => _ptMonths,
-      };
+    'es' => _esMonths,
+    'en' => _enMonths,
+    _ => _ptMonths,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -724,11 +779,10 @@ class _ArrivalMonthsRow extends StatelessWidget {
           child: Text(
             names[m - 1],
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: isOverlap ? color : AppColors.textSoftFor(context),
-                  fontWeight:
-                      isOverlap ? FontWeight.w800 : FontWeight.w400,
-                  fontSize: 10,
-                ),
+              color: isOverlap ? color : AppColors.textSoftFor(context),
+              fontWeight: isOverlap ? FontWeight.w800 : FontWeight.w400,
+              fontSize: 10,
+            ),
           ),
         );
       }).toList(),

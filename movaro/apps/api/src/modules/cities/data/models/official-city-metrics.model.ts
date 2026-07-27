@@ -23,6 +23,10 @@ export type OfficialCityEmploymentSnapshotModel =
 
 export type OfficialCitySafetySnapshotModel = OfficialSnapshotSourceModel & {
   safetyScore: number;
+  homicideRatePer100k: number;
+  referenceStartYear: number;
+  referenceEndYear: number;
+  methodologyVersion: string;
 };
 
 export type OfficialCityMetricsModel = {

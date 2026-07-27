@@ -3369,6 +3369,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cityMetricInsightMappedBaseBadge => 'Referencia mapeada';
 
   @override
+  String get cityMetricInsightDerivedOfficialBadge =>
+      'Derivado de base oficial';
+
+  @override
   String get cityMetricInsightOpenSourceAction => 'Abrir fuente';
 
   @override
@@ -3403,7 +3407,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cityMetricInsightSafetyMethod =>
-      'Cuando existe un indicador oficial de seguridad, se muestra con su fuente. Sin una fuente oficial por ciudad, el puntaje interno es solo una estimación comparativa.';
+      'La señal combina el promedio municipal de homicidios registrados en los tres años más recientes con una porción menor del contexto comparativo anterior. La tasa proviene del Atlas de la Violencia/Ipea, con datos del SIM/MS; el puntaje final es derivado y no es un ranking oficial.';
 
   @override
   String get cityMetricInsightSafetyValidate =>
@@ -3412,6 +3416,18 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get cityMetricInsightSafetyMappedSource =>
       'Atlas da Violência es la referencia oficial mapeada en el proyecto para recalibrar este grupo con base pública y metodología abierta.';
+
+  @override
+  String get cityMetricInsightSafetyOfficialRateLabel =>
+      'Promedio oficial observado';
+
+  @override
+  String cityMetricInsightSafetyRateValue(Object value) {
+    return '$value por 100 mil/año';
+  }
+
+  @override
+  String get cityMetricInsightReferencePeriodLabel => 'Período de referencia';
 
   @override
   String get cityMetricInsightWorkMeaning =>
@@ -6719,8 +6735,30 @@ class AppLocalizationsEs extends AppLocalizations {
       'Si querés recomenzar, podés borrar tu progreso actual y armar un nuevo plan desde el principio.';
 
   @override
+  String get planMenuTitle => 'Opciones de tu plan';
+
+  @override
+  String get planMenuSubtitle =>
+      'Gestioná tu recorrido sin perder de vista el progreso actual.';
+
+  @override
+  String get planMenuNewPlanBody =>
+      'Elegí otra ciudad, objetivo o momento de mudanza.';
+
+  @override
+  String get planMenuSafetyNote =>
+      'Tu plan actual solo se borrará después de tu confirmación.';
+
+  @override
+  String get planResetImpactTitle => 'Al continuar, vamos a reiniciar';
+
+  @override
   String get planResetDialogBody =>
-      'Vas a reiniciar el cuestionario y elegir una nueva ciudad. Esto no se puede deshacer.';
+      'El nuevo plan empieza con todas las etapas en cero, aunque la ciudad, el objetivo y el plazo se parezcan al plan anterior.';
+
+  @override
+  String get planResetPreservedNote =>
+      'Se mantienen tu origen, idioma, moneda, favoritos y configuración. Los documentos permanentes se pueden marcar como “ya lo hice” en el plan nuevo.';
 
   @override
   String get planResetRebuildLabel => 'Sí, empezar de cero';

@@ -277,10 +277,9 @@ class _MigrationStartPageState extends State<MigrationStartPage> {
                           context.l10n.migrationStartFootnote(),
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color:
-                                AppColors.textSoftFor(context).withValues(
-                                  alpha: 0.55,
-                                ),
+                            color: AppColors.textSoftFor(
+                              context,
+                            ).withValues(alpha: 0.55),
                           ),
                         ),
                       ),
@@ -342,9 +341,7 @@ class _IllustrativePathCard extends StatelessWidget {
                   accent.withValues(alpha: 0.05),
                 ],
               ),
-              border: Border.all(
-                color: accent.withValues(alpha: 0.15),
-              ),
+              border: Border.all(color: accent.withValues(alpha: 0.15)),
             ),
             child: Stack(
               clipBehavior: Clip.hardEdge,
@@ -470,10 +467,10 @@ class _CtaButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor =
-        isPrimary ? accent : accent.withValues(alpha: 0.20);
-    final borderColor =
-        isPrimary ? Colors.transparent : accent.withValues(alpha: 0.40);
+    final bgColor = isPrimary ? accent : accent.withValues(alpha: 0.20);
+    final borderColor = isPrimary
+        ? Colors.transparent
+        : accent.withValues(alpha: 0.40);
     final textColor = isPrimary ? Colors.white : accent;
 
     return Material(

@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum GuideFlowMetric {
@@ -8,12 +10,38 @@ enum GuideFlowMetric {
   planGenerated,
   taskSelected,
   taskStarted,
+  taskWaiting,
+  taskResumed,
   taskCompleted,
   fullPlanOpened,
 }
 
+enum ProductAnalyticsConsent { undecided, granted, denied }
+
+abstract interface class GuideFlowMetricsSink {
+  Future<Set<String>> upload({
+    required String installationToken,
+    required List<GuideFlowUploadEvent> events,
+  });
+}
+
+class GuideFlowUploadEvent {
+  const GuideFlowUploadEvent({
+    required this.eventId,
+    required this.metric,
+    required this.occurredAt,
+    this.stepIndex,
+  });
+
+  final String eventId;
+  final GuideFlowMetric metric;
+  final DateTime occurredAt;
+  final int? stepIndex;
+}
+
 class GuideFlowMetricEvent {
   const GuideFlowMetricEvent({
+    required this.eventId,
     required this.metric,
     required this.occurredAt,
     this.referenceId,
@@ -22,6 +50,9 @@ class GuideFlowMetricEvent {
 
   factory GuideFlowMetricEvent.fromJson(Map<String, dynamic> json) {
     return GuideFlowMetricEvent(
+      eventId:
+          json['eventId'] as String? ??
+          'legacy-${json['occurredAt']}-${json['metric']}',
       metric: GuideFlowMetric.values.firstWhere(
         (metric) => metric.name == json['metric'],
       ),
@@ -31,12 +62,17 @@ class GuideFlowMetricEvent {
     );
   }
 
+  final String eventId;
   final GuideFlowMetric metric;
   final DateTime occurredAt;
+
+  /// Stored on-device for diagnosing the funnel, but intentionally never sent
+  /// to the aggregate endpoint because it can reveal a document or task.
   final String? referenceId;
   final int? stepIndex;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
+    'eventId': eventId,
     'metric': metric.name,
     'occurredAt': occurredAt.toUtc().toIso8601String(),
     if (referenceId != null) 'referenceId': referenceId,
@@ -44,20 +80,68 @@ class GuideFlowMetricEvent {
   };
 }
 
-/// Privacy-preserving product telemetry stored only on this installation.
+/// Consent-gated, privacy-preserving product telemetry.
 ///
-/// No answer value, city, document, financial amount, or personal identifier is
-/// persisted. The event trail is intentionally bounded and can later feed an
-/// opt-in analytics adapter without changing product code.
-class GuideFlowMetricsStore {
-  GuideFlowMetricsStore({SharedPreferences? preferences})
-    : _preferences = preferences;
+/// Events contain funnel names, timestamps and an optional step number. Answer
+/// values, city, document, money, location, task reference and account data are
+/// never uploaded. A random installation token supports aggregate retention
+/// cohorts and is deleted when the user clears diagnostics.
+class GuideFlowMetricsStore extends ChangeNotifier {
+  GuideFlowMetricsStore({
+    SharedPreferences? preferences,
+    GuideFlowMetricsSink? sink,
+  }) : _preferences = preferences,
+       _sink = sink;
 
   static final GuideFlowMetricsStore instance = GuideFlowMetricsStore();
-  static const String storageKey = 'movaro.guide_flow_metrics.v1';
-  static const int _maxEvents = 120;
+  static const String storageKey = 'movaro.guide_flow_metrics.v2';
+  static const String _legacyStorageKey = 'movaro.guide_flow_metrics.v1';
+  static const String _consentKey = 'movaro.product_analytics.consent.v1';
+  static const String _installationTokenKey =
+      'movaro.product_analytics.installation.v1';
+  static const String _uploadedIdsKey =
+      'movaro.product_analytics.uploaded_ids.v1';
+  static const int _maxEvents = 160;
 
   SharedPreferences? _preferences;
+  GuideFlowMetricsSink? _sink;
+  ProductAnalyticsConsent _consent = ProductAnalyticsConsent.undecided;
+  bool _initialized = false;
+  bool _isUploading = false;
+
+  ProductAnalyticsConsent get consent => _consent;
+  bool get isEnabled => _consent == ProductAnalyticsConsent.granted;
+  bool get isUploading => _isUploading;
+
+  Future<void> initialize({GuideFlowMetricsSink? sink}) async {
+    if (sink != null) {
+      _sink = sink;
+    }
+    final preferences = _preferences ??= await SharedPreferences.getInstance();
+    final stored = preferences.getString(_consentKey);
+    _consent = ProductAnalyticsConsent.values.firstWhere(
+      (value) => value.name == stored,
+      orElse: () => ProductAnalyticsConsent.undecided,
+    );
+    _initialized = true;
+    if (isEnabled) {
+      await flush();
+    }
+  }
+
+  Future<void> setConsent(ProductAnalyticsConsent value) async {
+    final preferences = _preferences ??= await SharedPreferences.getInstance();
+    _consent = value;
+    _initialized = true;
+    await preferences.setString(_consentKey, value.name);
+    if (value == ProductAnalyticsConsent.denied) {
+      await _clearEventTrail(preferences);
+    }
+    notifyListeners();
+    if (value == ProductAnalyticsConsent.granted) {
+      await flush();
+    }
+  }
 
   Future<void> record(
     GuideFlowMetric metric, {
@@ -65,14 +149,22 @@ class GuideFlowMetricsStore {
     int? stepIndex,
   }) async {
     try {
+      if (!_initialized) {
+        await initialize();
+      }
+      if (!isEnabled) {
+        return;
+      }
       final preferences = _preferences ??=
           await SharedPreferences.getInstance();
       final events = await read();
+      final now = DateTime.now();
       final next = <GuideFlowMetricEvent>[
         ...events,
         GuideFlowMetricEvent(
+          eventId: _newEventId(now),
           metric: metric,
-          occurredAt: DateTime.now(),
+          occurredAt: now,
           referenceId: referenceId,
           stepIndex: stepIndex,
         ),
@@ -84,6 +176,7 @@ class GuideFlowMetricsStore {
         storageKey,
         jsonEncode(bounded.map((event) => event.toJson()).toList()),
       );
+      await flush();
     } on Object {
       // Metrics must never interrupt the user flow.
     }
@@ -91,7 +184,9 @@ class GuideFlowMetricsStore {
 
   Future<List<GuideFlowMetricEvent>> read() async {
     final preferences = _preferences ??= await SharedPreferences.getInstance();
-    final encoded = preferences.getString(storageKey);
+    final encoded =
+        preferences.getString(storageKey) ??
+        preferences.getString(_legacyStorageKey);
     if (encoded == null || encoded.isEmpty) {
       return const <GuideFlowMetricEvent>[];
     }
@@ -106,8 +201,82 @@ class GuideFlowMetricsStore {
     }
   }
 
+  Future<void> flush() async {
+    if (!isEnabled || _sink == null || _isUploading) {
+      return;
+    }
+    _isUploading = true;
+    notifyListeners();
+    try {
+      final preferences = _preferences ??=
+          await SharedPreferences.getInstance();
+      final uploadedIds =
+          preferences.getStringList(_uploadedIdsKey)?.toSet() ?? <String>{};
+      final pending = (await read())
+          .where((event) => !uploadedIds.contains(event.eventId))
+          .take(40)
+          .toList(growable: false);
+      if (pending.isEmpty) {
+        return;
+      }
+      final acceptedIds = await _sink!.upload(
+        installationToken: await _installationToken(preferences),
+        events: pending
+            .map(
+              (event) => GuideFlowUploadEvent(
+                eventId: event.eventId,
+                metric: event.metric,
+                occurredAt: event.occurredAt,
+                stepIndex: event.stepIndex,
+              ),
+            )
+            .toList(growable: false),
+      );
+      if (acceptedIds.isNotEmpty) {
+        final bounded = <String>{...uploadedIds, ...acceptedIds}.toList();
+        final start = max(0, bounded.length - _maxEvents);
+        await preferences.setStringList(
+          _uploadedIdsKey,
+          bounded.sublist(start),
+        );
+      }
+    } on Object {
+      // Offline or backend-not-ready: keep the bounded queue for a later flush.
+    } finally {
+      _isUploading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> clear() async {
     final preferences = _preferences ??= await SharedPreferences.getInstance();
+    await _clearEventTrail(preferences);
+    await preferences.remove(_installationTokenKey);
+    notifyListeners();
+  }
+
+  Future<void> _clearEventTrail(SharedPreferences preferences) async {
     await preferences.remove(storageKey);
+    await preferences.remove(_legacyStorageKey);
+    await preferences.remove(_uploadedIdsKey);
+  }
+
+  Future<String> _installationToken(SharedPreferences preferences) async {
+    final existing = preferences.getString(_installationTokenKey);
+    if (existing != null && existing.length >= 24) {
+      return existing;
+    }
+    final random = Random.secure();
+    final token = List<int>.generate(
+      24,
+      (_) => random.nextInt(256),
+    ).map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
+    await preferences.setString(_installationTokenKey, token);
+    return token;
+  }
+
+  String _newEventId(DateTime now) {
+    final suffix = Random.secure().nextInt(1 << 32).toRadixString(16);
+    return '${now.microsecondsSinceEpoch}-$suffix';
   }
 }

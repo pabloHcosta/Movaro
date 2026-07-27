@@ -83,4 +83,51 @@ void main() {
     );
     expect(await latestPlanStore.read(), isNull);
   });
+
+  test('different plan ids never share completed steps', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'movaro_plan_identity_test',
+    );
+    addTearDown(() async {
+      if (directory.existsSync()) {
+        await directory.delete(recursive: true);
+      }
+    });
+
+    final progressStore = MigrationCopilotProgressStore(
+      directoryProvider: () async => directory,
+    );
+    const florianopolisPlan = MigrationPlan(
+      id: 'plan-florianopolis',
+      originCountry: 'argentina',
+      destinationCountry: 'brasil',
+      goal: 'remote_income',
+      timeline: 'in_3_6m',
+      steps: [],
+    );
+    const saoPauloPlan = MigrationPlan(
+      id: 'plan-sao-paulo',
+      originCountry: 'argentina',
+      destinationCountry: 'brasil',
+      goal: 'remote_income',
+      timeline: 'in_3_6m',
+      steps: [],
+    );
+
+    await progressStore.write(
+      plan: florianopolisPlan,
+      readinessCompletedIds: const {'florianopolis_housing'},
+      documentCompletedIds: const {'florianopolis_documents'},
+      arrivalCompletedIds: const {},
+    );
+
+    expect(
+      (await progressStore.read(florianopolisPlan)).getAllCompletedIds(),
+      containsAll({'florianopolis_housing', 'florianopolis_documents'}),
+    );
+    expect(
+      (await progressStore.read(saoPauloPlan)).getAllCompletedIds(),
+      isEmpty,
+    );
+  });
 }

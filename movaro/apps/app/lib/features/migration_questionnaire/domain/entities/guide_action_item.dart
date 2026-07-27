@@ -16,6 +16,8 @@ enum GuideItemTier { critical, recommended, optional }
 
 enum GuideDismissReason { alreadyDone, notApplicable, later }
 
+enum GuideTaskState { notStarted, inProgress, waiting, completed }
+
 enum GuideEvidenceType { official, derived, marketReference, movaroGuidance }
 
 /// Traceability attached to a practical claim.

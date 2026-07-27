@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:movaro_app/core/trust/source_freshness_policy.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
@@ -619,6 +620,15 @@ class _SourcePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasLink = item.sourceUrl != null;
     final isDark = AppColors.isDark(context);
+    final curationDate = SourceFreshnessPolicy.parseCurationDate(
+      item.updatedAt,
+    );
+    final freshness = curationDate == null
+        ? null
+        : SourceFreshnessPolicy.assess(
+            lastVerified: curationDate,
+            reviewAfter: const Duration(days: 90),
+          );
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -653,6 +663,23 @@ class _SourcePanel extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: AppColors.textSoftFor(context),
                 fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+          if (freshness?.requiresWarning ?? false) ...[
+            const SizedBox(height: 8),
+            Text(
+              switch (locale) {
+                'pt' =>
+                  'Revisão pendente — confirme a informação na fonte original.',
+                'es' =>
+                  'Revisión pendiente — confirmá la información en la fuente original.',
+                _ =>
+                  'Review pending — confirm the information at the original source.',
+              },
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.warning,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],

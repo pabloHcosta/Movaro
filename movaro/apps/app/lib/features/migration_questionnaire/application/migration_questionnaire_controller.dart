@@ -5,7 +5,9 @@ import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/location/argentina_origin_classifier.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
@@ -256,9 +258,12 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _showRefinePrompt = false;
     _isRefineResolved = false;
     _includeConstraints = false;
-    await _migrationPlanRepository.setCurrentPlan(null);
-    await _flowDraftStore.clear();
-    await _planResetService?.clearPreviousPlanData();
+    await MigrationStateSyncCoordinator.suspend(() async {
+      await _migrationPlanRepository.setCurrentPlan(null);
+      await _flowDraftStore.clear();
+      await _planResetService?.clearPreviousPlanData();
+    });
+    MigrationStateSyncCoordinator.scheduleSync();
     notifyListeners();
   }
 
@@ -604,6 +609,10 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       var plan = await _planGenerator.generate(
         answers: _answers,
         variant: _selectedVariant ?? QuestionnaireVariant.lean,
+      );
+      plan = plan.copyWith(
+        id: MigrationPlanIdentity.generate(),
+        createdAt: DateTime.now().toUtc(),
       );
       // Attach preferred city if the user selected one.
       if (_preferredCity != null) {

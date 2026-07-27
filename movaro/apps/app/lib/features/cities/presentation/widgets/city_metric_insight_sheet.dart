@@ -434,6 +434,8 @@ class _CityMetricInsightContent {
           kind: CityMetricKind.safety,
           value: city.safetyScore,
         );
+        final safetySource = city.sources.safety;
+        final officialRate = safetySource?.referenceValue;
         return _CityMetricInsightContent(
           cityName: city.name,
           label: l10n.cityDetailSafetyLabel,
@@ -458,23 +460,43 @@ class _CityMetricInsightContent {
               label: l10n.cityMetricInsightRangeLabel,
               value: _trafficLightRange(city.safetyScore, mediumStartsAt: 55),
             ),
+            if (officialRate != null)
+              _InsightFact(
+                label: l10n.cityMetricInsightSafetyOfficialRateLabel,
+                value: l10n.cityMetricInsightSafetyRateValue(
+                  officialRate.toStringAsFixed(1),
+                ),
+              ),
+            if (safetySource?.referencePeriod != null)
+              _InsightFact(
+                label: l10n.cityMetricInsightReferencePeriodLabel,
+                value: safetySource!.referencePeriod!,
+              ),
           ],
-          sources: [
-            _fromCitySource(
-              context,
-              city.sources.safety ?? city.sources.curatedMetrics,
-              badge: l10n.cityMetricInsightCurrentBaseBadge,
-            ),
-            _InsightSource(
-              title: 'Atlas da Violencia',
-              provider: 'Ipea + FBSP',
-              description: l10n.cityMetricInsightSafetyMappedSource,
-              badge: l10n.cityMetricInsightMappedBaseBadge,
-              isOfficial: true,
-              url:
-                  'https://www.ipea.gov.br/atlasviolencia/publicacoes/287/atlas-da-violencia-2024',
-            ),
-          ],
+          sources: safetySource != null
+              ? [
+                  _fromCitySource(
+                    context,
+                    safetySource,
+                    badge: l10n.cityMetricInsightDerivedOfficialBadge,
+                  ),
+                ]
+              : [
+                  _fromCitySource(
+                    context,
+                    city.sources.curatedMetrics,
+                    badge: l10n.cityMetricInsightCurrentBaseBadge,
+                  ),
+                  _InsightSource(
+                    title: 'Atlas da Violencia',
+                    provider: 'Ipea + FBSP',
+                    description: l10n.cityMetricInsightSafetyMappedSource,
+                    badge: l10n.cityMetricInsightMappedBaseBadge,
+                    isOfficial: true,
+                    url:
+                        'https://www.ipea.gov.br/atlasviolencia/dados-series/20/',
+                  ),
+                ],
         );
       case CityMetricInsightTopic.work:
         final work = CityMetricPresentation.resolve(

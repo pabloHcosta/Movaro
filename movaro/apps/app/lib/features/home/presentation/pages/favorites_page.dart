@@ -891,11 +891,11 @@ class _DecideFromFavoritesCard extends StatelessWidget {
             runSpacing: 4,
             children: favorites.map((city) {
               return Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primary
-                      .withValues(alpha: isDark ? 0.18 : 0.10),
+                  color: AppColors.primary.withValues(
+                    alpha: isDark ? 0.18 : 0.10,
+                  ),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(

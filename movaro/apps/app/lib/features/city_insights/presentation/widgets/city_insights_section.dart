@@ -43,7 +43,8 @@ class _CityInsightsSectionState extends State<CityInsightsSection> {
   int _featuredIndex = 0;
   final Map<CityInsightTheme, List<CityInsightExplorePlaceEntity>>
   _featuredPlacesByTheme = {};
-  final Map<String, List<CityInsightExplorePlaceEntity>> _featuredPlacesBySeed = {};
+  final Map<String, List<CityInsightExplorePlaceEntity>> _featuredPlacesBySeed =
+      {};
   final Set<CityInsightTheme> _loadingFeaturedThemes = <CityInsightTheme>{};
   final Set<String> _loadingFeaturedSeedKeys = <String>{};
   String? _lastFeaturedLocale;
@@ -169,11 +170,7 @@ class _CityInsightsSectionState extends State<CityInsightsSection> {
       final highlights = item.placeHighlights
           .where((place) => place.trim().isNotEmpty)
           .toList(growable: false);
-      final places = _resolvePlacesForInsight(
-        item,
-        highlights,
-        usedPlaceIds,
-      );
+      final places = _resolvePlacesForInsight(item, highlights, usedPlaceIds);
       if (places.isNotEmpty) {
         spotlightPool.addAll(
           places.map(
@@ -486,7 +483,8 @@ class _CityInsightsSectionState extends State<CityInsightsSection> {
     String highlight,
     Set<String> usedPlaceIds,
   ) {
-    final seedPlaces = _featuredPlacesBySeed[_seedCacheKey(theme, highlight)] ??
+    final seedPlaces =
+        _featuredPlacesBySeed[_seedCacheKey(theme, highlight)] ??
         const <CityInsightExplorePlaceEntity>[];
     return _matchHighlightAgainstPlaces(highlight, seedPlaces, usedPlaceIds);
   }
@@ -511,8 +509,7 @@ class _CityInsightsSectionState extends State<CityInsightsSection> {
               normalizedNeighborhood.contains(normalizedHighlight))) {
         return place;
       }
-      if (place.source == 'template' &&
-          normalizedName == normalizedHighlight) {
+      if (place.source == 'template' && normalizedName == normalizedHighlight) {
         return place;
       }
     }
@@ -651,10 +648,7 @@ class _CityInsightsSectionState extends State<CityInsightsSection> {
               onSelectIndex: _selectFeatured,
               onTap: featuredSpotlight == null
                   ? null
-                  : () => _openSpotlightFromBanner(
-                      context,
-                      featuredSpotlight,
-                    ),
+                  : () => _openSpotlightFromBanner(context, featuredSpotlight),
             ),
           ],
         ],
@@ -886,9 +880,8 @@ class _CityInsightsSectionState extends State<CityInsightsSection> {
                         Image.network(
                           imageUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => _TipSheetFallbackVisual(
-                            isDark: isDark,
-                          ),
+                          errorBuilder: (_, _, _) =>
+                              _TipSheetFallbackVisual(isDark: isDark),
                         )
                       else
                         _TipSheetFallbackVisual(isDark: isDark),
@@ -921,7 +914,9 @@ class _CityInsightsSectionState extends State<CityInsightsSection> {
                                     color: Colors.white.withValues(alpha: 0.14),
                                     borderRadius: BorderRadius.circular(999),
                                     border: Border.all(
-                                      color: Colors.white.withValues(alpha: 0.18),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.18,
+                                      ),
                                     ),
                                   ),
                                   child: Text(
@@ -939,14 +934,16 @@ class _CityInsightsSectionState extends State<CityInsightsSection> {
                                 ),
                                 const Spacer(),
                                 IconButton(
-                                  onPressed: () => Navigator.of(sheetContext).pop(),
+                                  onPressed: () =>
+                                      Navigator.of(sheetContext).pop(),
                                   style: IconButton.styleFrom(
                                     backgroundColor: Colors.black.withValues(
                                       alpha: 0.18,
                                     ),
                                     padding: EdgeInsets.zero,
                                     minimumSize: const Size(36, 36),
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   icon: const Icon(
                                     Icons.close_rounded,
@@ -961,7 +958,9 @@ class _CityInsightsSectionState extends State<CityInsightsSection> {
                               _compactBannerCopy(insight.title, maxChars: 54),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(sheetContext).textTheme.headlineSmall
+                              style: Theme.of(sheetContext)
+                                  .textTheme
+                                  .headlineSmall
                                   ?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w900,
@@ -995,12 +994,13 @@ class _CityInsightsSectionState extends State<CityInsightsSection> {
                     children: [
                       Text(
                         _compactBannerCopy(insight.content, maxChars: 260),
-                        style: Theme.of(sheetContext).textTheme.bodyMedium?.copyWith(
-                          height: 1.5,
-                          color: isDark
-                              ? const Color(0xFFCDD7E5)
-                              : const Color(0xFF4F6073),
-                        ),
+                        style: Theme.of(sheetContext).textTheme.bodyMedium
+                            ?.copyWith(
+                              height: 1.5,
+                              color: isDark
+                                  ? const Color(0xFFCDD7E5)
+                                  : const Color(0xFF4F6073),
+                            ),
                       ),
                       if (insight.placeHighlights.isNotEmpty) ...[
                         const SizedBox(height: 16),
@@ -1092,11 +1092,7 @@ class _TipSheetFallbackVisual extends StatelessWidget {
 }
 
 class _FeaturedSpotlight {
-  const _FeaturedSpotlight({
-    required this.insight,
-    this.place,
-    this.placeName,
-  });
+  const _FeaturedSpotlight({required this.insight, this.place, this.placeName});
 
   final CityInsightEntity insight;
   final CityInsightExplorePlaceEntity? place;
@@ -1246,11 +1242,11 @@ class _PremiumBannerCarousel extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: index == currentIndex
                                   ? (isDark
-                                      ? const Color(0xFFF4F7FB)
-                                      : const Color(0xFF17283A))
+                                        ? const Color(0xFFF4F7FB)
+                                        : const Color(0xFF17283A))
                                   : (isDark
-                                      ? Colors.white.withValues(alpha: 0.24)
-                                      : const Color(0x3317283A)),
+                                        ? Colors.white.withValues(alpha: 0.24)
+                                        : const Color(0x3317283A)),
                               borderRadius: BorderRadius.circular(999),
                             ),
                           ),
@@ -1332,13 +1328,15 @@ class _PremiumBannerCarousel extends StatelessWidget {
     required String? placeName,
     CityInsightExplorePlaceEntity? place,
   }) {
-    if ((insight.placeHighlights.length <= 1) && insight.shortText.trim().isNotEmpty) {
+    if ((insight.placeHighlights.length <= 1) &&
+        insight.shortText.trim().isNotEmpty) {
       return _compactBannerCopy(insight.shortText, maxChars: 92);
     }
     if (place != null) {
-      final location = [place.neighborhood, place.region]
-          .where((value) => value != null && value.trim().isNotEmpty)
-          .join(' • ');
+      final location = [
+        place.neighborhood,
+        place.region,
+      ].where((value) => value != null && value.trim().isNotEmpty).join(' • ');
       final baseText = place.shortText.trim().isNotEmpty
           ? place.shortText
           : insight.shortText;
@@ -1378,7 +1376,8 @@ class _PremiumBannerCarousel extends StatelessWidget {
       case CityInsightTheme.parks:
         return switch (locale) {
           'es' => 'Espacio que muestra el lado de la ciudad que respira mejor.',
-          'en' => 'A place that shows the side of the city that breathes better.',
+          'en' =>
+            'A place that shows the side of the city that breathes better.',
           _ => 'Espaco que mostra o lado da cidade que respira melhor.',
         };
       case CityInsightTheme.cultureAndEvents:
@@ -1389,16 +1388,20 @@ class _PremiumBannerCarousel extends StatelessWidget {
         };
       case CityInsightTheme.viewpoints:
         return switch (locale) {
-          'es' => 'Vista que ayuda a entender por qué tanta gente sueña con la ciudad.',
+          'es' =>
+            'Vista que ayuda a entender por qué tanta gente sueña con la ciudad.',
           'en' => 'A view that helps explain why people dream about this city.',
-          _ => 'Vista que ajuda a entender por que tanta gente sonha com a cidade.',
+          _ =>
+            'Vista que ajuda a entender por que tanta gente sonha com a cidade.',
         };
       case CityInsightTheme.localRoutine:
       case null:
         return switch (locale) {
-          'es' => 'Dica rápida para transformar curiosidad en sensación de llegada.',
+          'es' =>
+            'Dica rápida para transformar curiosidad en sensación de llegada.',
           'en' => 'A quick tip that turns curiosity into a sense of arrival.',
-          _ => 'Dica rapida para transformar curiosidade em sensacao de chegada.',
+          _ =>
+            'Dica rapida para transformar curiosidade em sensacao de chegada.',
         };
     }
   }

@@ -109,6 +109,8 @@ void main() {
 
         expect(await controller.goNext(), isTrue);
         expect(controller.generatedPlan, isNotNull);
+        expect(controller.generatedPlan!.id, isNotEmpty);
+        expect(controller.generatedPlan!.createdAt, isNotNull);
         expect(journeyContextController.isJourneyReadyForPlanning, isTrue);
       },
     );

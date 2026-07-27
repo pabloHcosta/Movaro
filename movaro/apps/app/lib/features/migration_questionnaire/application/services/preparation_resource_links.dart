@@ -49,7 +49,7 @@ class PreparationResourceLinks {
   );
 
   static final Uri foreignStudentGuide = Uri.parse(
-    'https://www.gov.br/mre/pt-br/assuntos/cultura-e-educacao/temas-educacionais/programa-de-estudantes-convenio-de-graduacao-pec-g',
+    'https://www.gov.br/pt-br/servicos/estudar-o-ensino-superior-no-brasil?id=5999&origem=servico',
   );
 
   static final Uri taxEntryGuide = Uri.parse(
@@ -99,6 +99,9 @@ class PreparationResourceLinks {
   static final Uri rnMRegistrationGuide = Uri.parse(
     'https://www.gov.br/pt-br/servicos/registrar-se-como-estrangeiro-no-brasil',
   );
+  static final Uri consumerFinancialEducation = Uri.parse(
+    'https://www.bcb.gov.br/cidadaniafinanceira',
+  );
 
   static final Uri migrantSupportNetwork = Uri.parse(
     'https://www.gov.br/mj/pt-br/assuntos/seus-direitos/refugio/integracao-local/rede-de-apoio-a-refugiados',
@@ -145,7 +148,7 @@ class PreparationResourceLinks {
   );
 
   static final Uri rentalScamAlert = Uri.parse(
-    'https://www.comunicacao.pr.gov.br/noticias/aen/42be055d-f9d9-48bc-a40d-9736e9e21cbf',
+    'https://www.gov.br/turismo/pt-br/assuntos/noticias/vai-viajar-confira-dicas-para-nao-cair-em-golpes',
   );
 
   static final Uri traffickingAlert = Uri.parse(
@@ -271,7 +274,7 @@ class PreparationResourceLinks {
   }
 
   static final Uri susPortal = Uri.parse(
-    'https://www.gov.br/saude/pt-br/composicao/sas/cartao-nacional-de-saude',
+    'https://www.gov.br/saude/pt-br/composicao/sectics/daf/ceaf/faq/o-que-e-cns-cartao',
   );
 
   static final Uri ansPortal = Uri.parse('https://www.gov.br/ans/pt-br');

@@ -41,6 +41,7 @@ import 'package:movaro_app/features/cities/domain/repositories/cities_repository
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
@@ -423,6 +424,10 @@ class _AppTestHarness {
     final exchangeRatesController = ExchangeRatesController(
       service: copilotExchangeRatesService,
     );
+    final guideFlowMetricsStore = GuideFlowMetricsStore(
+      preferences: await SharedPreferences.getInstance(),
+    );
+    await guideFlowMetricsStore.initialize();
 
     await journeyContextController.initialize();
     await journeyContextController.markIntroSeen();
@@ -453,6 +458,7 @@ class _AppTestHarness {
         themeController: themeController,
         currencyController: currencyController,
         exchangeRatesController: exchangeRatesController,
+        guideFlowMetricsStore: guideFlowMetricsStore,
       ),
       tempDirectory: tempDirectory,
     );

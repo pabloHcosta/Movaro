@@ -26,7 +26,9 @@ class CitySourcesModel {
       ),
       employment: json['employment'] == null
           ? null
-          : CitySourceModel.fromJson(json['employment'] as Map<String, dynamic>),
+          : CitySourceModel.fromJson(
+              json['employment'] as Map<String, dynamic>,
+            ),
       safety: json['safety'] == null
           ? null
           : CitySourceModel.fromJson(json['safety'] as Map<String, dynamic>),

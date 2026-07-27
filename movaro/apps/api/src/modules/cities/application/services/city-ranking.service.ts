@@ -74,10 +74,13 @@ export class CityRankingService {
         'Scores representam heuristicas do produto, nao verdades absolutas.',
         'Cada categoria responde a uma intencao diferente de migracao.',
         'Os dados combinam fonte oficial publica e dataset curado inicial do MVP.',
+        'Seguranca usa a media municipal de homicidios registrados dos tres anos mais recentes do Atlas da Violencia/Ipea (SIM/MS), sem tratar esse recorte como retrato completo de bairros ou crimes patrimoniais.',
         'Adaptacao linguistica usa um proxy curado de presenca argentina, atendimento recorrente em espanhol e contexto turistico ou fronteirico.',
       ],
       formulas: {
         economical: 'media(costOfLivingScore, rentScore)',
+        safety:
+          '0.75 * sinalInvertidoDaTaxaMediaDeHomicidios + 0.25 * contextoComparativoCurado',
         popularForArgentinians: 'argentinaPopularityScore',
         languageAdaptation:
           '0.70 * spanishSupportScore + 0.30 * argentinaPopularityScore',

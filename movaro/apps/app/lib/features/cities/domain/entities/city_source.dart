@@ -7,6 +7,10 @@ class CitySource {
     required this.isOfficial,
     required this.url,
     required this.sourceType,
+    this.referenceValue,
+    this.referenceUnit,
+    this.referencePeriod,
+    this.updatedAt,
   });
 
   final String id;
@@ -16,4 +20,8 @@ class CitySource {
   final bool isOfficial;
   final String? url;
   final String sourceType;
+  final double? referenceValue;
+  final String? referenceUnit;
+  final String? referencePeriod;
+  final String? updatedAt;
 }

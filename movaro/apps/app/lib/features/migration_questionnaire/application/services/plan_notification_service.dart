@@ -1,8 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -68,71 +68,7 @@ class PlanNotificationService {
   }
 
   Future<void> scheduleOnboardingSequence(MigrationPlan plan) async {
-    await initialize();
-    if (!_available) return;
-    await cancelPlanReminders();
-
-    final cityName =
-        plan.currentPlanCity?.name ??
-        _text(pt: 'sua cidade', es: 'tu ciudad', en: 'your city');
-    final nextItem = _getNextPendingItemTitle(plan);
-
-    await _scheduleNotification(
-      id: 1001,
-      title: _text(
-        pt: 'Seu plano de $cityName está pronto',
-        es: 'Tu plan para $cityName ya está listo',
-        en: 'Your $cityName guide is ready to review',
-      ),
-      body: nextItem != null
-          ? _text(
-              pt: 'Próximo passo: $nextItem. Leva menos de 5 minutos.',
-              es: 'Próximo paso: $nextItem. Te lleva menos de 5 minutos.',
-              en: 'One possible next item: $nextItem. It may take less than 5 minutes.',
-            )
-          : _text(
-              pt: 'Continue de onde parou no guia de mudança.',
-              es: 'Seguı́ desde donde dejaste la guía de mudanza.',
-              en: 'Continue where you left off in the moving guide.',
-            ),
-      scheduledDate: DateTime.now().add(const Duration(hours: 24)),
-    );
-
-    await _scheduleNotification(
-      id: 1002,
-      title: _text(
-        pt: 'Seu plano ainda está te esperando',
-        es: 'Tu plan todavía te está esperando',
-        en: 'Your guide is still available',
-      ),
-      body: nextItem != null
-          ? _text(
-              pt: 'Você ainda não concluiu: $nextItem. 5 minutos e está feito.',
-              es: 'Todavía no completaste: $nextItem. En 5 minutos queda hecho.',
-              en: 'You still have this item open: $nextItem. It may take around five minutes.',
-            )
-          : _text(
-              pt: 'Volte ao guia e marque o próximo passo do seu plano.',
-              es: 'Volvé a la guía y marcá el próximo paso de tu plan.',
-              en: 'Return to the guide and continue with the item that feels most relevant now.',
-            ),
-      scheduledDate: DateTime.now().add(const Duration(hours: 72)),
-    );
-
-    await _scheduleNotification(
-      id: 1003,
-      title: _text(
-        pt: 'Sua mudança ainda é possível',
-        es: 'Tu mudanza todavía es posible',
-        en: 'Your move is still possible',
-      ),
-      body: _text(
-        pt: 'Seu plano de $cityName está salvo e pronto. Cada passo pequeno conta.',
-        es: 'Tu plan para $cityName está guardado y listo. Cada paso pequeño cuenta.',
-        en: 'Your $cityName plan is saved and ready. Every small step counts.',
-      ),
-      scheduledDate: DateTime.now().add(const Duration(days: 7)),
-    );
+    await scheduleContextualResumeReminder(plan: plan);
   }
 
   Future<void> cancelPlanReminders() async {
@@ -141,6 +77,8 @@ class PlanNotificationService {
     await _notifications.cancel(id: 1001);
     await _notifications.cancel(id: 1002);
     await _notifications.cancel(id: 1003);
+    await _notifications.cancel(id: 1202);
+    await _notifications.cancel(id: 1203);
   }
 
   /// Fires 1 day after plan creation to remind users to confirm the correct
@@ -184,50 +122,54 @@ class PlanNotificationService {
     await _notifications.cancel(id: 1201);
   }
 
-  /// Fires after 7 days of inactivity to re-engage the user.
-  /// [lastActivityDate] is the date of the last recorded app interaction.
-  Future<void> scheduleReEngagementReminder(DateTime lastActivityDate) async {
+  /// Keeps one relevant resume reminder instead of a daily streak or a generic
+  /// multi-message campaign. No city, document or task title is placed on the
+  /// lock screen.
+  Future<void> scheduleContextualResumeReminder({
+    required MigrationPlan plan,
+    GuideActionItem? currentItem,
+  }) async {
     await initialize();
     if (!_available) return;
-    final scheduledDate = lastActivityDate.add(const Duration(days: 7));
-    if (!scheduledDate.isAfter(DateTime.now())) return;
+    await _notifications.cancel(id: 1202);
+
+    final delay = switch (currentItem?.urgencyLevel) {
+      GuideUrgencyLevel.critical ||
+      GuideUrgencyLevel.urgent => const Duration(days: 2),
+      _ when plan.timeline == 'in_0_3m' => const Duration(days: 4),
+      _ when plan.timeline == 'just_exploring' || plan.timeline == 'depends' =>
+        const Duration(days: 14),
+      _ => const Duration(days: 7),
+    };
 
     await _scheduleNotification(
       id: 1202,
       title: _text(
-        pt: 'Você está no caminho certo',
-        es: 'Estás en el camino correcto',
-        en: 'You are on the right path',
+        pt: 'Seu plano tem uma próxima ação',
+        es: 'Tu plan tiene una próxima acción',
+        en: 'Your plan has a next action',
       ),
       body: _text(
-        pt: 'Seu próximo passo te espera. Cada avanço pequeno muda tudo.',
-        es: 'Tu próximo paso te espera. Cada pequeño avance cambia todo.',
-        en: 'Your next step is waiting. Every small advance changes everything.',
+        pt: 'Abra para continuar exatamente de onde parou e revisar o que precisa de atenção.',
+        es: 'Abrí para continuar exactamente desde donde quedaste y revisar qué necesita atención.',
+        en: 'Open to continue exactly where you stopped and review what needs attention.',
       ),
-      scheduledDate: scheduledDate,
+      scheduledDate: DateTime.now().add(delay),
     );
   }
 
-  /// Schedules a weekly city content notification for active users.
+  @Deprecated('Use scheduleContextualResumeReminder')
+  Future<void> scheduleReEngagementReminder(DateTime lastActivityDate) async {
+    // Kept only for source compatibility with older callers.
+  }
+
+  /// City tips are no longer pushed on a timer. Content notifications must be
+  /// tied to an actual source update before this method is re-enabled.
+  @Deprecated('City content notifications require a real source update')
   Future<void> scheduleCityContentReminder(String cityLabel) async {
     await initialize();
     if (!_available) return;
     await _notifications.cancel(id: 1203);
-
-    await _scheduleNotification(
-      id: 1203,
-      title: _text(
-        pt: 'Nova dica para $cityLabel',
-        es: 'Nuevo consejo para $cityLabel',
-        en: 'New tip for $cityLabel',
-      ),
-      body: _text(
-        pt: 'Confira o que acontece na cidade que você escolheu.',
-        es: 'Mira qué pasa en la ciudad que elegiste.',
-        en: 'See what is happening in the city you chose.',
-      ),
-      scheduledDate: DateTime.now().add(const Duration(days: 7)),
-    );
   }
 
   Future<void> scheduleResidenceDeadlineReminder({
@@ -312,31 +254,6 @@ class PlanNotificationService {
         iOS: const DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
-  }
-
-  String? _getNextPendingItemTitle(MigrationPlan plan) {
-    if (MigrationGuideRegistry.supportsCorridor(
-      plan.originCountry,
-      plan.destinationCountry,
-    )) {
-      if (plan.goal == 'find_job_br') {
-        return _text(
-          pt: 'tirar seu CPF',
-          es: 'sacar tu CPF',
-          en: 'get your CPF',
-        );
-      }
-      return _text(
-        pt: 'ver seus documentos para o Brasil',
-        es: 'ver tus documentos para Brasil',
-        en: 'review your documents for Brazil',
-      );
-    }
-    return _text(
-      pt: 'abrir seu guia de mudança',
-      es: 'abrir tu guía de mudanza',
-      en: 'open your moving guide',
     );
   }
 

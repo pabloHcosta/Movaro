@@ -27,3 +27,13 @@ O usuário pode negar a localização, alterar a cidade de origem, apagar a cida
 ## Limites
 
 O conteúdo é educacional e comparativo. Não constitui consultoria jurídica, migratória, médica, financeira ou tributária. Informações críticas devem ser confirmadas na fonte oficial indicada.
+# Métricas de melhoria do produto
+
+- A coleta é desativada até uma autorização explícita no aplicativo.
+- São enviados somente nome do evento do funil, horário, índice opcional da
+  etapa, ambiente do aplicativo e um token aleatório da instalação.
+- Não são enviados respostas, cidade, localização, documentos, valores,
+  conteúdo de tarefas nem identificadores de conta.
+- O usuário pode desativar a coleta e apagar a fila e o token local em
+  Configurações.
+- Falhas de rede mantêm uma fila limitada no aparelho e nunca bloqueiam o uso.

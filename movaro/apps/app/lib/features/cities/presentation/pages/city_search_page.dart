@@ -489,22 +489,24 @@ class _CitySearchPageState extends State<CitySearchPage> {
     }
 
     final semanticSearch = _CitySemanticSearch(normalizedQuery);
-    final ranked = List<City>.from(controller.catalog)
-        .map(
-          (city) => (
-            city: city,
-            score: semanticSearch.score(city) +
-                CitySearchMatcher.score(
-                  normalizedQuery,
-                  city.name,
-                  city.stateName,
-                ) +
-                (_startsWithQuery(city, normalizedQuery) ? 12 : 0),
-          ),
-        )
-        .where((entry) => entry.score > 0)
-        .toList()
-      ..sort((left, right) => right.score.compareTo(left.score));
+    final ranked =
+        List<City>.from(controller.catalog)
+            .map(
+              (city) => (
+                city: city,
+                score:
+                    semanticSearch.score(city) +
+                    CitySearchMatcher.score(
+                      normalizedQuery,
+                      city.name,
+                      city.stateName,
+                    ) +
+                    (_startsWithQuery(city, normalizedQuery) ? 12 : 0),
+              ),
+            )
+            .where((entry) => entry.score > 0)
+            .toList()
+          ..sort((left, right) => right.score.compareTo(left.score));
     return ranked.map((entry) => entry.city).take(5).toList();
   }
 

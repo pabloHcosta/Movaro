@@ -8,6 +8,7 @@ import 'package:movaro_app/app/theme/theme_controller.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class AppSettingsPage extends StatelessWidget {
@@ -16,6 +17,7 @@ class AppSettingsPage extends StatelessWidget {
     required this.themeController,
     required this.currencyController,
     required this.locationController,
+    required this.guideFlowMetricsStore,
     super.key,
   });
 
@@ -23,6 +25,7 @@ class AppSettingsPage extends StatelessWidget {
   final ThemeController themeController;
   final CurrencyController currencyController;
   final LocationController locationController;
+  final GuideFlowMetricsStore guideFlowMetricsStore;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +35,7 @@ class AppSettingsPage extends StatelessWidget {
         themeController,
         currencyController,
         locationController,
+        guideFlowMetricsStore,
       ]),
       builder: (context, _) {
         final activeLocale = localeController.effectiveLocale;
@@ -142,6 +146,96 @@ class AppSettingsPage extends StatelessWidget {
                                         ? constraints.maxWidth
                                         : (constraints.maxWidth - 14) / 2,
                                     child: _EntranceReveal(
+                                      delayIndex: 4,
+                                      child: _SettingCard(
+                                        icon: Icons.insights_outlined,
+                                        title: _settingsText(
+                                          context,
+                                          pt: 'Ajudar a melhorar o Movaro',
+                                          es: 'Ayudar a mejorar Movaro',
+                                          en: 'Help improve Movaro',
+                                        ),
+                                        description: _settingsText(
+                                          context,
+                                          pt: 'Com sua autorização, enviamos apenas eventos anônimos do fluxo. Nunca enviamos respostas, cidade, localização, documentos ou valores.',
+                                          es: 'Con tu autorización, enviamos solo eventos anónimos del flujo. Nunca enviamos respuestas, ciudad, ubicación, documentos ni valores.',
+                                          en: 'With your permission, we send only anonymous flow events. We never send answers, city, location, documents, or amounts.',
+                                        ),
+                                        trailingLabel:
+                                            guideFlowMetricsStore.isEnabled
+                                            ? _settingsText(
+                                                context,
+                                                pt: 'Ativado',
+                                                es: 'Activado',
+                                                en: 'Enabled',
+                                              )
+                                            : _settingsText(
+                                                context,
+                                                pt: 'Desativado',
+                                                es: 'Desactivado',
+                                                en: 'Disabled',
+                                              ),
+                                        accentColor: const Color(0xFF536DFE),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SwitchListTile.adaptive(
+                                              contentPadding: EdgeInsets.zero,
+                                              value: guideFlowMetricsStore
+                                                  .isEnabled,
+                                              title: Text(
+                                                _settingsText(
+                                                  context,
+                                                  pt: 'Compartilhar métricas anônimas',
+                                                  es: 'Compartir métricas anónimas',
+                                                  en: 'Share anonymous metrics',
+                                                ),
+                                              ),
+                                              subtitle: Text(
+                                                _settingsText(
+                                                  context,
+                                                  pt: 'Você pode mudar de ideia e apagar o histórico deste aparelho a qualquer momento.',
+                                                  es: 'Podés cambiar de idea y borrar el historial de este teléfono en cualquier momento.',
+                                                  en: 'You can change your mind and delete this device history at any time.',
+                                                ),
+                                              ),
+                                              onChanged: (enabled) {
+                                                guideFlowMetricsStore.setConsent(
+                                                  enabled
+                                                      ? ProductAnalyticsConsent
+                                                            .granted
+                                                      : ProductAnalyticsConsent
+                                                            .denied,
+                                                );
+                                              },
+                                            ),
+                                            TextButton.icon(
+                                              onPressed:
+                                                  guideFlowMetricsStore.clear,
+                                              icon: const Icon(
+                                                Icons.delete_outline_rounded,
+                                                size: 18,
+                                              ),
+                                              label: Text(
+                                                _settingsText(
+                                                  context,
+                                                  pt: 'Apagar métricas deste aparelho',
+                                                  es: 'Borrar métricas de este teléfono',
+                                                  en: 'Delete this device metrics',
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: compact
+                                        ? constraints.maxWidth
+                                        : (constraints.maxWidth - 14) / 2,
+                                    child: _EntranceReveal(
                                       delayIndex: 2,
                                       child: _SettingCard(
                                         icon: Icons.language_rounded,
@@ -235,7 +329,7 @@ class AppSettingsPage extends StatelessWidget {
                                         ? constraints.maxWidth
                                         : (constraints.maxWidth - 14) / 2,
                                     child: _EntranceReveal(
-                                      delayIndex: 4,
+                                      delayIndex: 5,
                                       child: _SettingCard(
                                         icon: Icons.tune_rounded,
                                         title: context.l10n
@@ -259,7 +353,7 @@ class AppSettingsPage extends StatelessWidget {
                                         ? constraints.maxWidth
                                         : (constraints.maxWidth - 14) / 2,
                                     child: _EntranceReveal(
-                                      delayIndex: 5,
+                                      delayIndex: 6,
                                       child: _SettingCard(
                                         icon: Icons.verified_user_outlined,
                                         title: _settingsText(
@@ -300,7 +394,7 @@ class AppSettingsPage extends StatelessWidget {
                                         ? constraints.maxWidth
                                         : (constraints.maxWidth - 14) / 2,
                                     child: _EntranceReveal(
-                                      delayIndex: 6,
+                                      delayIndex: 7,
                                       child: _SettingCard(
                                         icon: Icons.location_on_outlined,
                                         title: _settingsText(

@@ -262,12 +262,16 @@ export class CityMergeService {
         ? null
         : new CitySourceEntity(
             'safety',
-            'Seguranca publica',
+            'Violencia letal registrada',
             officialMetrics.safety.sourceLabel,
-            'Indicador oficial ingerido para leitura de seguranca da localidade.',
-            officialMetrics.safety.sourceType === 'official',
+            `Media anual de ${officialMetrics.safety.homicideRatePer100k.toFixed(1)} homicidios registrados por 100 mil habitantes entre ${officialMetrics.safety.referenceStartYear} e ${officialMetrics.safety.referenceEndYear}. O score de 0 a 100 e um sinal comparativo derivado, nao uma classificacao oficial e nao representa diferencas entre bairros nem crimes patrimoniais.`,
+            false,
             officialMetrics.safety.sourceUrl ?? null,
-            officialMetrics.safety.sourceType ?? 'official',
+            'derived',
+            officialMetrics.safety.homicideRatePer100k,
+            'homicides_per_100k',
+            `${officialMetrics.safety.referenceStartYear}-${officialMetrics.safety.referenceEndYear}`,
+            officialMetrics.safety.updatedAt,
           ),
       new CitySourceEntity(
         'curated_metrics',

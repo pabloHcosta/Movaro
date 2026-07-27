@@ -1,1 +1,662 @@
-[]
+[
+  {
+    "cityId": "florianopolis-sc",
+    "ibgeCode": 4205407,
+    "safety": {
+      "safetyScore": 84,
+      "homicideRatePer100k": 7.6,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "balneario-camboriu-sc",
+    "ibgeCode": 4202008,
+    "safety": {
+      "safetyScore": 85,
+      "homicideRatePer100k": 6.64,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "sao-paulo-sp",
+    "ibgeCode": 3550308,
+    "safety": {
+      "safetyScore": 82,
+      "homicideRatePer100k": 2.45,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "rio-de-janeiro-rj",
+    "ibgeCode": 3304557,
+    "safety": {
+      "safetyScore": 68,
+      "homicideRatePer100k": 14.48,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "armacao-dos-buzios-rj",
+    "ibgeCode": 3300233,
+    "safety": {
+      "safetyScore": 48,
+      "homicideRatePer100k": 36.42,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "arraial-do-cabo-rj",
+    "ibgeCode": 3300258,
+    "safety": {
+      "safetyScore": 58,
+      "homicideRatePer100k": 27.66,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "cabo-frio-rj",
+    "ibgeCode": 3300704,
+    "safety": {
+      "safetyScore": 53,
+      "homicideRatePer100k": 30.45,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "niteroi-rj",
+    "ibgeCode": 3303302,
+    "safety": {
+      "safetyScore": 77,
+      "homicideRatePer100k": 10.05,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "curitiba-pr",
+    "ibgeCode": 4106902,
+    "safety": {
+      "safetyScore": 80,
+      "homicideRatePer100k": 11.05,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "foz-do-iguacu-pr",
+    "ibgeCode": 4108304,
+    "safety": {
+      "safetyScore": 54,
+      "homicideRatePer100k": 31.47,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "joinville-sc",
+    "ibgeCode": 4209102,
+    "safety": {
+      "safetyScore": 82,
+      "homicideRatePer100k": 8.68,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "bombinhas-sc",
+    "ibgeCode": 4202453,
+    "safety": {
+      "safetyScore": 86,
+      "homicideRatePer100k": 6.23,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "itajai-sc",
+    "ibgeCode": 4208203,
+    "safety": {
+      "safetyScore": 81,
+      "homicideRatePer100k": 8.8,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "porto-alegre-rs",
+    "ibgeCode": 4314902,
+    "safety": {
+      "safetyScore": 63,
+      "homicideRatePer100k": 21.8,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "maceio-al",
+    "ibgeCode": 2704302,
+    "safety": {
+      "safetyScore": 40,
+      "homicideRatePer100k": 39.82,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "maragogi-al",
+    "ibgeCode": 2704500,
+    "safety": {
+      "safetyScore": 28,
+      "homicideRatePer100k": 58.66,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "joao-pessoa-pb",
+    "ibgeCode": 2507507,
+    "safety": {
+      "safetyScore": 62,
+      "homicideRatePer100k": 24.64,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "recife-pe",
+    "ibgeCode": 2611606,
+    "safety": {
+      "safetyScore": 36,
+      "homicideRatePer100k": 41.93,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "natal-rn",
+    "ibgeCode": 2408102,
+    "safety": {
+      "safetyScore": 60,
+      "homicideRatePer100k": 23.61,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "aracaju-se",
+    "ibgeCode": 2800308,
+    "safety": {
+      "safetyScore": 54,
+      "homicideRatePer100k": 30.14,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "goiania-go",
+    "ibgeCode": 5208707,
+    "safety": {
+      "safetyScore": 72,
+      "homicideRatePer100k": 14.27,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "salvador-ba",
+    "ibgeCode": 2927408,
+    "safety": {
+      "safetyScore": 36,
+      "homicideRatePer100k": 41.22,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "porto-seguro-ba",
+    "ibgeCode": 2925303,
+    "safety": {
+      "safetyScore": 37,
+      "homicideRatePer100k": 43.93,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "campo-grande-ms",
+    "ibgeCode": 5002704,
+    "safety": {
+      "safetyScore": 73,
+      "homicideRatePer100k": 15.12,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "santos-sp",
+    "ibgeCode": 3548500,
+    "safety": {
+      "safetyScore": 84,
+      "homicideRatePer100k": 4.8,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "ubatuba-sp",
+    "ibgeCode": 3555406,
+    "safety": {
+      "safetyScore": 69,
+      "homicideRatePer100k": 20.27,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "paraty-rj",
+    "ibgeCode": 3303807,
+    "safety": {
+      "safetyScore": 50,
+      "homicideRatePer100k": 36.28,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "tibau-do-sul-rn",
+    "ibgeCode": 2414209,
+    "safety": {
+      "safetyScore": 68,
+      "homicideRatePer100k": 21.09,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "jijoca-de-jericoacoara-ce",
+    "ibgeCode": 2307254,
+    "safety": {
+      "safetyScore": 30,
+      "homicideRatePer100k": 53.36,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "ilhabela-sp",
+    "ibgeCode": 3520400,
+    "safety": {
+      "safetyScore": 88,
+      "homicideRatePer100k": 4.65,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "guaruja-sp",
+    "ibgeCode": 3518701,
+    "safety": {
+      "safetyScore": 74,
+      "homicideRatePer100k": 12.14,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "garopaba-sc",
+    "ibgeCode": 4205704,
+    "safety": {
+      "safetyScore": 89,
+      "homicideRatePer100k": 4.67,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "imbituba-sc",
+    "ibgeCode": 4207304,
+    "safety": {
+      "safetyScore": 87,
+      "homicideRatePer100k": 5.48,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "itacare-ba",
+    "ibgeCode": 2914901,
+    "safety": {
+      "safetyScore": 55,
+      "homicideRatePer100k": 31.06,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "sao-miguel-do-gostoso-rn",
+    "ibgeCode": 2412559,
+    "safety": {
+      "safetyScore": 60,
+      "homicideRatePer100k": 28.57,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "cairu-ba",
+    "ibgeCode": 2905404,
+    "safety": {
+      "safetyScore": 39,
+      "homicideRatePer100k": 45.62,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "caxias-do-sul-rs",
+    "ibgeCode": 4305108,
+    "safety": {
+      "safetyScore": 71,
+      "homicideRatePer100k": 17.73,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "chapeco-sc",
+    "ibgeCode": 4204202,
+    "safety": {
+      "safetyScore": 80,
+      "homicideRatePer100k": 10.78,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "passo-fundo-rs",
+    "ibgeCode": 4314100,
+    "safety": {
+      "safetyScore": 63,
+      "homicideRatePer100k": 23.15,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "belo-horizonte-mg",
+    "ibgeCode": 3106200,
+    "safety": {
+      "safetyScore": 74,
+      "homicideRatePer100k": 11.93,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "campinas-sp",
+    "ibgeCode": 3509502,
+    "safety": {
+      "safetyScore": 76,
+      "homicideRatePer100k": 10.69,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "brasilia-df",
+    "ibgeCode": 5300108,
+    "safety": {
+      "safetyScore": 77,
+      "homicideRatePer100k": 10.78,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "londrina-pr",
+    "ibgeCode": 4113700,
+    "safety": {
+      "safetyScore": 76,
+      "homicideRatePer100k": 11.67,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  },
+  {
+    "cityId": "ribeirao-preto-sp",
+    "ibgeCode": 3543402,
+    "safety": {
+      "safetyScore": 81,
+      "homicideRatePer100k": 7.76,
+      "referenceStartYear": 2022,
+      "referenceEndYear": 2024,
+      "methodologyVersion": "ipea-homicide-3y-blend-v1",
+      "sourceLabel": "Atlas da Violência / Ipea (SIM/MS)",
+      "sourceUrl": "https://www.ipea.gov.br/atlasviolencia/dados-series/20/",
+      "sourceType": "derived",
+      "updatedAt": "2026-01-26"
+    }
+  }
+]

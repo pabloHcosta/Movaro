@@ -19,10 +19,7 @@ class PracticalInfoDisclaimer extends StatelessWidget {
     final onSurface = theme.colorScheme.onSurface;
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: compact ? 8 : 10,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: compact ? 8 : 10),
       decoration: BoxDecoration(
         color: onSurface.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10),

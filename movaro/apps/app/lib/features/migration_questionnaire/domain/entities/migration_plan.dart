@@ -9,6 +9,8 @@ class MigrationPlan {
     required this.goal,
     required this.timeline,
     required this.steps,
+    this.id,
+    this.createdAt,
     this.variant = QuestionnaireVariant.lean,
     this.funding = '',
     this.travelGroup = '',
@@ -31,6 +33,8 @@ class MigrationPlan {
   final String goal;
   final String timeline;
   final List<MigrationStep> steps;
+  final String? id;
+  final DateTime? createdAt;
   final QuestionnaireVariant variant;
   final String funding;
   final String travelGroup;
@@ -79,6 +83,8 @@ class MigrationPlan {
   }
 
   MigrationPlan copyWith({
+    String? id,
+    DateTime? createdAt,
     String? originCountry,
     String? destinationCountry,
     String? goal,
@@ -101,6 +107,8 @@ class MigrationPlan {
     bool? isCityConfirmed,
   }) {
     return MigrationPlan(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
       originCountry: originCountry ?? this.originCountry,
       destinationCountry: destinationCountry ?? this.destinationCountry,
       goal: goal ?? this.goal,

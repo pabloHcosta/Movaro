@@ -11,118 +11,164 @@ Future<PlanResetChoice?> showPlanResetDialog(
   final copy = PlanResetDialogCopy.fromContext(context);
   final cityName = currentCityName ?? copy.currentPlanFallbackLabel;
 
-  return showDialog<PlanResetChoice>(
+  return showModalBottomSheet<PlanResetChoice>(
     context: context,
-    barrierDismissible: true,
-    builder: (dialogContext) {
-      final isDark = AppColors.isDark(dialogContext);
-      final surfaceColor = AppColors.surfaceFor(dialogContext);
-      final borderColor = AppColors.borderFor(dialogContext);
-      final titleColor = AppColors.textPrimaryFor(dialogContext);
-      final bodyColor = AppColors.textSoftFor(dialogContext);
-      return Dialog(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: Container(
-          decoration: BoxDecoration(
-            color: surfaceColor,
-            border: Border.all(color: borderColor),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withValues(alpha: 0.48)
-                    : Colors.black.withValues(alpha: 0.10),
-                blurRadius: isDark ? 48 : 26,
-              ),
-            ],
-          ),
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: 0.72),
+    isScrollControlled: true,
+    useSafeArea: true,
+    isDismissible: true,
+    builder: (sheetContext) {
+      final theme = Theme.of(sheetContext);
+      final isDark = AppColors.isDark(sheetContext);
+      final borderColor = AppColors.borderFor(sheetContext);
+      final titleColor = AppColors.textPrimaryFor(sheetContext);
+      final bodyColor = AppColors.textSoftFor(sheetContext);
+
+      return Container(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceFor(sheetContext),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          border: Border(top: BorderSide(color: borderColor)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.52 : 0.16),
+              blurRadius: 44,
+              offset: const Offset(0, -14),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+        child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: bodyColor.withValues(alpha: 0.28),
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFFFB648), Color(0xFFF08019)],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.caution.withValues(alpha: 0.26),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.route_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                copy.manageActionLabel,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: titleColor,
+                  letterSpacing: -0.55,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                copy.dialogBody,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: bodyColor,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(13),
+                decoration: BoxDecoration(
+                  color: AppColors.tintedSurfaceFor(
+                    sheetContext,
+                    tint: AppColors.caution,
+                    lightColor: const Color(0xFFFFF8ED),
+                    darkAlpha: 0.11,
+                  ),
+                  border: Border.all(
+                    color: AppColors.tintedBorderFor(
+                      sheetContext,
+                      tint: AppColors.caution,
+                      lightColor: const Color(0xFFF4D7AA),
+                      darkAlpha: 0.30,
+                    ),
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: AppColors.tintedSurfaceFor(
-                          dialogContext,
-                          tint: AppColors.danger,
-                          lightColor: const Color(0xFFFFEFEF),
-                          darkAlpha: 0.16,
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.refresh_rounded,
+                          color: AppColors.caution,
+                          size: 19,
                         ),
-                        border: Border.all(
-                          color: AppColors.tintedBorderFor(
-                            dialogContext,
-                            tint: AppColors.danger,
-                            lightColor: const Color(0xFFF3B8B8),
-                            darkAlpha: 0.30,
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            sheetContext.l10n.planResetImpactTitle,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: titleColor,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(
-                        Icons.warning_amber_rounded,
-                        color: AppColors.danger,
-                        size: 22,
-                      ),
+                      ],
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      copy.manageActionLabel,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: titleColor,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      copy.dialogBody,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: bodyColor,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 11,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
-                        color: AppColors.tintedSurfaceFor(
-                          dialogContext,
-                          tint: AppColors.danger,
-                          lightColor: const Color(0xFFFFF4F4),
-                          darkAlpha: 0.14,
-                        ),
-                        border: Border.all(
-                          color: AppColors.tintedBorderFor(
-                            dialogContext,
-                            tint: AppColors.danger,
-                            lightColor: const Color(0xFFF3B8B8),
-                            darkAlpha: 0.24,
-                          ),
-                        ),
-                        borderRadius: BorderRadius.circular(9),
+                        color: AppColors.surfaceFor(
+                          sheetContext,
+                        ).withValues(alpha: 0.74),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Icon(
-                            Icons.info_outline_rounded,
-                            color: AppColors.danger,
-                            size: 13,
+                            Icons.location_on_outlined,
+                            color: AppColors.caution,
+                            size: 18,
                           ),
-                          const SizedBox(width: 7),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               copy.cityWarning(cityName),
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: AppColors.danger,
-                                    height: 1.4,
-                                  ),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: bodyColor,
+                                height: 1.4,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -131,66 +177,87 @@ Future<PlanResetChoice?> showPlanResetDialog(
                   ],
                 ),
               ),
-              Container(height: 1, color: borderColor),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-                child: Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.of(
-                        dialogContext,
-                      ).pop(PlanResetChoice.rebuild),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 13),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1F6FEB),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.arrow_forward_rounded,
-                              color: Colors.white,
-                              size: 14,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              copy.rebuildLabel,
-                              style: Theme.of(context).textTheme.labelLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
-                            ),
-                          ],
-                        ),
+              const SizedBox(height: 14),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.shield_outlined,
+                    color: AppColors.primary,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 9),
+                  Expanded(
+                    child: Text(
+                      sheetContext.l10n.planResetPreservedNote,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: bodyColor,
+                        height: 1.45,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () => Navigator.of(dialogContext).pop(),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 11),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceMutedFor(dialogContext),
-                          border: Border.all(color: borderColor),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          copy.cancelWithCity(cityName),
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: bodyColor,
-                              ),
-                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () =>
+                      Navigator.of(sheetContext).pop(PlanResetChoice.rebuild),
+                  child: Ink(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF238BFF), Color(0xFF0068E8)],
                       ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.28),
+                          blurRadius: 18,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                  ],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          copy.rebuildLabel,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.white,
+                          size: 19,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 9),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => Navigator.of(sheetContext).pop(),
+                  style: TextButton.styleFrom(
+                    foregroundColor: bodyColor,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Text(
+                    copy.cancelWithCity(cityName),
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
                 ),
               ),
             ],

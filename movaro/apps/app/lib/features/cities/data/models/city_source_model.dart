@@ -9,6 +9,10 @@ class CitySourceModel {
     required this.isOfficial,
     required this.url,
     required this.sourceType,
+    this.referenceValue,
+    this.referenceUnit,
+    this.referencePeriod,
+    this.updatedAt,
   });
 
   factory CitySourceModel.fromJson(Map<String, dynamic> json) {
@@ -19,8 +23,13 @@ class CitySourceModel {
       description: json['description'] as String,
       isOfficial: json['isOfficial'] as bool,
       url: json['url'] as String?,
-      sourceType: (json['sourceType'] as String?) ??
+      sourceType:
+          (json['sourceType'] as String?) ??
           ((json['isOfficial'] as bool) ? 'official' : 'curated'),
+      referenceValue: (json['referenceValue'] as num?)?.toDouble(),
+      referenceUnit: json['referenceUnit'] as String?,
+      referencePeriod: json['referencePeriod'] as String?,
+      updatedAt: json['updatedAt'] as String?,
     );
   }
 
@@ -31,6 +40,10 @@ class CitySourceModel {
   final bool isOfficial;
   final String? url;
   final String sourceType;
+  final double? referenceValue;
+  final String? referenceUnit;
+  final String? referencePeriod;
+  final String? updatedAt;
 
   factory CitySourceModel.fromEntity(CitySource source) {
     return CitySourceModel(
@@ -41,6 +54,10 @@ class CitySourceModel {
       isOfficial: source.isOfficial,
       url: source.url,
       sourceType: source.sourceType,
+      referenceValue: source.referenceValue,
+      referenceUnit: source.referenceUnit,
+      referencePeriod: source.referencePeriod,
+      updatedAt: source.updatedAt,
     );
   }
 
@@ -52,6 +69,10 @@ class CitySourceModel {
     'isOfficial': isOfficial,
     'url': url,
     'sourceType': sourceType,
+    if (referenceValue != null) 'referenceValue': referenceValue,
+    if (referenceUnit != null) 'referenceUnit': referenceUnit,
+    if (referencePeriod != null) 'referencePeriod': referencePeriod,
+    if (updatedAt != null) 'updatedAt': updatedAt,
   };
 
   CitySource toEntity() => CitySource(
@@ -62,5 +83,9 @@ class CitySourceModel {
     isOfficial: isOfficial,
     url: url,
     sourceType: sourceType,
+    referenceValue: referenceValue,
+    referenceUnit: referenceUnit,
+    referencePeriod: referencePeriod,
+    updatedAt: updatedAt,
   );
 }

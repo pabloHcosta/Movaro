@@ -145,99 +145,99 @@ class _FlightSeasonalityCatalog {
     _PriceLevel.high,
   ];
 
-  static const Map<String, _DestinationSeasonalityProfile>
-  destinationProfiles = {
-    'GRU': _DestinationSeasonalityProfile(
-      months: _defaultMonths,
-      lowUsdMin: 133,
-      lowUsdMax: 160,
-    ),
-    'FLN': _DestinationSeasonalityProfile(
-      months: _coastalSouthMonths,
-      lowUsdMin: 150,
-      lowUsdMax: 200,
-      seasonalWarningKey: 'fln',
-    ),
-    'NVT': _DestinationSeasonalityProfile(
-      months: _coastalSouthMonths,
-      lowUsdMin: 160,
-      lowUsdMax: 210,
-      seasonalWarningKey: 'nvt',
-    ),
-    'CWB': _DestinationSeasonalityProfile(
-      months: _defaultMonths,
-      lowUsdMin: 170,
-      lowUsdMax: 250,
-    ),
-    'GIG': _DestinationSeasonalityProfile(
-      months: _defaultMonths,
-      lowUsdMin: 150,
-      lowUsdMax: 220,
-      seasonalWarningKey: 'gig',
-    ),
-    'POA': _DestinationSeasonalityProfile(
-      months: _defaultMonths,
-      lowUsdMin: 140,
-      lowUsdMax: 190,
-    ),
-    'CNF': _DestinationSeasonalityProfile(
-      months: _defaultMonths,
-      lowUsdMin: 175,
-      lowUsdMax: 240,
-    ),
-    'SSA': _DestinationSeasonalityProfile(
-      months: _northeastMonths,
-      lowUsdMin: 200,
-      lowUsdMax: 280,
-    ),
-    'REC': _DestinationSeasonalityProfile(
-      months: _northeastMonths,
-      lowUsdMin: 210,
-      lowUsdMax: 290,
-    ),
-    'FOR': _DestinationSeasonalityProfile(
-      months: _northeastMonths,
-      lowUsdMin: 210,
-      lowUsdMax: 300,
-    ),
-    'NAT': _DestinationSeasonalityProfile(
-      months: _northeastMonths,
-      lowUsdMin: 220,
-      lowUsdMax: 310,
-    ),
-    'JPA': _DestinationSeasonalityProfile(
-      months: _northeastMonths,
-      lowUsdMin: 215,
-      lowUsdMax: 295,
-    ),
-    'AJU': _DestinationSeasonalityProfile(
-      months: _northeastMonths,
-      lowUsdMin: 205,
-      lowUsdMax: 285,
-    ),
-    'MCZ': _DestinationSeasonalityProfile(
-      months: _northeastMonths,
-      lowUsdMin: 215,
-      lowUsdMax: 300,
-    ),
-    'CGR': _DestinationSeasonalityProfile(
-      months: _defaultMonths,
-      lowUsdMin: 165,
-      lowUsdMax: 235,
-    ),
-    'MAO': _DestinationSeasonalityProfile(
-      months: _northMonths,
-      lowUsdMin: 260,
-      lowUsdMax: 360,
-      seasonalWarningKey: 'mao',
-    ),
-    'BEL': _DestinationSeasonalityProfile(
-      months: _northMonths,
-      lowUsdMin: 250,
-      lowUsdMax: 340,
-      seasonalWarningKey: 'bel',
-    ),
-  };
+  static const Map<String, _DestinationSeasonalityProfile> destinationProfiles =
+      {
+        'GRU': _DestinationSeasonalityProfile(
+          months: _defaultMonths,
+          lowUsdMin: 133,
+          lowUsdMax: 160,
+        ),
+        'FLN': _DestinationSeasonalityProfile(
+          months: _coastalSouthMonths,
+          lowUsdMin: 150,
+          lowUsdMax: 200,
+          seasonalWarningKey: 'fln',
+        ),
+        'NVT': _DestinationSeasonalityProfile(
+          months: _coastalSouthMonths,
+          lowUsdMin: 160,
+          lowUsdMax: 210,
+          seasonalWarningKey: 'nvt',
+        ),
+        'CWB': _DestinationSeasonalityProfile(
+          months: _defaultMonths,
+          lowUsdMin: 170,
+          lowUsdMax: 250,
+        ),
+        'GIG': _DestinationSeasonalityProfile(
+          months: _defaultMonths,
+          lowUsdMin: 150,
+          lowUsdMax: 220,
+          seasonalWarningKey: 'gig',
+        ),
+        'POA': _DestinationSeasonalityProfile(
+          months: _defaultMonths,
+          lowUsdMin: 140,
+          lowUsdMax: 190,
+        ),
+        'CNF': _DestinationSeasonalityProfile(
+          months: _defaultMonths,
+          lowUsdMin: 175,
+          lowUsdMax: 240,
+        ),
+        'SSA': _DestinationSeasonalityProfile(
+          months: _northeastMonths,
+          lowUsdMin: 200,
+          lowUsdMax: 280,
+        ),
+        'REC': _DestinationSeasonalityProfile(
+          months: _northeastMonths,
+          lowUsdMin: 210,
+          lowUsdMax: 290,
+        ),
+        'FOR': _DestinationSeasonalityProfile(
+          months: _northeastMonths,
+          lowUsdMin: 210,
+          lowUsdMax: 300,
+        ),
+        'NAT': _DestinationSeasonalityProfile(
+          months: _northeastMonths,
+          lowUsdMin: 220,
+          lowUsdMax: 310,
+        ),
+        'JPA': _DestinationSeasonalityProfile(
+          months: _northeastMonths,
+          lowUsdMin: 215,
+          lowUsdMax: 295,
+        ),
+        'AJU': _DestinationSeasonalityProfile(
+          months: _northeastMonths,
+          lowUsdMin: 205,
+          lowUsdMax: 285,
+        ),
+        'MCZ': _DestinationSeasonalityProfile(
+          months: _northeastMonths,
+          lowUsdMin: 215,
+          lowUsdMax: 300,
+        ),
+        'CGR': _DestinationSeasonalityProfile(
+          months: _defaultMonths,
+          lowUsdMin: 165,
+          lowUsdMax: 235,
+        ),
+        'MAO': _DestinationSeasonalityProfile(
+          months: _northMonths,
+          lowUsdMin: 260,
+          lowUsdMax: 360,
+          seasonalWarningKey: 'mao',
+        ),
+        'BEL': _DestinationSeasonalityProfile(
+          months: _northMonths,
+          lowUsdMin: 250,
+          lowUsdMax: 340,
+          seasonalWarningKey: 'bel',
+        ),
+      };
 
   static const Map<String, _OriginPriceAdjustment> originAdjustments = {
     'EZE': _OriginPriceAdjustment(lowMinDelta: 0, lowMaxDelta: 0),
@@ -286,10 +286,11 @@ class _FlightSeasonalityCatalog {
     );
   }
 
-  static List<String> cheapMonths(_RouteData data, List<String> monthLabels) => [
-    for (var i = 0; i < data.months.length; i++)
-      if (data.months[i] == _PriceLevel.low) monthLabels[i],
-  ];
+  static List<String> cheapMonths(_RouteData data, List<String> monthLabels) =>
+      [
+        for (var i = 0; i < data.months.length; i++)
+          if (data.months[i] == _PriceLevel.low) monthLabels[i],
+      ];
 }
 
 class FlightSeasonalityCard extends StatelessWidget {
@@ -339,18 +340,24 @@ class FlightSeasonalityCard extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final data = routeInsight == null ? _route : _RouteData(
-      originIata: routeInsight!.originIata,
-      destIata: routeInsight!.destIata,
-      months: routeInsight!.months.map((item) => switch (item) {
-        TravelRoutePriceLevel.low => _PriceLevel.low,
-        TravelRoutePriceLevel.mid => _PriceLevel.mid,
-        TravelRoutePriceLevel.high => _PriceLevel.high,
-      }).toList(growable: false),
-      lowUsdMin: routeInsight!.lowUsdMin,
-      lowUsdMax: routeInsight!.lowUsdMax,
-      seasonalWarningKey: routeInsight!.seasonalWarningKey,
-    );
+    final data = routeInsight == null
+        ? _route
+        : _RouteData(
+            originIata: routeInsight!.originIata,
+            destIata: routeInsight!.destIata,
+            months: routeInsight!.months
+                .map(
+                  (item) => switch (item) {
+                    TravelRoutePriceLevel.low => _PriceLevel.low,
+                    TravelRoutePriceLevel.mid => _PriceLevel.mid,
+                    TravelRoutePriceLevel.high => _PriceLevel.high,
+                  },
+                )
+                .toList(growable: false),
+            lowUsdMin: routeInsight!.lowUsdMin,
+            lowUsdMax: routeInsight!.lowUsdMax,
+            seasonalWarningKey: routeInsight!.seasonalWarningKey,
+          );
     final monthLabels = _monthLabels(l10n);
     final cheapMonths = data == null
         ? const <String>[]
@@ -384,10 +391,7 @@ class FlightSeasonalityCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           if (data != null) ...[
-            _MonthBarChart(
-              months: data.months,
-              labels: _monthInitials(l10n),
-            ),
+            _MonthBarChart(months: data.months, labels: _monthInitials(l10n)),
             const SizedBox(height: 12),
             _PriceLegend(lowMin: data.lowUsdMin, lowMax: data.lowUsdMax),
             const SizedBox(height: 12),
@@ -669,11 +673,15 @@ class FlightPriceBadge extends StatelessWidget {
         : _RouteData(
             originIata: routeInsight!.originIata,
             destIata: routeInsight!.destIata,
-            months: routeInsight!.months.map((item) => switch (item) {
-              TravelRoutePriceLevel.low => _PriceLevel.low,
-              TravelRoutePriceLevel.mid => _PriceLevel.mid,
-              TravelRoutePriceLevel.high => _PriceLevel.high,
-            }).toList(growable: false),
+            months: routeInsight!.months
+                .map(
+                  (item) => switch (item) {
+                    TravelRoutePriceLevel.low => _PriceLevel.low,
+                    TravelRoutePriceLevel.mid => _PriceLevel.mid,
+                    TravelRoutePriceLevel.high => _PriceLevel.high,
+                  },
+                )
+                .toList(growable: false),
             lowUsdMin: routeInsight!.lowUsdMin,
             lowUsdMax: routeInsight!.lowUsdMax,
             seasonalWarningKey: routeInsight!.seasonalWarningKey,

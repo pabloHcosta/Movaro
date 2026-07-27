@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:movaro_app/core/storage/versioned_json_file_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -50,7 +51,7 @@ class GuideEventSuggestionStore {
   }) async {
     try {
       final data = await _readAll();
-      final planEntry = data[_planKey(plan)];
+      final planEntry = data[MigrationPlanIdentity.storageKeyFor(plan)];
       if (planEntry is! Map<String, dynamic>) {
         return const GuideEventSuggestionPreference();
       }
@@ -143,7 +144,7 @@ class GuideEventSuggestionStore {
   }) async {
     final file = await _file();
     final data = await _readAll();
-    final key = _planKey(plan);
+    final key = MigrationPlanIdentity.storageKeyFor(plan);
     final rawPlanEntry = data[key];
     final planEntry = rawPlanEntry is Map<String, dynamic>
         ? Map<String, dynamic>.from(rawPlanEntry)
@@ -160,16 +161,6 @@ class GuideEventSuggestionStore {
 
     await VersionedJsonFileStore.write(file, data);
     MigrationStateSyncCoordinator.scheduleSync();
-  }
-
-  String _planKey(MigrationPlan plan) {
-    return [
-      plan.originCountry,
-      plan.destinationCountry,
-      plan.goal,
-      plan.timeline,
-      plan.currentPlanCity?.id ?? 'no-city',
-    ].join('::');
   }
 
   Future<File> _file() async {

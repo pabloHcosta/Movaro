@@ -20,6 +20,8 @@ class GuideGpsController extends ChangeNotifier {
     Set<String> prioritizedItemIds = const <String>{},
     Map<String, GuideDismissReason> dismissedReasonsById =
         const <String, GuideDismissReason>{},
+    Map<String, GuideTaskState> taskStatesById =
+        const <String, GuideTaskState>{},
     String? activeItemId,
     GuideFlowMetricsStore? metricsStore,
   }) : _plan = plan,
@@ -33,6 +35,7 @@ class GuideGpsController extends ChangeNotifier {
        _dismissedReasonsById = Map<String, GuideDismissReason>.from(
          dismissedReasonsById,
        ),
+       _taskStatesById = Map<String, GuideTaskState>.from(taskStatesById),
        _items = List<GuideActionItem>.from(items)
          ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex)),
        _activeItemId = activeItemId {
@@ -49,6 +52,7 @@ class GuideGpsController extends ChangeNotifier {
   Map<String, String> _completedAtById;
   Set<String> _prioritizedItemIds;
   final Map<String, GuideDismissReason> _dismissedReasonsById;
+  final Map<String, GuideTaskState> _taskStatesById;
   final List<GuideActionItem> _items;
   String? _activeItemId;
   bool _currentItemStarted = false;
@@ -65,6 +69,8 @@ class GuideGpsController extends ChangeNotifier {
       Set<String>.unmodifiable(_prioritizedItemIds);
   Map<String, GuideDismissReason> get dismissedReasonsById =>
       Map<String, GuideDismissReason>.unmodifiable(_dismissedReasonsById);
+  Map<String, GuideTaskState> get taskStatesById =>
+      Map<String, GuideTaskState>.unmodifiable(_taskStatesById);
 
   Set<String> get allCompletedIds => <String>{
     for (final item in _items)
@@ -107,6 +113,20 @@ class GuideGpsController extends ChangeNotifier {
   bool get currentItemStarted => _currentItemStarted;
   bool get awaitingConfirmation => _awaitingConfirmation;
   String? get activeItemId => _activeItemId;
+  GuideTaskState stateFor(String itemId) {
+    final item = _items.cast<GuideActionItem?>().firstWhere(
+      (entry) => entry?.id == itemId,
+      orElse: () => null,
+    );
+    if (item?.isCompleted ?? false) {
+      return GuideTaskState.completed;
+    }
+    return _taskStatesById[itemId] ?? GuideTaskState.notStarted;
+  }
+
+  GuideTaskState get currentTaskState => currentItem == null
+      ? GuideTaskState.completed
+      : stateFor(currentItem!.id);
 
   GuidePhase get currentPhase => currentItem?.phase ?? GuidePhase.arrival;
 
@@ -116,6 +136,7 @@ class GuideGpsController extends ChangeNotifier {
     }
     _activeItemId = currentItem!.id;
     _currentItemStarted = true;
+    _taskStatesById[currentItem!.id] = GuideTaskState.inProgress;
     notifyListeners();
     unawaited(
       _metricsStore.record(
@@ -124,6 +145,36 @@ class GuideGpsController extends ChangeNotifier {
       ),
     );
     unawaited(_persist());
+  }
+
+  Future<void> markCurrentItemWaiting() async {
+    final item = currentItem;
+    if (item == null || item.isCompleted) {
+      return;
+    }
+    _activeItemId = item.id;
+    _taskStatesById[item.id] = GuideTaskState.waiting;
+    _currentItemStarted = false;
+    notifyListeners();
+    unawaited(
+      _metricsStore.record(GuideFlowMetric.taskWaiting, referenceId: item.id),
+    );
+    await _persist();
+  }
+
+  Future<void> resumeCurrentItem() async {
+    final item = currentItem;
+    if (item == null || item.isCompleted) {
+      return;
+    }
+    _activeItemId = item.id;
+    _taskStatesById[item.id] = GuideTaskState.inProgress;
+    _currentItemStarted = true;
+    notifyListeners();
+    unawaited(
+      _metricsStore.record(GuideFlowMetric.taskResumed, referenceId: item.id),
+    );
+    await _persist();
   }
 
   void markNeedsConfirmation() {
@@ -152,6 +203,7 @@ class GuideGpsController extends ChangeNotifier {
       isUserPrioritized: false,
     );
     _dismissedReasonsById.remove(item.id);
+    _taskStatesById[item.id] = GuideTaskState.completed;
     _prioritizedItemIds.remove(item.id);
     _setCompleted(item);
     _setCompletedAt(itemId);
@@ -201,6 +253,7 @@ class GuideGpsController extends ChangeNotifier {
       isUserPrioritized: false,
     );
     _dismissedReasonsById[itemId] = reason;
+    _taskStatesById[itemId] = GuideTaskState.completed;
     _prioritizedItemIds.remove(itemId);
     _setCompleted(item);
     _setCompletedAt(itemId);
@@ -240,6 +293,7 @@ class GuideGpsController extends ChangeNotifier {
         isUserPrioritized: false,
       );
       _dismissedReasonsById[itemId] = reason;
+      _taskStatesById[itemId] = GuideTaskState.completed;
       _prioritizedItemIds.remove(itemId);
       _setCompleted(item);
       _setCompletedAt(itemId);
@@ -272,6 +326,7 @@ class GuideGpsController extends ChangeNotifier {
 
     _items[index] = item.copyWith(isCompleted: false, dismissReason: null);
     _dismissedReasonsById.remove(itemId);
+    _taskStatesById.remove(itemId);
     _unsetCompleted(item);
     _completedAtById = <String, String>{..._completedAtById}..remove(itemId);
     notifyListeners();
@@ -327,6 +382,7 @@ class GuideGpsController extends ChangeNotifier {
       isCompleted: allDone,
     );
     if (allDone) {
+      _taskStatesById[item.id] = GuideTaskState.completed;
       _setCompleted(item);
       _setCompletedAt(item.id);
       await _handlePostCompletion(item);
@@ -540,6 +596,7 @@ class GuideGpsController extends ChangeNotifier {
       completedAtById: _completedAtById,
       prioritizedItemIds: _prioritizedItemIds,
       dismissedReasonsById: _dismissedReasonsById,
+      taskStatesById: _taskStatesById,
     );
   }
 }

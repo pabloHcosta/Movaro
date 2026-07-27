@@ -11,10 +11,7 @@ import 'package:movaro_app/features/migration_questionnaire/domain/entities/migr
 /// final urgent = engine.urgentItems();
 /// ```
 class MigrationTimingEngine {
-  const MigrationTimingEngine({
-    required this.plan,
-    required this.items,
-  });
+  const MigrationTimingEngine({required this.plan, required this.items});
 
   final MigrationPlan plan;
   final List<GuideActionItem> items;
@@ -58,9 +55,7 @@ class MigrationTimingEngine {
   /// Returns the highest urgency level across all incomplete items.
   GuideUrgencyLevel get highestPendingUrgency {
     final incomplete = items.where((it) => !it.isCompleted).toList();
-    if (incomplete.any(
-      (it) => it.urgencyLevel == GuideUrgencyLevel.critical,
-    )) {
+    if (incomplete.any((it) => it.urgencyLevel == GuideUrgencyLevel.critical)) {
       return GuideUrgencyLevel.critical;
     }
     if (incomplete.any((it) => it.urgencyLevel == GuideUrgencyLevel.urgent)) {
@@ -82,9 +77,9 @@ class MigrationTimingEngine {
   }
 
   static int _urgencyRank(GuideUrgencyLevel level) => switch (level) {
-        GuideUrgencyLevel.normal => 0,
-        GuideUrgencyLevel.watch => 1,
-        GuideUrgencyLevel.urgent => 2,
-        GuideUrgencyLevel.critical => 3,
-      };
+    GuideUrgencyLevel.normal => 0,
+    GuideUrgencyLevel.watch => 1,
+    GuideUrgencyLevel.urgent => 2,
+    GuideUrgencyLevel.critical => 3,
+  };
 }

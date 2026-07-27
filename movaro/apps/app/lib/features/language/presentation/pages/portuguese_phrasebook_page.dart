@@ -109,9 +109,7 @@ class _PhraseCard extends StatelessWidget {
           messenger.hideCurrentSnackBar();
           messenger.showSnackBar(
             SnackBar(
-              content: Text(
-                _copiedLabel(locale),
-              ),
+              content: Text(_copiedLabel(locale)),
               duration: const Duration(seconds: 2),
             ),
           );

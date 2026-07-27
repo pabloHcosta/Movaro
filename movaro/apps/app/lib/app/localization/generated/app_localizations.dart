@@ -5731,6 +5731,12 @@ abstract class AppLocalizations {
   /// **'Mapped reference'**
   String get cityMetricInsightMappedBaseBadge;
 
+  /// No description provided for @cityMetricInsightDerivedOfficialBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Derived from official data'**
+  String get cityMetricInsightDerivedOfficialBadge;
+
   /// No description provided for @cityMetricInsightOpenSourceAction.
   ///
   /// In en, this message translates to:
@@ -5788,7 +5794,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricInsightSafetyMethod.
   ///
   /// In en, this message translates to:
-  /// **'When an official safety indicator exists, it is shown with its source. Without a city-level official source, the internal score is only a comparative estimate.'**
+  /// **'The signal combines the latest three-year municipal average of registered homicides with a smaller share of the previous comparative context. The rate comes from the Atlas of Violence/Ipea using SIM/MS data; the final score is derived and is not an official ranking.'**
   String get cityMetricInsightSafetyMethod;
 
   /// No description provided for @cityMetricInsightSafetyValidate.
@@ -5802,6 +5808,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Atlas da Violência is the official reference already mapped in the project to recalibrate this group with public data and open methodology.'**
   String get cityMetricInsightSafetyMappedSource;
+
+  /// No description provided for @cityMetricInsightSafetyOfficialRateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Observed official average'**
+  String get cityMetricInsightSafetyOfficialRateLabel;
+
+  /// No description provided for @cityMetricInsightSafetyRateValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} per 100k/year'**
+  String cityMetricInsightSafetyRateValue(Object value);
+
+  /// No description provided for @cityMetricInsightReferencePeriodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference period'**
+  String get cityMetricInsightReferencePeriodLabel;
 
   /// No description provided for @cityMetricInsightWorkMeaning.
   ///
@@ -11264,11 +11288,47 @@ abstract class AppLocalizations {
   /// **'If you want to restart, you can clear your current progress and build a new plan from the beginning.'**
   String get planResetManageBody;
 
+  /// No description provided for @planMenuTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan options'**
+  String get planMenuTitle;
+
+  /// No description provided for @planMenuSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your journey without losing sight of your current progress.'**
+  String get planMenuSubtitle;
+
+  /// No description provided for @planMenuNewPlanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another city, goal, or moving timeline.'**
+  String get planMenuNewPlanBody;
+
+  /// No description provided for @planMenuSafetyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current plan is only erased after you confirm.'**
+  String get planMenuSafetyNote;
+
+  /// No description provided for @planResetImpactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'If you continue, we will reset'**
+  String get planResetImpactTitle;
+
   /// No description provided for @planResetDialogBody.
   ///
   /// In en, this message translates to:
-  /// **'You will restart the questionnaire and choose a new city. This cannot be undone.'**
+  /// **'The new plan starts with every step at zero, even when its city, goal, or timeline resembles the previous plan.'**
   String get planResetDialogBody;
+
+  /// No description provided for @planResetPreservedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your origin, language, currency, favorites, and settings are kept. Permanent documents can be marked as “already done” in the new plan.'**
+  String get planResetPreservedNote;
 
   /// No description provided for @planResetRebuildLabel.
   ///
