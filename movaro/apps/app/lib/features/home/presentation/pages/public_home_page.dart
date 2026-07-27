@@ -54,13 +54,12 @@ class PublicHomePage extends StatefulWidget {
     super.key,
   });
 
-  final CityInsightController cityInsightsController;
-  final JourneyContextController journeyContextController;
   final CitiesController citiesController;
-  final MigrationQuestionnaireController migrationQuestionnaireController;
-  final LocationController locationController;
+  final CityInsightController cityInsightsController;
   final AppEnvironment environment;
-
+  final JourneyContextController journeyContextController;
+  final LocationController locationController;
+  final MigrationQuestionnaireController migrationQuestionnaireController;
   /// When the router silently redirected to this page, this message is shown
   /// as a floating snackbar on the first frame so the user understands why.
   final String? redirectMessage;
@@ -71,56 +70,27 @@ class PublicHomePage extends StatefulWidget {
 
 class _PublicHomePageState extends State<PublicHomePage>
     with WidgetsBindingObserver, RouteAware {
-  final MigrationCopilotProgressStore _progressStore =
-      MigrationCopilotProgressStore();
-  MigrationCopilotProgressSnapshot _progressSnapshot =
-      const MigrationCopilotProgressSnapshot();
-  String? _loadedPlanKey;
-  String? _loadedWeatherCityId;
-
   // Stage transition tracking — used to show a one-time celebration modal
   // when the user advances from explorer → planner or planner → executor.
   bool _isFirstPlanLoad = true;
+
+  String? _loadedPlanKey;
+  String? _loadedWeatherCityId;
   int _prevCompletedCount = 0;
   String _prevTimeline = '';
+  MigrationCopilotProgressSnapshot _progressSnapshot =
+      const MigrationCopilotProgressSnapshot();
+
+  final MigrationCopilotProgressStore _progressStore =
+      MigrationCopilotProgressStore();
+
   ModalRoute<dynamic>? _route;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    widget.journeyContextController.addListener(_handleControllerUpdate);
-    widget.migrationQuestionnaireController.addListener(
-      _handleControllerUpdate,
-    );
-    widget.citiesController.addListener(_handleControllerUpdate);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_syncPlanState());
-      final msg = widget.redirectMessage;
-      if (msg != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(msg),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    if (_route != null) {
-      appRouteObserver.unsubscribe(this);
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_refreshProgress());
     }
-    WidgetsBinding.instance.removeObserver(this);
-    widget.journeyContextController.removeListener(_handleControllerUpdate);
-    widget.migrationQuestionnaireController.removeListener(
-      _handleControllerUpdate,
-    );
-    widget.citiesController.removeListener(_handleControllerUpdate);
-    super.dispose();
   }
 
   @override
@@ -144,170 +114,41 @@ class _PublicHomePageState extends State<PublicHomePage>
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      unawaited(_refreshProgress());
+  void dispose() {
+    if (_route != null) {
+      appRouteObserver.unsubscribe(this);
     }
+    WidgetsBinding.instance.removeObserver(this);
+    widget.journeyContextController.removeListener(_handleControllerUpdate);
+    widget.migrationQuestionnaireController.removeListener(
+      _handleControllerUpdate,
+    );
+    widget.citiesController.removeListener(_handleControllerUpdate);
+    super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    final maxWidth = context.isDesktopLayout ? 520.0 : double.infinity;
-
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: AppColors.isDark(context)
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
-      child: Scaffold(
-        extendBody: true,
-        backgroundColor: _screenBackground(context),
-        body: SafeArea(
-          top: false,
-          child: AnimatedBuilder(
-            animation: Listenable.merge([
-              widget.cityInsightsController,
-              widget.journeyContextController,
-              widget.migrationQuestionnaireController,
-              widget.citiesController,
-            ]),
-            builder: (context, _) {
-              final plan =
-                  widget.migrationQuestionnaireController.generatedPlan;
-              final city = plan?.confirmedCity;
-              final hasActivePlan = city != null;
-              final hasPlanDraft = plan != null && city == null;
-              final guideState = city == null || plan == null
-                  ? null
-                  : _buildGuideState(plan, _progressSnapshot);
-
-              return Stack(
-                children: [
-                  Center(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: maxWidth),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 500),
-                              switchInCurve: Curves.easeInOut,
-                              switchOutCurve: Curves.easeInOut,
-                              transitionBuilder: (child, animation) =>
-                                  FadeTransition(
-                                    opacity: animation,
-                                    child: child,
-                                  ),
-                              child: hasActivePlan
-                                  ? _ActiveHomeState(
-                                      key: const ValueKey('active-home'),
-                                      city: city,
-                                      weather: widget.citiesController
-                                          .weatherFor(city.id),
-                                      citiesController: widget.citiesController,
-                                      plan: plan!,
-                                      guideState: guideState!,
-                                      cityInsightsController:
-                                          widget.cityInsightsController,
-                                      planGoal: plan.goal,
-                                      planTimeline: plan.timeline,
-                                      recommendationReasons:
-                                          plan.cityRecommendationReasons,
-                                      onOpenSettings: _openSettings,
-                                      onViewAction: (_) => Navigator.pushNamed(
-                                        context,
-                                        AppRoutes.migrationPlanCopilot,
-                                      ),
-                                      onCompare: () => _openComparison(city),
-                                      onViewCity: () => Navigator.pushNamed(
-                                        context,
-                                        AppRoutes.cityDetail(city.id),
-                                      ),
-                                      onNewPlan: () =>
-                                          _handleManagePlan(context),
-                                    )
-                                  : hasPlanDraft
-                                  ? _PlannerHomeState(
-                                      key: const ValueKey('planner-home'),
-                                      plan: plan,
-                                      citiesController: widget.citiesController,
-                                      onContinuePlan: () => Navigator.pushNamed(
-                                        context,
-                                        AppRoutes.migrationResultReveal,
-                                      ),
-                                      onCompareCities: () {
-                                        final candidates = plan.reviewCities;
-                                        if (candidates.isEmpty) return;
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute<void>(
-                                            builder: (_) => CityComparisonScreen(
-                                              initialCities: candidates
-                                                  .take(3)
-                                                  .toList(),
-                                              citiesController:
-                                                  widget.citiesController,
-                                              migrationQuestionnaireController:
-                                                  widget
-                                                      .migrationQuestionnaireController,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      onBrowseCities: () => Navigator.pushNamed(
-                                        context,
-                                        AppRoutes.cities,
-                                      ),
-                                    )
-                                  : _EmptyHomeState(
-                                      key: const ValueKey('empty-home'),
-                                      onDiscoverDirectionTap: () =>
-                                          _startPlanFlow(),
-                                      onKnownCityTap: () =>
-                                          _startKnownCityFlow(),
-                                      onExploreCitiesTap: () =>
-                                          Navigator.pushNamed(
-                                            context,
-                                            AppRoutes.cities,
-                                          ),
-                                      onOpenCostsTap: () => Navigator.pushNamed(
-                                        context,
-                                        AppRoutes.documentationTopic,
-                                        arguments:
-                                            DocumentationGuideSection.costs,
-                                      ),
-                                      onOpenDocumentsTap: () =>
-                                          Navigator.pushNamed(
-                                            context,
-                                            AppRoutes.documentationGuide,
-                                            arguments: DocumentationGuideSection
-                                                .documents,
-                                          ),
-                                      onLearnPortugueseTap: () =>
-                                          Navigator.pushNamed(
-                                            context,
-                                            AppRoutes.phrasebook,
-                                          ),
-                                    ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-        bottomNavigationBar: MainNavigationBar(
-          currentIndex: 0,
-          journeyContextController: widget.journeyContextController,
-          citiesController: widget.citiesController,
-          migrationQuestionnaireController:
-              widget.migrationQuestionnaireController,
-        ),
-      ),
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    widget.journeyContextController.addListener(_handleControllerUpdate);
+    widget.migrationQuestionnaireController.addListener(
+      _handleControllerUpdate,
     );
+    widget.citiesController.addListener(_handleControllerUpdate);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_syncPlanState());
+      final msg = widget.redirectMessage;
+      if (msg != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(msg),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    });
   }
 
   Color _screenBackground(BuildContext context) => AppColors.isDark(context)
@@ -792,6 +633,166 @@ class _PublicHomePageState extends State<PublicHomePage>
   String _planKey(MigrationPlan plan) {
     return MigrationPlanIdentity.storageKeyFor(plan);
   }
+
+  @override
+  Widget build(BuildContext context) {
+    final maxWidth = context.isDesktopLayout ? 520.0 : double.infinity;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: AppColors.isDark(context)
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        extendBody: true,
+        backgroundColor: _screenBackground(context),
+        body: SafeArea(
+          top: false,
+          child: AnimatedBuilder(
+            animation: Listenable.merge([
+              widget.cityInsightsController,
+              widget.journeyContextController,
+              widget.migrationQuestionnaireController,
+              widget.citiesController,
+            ]),
+            builder: (context, _) {
+              final plan =
+                  widget.migrationQuestionnaireController.generatedPlan;
+              final city = plan?.confirmedCity;
+              final hasActivePlan = city != null;
+              final hasPlanDraft = plan != null && city == null;
+              final guideState = city == null || plan == null
+                  ? null
+                  : _buildGuideState(plan, _progressSnapshot);
+
+              return Stack(
+                children: [
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxWidth),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 500),
+                              switchInCurve: Curves.easeInOut,
+                              switchOutCurve: Curves.easeInOut,
+                              transitionBuilder: (child, animation) =>
+                                  FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  ),
+                              child: hasActivePlan
+                                  ? _ActiveHomeState(
+                                      key: const ValueKey('active-home'),
+                                      city: city,
+                                      weather: widget.citiesController
+                                          .weatherFor(city.id),
+                                      citiesController: widget.citiesController,
+                                      plan: plan!,
+                                      guideState: guideState!,
+                                      cityInsightsController:
+                                          widget.cityInsightsController,
+                                      planGoal: plan.goal,
+                                      planTimeline: plan.timeline,
+                                      recommendationReasons:
+                                          plan.cityRecommendationReasons,
+                                      onOpenSettings: _openSettings,
+                                      onViewAction: (_) => Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.migrationPlanCopilot,
+                                      ),
+                                      onCompare: () => _openComparison(city),
+                                      onViewCity: () => Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.cityDetail(city.id),
+                                      ),
+                                      onNewPlan: () =>
+                                          _handleManagePlan(context),
+                                    )
+                                  : hasPlanDraft
+                                  ? _PlannerHomeState(
+                                      key: const ValueKey('planner-home'),
+                                      plan: plan,
+                                      citiesController: widget.citiesController,
+                                      onContinuePlan: () => Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.migrationResultReveal,
+                                      ),
+                                      onCompareCities: () {
+                                        final candidates = plan.reviewCities;
+                                        if (candidates.isEmpty) return;
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute<void>(
+                                            builder: (_) => CityComparisonScreen(
+                                              initialCities: candidates
+                                                  .take(3)
+                                                  .toList(),
+                                              citiesController:
+                                                  widget.citiesController,
+                                              migrationQuestionnaireController:
+                                                  widget
+                                                      .migrationQuestionnaireController,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      onBrowseCities: () => Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.cities,
+                                      ),
+                                    )
+                                  : _EmptyHomeState(
+                                      key: const ValueKey('empty-home'),
+                                      onDiscoverDirectionTap: () =>
+                                          _startPlanFlow(),
+                                      onKnownCityTap: () =>
+                                          _startKnownCityFlow(),
+                                      onExploreCitiesTap: () =>
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.cities,
+                                          ),
+                                      onOpenCostsTap: () => Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.documentationTopic,
+                                        arguments:
+                                            DocumentationGuideSection.costs,
+                                      ),
+                                      onOpenDocumentsTap: () =>
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.documentationGuide,
+                                            arguments: DocumentationGuideSection
+                                                .documents,
+                                          ),
+                                      onLearnPortugueseTap: () =>
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.phrasebook,
+                                          ),
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+        bottomNavigationBar: MainNavigationBar(
+          currentIndex: 0,
+          journeyContextController: widget.journeyContextController,
+          citiesController: widget.citiesController,
+          migrationQuestionnaireController:
+              widget.migrationQuestionnaireController,
+        ),
+      ),
+    );
+  }
 }
 
 class _EmptyHomeState extends StatelessWidget {
@@ -806,11 +807,11 @@ class _EmptyHomeState extends StatelessWidget {
   });
 
   final VoidCallback onDiscoverDirectionTap;
-  final VoidCallback onKnownCityTap;
   final VoidCallback onExploreCitiesTap;
+  final VoidCallback onKnownCityTap;
+  final VoidCallback onLearnPortugueseTap;
   final VoidCallback onOpenCostsTap;
   final VoidCallback onOpenDocumentsTap;
-  final VoidCallback onLearnPortugueseTap;
 
   @override
   Widget build(BuildContext context) {
@@ -844,11 +845,11 @@ class _PlannerHomeState extends StatelessWidget {
     super.key,
   });
 
-  final MigrationPlan plan;
   final CitiesController citiesController;
-  final VoidCallback onContinuePlan;
-  final VoidCallback onCompareCities;
   final VoidCallback onBrowseCities;
+  final VoidCallback onCompareCities;
+  final VoidCallback onContinuePlan;
+  final MigrationPlan plan;
 
   static String _t(
     BuildContext context, {
@@ -1040,10 +1041,10 @@ class _CandidateCityTile extends StatelessWidget {
   });
 
   final City city;
-  final int rank;
-  final double? matchScore;
   final bool isDark;
+  final double? matchScore;
   final VoidCallback onTap;
+  final int rank;
 
   static String _t(
     BuildContext context, {
@@ -1163,20 +1164,20 @@ class _ActiveHomeState extends StatelessWidget {
     super.key,
   });
 
-  final City city;
-  final CityWeather? weather;
   final CitiesController citiesController;
-  final MigrationPlan plan;
-  final _HomeGuideState guideState;
+  final City city;
   final CityInsightController cityInsightsController;
+  final _HomeGuideState guideState;
+  final VoidCallback onCompare;
+  final VoidCallback onNewPlan;
+  final VoidCallback onOpenSettings;
+  final ValueChanged<GuideActionItem> onViewAction;
+  final VoidCallback onViewCity;
+  final MigrationPlan plan;
   final String planGoal;
   final String planTimeline;
   final List<String> recommendationReasons;
-  final VoidCallback onOpenSettings;
-  final ValueChanged<GuideActionItem> onViewAction;
-  final VoidCallback onCompare;
-  final VoidCallback onViewCity;
-  final VoidCallback onNewPlan;
+  final CityWeather? weather;
 
   @override
   Widget build(BuildContext context) {
@@ -1428,13 +1429,13 @@ class _PrimaryActionCard extends StatelessWidget {
     this.bigScreen = false,
   });
 
-  final GuideActionItem item;
-  final String phaseName;
-  final bool isDark;
-  final VoidCallback? onTap;
-
   /// When true, slightly increases title and body font sizes for taller screens.
   final bool bigScreen;
+
+  final bool isDark;
+  final GuideActionItem item;
+  final VoidCallback? onTap;
+  final String phaseName;
 
   static String _localizedText(
     BuildContext context, {
@@ -1650,11 +1651,11 @@ class _ActiveHero extends StatelessWidget {
   });
 
   final City city;
-  final CityWeather? weather;
-
   /// Total hero height in logical pixels, including the top safe-area inset.
   final double height;
+
   final VoidCallback onOpenSettings;
+  final CityWeather? weather;
 
   @override
   Widget build(BuildContext context) {
@@ -1853,71 +1854,10 @@ class _SecondaryActionRow extends StatelessWidget {
     this.compact = false,
   });
 
-  final VoidCallback onCompare;
-  final VoidCallback onViewCity;
-  final VoidCallback onNewPlan;
-
   final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _ActionChip(
-            icon: Icons.location_city_outlined,
-            label: context.l10n.homeActionViewCity,
-            onTap: onViewCity,
-            compact: compact,
-            emphasized: true,
-          ),
-        ),
-        const SizedBox(width: 7),
-        Expanded(
-          child: _ActionChip(
-            icon: Icons.compare_arrows_rounded,
-            label: context.l10n.homeActionCompare,
-            onTap: onCompare,
-            compact: compact,
-          ),
-        ),
-        const SizedBox(width: 7),
-        Semantics(
-          button: true,
-          label: context.l10n.planMenuTitle,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () async {
-                HapticFeedback.selectionClick();
-                final shouldStartNewPlan = await _showPlanOptionsSheet(context);
-                if (shouldStartNewPlan == true) {
-                  onNewPlan();
-                }
-              },
-              child: Ink(
-                width: 42,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceMutedFor(context),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppColors.borderFor(context),
-                    width: 0.5,
-                  ),
-                ),
-                child: Icon(
-                  Icons.more_horiz_rounded,
-                  color: AppColors.textSoftFor(context),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  final VoidCallback onCompare;
+  final VoidCallback onNewPlan;
+  final VoidCallback onViewCity;
 
   Future<bool?> _showPlanOptionsSheet(BuildContext context) {
     return showModalBottomSheet<bool>(
@@ -2131,6 +2071,66 @@ class _SecondaryActionRow extends StatelessWidget {
       },
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _ActionChip(
+            icon: Icons.location_city_outlined,
+            label: context.l10n.homeActionViewCity,
+            onTap: onViewCity,
+            compact: compact,
+            emphasized: true,
+          ),
+        ),
+        const SizedBox(width: 7),
+        Expanded(
+          child: _ActionChip(
+            icon: Icons.compare_arrows_rounded,
+            label: context.l10n.homeActionCompare,
+            onTap: onCompare,
+            compact: compact,
+          ),
+        ),
+        const SizedBox(width: 7),
+        Semantics(
+          button: true,
+          label: context.l10n.planMenuTitle,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () async {
+                HapticFeedback.selectionClick();
+                final shouldStartNewPlan = await _showPlanOptionsSheet(context);
+                if (shouldStartNewPlan == true) {
+                  onNewPlan();
+                }
+              },
+              child: Ink(
+                width: 42,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMutedFor(context),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.borderFor(context),
+                    width: 0.5,
+                  ),
+                ),
+                child: Icon(
+                  Icons.more_horiz_rounded,
+                  color: AppColors.textSoftFor(context),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _ActionChip extends StatelessWidget {
@@ -2142,14 +2142,14 @@ class _ActionChip extends StatelessWidget {
     this.emphasized = false,
   });
 
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool emphasized;
-
   /// Compact mode renders a horizontal Row(icon, label) chip with reduced
   /// padding — fits in the Focus Mode "Tu Jornada" quick-actions row.
   final bool compact;
+
+  final bool emphasized;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -2367,13 +2367,13 @@ class _HomeGuideState {
     required this.totalPhases,
   });
 
-  final List<GuideActionItem> items;
+  final int completedCount;
   final Set<String> completedIds;
   final GuideActionItem? currentItem;
-  final int completedCount;
-  final int totalItems;
-  final int progressPercent;
   final int currentPhaseIndex;
+  final List<GuideActionItem> items;
+  final int progressPercent;
+  final int totalItems;
   final int totalPhases;
 
   String currentTitle(BuildContext context) {
@@ -2491,6 +2491,17 @@ class _PFAppointmentNudge extends StatelessWidget {
   const _PFAppointmentNudge({required this.city});
 
   final City city;
+
+  static String _localizedText(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) => switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -2630,17 +2641,6 @@ class _PFAppointmentNudge extends StatelessWidget {
       ),
     );
   }
-
-  static String _localizedText(
-    BuildContext context, {
-    required String pt,
-    required String es,
-    required String en,
-  }) => switch (Localizations.localeOf(context).languageCode) {
-    'pt' => pt,
-    'es' => es,
-    _ => en,
-  };
 }
 
 // ─── Planner Countdown Chip ───────────────────────────────────────────────────
@@ -2649,6 +2649,32 @@ class _PlannerCountdownChip extends StatelessWidget {
   const _PlannerCountdownChip({required this.timeline});
 
   final String timeline;
+
+  String _timelineLabel(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return switch (timeline) {
+      'in_0_3m' => switch (locale) {
+        'pt' => 'Mudança em até 3 meses',
+        'es' => 'Mudanza en menos de 3 meses',
+        _ => 'Move within 3 months',
+      },
+      'in_3_6m' => switch (locale) {
+        'pt' => 'Mudança em 3–6 meses',
+        'es' => 'Mudanza en 3–6 meses',
+        _ => 'Move in 3–6 months',
+      },
+      'in_6_12m' => switch (locale) {
+        'pt' => 'Mudança em 6–12 meses',
+        'es' => 'Mudanza en 6–12 meses',
+        _ => 'Move in 6–12 months',
+      },
+      _ => switch (locale) {
+        'pt' => 'Ainda planejando',
+        'es' => 'Todavía planificando',
+        _ => 'Still planning',
+      },
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2683,32 +2709,6 @@ class _PlannerCountdownChip extends StatelessWidget {
       ),
     );
   }
-
-  String _timelineLabel(BuildContext context) {
-    final locale = Localizations.localeOf(context).languageCode;
-    return switch (timeline) {
-      'in_0_3m' => switch (locale) {
-        'pt' => 'Mudança em até 3 meses',
-        'es' => 'Mudanza en menos de 3 meses',
-        _ => 'Move within 3 months',
-      },
-      'in_3_6m' => switch (locale) {
-        'pt' => 'Mudança em 3–6 meses',
-        'es' => 'Mudanza en 3–6 meses',
-        _ => 'Move in 3–6 months',
-      },
-      'in_6_12m' => switch (locale) {
-        'pt' => 'Mudança em 6–12 meses',
-        'es' => 'Mudanza en 6–12 meses',
-        _ => 'Move in 6–12 months',
-      },
-      _ => switch (locale) {
-        'pt' => 'Ainda planejando',
-        'es' => 'Todavía planificando',
-        _ => 'Still planning',
-      },
-    };
-  }
 }
 
 // ─── Explorer Stage Card ──────────────────────────────────────────────────────
@@ -2723,6 +2723,64 @@ class _ExplorerStageCard extends StatelessWidget {
   final City city;
   final CityBudgetSnapshot? cityBudget;
   final VoidCallback onCreatePlan;
+
+  Widget _affordabilityRow(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final budget = cityBudget;
+
+    final locale = Localizations.localeOf(context).toString();
+    final rentLabel = budget != null
+        ? CostEstimateFormatter.brlRange(
+            budget.planningRentLow,
+            budget.planningRentHigh,
+            locale: locale,
+          )
+        : 'R\$1.800–3.500';
+    final totalLabel = budget != null
+        ? CostEstimateFormatter.brlRange(
+            budget.fairLivingTotal,
+            budget.wellLivingTotal,
+            locale: locale,
+          )
+        : 'R\$4.000–6.000';
+
+    return Row(
+      children: [
+        _AffordabilityChip(
+          icon: Icons.home_outlined,
+          label: _localizedText(
+            context,
+            pt: 'Aluguel $rentLabel',
+            es: 'Alquiler $rentLabel',
+            en: 'Rent $rentLabel',
+          ),
+          isDark: isDark,
+        ),
+        const SizedBox(width: 6),
+        _AffordabilityChip(
+          icon: Icons.attach_money_rounded,
+          label: _localizedText(
+            context,
+            pt: 'Viver justo/bem $totalLabel',
+            es: 'Vivir justo/bien $totalLabel',
+            en: 'Live fair/well $totalLabel',
+          ),
+          isDark: isDark,
+        ),
+      ],
+    );
+  }
+
+  static String _localizedText(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) => switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -2818,64 +2876,6 @@ class _ExplorerStageCard extends StatelessWidget {
       ),
     );
   }
-
-  Widget _affordabilityRow(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    final budget = cityBudget;
-
-    final locale = Localizations.localeOf(context).toString();
-    final rentLabel = budget != null
-        ? CostEstimateFormatter.brlRange(
-            budget.planningRentLow,
-            budget.planningRentHigh,
-            locale: locale,
-          )
-        : 'R\$1.800–3.500';
-    final totalLabel = budget != null
-        ? CostEstimateFormatter.brlRange(
-            budget.fairLivingTotal,
-            budget.wellLivingTotal,
-            locale: locale,
-          )
-        : 'R\$4.000–6.000';
-
-    return Row(
-      children: [
-        _AffordabilityChip(
-          icon: Icons.home_outlined,
-          label: _localizedText(
-            context,
-            pt: 'Aluguel $rentLabel',
-            es: 'Alquiler $rentLabel',
-            en: 'Rent $rentLabel',
-          ),
-          isDark: isDark,
-        ),
-        const SizedBox(width: 6),
-        _AffordabilityChip(
-          icon: Icons.attach_money_rounded,
-          label: _localizedText(
-            context,
-            pt: 'Viver justo/bem $totalLabel',
-            es: 'Vivir justo/bien $totalLabel',
-            en: 'Live fair/well $totalLabel',
-          ),
-          isDark: isDark,
-        ),
-      ],
-    );
-  }
-
-  static String _localizedText(
-    BuildContext context, {
-    required String pt,
-    required String es,
-    required String en,
-  }) => switch (Localizations.localeOf(context).languageCode) {
-    'pt' => pt,
-    'es' => es,
-    _ => en,
-  };
 }
 
 class _AffordabilityChip extends StatelessWidget {
@@ -2886,8 +2886,8 @@ class _AffordabilityChip extends StatelessWidget {
   });
 
   final IconData icon;
-  final String label;
   final bool isDark;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -3031,6 +3031,19 @@ class _PreArrivalWarningBanner extends StatelessWidget {
   final int count;
   final VoidCallback? onTap;
 
+  static String _localizedText(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => pt,
+      'es' => es,
+      _ => en,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final label = count == 1
@@ -3083,18 +3096,5 @@ class _PreArrivalWarningBanner extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  static String _localizedText(
-    BuildContext context, {
-    required String pt,
-    required String es,
-    required String en,
-  }) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => pt,
-      'es' => es,
-      _ => en,
-    };
   }
 }
