@@ -60,7 +60,7 @@ class FrostedPanel extends StatelessWidget {
             border: Border.all(color: resolvedBorderColor),
             boxShadow: resolvedBoxShadow,
           ),
-          child: child,
+          child: Material(type: MaterialType.transparency, child: child),
         ),
       ),
     );
