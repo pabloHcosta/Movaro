@@ -3770,11 +3770,13 @@ class _CategoryListCard extends StatelessWidget {
       (
         icon: Icons.work_outline_rounded,
         label: context.l10n.cityDetailWorkLabel,
-        presentation: CityMetricPresentation.resolve(
-          context,
-          kind: CityMetricKind.work,
-          value: city.movaroScores.workOpportunity,
-        ),
+        presentation: city.sources.employment == null
+            ? CityMetricPresentation.preliminaryWork(context)
+            : CityMetricPresentation.resolve(
+                context,
+                kind: CityMetricKind.work,
+                value: city.movaroScores.workOpportunity,
+              ),
         onTap: () => showCityMetricInsightSheet(
           context,
           city: city,

@@ -2491,6 +2491,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cityDetailLanguageLabel => 'Ease with Portuguese';
 
   @override
+  String get cityCardPortugueseLabel => 'Portuguese';
+
+  @override
+  String get cityCardCostLow => 'Low';
+
+  @override
+  String get cityCardCostMedium => 'Mid-range';
+
+  @override
+  String get cityCardCostHigh => 'High';
+
+  @override
+  String get cityCardSafetyHigh => 'High';
+
+  @override
+  String get cityCardSafetyMedium => 'Medium';
+
+  @override
+  String get cityCardSafetyLow => 'Low';
+
+  @override
+  String get cityCardLanguageEasy => 'Easy';
+
+  @override
+  String get cityCardLanguageModerate => 'Moderate';
+
+  @override
+  String get cityCardLanguageChallenging => 'Challenging';
+
+  @override
+  String get cityCardDataUnavailable => 'Data unavailable';
+
+  @override
+  String get cityCardComparativeEstimate => 'Comparative estimate';
+
+  @override
+  String cityCardMonthlyEstimate(Object value) {
+    return '$value/mo';
+  }
+
+  @override
+  String get cityCardDataCoverageBroad => 'Broad data coverage';
+
+  @override
+  String get cityCardDataCoverageGood => 'Good data coverage';
+
+  @override
+  String get cityCardDataCoveragePartial => 'Partial data';
+
+  @override
+  String cityCardDataCoverageTooltip(int count) {
+    return '$count traceable sources support this summary.';
+  }
+
+  @override
   String get cityDetailWorkLabel => 'Job market';
 
   @override
@@ -3184,7 +3239,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'A more comfortable read for daily life at the start.';
 
   @override
-  String get cityMetricSafetyMediumHeadline => 'Balanced';
+  String get cityMetricSafetyMediumHeadline => 'Medium';
 
   @override
   String get cityMetricSafetyMediumSupporting =>
@@ -3205,7 +3260,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Usually friendlier if you arrive speaking Spanish.';
 
   @override
-  String get cityMetricLanguageMediumHeadline => 'Medium';
+  String get cityMetricLanguageMediumHeadline => 'Moderate';
 
   @override
   String get cityMetricLanguageMediumSupporting =>
@@ -3234,6 +3289,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cityMetricWorkLowHeadline => 'Limited';
+
+  @override
+  String get cityMetricWorkPreliminaryHeadline => 'Preliminary';
+
+  @override
+  String get cityMetricWorkPreliminarySupporting =>
+      'Municipal formal-employment data is not integrated yet.';
 
   @override
   String get cityMetricWorkLowSupporting =>
@@ -3333,34 +3395,43 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tap to understand the data behind this read.';
 
   @override
+  String get cityMetricInsightQuickReadTitle => 'A few-second read';
+
+  @override
   String get cityMetricInsightMeaningTitle => 'What this means';
 
   @override
-  String get cityMetricInsightMethodTitle => 'How this read was built';
+  String get cityMetricInsightMethodTitle => 'How we reached this read';
 
   @override
-  String get cityMetricInsightFactsTitle => 'Data used today';
+  String get cityMetricInsightFactsTitle => 'What supports this read';
 
   @override
   String get cityMetricInsightValidateTitle =>
       'What to validate before deciding';
 
   @override
-  String get cityMetricInsightSourcesTitle => 'Base and sources';
+  String get cityMetricInsightSourcesTitle => 'Sources and limits';
 
   @override
   String get cityMetricInsightDisclaimer =>
-      'Use this card as an early triage. The final decision still depends on neighborhood, real prices, and local validation.';
+      'This is comparative guidance, not an official assessment or individual recommendation. Confirm prices, neighborhood, and current conditions before deciding.';
 
   @override
   String get cityMetricInsightCurrentBaseBadge => 'Current base';
 
   @override
-  String get cityMetricInsightMappedBaseBadge => 'Mapped reference';
-
-  @override
   String get cityMetricInsightDerivedOfficialBadge =>
       'Derived from official data';
+
+  @override
+  String get cityMetricInsightExternalEstimateBadge => 'External estimate';
+
+  @override
+  String get cityMetricInsightInternalMethodBadge => 'Internal method';
+
+  @override
+  String get cityMetricInsightOfficialConsultationBadge => 'Official check';
 
   @override
   String get cityMetricInsightOpenSourceAction => 'Open source';
@@ -3377,19 +3448,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cityMetricInsightHousingMeaning =>
-      'When this block drops into alert territory, it means rent and housing entry costs tend to weigh more in the first move to this city.';
+      'Use this read to understand whether rent and monthly routine may require a larger arrival reserve. It is not a guaranteed price.';
 
   @override
   String get cityMetricInsightHousingMethod =>
-      'Today the app combines the city\'s rentScore with its broader economical score. When housing stays below 55, the product treats housing entry as a critical filter.';
+      'When a monthly city estimate exists, we use the routine and rent range reported by the external source. Without that coverage, we show only an internal comparison with the rest of the catalog.';
 
   @override
   String get cityMetricInsightHousingValidate =>
       'Compare real rent, deposit, guarantees, furniture, and neighborhood cost before signing. Housing mistakes usually cost more here.';
-
-  @override
-  String get cityMetricInsightHousingMappedSource =>
-      'FipeZAP is the strongest reference already mapped in the project to recalibrate rent and housing pressure where municipal coverage exists.';
 
   @override
   String get cityMetricInsightSafetyMeaning =>
@@ -3402,10 +3469,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cityMetricInsightSafetyValidate =>
       'Check neighborhood by neighborhood, nighttime travel, the real routine of residents, and the difference between tourist and residential areas.';
-
-  @override
-  String get cityMetricInsightSafetyMappedSource =>
-      'Atlas da Violência is the official reference already mapped in the project to recalibrate this group with public data and open methodology.';
 
   @override
   String get cityMetricInsightSafetyOfficialRateLabel =>
@@ -3425,19 +3488,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cityMetricInsightWorkMethod =>
-      'The work score combines jobMarketScore, economicActivityScore, and inverted unemployment. Between 62 and 77, the read stays moderate; above 78, it becomes strong.';
+      'The current read is preliminary while the catalog has no integrated municipal formal-employment data. Sectors and economic context are only clues; real openings and official data should confirm the decision.';
 
   @override
   String get cityMetricInsightWorkValidate =>
       'Look for real openings in your field, see which sectors pull the city, and estimate how much runway you have until your first income.';
-
-  @override
-  String get cityMetricInsightWorkMappedSource =>
-      'Novo Caged is the main official reference mapped to measure municipal formal-employment momentum.';
-
-  @override
-  String get cityMetricInsightWorkEconomicMappedSource =>
-      'IBGE\'s PIB dos Municipios is the mapped official reference for calibrating the city\'s economic activity weight.';
 
   @override
   String get cityMetricInsightLanguageMeaning =>
@@ -3445,15 +3500,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cityMetricInsightLanguageMethod =>
-      'This read uses the language-adaptation score, supported by Spanish support and familiarity among Argentinians. Below 65, friction tends to be higher.';
+      'This is a non-official heuristic based on Argentine presence and perceived Spanish support. It helps compare early adaptation, but does not measure individual proficiency or every neighborhood experience.';
 
   @override
   String get cityMetricInsightLanguageValidate =>
       'Test the routine without relying on Spanish: housing, groceries, healthcare, services, and work. If that becomes a blocker, real adaptation in the city is tougher for your profile.';
-
-  @override
-  String get cityMetricInsightLanguageMappedSource =>
-      'There is still no single official source for this read. Today it remains a curated product heuristic for practical adaptation.';
 
   @override
   String get citySnapshotPopularityHigh => 'Highly sought after';

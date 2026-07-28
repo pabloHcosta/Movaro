@@ -69,8 +69,14 @@ void main() {
     });
 
     tearDown(() async {
-      if (tempDirectory.existsSync()) {
+      try {
         await tempDirectory.delete(recursive: true);
+      } on FileSystemException {
+        // Background persistence can finish between existsSync and delete.
+        // Cleanup is already complete when the directory no longer exists.
+        if (tempDirectory.existsSync()) {
+          rethrow;
+        }
       }
     });
 

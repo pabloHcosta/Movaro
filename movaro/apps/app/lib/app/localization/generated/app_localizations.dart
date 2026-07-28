@@ -4249,6 +4249,108 @@ abstract class AppLocalizations {
   /// **'Ease with Portuguese'**
   String get cityDetailLanguageLabel;
 
+  /// No description provided for @cityCardPortugueseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Portuguese'**
+  String get cityCardPortugueseLabel;
+
+  /// No description provided for @cityCardCostLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get cityCardCostLow;
+
+  /// No description provided for @cityCardCostMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Mid-range'**
+  String get cityCardCostMedium;
+
+  /// No description provided for @cityCardCostHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get cityCardCostHigh;
+
+  /// No description provided for @cityCardSafetyHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get cityCardSafetyHigh;
+
+  /// No description provided for @cityCardSafetyMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get cityCardSafetyMedium;
+
+  /// No description provided for @cityCardSafetyLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get cityCardSafetyLow;
+
+  /// No description provided for @cityCardLanguageEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get cityCardLanguageEasy;
+
+  /// No description provided for @cityCardLanguageModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get cityCardLanguageModerate;
+
+  /// No description provided for @cityCardLanguageChallenging.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenging'**
+  String get cityCardLanguageChallenging;
+
+  /// No description provided for @cityCardDataUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Data unavailable'**
+  String get cityCardDataUnavailable;
+
+  /// No description provided for @cityCardComparativeEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Comparative estimate'**
+  String get cityCardComparativeEstimate;
+
+  /// No description provided for @cityCardMonthlyEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}/mo'**
+  String cityCardMonthlyEstimate(Object value);
+
+  /// No description provided for @cityCardDataCoverageBroad.
+  ///
+  /// In en, this message translates to:
+  /// **'Broad data coverage'**
+  String get cityCardDataCoverageBroad;
+
+  /// No description provided for @cityCardDataCoverageGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good data coverage'**
+  String get cityCardDataCoverageGood;
+
+  /// No description provided for @cityCardDataCoveragePartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial data'**
+  String get cityCardDataCoveragePartial;
+
+  /// No description provided for @cityCardDataCoverageTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} traceable sources support this summary.'**
+  String cityCardDataCoverageTooltip(int count);
+
   /// No description provided for @cityDetailWorkLabel.
   ///
   /// In en, this message translates to:
@@ -5428,7 +5530,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricSafetyMediumHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Balanced'**
+  /// **'Medium'**
   String get cityMetricSafetyMediumHeadline;
 
   /// No description provided for @cityMetricSafetyMediumSupporting.
@@ -5464,7 +5566,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricLanguageMediumHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Medium'**
+  /// **'Moderate'**
   String get cityMetricLanguageMediumHeadline;
 
   /// No description provided for @cityMetricLanguageMediumSupporting.
@@ -5514,6 +5616,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Limited'**
   String get cityMetricWorkLowHeadline;
+
+  /// No description provided for @cityMetricWorkPreliminaryHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Preliminary'**
+  String get cityMetricWorkPreliminaryHeadline;
+
+  /// No description provided for @cityMetricWorkPreliminarySupporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Municipal formal-employment data is not integrated yet.'**
+  String get cityMetricWorkPreliminarySupporting;
 
   /// No description provided for @cityMetricWorkLowSupporting.
   ///
@@ -5683,6 +5797,12 @@ abstract class AppLocalizations {
   /// **'Tap to understand the data behind this read.'**
   String get cityMetricInsightTapHint;
 
+  /// No description provided for @cityMetricInsightQuickReadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A few-second read'**
+  String get cityMetricInsightQuickReadTitle;
+
   /// No description provided for @cityMetricInsightMeaningTitle.
   ///
   /// In en, this message translates to:
@@ -5692,13 +5812,13 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricInsightMethodTitle.
   ///
   /// In en, this message translates to:
-  /// **'How this read was built'**
+  /// **'How we reached this read'**
   String get cityMetricInsightMethodTitle;
 
   /// No description provided for @cityMetricInsightFactsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Data used today'**
+  /// **'What supports this read'**
   String get cityMetricInsightFactsTitle;
 
   /// No description provided for @cityMetricInsightValidateTitle.
@@ -5710,13 +5830,13 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricInsightSourcesTitle.
   ///
   /// In en, this message translates to:
-  /// **'Base and sources'**
+  /// **'Sources and limits'**
   String get cityMetricInsightSourcesTitle;
 
   /// No description provided for @cityMetricInsightDisclaimer.
   ///
   /// In en, this message translates to:
-  /// **'Use this card as an early triage. The final decision still depends on neighborhood, real prices, and local validation.'**
+  /// **'This is comparative guidance, not an official assessment or individual recommendation. Confirm prices, neighborhood, and current conditions before deciding.'**
   String get cityMetricInsightDisclaimer;
 
   /// No description provided for @cityMetricInsightCurrentBaseBadge.
@@ -5725,17 +5845,29 @@ abstract class AppLocalizations {
   /// **'Current base'**
   String get cityMetricInsightCurrentBaseBadge;
 
-  /// No description provided for @cityMetricInsightMappedBaseBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Mapped reference'**
-  String get cityMetricInsightMappedBaseBadge;
-
   /// No description provided for @cityMetricInsightDerivedOfficialBadge.
   ///
   /// In en, this message translates to:
   /// **'Derived from official data'**
   String get cityMetricInsightDerivedOfficialBadge;
+
+  /// No description provided for @cityMetricInsightExternalEstimateBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'External estimate'**
+  String get cityMetricInsightExternalEstimateBadge;
+
+  /// No description provided for @cityMetricInsightInternalMethodBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal method'**
+  String get cityMetricInsightInternalMethodBadge;
+
+  /// No description provided for @cityMetricInsightOfficialConsultationBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Official check'**
+  String get cityMetricInsightOfficialConsultationBadge;
 
   /// No description provided for @cityMetricInsightOpenSourceAction.
   ///
@@ -5764,13 +5896,13 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricInsightHousingMeaning.
   ///
   /// In en, this message translates to:
-  /// **'When this block drops into alert territory, it means rent and housing entry costs tend to weigh more in the first move to this city.'**
+  /// **'Use this read to understand whether rent and monthly routine may require a larger arrival reserve. It is not a guaranteed price.'**
   String get cityMetricInsightHousingMeaning;
 
   /// No description provided for @cityMetricInsightHousingMethod.
   ///
   /// In en, this message translates to:
-  /// **'Today the app combines the city\'s rentScore with its broader economical score. When housing stays below 55, the product treats housing entry as a critical filter.'**
+  /// **'When a monthly city estimate exists, we use the routine and rent range reported by the external source. Without that coverage, we show only an internal comparison with the rest of the catalog.'**
   String get cityMetricInsightHousingMethod;
 
   /// No description provided for @cityMetricInsightHousingValidate.
@@ -5778,12 +5910,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Compare real rent, deposit, guarantees, furniture, and neighborhood cost before signing. Housing mistakes usually cost more here.'**
   String get cityMetricInsightHousingValidate;
-
-  /// No description provided for @cityMetricInsightHousingMappedSource.
-  ///
-  /// In en, this message translates to:
-  /// **'FipeZAP is the strongest reference already mapped in the project to recalibrate rent and housing pressure where municipal coverage exists.'**
-  String get cityMetricInsightHousingMappedSource;
 
   /// No description provided for @cityMetricInsightSafetyMeaning.
   ///
@@ -5802,12 +5928,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check neighborhood by neighborhood, nighttime travel, the real routine of residents, and the difference between tourist and residential areas.'**
   String get cityMetricInsightSafetyValidate;
-
-  /// No description provided for @cityMetricInsightSafetyMappedSource.
-  ///
-  /// In en, this message translates to:
-  /// **'Atlas da Violência is the official reference already mapped in the project to recalibrate this group with public data and open methodology.'**
-  String get cityMetricInsightSafetyMappedSource;
 
   /// No description provided for @cityMetricInsightSafetyOfficialRateLabel.
   ///
@@ -5836,7 +5956,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricInsightWorkMethod.
   ///
   /// In en, this message translates to:
-  /// **'The work score combines jobMarketScore, economicActivityScore, and inverted unemployment. Between 62 and 77, the read stays moderate; above 78, it becomes strong.'**
+  /// **'The current read is preliminary while the catalog has no integrated municipal formal-employment data. Sectors and economic context are only clues; real openings and official data should confirm the decision.'**
   String get cityMetricInsightWorkMethod;
 
   /// No description provided for @cityMetricInsightWorkValidate.
@@ -5844,18 +5964,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Look for real openings in your field, see which sectors pull the city, and estimate how much runway you have until your first income.'**
   String get cityMetricInsightWorkValidate;
-
-  /// No description provided for @cityMetricInsightWorkMappedSource.
-  ///
-  /// In en, this message translates to:
-  /// **'Novo Caged is the main official reference mapped to measure municipal formal-employment momentum.'**
-  String get cityMetricInsightWorkMappedSource;
-
-  /// No description provided for @cityMetricInsightWorkEconomicMappedSource.
-  ///
-  /// In en, this message translates to:
-  /// **'IBGE\'s PIB dos Municipios is the mapped official reference for calibrating the city\'s economic activity weight.'**
-  String get cityMetricInsightWorkEconomicMappedSource;
 
   /// No description provided for @cityMetricInsightLanguageMeaning.
   ///
@@ -5866,7 +5974,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityMetricInsightLanguageMethod.
   ///
   /// In en, this message translates to:
-  /// **'This read uses the language-adaptation score, supported by Spanish support and familiarity among Argentinians. Below 65, friction tends to be higher.'**
+  /// **'This is a non-official heuristic based on Argentine presence and perceived Spanish support. It helps compare early adaptation, but does not measure individual proficiency or every neighborhood experience.'**
   String get cityMetricInsightLanguageMethod;
 
   /// No description provided for @cityMetricInsightLanguageValidate.
@@ -5874,12 +5982,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Test the routine without relying on Spanish: housing, groceries, healthcare, services, and work. If that becomes a blocker, real adaptation in the city is tougher for your profile.'**
   String get cityMetricInsightLanguageValidate;
-
-  /// No description provided for @cityMetricInsightLanguageMappedSource.
-  ///
-  /// In en, this message translates to:
-  /// **'There is still no single official source for this read. Today it remains a curated product heuristic for practical adaptation.'**
-  String get cityMetricInsightLanguageMappedSource;
 
   /// No description provided for @citySnapshotPopularityHigh.
   ///

@@ -139,7 +139,7 @@ class CityMetricPresentation {
 
     switch (kind) {
       case CityMetricKind.cost:
-        if (value >= 72) {
+        if (value >= 70) {
           return CityMetricPresentation(
             headline: l10n.cityMetricCostLowHeadline,
             supporting: l10n.cityMetricCostLowSupporting,
@@ -158,7 +158,7 @@ class CityMetricPresentation {
             ),
           );
         }
-        if (value >= 55) {
+        if (value >= 50) {
           return CityMetricPresentation(
             headline: l10n.cityMetricCostMediumHeadline,
             supporting: l10n.cityMetricCostMediumSupporting,
@@ -214,7 +214,7 @@ class CityMetricPresentation {
             ),
           );
         }
-        if (value >= 55) {
+        if (value >= 50) {
           return CityMetricPresentation(
             headline: l10n.cityMetricSafetyMediumHeadline,
             supporting: l10n.cityMetricSafetyMediumSupporting,
@@ -251,7 +251,7 @@ class CityMetricPresentation {
           ),
         );
       case CityMetricKind.language:
-        if (value >= 82) {
+        if (value >= 70) {
           return CityMetricPresentation(
             headline: l10n.cityMetricLanguageEasyHeadline,
             supporting: l10n.cityMetricLanguageEasySupporting,
@@ -270,7 +270,7 @@ class CityMetricPresentation {
             ),
           );
         }
-        if (value >= 65) {
+        if (value >= 50) {
           return CityMetricPresentation(
             headline: l10n.cityMetricLanguageMediumHeadline,
             supporting: l10n.cityMetricLanguageMediumSupporting,
@@ -363,5 +363,26 @@ class CityMetricPresentation {
           ),
         );
     }
+  }
+
+  static CityMetricPresentation preliminaryWork(BuildContext context) {
+    final l10n = context.l10n;
+    return CityMetricPresentation(
+      headline: l10n.cityMetricWorkPreliminaryHeadline,
+      supporting: l10n.cityMetricWorkPreliminarySupporting,
+      badge: l10n.cityMetricBadgeAttention,
+      icon: Icons.pending_actions_outlined,
+      tint: AppColors.warning,
+      background: AppColors.tintedSurfaceFor(
+        context,
+        tint: AppColors.warning,
+        lightColor: const Color(0xFFFFF8E7),
+      ),
+      border: AppColors.tintedBorderFor(
+        context,
+        tint: AppColors.warning,
+        lightColor: const Color(0xFFEFCF84),
+      ),
+    );
   }
 }
