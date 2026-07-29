@@ -182,14 +182,9 @@ class QuestionRepositoryImpl implements QuestionRepository {
         id: 'support_needs',
         title: 'support_needs',
         type: 'multi_chip',
-        maxSelections: 5,
+        maxSelections: 3,
         variants: const [QuestionnaireVariant.strategic],
         options: const [
-          OptionModel(
-            id: 'children_school',
-            label: 'children_school',
-            value: 'children_school',
-          ),
           OptionModel(
             id: 'travel_with_pet',
             label: 'travel_with_pet',
@@ -204,11 +199,6 @@ class QuestionRepositoryImpl implements QuestionRepository {
             id: 'will_drive',
             label: 'will_drive',
             value: 'will_drive',
-          ),
-          OptionModel(
-            id: 'foreign_income',
-            label: 'foreign_income',
-            value: 'foreign_income',
           ),
           OptionModel(
             id: 'no_special_needs',

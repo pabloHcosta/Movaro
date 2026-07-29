@@ -100,9 +100,9 @@ class MigrationQuestionnaireController extends ChangeNotifier {
         'timeline',
         'travel_group',
         'work_arrangement',
+        'funding',
         'priorities',
         'support_needs',
-        'funding',
         'constraints',
       ],
     };
@@ -202,6 +202,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
           ? await _flowDraftStore.read()
           : null;
       _restoreDraft(draft);
+      _sanitizeDeprecatedSupportNeeds();
       _syncJourneyAnswers();
       _clampCurrentIndex();
       _isInitialized = true;
@@ -393,7 +394,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
 
     if (question.id == 'travel_group') {
       return values.isNotEmpty &&
-          (values.first != 'family_kids' ||
+          (!const {'family_kids', 'solo_parent'}.contains(values.first) ||
               answerFor('travel_group_children_count') != null);
     }
 
@@ -811,7 +812,8 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   }
 
   void _syncConditionalAnswers(String questionId, List<String> values) {
-    if (questionId == 'travel_group' && values.firstOrNull != 'family_kids') {
+    if (questionId == 'travel_group' &&
+        !const {'family_kids', 'solo_parent'}.contains(values.firstOrNull)) {
       _removeAnswer('travel_group_children_count');
     }
 
@@ -941,6 +943,36 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _isRefineResolved = draft.isRefineResolved;
     _includeConstraints = draft.includeConstraints;
     _currentIndex = draft.currentIndex;
+  }
+
+  void _sanitizeDeprecatedSupportNeeds() {
+    const supportedValues = <String>{
+      'travel_with_pet',
+      'continuous_medication',
+      'will_drive',
+      'no_special_needs',
+    };
+    final answerIndex = _answers.indexWhere(
+      (answer) => answer.questionId == 'support_needs',
+    );
+    if (answerIndex == -1) {
+      return;
+    }
+
+    final sanitizedValues = _answers[answerIndex].values
+        .where(supportedValues.contains)
+        .take(3)
+        .toList(growable: false);
+    final nextAnswers = List<Answer>.from(_answers);
+    if (sanitizedValues.isEmpty) {
+      nextAnswers.removeAt(answerIndex);
+    } else {
+      nextAnswers[answerIndex] = Answer(
+        questionId: 'support_needs',
+        values: sanitizedValues,
+      );
+    }
+    _answers = nextAnswers;
   }
 
   void _clampCurrentIndex() {

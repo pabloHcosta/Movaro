@@ -470,7 +470,7 @@ class _QuestionPageState extends State<QuestionPage> {
                   height: 1.12,
                 ),
               ),
-              if (question.id == 'priorities') ...[
+              if (question.type == 'multi_chip') ...[
                 const SizedBox(height: 10),
                 _SelectionStatusCard(
                   label: _selectionHelperLabel(context, question),
@@ -478,14 +478,9 @@ class _QuestionPageState extends State<QuestionPage> {
                     controller.answerValuesFor(question.id).length,
                     question.maxSelections,
                   ),
-                  isComplete:
-                      controller.answerValuesFor(question.id).length >=
-                      question.maxSelections,
-                ),
-              ] else if (question.id == 'constraints') ...[
-                const SizedBox(height: 10),
-                _QuestionSubnote(
-                  label: _selectionHelperLabel(context, question),
+                  isComplete: controller
+                      .answerValuesFor(question.id)
+                      .isNotEmpty,
                 ),
               ],
             ],
@@ -616,8 +611,43 @@ class _QuestionPageState extends State<QuestionPage> {
       return _buildPriorityChips(context, question);
     }
 
+    if (question.type == 'multi_chip') {
+      return _buildMultiSelectList(context, question);
+    }
+
     // All other questions → horizontal compact list
     return _buildIconicGrid(context, question);
+  }
+
+  Widget _buildMultiSelectList(BuildContext context, Question question) {
+    final options = question.options;
+    final selectedValues = controller.answerValuesFor(question.id).toSet();
+
+    return CustomScrollView(
+      controller: _optionsScrollController,
+      slivers: [
+        SliverList(
+          delegate: SliverChildBuilderDelegate((ctx, index) {
+            final option = options[index];
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: index < options.length - 1 ? 8 : 0,
+              ),
+              child: _CompactOptionRow(
+                icon: _iconDataFor(question.id, option.value),
+                label: _displayOptionLabel(context, question.id, option.value),
+                isSelected: selectedValues.contains(option.value),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  _handleMultiSelect(question, option);
+                },
+              ),
+            );
+          }, childCount: options.length),
+        ),
+        const SliverPadding(padding: EdgeInsets.only(bottom: 4)),
+      ],
+    );
   }
 
   // ── Horizontal compact list for standard single-select questions ──────────
@@ -1171,6 +1201,13 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   String _selectionHelperLabel(BuildContext context, Question question) {
+    if (question.id == 'support_needs') {
+      return switch (Localizations.localeOf(context).languageCode) {
+        'pt' => 'Marque todas as situações que se aplicam',
+        'es' => 'Marcá todas las situaciones que correspondan',
+        _ => 'Select every situation that applies',
+      };
+    }
     return context.l10n.questionnaireSelectionHelper(question.maxSelections);
   }
 
@@ -2468,23 +2505,6 @@ class _QuestionCountryPickerSheetState
           ),
         );
       },
-    );
-  }
-}
-
-class _QuestionSubnote extends StatelessWidget {
-  const _QuestionSubnote({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: AppColors.textSoftFor(context),
-        fontWeight: FontWeight.w600,
-      ),
     );
   }
 }

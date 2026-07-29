@@ -126,9 +126,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
         return qConstraintsPrompt;
       case 'support_needs':
         return _localizedText(
-          pt: 'O que precisa entrar no seu plano?',
-          es: '¿Qué necesitás incluir en tu plan?',
-          en: 'What needs to be included in your plan?',
+          pt: 'Há alguma situação prática que muda seu plano?',
+          es: '¿Hay alguna situación práctica que cambie tu plan?',
+          en: 'Is there any practical situation that changes your plan?',
         );
       case 'available_capital':
         return _localizedText(
@@ -226,19 +226,19 @@ extension AppLocalizationsFormatting on AppLocalizations {
         en: 'Children and school',
       ),
       'travel_with_pet' => _localizedText(
-        pt: 'Viajar com pet',
-        es: 'Viajar con mascota',
-        en: 'Travel with a pet',
+        pt: 'Vou viajar com pet',
+        es: 'Voy a viajar con mascota',
+        en: 'I am traveling with a pet',
       ),
       'continuous_medication' => _localizedText(
-        pt: 'Medicamento contínuo',
-        es: 'Medicación continua',
-        en: 'Ongoing medication',
+        pt: 'Uso medicação contínua',
+        es: 'Uso medicación continua',
+        en: 'I use ongoing medication',
       ),
       'will_drive' => _localizedText(
-        pt: 'Vou dirigir ou levar veículo',
-        es: 'Voy a manejar o llevar un vehículo',
-        en: 'I will drive or bring a vehicle',
+        pt: 'Vou dirigir no Brasil ou levar veículo',
+        es: 'Voy a manejar en Brasil o llevar un vehículo',
+        en: 'I will drive in Brazil or bring a vehicle',
       ),
       'foreign_income' => _localizedText(
         pt: 'Renda do exterior',

@@ -147,14 +147,15 @@ void main() {
       expect(await controller.goNext(), isFalse);
       controller.selectAnswer('work_arrangement', 'local_job');
       expect(await controller.goNext(), isFalse);
+      expect(controller.currentQuestion?.id, 'funding');
+      controller.selectAnswer('funding', 'job_search');
+      expect(await controller.goNext(), isFalse);
       expect(controller.currentQuestion?.id, 'support_needs');
       controller.setAnswerValues('support_needs', [
         'travel_with_pet',
         'continuous_medication',
         'will_drive',
       ]);
-      expect(await controller.goNext(), isFalse);
-      controller.selectAnswer('funding', 'job_search');
 
       expect(await controller.goNext(), isTrue);
       expect(controller.generatedPlan?.variant, QuestionnaireVariant.strategic);
@@ -183,9 +184,9 @@ void main() {
           'timeline',
           'travel_group',
           'work_arrangement',
+          'funding',
           'priorities',
           'support_needs',
-          'funding',
         ]);
         expect(controller.currentQuestion?.id, 'travel_group');
       },
@@ -199,9 +200,9 @@ void main() {
         'timeline',
         'travel_group',
         'work_arrangement',
+        'funding',
         'priorities',
         'support_needs',
-        'funding',
       ]);
 
       controller.selectAnswer('funding', 'savings');
@@ -211,10 +212,10 @@ void main() {
         'timeline',
         'travel_group',
         'work_arrangement',
-        'priorities',
-        'support_needs',
         'funding',
         'available_capital',
+        'priorities',
+        'support_needs',
       ]);
 
       controller.selectAnswer('funding', 'job_offer');
@@ -224,10 +225,52 @@ void main() {
         'timeline',
         'travel_group',
         'work_arrangement',
+        'funding',
         'priorities',
         'support_needs',
-        'funding',
       ]);
+    });
+
+    test('practical situations are independent multi-select refinements', () {
+      final question = controller.questions.firstWhere(
+        (item) => item.id == 'support_needs',
+      );
+
+      expect(question.type, 'multi_chip');
+      expect(question.maxSelections, 3);
+      expect(
+        question.options.map((option) => option.value),
+        orderedEquals([
+          'travel_with_pet',
+          'continuous_medication',
+          'will_drive',
+          'no_special_needs',
+        ]),
+      );
+      expect(
+        question.options.map((option) => option.value),
+        isNot(contains('children_school')),
+      );
+      expect(
+        question.options.map((option) => option.value),
+        isNot(contains('foreign_income')),
+      );
+    });
+
+    test('single parents must provide and retain the children count', () async {
+      controller.selectVariant(QuestionnaireVariant.strategic);
+      controller.selectAnswer('intent', 'fresh_start');
+      expect(await controller.goNext(), isFalse);
+      controller.selectAnswer('timeline', 'in_3_6m');
+      expect(await controller.goNext(), isFalse);
+      expect(controller.currentQuestion?.id, 'travel_group');
+
+      controller.selectAnswer('travel_group', 'solo_parent');
+      expect(controller.canGoNext, isFalse);
+
+      controller.selectAnswer('travel_group_children_count', '1');
+      expect(controller.canGoNext, isTrue);
+      expect(controller.answerFor('travel_group_children_count'), '1');
     });
 
     test('special-needs none option remains exclusive', () {
