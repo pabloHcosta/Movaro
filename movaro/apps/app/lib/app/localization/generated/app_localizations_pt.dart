@@ -23,7 +23,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get splashLoadingLabel => 'Preparando seu caminho';
 
   @override
-  String get splashHeroTitle => 'Seu próximo passo começa com clareza.';
+  String get splashHeroTitle => 'Você escolhe onde. O Movaro mostra o caminho.';
 
   @override
   String get splashHeroBody =>

@@ -290,7 +290,7 @@
     "jobMarketScore": 75,
     "unemploymentRate": 6.6,
     "economicActivityScore": 77,
-    "topIndustries": ["Servicos", "Saude", "Tecnologia"],
+    "topIndustries": ["Servicos", "Saúde", "Tecnologia"],
     "updatedAt": "2026-03-08"
   },
   {
@@ -437,7 +437,7 @@
     "jobMarketScore": 73,
     "unemploymentRate": 6.1,
     "economicActivityScore": 76,
-    "topIndustries": ["Saude", "Agronegocio", "Servicos"],
+    "topIndustries": ["Saúde", "Agronegocio", "Servicos"],
     "updatedAt": "2026-03-08"
   },
   {

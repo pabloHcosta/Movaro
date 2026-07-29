@@ -180,6 +180,80 @@ void main() {
       );
     });
 
+    test('explains SUS access, documents, care levels, and local limits', () {
+      final health = _item(
+        ArgentinaBrazilGuideDataSource.build(
+          _plan(goal: 'quality_of_life'),
+          localeCode: 'pt',
+        ),
+        'item_0_6_saude_entender',
+      );
+      final text = <String>[
+        health.context ?? '',
+        health.whyItMatters ?? '',
+        ...?health.steps,
+        ...?health.tips,
+        ...?health.warningFlags,
+      ].join(' ');
+      final optionTitles =
+          health.decisionOptions?.map((option) => option.title).toList() ??
+          const [];
+      final supportUrls =
+          health.supportLinks?.map((link) => link.url).toList() ?? const [];
+
+      expect(text, contains('passaporte'));
+      expect(text, contains('situação migratória'));
+      expect(text, contains('classificação de risco'));
+      expect(text, contains('variam por cidade'));
+      expect(optionTitles, containsAll(<String>['UBS', 'UPA 24h', 'SAMU 192']));
+      expect(
+        supportUrls,
+        contains(PreparationResourceLinks.migrantSusRightsGuide.toString()),
+      );
+      expect(
+        supportUrls,
+        contains(PreparationResourceLinks.susCareNetworkGuide.toString()),
+      );
+      expect(text, isNot(contains('UPS')));
+    });
+
+    test('turns the first-week health item into a practical CNS setup', () {
+      final health = _item(
+        ArgentinaBrazilGuideDataSource.build(
+          _plan(goal: 'quality_of_life'),
+          localeCode: 'pt',
+        ),
+        'item_4_2_saude',
+      );
+      final text = <String>[
+        health.title,
+        health.shortDescription,
+        health.context ?? '',
+        ...?health.steps,
+        ...?health.requirements,
+        ...?health.tips,
+      ].join(' ');
+      final supportUrls =
+          health.supportLinks?.map((link) => link.url).toList() ?? const [];
+
+      expect(text, contains('UBS'));
+      expect(text, contains('passaporte'));
+      expect(text, contains('identidade argentina'));
+      expect(text, contains('não é condição'));
+      expect(text, contains('não emite um novo'));
+      expect(text, contains('SAMU 192'));
+      expect(text, contains('variam por cidade'));
+      expect(text, isNot(contains('UPS')));
+      expect(
+        supportUrls,
+        contains(PreparationResourceLinks.mySusDigitalCnsGuide.toString()),
+      );
+      expect(
+        supportUrls,
+        contains(PreparationResourceLinks.migrantSusRightsGuide.toString()),
+      );
+    });
+
     test('uses current official jobs and foreign-driving sources', () {
       expect(
         PreparationResourceLinks.officialJobsPortal,

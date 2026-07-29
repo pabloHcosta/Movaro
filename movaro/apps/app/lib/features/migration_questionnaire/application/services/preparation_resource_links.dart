@@ -137,6 +137,22 @@ class PreparationResourceLinks {
     'https://www.gov.br/saude/pt-br/composicao/saps/equidade-em-saude/migrantes-refugiadas-e-apatridas',
   );
 
+  static final Uri migrantSusRightsGuide = Uri.parse(
+    'https://www.gov.br/saude/pt-br/centrais-de-conteudo/publicacoes/cartilhas/2024/conheca-seus-direitos-no-sus.pdf',
+  );
+
+  static final Uri susCareNetworkGuide = Uri.parse(
+    'https://www.saude.ms.gov.br/ubs-upa-hospital-ou-samu-voce-sabe-onde-buscar-atendimento-no-sus/',
+  );
+
+  static final Uri travelerHealthDuringStay = Uri.parse(
+    'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/saude-do-viajante/durante-sua-estadia',
+  );
+
+  static final Uri mySusDigitalCnsGuide = Uri.parse(
+    'https://www.gov.br/saude/pt-br/composicao/seidigi/meususdigital/perguntas-e-respostas/cidadao',
+  );
+
   static final Uri travelerVaccinationGuide = Uri.parse(
     'https://www.gov.br/saude/pt-br/vacinacao/viajantes',
   );

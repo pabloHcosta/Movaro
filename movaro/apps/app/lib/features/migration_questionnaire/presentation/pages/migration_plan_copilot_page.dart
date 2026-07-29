@@ -3447,9 +3447,9 @@ class _PreparationHero extends StatelessWidget {
               _HeroPill(
                 label: _localizedText(
                   context,
-                  pt: 'Guia de mudanca',
-                  es: 'Guia de mudanza',
-                  en: 'Moving guide',
+                  pt: 'Minha Jornada',
+                  es: 'Mi Camino',
+                  en: '    My Journey',
                 ),
               ),
               if (cityName != null && stateCode != null)
@@ -4392,9 +4392,9 @@ class _GuideGpsHeader extends StatelessWidget {
                   Text(
                     _localizedText(
                       context,
-                      pt: 'Guia de mudanca',
-                      es: 'Guia de mudanza',
-                      en: 'Moving guide',
+                      pt: 'Minha Jornada',
+                      es: 'Mi Camino',
+                      en: 'My Journey',
                     ),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
@@ -8685,7 +8685,7 @@ class _WorkGuideSection extends StatelessWidget {
           tint: AppColors.primary,
           title: _localizedText(
             context,
-            pt: 'Saude no Brasil: SUS, plano e pontos para entender',
+            pt: 'Saúde no Brasil: SUS, plano e pontos para entender',
             es: 'Salud en Brasil: SUS, prepaga y puntos para entender',
             en: 'Healthcare in Brazil: SUS, insurance, and points to understand',
           ),

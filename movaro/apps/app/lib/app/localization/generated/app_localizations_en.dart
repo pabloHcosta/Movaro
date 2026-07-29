@@ -23,7 +23,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashLoadingLabel => 'Preparing your path';
 
   @override
-  String get splashHeroTitle => 'Your next step starts with clarity.';
+  String get splashHeroTitle => 'You choose where. Movaro shows you the way.';
 
   @override
   String get splashHeroBody =>
@@ -6631,7 +6631,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get migrationResultRevealExploreCity => 'View city details';
 
   @override
-  String get migrationResultRevealCompareCta => 'Compare alternatives';
+  String get migrationResultRevealCompareCta => 'Compare with alternatives';
 
   @override
   String migrationResultRevealStartPreparationCta(String city) {

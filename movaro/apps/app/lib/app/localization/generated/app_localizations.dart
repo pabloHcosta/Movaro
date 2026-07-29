@@ -127,7 +127,7 @@ abstract class AppLocalizations {
   /// No description provided for @splashHeroTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your next step starts with clarity.'**
+  /// **'You choose where. Movaro shows you the way.'**
   String get splashHeroTitle;
 
   /// No description provided for @splashHeroBody.
@@ -11147,7 +11147,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationResultRevealCompareCta.
   ///
   /// In en, this message translates to:
-  /// **'Compare alternatives'**
+  /// **'Compare with alternatives'**
   String get migrationResultRevealCompareCta;
 
   /// No description provided for @migrationResultRevealStartPreparationCta.
