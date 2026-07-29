@@ -6686,58 +6686,32 @@ class AppLocalizationsPt extends AppLocalizations {
       'Você pode começar mesmo sem ter tudo decidido.';
 
   @override
-  String get homeEntryTitlePrefix => 'Escolha ';
-
-  @override
-  String get homeEntryTitleHighlight => 'como quer começar';
+  String get homeEntryTitle => 'Encontre cidades que combinam com seu plano';
 
   @override
   String get homeEntrySubtitle =>
-      'Receba uma direção inicial em poucos minutos ou valide uma cidade que você já está considerando antes de entrar no modo execução.';
+      'Compare custo de vida, oportunidades e qualidade de vida para decidir por onde começar.';
 
   @override
-  String get homeEntrySupportLine => 'Direção inicial em cerca de 2 minutos';
+  String get homeEntrySupportLine => 'Leva cerca de 2 minutos';
 
   @override
-  String get homeEntryDiscoverTitle => 'Quero descobrir cidades possíveis';
+  String get homeEntryDiscoverAction => 'Descobrir cidades para mim';
 
   @override
-  String get homeEntryDiscoverBody =>
-      'Responda poucas perguntas e receba uma direção inicial com encaixes de cidade, alternativas e possíveis próximos passos.';
+  String get homeEntryKnownCityAction => 'Já tenho uma cidade para avaliar';
 
   @override
-  String get homeEntryDiscoverBadge => 'Caminho mais rápido';
+  String get homeEntryShortcutsTitle => 'Resolver uma dúvida agora';
 
   @override
-  String get homeEntryDiscoverAction => 'Receber minha direção inicial';
+  String get homeVisualCostsAction => 'Custos iniciais';
 
   @override
-  String get homeEntryKnownCityTitle => 'Já tenho uma cidade em mente';
+  String get homeVisualDocumentsAction => 'Documentos';
 
   @override
-  String get homeEntryKnownCityBody =>
-      'Busque a cidade, compare alternativas e valide custo, encaixe e próximos passos antes de assumir um plano completo.';
-
-  @override
-  String get homeEntryKnownCityBadge => 'Sem questionário obrigatório';
-
-  @override
-  String get homeEntryKnownCityAction => 'Validar uma cidade';
-
-  @override
-  String get homeEntryShortcutsTitle => 'Atalhos úteis';
-
-  @override
-  String get homeEntryExploreCitiesAction => 'Explorar cidades';
-
-  @override
-  String get homeVisualCostsAction => 'Planejar custos iniciais';
-
-  @override
-  String get homeVisualDocumentsAction => 'Guia prático';
-
-  @override
-  String get homeVisualHousingAction => 'Moradia e chegada';
+  String get homeVisualHousingAction => 'Moradia';
 
   @override
   String get homeVisualStartAction => 'Descobrir por onde começar';

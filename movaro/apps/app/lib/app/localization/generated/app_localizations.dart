@@ -11192,106 +11192,58 @@ abstract class AppLocalizations {
   /// **'You can start even if you have not decided everything yet.'**
   String get homeVisualSupportLine;
 
-  /// No description provided for @homeEntryTitlePrefix.
+  /// No description provided for @homeEntryTitle.
   ///
   /// In en, this message translates to:
-  /// **'Choose '**
-  String get homeEntryTitlePrefix;
-
-  /// No description provided for @homeEntryTitleHighlight.
-  ///
-  /// In en, this message translates to:
-  /// **'how to start'**
-  String get homeEntryTitleHighlight;
+  /// **'Find cities that fit your plan'**
+  String get homeEntryTitle;
 
   /// No description provided for @homeEntrySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Get an initial direction in a few minutes or validate a city you are already considering before moving into execution mode.'**
+  /// **'Compare cost of living, opportunities, and quality of life to decide where to start.'**
   String get homeEntrySubtitle;
 
   /// No description provided for @homeEntrySupportLine.
   ///
   /// In en, this message translates to:
-  /// **'Initial direction in about 2 minutes'**
+  /// **'Takes about 2 minutes'**
   String get homeEntrySupportLine;
-
-  /// No description provided for @homeEntryDiscoverTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'I want to discover possible cities'**
-  String get homeEntryDiscoverTitle;
-
-  /// No description provided for @homeEntryDiscoverBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Answer a few questions and get an initial direction with city matches, alternatives, and possible next steps.'**
-  String get homeEntryDiscoverBody;
-
-  /// No description provided for @homeEntryDiscoverBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Fastest path'**
-  String get homeEntryDiscoverBadge;
 
   /// No description provided for @homeEntryDiscoverAction.
   ///
   /// In en, this message translates to:
-  /// **'Get my initial direction'**
+  /// **'Discover cities for me'**
   String get homeEntryDiscoverAction;
-
-  /// No description provided for @homeEntryKnownCityTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'I already have a city in mind'**
-  String get homeEntryKnownCityTitle;
-
-  /// No description provided for @homeEntryKnownCityBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Search for the city, compare alternatives, and validate cost, fit, and next steps before committing to a full plan.'**
-  String get homeEntryKnownCityBody;
-
-  /// No description provided for @homeEntryKnownCityBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'No questionnaire required'**
-  String get homeEntryKnownCityBadge;
 
   /// No description provided for @homeEntryKnownCityAction.
   ///
   /// In en, this message translates to:
-  /// **'Validate a city'**
+  /// **'I already have a city to evaluate'**
   String get homeEntryKnownCityAction;
 
   /// No description provided for @homeEntryShortcutsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Useful shortcuts'**
+  /// **'Get an answer now'**
   String get homeEntryShortcutsTitle;
-
-  /// No description provided for @homeEntryExploreCitiesAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Explore cities'**
-  String get homeEntryExploreCitiesAction;
 
   /// No description provided for @homeVisualCostsAction.
   ///
   /// In en, this message translates to:
-  /// **'Plan initial costs'**
+  /// **'Initial costs'**
   String get homeVisualCostsAction;
 
   /// No description provided for @homeVisualDocumentsAction.
   ///
   /// In en, this message translates to:
-  /// **'Practical guide'**
+  /// **'Documents'**
   String get homeVisualDocumentsAction;
 
   /// No description provided for @homeVisualHousingAction.
   ///
   /// In en, this message translates to:
-  /// **'Housing and arrival'**
+  /// **'Housing'**
   String get homeVisualHousingAction;
 
   /// No description provided for @homeVisualStartAction.

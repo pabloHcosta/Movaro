@@ -749,11 +749,6 @@ class _PublicHomePageState extends State<PublicHomePage>
                                           _startPlanFlow(),
                                       onKnownCityTap: () =>
                                           _startKnownCityFlow(),
-                                      onExploreCitiesTap: () =>
-                                          Navigator.pushNamed(
-                                            context,
-                                            AppRoutes.cities,
-                                          ),
                                       onOpenCostsTap: () => Navigator.pushNamed(
                                         context,
                                         AppRoutes.documentationTopic,
@@ -800,7 +795,6 @@ class _EmptyHomeState extends StatelessWidget {
   const _EmptyHomeState({
     required this.onDiscoverDirectionTap,
     required this.onKnownCityTap,
-    required this.onExploreCitiesTap,
     required this.onOpenCostsTap,
     required this.onOpenDocumentsTap,
     required this.onOpenHousingTap,
@@ -808,7 +802,6 @@ class _EmptyHomeState extends StatelessWidget {
   });
 
   final VoidCallback onDiscoverDirectionTap;
-  final VoidCallback onExploreCitiesTap;
   final VoidCallback onKnownCityTap;
   final VoidCallback onOpenHousingTap;
   final VoidCallback onOpenCostsTap;
@@ -819,7 +812,6 @@ class _EmptyHomeState extends StatelessWidget {
     return HomeVisualLayout(
       onDiscoverDirectionTap: onDiscoverDirectionTap,
       onKnownCityTap: onKnownCityTap,
-      onExploreCitiesTap: onExploreCitiesTap,
       onOpenCostsTap: onOpenCostsTap,
       onOpenDocumentsTap: onOpenDocumentsTap,
       onOpenHousingTap: onOpenHousingTap,

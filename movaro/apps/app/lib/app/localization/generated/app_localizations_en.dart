@@ -6659,58 +6659,32 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can start even if you have not decided everything yet.';
 
   @override
-  String get homeEntryTitlePrefix => 'Choose ';
-
-  @override
-  String get homeEntryTitleHighlight => 'how to start';
+  String get homeEntryTitle => 'Find cities that fit your plan';
 
   @override
   String get homeEntrySubtitle =>
-      'Get an initial direction in a few minutes or validate a city you are already considering before moving into execution mode.';
+      'Compare cost of living, opportunities, and quality of life to decide where to start.';
 
   @override
-  String get homeEntrySupportLine => 'Initial direction in about 2 minutes';
+  String get homeEntrySupportLine => 'Takes about 2 minutes';
 
   @override
-  String get homeEntryDiscoverTitle => 'I want to discover possible cities';
+  String get homeEntryDiscoverAction => 'Discover cities for me';
 
   @override
-  String get homeEntryDiscoverBody =>
-      'Answer a few questions and get an initial direction with city matches, alternatives, and possible next steps.';
+  String get homeEntryKnownCityAction => 'I already have a city to evaluate';
 
   @override
-  String get homeEntryDiscoverBadge => 'Fastest path';
+  String get homeEntryShortcutsTitle => 'Get an answer now';
 
   @override
-  String get homeEntryDiscoverAction => 'Get my initial direction';
+  String get homeVisualCostsAction => 'Initial costs';
 
   @override
-  String get homeEntryKnownCityTitle => 'I already have a city in mind';
+  String get homeVisualDocumentsAction => 'Documents';
 
   @override
-  String get homeEntryKnownCityBody =>
-      'Search for the city, compare alternatives, and validate cost, fit, and next steps before committing to a full plan.';
-
-  @override
-  String get homeEntryKnownCityBadge => 'No questionnaire required';
-
-  @override
-  String get homeEntryKnownCityAction => 'Validate a city';
-
-  @override
-  String get homeEntryShortcutsTitle => 'Useful shortcuts';
-
-  @override
-  String get homeEntryExploreCitiesAction => 'Explore cities';
-
-  @override
-  String get homeVisualCostsAction => 'Plan initial costs';
-
-  @override
-  String get homeVisualDocumentsAction => 'Practical guide';
-
-  @override
-  String get homeVisualHousingAction => 'Housing and arrival';
+  String get homeVisualHousingAction => 'Housing';
 
   @override
   String get homeVisualStartAction => 'Find where to start';

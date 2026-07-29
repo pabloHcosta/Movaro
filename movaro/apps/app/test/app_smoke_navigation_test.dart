@@ -82,9 +82,15 @@ void main() {
       await _pumpScreen(tester);
 
       expect(find.text('Plano'), findsNothing);
-      expect(find.text('Receber minha direção inicial'), findsOneWidget);
-      expect(find.text('Já tenho uma cidade em mente'), findsOneWidget);
-      expect(find.text('Atalhos úteis'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('home-action-discover')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('home-action-known-city')),
+        findsOneWidget,
+      );
+      expect(find.text('Resolver uma dúvida agora'), findsOneWidget);
 
       await tester.pumpWidget(harness.buildApp(initialRoute: AppRoutes.cities));
       await _pumpScreen(tester);
@@ -117,7 +123,7 @@ void main() {
     );
     await _pumpScreen(tester);
 
-    final discoverAction = find.text('Receber minha direção inicial');
+    final discoverAction = find.byKey(const ValueKey('home-action-discover'));
     await tester.ensureVisible(discoverAction);
     await tester.tap(discoverAction);
     await _pumpScreen(tester);
@@ -146,7 +152,9 @@ void main() {
     );
     await _pumpScreen(tester);
 
-    final knownCityAction = find.text('Validar uma cidade');
+    final knownCityAction = find.byKey(
+      const ValueKey('home-action-known-city'),
+    );
     await tester.ensureVisible(knownCityAction);
     await tester.tap(knownCityAction);
     await _pumpScreen(tester);
@@ -321,8 +329,11 @@ void main() {
     await tester.tap(find.text('Sim, começar do zero'));
     await _pumpScreen(tester);
 
-    expect(find.text('Receber minha direção inicial'), findsOneWidget);
-    expect(find.text('Já tenho uma cidade em mente'), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-action-discover')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('home-action-known-city')),
+      findsOneWidget,
+    );
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
