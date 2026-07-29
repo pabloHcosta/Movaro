@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 
@@ -81,14 +82,6 @@ class _SplashLoadingViewState extends State<SplashLoadingView>
     super.dispose();
   }
 
-  String _tagline(BuildContext context) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'es' => 'Tu guía para mudarte a Brasil y arrancar con el pie derecho.',
-      'en' => 'Your guide to moving to Brazil and starting on the right foot.',
-      _ => 'Seu guia para mudar para o Brasil e começar com o pé direito.',
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
@@ -160,7 +153,7 @@ class _SplashLoadingViewState extends State<SplashLoadingView>
                   FadeTransition(
                     opacity: _taglineFade,
                     child: Text(
-                      _tagline(context),
+                      context.l10n.splashHeroTitle,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.white.withValues(alpha: 0.55),

@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# Xcode 27 beta can suppress `xcrun --show-sdk-path` output when it is called
+# by Dart native-asset hooks from an Xcode build phase. Xcode already exports
+# the exact SDK path for the active destination, so return it directly.
+if [ "$1" = "--show-sdk-path" ]; then
+  if [ -n "$SDKROOT" ]; then
+    printf '%s\n' "$SDKROOT"
+    exit 0
+  fi
+
+  developer_dir="$DEVELOPER_DIR"
+  if [ -z "$developer_dir" ]; then
+    compiler_path="$(command -v clang 2>/dev/null)"
+    case "$compiler_path" in
+      */Contents/Developer/*)
+        developer_dir="${compiler_path%%/Contents/Developer/*}/Contents/Developer"
+        ;;
+    esac
+  fi
+  if [ -z "$developer_dir" ]; then
+    developer_dir="/Applications/Xcode.app/Contents/Developer"
+  fi
+  case "$3" in
+    iphoneos)
+      printf '%s\n' "$developer_dir/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
+      exit 0
+      ;;
+    iphonesimulator)
+      printf '%s\n' "$developer_dir/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk"
+      exit 0
+      ;;
+    macosx)
+      printf '%s\n' "$developer_dir/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+      exit 0
+      ;;
+  esac
+fi
+
+exec /usr/bin/xcrun "$@"

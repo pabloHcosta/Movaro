@@ -50,6 +50,7 @@ import 'package:movaro_app/features/migration_questionnaire/presentation/pages/h
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/arrival_execution_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/guide_event_suggestion_sheet.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/landing_budget_estimator_section.dart';
+import 'package:movaro_app/features/language/presentation/widgets/contextual_phrase_support_card.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_document_readiness_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_readiness_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
@@ -4830,7 +4831,7 @@ class _GuideDominantActionCard extends StatelessWidget {
           return ClipRect(
             child: SizeTransition(
               sizeFactor: curved,
-              axisAlignment: -1,
+              alignment: Alignment.topCenter,
               child: FadeTransition(
                 opacity: curved,
                 child: SlideTransition(position: offsetAnimation, child: child),
@@ -6749,6 +6750,8 @@ class _PreparationSectionContent extends StatelessWidget {
               onToggleItem: onToggleDocumentItem,
             ),
             const SizedBox(height: 16),
+            const ContextualPhraseSupportCard(groupKey: 'documents'),
+            const SizedBox(height: 16),
             _DocumentsGuideSection(
               onOpenGuide: onOpenGuide,
               onOpenTopic: onOpenTopic,
@@ -6757,16 +6760,24 @@ class _PreparationSectionContent extends StatelessWidget {
           ],
         );
       case _PreparationSection.housing:
-        return _HousingGuideSection(
-          plan: plan,
-          city: city,
-          onOpenRentalSearch: onOpenRentalSearch,
-          onHelp: () => showContextualHelpGuide(
-            context,
-            preferenceKey: _MigrationPlanCopilotPageState._helpPreferenceKey,
-            content: _buildCopilotHelpContent(context),
-          ),
-          onOpenExternalPreparationLink: onOpenExternalPreparationLink,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _HousingGuideSection(
+              plan: plan,
+              city: city,
+              onOpenRentalSearch: onOpenRentalSearch,
+              onHelp: () => showContextualHelpGuide(
+                context,
+                preferenceKey:
+                    _MigrationPlanCopilotPageState._helpPreferenceKey,
+                content: _buildCopilotHelpContent(context),
+              ),
+              onOpenExternalPreparationLink: onOpenExternalPreparationLink,
+            ),
+            const SizedBox(height: 16),
+            const ContextualPhraseSupportCard(groupKey: 'rental'),
+          ],
         );
       case _PreparationSection.work:
         return Column(
@@ -6777,6 +6788,8 @@ class _PreparationSectionContent extends StatelessWidget {
               completedItemIds: readinessCompletedIds,
               onToggleItem: onToggleReadinessItem,
             ),
+            const SizedBox(height: 16),
+            const ContextualPhraseSupportCard(groupKey: 'work'),
             const SizedBox(height: 16),
             _WorkGuideSection(
               onOpenTopic: onOpenTopic,
@@ -6796,6 +6809,8 @@ class _PreparationSectionContent extends StatelessWidget {
               completedItemIds: arrivalCompletedIds,
               onToggleItem: onToggleArrivalItem,
             ),
+            const SizedBox(height: 16),
+            const ContextualPhraseSupportCard(groupKey: 'health'),
             const SizedBox(height: 16),
             _ArrivalGuideSection(
               onOpenTopic: onOpenTopic,

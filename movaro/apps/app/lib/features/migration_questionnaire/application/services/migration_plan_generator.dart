@@ -241,6 +241,9 @@ class MigrationPlanGenerator {
         timeline: timeline,
         funding: funding,
         variant: variant,
+        intent: intent,
+        travelGroup: travelGroup,
+        childrenCount: childrenCount,
       ),
     ).toEntity();
   }
@@ -670,6 +673,9 @@ class MigrationPlanGenerator {
     required String timeline,
     required String funding,
     required QuestionnaireVariant variant,
+    required String intent,
+    required String travelGroup,
+    required int? childrenCount,
   }) {
     final urgency = switch (timeline) {
       'in_0_3m' => 'urgent',
@@ -685,7 +691,7 @@ class MigrationPlanGenerator {
         ? 'step_desc_residence_path_funding_unknown'
         : 'step_desc_residence_path_$urgency';
 
-    return [
+    final steps = <MigrationStepModel>[
       MigrationStepModel(
         title: 'step_choose_base_city',
         description: firstStepDescription,
@@ -705,6 +711,40 @@ class MigrationPlanGenerator {
         estimatedDays: 2,
       ),
     ];
+
+    if (intent == 'study') {
+      steps.addAll(const [
+        MigrationStepModel(
+          title: 'step_education_admission_route',
+          description: 'step_desc_education_admission_route',
+          category: 'education',
+          estimatedDays: 7,
+        ),
+        MigrationStepModel(
+          title: 'step_education_documents',
+          description: 'step_desc_education_documents',
+          category: 'education',
+          estimatedDays: 14,
+        ),
+      ]);
+    }
+
+    final hasChildren =
+        travelGroup == 'family_kids' ||
+        travelGroup == 'solo_parent' ||
+        (childrenCount ?? 0) > 0;
+    if (hasChildren) {
+      steps.add(
+        const MigrationStepModel(
+          title: 'step_school_enrollment',
+          description: 'step_desc_school_enrollment',
+          category: 'education',
+          estimatedDays: 7,
+        ),
+      );
+    }
+
+    return steps;
   }
 
   double _calcConfidence({

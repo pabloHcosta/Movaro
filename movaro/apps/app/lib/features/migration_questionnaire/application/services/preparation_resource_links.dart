@@ -52,6 +52,14 @@ class PreparationResourceLinks {
     'https://www.gov.br/pt-br/servicos/estudar-o-ensino-superior-no-brasil?id=5999&origem=servico',
   );
 
+  static final Uri sisuGuide = Uri.parse(
+    'https://www.gov.br/mec/pt-br/assuntos/es/sistema-de-selecao-unificada-sisu',
+  );
+
+  static final Uri pecGGuide = Uri.parse(
+    'https://www.gov.br/mre/pt-br/assuntos/cultura-e-educacao/temas-educacionais/programas-de-estudo-para-estrangeiros/pec-g',
+  );
+
   static final Uri taxEntryGuide = Uri.parse(
     'https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/formularios/declaracoes/declaracao-entrada-brasil',
   );

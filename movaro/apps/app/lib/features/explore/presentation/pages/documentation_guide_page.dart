@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/network/network_client.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/journey/journey_country_metadata.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -18,23 +16,39 @@ import 'package:movaro_app/core/widgets/journey_stage_banner.dart';
 import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/explore/application/services/documentation_guide_preferences_store.dart';
+import 'package:movaro_app/features/explore/application/services/documentation_guide_search.dart';
 import 'package:movaro_app/features/explore/application/services/guide_answers_remote_service.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_decision_support_section.dart';
+import 'package:movaro_app/features/explore/presentation/widgets/education_overview_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_entry_cost_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_soft_landing_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/practical_cost_estimator.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
+import 'package:movaro_app/features/language/presentation/widgets/contextual_phrase_support_card.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 
 enum DocumentationGuideSection {
   documents,
   housing,
   health,
+  education,
   work,
   driving,
   costs,
+}
+
+String _guideText(
+  BuildContext context, {
+  required String pt,
+  required String es,
+  required String en,
+}) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 }
 
 class DocumentationGuidePage extends StatefulWidget {
@@ -79,7 +93,6 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
   DocumentationGuideSection? _selectedSection;
   bool _didTryAutoGuide = false;
   bool _showScrollHint = false;
-  String? _selectedCountryId;
   List<_GuideQuickAnswerMeta>? _remoteQuickAnswers;
 
   @override
@@ -115,13 +128,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
 
   Future<void> _loadRemoteGuideAnswers() async {
     final locale = Localizations.localeOf(context).languageCode;
-    final destination =
-        widget
-            .migrationQuestionnaireController
-            ?.generatedPlan
-            ?.destinationCountry ??
-        widget.journeyContextController?.selection.destination?.name ??
-        'brasil';
+    const destination = 'brasil';
     final origin =
         widget.migrationQuestionnaireController?.generatedPlan?.originCountry ??
         widget.journeyContextController?.selection.origin?.name;
@@ -228,19 +235,27 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     final l10n = context.l10n;
     final paths = _guidePaths(context);
     assert(_topics(context).isNotEmpty);
-    final filteredPaths = paths.where(_matchesPath).toList();
+    final filteredPaths = paths.where(_matchesPath).toList()
+      ..sort(
+        (a, b) => _searchScore([
+          b.title,
+          b.description,
+          ...b.keywords,
+        ]).compareTo(_searchScore([a.title, a.description, ...a.keywords])),
+      );
     final quickAnswers = _guideQuickAnswers(context);
-    final filteredAnswers = quickAnswers.where(_matchesAnswer).toList();
+    final filteredAnswers = quickAnswers.where(_matchesAnswer).toList()
+      ..sort(
+        (a, b) => _searchScore([
+          b.question,
+          b.answer,
+          ...b.keywords,
+        ]).compareTo(_searchScore([a.question, a.answer, ...a.keywords])),
+      );
     final searchResults = _buildSearchResults(filteredPaths, filteredAnswers);
     final displayedAnswers = _searchQuery.isEmpty && _selectedSection == null
         ? filteredAnswers.take(6).toList()
         : filteredAnswers;
-    final availableCountries = _availableGuideCountries(context);
-    final selectedCountry = _selectedGuideCountry(context, availableCountries);
-    final hasActivePlan = _hasActivePlan;
-    final hasGuideData = MigrationGuideRegistry.supportsDestination(
-      selectedCountry.id,
-    );
     final isExecutionStage =
         widget
             .migrationQuestionnaireController
@@ -306,38 +321,9 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _GuideCountryBar(
-                              selectedCountry: selectedCountry,
-                              selectedCountryLabel: _localizedCountryName(
-                                context,
-                                selectedCountry,
-                              ),
-                              hasActivePlan: hasActivePlan,
-                              hasGuideData: hasGuideData,
-                              onTapCountry: () => _showCountryPicker(
-                                context,
-                                availableCountries,
-                                selectedCountry.id,
-                              ),
+                            _GuideSearchIntro(
+                              onSuggestionTap: _applySuggestedSearch,
                             ),
-                            if (!hasActivePlan) ...[
-                              const SizedBox(height: 14),
-                              _GuideStatusNotice(
-                                title: l10n.documentationGuideNoPlanTitle,
-                                body: l10n.documentationGuideNoPlanBody(
-                                  selectedCountry.name,
-                                ),
-                              ),
-                            ] else if (!hasGuideData) ...[
-                              const SizedBox(height: 14),
-                              _GuideStatusNotice(
-                                title: l10n
-                                    .documentationGuideCountryPendingTitle(
-                                      selectedCountry.name,
-                                    ),
-                                body: l10n.documentationGuideCountryPendingBody,
-                              ),
-                            ],
                             const SizedBox(height: 14),
                             _GuideSearchField(
                               controller: _searchController,
@@ -346,16 +332,14 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                                 context,
                                 searchResults,
                               ),
-                              onChanged: hasGuideData
-                                  ? (value) {
-                                      setState(() {
-                                        _searchQuery = value;
-                                        if (value.trim().isNotEmpty) {
-                                          _selectedSection = null;
-                                        }
-                                      });
-                                    }
-                                  : null,
+                              onChanged: (value) {
+                                setState(() {
+                                  _searchQuery = value;
+                                  if (value.trim().isNotEmpty) {
+                                    _selectedSection = null;
+                                  }
+                                });
+                              },
                               onClear: _searchQuery.isEmpty
                                   ? null
                                   : () {
@@ -364,10 +348,8 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                                         _searchQuery = '';
                                       });
                                     },
-                              enabled: hasGuideData,
                             ),
-                            if (hasGuideData &&
-                                _searchQuery.trim().isNotEmpty) ...[
+                            if (_searchQuery.trim().isNotEmpty) ...[
                               const SizedBox(height: 12),
                               _SearchMatchPanel(
                                 l10n: l10n,
@@ -376,41 +358,38 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
                                     _handleSearchResultTap(context, result),
                               ),
                             ],
-                            if (hasGuideData) ...[
-                              const SizedBox(height: 14),
-                              _SectionFilterRail(
-                                l10n: l10n,
-                                paths: paths,
-                                selectedSection: _selectedSection,
-                                onSelected: (section) {
-                                  setState(() {
-                                    _selectedSection =
-                                        _selectedSection == section
-                                        ? null
-                                        : section;
-                                  });
-                                },
-                              ),
-                            ],
+                            const SizedBox(height: 14),
+                            _SectionFilterRail(
+                              l10n: l10n,
+                              paths: paths,
+                              selectedSection: _selectedSection,
+                              onSelected: (section) {
+                                setState(() {
+                                  _selectedSection = _selectedSection == section
+                                      ? null
+                                      : section;
+                                });
+                              },
+                            ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 16),
-                      if (hasGuideData)
-                        _GuideResultsSection(
-                          key: _resultsKey,
-                          l10n: l10n,
-                          filteredPaths: filteredPaths,
-                          filteredAnswers: displayedAnswers,
-                          hasActiveFilter:
-                              _searchQuery.trim().isNotEmpty ||
-                              _selectedSection != null,
-                          onOpenSection: (section) => Navigator.pushNamed(
-                            context,
-                            AppRoutes.documentationTopic,
-                            arguments: section,
-                          ),
+                      _GuideResultsSection(
+                        key: _resultsKey,
+                        l10n: l10n,
+                        filteredPaths: filteredPaths,
+                        filteredAnswers: displayedAnswers,
+                        hasActiveFilter:
+                            _searchQuery.trim().isNotEmpty ||
+                            _selectedSection != null,
+                        onOpenSection: (section) => Navigator.pushNamed(
+                          context,
+                          AppRoutes.documentationTopic,
+                          arguments: section,
                         ),
+                        onAskAssistant: _openAiChat,
+                      ),
                     ],
                   ),
                 ),
@@ -454,34 +433,41 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
     List<_GuidePathMeta> filteredPaths,
     List<_GuideQuickAnswerMeta> filteredAnswers,
   ) {
-    final sectionsById = <DocumentationGuideSection, _GuideSearchResultMeta>{};
+    final results = <_GuideSearchResultMeta>[];
 
-    for (final path in filteredPaths) {
-      sectionsById[path.section] = _GuideSearchResultMeta(
-        icon: path.icon,
-        title: path.title,
-        subtitle: path.description,
-        section: path.section,
-      );
-    }
-
-    final allPaths = _guidePaths(context);
     for (final answer in filteredAnswers) {
-      final fallbackPath = allPaths.firstWhere(
-        (path) => path.section == answer.section,
-      );
-      sectionsById.putIfAbsent(
-        answer.section,
-        () => _GuideSearchResultMeta(
-          icon: fallbackPath.icon,
-          title: fallbackPath.title,
-          subtitle: fallbackPath.description,
-          section: fallbackPath.section,
+      results.add(
+        _GuideSearchResultMeta(
+          icon: answer.icon,
+          title: answer.question,
+          subtitle: answer.answer,
+          section: answer.section,
+          directAnswer: true,
         ),
       );
     }
 
-    return sectionsById.values.toList();
+    for (final path in filteredPaths) {
+      results.add(
+        _GuideSearchResultMeta(
+          icon: path.icon,
+          title: path.title,
+          subtitle: path.description,
+          section: path.section,
+        ),
+      );
+    }
+
+    return results;
+  }
+
+  void _applySuggestedSearch(String query) {
+    _searchController.text = query;
+    _searchController.selection = TextSelection.collapsed(offset: query.length);
+    setState(() {
+      _searchQuery = query;
+      _selectedSection = null;
+    });
   }
 
   void _handlePrimarySearchAction(
@@ -568,8 +554,18 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
         steps: [
           FeatureGuideStep(
             number: '1',
-            title: l10n.documentationGuideModalStepCountryTitle,
-            body: l10n.documentationGuideModalStepCountryBody,
+            title: _guideText(
+              context,
+              pt: 'Descreva o que precisa resolver',
+              es: 'Describe lo que necesitas resolver',
+              en: 'Describe what you need to solve',
+            ),
+            body: _guideText(
+              context,
+              pt: 'Busque com uma pergunta natural, como “quais documentos preciso para o CPF?” ou use uma sugestão.',
+              es: 'Busca con una pregunta natural, como “¿qué documentos necesito para el CPF?” o usa una sugerencia.',
+              en: 'Search with a natural question, such as “which documents do I need for CPF?”, or use a suggestion.',
+            ),
           ),
           FeatureGuideStep(
             number: '2',
@@ -584,127 +580,6 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
         ],
       ),
     );
-  }
-
-  bool get _hasActivePlan {
-    final selection = widget.journeyContextController?.selection;
-    if (selection?.destination != null) {
-      return true;
-    }
-    return widget.migrationQuestionnaireController?.generatedPlan != null;
-  }
-
-  List<CatalogCountry> _availableGuideCountries(BuildContext context) {
-    final journeyCountries =
-        widget.journeyContextController?.countries ?? const [];
-    final selectable = journeyCountries
-        .where((country) => country.coverage.canChooseAsDestination)
-        .toList(growable: false);
-    if (selectable.isNotEmpty) {
-      return selectable;
-    }
-    return MigrationGuideRegistry.defaultSupportedDestinations
-        .map(
-          (countryId) => CatalogCountry(
-            id: countryId,
-            name: context.l10n.countryLabel(countryId),
-            isoCode: countryId == 'brasil' ? 'BR' : countryId.toUpperCase(),
-          ),
-        )
-        .toList(growable: false);
-  }
-
-  CatalogCountry _selectedGuideCountry(
-    BuildContext context,
-    List<CatalogCountry> countries,
-  ) {
-    final preferredId =
-        MigrationGuideRegistry.normalizeCountryId(_selectedCountryId) ??
-        MigrationGuideRegistry.normalizeCountryId(
-          widget.journeyContextController?.destinationCountryId,
-        ) ??
-        MigrationGuideRegistry.normalizeCountryId(
-          widget
-              .migrationQuestionnaireController
-              ?.generatedPlan
-              ?.destinationCountry,
-        ) ??
-        countries.first.id;
-
-    for (final country in countries) {
-      if (country.id == preferredId) {
-        return country;
-      }
-    }
-    return countries.first;
-  }
-
-  String _localizedCountryName(BuildContext context, CatalogCountry country) {
-    final l10n = context.l10n;
-    final normalizedId =
-        MigrationGuideRegistry.normalizeCountryId(country.id) ?? country.id;
-
-    return switch (normalizedId) {
-      'argentina' => l10n.questionOptionArgentina,
-      'brasil' => l10n.questionOptionBrazil,
-      'chile' => l10n.countryLabel('chile'),
-      'uruguai' => l10n.countryLabel('uruguai'),
-      'paraguai' => l10n.countryLabel('paraguai'),
-      _ => country.name,
-    };
-  }
-
-  Future<void> _showCountryPicker(
-    BuildContext context,
-    List<CatalogCountry> countries,
-    String selectedCountryId,
-  ) async {
-    final selected = await showModalBottomSheet<CatalogCountry>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: FrostedPanel(
-              padding: const EdgeInsets.all(18),
-              borderRadius: BorderRadius.circular(28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (var index = 0; index < countries.length; index++) ...[
-                    _GuideCountryOptionTile(
-                      country: countries[index],
-                      countryLabel: _localizedCountryName(
-                        context,
-                        countries[index],
-                      ),
-                      selected: countries[index].id == selectedCountryId,
-                      onTap: () =>
-                          Navigator.of(sheetContext).pop(countries[index]),
-                    ),
-                    if (index != countries.length - 1)
-                      const SizedBox(height: 10),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-
-    if (selected == null || !mounted) {
-      return;
-    }
-
-    setState(() {
-      _selectedCountryId = selected.id;
-      _selectedSection = null;
-      _searchQuery = '';
-      _searchController.clear();
-    });
   }
 
   bool _matchesPath(_GuidePathMeta path) {
@@ -722,15 +597,15 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
   }
 
   bool _matchesSearch(List<String> values) {
-    final normalizedQuery = _normalizeSearch(_searchQuery);
+    final normalizedQuery = DocumentationGuideSearch.normalize(_searchQuery);
     if (normalizedQuery.isEmpty) {
       return true;
     }
-    final haystack = _normalizeSearch(values.join(' '));
-    final tokens = normalizedQuery
-        .split(RegExp(r'\s+'))
-        .where((token) => token.isNotEmpty);
-    return tokens.every(haystack.contains);
+    return _searchScore(values) > 0;
+  }
+
+  int _searchScore(List<String> values) {
+    return DocumentationGuideSearch.score(query: _searchQuery, values: values);
   }
 
   List<_DocumentationTopic> _topics(BuildContext context) =>
@@ -818,6 +693,40 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
         ],
       ),
       _GuidePathMeta(
+        section: DocumentationGuideSection.education,
+        icon: Icons.school_outlined,
+        title: _guideText(
+          context,
+          pt: 'Escola e universidade',
+          es: 'Escuela y universidad',
+          en: 'School and university',
+        ),
+        description: _guideText(
+          context,
+          pt: 'Entenda matrícula escolar, ensino público e particular, Enem, Sisu, PEC-G e documentos acadêmicos.',
+          es: 'Entiende matrícula escolar, educación pública y privada, Enem, Sisu, PEC-G y documentos académicos.',
+          en: 'Understand school enrollment, public and private education, Enem, Sisu, PEC-G, and academic documents.',
+        ),
+        accent: const Color(0xFFEAF2FF),
+        keywords: const [
+          'escola',
+          'escuela',
+          'school',
+          'universidade',
+          'universidad',
+          'university',
+          'faculdade',
+          'enem',
+          'sisu',
+          'pec-g',
+          'matricula',
+          'mensalidade',
+          'tuition',
+          'estudar',
+          'study',
+        ],
+      ),
+      _GuidePathMeta(
         section: DocumentationGuideSection.driving,
         icon: Icons.directions_car_outlined,
         title: l10n.documentationPathDrivingTitle,
@@ -888,13 +797,9 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
   }
 
   List<_GuideQuickAnswerMeta> _guideQuickAnswers(BuildContext context) {
-    if (_remoteQuickAnswers != null && _remoteQuickAnswers!.isNotEmpty) {
-      return _remoteQuickAnswers!;
-    }
-
     final l10n = context.l10n;
 
-    return [
+    final localAnswers = [
       _GuideQuickAnswerMeta(
         section: DocumentationGuideSection.work,
         icon: Icons.work_outline_rounded,
@@ -1056,6 +961,91 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
         ],
       ),
       _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.documents,
+        icon: Icons.luggage_outlined,
+        question: _guideText(
+          context,
+          pt: 'Quais documentos vale preparar antes de sair da Argentina?',
+          es: '¿Qué documentos conviene preparar antes de salir de Argentina?',
+          en: 'Which documents should I prepare before leaving Argentina?',
+        ),
+        answer: _guideText(
+          context,
+          pt: 'Comece por documento de viagem válido, certidões civis, antecedentes e históricos escolares ou acadêmicos aplicáveis. Confirme apostila, tradução e validade na fonte da etapa — a lista muda conforme família, estudo e uso profissional.',
+          es: 'Empieza por documento de viaje vigente, partidas civiles, antecedentes e historiales escolares o académicos aplicables. Confirma apostilla, traducción y vigencia en la fuente de cada etapa.',
+          en: 'Start with a valid travel document, civil certificates, criminal records, and relevant school or academic records. Check apostille, translation, and validity requirements for each step.',
+        ),
+        keywords: const [
+          'documentos levar trazer argentina antes viagem',
+          'certidao nascimento casamento antecedentes apostila traducao',
+          'documentos llevar traer argentina antes viaje',
+          'documents bring argentina before travel certificates apostille',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.education,
+        icon: Icons.child_care_rounded,
+        question: _guideText(
+          context,
+          pt: 'Meu filho estrangeiro pode estudar em escola pública?',
+          es: '¿Mi hijo extranjero puede estudiar en una escuela pública?',
+          en: 'Can my foreign child attend public school?',
+        ),
+        answer: _guideText(
+          context,
+          pt: 'Sim. Crianças e adolescentes migrantes têm direito à matrícula sem discriminação. A falta de histórico ou documento migratório não deve impedir o acesso; procure a Secretaria de Educação local.',
+          es: 'Sí. Los niños y adolescentes migrantes tienen derecho a matricularse sin discriminación. La falta de historial o documento migratorio no debe impedir el acceso.',
+          en: 'Yes. Migrant children and adolescents have a right to enrollment without discrimination. Missing school or migration records should not block access.',
+        ),
+        keywords: const [
+          'filho filha crianca escola publica matricula estrangeiro',
+          'hijo hija nino escuela publica matricula extranjero',
+          'child children public school enrollment foreign migrant',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.education,
+        icon: Icons.account_balance_rounded,
+        question: _guideText(
+          context,
+          pt: 'Como um estrangeiro entra em uma universidade no Brasil?',
+          es: '¿Cómo ingresa un extranjero a una universidad en Brasil?',
+          en: 'How can a foreign student enter a Brazilian university?',
+        ),
+        answer: _guideText(
+          context,
+          pt: 'A rota pode ser Enem/Sisu, vestibular próprio, transferência ou edital internacional, como o PEC-G para candidatos elegíveis. Universidade pública não cobra mensalidade, mas cada seleção define documentos e prazos.',
+          es: 'La vía puede ser Enem/Sisu, examen propio, transferencia o convocatoria internacional, como PEC-G para candidatos elegibles. La universidad pública no cobra mensualidad.',
+          en: 'Routes include Enem/Sisu, institution exams, transfer, or an international call such as PEC-G for eligible applicants. Public universities charge no tuition.',
+        ),
+        keywords: const [
+          'estudar estudo faculdade universidade estrangeiro ingresso enem sisu pecg',
+          'estudiar universidad extranjero ingreso enem sisu pecg',
+          'study college university foreign admission enem sisu pecg',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
+        section: DocumentationGuideSection.documents,
+        icon: Icons.translate_rounded,
+        question: _guideText(
+          context,
+          pt: 'Todo documento estrangeiro precisa de tradução juramentada?',
+          es: '¿Todo documento extranjero necesita traducción jurada?',
+          en: 'Does every foreign document require a sworn translation?',
+        ),
+        answer: _guideText(
+          context,
+          pt: 'Não existe uma regra única para todas as etapas. Verifique a exigência no órgão ou edital responsável antes de pagar por tradução ou apostilamento.',
+          es: 'No existe una regla única para todos los trámites. Confirma el requisito con el organismo o convocatoria antes de pagar traducción o apostilla.',
+          en: 'There is no single rule for every process. Check the responsible agency or admission notice before paying for translation or apostille services.',
+        ),
+        keywords: const [
+          'traducao juramentada apostila documento estrangeiro',
+          'traduccion jurada apostilla documento extranjero',
+          'sworn translation apostille foreign document',
+        ],
+      ),
+      _GuideQuickAnswerMeta(
         section: DocumentationGuideSection.costs,
         icon: Icons.savings_outlined,
         question: l10n.documentationPathCostsTitle,
@@ -1070,6 +1060,26 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
         ],
       ),
     ];
+
+    final remoteAnswers = _remoteQuickAnswers;
+    if (remoteAnswers == null || remoteAnswers.isEmpty) {
+      return localAnswers;
+    }
+
+    final remoteKeys = remoteAnswers
+        .map(
+          (answer) =>
+              '${answer.section.name}:${DocumentationGuideSearch.normalize(answer.question)}',
+        )
+        .toSet();
+    return [
+      ...remoteAnswers,
+      ...localAnswers.where(
+        (answer) => !remoteKeys.contains(
+          '${answer.section.name}:${DocumentationGuideSearch.normalize(answer.question)}',
+        ),
+      ),
+    ];
   }
 
   DocumentationGuideSection _sectionFromApi(String section) {
@@ -1077,6 +1087,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
       'documents' => DocumentationGuideSection.documents,
       'housing' => DocumentationGuideSection.housing,
       'health' => DocumentationGuideSection.health,
+      'education' => DocumentationGuideSection.education,
       'work' => DocumentationGuideSection.work,
       'driving' => DocumentationGuideSection.driving,
       'costs' => DocumentationGuideSection.costs,
@@ -1089,6 +1100,7 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
       DocumentationGuideSection.documents => Icons.badge_outlined,
       DocumentationGuideSection.housing => Icons.home_work_outlined,
       DocumentationGuideSection.health => Icons.health_and_safety_outlined,
+      DocumentationGuideSection.education => Icons.school_outlined,
       DocumentationGuideSection.work => Icons.work_outline_rounded,
       DocumentationGuideSection.driving => Icons.directions_car_outlined,
       DocumentationGuideSection.costs => Icons.wallet_outlined,
@@ -1119,6 +1131,82 @@ List<_DocumentationTopic> _documentationTopics(BuildContext context) {
           'https://www.argentina.gob.ar/interior/migraciones/documentacion-para-salir-o-ingresar-al-pais',
     ),
     _DocumentationTopic(
+      icon: Icons.fact_check_outlined,
+      title: _guideText(
+        context,
+        pt: 'Antecedentes e certidões da Argentina',
+        es: 'Antecedentes y partidas de Argentina',
+        en: 'Argentine criminal and civil records',
+      ),
+      summary: _guideText(
+        context,
+        pt: 'Prepare no país de origem os documentos que podem ser mais difíceis de obter depois da mudança.',
+        es: 'Prepara en el país de origen los documentos que pueden ser más difíciles de obtener después de mudarte.',
+        en: 'Prepare in your home country the records that may be harder to obtain after moving.',
+      ),
+      bullets: [
+        _guideText(
+          context,
+          pt: 'Confira antecedentes exigidos pela sua rota de residência e o prazo aceito.',
+          es: 'Confirma los antecedentes exigidos por tu vía de residencia y el plazo aceptado.',
+          en: 'Check the criminal records required by your residence route and accepted validity.',
+        ),
+        _guideText(
+          context,
+          pt: 'Separe certidões de nascimento, casamento e filiação quando forem aplicáveis à família.',
+          es: 'Separa partidas de nacimiento, matrimonio y filiación cuando correspondan a la familia.',
+          en: 'Prepare birth, marriage, and parentage certificates when relevant to the family.',
+        ),
+        _guideText(
+          context,
+          pt: 'Guarde originais e cópias digitais legíveis antes da viagem.',
+          es: 'Guarda originales y copias digitales legibles antes del viaje.',
+          en: 'Keep originals and readable digital copies before travel.',
+        ),
+      ],
+      sourceNameKey: 'policia_federal',
+      sourceUrl:
+          'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia/acordo-de-residencia-brasil-e-argentina',
+    ),
+    _DocumentationTopic(
+      icon: Icons.translate_outlined,
+      title: _guideText(
+        context,
+        pt: 'Apostila e tradução: quando fazer',
+        es: 'Apostilla y traducción: cuándo hacerlas',
+        en: 'Apostille and translation: when to use them',
+      ),
+      summary: _guideText(
+        context,
+        pt: 'Evite pagar por todos os documentos sem antes conferir a exigência do órgão, escola ou universidade.',
+        es: 'Evita pagar por todos los documentos sin confirmar antes el requisito del organismo, escuela o universidad.',
+        en: 'Avoid paying for every document before checking the agency, school, or university requirement.',
+      ),
+      bullets: [
+        _guideText(
+          context,
+          pt: 'Apostilamento autentica a origem do documento; não substitui tradução.',
+          es: 'La apostilla autentica el origen del documento; no sustituye la traducción.',
+          en: 'An apostille authenticates a document’s origin; it does not replace translation.',
+        ),
+        _guideText(
+          context,
+          pt: 'A necessidade de tradução depende da etapa e da autoridade responsável.',
+          es: 'La necesidad de traducción depende del trámite y de la autoridad responsable.',
+          en: 'Translation requirements depend on the process and responsible authority.',
+        ),
+        _guideText(
+          context,
+          pt: 'Confirme formato, validade e exceções diretamente na fonte oficial.',
+          es: 'Confirma formato, vigencia y excepciones directamente en la fuente oficial.',
+          en: 'Confirm format, validity, and exceptions directly with the official source.',
+        ),
+      ],
+      sourceNameKey: 'policia_federal',
+      sourceUrl:
+          'https://www.gov.br/pf/pt-br/assuntos/imigracao/organizar/duvidas-frequentes2/mais-informacoes/legalizacao-apostilamento-e-traducao',
+    ),
+    _DocumentationTopic(
       icon: Icons.badge_outlined,
       title: l10n.documentationCpfTitle,
       summary: l10n.documentationCpfSummary,
@@ -1129,7 +1217,7 @@ List<_DocumentationTopic> _documentationTopics(BuildContext context) {
       ],
       sourceNameKey: 'receita_federal_govbr',
       sourceUrl:
-          'https://www.gov.br/pt-br/servicos/inscrever-no-cpf-no-exterior',
+          'https://www.gov.br/pt-br/servicos/inscrever-no-cpf?id=10416&origem=servico',
     ),
     _DocumentationTopic(
       icon: Icons.perm_identity_rounded,
@@ -1172,16 +1260,16 @@ List<_DocumentationTopic> _documentationTopics(BuildContext context) {
     ),
     _DocumentationTopic(
       icon: Icons.flag_outlined,
-      title: l10n.documentationCitizenshipTitle,
-      summary: l10n.documentationCitizenshipSummary,
+      title: l10n.documentationResidenceChecklistTitle,
+      summary: l10n.documentationResidenceChecklistSummary,
       bullets: [
-        l10n.documentationCitizenshipBulletOne,
-        l10n.documentationCitizenshipBulletTwo,
-        l10n.documentationCitizenshipBulletThree,
+        l10n.documentationResidenceChecklistBulletOne,
+        l10n.documentationResidenceChecklistBulletTwo,
+        l10n.documentationResidenceChecklistBulletThree,
       ],
-      sourceNameKey: 'ministerio_justica',
+      sourceNameKey: 'policia_federal',
       sourceUrl:
-          'https://www.gov.br/mj/pt-br/assuntos/seus-direitos/migracoes/naturalizacao/o-que-e-naturalizacao/naturalizacao-ordinaria',
+          'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia/acordo-de-residencia-brasil-e-argentina',
     ),
     _DocumentationTopic(
       icon: Icons.health_and_safety_outlined,
@@ -1428,9 +1516,25 @@ class DocumentationTopicPage extends StatelessWidget {
                     topic.title == l10n.documentationRegistrationTitle ||
                     topic.title == l10n.documentationStayTitle ||
                     topic.title == l10n.documentationWorkBankTitle ||
-                    topic.title == l10n.documentationCitizenshipTitle;
+                    topic.title == l10n.documentationResidenceChecklistTitle ||
+                    topic.title ==
+                        _guideText(
+                          context,
+                          pt: 'Antecedentes e certidões da Argentina',
+                          es: 'Antecedentes y partidas de Argentina',
+                          en: 'Argentine criminal and civil records',
+                        ) ||
+                    topic.title ==
+                        _guideText(
+                          context,
+                          pt: 'Apostila e tradução: quando fazer',
+                          es: 'Apostilla y traducción: cuándo hacerlas',
+                          en: 'Apostille and translation: when to use them',
+                        );
               }).toList(),
             ),
+            const SizedBox(height: 12),
+            const ContextualPhraseSupportCard(groupKey: 'documents'),
           ],
         );
       case DocumentationGuideSection.housing:
@@ -1447,6 +1551,8 @@ class DocumentationTopicPage extends StatelessWidget {
             const SizedBox(height: 12),
             const HousingSoftLandingSection(),
             const SizedBox(height: 12),
+            const ContextualPhraseSupportCard(groupKey: 'rental'),
+            const SizedBox(height: 12),
             _TopicGrid(
               topics: topics.where((topic) {
                 return topic.title == l10n.documentationSafetyTitle;
@@ -1461,6 +1567,8 @@ class DocumentationTopicPage extends StatelessWidget {
           sections: [
             _HealthDecisionsSection(l10n: l10n),
             const SizedBox(height: 12),
+            const ContextualPhraseSupportCard(groupKey: 'health'),
+            const SizedBox(height: 12),
             _TopicGrid(
               topics: topics.where((topic) {
                 return topic.title == l10n.documentationHealthPublicTitle ||
@@ -1470,12 +1578,34 @@ class DocumentationTopicPage extends StatelessWidget {
             ),
           ],
         );
+      case DocumentationGuideSection.education:
+        return _DocumentationSectionDetails(
+          title: _guideText(
+            context,
+            pt: 'Escola e universidade',
+            es: 'Escuela y universidad',
+            en: 'School and university',
+          ),
+          description: _guideText(
+            context,
+            pt: 'Direitos, caminhos de ingresso, documentos e custos para famílias e estudantes estrangeiros.',
+            es: 'Derechos, vías de ingreso, documentos y costos para familias y estudiantes extranjeros.',
+            en: 'Rights, admission routes, documents, and costs for foreign families and students.',
+          ),
+          sections: const [
+            EducationOverviewSection(),
+            SizedBox(height: 12),
+            ContextualPhraseSupportCard(groupKey: 'education'),
+          ],
+        );
       case DocumentationGuideSection.work:
         return _DocumentationSectionDetails(
           title: l10n.documentationPathWorkTitle,
           description: l10n.documentationPathWorkBody,
           sections: [
             _WorkModelsSection(l10n: l10n),
+            const SizedBox(height: 12),
+            const ContextualPhraseSupportCard(groupKey: 'work'),
             const SizedBox(height: 12),
             _TopicGrid(
               topics: topics.where((topic) {
@@ -1681,7 +1811,6 @@ class _GuideSearchField extends StatelessWidget {
     required this.onSubmitted,
     required this.onChanged,
     required this.onClear,
-    this.enabled = true,
   });
 
   final TextEditingController controller;
@@ -1689,7 +1818,6 @@ class _GuideSearchField extends StatelessWidget {
   final ValueChanged<String> onSubmitted;
   final ValueChanged<String>? onChanged;
   final VoidCallback? onClear;
-  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -1701,9 +1829,8 @@ class _GuideSearchField extends StatelessWidget {
 
     return TextField(
       controller: controller,
-      onSubmitted: enabled ? onSubmitted : null,
-      onChanged: enabled ? onChanged : null,
-      enabled: enabled,
+      onSubmitted: onSubmitted,
+      onChanged: onChanged,
       style: Theme.of(
         context,
       ).textTheme.bodyLarge?.copyWith(color: textPrimary),
@@ -1752,184 +1879,112 @@ class _GuideSearchField extends StatelessWidget {
   }
 }
 
-class _GuideCountryBar extends StatelessWidget {
-  const _GuideCountryBar({
-    required this.selectedCountry,
-    required this.selectedCountryLabel,
-    required this.hasActivePlan,
-    required this.hasGuideData,
-    required this.onTapCountry,
-  });
+class _GuideSearchIntro extends StatelessWidget {
+  const _GuideSearchIntro({required this.onSuggestionTap});
 
-  final CatalogCountry selectedCountry;
-  final String selectedCountryLabel;
-  final bool hasActivePlan;
-  final bool hasGuideData;
-  final VoidCallback onTapCountry;
+  final ValueChanged<String> onSuggestionTap;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
+    final suggestions = [
+      _guideText(
+        context,
+        pt: 'Quais documentos preciso levar?',
+        es: '¿Qué documentos necesito llevar?',
+        en: 'Which documents should I bring?',
+      ),
+      _guideText(
+        context,
+        pt: 'Como tirar CPF e residência?',
+        es: '¿Cómo sacar CPF y residencia?',
+        en: 'How do I get CPF and residence?',
+      ),
+      _guideText(
+        context,
+        pt: 'Como matricular meus filhos?',
+        es: '¿Cómo matriculo a mis hijos?',
+        en: 'How do I enroll my children?',
+      ),
+      _guideText(
+        context,
+        pt: 'Como estudar na universidade?',
+        es: '¿Cómo estudio en la universidad?',
+        en: 'How do I attend university?',
+      ),
+      _guideText(
+        context,
+        pt: 'Quanto custa a chegada?',
+        es: '¿Cuánto cuesta la llegada?',
+        en: 'How much does arrival cost?',
+      ),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.documentationGuideCountryLabel,
-          style: Theme.of(
-            context,
-          ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          hasActivePlan
-              ? l10n.documentationGuideCountryBodyFromPlan(selectedCountryLabel)
-              : l10n.documentationGuideCountryBodyManual(selectedCountryLabel),
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.textSoftFor(context),
-            height: 1.35,
-          ),
-        ),
-        const SizedBox(height: 12),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: onTapCountry,
-                icon: Text(
-                  selectedCountry.flagEmoji,
-                  style: const TextStyle(fontSize: 18),
-                ),
-                label: Text(selectedCountryLabel),
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: const Icon(
+                Icons.manage_search_rounded,
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(width: 12),
-            _GuideStatusChip(
-              label: hasActivePlan
-                  ? l10n.documentationGuideUsingPlanLabel
-                  : l10n.documentationGuideManualCountryLabel,
-              highlighted: hasGuideData,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _guideText(
+                      context,
+                      pt: 'O que você precisa resolver?',
+                      es: '¿Qué necesitas resolver?',
+                      en: 'What do you need to solve?',
+                    ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    _guideText(
+                      context,
+                      pt: 'Escreva sua dúvida do seu jeito. A busca relaciona documentos, serviços, custos e fontes oficiais.',
+                      es: 'Escribe tu duda con tus palabras. La búsqueda relaciona documentos, servicios, costos y fuentes oficiales.',
+                      en: 'Ask in your own words. Search connects documents, services, costs, and official sources.',
+                    ),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-      ],
-    );
-  }
-}
-
-class _GuideStatusChip extends StatelessWidget {
-  const _GuideStatusChip({required this.label, this.highlighted = true});
-
-  final String label;
-  final bool highlighted;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: highlighted
-            ? AppColors.primary.withValues(alpha: 0.10)
-            : AppColors.warning.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: highlighted
-              ? AppColors.primary.withValues(alpha: 0.14)
-              : AppColors.warning.withValues(alpha: 0.18),
-        ),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: highlighted ? AppColors.primary : AppColors.warning,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    );
-  }
-}
-
-class _GuideStatusNotice extends StatelessWidget {
-  const _GuideStatusNotice({required this.title, required this.body});
-
-  final String title;
-  final String body;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMutedFor(context),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.borderFor(context)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            body,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.35,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _GuideCountryOptionTile extends StatelessWidget {
-  const _GuideCountryOptionTile({
-    required this.country,
-    required this.countryLabel,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final CatalogCountry country;
-  final String countryLabel;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: selected
-          ? AppColors.primary.withValues(alpha: 0.12)
-          : Colors.transparent,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          child: Row(
-            children: [
-              Text(country.flagEmoji, style: const TextStyle(fontSize: 22)),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  countryLabel,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
-                ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final suggestion in suggestions)
+              ActionChip(
+                avatar: const Icon(Icons.auto_awesome_rounded, size: 16),
+                label: Text(suggestion),
+                onPressed: () => onSuggestionTap(suggestion),
               ),
-              if (selected)
-                const Icon(Icons.check_rounded, color: AppColors.primary),
-            ],
-          ),
+          ],
         ),
-      ),
+      ],
     );
   }
 }
@@ -2048,6 +2103,22 @@ class _SearchResultTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (result.directAnswer) ...[
+                      Text(
+                        _guideText(
+                          context,
+                          pt: 'RESPOSTA DIRETA',
+                          es: 'RESPUESTA DIRECTA',
+                          en: 'DIRECT ANSWER',
+                        ),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                    ],
                     Text(
                       result.title,
                       maxLines: 2,
@@ -2136,6 +2207,7 @@ class _GuideResultsSection extends StatelessWidget {
     required this.filteredAnswers,
     required this.hasActiveFilter,
     required this.onOpenSection,
+    required this.onAskAssistant,
   });
 
   final dynamic l10n;
@@ -2143,6 +2215,7 @@ class _GuideResultsSection extends StatelessWidget {
   final List<_GuideQuickAnswerMeta> filteredAnswers;
   final bool hasActiveFilter;
   final ValueChanged<DocumentationGuideSection> onOpenSection;
+  final VoidCallback onAskAssistant;
 
   @override
   Widget build(BuildContext context) {
@@ -2160,6 +2233,19 @@ class _GuideResultsSection extends StatelessWidget {
               l10n.documentationNoResultsBody,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppColors.textSoftFor(context),
+              ),
+            ),
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: onAskAssistant,
+              icon: const Icon(Icons.auto_awesome_rounded),
+              label: Text(
+                _guideText(
+                  context,
+                  pt: 'Perguntar ao assistente',
+                  es: 'Preguntar al asistente',
+                  en: 'Ask the assistant',
+                ),
               ),
             ),
           ],
@@ -2811,42 +2897,6 @@ class _TopicGrid extends StatelessWidget {
   }
 }
 
-String _normalizeSearch(String value) {
-  const replacements = {
-    'á': 'a',
-    'à': 'a',
-    'â': 'a',
-    'ã': 'a',
-    'ä': 'a',
-    'é': 'e',
-    'è': 'e',
-    'ê': 'e',
-    'ë': 'e',
-    'í': 'i',
-    'ì': 'i',
-    'î': 'i',
-    'ï': 'i',
-    'ó': 'o',
-    'ò': 'o',
-    'ô': 'o',
-    'õ': 'o',
-    'ö': 'o',
-    'ú': 'u',
-    'ù': 'u',
-    'û': 'u',
-    'ü': 'u',
-    'ç': 'c',
-    'ñ': 'n',
-  };
-
-  var normalized = value.toLowerCase();
-  replacements.forEach((from, to) {
-    normalized = normalized.replaceAll(from, to);
-  });
-
-  return normalized.replaceAll(RegExp(r'[^a-z0-9\s]'), ' ');
-}
-
 class _GuidePathMeta {
   const _GuidePathMeta({
     required this.section,
@@ -2887,12 +2937,14 @@ class _GuideSearchResultMeta {
     required this.title,
     required this.subtitle,
     required this.section,
+    this.directAnswer = false,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
   final DocumentationGuideSection section;
+  final bool directAnswer;
 }
 
 class _PathCard extends StatelessWidget {

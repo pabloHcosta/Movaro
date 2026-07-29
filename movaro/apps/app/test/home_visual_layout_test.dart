@@ -28,7 +28,7 @@ void main() {
             onExploreCitiesTap: () {},
             onOpenCostsTap: () {},
             onOpenDocumentsTap: () {},
-            onLearnPortugueseTap: () {},
+            onOpenHousingTap: () {},
           ),
         ),
       ),
@@ -62,6 +62,9 @@ void main() {
     );
     expect(find.text('Atalhos úteis'), findsOneWidget);
     expect(find.text('Explorar cidades'), findsOneWidget);
+    expect(find.text('Planejar custos iniciais'), findsOneWidget);
+    expect(find.text('Guia prático'), findsWidgets);
+    expect(find.text('Moradia e chegada'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

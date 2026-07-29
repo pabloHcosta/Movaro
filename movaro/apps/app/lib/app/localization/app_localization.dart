@@ -571,39 +571,39 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String introRedesignCityTitle() => _localizedText(
-    pt: 'Ache a cidade certa para trabalhar e recomeçar',
-    es: 'Encontrá la ciudad ideal para trabajar y arrancar de nuevo',
-    en: 'Find the right city to work and start over',
+    pt: 'Escolha onde sua nova vida pode começar',
+    es: 'Elegí dónde puede empezar tu nueva vida',
+    en: 'Choose where your new life can begin',
   );
 
   String introRedesignCityDescription() => _localizedText(
-    pt: 'Comparamos trabalho, custo de vida e distância da Argentina para você escolher com segurança — mesmo começando com pouco.',
-    es: 'Comparamos trabajo, costo de vida y distancia con Argentina para que elijas con seguridad, incluso si arrancás con poco.',
-    en: 'We compare jobs, cost of living, and distance from Argentina so you can choose with confidence — even if you are starting with little.',
+    pt: 'Compare custo, trabalho, segurança e adaptação para escolher sua cidade com mais confiança.',
+    es: 'Compará costo, trabajo, seguridad y adaptación para elegir tu ciudad con más confianza.',
+    en: 'Compare costs, jobs, safety, and adaptation to choose your city with more confidence.',
   );
 
   String introRedesignPlanTitle() => _localizedText(
-    pt: 'Um plano claro do que fazer primeiro',
-    es: 'Un plan claro de qué hacer primero',
-    en: 'A clear plan of what to do first',
+    pt: 'Transforme dúvidas em um plano possível',
+    es: 'Convertí tus dudas en un plan posible',
+    en: 'Turn uncertainty into a practical plan',
   );
 
   String introRedesignPlanDescription() => _localizedText(
-    pt: 'Suas respostas viram um passo a passo prático: cidade, documentos e os primeiros 90 dias no Brasil.',
-    es: 'Tus respuestas se vuelven un paso a paso práctico: ciudad, documentos y los primeros 90 días en Brasil.',
-    en: 'Your answers become a practical step-by-step: city, documents, and your first 90 days in Brazil.',
+    pt: 'Conte o que busca e receba prioridades claras para decidir e preparar sua mudança.',
+    es: 'Contanos qué buscás y recibí prioridades claras para decidir y preparar tu mudanza.',
+    en: 'Tell us what you need and get clear priorities to decide and prepare your move.',
   );
 
   String introRedesignGuideTitle() => _localizedText(
-    pt: 'Resolva a papelada sem se perder',
-    es: 'Resolvé los trámites sin perderte',
-    en: 'Handle the paperwork without getting lost',
+    pt: 'Saiba o que fazer — e em que ordem',
+    es: 'Sabé qué hacer y en qué orden',
+    en: 'Know what to do — and in what order',
   );
 
   String introRedesignGuideDescription() => _localizedText(
-    pt: 'CPF, residência Mercosul, conta no banco e aluguel — na ordem certa, com fontes oficiais.',
-    es: 'CPF, residencia Mercosur, cuenta bancaria y alquiler — en el orden correcto y con fuentes oficiales.',
-    en: 'CPF, Mercosur residency, bank account, and rent — in the right order, with official sources.',
+    pt: 'Organize documentos, moradia, dinheiro e chegada com fontes oficiais.',
+    es: 'Organizá documentos, vivienda, dinero y llegada con fuentes oficiales.',
+    en: 'Organize documents, housing, money, and arrival with official sources.',
   );
 
   String introRedesignLocationTitle() => _localizedText(
@@ -2705,6 +2705,24 @@ extension AppLocalizationsFormatting on AppLocalizations {
         return planStepTitleResidencePath;
       case 'step_cpf_start':
         return planStepTitleCpfStart;
+      case 'step_education_admission_route':
+        return _localizedText(
+          pt: 'Defina sua rota de ingresso no ensino superior',
+          es: 'Define tu vía de ingreso a la educación superior',
+          en: 'Choose your higher-education admission route',
+        );
+      case 'step_education_documents':
+        return _localizedText(
+          pt: 'Prepare seus documentos acadêmicos',
+          es: 'Prepara tus documentos académicos',
+          en: 'Prepare your academic documents',
+        );
+      case 'step_school_enrollment':
+        return _localizedText(
+          pt: 'Planeje a matrícula escolar das crianças',
+          es: 'Planifica la matrícula escolar de los niños',
+          en: 'Plan children’s school enrollment',
+        );
       default:
         return value;
     }
@@ -2874,6 +2892,24 @@ extension AppLocalizationsFormatting on AppLocalizations {
         return planStepDescriptionResidencePathFundingUnknown;
       case 'step_desc_cpf_start':
         return planStepDescriptionCpfStart;
+      case 'step_desc_education_admission_route':
+        return _localizedText(
+          pt: 'Compare Enem/Sisu, vestibular próprio, transferência, PEC-G e processos internacionais da instituição.',
+          es: 'Compara Enem/Sisu, examen propio, transferencia, PEC-G y procesos internacionales de la institución.',
+          en: 'Compare Enem/Sisu, institution exams, transfer, PEC-G, and international admission routes.',
+        );
+      case 'step_desc_education_documents':
+        return _localizedText(
+          pt: 'Confirme no edital diploma ou certificado, histórico, apostilamento, tradução e proficiência exigidos.',
+          es: 'Confirma en la convocatoria diploma o certificado, historial, apostilla, traducción y dominio del idioma exigidos.',
+          en: 'Check the rules for certificates, transcripts, apostilles, translations, and language proficiency.',
+        );
+      case 'step_desc_school_enrollment':
+        return _localizedText(
+          pt: 'Localize a rede pública ou particular e reúna os documentos disponíveis sem adiar o direito à matrícula.',
+          es: 'Ubica la red pública o privada y reúne los documentos disponibles sin postergar el derecho a matrícula.',
+          en: 'Find the public or private school network and gather available documents without delaying enrollment rights.',
+        );
       default:
         return value;
     }
@@ -2893,6 +2929,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
         return stepCategoryResearch;
       case 'planning':
         return stepCategoryPlanning;
+      case 'education':
+        return _localizedText(pt: 'Educação', es: 'Educación', en: 'Education');
       default:
         return value;
     }

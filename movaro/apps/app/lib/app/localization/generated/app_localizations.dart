@@ -127,13 +127,13 @@ abstract class AppLocalizations {
   /// No description provided for @splashHeroTitle.
   ///
   /// In en, this message translates to:
-  /// **'Migration planning with more clarity.'**
+  /// **'Compare cities. Organize your move. Move forward with clarity.'**
   String get splashHeroTitle;
 
   /// No description provided for @splashHeroBody.
   ///
   /// In en, this message translates to:
-  /// **'Loading cities, costs, and practical context to shape your first route.'**
+  /// **'Preparing cities, costs, and guidance for your next step.'**
   String get splashHeroBody;
 
   /// No description provided for @splashInitializingLabel.
@@ -1648,7 +1648,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationPathDocumentsBody.
   ///
   /// In en, this message translates to:
-  /// **'CPF, registration, stay timing, and what usually unlocks practical life first.'**
+  /// **'Argentina → Brazil route checklist: travel ID, CPF, residence, CRNM, and the supporting documents that help you carry out your plan.'**
   String get documentationPathDocumentsBody;
 
   /// No description provided for @documentationPathHealthTitle.
@@ -1948,13 +1948,13 @@ abstract class AppLocalizations {
   /// No description provided for @documentationCostsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Approximate costs that help with first decisions'**
+  /// **'A starting-cost overview'**
   String get documentationCostsTitle;
 
   /// No description provided for @documentationCostsBody.
   ///
   /// In en, this message translates to:
-  /// **'When a national value or a useful official reference exists, the app shows an approximate conversion to support your first reading.'**
+  /// **'See what typically belongs in the Argentina → Brazil route budget. Federal amounts are shown per person; housing, supporting documents, and private health depend on your situation.'**
   String get documentationCostsBody;
 
   /// No description provided for @documentationCostsUpdatedAt.
@@ -1972,7 +1972,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationCostsDisclaimer.
   ///
   /// In en, this message translates to:
-  /// **'Use this as early guidance only. Costs vary by state, provider, age, coverage, and local rules.'**
+  /// **'Official references checked in July 2026. Confirm amounts before paying: exemptions, residence category, city, required documents, and personal choices can change the total.'**
   String get documentationCostsDisclaimer;
 
   /// No description provided for @documentationCostFreeValue.
@@ -1987,59 +1987,89 @@ abstract class AppLocalizations {
   /// **'Variable'**
   String get documentationCostVariableValue;
 
+  /// No description provided for @documentationCostMigrationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Residence + CRNM issuance'**
+  String get documentationCostMigrationTitle;
+
+  /// No description provided for @documentationCostMigrationValue.
+  ///
+  /// In en, this message translates to:
+  /// **'R\$ 372.90 per person'**
+  String get documentationCostMigrationValue;
+
+  /// No description provided for @documentationCostMigrationSupporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined federal fees for residence authorization (R\$ 168.13) and CRNM issuance (R\$ 204.77), when both apply.'**
+  String get documentationCostMigrationSupporting;
+
   /// No description provided for @documentationCostCpfTitle.
   ///
   /// In en, this message translates to:
-  /// **'Official CPF request'**
+  /// **'CPF registration'**
   String get documentationCostCpfTitle;
+
+  /// No description provided for @documentationCostCpfValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Free or R\$ 7'**
+  String get documentationCostCpfValue;
 
   /// No description provided for @documentationCostCpfSupporting.
   ///
   /// In en, this message translates to:
-  /// **'The official request is free; the app treats it as zero cost.'**
+  /// **'The official request is free. The Revenue Service lists a R\$ 7 fee only at partner offices; no intermediary is required.'**
   String get documentationCostCpfSupporting;
 
   /// No description provided for @documentationCostSusCardTitle.
   ///
   /// In en, this message translates to:
-  /// **'SUS card and first registration'**
+  /// **'SUS access and National Health Card'**
   String get documentationCostSusCardTitle;
 
   /// No description provided for @documentationCostSusCardSupporting.
   ///
   /// In en, this message translates to:
-  /// **'Public registration and issuance do not usually require direct payment.'**
+  /// **'SUS access is free for anyone in Brazil, regardless of migration status. The card helps with registration but must not prevent care.'**
   String get documentationCostSusCardSupporting;
 
-  /// No description provided for @documentationCostPublicCareTitle.
+  /// No description provided for @documentationCostHousingTitle.
   ///
   /// In en, this message translates to:
-  /// **'Initial SUS care'**
-  String get documentationCostPublicCareTitle;
+  /// **'Rental guarantee'**
+  String get documentationCostHousingTitle;
 
-  /// No description provided for @documentationCostPublicCareSupporting.
+  /// No description provided for @documentationCostHousingValue.
   ///
   /// In en, this message translates to:
-  /// **'A UBS, health post, or public entry point does not work like a paid private consultation.'**
-  String get documentationCostPublicCareSupporting;
+  /// **'Up to 3 months\' rent'**
+  String get documentationCostHousingValue;
 
-  /// No description provided for @documentationCostDrivingTitle.
+  /// No description provided for @documentationCostHousingSupporting.
   ///
   /// In en, this message translates to:
-  /// **'First driving license'**
-  String get documentationCostDrivingTitle;
+  /// **'When a lease uses a cash deposit, tenancy law limits it to three months\' rent. Other guarantee types have their own costs.'**
+  String get documentationCostHousingSupporting;
 
-  /// No description provided for @documentationCostDrivingValue.
+  /// No description provided for @documentationCostHousingSource.
   ///
   /// In en, this message translates to:
-  /// **'Official example'**
-  String get documentationCostDrivingValue;
+  /// **'Tenancy Law'**
+  String get documentationCostHousingSource;
 
-  /// No description provided for @documentationCostDrivingSupporting.
+  /// No description provided for @documentationCostDocumentsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Recent Detran-ES reference: R\$ 533.34. Your state and driving school may charge differently.'**
-  String get documentationCostDrivingSupporting;
+  /// **'Certificates, legalization, and translation'**
+  String get documentationCostDocumentsTitle;
+
+  /// No description provided for @documentationCostDocumentsSupporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth or marriage certificates and criminal records may be required. The Argentina → Brazil route has specific exemptions, but extra documents can create variable costs.'**
+  String get documentationCostDocumentsSupporting;
 
   /// No description provided for @documentationCostPrivateHealthTitle.
   ///
@@ -2050,7 +2080,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationCostPrivateHealthSupporting.
   ///
   /// In en, this message translates to:
-  /// **'There is no single national price. Age, coverage, network, and waiting periods can significantly change the final cost.'**
+  /// **'It is optional and does not replace SUS. Age, coverage, network, geographic scope, and copay determine the final price.'**
   String get documentationCostPrivateHealthSupporting;
 
   /// No description provided for @documentationCpfTitle.
@@ -2062,19 +2092,19 @@ abstract class AppLocalizations {
   /// No description provided for @documentationCpfSummary.
   ///
   /// In en, this message translates to:
-  /// **'The first practical document that helps with banking, contracts, and registrations.'**
+  /// **'An important registration for banking, contracts, work, and services, but it does not replace migration regularization.'**
   String get documentationCpfSummary;
 
   /// No description provided for @documentationCpfBulletOne.
   ///
   /// In en, this message translates to:
-  /// **'A foreign national can request a CPF; in Brazil, the process can be started online or through a partnered entity.'**
+  /// **'Resident and nonresident foreign nationals can request a CPF. The official service is free; partner offices charge R\$ 7.'**
   String get documentationCpfBulletOne;
 
   /// No description provided for @documentationCpfBulletTwo.
   ///
   /// In en, this message translates to:
-  /// **'The official service lists an estimated time of up to 30 calendar days.'**
+  /// **'Bring an official photo ID and, if it omits birthplace, parentage, or date of birth, an equivalent civil certificate.'**
   String get documentationCpfBulletTwo;
 
   /// No description provided for @documentationCpfBulletThree.
@@ -2232,6 +2262,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'There are official cases that reduce that period, so it is worth checking the exact rule before planning your path.'**
   String get documentationCitizenshipBulletThree;
+
+  /// No description provided for @documentationResidenceChecklistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Argentina → Brazil residence checklist'**
+  String get documentationResidenceChecklistTitle;
+
+  /// No description provided for @documentationResidenceChecklistSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare documents before traveling so a missing certificate or proof does not interrupt your Federal Police application.'**
+  String get documentationResidenceChecklistSummary;
+
+  /// No description provided for @documentationResidenceChecklistBulletOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Have a valid DNI or passport and proof of regular entry into Brazil.'**
+  String get documentationResidenceChecklistBulletOne;
+
+  /// No description provided for @documentationResidenceChecklistBulletTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare a birth or marriage certificate when your ID omits parentage, plus criminal records from countries where you lived during the previous five years.'**
+  String get documentationResidenceChecklistBulletTwo;
+
+  /// No description provided for @documentationResidenceChecklistBulletThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm legalization and translation for your migration basis: the Brazil–Argentina agreement provides specific exemptions, but the Federal Police may request additional documents.'**
+  String get documentationResidenceChecklistBulletThree;
 
   /// No description provided for @documentationHealthPublicTitle.
   ///
@@ -2626,13 +2686,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingHeadline.
   ///
   /// In en, this message translates to:
-  /// **'To start, choose your origin and destination'**
+  /// **'Start with the route that makes sense for you'**
   String get onboardingHeadline;
 
   /// No description provided for @onboardingDescription.
   ///
   /// In en, this message translates to:
-  /// **'That helps us organize the next steps in the right way for you.'**
+  /// **'Choose your origin and destination to personalize cities, costs, documents, and next steps.'**
   String get onboardingDescription;
 
   /// No description provided for @onboardingOriginLabel.
@@ -11219,14 +11279,20 @@ abstract class AppLocalizations {
   /// No description provided for @homeVisualCostsAction.
   ///
   /// In en, this message translates to:
-  /// **'See what it may cost'**
+  /// **'Plan initial costs'**
   String get homeVisualCostsAction;
 
   /// No description provided for @homeVisualDocumentsAction.
   ///
   /// In en, this message translates to:
-  /// **'Understand documents'**
+  /// **'Practical guide'**
   String get homeVisualDocumentsAction;
+
+  /// No description provided for @homeVisualHousingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Housing and arrival'**
+  String get homeVisualHousingAction;
 
   /// No description provided for @homeVisualStartAction.
   ///

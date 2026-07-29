@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
+import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 enum LandingBudgetScenario { lean, balanced, comfortable }
@@ -50,13 +51,21 @@ class LandingBudgetEstimate {
 class LandingBudgetEstimator {
   const LandingBudgetEstimator._();
 
-  static LandingBudgetEstimate build({required MigrationPlan plan}) {
-    final cityBudget = plan.currentPlanCity?.budgetSnapshot;
-    final monthlyBase = _resolveMonthlyBase(plan, cityBudget);
+  static LandingBudgetEstimate build({
+    required MigrationPlan plan,
+    City? explicitPreviewCity,
+  }) {
+    // A recommended/leading city is still discovery data. Local costs may only
+    // enter the executable plan after the user explicitly confirms the city.
+    final confirmedCity = plan.isCityConfirmed ? plan.confirmedCity : null;
+    final budgetCity = confirmedCity ?? explicitPreviewCity;
+    final cityBudget = budgetCity?.budgetSnapshot;
+    final householdFactor = _householdFactor(plan);
+    final monthlyBase = _resolveMonthlyBase(plan, cityBudget, budgetCity);
 
     return LandingBudgetEstimate(
       summaryKey: _summaryKey(plan.timeline),
-      cityContext: plan.currentPlanCity?.name,
+      cityContext: budgetCity?.name,
       scenarios: [
         _scenario(
           scenario: LandingBudgetScenario.lean,
@@ -66,6 +75,7 @@ class LandingBudgetEstimator {
             LandingBudgetScenario.lean,
             monthlyBase,
             cityBudget,
+            householdFactor,
           ),
           setupBase: _resolveSetupBase(
             plan,
@@ -73,6 +83,7 @@ class LandingBudgetEstimator {
               LandingBudgetScenario.lean,
               monthlyBase,
               cityBudget,
+              householdFactor,
             ),
             LandingBudgetScenario.lean,
           ),
@@ -82,6 +93,7 @@ class LandingBudgetEstimator {
               LandingBudgetScenario.lean,
               monthlyBase,
               cityBudget,
+              householdFactor,
             ),
             LandingBudgetScenario.lean,
           ),
@@ -110,6 +122,7 @@ class LandingBudgetEstimator {
             LandingBudgetScenario.comfortable,
             monthlyBase,
             cityBudget,
+            householdFactor,
           ),
           setupBase: _resolveSetupBase(
             plan,
@@ -117,6 +130,7 @@ class LandingBudgetEstimator {
               LandingBudgetScenario.comfortable,
               monthlyBase,
               cityBudget,
+              householdFactor,
             ),
             LandingBudgetScenario.comfortable,
           ),
@@ -126,6 +140,7 @@ class LandingBudgetEstimator {
               LandingBudgetScenario.comfortable,
               monthlyBase,
               cityBudget,
+              householdFactor,
             ),
             LandingBudgetScenario.comfortable,
           ),
@@ -159,14 +174,15 @@ class LandingBudgetEstimator {
   static int _resolveMonthlyBase(
     MigrationPlan plan,
     CityBudgetSnapshot? cityBudget,
+    City? budgetCity,
   ) {
     if (cityBudget != null) {
-      return cityBudget.fairLivingTotal;
+      return (cityBudget.fairLivingTotal * _householdFactor(plan)).round();
     }
 
-    final city = plan.currentPlanCity;
+    final city = budgetCity;
     if (city == null) {
-      return 3600;
+      return (3600 * _householdFactor(plan)).round();
     }
 
     final monthlyFromScores =
@@ -183,13 +199,25 @@ class LandingBudgetEstimator {
       _ => 1.0,
     };
 
-    return (monthlyFromScores * regionalFactor).round().clamp(2400, 5600);
+    return (monthlyFromScores * regionalFactor * _householdFactor(plan))
+        .round()
+        .clamp(2400, 14000);
+  }
+
+  static double _householdFactor(MigrationPlan plan) {
+    final children = plan.childrenCount ?? 0;
+    final adults = switch (plan.travelGroup) {
+      'partner' || 'family_kids' => 2,
+      _ => 1,
+    };
+    return (adults + (children * 0.65)).clamp(1, 3.6);
   }
 
   static int _resolveScenarioMonthlyBase(
     LandingBudgetScenario scenario,
     int balancedMonthlyBase,
     CityBudgetSnapshot? cityBudget,
+    double householdFactor,
   ) {
     if (cityBudget == null) {
       return switch (scenario) {
@@ -202,13 +230,17 @@ class LandingBudgetEstimator {
 
     return switch (scenario) {
       LandingBudgetScenario.lean =>
-        cityBudget.singlePersonExcludingRent +
-            (cityBudget.planningRentLow * 0.72).round(),
+        ((cityBudget.singlePersonExcludingRent +
+                    (cityBudget.planningRentLow * 0.72)) *
+                householdFactor)
+            .round(),
       LandingBudgetScenario.balanced => cityBudget.fairLivingTotal,
       LandingBudgetScenario.comfortable =>
-        cityBudget.singlePersonExcludingRent +
-            cityBudget.pricierRent +
-            (cityBudget.monthlyTransportPass * 0.35).round(),
+        ((cityBudget.singlePersonExcludingRent +
+                    cityBudget.pricierRent +
+                    (cityBudget.monthlyTransportPass * 0.35)) *
+                householdFactor)
+            .round(),
     };
   }
 

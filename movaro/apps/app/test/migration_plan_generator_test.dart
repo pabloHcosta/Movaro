@@ -144,6 +144,35 @@ void main() {
       expect(plan.travelGroup, 'family_kids');
       expect(plan.childrenCount, 2);
       expect(plan.availableCapital, 'medium');
+      expect(
+        plan.steps.map((step) => step.title),
+        contains('step_school_enrollment'),
+      );
+    });
+
+    test('study goal adds admission and academic document steps', () async {
+      final plan = await generator.generate(
+        variant: QuestionnaireVariant.lean,
+        answers: const [
+          Answer(questionId: 'origin_country', values: ['argentina']),
+          Answer(questionId: 'destination_country', values: ['brasil']),
+          Answer(questionId: 'intent', values: ['study']),
+          Answer(questionId: 'timeline', values: ['in_6_12m']),
+          Answer(questionId: 'priorities', values: ['university']),
+        ],
+      );
+
+      expect(
+        plan.steps.map((step) => step.title),
+        containsAll([
+          'step_education_admission_route',
+          'step_education_documents',
+        ]),
+      );
+      expect(
+        plan.steps.where((step) => step.category == 'education'),
+        hasLength(2),
+      );
     });
   });
 }

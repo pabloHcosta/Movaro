@@ -103,4 +103,36 @@ void main() {
       isFalse,
     );
   });
+
+  test('study goal receives admission and academic document actions', () {
+    const studyPlan = MigrationPlan(
+      originCountry: 'argentina',
+      destinationCountry: 'brasil',
+      goal: 'study',
+      timeline: 'in_6_12m',
+      steps: [],
+    );
+
+    final items = ArgentinaBrazilGuideDataSource.build(
+      studyPlan,
+      localeCode: 'pt',
+    );
+    final ids = items.map((item) => item.id).toSet();
+
+    expect(
+      ids,
+      containsAll({
+        'item_0_7_ingresso_ensino_superior',
+        'item_2_7_documentos_academicos',
+        'item_3_5_revalidacao_estudos',
+      }),
+    );
+    expect(
+      items
+          .singleWhere((item) => item.id == 'item_0_7_ingresso_ensino_superior')
+          .evidence
+          ?.sourceUrl,
+      contains('sistema-de-selecao-unificada-sisu'),
+    );
+  });
 }

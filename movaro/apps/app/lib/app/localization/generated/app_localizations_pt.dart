@@ -23,11 +23,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get splashLoadingLabel => 'Organizando sua experiência';
 
   @override
-  String get splashHeroTitle => 'Planejamento de migração com mais clareza.';
+  String get splashHeroTitle =>
+      'Compare cidades. Organize sua mudança. Avance com clareza.';
 
   @override
   String get splashHeroBody =>
-      'Carregando cidades, custos e contexto prático para montar sua rota inicial.';
+      'Preparando cidades, custos e orientações para o seu próximo passo.';
 
   @override
   String get splashInitializingLabel => 'Inicializando experiência';
@@ -919,7 +920,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get documentationPathDocumentsBody =>
-      'CPF, registro, prazo de permanência e o que destrava primeiro a vida prática.';
+      'Checklist da rota Argentina → Brasil: documento de viagem, CPF, residência, CRNM e comprovantes que ajudam a executar seu plano.';
 
   @override
   String get documentationPathHealthTitle => 'Saúde no dia a dia';
@@ -1110,12 +1111,11 @@ class AppLocalizationsPt extends AppLocalizations {
       'Aqui ficam os cards completos com fonte oficial. Eles continuam curtos, mas servem para quando a resposta rápida não bastar.';
 
   @override
-  String get documentationCostsTitle =>
-      'Custos aproximados que ajudam a orientar';
+  String get documentationCostsTitle => 'Resumo dos custos para começar';
 
   @override
   String get documentationCostsBody =>
-      'Quando existe valor nacional ou uma referência oficial útil, o app mostra a conversão aproximada para ajudar na sua leitura inicial.';
+      'Veja o que costuma entrar no orçamento da rota Argentina → Brasil. Valores federais são mostrados por pessoa; moradia, documentos complementares e saúde privada dependem do seu caso.';
 
   @override
   String documentationCostsUpdatedAt(String value) {
@@ -1128,7 +1128,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get documentationCostsDisclaimer =>
-      'Use isto como orientação inicial. Os custos variam por estado, convênio, idade, cobertura e regras locais.';
+      'Referências oficiais consultadas em julho de 2026. Confirme os valores antes de pagar: isenções, modalidade de residência, cidade, documentos exigidos e escolhas pessoais podem alterar o total.';
 
   @override
   String get documentationCostFreeValue => 'Grátis';
@@ -1137,57 +1137,75 @@ class AppLocalizationsPt extends AppLocalizations {
   String get documentationCostVariableValue => 'Variável';
 
   @override
-  String get documentationCostCpfTitle => 'Pedido oficial de CPF';
+  String get documentationCostMigrationTitle => 'Residência + emissão da CRNM';
+
+  @override
+  String get documentationCostMigrationValue => 'R\$ 372,90 por pessoa';
+
+  @override
+  String get documentationCostMigrationSupporting =>
+      'Soma das taxas federais de autorização de residência (R\$ 168,13) e emissão da CRNM (R\$ 204,77), quando ambas forem aplicáveis.';
+
+  @override
+  String get documentationCostCpfTitle => 'Inscrição no CPF';
+
+  @override
+  String get documentationCostCpfValue => 'Grátis ou R\$ 7';
 
   @override
   String get documentationCostCpfSupporting =>
-      'O pedido oficial é gratuito; o app trata isso como custo zero.';
+      'O pedido oficial é gratuito. A Receita informa tarifa de R\$ 7 apenas no atendimento por unidade conveniada; não é necessário intermediário.';
 
   @override
-  String get documentationCostSusCardTitle => 'Cartão SUS e cadastro inicial';
+  String get documentationCostSusCardTitle =>
+      'Acesso ao SUS e Cartão Nacional de Saúde';
 
   @override
   String get documentationCostSusCardSupporting =>
-      'A emissão e o cadastro público não costumam exigir pagamento direto.';
+      'O acesso ao SUS é gratuito para quem está no Brasil, independentemente da situação migratória. O cartão facilita o cadastro, mas não deve impedir atendimento.';
 
   @override
-  String get documentationCostPublicCareTitle => 'Atendimento inicial no SUS';
+  String get documentationCostHousingTitle => 'Garantia para alugar';
 
   @override
-  String get documentationCostPublicCareSupporting =>
-      'UBS, posto de saúde e portas públicas de entrada não funcionam como consulta particular paga.';
+  String get documentationCostHousingValue => 'Até 3 aluguéis';
 
   @override
-  String get documentationCostDrivingTitle => 'Primeira habilitação';
+  String get documentationCostHousingSupporting =>
+      'Se o contrato usar caução em dinheiro, a Lei do Inquilinato limita o depósito ao equivalente a três meses de aluguel. Outras garantias têm custos próprios.';
 
   @override
-  String get documentationCostDrivingValue => 'Exemplo oficial';
+  String get documentationCostHousingSource => 'Lei do Inquilinato';
 
   @override
-  String get documentationCostDrivingSupporting =>
-      'Referência recente do Detran-ES: R\$ 533,34. Seu estado e sua autoescola podem cobrar valores diferentes.';
+  String get documentationCostDocumentsTitle =>
+      'Certidões, legalização e tradução';
+
+  @override
+  String get documentationCostDocumentsSupporting =>
+      'Certidão de nascimento ou casamento e antecedentes podem ser exigidos. Na rota Argentina → Brasil há dispensas específicas, mas o custo varia quando documentos adicionais são necessários.';
 
   @override
   String get documentationCostPrivateHealthTitle => 'Plano de saúde privado';
 
   @override
   String get documentationCostPrivateHealthSupporting =>
-      'Não existe um preço único nacional. Idade, cobertura, rede e carência mudam bastante o valor final.';
+      'É opcional e não substitui o SUS. Idade, cobertura, rede, abrangência e coparticipação determinam o preço final.';
 
   @override
   String get documentationCpfTitle => 'CPF';
 
   @override
   String get documentationCpfSummary =>
-      'O primeiro documento prático para abrir caminho em banco, contrato e cadastros.';
+      'Um cadastro importante para banco, contrato, trabalho e serviços — mas não substitui sua regularização migratória.';
 
   @override
   String get documentationCpfBulletOne =>
-      'Estrangeiros podem solicitar CPF; no Brasil, o pedido pode ser feito online ou em entidade conveniada.';
+      'Estrangeiros residentes ou não residentes podem solicitar CPF. O serviço oficial é gratuito; unidades conveniadas cobram R\$ 7.';
 
   @override
   String get documentationCpfBulletTwo =>
-      'O serviço oficial informa prazo estimado de até 30 dias corridos.';
+      'Leve documento oficial com foto e, se ele não mostrar naturalidade, filiação e nascimento, uma certidão equivalente.';
 
   @override
   String get documentationCpfBulletThree =>
@@ -1288,6 +1306,26 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get documentationCitizenshipBulletThree =>
       'Existem hipóteses oficiais de redução desse prazo, então vale checar a regra exata antes de planejar seu caminho.';
+
+  @override
+  String get documentationResidenceChecklistTitle =>
+      'Checklist para a residência Argentina → Brasil';
+
+  @override
+  String get documentationResidenceChecklistSummary =>
+      'Separe os documentos antes da viagem para evitar que uma certidão ou comprovante interrompa seu pedido na Polícia Federal.';
+
+  @override
+  String get documentationResidenceChecklistBulletOne =>
+      'Tenha DNI ou passaporte válido e o comprovante de ingresso regular no Brasil.';
+
+  @override
+  String get documentationResidenceChecklistBulletTwo =>
+      'Separe certidão de nascimento ou casamento quando o documento não trouxer filiação, além dos antecedentes dos países onde viveu nos últimos cinco anos.';
+
+  @override
+  String get documentationResidenceChecklistBulletThree =>
+      'Confirme legalização e tradução para o seu fundamento migratório: o acordo Brasil–Argentina prevê dispensas específicas, mas a Polícia Federal pode pedir documentos adicionais.';
 
   @override
   String get documentationHealthPublicTitle =>
@@ -1536,12 +1574,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get onboardingPageTitle => 'Sua rota';
 
   @override
-  String get onboardingHeadline =>
-      'Para começar, escolha sua origem e seu destino';
+  String get onboardingHeadline => 'Comece pela rota que faz sentido para você';
 
   @override
   String get onboardingDescription =>
-      'Com isso, a gente organiza os próximos passos do jeito certo para você.';
+      'Escolha sua origem e seu destino para personalizar cidades, custos, documentos e próximos passos.';
 
   @override
   String get onboardingOriginLabel => 'De onde você vem?';
@@ -6694,10 +6731,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeEntryExploreCitiesAction => 'Explorar cidades';
 
   @override
-  String get homeVisualCostsAction => 'Ver quanto pode custar';
+  String get homeVisualCostsAction => 'Planejar custos iniciais';
 
   @override
-  String get homeVisualDocumentsAction => 'Entender documentos';
+  String get homeVisualDocumentsAction => 'Guia prático';
+
+  @override
+  String get homeVisualHousingAction => 'Moradia e chegada';
 
   @override
   String get homeVisualStartAction => 'Descobrir por onde começar';

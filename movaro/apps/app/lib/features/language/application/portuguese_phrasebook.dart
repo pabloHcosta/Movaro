@@ -207,6 +207,30 @@ class PortuguesePhrasebook {
       ],
     ),
     PhraseGroup(
+      key: 'education',
+      icon: Icons.school_outlined,
+      titlePt: 'Escola e universidade',
+      titleEs: 'Escuela y universidad',
+      titleEn: 'School & university',
+      phrases: [
+        PortuguesePhrase(
+          pt: 'Quais documentos preciso apresentar para a matrícula?',
+          es: '¿Qué documentos tengo que presentar para la matrícula?',
+          en: 'Which documents do I need to provide for enrollment?',
+        ),
+        PortuguesePhrase(
+          pt: 'Como funciona o processo seletivo para estrangeiros?',
+          es: '¿Cómo funciona el proceso de admisión para extranjeros?',
+          en: 'How does the admission process work for foreign students?',
+        ),
+        PortuguesePhrase(
+          pt: 'A instituição oferece apoio de português para estudantes estrangeiros?',
+          es: '¿La institución ofrece apoyo de portugués para estudiantes extranjeros?',
+          en: 'Does the institution offer Portuguese support for foreign students?',
+        ),
+      ],
+    ),
+    PhraseGroup(
       key: 'everyday',
       icon: Icons.chat_bubble_outline,
       titlePt: 'Dia a dia',

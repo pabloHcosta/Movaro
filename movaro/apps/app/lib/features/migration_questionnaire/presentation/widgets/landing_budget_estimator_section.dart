@@ -31,7 +31,9 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
         ? l10n.landingBudgetSectionTitle
         : l10n.landingBudgetSectionTitleWithCity(estimate.cityContext!);
 
-    final cityBudget = plan.currentPlanCity?.budgetSnapshot;
+    final cityBudget = plan.isCityConfirmed
+        ? plan.confirmedCity?.budgetSnapshot
+        : null;
 
     return FrostedPanel(
       child: Column(
@@ -53,6 +55,10 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
               exchangeRates: exchangeRates,
               preferredCountryId: preferredCountryId,
             ),
+          ],
+          if (_hasEducationContext(plan)) ...[
+            const SizedBox(height: 18),
+            _EducationBudgetNote(plan: plan),
           ],
           const SizedBox(height: 18),
           if (exchangeRates != null) ...[
@@ -135,6 +141,13 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
     );
   }
 
+  bool _hasEducationContext(MigrationPlan plan) {
+    return plan.goal == 'study' ||
+        plan.travelGroup == 'family_kids' ||
+        plan.travelGroup == 'solo_parent' ||
+        (plan.childrenCount ?? 0) > 0;
+  }
+
   String _summaryLabel(BuildContext context, String key) {
     final l10n = context.l10n;
     return switch (key) {
@@ -172,6 +185,83 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
     }
 
     return DateFormat('dd/MM HH:mm', localeName).format(parsed.toLocal());
+  }
+}
+
+class _EducationBudgetNote extends StatelessWidget {
+  const _EducationBudgetNote({required this.plan});
+
+  final MigrationPlan plan;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final hasChildren =
+        plan.travelGroup == 'family_kids' ||
+        plan.travelGroup == 'solo_parent' ||
+        (plan.childrenCount ?? 0) > 0;
+    String tr({required String pt, required String es, required String en}) =>
+        switch (locale) {
+          'pt' => pt,
+          'es' => es,
+          _ => en,
+        };
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.school_outlined, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  tr(
+                    pt: 'Educação no seu orçamento',
+                    es: 'Educación en tu presupuesto',
+                    en: 'Education in your budget',
+                  ),
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (hasChildren)
+            Text(
+              tr(
+                pt: 'Escola pública: sem mensalidade. Escola particular, material, uniforme e transporte não entram no total porque dependem da instituição e da rede local.',
+                es: 'Escuela pública: sin mensualidad. Escuela privada, materiales, uniforme y transporte no están en el total porque dependen de la institución y la red local.',
+                en: 'Public school: no tuition. Private school, supplies, uniforms, and transport are not in the total because they depend on the institution and local network.',
+              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.4,
+              ),
+            ),
+          if (hasChildren && plan.goal == 'study') const SizedBox(height: 8),
+          if (plan.goal == 'study')
+            Text(
+              tr(
+                pt: 'Universidade pública: sem mensalidade. Mensalidade particular e custos de documentação devem ser adicionados com o valor do curso e do edital escolhidos.',
+                es: 'Universidad pública: sin mensualidad. La cuota privada y los documentos deben añadirse con el valor de la carrera y convocatoria elegidas.',
+                en: 'Public university: no tuition. Private tuition and document costs should be added using the chosen course and admission rules.',
+              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.4,
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }
 

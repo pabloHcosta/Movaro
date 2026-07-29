@@ -3828,7 +3828,13 @@ class ArgentinaBrazilGuideDataSource {
           es: 'La red educativa y el camino de matrícula están identificados.',
           en: 'The education network and enrollment path are identified.',
         ),
-        tier: GuideItemTier.optional,
+        costInfo: _t(
+          locale,
+          pt: 'Rede pública: sem mensalidade. Escola particular, uniforme, material e transporte: valores variáveis.',
+          es: 'Red pública: sin mensualidad. Escuela privada, uniforme, materiales y transporte: valores variables.',
+          en: 'Public network: no tuition. Private school, uniforms, supplies, and transport: variable.',
+        ),
+        tier: GuideItemTier.recommended,
         applicabilityConditions: const <String>['family_with_kids'],
         evidence: GuideEvidence(
           type: GuideEvidenceType.official,
@@ -3927,6 +3933,171 @@ class ArgentinaBrazilGuideDataSource {
     ];
 
     if (plan.goal == 'study') {
+      items.addAll([
+        GuideActionItem(
+          id: 'item_0_7_ingresso_ensino_superior',
+          title: _t(
+            locale,
+            pt: 'Defina sua rota de ingresso na universidade',
+            es: 'Define tu vía de ingreso a la universidad',
+            en: 'Choose your university admission route',
+          ),
+          shortDescription: _t(
+            locale,
+            pt: 'Compare Enem/Sisu, vestibular próprio, transferência e programas internacionais antes de organizar a mudança.',
+            es: 'Compara Enem/Sisu, examen propio, transferencia y programas internacionales antes de organizar la mudanza.',
+            en: 'Compare Enem/Sisu, institution exams, transfer, and international programs before organizing the move.',
+          ),
+          type: GuideActionType.external,
+          phase: GuidePhase.preparation,
+          orderIndex: 7,
+          isCompleted: false,
+          icon: Icons.account_balance_outlined,
+          primaryActionLabel: _t(
+            locale,
+            pt: 'Consultar o Sisu',
+            es: 'Consultar Sisu',
+            en: 'Check Sisu',
+          ),
+          primaryActionType: GuidePrimaryActionType.external,
+          primaryActionTarget: PreparationResourceLinks.sisuGuide.toString(),
+          steps: _list(
+            locale,
+            pt: [
+              'Escolha curso, nível e instituições possíveis.',
+              'Confira se o ingresso é por Enem/Sisu, vestibular, transferência ou edital internacional.',
+              'Se considerar o PEC-G, valide país elegível, calendário, proficiência e comprovação financeira no edital vigente.',
+              'Compare mensalidade zero ou privada com moradia, alimentação, transporte e material.',
+            ],
+            es: [
+              'Elige carrera, nivel e instituciones posibles.',
+              'Confirma si el ingreso es por Enem/Sisu, examen, transferencia o convocatoria internacional.',
+              'Si consideras PEC-G, valida país elegible, calendario, idioma y respaldo financiero en la convocatoria vigente.',
+              'Compara matrícula gratuita o privada con vivienda, comida, transporte y materiales.',
+            ],
+            en: [
+              'Choose the course, level, and possible institutions.',
+              'Check whether admission uses Enem/Sisu, an exam, transfer, or an international call.',
+              'If considering PEC-G, verify eligible country, schedule, language, and financial proof in the current call.',
+              'Compare tuition-free or private study with housing, food, transport, and supplies.',
+            ],
+          ),
+          doneCriteria: _t(
+            locale,
+            pt: 'Você escolheu uma rota de ingresso e registrou os prazos oficiais.',
+            es: 'Elegiste una vía de ingreso y registraste los plazos oficiales.',
+            en: 'You selected an admission route and recorded official deadlines.',
+          ),
+          costInfo: _t(
+            locale,
+            pt: 'Instituição pública: sem mensalidade. Instituição privada e despesas de permanência: valores variáveis.',
+            es: 'Institución pública: sin mensualidad. Institución privada y gastos de vida: valores variables.',
+            en: 'Public institution: no tuition. Private institution and living costs: variable.',
+          ),
+          supportLinks: [
+            GuideSupportLink(
+              label: 'PEC-G',
+              url: PreparationResourceLinks.pecGGuide.toString(),
+            ),
+            GuideSupportLink(
+              label: 'e-MEC',
+              url: PreparationResourceLinks.publicUniversitiesCatalog
+                  .toString(),
+            ),
+          ],
+          tier: GuideItemTier.critical,
+          preArrivalRequired: true,
+          applicabilityConditions: const <String>['study_goal'],
+          evidence: GuideEvidence(
+            type: GuideEvidenceType.official,
+            sourceLabel: 'MEC · Sisu',
+            sourceUrl: PreparationResourceLinks.sisuGuide.toString(),
+            lastVerified: DateTime(2026, 7, 28),
+            scopeNote: _t(
+              locale,
+              pt: 'Cada edição e instituição pode ter calendário e documentos próprios.',
+              es: 'Cada edición e institución puede tener calendario y documentos propios.',
+              en: 'Each edition and institution may set its own schedule and documents.',
+            ),
+          ),
+        ),
+        GuideActionItem(
+          id: 'item_2_7_documentos_academicos',
+          title: _t(
+            locale,
+            pt: 'Prepare a documentação acadêmica para matrícula',
+            es: 'Prepara la documentación académica para matricularte',
+            en: 'Prepare academic enrollment documents',
+          ),
+          shortDescription: _t(
+            locale,
+            pt: 'O edital pode exigir conclusão do ensino médio, histórico, identificação, tradução, apostila e proficiência.',
+            es: 'La convocatoria puede exigir título secundario, historial, identificación, traducción, apostilla e idioma.',
+            en: 'Admission rules may require secondary completion, transcripts, identity, translations, apostilles, and language proficiency.',
+          ),
+          type: GuideActionType.checklist,
+          phase: GuidePhase.documents,
+          orderIndex: 12,
+          isCompleted: false,
+          icon: Icons.history_edu_outlined,
+          checklistItems: [
+            ChecklistSubItem(
+              id: 'study_secondary_certificate',
+              title: _t(
+                locale,
+                pt: 'Certificado de conclusão do ensino médio',
+                es: 'Certificado de finalización de la secundaria',
+                en: 'Secondary-school completion certificate',
+              ),
+              isCompleted: false,
+            ),
+            ChecklistSubItem(
+              id: 'study_transcript',
+              title: _t(
+                locale,
+                pt: 'Histórico escolar ou acadêmico',
+                es: 'Historial escolar o académico',
+                en: 'School or academic transcript',
+              ),
+              isCompleted: false,
+            ),
+            ChecklistSubItem(
+              id: 'study_notice_requirements',
+              title: _t(
+                locale,
+                pt: 'Exigências de tradução, apostila e proficiência conferidas no edital',
+                es: 'Requisitos de traducción, apostilla e idioma revisados en la convocatoria',
+                en: 'Translation, apostille, and language rules checked in the official call',
+              ),
+              isCompleted: false,
+            ),
+          ],
+          primaryActionLabel: _t(
+            locale,
+            pt: 'Ver opções para estrangeiros',
+            es: 'Ver opciones para extranjeros',
+            en: 'See options for foreign students',
+          ),
+          primaryActionType: GuidePrimaryActionType.external,
+          primaryActionTarget: PreparationResourceLinks.foreignStudentGuide
+              .toString(),
+          doneCriteria: _t(
+            locale,
+            pt: 'A lista da instituição foi conferida e os documentos necessários estão preparados ou solicitados.',
+            es: 'Revisaste la lista de la institución y preparaste o solicitaste los documentos necesarios.',
+            en: 'You checked the institution’s list and prepared or requested the required documents.',
+          ),
+          tier: GuideItemTier.critical,
+          preArrivalRequired: true,
+          applicabilityConditions: const <String>['study_goal'],
+          evidence: GuideEvidence(
+            type: GuideEvidenceType.official,
+            sourceLabel: 'Governo do Brasil · Estudar no ensino superior',
+            sourceUrl: PreparationResourceLinks.foreignStudentGuide.toString(),
+            lastVerified: DateTime(2026, 7, 28),
+          ),
+        ),
+      ]);
       items.add(
         GuideActionItem(
           id: 'item_3_5_revalidacao_estudos',

@@ -3308,7 +3308,8 @@ class _ExploreMediaCardState extends State<_ExploreMediaCard> {
   }
 
   final estimate = LandingBudgetEstimator.build(
-    plan: plan.copyWith(highlightedCity: city),
+    plan: plan,
+    explicitPreviewCity: city,
   );
   final selectedScenario = switch (plan.availableCapital) {
     'low' => LandingBudgetScenario.lean,
