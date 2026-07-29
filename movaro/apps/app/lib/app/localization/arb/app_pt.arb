@@ -376,7 +376,7 @@
       }
     }
   },
-  "documentationCostsUnavailable": "Não foi possível atualizar a cotação agora. Os valores em reais continuam como referência.",
+  "documentationCostsUnavailable": "Não foi possível atualizar a cotação agora. Os valores convertidos ficam temporariamente indisponíveis.",
   "documentationCostsDisclaimer": "Use isto como orientação inicial. Os custos variam por estado, convênio, idade, cobertura e regras locais.",
   "documentationCostFreeValue": "Grátis",
   "documentationCostVariableValue": "Variável",
@@ -1639,7 +1639,7 @@
       "value": {}
     }
   },
-  "landingBudgetExchangeUnavailable": "Não foi possível atualizar o câmbio oficial agora. Os valores em reais continuam como referência.",
+  "landingBudgetExchangeUnavailable": "Não foi possível atualizar o câmbio oficial agora. Os valores convertidos ficam temporariamente indisponíveis.",
   "arrivalExecutionSectionTitle": "Primeiros 7 / 30 / 90 dias",
   "arrivalExecutionStageWeek": "Primeiros 7 dias",
   "arrivalExecutionStageMonth": "Primeiros 30 dias",

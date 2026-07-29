@@ -1124,7 +1124,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get documentationCostsUnavailable =>
-      'Não foi possível atualizar a cotação agora. Os valores em reais continuam como referência.';
+      'Não foi possível atualizar a cotação agora. Os valores convertidos ficam temporariamente indisponíveis.';
 
   @override
   String get documentationCostsDisclaimer =>
@@ -4741,7 +4741,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get landingBudgetExchangeUnavailable =>
-      'Não foi possível atualizar o câmbio oficial agora. Os valores em reais continuam como referência.';
+      'Não foi possível atualizar o câmbio oficial agora. Os valores convertidos ficam temporariamente indisponíveis.';
 
   @override
   String get arrivalExecutionSectionTitle => 'Primeiros 7 / 30 / 90 dias';

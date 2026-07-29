@@ -376,7 +376,7 @@
       }
     }
   },
-  "documentationCostsUnavailable": "No fue posible actualizar la cotización ahora. Los valores en reales siguen como referencia.",
+  "documentationCostsUnavailable": "No fue posible actualizar la cotización ahora. Los valores convertidos no están disponibles temporalmente.",
   "documentationCostsDisclaimer": "Usá esto como orientación inicial. Los costos cambian según el estado, convenio, edad, cobertura y reglas locales.",
   "documentationCostFreeValue": "Gratis",
   "documentationCostVariableValue": "Variable",
@@ -1639,7 +1639,7 @@
       "value": {}
     }
   },
-  "landingBudgetExchangeUnavailable": "No fue posible actualizar el tipo de cambio oficial ahora. Los valores en reales siguen como referencia.",
+  "landingBudgetExchangeUnavailable": "No fue posible actualizar el tipo de cambio oficial ahora. Los valores convertidos no están disponibles temporalmente.",
   "arrivalExecutionSectionTitle": "Primeros 7 / 30 / 90 días",
   "arrivalExecutionStageWeek": "Primeros 7 días",
   "arrivalExecutionStageMonth": "Primeros 30 días",

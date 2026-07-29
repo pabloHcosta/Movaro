@@ -14,13 +14,16 @@ class CurrencyScope extends InheritedNotifier<CurrencyController> {
     return scope!.notifier!;
   }
 
-  /// Returns the resolved currency code (user-selected > GPS-detected > null).
-  static String? preferredCodeOf(BuildContext context) {
-    return of(context).resolvedCurrencyCode;
+  static String preferredCodeOf(BuildContext context) {
+    return context
+            .dependOnInheritedWidgetOfExactType<CurrencyScope>()
+            ?.notifier
+            ?.resolvedCurrencyCode ??
+        CurrencyController.defaultCurrencyCode;
   }
 }
 
 extension CurrencyScopeX on BuildContext {
   CurrencyController get currencyController => CurrencyScope.of(this);
-  String? get preferredCurrencyCode => CurrencyScope.preferredCodeOf(this);
+  String get preferredCurrencyCode => CurrencyScope.preferredCodeOf(this);
 }

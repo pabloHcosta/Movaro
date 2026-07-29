@@ -52,13 +52,12 @@ class AppSettingsPage extends StatelessWidget {
           ThemeMode.light => context.l10n.settingsThemeLight(),
           ThemeMode.system => context.l10n.settingsThemeSystem(),
         };
-        final currentCurrencyLabel = currentCurrency == null
-            ? context.l10n.settingsCurrencyAuto()
-            : _currencyOptions
-                      .where((entry) => entry.code == currentCurrency)
-                      .firstOrNull
-                      ?.label ??
-                  currentCurrency;
+        final currentCurrencyLabel =
+            _currencyOptions
+                .where((entry) => entry.code == currentCurrency)
+                .firstOrNull
+                ?.label ??
+            currentCurrency;
         final settingsIntro = _settingsIntro(context);
         final settingsEyebrow = _settingsEyebrow(context);
 
@@ -308,17 +307,11 @@ class AppSettingsPage extends StatelessWidget {
                                         child: _CurrencySelector(
                                           value: currentCurrency,
                                           onChanged: (value) {
-                                            if (value == null) {
-                                              return;
+                                            if (value != null) {
+                                              currencyController.setCurrency(
+                                                value,
+                                              );
                                             }
-                                            if (value == _autoCurrencyValue) {
-                                              currencyController
-                                                  .clearCurrency();
-                                              return;
-                                            }
-                                            currencyController.setCurrency(
-                                              value,
-                                            );
                                           },
                                         ),
                                       ),
@@ -577,19 +570,11 @@ class AppSettingsPage extends StatelessWidget {
   }
 }
 
-const _autoCurrencyValue = '__auto__';
-
 const _currencyOptions = [
   _CurrencyOption(label: 'US Dollar (USD)', code: 'USD'),
-  _CurrencyOption(label: 'Euro (EUR)', code: 'EUR'),
   _CurrencyOption(label: 'Real Brasileiro (BRL)', code: 'BRL'),
   _CurrencyOption(label: 'Peso Argentino (ARS)', code: 'ARS'),
   _CurrencyOption(label: 'Peso Chileno (CLP)', code: 'CLP'),
-  _CurrencyOption(label: 'Peso Uruguayo (UYU)', code: 'UYU'),
-  _CurrencyOption(label: 'Peso Colombiano (COP)', code: 'COP'),
-  _CurrencyOption(label: 'Sol Peruano (PEN)', code: 'PEN'),
-  _CurrencyOption(label: 'Guaraní Paraguayo (PYG)', code: 'PYG'),
-  _CurrencyOption(label: 'Boliviano (BOB)', code: 'BOB'),
 ];
 
 String _settingsText(
@@ -1078,12 +1063,12 @@ class _ChoicePill extends StatelessWidget {
 class _CurrencySelector extends StatelessWidget {
   const _CurrencySelector({required this.value, required this.onChanged});
 
-  final String? value;
+  final String value;
   final ValueChanged<String?> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final quickCodes = <String?>[null, 'USD', 'BRL', 'ARS'];
+    final quickCodes = <String>['USD', 'BRL', 'ARS', 'CLP'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1094,20 +1079,16 @@ class _CurrencySelector extends StatelessWidget {
           children: quickCodes
               .map(
                 (code) => _ChoicePill(
-                  label: code == null
-                      ? context.l10n.settingsCurrencyAuto()
-                      : _currencyOptions
-                            .firstWhere((entry) => entry.code == code)
-                            .code,
+                  label: code,
                   selected: value == code,
-                  onTap: () => onChanged(code ?? _autoCurrencyValue),
+                  onTap: () => onChanged(code),
                 ),
               )
               .toList(growable: false),
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
-          initialValue: value ?? _autoCurrencyValue,
+          initialValue: value,
           isExpanded: true,
           decoration: InputDecoration(
             filled: true,
@@ -1130,10 +1111,6 @@ class _CurrencySelector extends StatelessWidget {
             ),
           ),
           items: [
-            DropdownMenuItem(
-              value: _autoCurrencyValue,
-              child: Text(context.l10n.settingsCurrencyAuto()),
-            ),
             ..._currencyOptions.map(
               (entry) =>
                   DropdownMenuItem(value: entry.code, child: Text(entry.label)),

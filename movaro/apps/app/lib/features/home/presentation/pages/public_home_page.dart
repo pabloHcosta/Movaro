@@ -32,7 +32,7 @@ import 'package:movaro_app/features/migration_questionnaire/domain/entities/guid
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/utils/cost_estimate_formatter.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/home/presentation/widgets/city_feed_widget.dart';
@@ -60,6 +60,7 @@ class PublicHomePage extends StatefulWidget {
   final JourneyContextController journeyContextController;
   final LocationController locationController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
+
   /// When the router silently redirected to this page, this message is shown
   /// as a floating snackbar on the first frame so the user understands why.
   final String? redirectMessage;
@@ -1651,6 +1652,7 @@ class _ActiveHero extends StatelessWidget {
   });
 
   final City city;
+
   /// Total hero height in logical pixels, including the top safe-area inset.
   final double height;
 
@@ -2730,19 +2732,31 @@ class _ExplorerStageCard extends StatelessWidget {
 
     final locale = Localizations.localeOf(context).toString();
     final rentLabel = budget != null
-        ? CostEstimateFormatter.brlRange(
-            budget.planningRentLow,
-            budget.planningRentHigh,
-            locale: locale,
+        ? MultiCurrencyAmount.formatRangeFromBrl(
+            context: context,
+            minBrl: budget.planningRentLow,
+            maxBrl: budget.planningRentHigh,
+            primaryLocale: locale,
           )
-        : 'R\$1.800–3.500';
+        : MultiCurrencyAmount.formatRangeFromBrl(
+            context: context,
+            minBrl: 1800,
+            maxBrl: 3500,
+            primaryLocale: locale,
+          );
     final totalLabel = budget != null
-        ? CostEstimateFormatter.brlRange(
-            budget.fairLivingTotal,
-            budget.wellLivingTotal,
-            locale: locale,
+        ? MultiCurrencyAmount.formatRangeFromBrl(
+            context: context,
+            minBrl: budget.fairLivingTotal,
+            maxBrl: budget.wellLivingTotal,
+            primaryLocale: locale,
           )
-        : 'R\$4.000–6.000';
+        : MultiCurrencyAmount.formatRangeFromBrl(
+            context: context,
+            minBrl: 4000,
+            maxBrl: 6000,
+            primaryLocale: locale,
+          );
 
     return Row(
       children: [

@@ -10,6 +10,7 @@ import 'package:movaro_app/features/flight_search/domain/services/airport_finder
 import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
 import 'package:movaro_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
 import 'package:movaro_app/features/flight_search/domain/services/flight_url_builder.dart';
+import 'package:movaro_app/app/currency/currency_scope.dart';
 import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
 
@@ -165,7 +166,10 @@ class _FlightSearchToolState extends State<FlightSearchTool> {
       destination: _selectedDestination!,
       departureDate: _selectedDate!,
     );
-    final uri = FlightUrlBuilder.build(params);
+    final uri = FlightUrlBuilder.build(
+      params,
+      currencyCode: context.preferredCurrencyCode,
+    );
     if (!context.mounted) return;
 
     await Navigator.of(context).push(

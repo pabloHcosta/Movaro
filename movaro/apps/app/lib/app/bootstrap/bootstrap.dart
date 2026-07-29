@@ -124,16 +124,6 @@ Future<AppDependencies> buildAppDependencies({
   final currencyController = CurrencyController();
   await currencyController.initialize();
 
-  // Sync GPS-detected country to currency whenever JourneyContextController changes.
-  journeyContextController.addListener(() {
-    final countryId = journeyContextController.detectedLocation?.countryId;
-    currencyController.setDetectedCurrencyFromCountry(countryId);
-  });
-  // Apply any already-persisted detected location immediately.
-  currencyController.setDetectedCurrencyFromCountry(
-    journeyContextController.detectedLocation?.countryId,
-  );
-
   final exchangeRatesController = ExchangeRatesController(
     service: copilotExchangeRatesService,
   );

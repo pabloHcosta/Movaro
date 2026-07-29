@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:movaro_app/app/currency/currency_controller.dart';
@@ -7,6 +9,35 @@ import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 
 void main() {
+  test('supports exactly the four configured display currencies', () {
+    expect(AppCurrency.values.map((currency) => currency.code), [
+      'USD',
+      'BRL',
+      'ARS',
+      'CLP',
+    ]);
+    final controller = CurrencyController()..setCurrency('EUR');
+    expect(controller.currencyCode, 'USD');
+  });
+
+  test('presentation code has no parallel currency formatter', () {
+    final files = Directory('lib')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((file) => file.path.endsWith('.dart'))
+        .where((file) => !file.path.endsWith('multi_currency_amount.dart'));
+    final violations = <String>[];
+    for (final file in files) {
+      final source = file.readAsStringSync();
+      if (source.contains('NumberFormat.currency(') ||
+          source.contains('CostEstimateFormatter.') ||
+          source.contains("prefixText: 'R\\\$")) {
+        violations.add(file.path);
+      }
+    }
+    expect(violations, isEmpty);
+  });
+
   test('rejects stale exchange snapshots', () {
     final now = DateTime(2026, 7, 26, 12);
     final fresh = _rates(
@@ -42,31 +73,71 @@ void main() {
     expect(budget.fairLivingTotal, 3165);
   });
 
-  testWidgets('does not invent an ARS conversion when rates are unavailable', (
+  testWidgets(
+    'defaults to USD and does not invent a conversion without rates',
+    (tester) async {
+      final currencyController = CurrencyController();
+
+      await tester.pumpWidget(
+        CurrencyScope(
+          controller: currencyController,
+          child: const MaterialApp(
+            locale: Locale('pt', 'BR'),
+            home: Scaffold(
+              body: MultiCurrencyAmount(
+                amountInBrl: 3123,
+                exchangeRates: null,
+                preferredCountryId: 'argentina',
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(currencyController.currencyCode, 'USD');
+      expect(find.textContaining('— USD'), findsOneWidget);
+      expect(find.textContaining('R\$'), findsNothing);
+      expect(find.textContaining('AR\$'), findsNothing);
+    },
+  );
+
+  testWidgets('uses the same selected currency for BRL and USD sources', (
     tester,
   ) async {
-    final currencyController = CurrencyController()
-      ..setDetectedCurrencyFromCountry('AR');
+    final currencyController = CurrencyController()..setCurrency('ARS');
+    final rates = _rates(
+      fetchedAt: DateTime.now().toIso8601String(),
+      referenceDate: DateTime.now().toIso8601String(),
+    );
 
     await tester.pumpWidget(
       CurrencyScope(
         controller: currencyController,
-        child: const MaterialApp(
-          locale: Locale('pt', 'BR'),
-          home: Scaffold(
-            body: MultiCurrencyAmount(
-              amountInBrl: 3123,
-              exchangeRates: null,
-              preferredCountryId: 'argentina',
+        child: MaterialApp(
+          locale: const Locale('pt', 'BR'),
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: Column(
+                children: [
+                  MultiCurrencyAmount(amountInBrl: 10, exchangeRates: rates),
+                  Text(
+                    MultiCurrencyAmount.formatAmount(
+                      context: context,
+                      amount: 2,
+                      sourceCurrencyCode: 'USD',
+                      exchangeRates: rates,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
 
-    expect(find.textContaining('≈ R\$'), findsOneWidget);
-    expect(find.textContaining('3123'), findsNothing);
-    expect(find.textContaining('AR\$'), findsNothing);
+    expect(find.textContaining('AR\$'), findsNWidgets(2));
+    expect(find.textContaining('US\$'), findsNothing);
   });
 }
 

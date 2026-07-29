@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/core/utils/cost_estimate_formatter.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
@@ -857,7 +857,7 @@ class _LongTermHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final estimate = _estimatedRent(city.rentScore);
+    final estimate = _estimatedRent(context, city.rentScore);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -916,12 +916,12 @@ class _LongTermHeader extends StatelessWidget {
     );
   }
 
-  static String _estimatedRent(int rentScore) {
+  static String _estimatedRent(BuildContext context, int rentScore) {
     final estimate = (2200 + ((100 - rentScore) * 18)).round().clamp(
       1200,
       3200,
     );
-    return '${CostEstimateFormatter.brl(estimate, increment: 100)}/mês';
+    return '${MultiCurrencyAmount.formatPreferredCurrency(context: context, amountInBrl: estimate, exchangeRates: null)}/mês';
   }
 }
 

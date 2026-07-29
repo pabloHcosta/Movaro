@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:movaro_app/core/trust/source_freshness_policy.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
@@ -344,7 +345,7 @@ class _ExpandedFeedSheet extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            item.body,
+                            _resolvedBody(context),
                             style: Theme.of(context).textTheme.bodyLarge
                                 ?.copyWith(
                                   color: AppColors.textPrimaryFor(context),
@@ -406,6 +407,18 @@ class _ExpandedFeedSheet extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _resolvedBody(BuildContext context) {
+    final minBrl = item.rangeMinBrl;
+    final maxBrl = item.rangeMaxBrl;
+    if (minBrl == null || maxBrl == null) return item.body;
+    final range = MultiCurrencyAmount.formatRangeFromBrl(
+      context: context,
+      minBrl: minBrl,
+      maxBrl: maxBrl,
+    );
+    return '${item.bodyBeforeRange ?? ''}$range${item.bodyAfterRange ?? ''}';
   }
 
   static String _copy(

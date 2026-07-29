@@ -1,6 +1,5 @@
 import 'package:movaro_app/features/home/domain/city_feed_item.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/core/utils/cost_estimate_formatter.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
@@ -200,11 +199,20 @@ class CityFeedDatasource {
             es: 'Cuanto cuesta vivir en ${city.name}',
             en: 'What it costs to live in ${city.name}',
           ),
-          body: _t(
+          body: '',
+          rangeMinBrl: budget.fairLivingTotal,
+          rangeMaxBrl: budget.wellLivingTotal,
+          bodyBeforeRange: _t(
             locale,
-            pt: 'Faixa de planejamento: ${CostEstimateFormatter.brlRange(budget.fairLivingTotal, budget.wellLivingTotal)} por mês, variando por zona e estilo de vida. Fonte de referência: ${budget.sourceLabel}.',
-            es: 'Rango de planificación: ${CostEstimateFormatter.brlRange(budget.fairLivingTotal, budget.wellLivingTotal, locale: 'es_AR')} por mes, según la zona y el estilo de vida. Fuente de referencia: ${budget.sourceLabel}.',
-            en: 'Planning range: ${CostEstimateFormatter.brlRange(budget.fairLivingTotal, budget.wellLivingTotal, locale: 'en_US')} per month, depending on area and lifestyle. Reference source: ${budget.sourceLabel}.',
+            pt: 'Faixa de planejamento: ',
+            es: 'Rango de planificación: ',
+            en: 'Planning range: ',
+          ),
+          bodyAfterRange: _t(
+            locale,
+            pt: ' por mês, variando por zona e estilo de vida. Fonte de referência: ${budget.sourceLabel}.',
+            es: ' por mes, según la zona y el estilo de vida. Fuente de referencia: ${budget.sourceLabel}.',
+            en: ' per month, depending on area and lifestyle. Reference source: ${budget.sourceLabel}.',
           ),
           updatedAt: budget.updatedAt,
           sourceLabel: budget.sourceLabel,

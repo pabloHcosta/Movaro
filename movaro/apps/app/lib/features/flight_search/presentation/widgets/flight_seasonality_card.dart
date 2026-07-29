@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
+import 'package:movaro_app/app/currency/currency_scope.dart';
 import 'package:movaro_app/app/localization/generated/app_localizations.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
@@ -384,7 +385,14 @@ class FlightSeasonalityCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            l10n.flightSeasonalitySubtitle(originIata, destinationIata),
+            switch (Localizations.localeOf(context).languageCode) {
+              'pt' =>
+                '$originIata -> $destinationIata · Faixas históricas convertidas',
+              'es' =>
+                '$originIata -> $destinationIata · Rangos históricos convertidos',
+              _ =>
+                '$originIata -> $destinationIata · Converted historical ranges',
+            },
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSoftFor(context),
             ),
@@ -448,7 +456,8 @@ class FlightSeasonalityCard extends StatelessWidget {
     final uri = Uri.parse(
       'https://www.skyscanner.com/transport/flights/'
       '${origin.toLowerCase()}/${dest.toLowerCase()}/'
-      '?adults=1&cabinclass=economy&currency=USD',
+      '?adults=1&cabinclass=economy'
+      '&currency=${context.preferredCurrencyCode}',
     );
     Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -718,9 +727,16 @@ class FlightPriceBadge extends StatelessWidget {
                 children: [
                   TextSpan(text: context.l10n.flightSeasonalityBadgePrefix),
                   TextSpan(
-                    text: context.l10n.flightSeasonalityBadgeFrom(
-                      route.lowUsdMin,
-                    ),
+                    text: switch (Localizations.localeOf(
+                      context,
+                    ).languageCode) {
+                      'pt' =>
+                        'a partir de ${MultiCurrencyAmount.formatFromUsd(context: context, amountInUsd: route.lowUsdMin)}',
+                      'es' =>
+                        'desde ${MultiCurrencyAmount.formatFromUsd(context: context, amountInUsd: route.lowUsdMin)}',
+                      _ =>
+                        'from ${MultiCurrencyAmount.formatFromUsd(context: context, amountInUsd: route.lowUsdMin)}',
+                    },
                     style: const TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w700,

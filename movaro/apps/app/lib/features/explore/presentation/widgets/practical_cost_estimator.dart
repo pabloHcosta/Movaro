@@ -73,9 +73,9 @@ class _PracticalCostEstimatorState extends State<PracticalCostEstimator> {
                       ? _exchangeStatus(context, exchange)
                       : _localizedText(
                           context,
-                          pt: 'Conversão indisponível agora · valores mantidos em reais, sem usar cotação antiga',
-                          es: 'Conversión no disponible ahora · valores en reales, sin usar una cotización antigua',
-                          en: 'Conversion unavailable now · values remain in BRL instead of using an old rate',
+                          pt: 'Conversão indisponível agora · valores convertidos ficam ocultos, sem usar cotação antiga',
+                          es: 'Conversión no disponible ahora · los valores convertidos se ocultan, sin usar una cotización antigua',
+                          en: 'Conversion unavailable now · converted values stay hidden instead of using an old rate',
                         ),
                   style: Theme.of(
                     context,
@@ -154,7 +154,12 @@ class _PracticalCostEstimatorState extends State<PracticalCostEstimator> {
         title: l10n.documentationCostDrivingTitle,
         headline: l10n.documentationCostDrivingValue,
         amountInBrl: 533.34,
-        supporting: l10n.documentationCostDrivingSupporting,
+        supporting: _localizedText(
+          context,
+          pt: 'Referência recente do Detran-ES. Seu estado e sua autoescola podem cobrar valores diferentes.',
+          es: 'Referencia reciente del Detran-ES. Tu estado y tu autoescuela pueden cobrar distinto.',
+          en: 'Recent Detran-ES reference. Your state and driving school may charge differently.',
+        ),
       ),
       _CostItem(
         icon: Icons.favorite_outline_rounded,

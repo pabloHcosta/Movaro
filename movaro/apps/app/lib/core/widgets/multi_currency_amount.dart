@@ -5,7 +5,12 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/exchange_rates/exchange_rates_scope.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 
-class MultiCurrencyAmount extends StatefulWidget {
+/// Renders monetary values in the single currency selected in Settings.
+///
+/// Domain prices currently use BRL or USD as their reference currency. This
+/// widget is the presentation boundary that converts those values with the
+/// latest app-wide exchange-rate snapshot.
+class MultiCurrencyAmount extends StatelessWidget {
   const MultiCurrencyAmount({
     required this.amountInBrl,
     required this.exchangeRates,
@@ -19,26 +24,48 @@ class MultiCurrencyAmount extends StatefulWidget {
 
   final num amountInBrl;
   final CopilotExchangeRates? exchangeRates;
+
+  /// Kept for source compatibility. Currency is controlled only by Settings.
   final String? preferredCountryId;
   final String? primaryLocale;
   final bool compact;
+
+  /// Kept for source compatibility with the former expandable selector.
   final double wrapSpacing;
   final double runSpacing;
 
   @override
-  State<MultiCurrencyAmount> createState() => _MultiCurrencyAmountState();
+  Widget build(BuildContext context) {
+    final label = formatPreferredCurrency(
+      context: context,
+      amountInBrl: amountInBrl,
+      exchangeRates: exchangeRates,
+      primaryLocale: primaryLocale,
+    );
+    return _AmountChip(label: label, compact: compact);
+  }
 
   static String formatCurrency({
     required String locale,
     required String currencyCode,
     required num amount,
   }) {
-    return _formatCurrency(
+    final formatter = NumberFormat.currency(
       locale: locale,
-      currencyCode: currencyCode,
-      amount: amount,
+      name: currencyCode,
+      symbol: symbolFor(currencyCode),
+      decimalDigits: currencyCode == 'USD' ? 2 : 0,
     );
+    return formatter.format(amount);
   }
+
+  static String symbolFor(String currencyCode) => switch (currencyCode) {
+    'USD' => 'US\$',
+    'ARS' => 'AR\$',
+    'CLP' => 'CLP\$',
+    'BRL' => 'R\$',
+    _ => currencyCode,
+  };
 
   static String formatPreferredCurrency({
     required BuildContext context,
@@ -47,474 +74,201 @@ class MultiCurrencyAmount extends StatefulWidget {
     String? preferredCountryId,
     String? primaryLocale,
   }) {
-    final settingsCurrencyCode = CurrencyScope.preferredCodeOf(context);
-    // Use scope rates as fallback when no explicit rates are provided.
-    final effectiveRates = exchangeRates ?? ExchangeRatesScope.ratesOf(context);
-    final options = _buildOptions(
-      amountInBrl: amountInBrl,
-      exchangeRates: effectiveRates,
-      fallbackLocale:
-          primaryLocale ?? Localizations.localeOf(context).toString(),
-      preferredCountryId: preferredCountryId,
-      settingsCurrencyCode: settingsCurrencyCode,
+    return _formatConverted(
+      context: context,
+      amount: amountInBrl,
+      sourceCurrencyCode: 'BRL',
+      exchangeRates: exchangeRates ?? ExchangeRatesScope.ratesOf(context),
     );
-    return options.first.label;
   }
 
-  /// Formats a USD amount into the user's preferred currency.
-  /// Falls back to displaying in USD if exchange rates are not yet loaded.
   static String formatFromUsd({
     required BuildContext context,
     required num amountInUsd,
     String? preferredCountryId,
   }) {
-    final rates = ExchangeRatesScope.ratesOf(context);
-    if (rates == null) {
-      return formatCurrency(
-        locale: 'en_US',
-        currencyCode: 'USD',
-        amount: amountInUsd,
-      );
-    }
-    final amountInBrl = amountInUsd * rates.usdToBrl;
-    return formatPreferredCurrency(
+    return _formatConverted(
       context: context,
-      amountInBrl: amountInBrl,
-      exchangeRates: rates,
-      preferredCountryId: preferredCountryId,
+      amount: amountInUsd,
+      sourceCurrencyCode: 'USD',
+      exchangeRates: ExchangeRatesScope.ratesOf(context),
     );
   }
 
-  /// Formats a USD min–max range (e.g. flight prices) into the user's
-  /// preferred currency. Returns a string like "R$500–R$800".
+  static String formatAmount({
+    required BuildContext context,
+    required num amount,
+    required String sourceCurrencyCode,
+    CopilotExchangeRates? exchangeRates,
+  }) {
+    return _formatConverted(
+      context: context,
+      amount: amount,
+      sourceCurrencyCode: sourceCurrencyCode,
+      exchangeRates: exchangeRates ?? ExchangeRatesScope.ratesOf(context),
+    );
+  }
+
+  static double? convertToBrl({
+    required num amount,
+    required String sourceCurrencyCode,
+    required CopilotExchangeRates? exchangeRates,
+  }) {
+    if (sourceCurrencyCode == 'BRL') return amount.toDouble();
+    final rates = exchangeRates;
+    if (rates == null || !rates.hasValidRates) return null;
+    return switch (sourceCurrencyCode) {
+      'USD' => amount * rates.usdToBrl,
+      'ARS' => amount * rates.arsToBrl,
+      'CLP' => amount / rates.brlToClp,
+      _ => null,
+    };
+  }
+
   static String formatRangeFromUsd({
     required BuildContext context,
     required num minUsd,
     required num maxUsd,
     String? preferredCountryId,
   }) {
-    final min = formatFromUsd(
-      context: context,
-      amountInUsd: minUsd,
-      preferredCountryId: preferredCountryId,
-    );
-    final max = formatFromUsd(
-      context: context,
-      amountInUsd: maxUsd,
-      preferredCountryId: preferredCountryId,
-    );
+    final min = formatFromUsd(context: context, amountInUsd: minUsd);
+    final max = formatFromUsd(context: context, amountInUsd: maxUsd);
+    if (min.startsWith('—') && max == min) return min;
     return '$min–$max';
   }
 
-  static List<_CurrencyOption> _buildOptions({
-    required num amountInBrl,
-    required CopilotExchangeRates? exchangeRates,
-    required String fallbackLocale,
-    String? preferredCountryId,
-    String? settingsCurrencyCode,
+  static String formatRangeFromBrl({
+    required BuildContext context,
+    required num minBrl,
+    required num maxBrl,
+    CopilotExchangeRates? exchangeRates,
+    String? primaryLocale,
   }) {
-    final effectiveRates = _EffectiveExchangeRates.resolve(exchangeRates);
-    final estimatedBrl = _roundEstimate(amountInBrl.toDouble());
-    final optionsByCode = <String, _CurrencyOption>{
-      'BRL': _CurrencyOption(
-        currencyCode: 'BRL',
-        label: _estimatedLabel(
-          _formatCurrency(
-            locale: fallbackLocale,
-            currencyCode: 'BRL',
-            amount: estimatedBrl,
-          ),
-        ),
-      ),
-      if (effectiveRates != null) ...{
-        'USD': _CurrencyOption(
-          currencyCode: 'USD',
-          label: _estimatedLabel(
-            _formatCurrency(
-              locale: 'en_US',
-              currencyCode: 'USD',
-              amount: estimatedBrl * effectiveRates.brlToUsd,
-            ),
-          ),
-        ),
-        'EUR': _CurrencyOption(
-          currencyCode: 'EUR',
-          label: _estimatedLabel(
-            _formatCurrency(
-              locale: 'en_EU',
-              currencyCode: 'EUR',
-              amount: estimatedBrl * effectiveRates.brlToEur,
-            ),
-          ),
-        ),
-        'ARS': _CurrencyOption(
-          currencyCode: 'ARS',
-          label: _estimatedLabel(
-            _formatCurrency(
-              locale: 'es_AR',
-              currencyCode: 'ARS',
-              amount: estimatedBrl * effectiveRates.brlToArs,
-            ),
-          ),
-        ),
-        'CLP': _CurrencyOption(
-          currencyCode: 'CLP',
-          label: _estimatedLabel(
-            _formatCurrency(
-              locale: 'es_CL',
-              currencyCode: 'CLP',
-              amount: estimatedBrl * effectiveRates.brlToClp,
-            ),
-          ),
-        ),
-        'UYU': _CurrencyOption(
-          currencyCode: 'UYU',
-          label: _estimatedLabel(
-            _formatCurrency(
-              locale: 'es_UY',
-              currencyCode: 'UYU',
-              amount: estimatedBrl * effectiveRates.brlToUyu,
-            ),
-          ),
-        ),
-        'COP': _CurrencyOption(
-          currencyCode: 'COP',
-          label: _estimatedLabel(
-            _formatCurrency(
-              locale: 'es_CO',
-              currencyCode: 'COP',
-              amount: estimatedBrl * effectiveRates.brlToCop,
-            ),
-          ),
-        ),
-        'PEN': _CurrencyOption(
-          currencyCode: 'PEN',
-          label: _estimatedLabel(
-            _formatCurrency(
-              locale: 'es_PE',
-              currencyCode: 'PEN',
-              amount: estimatedBrl * effectiveRates.brlToPen,
-            ),
-          ),
-        ),
-        'PYG': _CurrencyOption(
-          currencyCode: 'PYG',
-          label: _estimatedLabel(
-            _formatCurrency(
-              locale: 'es_PY',
-              currencyCode: 'PYG',
-              amount: estimatedBrl * effectiveRates.brlToPyg,
-            ),
-          ),
-        ),
-        'BOB': _CurrencyOption(
-          currencyCode: 'BOB',
-          label: _estimatedLabel(
-            _formatCurrency(
-              locale: 'es_BO',
-              currencyCode: 'BOB',
-              amount: estimatedBrl * effectiveRates.brlToBob,
-            ),
-          ),
-        ),
-      },
-    };
-
-    // Priority: explicit settings selection > country-inferred > USD > BRL
-    final localCurrencyCode = _currencyCodeForCountry(preferredCountryId);
-    final primaryCode =
-        settingsCurrencyCode != null &&
-            optionsByCode.containsKey(settingsCurrencyCode)
-        ? settingsCurrencyCode
-        : localCurrencyCode != null &&
-              optionsByCode.containsKey(localCurrencyCode)
-        ? localCurrencyCode
-        : optionsByCode.containsKey('USD')
-        ? 'USD'
-        : 'BRL';
-
-    final orderedCodes = <String>[
-      primaryCode,
-      if (primaryCode != 'USD' && optionsByCode.containsKey('USD')) 'USD',
-      if (primaryCode != 'BRL') 'BRL',
-      if (localCurrencyCode != null &&
-          localCurrencyCode != primaryCode &&
-          localCurrencyCode != 'USD' &&
-          localCurrencyCode != 'BRL' &&
-          optionsByCode.containsKey(localCurrencyCode))
-        localCurrencyCode,
-    ];
-
-    return orderedCodes
-        .map((code) => optionsByCode[code])
-        .whereType<_CurrencyOption>()
-        .toList(growable: false);
+    final min = formatPreferredCurrency(
+      context: context,
+      amountInBrl: minBrl,
+      exchangeRates: exchangeRates,
+      primaryLocale: primaryLocale,
+    );
+    final max = formatPreferredCurrency(
+      context: context,
+      amountInBrl: maxBrl,
+      exchangeRates: exchangeRates,
+      primaryLocale: primaryLocale,
+    );
+    if (min.startsWith('—') && max == min) return min;
+    return '$min–$max';
   }
 
-  static String? _currencyCodeForCountry(String? countryId) {
-    switch (countryId?.toLowerCase()) {
-      case 'argentina':
-      case 'ar':
-        return 'ARS';
-      case 'chile':
-      case 'cl':
-        return 'CLP';
-      case 'uruguai':
-      case 'uruguay':
-      case 'uy':
-        return 'UYU';
-      case 'colombia':
-      case 'co':
-        return 'COP';
-      case 'peru':
-      case 'pe':
-        return 'PEN';
-      case 'paraguai':
-      case 'paraguay':
-      case 'py':
-        return 'PYG';
-      case 'bolivia':
-      case 'bo':
-        return 'BOB';
-      case 'brasil':
-      case 'brazil':
-      case 'br':
-        return 'BRL';
-      case 'estados_unidos':
-      case 'united_states':
-      case 'usa':
-      case 'us':
-        return 'USD';
-      default:
-        return null;
-    }
-  }
-
-  static String _formatCurrency({
-    required String locale,
-    required String currencyCode,
+  static String _formatConverted({
+    required BuildContext context,
     required num amount,
+    required String sourceCurrencyCode,
+    required CopilotExchangeRates? exchangeRates,
   }) {
-    final formatter = NumberFormat.currency(
-      locale: locale,
-      name: currencyCode,
-      symbol: switch (currencyCode) {
-        'USD' => 'US\$',
-        'EUR' => '€',
-        'ARS' => 'AR\$',
-        'CLP' => 'CLP\$',
-        'UYU' => 'UYU\$',
-        'COP' => 'COP\$',
-        'PEN' => 'S/.',
-        'PYG' => '₲',
-        'BOB' => 'Bs.',
-        'BRL' => 'R\$',
-        _ => currencyCode,
-      },
-      decimalDigits: switch (currencyCode) {
-        'USD' || 'EUR' || 'PEN' || 'BOB' => 2,
-        _ => 0,
-      },
+    final targetCurrencyCode = context.preferredCurrencyCode;
+    final converted = _convert(
+      amount: amount.toDouble(),
+      sourceCurrencyCode: sourceCurrencyCode,
+      targetCurrencyCode: targetCurrencyCode,
+      rates: exchangeRates,
     );
-
-    return formatter.format(amount);
-  }
-
-  static double _roundEstimate(double amountInBrl) {
-    final increment = amountInBrl.abs() < 1000
-        ? 10
-        : amountInBrl.abs() < 5000
-        ? 50
-        : amountInBrl.abs() < 20000
-        ? 100
-        : 500;
-    return (amountInBrl / increment).round() * increment.toDouble();
-  }
-
-  static String _estimatedLabel(String value) => '≈ $value';
-}
-
-class _MultiCurrencyAmountState extends State<MultiCurrencyAmount> {
-  String? _selectedCurrencyCode;
-  bool _isExpanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final settingsCurrencyCode = context.preferredCurrencyCode;
-    // Use scope rates as fallback when no explicit rates are provided.
-    final effectiveRates =
-        widget.exchangeRates ?? ExchangeRatesScope.ratesOf(context);
-    final options = MultiCurrencyAmount._buildOptions(
-      amountInBrl: widget.amountInBrl,
-      exchangeRates: effectiveRates,
-      fallbackLocale:
-          widget.primaryLocale ?? Localizations.localeOf(context).toString(),
-      preferredCountryId: widget.preferredCountryId,
-      settingsCurrencyCode: settingsCurrencyCode,
-    );
-
-    final selected = options.firstWhere(
-      (option) => option.currencyCode == _selectedCurrencyCode,
-      orElse: () => options.first,
-    );
-    final selectedCurrencyCode = selected.currencyCode;
-
-    if (options.length == 1) {
-      return _AmountChip(
-        label: selected.label,
-        compact: widget.compact,
-        selected: true,
-      );
+    if (converted == null) {
+      return '— $targetCurrencyCode';
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          borderRadius: BorderRadius.circular(999),
-          onTap: () => setState(() => _isExpanded = !_isExpanded),
-          child: Wrap(
-            spacing: 6,
-            runSpacing: 4,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              _AmountChip(
-                label: selected.label,
-                compact: widget.compact,
-                selected: true,
-              ),
-              Icon(
-                _isExpanded
-                    ? Icons.keyboard_arrow_up_rounded
-                    : Icons.keyboard_arrow_down_rounded,
-                size: widget.compact ? 16 : 18,
-                color: AppColors.textSoftFor(context),
-              ),
-            ],
-          ),
-        ),
-        if (_isExpanded) ...[
-          SizedBox(height: widget.compact ? 6 : 8),
-          Wrap(
-            spacing: widget.wrapSpacing,
-            runSpacing: widget.runSpacing,
-            children: [
-              for (final option in options)
-                _AmountChip(
-                  label: option.label,
-                  compact: widget.compact,
-                  selected: option.currencyCode == selectedCurrencyCode,
-                  onTap: () {
-                    setState(() {
-                      _selectedCurrencyCode = option.currencyCode;
-                      _isExpanded = false;
-                    });
-                  },
-                ),
-            ],
-          ),
-        ],
-      ],
-    );
+    final rounded = _roundEstimate(converted, currencyCode: targetCurrencyCode);
+    return '≈ ${formatCurrency(locale: _localeFor(targetCurrencyCode), currencyCode: targetCurrencyCode, amount: rounded)}';
   }
-}
 
-class _CurrencyOption {
-  const _CurrencyOption({required this.currencyCode, required this.label});
+  static double? _convert({
+    required double amount,
+    required String sourceCurrencyCode,
+    required String targetCurrencyCode,
+    required CopilotExchangeRates? rates,
+  }) {
+    if (sourceCurrencyCode == targetCurrencyCode) return amount;
+    if (rates == null || !rates.hasValidRates) return null;
 
-  final String currencyCode;
-  final String label;
-}
+    final amountInBrl = switch (sourceCurrencyCode) {
+      'BRL' => amount,
+      'USD' => amount * rates.usdToBrl,
+      'ARS' => amount * rates.arsToBrl,
+      'CLP' => amount / rates.brlToClp,
+      'UYU' => amount / rates.brlToUyu,
+      _ => null,
+    };
+    if (amountInBrl == null) return null;
 
-class _EffectiveExchangeRates {
-  const _EffectiveExchangeRates({
-    required this.brlToUsd,
-    required this.brlToEur,
-    required this.brlToArs,
-    required this.brlToClp,
-    required this.brlToUyu,
-    required this.brlToCop,
-    required this.brlToPen,
-    required this.brlToPyg,
-    required this.brlToBob,
-  });
+    return switch (targetCurrencyCode) {
+      'BRL' => amountInBrl,
+      'USD' => amountInBrl * rates.brlToUsd,
+      'ARS' => amountInBrl * rates.brlToArs,
+      'CLP' => amountInBrl * rates.brlToClp,
+      _ => null,
+    };
+  }
 
-  final double brlToUsd;
-  final double brlToEur;
-  final double brlToArs;
-  final double brlToClp;
-  final double brlToUyu;
-  final double brlToCop;
-  final double brlToPen;
-  final double brlToPyg;
-  final double brlToBob;
+  static String _localeFor(String currencyCode) => switch (currencyCode) {
+    'BRL' => 'pt_BR',
+    'ARS' => 'es_AR',
+    'CLP' => 'es_CL',
+    _ => 'en_US',
+  };
 
-  static _EffectiveExchangeRates? resolve(CopilotExchangeRates? liveRates) {
-    if (liveRates == null || !liveRates.hasValidRates) return null;
-    return _EffectiveExchangeRates(
-      brlToUsd: liveRates.brlToUsd,
-      brlToEur: liveRates.brlToEur,
-      brlToArs: liveRates.brlToArs,
-      brlToClp: liveRates.brlToClp,
-      brlToUyu: liveRates.brlToUyu,
-      brlToCop: liveRates.brlToCop,
-      brlToPen: liveRates.brlToPen,
-      brlToPyg: liveRates.brlToPyg,
-      brlToBob: liveRates.brlToBob,
-    );
+  static double _roundEstimate(double amount, {required String currencyCode}) {
+    final increment = switch (currencyCode) {
+      'USD' =>
+        amount.abs() < 100
+            ? 1
+            : amount.abs() < 1000
+            ? 5
+            : 10,
+      'BRL' =>
+        amount.abs() < 1000
+            ? 10
+            : amount.abs() < 5000
+            ? 50
+            : amount.abs() < 20000
+            ? 100
+            : 500,
+      'ARS' || 'CLP' =>
+        amount.abs() < 10000
+            ? 100
+            : amount.abs() < 100000
+            ? 1000
+            : 5000,
+      _ => 1,
+    };
+    return (amount / increment).round() * increment.toDouble();
   }
 }
 
 class _AmountChip extends StatelessWidget {
-  const _AmountChip({
-    required this.label,
-    required this.compact,
-    required this.selected,
-    this.onTap,
-  });
+  const _AmountChip({required this.label, required this.compact});
 
   final String label;
   final bool compact;
-  final bool selected;
-  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final child = Container(
+    return Container(
       padding: EdgeInsets.symmetric(
         horizontal: compact ? 9 : 10,
         vertical: compact ? 6 : 7,
       ),
       decoration: BoxDecoration(
-        color: selected
-            ? AppColors.primary.withValues(alpha: 0.12)
-            : AppColors.surfaceMutedFor(context),
+        color: AppColors.primary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: selected
-              ? AppColors.primary.withValues(alpha: 0.24)
-              : AppColors.borderFor(context),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.24)),
       ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: selected
-              ? AppColors.primary
-              : AppColors.textPrimaryFor(context),
-          fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+          color: AppColors.primary,
+          fontWeight: FontWeight.w700,
         ),
       ),
-    );
-
-    if (onTap == null) {
-      return child;
-    }
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
-      child: child,
     );
   }
 }

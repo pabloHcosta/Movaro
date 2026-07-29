@@ -1121,7 +1121,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get documentationCostsUnavailable =>
-      'The exchange rate could not be updated right now. Values in BRL remain as the reference.';
+      'The exchange rate could not be updated right now. Converted values are temporarily unavailable.';
 
   @override
   String get documentationCostsDisclaimer =>
@@ -4719,7 +4719,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get landingBudgetExchangeUnavailable =>
-      'The official exchange rate could not be updated right now. BRL values remain as the reference.';
+      'The official exchange rate could not be updated right now. Converted values are temporarily unavailable.';
 
   @override
   String get arrivalExecutionSectionTitle => 'First 7 / 30 / 90 days';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/core/utils/cost_estimate_formatter.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 
@@ -127,11 +127,16 @@ class CityStrengthStoryService {
         en: 'The cost and housing score suggests a less tight start than other cities.',
       );
     }
+    final range = MultiCurrencyAmount.formatRangeFromBrl(
+      context: context,
+      minBrl: budget.fairLivingTotal,
+      maxBrl: budget.wellLivingTotal,
+    );
     return _localizedText(
       context,
-      pt: 'Faixa de planejamento para uma pessoa: ${CostEstimateFormatter.brlRange(budget.fairLivingTotal, budget.wellLivingTotal)}/mês.',
-      es: 'Rango de planificación para una persona: ${CostEstimateFormatter.brlRange(budget.fairLivingTotal, budget.wellLivingTotal, locale: 'es_AR')}/mes.',
-      en: 'Planning range for one person: ${CostEstimateFormatter.brlRange(budget.fairLivingTotal, budget.wellLivingTotal, locale: 'en_US')}/month.',
+      pt: 'Faixa de planejamento para uma pessoa: $range/mês.',
+      es: 'Rango de planificación para una persona: $range/mes.',
+      en: 'Planning range for one person: $range/month.',
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 
 /// Parses guide `fullContent` plain text into structured visual blocks.
 ///
@@ -22,6 +23,9 @@ class GuideContentRenderer extends StatelessWidget {
 
   static final _urlPattern = RegExp(
     r'(https?://[^\s,)]+|www\.[^\s,)]+|\w+\.\w+\.(?:com|gov|org|net|br|ar)(?:\.\w+)?(?:/[^\s,)]*)?)',
+  );
+  static final _brlAmountPattern = RegExp(
+    r'R\$\s*([0-9][0-9.,]*)(?:\s*[–-]\s*(?:R\$\s*)?([0-9][0-9.,]*))?',
   );
 
   @override
@@ -247,6 +251,7 @@ class GuideContentRenderer extends StatelessWidget {
   /// Builds a RichText widget that highlights URLs as tappable links
   /// and R$ values with a subtle emphasis.
   Widget _buildRichText(BuildContext context, String text) {
+    final displayText = _convertEmbeddedBrlAmounts(context, text);
     final baseStyle = Theme.of(
       context,
     ).textTheme.bodyMedium?.copyWith(height: 1.5);
@@ -255,11 +260,11 @@ class GuideContentRenderer extends StatelessWidget {
     var lastEnd = 0;
 
     // Find all URLs
-    for (final match in _urlPattern.allMatches(text)) {
+    for (final match in _urlPattern.allMatches(displayText)) {
       if (match.start > lastEnd) {
         spans.add(
           TextSpan(
-            text: text.substring(lastEnd, match.start),
+            text: displayText.substring(lastEnd, match.start),
             style: baseStyle,
           ),
         );
@@ -289,14 +294,49 @@ class GuideContentRenderer extends StatelessWidget {
       lastEnd = match.end;
     }
 
-    if (lastEnd < text.length) {
-      spans.add(TextSpan(text: text.substring(lastEnd), style: baseStyle));
+    if (lastEnd < displayText.length) {
+      spans.add(
+        TextSpan(text: displayText.substring(lastEnd), style: baseStyle),
+      );
     }
 
     if (spans.isEmpty) {
-      return Text(text, style: baseStyle);
+      return Text(displayText, style: baseStyle);
     }
 
     return Text.rich(TextSpan(children: spans));
+  }
+
+  String _convertEmbeddedBrlAmounts(BuildContext context, String text) {
+    return text.replaceAllMapped(_brlAmountPattern, (match) {
+      final low = _parseBrlNumber(match.group(1)!);
+      final highRaw = match.group(2);
+      if (low == null) return match.group(0)!;
+      if (highRaw == null) {
+        return MultiCurrencyAmount.formatPreferredCurrency(
+          context: context,
+          amountInBrl: low,
+          exchangeRates: null,
+        );
+      }
+      final high = _parseBrlNumber(highRaw);
+      if (high == null) return match.group(0)!;
+      return MultiCurrencyAmount.formatRangeFromBrl(
+        context: context,
+        minBrl: low,
+        maxBrl: high,
+      );
+    });
+  }
+
+  num? _parseBrlNumber(String raw) {
+    final separators = RegExp(r'[.,]').allMatches(raw).toList();
+    if (separators.isEmpty) return num.tryParse(raw);
+    final lastSeparator = separators.last;
+    final decimalDigits = raw.length - lastSeparator.end;
+    if (separators.length == 1 && decimalDigits == 2) {
+      return num.tryParse(raw.replaceAll(',', '.'));
+    }
+    return num.tryParse(raw.replaceAll(RegExp(r'[.,]'), ''));
   }
 }

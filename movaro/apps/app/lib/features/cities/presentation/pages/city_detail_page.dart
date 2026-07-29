@@ -5,16 +5,17 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
+import 'package:movaro_app/app/currency/currency_scope.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/errors/error_handler.dart';
+import 'package:movaro_app/core/exchange_rates/exchange_rates_scope.dart';
 import 'package:movaro_app/features/journey/detected_location.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
 import 'package:movaro_app/features/location/presentation/widgets/location_banner_widget.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/utils/number_formatters.dart';
-import 'package:movaro_app/core/utils/cost_estimate_formatter.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/core/widgets/city_cost_of_living_card.dart';
@@ -1788,8 +1789,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
     String? verdictLine;
     Color? verdictColor;
     if (affordability != null) {
-      final amount = _formatBrl(affordability.gap.abs());
-      final income = _formatBrl(affordability.monthlyIncome);
+      final amount = _formatMoney(context, affordability.gap.abs());
+      final income = _formatMoney(context, affordability.monthlyIncome);
       (verdictColor, verdictLine) = switch (affordability.verdict) {
         AffordabilityVerdict.comfortable => (
           AppColors.success,
@@ -4469,19 +4470,11 @@ class _FlightBurdenCard extends StatelessWidget {
   }
 
   String _usdRange(BuildContext context, int min, int max) {
-    final minLabel = NumberFormat.currency(
-      locale: 'en_US',
-      name: 'USD',
-      symbol: 'US\$',
-      decimalDigits: 0,
-    ).format(min);
-    final maxLabel = NumberFormat.currency(
-      locale: 'en_US',
-      name: 'USD',
-      symbol: 'US\$',
-      decimalDigits: 0,
-    ).format(max);
-    return '$minLabel-$maxLabel';
+    return MultiCurrencyAmount.formatRangeFromUsd(
+      context: context,
+      minUsd: min,
+      maxUsd: max,
+    );
   }
 }
 
@@ -6901,11 +6894,20 @@ class _AffordabilityNoteState extends State<_AffordabilityNote> {
     super.dispose();
   }
 
-  void _onIncomeChanged(String value) {
+  void _onIncomeChanged(BuildContext context, String value) {
     final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
     final parsed = int.tryParse(digits);
+    final amountInBrl = parsed == null
+        ? null
+        : MultiCurrencyAmount.convertToBrl(
+            amount: parsed,
+            sourceCurrencyCode: context.preferredCurrencyCode,
+            exchangeRates: ExchangeRatesScope.ratesOf(context),
+          );
     setState(() {
-      _customIncome = (parsed != null && parsed > 0) ? parsed : null;
+      _customIncome = amountInBrl != null && amountInBrl > 0
+          ? amountInBrl.round()
+          : null;
     });
   }
 
@@ -6924,8 +6926,8 @@ class _AffordabilityNoteState extends State<_AffordabilityNote> {
       return const SizedBox.shrink();
     }
 
-    final amount = _formatBrl(result.gap.abs());
-    final incomeLabel = _formatBrl(result.monthlyIncome);
+    final amount = _formatMoney(context, result.gap.abs());
+    final incomeLabel = _formatMoney(context, result.monthlyIncome);
 
     final incomeLead = result.usesLocalAverageSalary
         ? _cityDetailLocalizedText(
@@ -7022,10 +7024,11 @@ class _AffordabilityNoteState extends State<_AffordabilityNote> {
           TextField(
             controller: _incomeController,
             keyboardType: TextInputType.number,
-            onChanged: _onIncomeChanged,
+            onChanged: (value) => _onIncomeChanged(context, value),
             decoration: InputDecoration(
               isDense: true,
-              prefixText: 'R\$ ',
+              prefixText:
+                  '${MultiCurrencyAmount.symbolFor(context.preferredCurrencyCode)} ',
               labelText: _cityDetailLocalizedText(
                 context,
                 pt: 'Ver com o meu salário (por mês)',
@@ -7333,7 +7336,7 @@ class _AnalysisFinancialSection extends StatelessWidget {
               es: 'Salario neto medio',
               en: 'Average net salary',
             ),
-            value: _formatBrl(budget.averageMonthlyNetSalary),
+            value: _formatMoney(context, budget.averageMonthlyNetSalary),
             tint: AppColors.success,
             emphasis: true,
           ),
@@ -7349,7 +7352,7 @@ class _AnalysisFinancialSection extends StatelessWidget {
               es: 'Alquiler fuera del centro',
               en: 'Rent outside centre',
             ),
-            value: _formatBrl(budget.oneBedroomOutsideCentre),
+            value: _formatMoney(context, budget.oneBedroomOutsideCentre),
             tint: AppColors.primary,
           ),
           const SizedBox(height: 8),
@@ -7362,7 +7365,7 @@ class _AnalysisFinancialSection extends StatelessWidget {
               es: 'Alquiler en el centro',
               en: 'Rent in city centre',
             ),
-            value: _formatBrl(budget.oneBedroomCityCentre),
+            value: _formatMoney(context, budget.oneBedroomCityCentre),
             tint: AppColors.primary,
           ),
           const SizedBox(height: 8),
@@ -7375,7 +7378,7 @@ class _AnalysisFinancialSection extends StatelessWidget {
               es: 'Costo de vida (sin alquiler)',
               en: 'Cost of living (ex-rent)',
             ),
-            value: _formatBrl(budget.singlePersonExcludingRent),
+            value: _formatMoney(context, budget.singlePersonExcludingRent),
             tint: AppColors.primary,
           ),
           if (budget.monthlyTransportPass > 0) ...[
@@ -7388,7 +7391,7 @@ class _AnalysisFinancialSection extends StatelessWidget {
                 es: 'Pase de transporte',
                 en: 'Transport pass',
               ),
-              value: _formatBrl(budget.monthlyTransportPass),
+              value: _formatMoney(context, budget.monthlyTransportPass),
               tint: AppColors.primary,
             ),
           ],
@@ -7402,7 +7405,7 @@ class _AnalysisFinancialSection extends StatelessWidget {
                 es: 'Servicios (agua, luz, internet)',
                 en: 'Utilities (water, power, internet)',
               ),
-              value: _formatBrl(budget.utilities),
+              value: _formatMoney(context, budget.utilities),
               tint: AppColors.primary,
             ),
           ],
@@ -7419,7 +7422,7 @@ class _AnalysisFinancialSection extends StatelessWidget {
               en: 'Estimated total cost',
             ),
             value:
-                '${_formatBrl(budget.fairLivingTotal)} – ${_formatBrl(budget.wellLivingTotal)}/mês',
+                '${MultiCurrencyAmount.formatRangeFromBrl(context: context, minBrl: budget.fairLivingTotal, maxBrl: budget.wellLivingTotal)}/mês',
             tint: AppColors.textSoftFor(context),
           ),
           const SizedBox(height: 14),
@@ -8088,8 +8091,10 @@ class _AnalysisInfoRow extends StatelessWidget {
   }
 }
 
-// ── BRL currency formatter ────────────────────────────────────────────────────
-
-String _formatBrl(int amount) {
-  return CostEstimateFormatter.brl(amount);
+String _formatMoney(BuildContext context, int amount) {
+  return MultiCurrencyAmount.formatPreferredCurrency(
+    context: context,
+    amountInBrl: amount,
+    exchangeRates: null,
+  );
 }

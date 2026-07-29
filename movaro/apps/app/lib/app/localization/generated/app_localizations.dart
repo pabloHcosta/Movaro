@@ -1966,7 +1966,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationCostsUnavailable.
   ///
   /// In en, this message translates to:
-  /// **'The exchange rate could not be updated right now. Values in BRL remain as the reference.'**
+  /// **'The exchange rate could not be updated right now. Converted values are temporarily unavailable.'**
   String get documentationCostsUnavailable;
 
   /// No description provided for @documentationCostsDisclaimer.
@@ -7984,7 +7984,7 @@ abstract class AppLocalizations {
   /// No description provided for @landingBudgetExchangeUnavailable.
   ///
   /// In en, this message translates to:
-  /// **'The official exchange rate could not be updated right now. BRL values remain as the reference.'**
+  /// **'The official exchange rate could not be updated right now. Converted values are temporarily unavailable.'**
   String get landingBudgetExchangeUnavailable;
 
   /// No description provided for @arrivalExecutionSectionTitle.

@@ -5,9 +5,8 @@ import 'package:movaro_app/features/flight_search/domain/models/flight_search_pa
 /// URL format (tested March 2026):
 ///   https://www.google.com/travel/flights?q=Flights+from+EZE+to+GRU+on+2025-05-15
 ///
-/// Language (`hl`) and currency (`curr`) are derived from the **origin** country
-/// so the user sees prices in their own currency and the interface in their
-/// own language — regardless of the destination.
+/// Language (`hl`) is derived from the origin country. Currency can be supplied
+/// from the app-wide preference and defaults to USD.
 ///
 /// Examples:
 ///   AR origin → &curr=ARS&hl=es    (Spanish, Argentine Peso)
@@ -28,7 +27,7 @@ class FlightUrlBuilder {
     'US': (curr: 'USD', hl: 'en'),
   };
 
-  static Uri build(FlightSearchParams params) {
+  static Uri build(FlightSearchParams params, {String currencyCode = 'USD'}) {
     final origin = params.origin.iataCode;
     final destination = params.destination.iataCode;
     final date = _formatDate(params.departureDate);
@@ -37,9 +36,12 @@ class FlightUrlBuilder {
 
     // Locale is driven by where the user is flying FROM, not where they go.
     final locale = _localeByCountry[params.origin.countryIso.toUpperCase()];
-    final extraParams = locale != null
-        ? '&curr=${locale.curr}&hl=${locale.hl}'
-        : '';
+    final supportedCurrency =
+        const {'USD', 'BRL', 'ARS', 'CLP'}.contains(currencyCode.toUpperCase())
+        ? currencyCode.toUpperCase()
+        : 'USD';
+    final languageParam = locale == null ? '' : '&hl=${locale.hl}';
+    final extraParams = '&curr=$supportedCurrency$languageParam';
 
     return Uri.parse(
       'https://www.google.com/travel/flights'

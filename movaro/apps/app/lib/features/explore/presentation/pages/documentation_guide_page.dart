@@ -15,6 +15,7 @@ import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/core/widgets/journey_stage_banner.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/explore/application/services/documentation_guide_preferences_store.dart';
 import 'package:movaro_app/features/explore/application/services/guide_answers_remote_service.dart';
@@ -1097,6 +1098,11 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
 
 List<_DocumentationTopic> _documentationTopics(BuildContext context) {
   final l10n = context.l10n;
+  final averageEarnings = MultiCurrencyAmount.formatPreferredCurrency(
+    context: context,
+    amountInBrl: 3528,
+    exchangeRates: null,
+  );
 
   return [
     _DocumentationTopic(
@@ -1271,7 +1277,14 @@ List<_DocumentationTopic> _documentationTopics(BuildContext context) {
       title: l10n.documentationWorkMarketTitle,
       summary: l10n.documentationWorkMarketSummary,
       bullets: [
-        l10n.documentationWorkMarketBulletOne,
+        switch (Localizations.localeOf(context).languageCode) {
+          'pt' =>
+            'No trimestre móvel encerrado em outubro de 2025, o IBGE registrou desocupação em 5,4%, rendimento médio habitual de $averageEarnings e recorde de 39,2 milhões de empregados com carteira no setor privado.',
+          'es' =>
+            'En el trimestre móvil terminado en octubre de 2025, el IBGE registró desempleo en 5,4%, ingreso medio habitual de $averageEarnings y un récord de 39,2 millones de asalariados privados con registro.',
+          _ =>
+            'In the rolling quarter ending in October 2025, IBGE recorded unemployment at 5.4%, habitual average earnings at $averageEarnings, and a record 39.2 million formally registered private-sector workers.',
+        },
         l10n.documentationWorkMarketBulletTwo,
         l10n.documentationWorkMarketBulletThree,
       ],

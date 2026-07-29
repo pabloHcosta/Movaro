@@ -6,15 +6,9 @@ import 'package:movaro_app/app/currency/currency_preferences_store.dart';
 /// Supported currencies for display throughout the app.
 enum AppCurrency {
   usd('USD'),
-  eur('EUR'),
   brl('BRL'),
   ars('ARS'),
-  clp('CLP'),
-  uyu('UYU'),
-  cop('COP'),
-  pen('PEN'),
-  pyg('PYG'),
-  bob('BOB');
+  clp('CLP');
 
   const AppCurrency(this.code);
   final String code;
@@ -33,88 +27,31 @@ class CurrencyController extends ChangeNotifier {
 
   final CurrencyPreferencesStore _store;
 
-  /// Currency explicitly chosen by the user in Settings. Persisted.
-  String? _currencyCode;
+  static const defaultCurrencyCode = 'USD';
 
-  /// Currency inferred from the device's GPS location. Not persisted.
-  String? _detectedCurrencyCode;
+  /// Currency chosen by the user in Settings. USD is the app default.
+  String _currencyCode = defaultCurrencyCode;
 
-  /// The explicitly selected currency code, or null if not set.
-  String? get currencyCode => _currencyCode;
-
-  /// The GPS-inferred currency code, or null if location is unknown.
-  String? get detectedCurrencyCode => _detectedCurrencyCode;
-
-  /// Effective currency code: user-selected → GPS-detected → null (falls back to USD in widget).
-  String? get resolvedCurrencyCode => _currencyCode ?? _detectedCurrencyCode;
+  String get currencyCode => _currencyCode;
+  String get resolvedCurrencyCode => _currencyCode;
 
   Future<void> initialize() async {
-    _currencyCode = await _store.readCurrencyCode();
+    final storedCode = await _store.readCurrencyCode();
+    _currencyCode =
+        AppCurrency.fromCode(storedCode ?? '')?.code ?? defaultCurrencyCode;
     notifyListeners();
   }
 
   void setCurrency(String code) {
-    if (_currencyCode == code) return;
-    _currencyCode = code;
-    unawaited(_store.saveCurrencyCode(code));
+    final supported = AppCurrency.fromCode(code.toUpperCase());
+    if (supported == null || _currencyCode == supported.code) return;
+    _currencyCode = supported.code;
+    unawaited(_store.saveCurrencyCode(supported.code));
     notifyListeners();
   }
 
+  /// Resets the preference to the documented app default.
   void clearCurrency() {
-    if (_currencyCode == null) return;
-    _currencyCode = null;
-    unawaited(_store.saveCurrencyCode(null));
-    notifyListeners();
-  }
-
-  /// Called when the device GPS detects the user's current country.
-  /// [countryId] may be an ISO-2 code (e.g. "AR") or a catalog country ID
-  /// (e.g. "argentina"). Pass null to clear the detected currency.
-  void setDetectedCurrencyFromCountry(String? countryId) {
-    final code = _currencyCodeForCountry(countryId);
-    if (_detectedCurrencyCode == code) return;
-    _detectedCurrencyCode = code;
-    notifyListeners();
-  }
-
-  /// Maps a country ID or ISO-2 code to the corresponding currency code.
-  /// Returns null when the country is unknown (widget will fall back to USD).
-  static String? _currencyCodeForCountry(String? countryId) {
-    switch (countryId?.toLowerCase()) {
-      case 'argentina':
-      case 'ar':
-        return 'ARS';
-      case 'chile':
-      case 'cl':
-        return 'CLP';
-      case 'uruguai':
-      case 'uruguay':
-      case 'uy':
-        return 'UYU';
-      case 'colombia':
-      case 'co':
-        return 'COP';
-      case 'peru':
-      case 'pe':
-        return 'PEN';
-      case 'paraguai':
-      case 'paraguay':
-      case 'py':
-        return 'PYG';
-      case 'bolivia':
-      case 'bo':
-        return 'BOB';
-      case 'brasil':
-      case 'brazil':
-      case 'br':
-        return 'BRL';
-      case 'estados_unidos':
-      case 'united_states':
-      case 'usa':
-      case 'us':
-        return 'USD';
-      default:
-        return null;
-    }
+    setCurrency(defaultCurrencyCode);
   }
 }

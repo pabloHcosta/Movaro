@@ -25,6 +25,10 @@ class CityFeedItem {
     this.guideItemId,
     this.sourceLabel,
     this.sourceUrl,
+    this.rangeMinBrl,
+    this.rangeMaxBrl,
+    this.bodyBeforeRange,
+    this.bodyAfterRange,
   });
 
   final String id;
@@ -53,6 +57,13 @@ class CityFeedItem {
   final String? guideItemId;
   final String? sourceLabel;
   final String? sourceUrl;
+
+  /// Optional structured monetary content. Keeping the numeric BRL reference
+  /// separate lets presentation convert it to the app-wide selected currency.
+  final num? rangeMinBrl;
+  final num? rangeMaxBrl;
+  final String? bodyBeforeRange;
+  final String? bodyAfterRange;
 
   bool isRelevantFor({
     required String? cityCode,

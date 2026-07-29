@@ -438,7 +438,7 @@
       }
     }
   },
-  "documentationCostsUnavailable": "The exchange rate could not be updated right now. Values in BRL remain as the reference.",
+  "documentationCostsUnavailable": "The exchange rate could not be updated right now. Converted values are temporarily unavailable.",
   "documentationCostsDisclaimer": "Use this as early guidance only. Costs vary by state, provider, age, coverage, and local rules.",
   "documentationCostFreeValue": "Free",
   "documentationCostVariableValue": "Variable",
@@ -1846,7 +1846,7 @@
       "value": {}
     }
   },
-  "landingBudgetExchangeUnavailable": "The official exchange rate could not be updated right now. BRL values remain as the reference.",
+  "landingBudgetExchangeUnavailable": "The official exchange rate could not be updated right now. Converted values are temporarily unavailable.",
   "arrivalExecutionSectionTitle": "First 7 / 30 / 90 days",
   "arrivalExecutionStageWeek": "First 7 days",
   "arrivalExecutionStageMonth": "First 30 days",

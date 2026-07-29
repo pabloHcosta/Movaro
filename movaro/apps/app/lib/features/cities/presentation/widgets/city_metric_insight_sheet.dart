@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/utils/cost_estimate_formatter.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_source.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_card_metric_classifier.dart';
@@ -906,11 +906,11 @@ class _CityMetricInsightContent {
     if (budget == null) {
       return context.l10n.cityCardDataUnavailable;
     }
-    final range = CostEstimateFormatter.brlRange(
-      budget.fairLivingTotal,
-      budget.wellLivingTotal,
-      locale: Localizations.localeOf(context).toString(),
-      compact: true,
+    final range = MultiCurrencyAmount.formatRangeFromBrl(
+      context: context,
+      minBrl: budget.fairLivingTotal,
+      maxBrl: budget.wellLivingTotal,
+      primaryLocale: Localizations.localeOf(context).toString(),
     );
     return context.l10n.cityCardMonthlyEstimate(range);
   }
@@ -920,11 +920,11 @@ class _CityMetricInsightContent {
     if (budget == null) {
       return context.l10n.cityCardDataUnavailable;
     }
-    final range = CostEstimateFormatter.brlRange(
-      budget.planningRentLow,
-      budget.planningRentHigh,
-      locale: Localizations.localeOf(context).toString(),
-      compact: true,
+    final range = MultiCurrencyAmount.formatRangeFromBrl(
+      context: context,
+      minBrl: budget.planningRentLow,
+      maxBrl: budget.planningRentHigh,
+      primaryLocale: Localizations.localeOf(context).toString(),
     );
     return context.l10n.cityCardMonthlyEstimate(range);
   }

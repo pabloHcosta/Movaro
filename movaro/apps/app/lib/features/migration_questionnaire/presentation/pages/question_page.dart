@@ -20,6 +20,7 @@ import 'package:movaro_app/core/widgets/contextual_help.dart';
 import 'package:movaro_app/core/widgets/exit_flow_dialog.dart';
 import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
@@ -1194,71 +1195,35 @@ class _QuestionPageState extends State<QuestionPage> {
       controller.answerFor('origin_country'),
     );
     final language = Localizations.localeOf(context).languageCode;
-    final first = _formatCapitalAmount(
-      rangeSet.currencyCode,
-      rangeSet.bands[0],
+    final first = MultiCurrencyAmount.formatAmount(
+      context: context,
+      sourceCurrencyCode: rangeSet.currencyCode,
+      amount: rangeSet.bands[0],
     );
-    final second = _formatCapitalAmount(
-      rangeSet.currencyCode,
-      rangeSet.bands[1],
+    final second = MultiCurrencyAmount.formatAmount(
+      context: context,
+      sourceCurrencyCode: rangeSet.currencyCode,
+      amount: rangeSet.bands[1],
     );
-    final third = _formatCapitalAmount(
-      rangeSet.currencyCode,
-      rangeSet.bands[2],
+    final third = MultiCurrencyAmount.formatAmount(
+      context: context,
+      sourceCurrencyCode: rangeSet.currencyCode,
+      amount: rangeSet.bands[2],
     );
-    final unit = _capitalUnitLabel(language, rangeSet.currencyCode);
 
     return switch (value) {
       'low' =>
         language == 'en'
-            ? 'Up to $first $unit'
-            : '${language == 'pt' ? 'Até' : 'Hasta'} $first $unit',
-      'medium' => '$first a $second $unit',
-      'high' => '$second a $third $unit',
+            ? 'Up to $first'
+            : '${language == 'pt' ? 'Até' : 'Hasta'} $first',
+      'medium' => '$first a $second',
+      'high' => '$second a $third',
       'very_high' =>
         language == 'en'
-            ? 'More than $third $unit'
-            : '${language == 'pt' ? 'Mais de' : 'Más de'} $third $unit',
+            ? 'More than $third'
+            : '${language == 'pt' ? 'Mais de' : 'Más de'} $third',
       _ => value,
     };
-  }
-
-  String _formatCapitalAmount(String currencyCode, num amount) {
-    final value = amount.round().toString().replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'),
-      (match) => '.',
-    );
-    if (currencyCode == 'BRL') {
-      return 'R\$ $value';
-    }
-    return '\$$value';
-  }
-
-  String _capitalUnitLabel(String language, String currencyCode) {
-    switch (currencyCode) {
-      case 'ARS':
-        return language == 'en' ? 'Argentine pesos' : 'pesos';
-      case 'CLP':
-        return language == 'pt'
-            ? 'pesos chilenos'
-            : language == 'en'
-            ? 'Chilean pesos'
-            : 'pesos chilenos';
-      case 'UYU':
-        return language == 'pt'
-            ? 'pesos uruguaios'
-            : language == 'en'
-            ? 'Uruguayan pesos'
-            : 'pesos uruguayos';
-      case 'BRL':
-        return language == 'en'
-            ? 'reais'
-            : language == 'es'
-            ? 'reales'
-            : 'reais';
-      default:
-        return language == 'en' ? 'USD' : 'dólares';
-    }
   }
 
   ButtonStyle _primaryButtonStyle(BuildContext context) {
