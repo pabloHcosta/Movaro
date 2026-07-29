@@ -1196,7 +1196,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get documentationCpfSummary =>
-      'Um cadastro importante para banco, contrato, trabalho e serviços, mas não substitui sua regularização migratória.';
+      'Um cadastro importante para banco, contrato, trabalho e serviços — mas não substitui sua regularização migratória.';
 
   @override
   String get documentationCpfBulletOne =>
@@ -6464,7 +6464,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get infoGuideBody =>
-      'Encontre respostas sobre documentos, moradia, saúde, trabalho e custos para o seu país de destino, tudo em um só lugar.';
+      'Encontre respostas sobre documentos, moradia, saúde, trabalho e custos para o seu país de destino — tudo em um só lugar.';
 
   @override
   String get infoGuideStepOneTitle => 'Navegue por categoria';

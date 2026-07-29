@@ -1466,12 +1466,12 @@ extension AppLocalizationsFormatting on AppLocalizations {
           ),
           'study' => _localizedText(pt: 'Estudo', es: 'Estudio', en: 'Study'),
           'family_partner' => _localizedText(
-            pt: 'Familia',
+            pt: 'Família',
             es: 'Familia',
             en: 'Family',
           ),
           'fresh_start' => _localizedText(
-            pt: 'Recomeco',
+            pt: 'Recomeço',
             es: 'Reinicio',
             en: 'Restart',
           ),
@@ -1608,9 +1608,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
             en: 'Safety',
           ),
           'warm_climate_beach' => _localizedText(
-            pt: 'Costa quente',
-            es: 'Costa cálida',
-            en: 'Warm coast',
+            pt: 'Litoral',
+            es: 'Costa',
+            en: 'Coast',
           ),
           'transit_infra' => _localizedText(
             pt: 'Transporte',

@@ -6466,7 +6466,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get infoGuideBody =>
-      'Encontrá respuestas sobre documentos, vivienda, salud, trabajo y costos para tu país de destino, todo en un solo lugar.';
+      'Encontrá respuestas sobre documentos, vivienda, salud, trabajo y costos para tu país de destino — todo en un solo lugar.';
 
   @override
   String get infoGuideStepOneTitle => 'Navegá por categoría';

@@ -6440,7 +6440,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get infoGuideBody =>
-      'Find answers about documents, housing, health, work, and costs for your destination country all in one place.';
+      'Find answers about documents, housing, health, work, and costs for your destination country — all in one place.';
 
   @override
   String get infoGuideStepOneTitle => 'Browse by category';
@@ -6631,7 +6631,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get migrationResultRevealExploreCity => 'View city details';
 
   @override
-  String get migrationResultRevealCompareCta => 'Compare with alternatives';
+  String get migrationResultRevealCompareCta => 'Compare alternatives';
 
   @override
   String migrationResultRevealStartPreparationCta(String city) {

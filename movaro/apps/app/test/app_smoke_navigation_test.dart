@@ -256,8 +256,8 @@ void main() {
     );
     await _pumpScreen(tester);
 
-    expect(find.text('Ver detalhes da cidade'), findsOneWidget);
-    expect(find.text('Comparar com alternativas'), findsOneWidget);
+    expect(find.text('Ver detalhes'), findsOneWidget);
+    expect(find.text('Explorar alternativas'), findsOneWidget);
     expect(find.textContaining('Começar preparação com'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
