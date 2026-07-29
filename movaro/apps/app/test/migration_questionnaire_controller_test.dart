@@ -116,13 +116,57 @@ void main() {
         expect(await controller.goNext(), isFalse);
         controller.setAnswerValues('priorities', ['low_cost', 'safety']);
 
-        expect(await controller.goNext(), isTrue);
+        expect(await controller.goNext(), isFalse);
+        expect(controller.isRefinePromptVisible, isTrue);
+        expect(await controller.skipRefine(), isTrue);
         expect(controller.generatedPlan, isNotNull);
         expect(controller.generatedPlan!.id, isNotEmpty);
         expect(controller.generatedPlan!.createdAt, isNotNull);
         expect(journeyContextController.isJourneyReadyForPlanning, isTrue);
       },
     );
+
+    test('quick flow offers and applies explicit profile refinement', () async {
+      controller.selectVariant(QuestionnaireVariant.lean);
+      controller.selectAnswer('intent', 'fresh_start');
+      expect(await controller.goNext(), isFalse);
+      controller.selectAnswer('timeline', 'in_3_6m');
+      expect(await controller.goNext(), isFalse);
+      controller.setAnswerValues('priorities', ['safety', 'low_cost']);
+
+      expect(await controller.goNext(), isFalse);
+      expect(controller.isRefinePromptVisible, isTrue);
+
+      controller.acceptRefine();
+
+      expect(controller.selectedVariant, QuestionnaireVariant.strategic);
+      expect(controller.currentQuestion?.id, 'travel_group');
+
+      controller.selectAnswer('travel_group', 'family_kids');
+      controller.selectAnswer('travel_group_children_count', '2');
+      expect(await controller.goNext(), isFalse);
+      controller.selectAnswer('work_arrangement', 'local_job');
+      expect(await controller.goNext(), isFalse);
+      expect(controller.currentQuestion?.id, 'support_needs');
+      controller.setAnswerValues('support_needs', [
+        'travel_with_pet',
+        'continuous_medication',
+        'will_drive',
+      ]);
+      expect(await controller.goNext(), isFalse);
+      controller.selectAnswer('funding', 'job_search');
+
+      expect(await controller.goNext(), isTrue);
+      expect(controller.generatedPlan?.variant, QuestionnaireVariant.strategic);
+      expect(controller.generatedPlan?.travelGroup, 'family_kids');
+      expect(controller.generatedPlan?.childrenCount, 2);
+      expect(controller.generatedPlan?.workArrangement, 'local_job');
+      expect(controller.generatedPlan?.funding, 'job_search');
+      expect(
+        controller.generatedPlan?.selectedConstraints,
+        containsAll(['travel_with_pet', 'continuous_medication', 'will_drive']),
+      );
+    });
 
     test(
       'strategic refinement starts from contextual needs after core answers',
@@ -197,9 +241,14 @@ void main() {
         controller.toggleAnswer('support_needs', 'continuous_medication'),
         isTrue,
       );
+      expect(controller.toggleAnswer('support_needs', 'will_drive'), isTrue);
       expect(
         controller.answerValuesFor('support_needs'),
-        unorderedEquals(['travel_with_pet', 'continuous_medication']),
+        unorderedEquals([
+          'travel_with_pet',
+          'continuous_medication',
+          'will_drive',
+        ]),
       );
 
       expect(

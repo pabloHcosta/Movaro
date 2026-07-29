@@ -5673,10 +5673,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bmpRefineTitle =>
-      'Do you want to refine the recommendation with 1 more question?';
+      'Consider family, pets, a vehicle, health, and income before the recommendation?';
 
   @override
-  String get bmpRefineSubtitle => '(Optional) It takes about 5 seconds';
+  String get bmpRefineSubtitle =>
+      'Optional · adds about 1 minute and makes the city and plan more coherent';
 
   @override
   String get qIntentPrompt => 'What are you looking for in Brazil right now?';

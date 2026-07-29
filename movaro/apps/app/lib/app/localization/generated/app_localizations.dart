@@ -9524,13 +9524,13 @@ abstract class AppLocalizations {
   /// No description provided for @bmpRefineTitle.
   ///
   /// In en, this message translates to:
-  /// **'Do you want to refine the recommendation with 1 more question?'**
+  /// **'Consider family, pets, a vehicle, health, and income before the recommendation?'**
   String get bmpRefineTitle;
 
   /// No description provided for @bmpRefineSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'(Optional) It takes about 5 seconds'**
+  /// **'Optional · adds about 1 minute and makes the city and plan more coherent'**
   String get bmpRefineSubtitle;
 
   /// No description provided for @qIntentPrompt.

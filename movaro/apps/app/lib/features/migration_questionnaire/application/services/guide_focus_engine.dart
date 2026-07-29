@@ -120,7 +120,8 @@ class GuideFocusEngine {
     final current =
         active ??
         actionable.cast<GuideActionItem?>().firstWhere(
-          (item) => item != null && !_belongsOnArrival(item),
+          (item) =>
+              item != null && _tierForFocus(item) != GuideItemTier.optional,
           orElse: () => actionable.firstOrNull,
         );
 
@@ -130,7 +131,7 @@ class GuideFocusEngine {
         (item) =>
             item.id != current?.id &&
             _tierForFocus(item) != GuideItemTier.optional &&
-            !_belongsOnArrival(item),
+            item.resolvedExecutionWindow == current?.resolvedExecutionWindow,
       ),
     ];
     final now = rankedForNow.take(3).toList(growable: false);
@@ -141,6 +142,8 @@ class GuideFocusEngine {
             .where(
               (item) =>
                   _belongsOnArrival(item) &&
+                  _tierForFocus(item) != GuideItemTier.optional &&
+                  !nowIds.contains(item.id) &&
                   item.dismissReason != GuideDismissReason.later,
             )
             .toList(growable: false)
@@ -253,12 +256,14 @@ class GuideFocusEngine {
       'item_0_2_document_folder',
       'item_0_2_antecedentes',
       'item_0_3_budget',
+      'item_1_1_chip',
       'item_1_2_housing_temporary',
       'item_1_0_entry_proof',
       'item_2_1_cpf',
       'item_2_2_residencia',
       'item_4_5_registro_rnm',
       'item_4_2_saude',
+      'item_4_7_seguranca_emergencia',
     };
     if (baseMilestones.contains(item.id)) {
       return true;
@@ -300,7 +305,9 @@ class GuideFocusEngine {
       item.id.startsWith('questionnaire_');
 
   static bool _belongsOnArrival(GuideActionItem item) =>
-      item.phase == GuidePhase.arrival && !item.preArrivalRequired;
+      item.resolvedExecutionWindow == GuideExecutionWindow.arrivalDay ||
+      item.resolvedExecutionWindow == GuideExecutionWindow.firstWeek ||
+      item.resolvedExecutionWindow == GuideExecutionWindow.firstMonth;
 
   static int _compare({
     required MigrationPlan plan,
@@ -308,6 +315,19 @@ class GuideFocusEngine {
     required GuideActionItem b,
     required Map<String, int> unlockImpact,
   }) {
+    final windowCompare = _windowRank(
+      a.resolvedExecutionWindow,
+    ).compareTo(_windowRank(b.resolvedExecutionWindow));
+    if (windowCompare != 0) {
+      return windowCompare;
+    }
+    if (a.isUserPrioritized != b.isUserPrioritized) {
+      return a.isUserPrioritized ? -1 : 1;
+    }
+    final sequenceCompare = a.orderIndex.compareTo(b.orderIndex);
+    if (sequenceCompare != 0) {
+      return sequenceCompare;
+    }
     final scoreCompare = _score(
       plan,
       b,
@@ -316,8 +336,16 @@ class GuideFocusEngine {
     if (scoreCompare != 0) {
       return scoreCompare;
     }
-    return a.orderIndex.compareTo(b.orderIndex);
+    return 0;
   }
+
+  static int _windowRank(GuideExecutionWindow window) => switch (window) {
+    GuideExecutionWindow.beforeTravel => 0,
+    GuideExecutionWindow.arrivalDay => 1,
+    GuideExecutionWindow.firstWeek => 2,
+    GuideExecutionWindow.firstMonth => 3,
+    GuideExecutionWindow.later => 4,
+  };
 
   static int _score(MigrationPlan plan, GuideActionItem item, int unlockCount) {
     var score = switch (_tierForFocus(item)) {

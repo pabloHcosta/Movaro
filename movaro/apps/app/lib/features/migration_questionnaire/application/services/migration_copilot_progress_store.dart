@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:movaro_app/core/storage/persistent_json_store.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:movaro_app/core/storage/versioned_json_file_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
@@ -54,6 +54,8 @@ class MigrationCopilotProgressSnapshot {
 }
 
 class MigrationCopilotProgressStore {
+  static const _storageKey = 'movaro_copilot_progress';
+
   MigrationCopilotProgressStore({CopilotDirectoryProvider? directoryProvider})
     : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
 
@@ -91,8 +93,10 @@ class MigrationCopilotProgressStore {
 
   Future<Map<String, dynamic>?> exportState() async {
     try {
-      final file = await _file();
-      final decoded = await VersionedJsonFileStore.read(file);
+      final decoded = await PersistentJsonStore.read(
+        key: _storageKey,
+        fileProvider: _file,
+      );
       return decoded is Map<String, dynamic> ? decoded : null;
     } catch (_) {
       return null;
@@ -110,9 +114,11 @@ class MigrationCopilotProgressStore {
     Map<String, GuideDismissReason>? dismissedReasonsById,
     Map<String, GuideTaskState>? taskStatesById,
   }) async {
-    final file = await _file();
     Map<String, dynamic> current = <String, dynamic>{};
-    final existing = await VersionedJsonFileStore.read(file);
+    final existing = await PersistentJsonStore.read(
+      key: _storageKey,
+      fileProvider: _file,
+    );
     if (existing is Map<String, dynamic>) {
       current = existing;
     }
@@ -144,7 +150,11 @@ class MigrationCopilotProgressStore {
       'updatedAt': DateTime.now().toIso8601String(),
     };
 
-    await VersionedJsonFileStore.write(file, current);
+    await PersistentJsonStore.write(
+      key: _storageKey,
+      data: current,
+      fileProvider: _file,
+    );
     MigrationStateSyncCoordinator.scheduleSync();
   }
 
@@ -154,14 +164,16 @@ class MigrationCopilotProgressStore {
       return;
     }
 
-    final file = await _file();
-    await VersionedJsonFileStore.write(file, value);
+    await PersistentJsonStore.write(
+      key: _storageKey,
+      data: value,
+      fileProvider: _file,
+    );
     MigrationStateSyncCoordinator.scheduleSync();
   }
 
   Future<void> clear() async {
-    final file = await _file();
-    await VersionedJsonFileStore.delete(file);
+    await PersistentJsonStore.delete(key: _storageKey, fileProvider: _file);
     MigrationStateSyncCoordinator.scheduleSync();
   }
 

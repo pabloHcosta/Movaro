@@ -1,12 +1,14 @@
 import 'dart:io';
 
+import 'package:movaro_app/core/storage/persistent_json_store.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:movaro_app/core/storage/versioned_json_file_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
 
 typedef JourneyDirectoryProvider = Future<Directory> Function();
 
 class JourneyPreferencesStore {
+  static const _storageKey = 'movaro_journey_context';
+
   JourneyPreferencesStore({JourneyDirectoryProvider? directoryProvider})
     : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
 
@@ -14,8 +16,10 @@ class JourneyPreferencesStore {
 
   Future<Map<String, dynamic>> read() async {
     try {
-      final file = await _file();
-      final decoded = await VersionedJsonFileStore.read(file);
+      final decoded = await PersistentJsonStore.read(
+        key: _storageKey,
+        fileProvider: _file,
+      );
       return decoded is Map<String, dynamic>
           ? decoded
           : const <String, dynamic>{};
@@ -25,14 +29,16 @@ class JourneyPreferencesStore {
   }
 
   Future<void> write(Map<String, dynamic> value) async {
-    final file = await _file();
-    await VersionedJsonFileStore.write(file, value);
+    await PersistentJsonStore.write(
+      key: _storageKey,
+      data: value,
+      fileProvider: _file,
+    );
     MigrationStateSyncCoordinator.scheduleSync();
   }
 
   Future<void> clear() async {
-    final file = await _file();
-    await VersionedJsonFileStore.delete(file);
+    await PersistentJsonStore.delete(key: _storageKey, fileProvider: _file);
     MigrationStateSyncCoordinator.scheduleSync();
   }
 

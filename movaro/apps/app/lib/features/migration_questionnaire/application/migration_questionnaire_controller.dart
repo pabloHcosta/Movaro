@@ -212,18 +212,25 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   }
 
   Future<void> initializeForQuestionnaire({
-    QuestionnaireVariant variant = QuestionnaireVariant.lean,
+    QuestionnaireVariant? variant,
   }) async {
     await initialize();
+    final resolvedVariant =
+        variant ?? _selectedVariant ?? QuestionnaireVariant.lean;
     await _ensurePlanningContext(preferredCity: _preferredCity);
     _syncJourneyAnswers();
-    if (_selectedVariant != variant) {
-      _selectedVariant = variant;
+    if (_selectedVariant != resolvedVariant) {
+      _selectedVariant = resolvedVariant;
+      _isRefineResolved = resolvedVariant == QuestionnaireVariant.strategic;
+      if (resolvedVariant == QuestionnaireVariant.lean) {
+        _clearRefinementAnswers();
+      }
     }
-    _showRefinePrompt = false;
-    _isRefineResolved = variant == QuestionnaireVariant.lean;
+    if (variant != null) {
+      _showRefinePrompt = false;
+    }
     _includeConstraints =
-        variant == QuestionnaireVariant.strategic &&
+        resolvedVariant == QuestionnaireVariant.strategic &&
         answerFor('constraints') != null;
     _currentIndex = _firstUnansweredQuestionIndex();
     notifyListeners();
@@ -273,14 +280,12 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _selectedVariant = variant;
     _currentIndex = _firstUnansweredQuestionIndex();
     _showRefinePrompt = false;
-    _isRefineResolved = variant == QuestionnaireVariant.lean;
+    _isRefineResolved = variant == QuestionnaireVariant.strategic;
     _includeConstraints =
         variant == QuestionnaireVariant.strategic &&
         answerFor('constraints') != null;
     if (variant == QuestionnaireVariant.lean) {
-      _removeAnswer('constraints');
-      _removeAnswer('funding');
-      _removeAnswer('available_capital');
+      _clearRefinementAnswers();
     }
     notifyListeners();
     _persistDraft();
@@ -435,10 +440,34 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     }
 
     if (isLastQuestion) {
+      if (_selectedVariant == QuestionnaireVariant.lean && !_isRefineResolved) {
+        _showRefinePrompt = true;
+        notifyListeners();
+        _persistDraft();
+        return false;
+      }
       return _generatePlan();
     }
 
-    _currentIndex += 1;
+    var nextIndex = _currentIndex + 1;
+    if (_selectedVariant == QuestionnaireVariant.strategic &&
+        _isRefineResolved) {
+      const alreadyAnsweredCoreIds = <String>{
+        'intent',
+        'timeline',
+        'priorities',
+      };
+      final questions = _activeQuestions;
+      while (nextIndex < questions.length &&
+          alreadyAnsweredCoreIds.contains(questions[nextIndex].id) &&
+          answerValuesFor(questions[nextIndex].id).isNotEmpty) {
+        nextIndex += 1;
+      }
+      if (nextIndex >= questions.length) {
+        return _generatePlan();
+      }
+    }
+    _currentIndex = nextIndex;
     notifyListeners();
     _persistDraft();
     return false;
@@ -459,9 +488,11 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   }
 
   void acceptRefine() {
+    _selectedVariant = QuestionnaireVariant.strategic;
     _showRefinePrompt = false;
     _isRefineResolved = true;
     _includeConstraints = false;
+    _currentIndex = _firstUnansweredQuestionIndex();
     notifyListeners();
     _persistDraft();
   }
@@ -470,7 +501,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _showRefinePrompt = false;
     _isRefineResolved = true;
     _includeConstraints = false;
-    _removeAnswer('constraints');
+    _clearRefinementAnswers();
     notifyListeners();
     _persistDraft();
     return _generatePlan();
@@ -484,6 +515,20 @@ class MigrationQuestionnaireController extends ChangeNotifier {
 
     _setAnswer(question.id, const []);
     return _generatePlan();
+  }
+
+  void _clearRefinementAnswers() {
+    for (final questionId in const <String>[
+      'travel_group',
+      'travel_group_children_count',
+      'work_arrangement',
+      'support_needs',
+      'funding',
+      'available_capital',
+      'constraints',
+    ]) {
+      _removeAnswer(questionId);
+    }
   }
 
   Future<void> saveGeneratedPlan() async {

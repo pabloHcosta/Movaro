@@ -39,6 +39,13 @@ void main() {
 
     expect(snapshot.current?.id, 'before_travel');
     expect(snapshot.now.length, lessThanOrEqualTo(3));
+    expect(
+      snapshot.now
+          .map((item) => item.id)
+          .toSet()
+          .intersection(snapshot.onArrival.map((item) => item.id).toSet()),
+      isEmpty,
+    );
     expect(snapshot.upcoming.length, lessThanOrEqualTo(2));
     expect(snapshot.onArrival.map((item) => item.id), contains('arrival'));
     expect(snapshot.optional.map((item) => item.id), contains('optional'));
@@ -64,6 +71,56 @@ void main() {
 
     expect(snapshot.current?.id, 'chosen');
     expect(snapshot.now.first.id, 'chosen');
+  });
+
+  test(
+    'focuses arrival-day work without duplicating it in arrival backlog',
+    () {
+      final snapshot = GuideFocusEngine.build(
+        plan: _plan(),
+        items: [
+          _item(
+            id: 'arrival',
+            order: 0,
+            tier: GuideItemTier.recommended,
+            phase: GuidePhase.arrival,
+          ),
+        ],
+      );
+
+      expect(snapshot.current?.id, 'arrival');
+      expect(snapshot.now.map((item) => item.id), ['arrival']);
+      expect(snapshot.onArrival, isEmpty);
+    },
+  );
+
+  test('execution window outranks thematic phase and generic score', () {
+    final snapshot = GuideFocusEngine.build(
+      plan: _plan(),
+      items: [
+        _item(
+          id: 'first_week_critical',
+          order: 0,
+          tier: GuideItemTier.critical,
+          phase: GuidePhase.documents,
+        ).copyWith(executionWindow: GuideExecutionWindow.firstWeek),
+        _item(
+          id: 'arrival_day',
+          order: 1,
+          tier: GuideItemTier.recommended,
+          phase: GuidePhase.arrival,
+        ).copyWith(executionWindow: GuideExecutionWindow.arrivalDay),
+        _item(
+          id: 'before_travel',
+          order: 2,
+          tier: GuideItemTier.recommended,
+          phase: GuidePhase.work,
+        ).copyWith(executionWindow: GuideExecutionWindow.beforeTravel),
+      ],
+    );
+
+    expect(snapshot.current?.id, 'before_travel');
+    expect(snapshot.now.map((item) => item.id), ['before_travel']);
   });
 
   test('counts a compact set of outcome milestones instead of every task', () {
@@ -94,7 +151,7 @@ void main() {
     expect(snapshot.coreCompletedCount, 1);
   });
 
-  test('study-specific critical work outranks generic preparation', () {
+  test('foundational preparation stays ahead of specialized study work', () {
     final snapshot = GuideFocusEngine.build(
       plan: _plan(goal: 'study', timeline: 'in_6_12m'),
       items: [
@@ -119,7 +176,11 @@ void main() {
       ],
     );
 
-    expect(snapshot.current?.id, 'item_0_7_ingresso_ensino_superior');
+    expect(snapshot.current?.id, 'item_0_2_document_folder');
+    expect(
+      snapshot.upcoming.map((item) => item.id),
+      contains('item_0_7_ingresso_ensino_superior'),
+    );
     expect(
       snapshot.upcoming.map((item) => item.id),
       contains('item_2_7_documentos_academicos'),

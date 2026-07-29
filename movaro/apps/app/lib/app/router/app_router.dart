@@ -82,6 +82,19 @@ class AppRouter {
       );
     }
 
+    if (completeJourneyRequiredPaths.contains(routeName) &&
+        dependencies.migrationQuestionnaireController.generatedPlan == null) {
+      return _buildRoute(
+        const RouteSettings(name: AppRoutes.plan),
+        PlanEntryPage(
+          journeyContextController: dependencies.journeyContextController,
+          citiesController: dependencies.citiesController,
+          migrationQuestionnaireController:
+              dependencies.migrationQuestionnaireController,
+        ),
+      );
+    }
+
     if (routeName != AppRoutes.onboarding &&
         routeName != AppRoutes.login &&
         AppRoutes.privatePaths.contains(routeName) &&
@@ -441,7 +454,18 @@ class AppRouter {
         final args = settings.arguments is Map<String, dynamic>
             ? settings.arguments! as Map<String, dynamic>
             : null;
-        if (currentPlan == null || !currentPlan.isCityConfirmed) {
+        if (currentPlan == null) {
+          return _buildRoute(
+            const RouteSettings(name: AppRoutes.plan),
+            PlanEntryPage(
+              journeyContextController: dependencies.journeyContextController,
+              citiesController: dependencies.citiesController,
+              migrationQuestionnaireController:
+                  dependencies.migrationQuestionnaireController,
+            ),
+          );
+        }
+        if (!currentPlan.isCityConfirmed) {
           return _buildRoute(
             const RouteSettings(name: AppRoutes.migrationResultReveal),
             MigrationResultRevealPage(

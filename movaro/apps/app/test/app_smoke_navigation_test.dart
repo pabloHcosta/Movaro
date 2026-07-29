@@ -242,6 +242,24 @@ void main() {
     await tester.pump();
   });
 
+  testWidgets('result routes fall back to plan entry when no plan exists', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      harness.buildApp(initialRoute: AppRoutes.migrationResultReveal),
+    );
+    await _pumpScreen(tester);
+
+    expect(
+      find.text('Transforme uma cidade em um caminho claro'),
+      findsWidgets,
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
   testWidgets('confirmed city turns public home into execution home', (
     tester,
   ) async {
@@ -541,6 +559,7 @@ class _AppTestHarness {
     migrationQuestionnaireController.toggleAnswer('priorities', 'low_cost');
     migrationQuestionnaireController.toggleAnswer('priorities', 'safety');
     await migrationQuestionnaireController.goNext();
+    await migrationQuestionnaireController.skipRefine();
   }
 
   Future<void> dispose() async {

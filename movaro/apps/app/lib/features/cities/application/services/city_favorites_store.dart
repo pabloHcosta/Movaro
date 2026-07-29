@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:movaro_app/core/storage/persistent_json_store.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:movaro_app/core/storage/versioned_json_file_store.dart';
 
 typedef CityFavoritesDirectoryProvider = Future<Directory> Function();
 
 class CityFavoritesStore {
+  static const _storageKey = 'movaro_favorite_cities';
+
   CityFavoritesStore({CityFavoritesDirectoryProvider? directoryProvider})
     : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
 
@@ -13,8 +15,10 @@ class CityFavoritesStore {
 
   Future<List<String>> read() async {
     try {
-      final file = await _file();
-      final decoded = await VersionedJsonFileStore.read(file);
+      final decoded = await PersistentJsonStore.read(
+        key: _storageKey,
+        fileProvider: _file,
+      );
       if (decoded is! List) {
         return const [];
       }
@@ -26,8 +30,11 @@ class CityFavoritesStore {
   }
 
   Future<void> write(List<String> cityIds) async {
-    final file = await _file();
-    await VersionedJsonFileStore.write(file, cityIds);
+    await PersistentJsonStore.write(
+      key: _storageKey,
+      data: cityIds,
+      fileProvider: _file,
+    );
   }
 
   Future<File> _file() async {

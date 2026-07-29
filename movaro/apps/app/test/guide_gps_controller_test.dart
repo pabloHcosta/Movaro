@@ -84,6 +84,42 @@ void main() {
     expect(controller.allCompletedIds, isNot(contains(_item.id)));
     expect(controller.isItemUnlocked(_dependentItem), isFalse);
   });
+
+  test('hydration preserves automatic not-applicable dismissals', () async {
+    SharedPreferences.setMockInitialValues({});
+    final metrics = GuideFlowMetricsStore(
+      preferences: await SharedPreferences.getInstance(),
+    );
+    await metrics.setConsent(ProductAnalyticsConsent.denied);
+    final directory = await Directory.systemTemp.createTemp(
+      'movaro-guide-gps-applicability-',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+
+    final controller = GuideGpsController(
+      plan: _plan,
+      progressStore: MigrationCopilotProgressStore(
+        directoryProvider: () async => directory,
+      ),
+      items: [
+        _item.copyWith(
+          isCompleted: true,
+          dismissReason: GuideDismissReason.notApplicable,
+        ),
+      ],
+      readinessCompletedIds: const {},
+      documentCompletedIds: const {},
+      arrivalCompletedIds: const {},
+      metricsStore: metrics,
+    );
+
+    expect(
+      controller.items.single.dismissReason,
+      GuideDismissReason.notApplicable,
+    );
+    expect(controller.focusSnapshot.completed, isEmpty);
+    expect(controller.allCompletedIds, contains(_item.id));
+  });
 }
 
 const _plan = MigrationPlan(

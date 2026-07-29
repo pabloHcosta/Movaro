@@ -138,9 +138,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
         );
       case 'work_arrangement':
         return _localizedText(
-          pt: 'Como você vai trabalhar no Brasil?',
-          es: '¿Cómo vas a trabajar en Brasil?',
-          en: 'How are you planning to work in Brazil?',
+          pt: 'Qual será seu tipo principal de trabalho ou renda?',
+          es: '¿Cuál será tu tipo principal de trabajo o ingreso?',
+          en: 'What will be your main type of work or income?',
         );
       case 'argentina_origin':
         return _localizedText(
@@ -234,6 +234,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
         pt: 'Medicamento contínuo',
         es: 'Medicación continua',
         en: 'Ongoing medication',
+      ),
+      'will_drive' => _localizedText(
+        pt: 'Vou dirigir ou levar veículo',
+        es: 'Voy a manejar o llevar un vehículo',
+        en: 'I will drive or bring a vehicle',
       ),
       'foreign_income' => _localizedText(
         pt: 'Renda do exterior',
@@ -1567,6 +1572,11 @@ extension AppLocalizationsFormatting on AppLocalizations {
             pt: 'Medicamentos',
             es: 'Medicación',
             en: 'Medicine',
+          ),
+          'will_drive' => _localizedText(
+            pt: 'Veículo',
+            es: 'Vehículo',
+            en: 'Vehicle',
           ),
           'foreign_income' => _localizedText(
             pt: 'Renda exterior',

@@ -476,7 +476,9 @@ class GuideGpsController extends ChangeNotifier {
   void _hydrateUserState() {
     for (var i = 0; i < _items.length; i++) {
       final item = _items[i];
-      final dismissReason = _dismissedReasonsById[item.id];
+      final dismissReason = _dismissedReasonsById.containsKey(item.id)
+          ? _dismissedReasonsById[item.id]
+          : item.dismissReason;
       final isPostponed = dismissReason == GuideDismissReason.later;
       if (isPostponed) {
         _unsetCompleted(item);

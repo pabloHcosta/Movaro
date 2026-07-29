@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_personalization_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 void main() {
@@ -71,6 +72,12 @@ void main() {
           .isCompleted,
       isFalse,
     );
+    expect(
+      personalized
+          .singleWhere((item) => item.id == 'item_4_1_cnh')
+          .dismissReason,
+      GuideDismissReason.notApplicable,
+    );
 
     const planWithNeeds = MigrationPlan(
       originCountry: 'argentina',
@@ -78,7 +85,11 @@ void main() {
       goal: 'fresh_start',
       timeline: 'in_3_6m',
       steps: [],
-      selectedConstraints: ['travel_with_pet', 'continuous_medication'],
+      selectedConstraints: [
+        'travel_with_pet',
+        'continuous_medication',
+        'will_drive',
+      ],
     );
     final withNeeds = GuidePersonalizationService.personalize(
       plan: planWithNeeds,
@@ -100,6 +111,10 @@ void main() {
       withNeeds
           .singleWhere((item) => item.id == 'item_1_5_animais')
           .isCompleted,
+      isFalse,
+    );
+    expect(
+      withNeeds.singleWhere((item) => item.id == 'item_4_1_cnh').isCompleted,
       isFalse,
     );
   });

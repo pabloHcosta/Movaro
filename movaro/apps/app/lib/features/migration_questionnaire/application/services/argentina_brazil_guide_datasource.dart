@@ -371,9 +371,9 @@ class ArgentinaBrazilGuideDataSource {
         urgencyLevel: GuideUrgencyLevel.watch,
         urgencySignal: _t(
           locale,
-          pt: 'Faça antes de viajar — chegada sem reserva calculada é a causa mais comum de crise no primeiro mês.',
-          es: 'Hazlo antes de viajar — llegar sin reserva calculada es la causa mas comun de crisis en el primer mes.',
-          en: 'Do this before traveling — arriving without a calculated buffer is the most common cause of crisis in month one.',
+          pt: 'Faça antes de viajar — uma reserva calculada reduz decisões apressadas diante de imprevistos no primeiro mês.',
+          es: 'Hazlo antes de viajar: una reserva calculada reduce decisiones apuradas ante imprevistos del primer mes.',
+          en: 'Do this before traveling — a calculated buffer reduces rushed decisions when surprises arise in the first month.',
         ),
       ),
       GuideActionItem(
@@ -881,22 +881,22 @@ class ArgentinaBrazilGuideDataSource {
         urgencyLevel: GuideUrgencyLevel.urgent,
         urgencySignal: _t(
           locale,
-          pt: 'Configure antes de embarcar — câmbio de aeroporto consome 30-50% do seu dinheiro.',
-          es: 'Configura antes de embarcar — el cambio del aeropuerto consume entre 30-50% de tu dinero.',
-          en: 'Set up before boarding — airport exchange burns 30-50% of your money.',
+          pt: 'Configure antes de embarcar — o câmbio de aeroporto costuma ter spread e tarifas menos favoráveis.',
+          es: 'Configura antes de embarcar: el cambio del aeropuerto suele tener margen y comisiones menos favorables.',
+          en: 'Set this up before boarding — airport exchange commonly has less favorable spreads and fees.',
         ),
         warningFlags: _list(
           locale,
           pt: [
-            'Câmbio de aeroporto: taxas 30-50% piores que Wise ou cartão. Evite na chegada.',
+            'Compare o valor líquido antes de usar câmbio de aeroporto; spreads e tarifas podem ser menos favoráveis.',
             'Não dependa de um único meio de pagamento — se travar, você fica sem acesso a dinheiro.',
           ],
           es: [
-            'Cambio del aeropuerto: tasas 30-50% peores que Wise o tarjeta. Evitalo a la llegada.',
+            'Compara el valor neto antes de usar el cambio del aeropuerto; el margen y las comisiones pueden ser menos favorables.',
             'No dependas de un solo medio de pago — si falla, quedas sin acceso al dinero.',
           ],
           en: [
-            'Airport exchange: rates are 30-50% worse than Wise or card. Avoid it on arrival.',
+            'Compare the net amount before using airport exchange; spreads and fees may be less favorable.',
             'Do not rely on a single payment method — if it fails, you are left without money access.',
           ],
         ),
@@ -991,9 +991,9 @@ class ArgentinaBrazilGuideDataSource {
         urgencyLevel: GuideUrgencyLevel.urgent,
         urgencySignal: _t(
           locale,
-          pt: 'Reserve voo e hospedagem antes de viajar — sem endereço confirmado você não consegue CPF no primeiro dia.',
-          es: 'Reserva vuelo y alojamiento antes de viajar — sin direccion confirmada no puedes tramitar el CPF el primer dia.',
-          en: 'Book flight and housing before leaving — without a confirmed address you cannot start CPF on day one.',
+          pt: 'Reserve voo e hospedagem antes de viajar e confira a rota de CPF aplicável; o cadastro também pode ser iniciado no exterior.',
+          es: 'Reserva vuelo y alojamiento antes de viajar y revisa la vía de CPF aplicable; el trámite también puede iniciarse en el exterior.',
+          en: 'Book travel and initial housing before leaving and check the applicable CPF route; registration can also begin abroad.',
         ),
       ),
       GuideActionItem(
@@ -1016,6 +1016,7 @@ class ArgentinaBrazilGuideDataSource {
         orderIndex: 8,
         isCompleted: false,
         icon: Icons.sim_card_outlined,
+        dependencies: const <String>['item_1_0_entry_proof'],
         context: _t(
           locale,
           pt: 'Logo na chegada, ter um número brasileiro ajuda com internet móvel, SMS, apps e contatos locais.',
@@ -1035,29 +1036,52 @@ class ArgentinaBrazilGuideDataSource {
           en: 'Choose a carrier',
         ),
         primaryActionType: GuidePrimaryActionType.external,
+        primaryActionTarget: PreparationResourceLinks.anatelMobileCoverage
+            .toString(),
         steps: _list(
           locale,
           pt: [
-            'Compre um chip pré-pago em loja oficial da operadora ou ponto confiável logo na chegada.',
-            'Se você ainda não tem CPF, peça ativação com passaporte, DNI/RNE ou outro documento aceito pela operadora.',
+            'Antes de viajar, confirme que o aparelho está desbloqueado e mantenha roaming ou eSIM como contingência para a chegada.',
+            'Compare a cobertura das operadoras no endereço da hospedagem e nos trajetos de trabalho usando os mapas oficiais.',
+            'Se já tiver CPF, confira a ativação digital; sem CPF, prefira loja oficial e confirme a rota para estrangeiros antes de pagar.',
+            'A TIM publica uma rota para estrangeiros com passaporte, RNE ou identidade de país do Mercosul e endereço de hospedagem.',
             'Teste SMS e internet móvel antes de sair da loja.',
           ],
           es: [
-            'Compra un chip prepago en tienda oficial de la operadora o punto confiable apenas llegues.',
-            'Si aun no tienes CPF, pide la activacion con pasaporte, DNI/RNE u otro documento aceptado por la operadora.',
+            'Antes de viajar, confirma que el teléfono esté liberado y mantén roaming o eSIM como contingencia para la llegada.',
+            'Compara la cobertura en el alojamiento y en los trayectos de trabajo usando los mapas oficiales.',
+            'Si ya tienes CPF, revisa la activación digital; sin CPF, ve a una tienda oficial y confirma la vía para extranjeros antes de pagar.',
+            'TIM publica una vía para extranjeros con pasaporte, RNE o identidad de un país del Mercosur y dirección de alojamiento.',
             'Prueba SMS e internet movil antes de salir de la tienda.',
           ],
           en: [
-            'Buy a prepaid SIM at an official carrier store or trusted point right after arrival.',
-            'If you do not have CPF yet, ask for activation with your passport, DNI/RNE, or another document accepted by the carrier.',
+            'Before travel, confirm that the phone is unlocked and keep roaming or an eSIM as an arrival contingency.',
+            'Compare carrier coverage at the accommodation and along work routes using official maps.',
+            'If you already have a CPF, check digital activation; without one, use an official store and confirm the foreigner route before paying.',
+            'TIM publishes a foreign-visitor route accepting a passport, RNE, or Mercosur-country ID plus the accommodation address.',
             'Test SMS and mobile data before leaving the store.',
           ],
         ),
         requirements: _list(
           locale,
-          pt: ['Documento com foto', 'R\$ 20-50 para chip e crédito inicial'],
-          es: ['Documento con foto', 'R\$ 20-50 para chip y credito inicial'],
-          en: ['Photo ID', 'R\$ 20-50 for the SIM and initial credit'],
+          pt: [
+            'Passaporte, RNE ou identidade estrangeira aceita',
+            'Endereço da hospedagem',
+            'Aparelho desbloqueado e compatível',
+            'CPF, se a rota de ativação escolhida exigir',
+          ],
+          es: [
+            'Pasaporte, RNE o identidad extranjera aceptada',
+            'Dirección del alojamiento',
+            'Teléfono liberado y compatible',
+            'CPF, si la vía de activación elegida lo exige',
+          ],
+          en: [
+            'Accepted passport, RNE, or foreign ID',
+            'Accommodation address',
+            'Unlocked compatible phone',
+            'CPF if required by the selected activation route',
+          ],
         ),
         doneCriteria: _t(
           locale,
@@ -1068,19 +1092,19 @@ class ArgentinaBrazilGuideDataSource {
         tips: _list(
           locale,
           pt: [
-            'No aeroporto, os chips costumam ser mais caros. Se puder, compre em loja na cidade.',
-            'TIM e Claro têm orientação pública para estrangeiro sem CPF em atendimento/loja física. Em Vivo, confirme a exigência antes de comprar.',
-            'Guarde o número — ele pode virar sua chave Pix depois.',
+            'Não use o CPF de outra pessoa: a linha e eventuais responsabilidades ficam vinculadas ao titular cadastrado.',
+            'Cobertura teórica varia dentro de prédios; confirme também com moradores ou na hospedagem.',
+            'Guarde o número — depois de abrir uma conta compatível, ele pode ser cadastrado como chave Pix.',
           ],
           es: [
-            'En el aeropuerto los chips suelen ser mas caros. Si puedes, compra en tienda en la ciudad.',
-            'TIM y Claro tienen orientacion publica para extranjeros sin CPF en atencion/tienda fisica. En Vivo, confirma el requisito antes de comprar.',
-            'Guarda el numero — sera tu clave Pix despues.',
+            'No uses el CPF de otra persona: la línea y las responsabilidades quedan vinculadas al titular registrado.',
+            'La cobertura teórica varía dentro de edificios; confirma también con residentes o en el alojamiento.',
+            'Guarda el número: después de abrir una cuenta compatible, podrás registrarlo como clave Pix.',
           ],
           en: [
-            'At the airport, SIMs tend to cost more. If you can, buy at a store in the city.',
-            'TIM and Claro have public guidance for foreigners without CPF through store support. For Vivo, confirm the requirement before buying.',
-            'Save the number — it will become your Pix key later.',
+            'Do not use someone else’s CPF: the line and related responsibilities remain tied to the registered holder.',
+            'Theoretical coverage varies inside buildings; also confirm with residents or the accommodation.',
+            'Keep the number — after opening a compatible account, it can be registered as a Pix key.',
           ],
         ),
         decisionOptions: [
@@ -1088,95 +1112,88 @@ class ArgentinaBrazilGuideDataSource {
             title: 'Claro',
             description: _t(
               locale,
-              pt: 'Boa cobertura geral e presença em aeroportos.',
-              es: 'Buena cobertura general y presencia en aeropuertos.',
-              en: 'Good overall coverage and airport presence.',
+              pt: 'Compare o mapa no endereço real e confirme a documentação de ativação antes da compra.',
+              es: 'Compara el mapa en la dirección real y confirma la documentación de activación antes de comprar.',
+              en: 'Compare the map at the real address and confirm activation documents before purchase.',
             ),
             pros: _list(
               locale,
-              pt: ['Fácil de encontrar', 'Cobertura ampla'],
-              es: ['Facil de encontrar', 'Cobertura amplia'],
-              en: ['Easy to find', 'Wide coverage'],
+              pt: ['Mapa oficial disponível', 'Opções pré-pagas'],
+              es: ['Mapa oficial disponible', 'Opciones prepagas'],
+              en: ['Official map available', 'Prepaid options'],
             ),
             cons: _list(
               locale,
-              pt: [
-                'Preço intermediário',
-                'Sem CPF, a ativação costuma ir para loja física',
-              ],
-              es: [
-                'Precio intermedio',
-                'Sin CPF, la activacion suele ir a tienda fisica',
-              ],
-              en: [
-                'Mid-range price',
-                'Without CPF, activation usually goes through a physical store',
-              ],
+              pt: ['A rota sem CPF deve ser confirmada diretamente'],
+              es: ['La vía sin CPF debe confirmarse directamente'],
+              en: ['The no-CPF route must be confirmed directly'],
             ),
           ),
           GuideDecisionOption(
             title: 'Vivo',
             description: _t(
               locale,
-              pt: 'Melhor sinal em muitas regiões do Brasil.',
-              es: 'Mejor senal en muchas regiones de Brasil.',
-              en: 'Best signal in many Brazilian regions.',
+              pt: 'Compare a cobertura da hospedagem e dos trajetos; não presuma qualidade nacional uniforme.',
+              es: 'Compara la cobertura del alojamiento y los trayectos; no supongas calidad uniforme en todo el país.',
+              en: 'Compare coverage at the accommodation and along key routes; do not assume uniform nationwide quality.',
             ),
             pros: _list(
               locale,
-              pt: ['Melhor cobertura 4G/5G'],
-              es: ['Mejor cobertura 4G/5G'],
-              en: ['Best 4G/5G coverage'],
+              pt: ['Mapa oficial disponível', 'Opções pré-pagas'],
+              es: ['Mapa oficial disponible', 'Opciones prepagas'],
+              en: ['Official map available', 'Prepaid options'],
             ),
             cons: _list(
               locale,
-              pt: [
-                'Pode ser um pouco mais caro',
-                'Confirme a exigência de CPF antes de comprar o pré-pago',
-              ],
-              es: [
-                'Puede ser un poco mas caro',
-                'Confirma la exigencia de CPF antes de comprar el prepago',
-              ],
-              en: [
-                'Can be slightly more expensive',
-                'Confirm CPF requirements before buying prepaid',
-              ],
+              pt: ['Confirme a exigência de CPF antes de comprar'],
+              es: ['Confirma la exigencia de CPF antes de comprar'],
+              en: ['Confirm CPF requirements before buying'],
             ),
           ),
           GuideDecisionOption(
             title: 'TIM',
             description: _t(
               locale,
-              pt: 'Opção mais econômica para pré-pago.',
-              es: 'Opcion mas economica para prepago.',
-              en: 'Most affordable prepaid option.',
+              pt: 'Tem orientação pública específica para visitantes estrangeiros e aceita documento do Mercosul.',
+              es: 'Tiene orientación pública específica para visitantes extranjeros y acepta documento del Mercosur.',
+              en: 'Publishes specific guidance for foreign visitors and accepts Mercosur identification.',
             ),
             pros: _list(
               locale,
               pt: [
-                'Preço mais baixo',
-                'Bons pacotes de dados',
-                'Tem orientação para estrangeiro no Brasil',
+                'Rota para estrangeiro documentada',
+                'Passaporte ou identidade argentina aceitos',
               ],
               es: [
-                'Precio mas bajo',
-                'Buenos paquetes de datos',
-                'Tiene orientacion para extranjeros en Brasil',
+                'Vía para extranjeros documentada',
+                'Acepta pasaporte o identidad argentina',
               ],
               en: [
-                'Lower price',
-                'Good data plans',
-                'Has guidance for foreigners in Brazil',
+                'Documented foreign-visitor route',
+                'Accepts a passport or Argentine ID',
               ],
             ),
             cons: _list(
               locale,
-              pt: ['Cobertura pode variar fora de capitais'],
-              es: ['La cobertura puede variar fuera de capitales'],
-              en: ['Coverage can vary outside capitals'],
+              pt: ['Ainda é necessário comparar a cobertura no endereço'],
+              es: ['Igual debes comparar la cobertura en la dirección'],
+              en: ['Coverage at the actual address still needs comparison'],
             ),
             recommended: true,
+          ),
+        ],
+        supportLinks: [
+          GuideSupportLink(
+            label: 'Anatel · Mapas de cobertura',
+            url: PreparationResourceLinks.anatelMobileCoverage.toString(),
+          ),
+          GuideSupportLink(
+            label: 'Anatel · Cadastro pré-pago',
+            url: PreparationResourceLinks.anatelPrepaidRegistration.toString(),
+          ),
+          GuideSupportLink(
+            label: 'TIM · Estrangeiros no Brasil',
+            url: PreparationResourceLinks.timForeignVisitors.toString(),
           ),
         ],
         checklistItems: [
@@ -1217,6 +1234,24 @@ class ArgentinaBrazilGuideDataSource {
           pt: '15 min',
           es: '15 min',
           en: '15 min',
+        ),
+        urgencySignal: _t(
+          locale,
+          pt: 'Resolva no dia da chegada, depois de guardar o comprovante de entrada.',
+          es: 'Resuélvelo el día de llegada, después de guardar el comprobante de ingreso.',
+          en: 'Handle this on arrival day, after saving proof of entry.',
+        ),
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Anatel · Cobertura e cadastro pré-pago',
+          sourceUrl: PreparationResourceLinks.anatelMobileCoverage.toString(),
+          lastVerified: DateTime(2026, 7, 29),
+          scopeNote: _t(
+            locale,
+            pt: 'Cobertura é estimada e a ativação sem CPF varia por operadora; confirme antes de pagar.',
+            es: 'La cobertura es estimada y la activación sin CPF varía por operadora; confirma antes de pagar.',
+            en: 'Coverage is estimated and no-CPF activation varies by carrier; confirm before paying.',
+          ),
         ),
       ),
       GuideActionItem(
@@ -2744,6 +2779,7 @@ class ArgentinaBrazilGuideDataSource {
         orderIndex: 15,
         isCompleted: false,
         icon: Icons.directions_car_outlined,
+        applicabilityConditions: const <String>['will_drive'],
         dependencies: <String>['item_2_2_residencia'],
         context: _t(
           locale,
@@ -4229,6 +4265,7 @@ class ArgentinaBrazilGuideDataSource {
     return reordered
         .map((item) => _contextualizeItem(item, plan, currentLocation, locale))
         .map((item) => _applySafetyReview(item, locale))
+        .map(_applyExecutionSchedule)
         .toList(growable: false);
   }
 
@@ -4895,33 +4932,114 @@ class ArgentinaBrazilGuideDataSource {
     };
 
     return [
+      // Five-minute safety setup: useful before boarding and available offline.
+      'item_4_7_seguranca_emergencia',
       'item_0_1_rule_90_days',
       'item_0_2_document_folder',
       'item_0_2_antecedentes',
+      'item_0_6_saude_entender',
+      'item_0_6_medicamentos',
       ...goalSpecific,
       'item_2_1_cpf',
+      'item_2_1_govbr',
       'item_0_3_budget',
       'item_1_3_money',
       'item_3_3_pix',
-      'item_0_6_saude_entender',
-      'item_0_6_medicamentos',
       'item_0_7_family_documents',
       'item_1_5_animais',
       'item_0_4_flight',
       'item_1_2_housing_temporary',
+      // Arrival day: prove entry first, then secure connectivity.
       'item_1_0_entry_proof',
-      'item_4_7_seguranca_emergencia',
       'item_1_1_chip',
-      'item_2_1_govbr',
-      'item_2_2_residencia',
+      // First week: health, regularization and work activation.
       'item_4_2_saude',
-      'item_4_5_registro_rnm',
+      'item_2_2_residencia',
+      'item_2_3_ctps',
+      'item_3_4_formal_work_ready',
       'item_3_1_conta_bancaria',
+      // First month and consolidation.
+      'item_4_5_registro_rnm',
       'item_3_2_aluguel_fixo',
       'item_3_6_familia_escola',
       'item_4_1_cnh',
       'item_4_3_permanencia',
     ];
+  }
+
+  static GuideActionItem _applyExecutionSchedule(GuideActionItem item) {
+    const beforeTravel = <String>{
+      'item_4_7_seguranca_emergencia',
+      'item_0_1_rule_90_days',
+      'item_0_2_document_folder',
+      'item_0_2_antecedentes',
+      'item_0_3_budget',
+      'item_0_4_flight',
+      'item_0_5_mercado_trabalho',
+      'item_0_6_saude_entender',
+      'item_0_6_medicamentos',
+      'item_0_7_family_documents',
+      'item_0_7_ingresso_ensino_superior',
+      'item_1_2_housing_temporary',
+      'item_1_3_money',
+      'item_1_5_animais',
+      'item_2_1_cpf',
+      'item_2_1_govbr',
+      'item_2_6_impostos_exterior',
+      'item_2_7_documentos_academicos',
+      'item_3_3_pix',
+      'item_3_4_trabalho',
+      'item_3_4_work_rights',
+    };
+    const arrivalDay = <String>{'item_1_0_entry_proof', 'item_1_1_chip'};
+    const firstWeek = <String>{
+      'item_2_2_residencia',
+      'item_2_3_ctps',
+      'item_3_1_conta_bancaria',
+      'item_3_4_formal_work_ready',
+      'item_4_2_saude',
+    };
+    const firstMonth = <String>{
+      'item_3_2_aluguel_fixo',
+      'item_3_5_revalidacao_estudos',
+      'item_3_6_familia_escola',
+      'item_4_1_cnh',
+      'item_4_4_mei',
+      'item_4_5_registro_rnm',
+    };
+
+    final window = beforeTravel.contains(item.id)
+        ? GuideExecutionWindow.beforeTravel
+        : arrivalDay.contains(item.id)
+        ? GuideExecutionWindow.arrivalDay
+        : firstWeek.contains(item.id)
+        ? GuideExecutionWindow.firstWeek
+        : firstMonth.contains(item.id)
+        ? GuideExecutionWindow.firstMonth
+        : GuideExecutionWindow.later;
+
+    if (item.id == 'item_4_7_seguranca_emergencia') {
+      return item.copyWith(
+        executionWindow: window,
+        preArrivalRequired: true,
+        tier: GuideItemTier.critical,
+        urgencyLevel: GuideUrgencyLevel.urgent,
+      );
+    }
+    if (item.id == 'item_1_1_chip') {
+      return item.copyWith(
+        executionWindow: window,
+        tier: GuideItemTier.critical,
+        urgencyLevel: GuideUrgencyLevel.urgent,
+      );
+    }
+    if (item.id == 'item_4_2_saude') {
+      return item.copyWith(
+        executionWindow: window,
+        tier: GuideItemTier.critical,
+      );
+    }
+    return item.copyWith(executionWindow: window);
   }
 
   static GuideActionItem _contextualizeItem(
@@ -5278,25 +5396,23 @@ class ArgentinaBrazilGuideDataSource {
       'item_1_1_chip' => item.copyWith(
         costInfo: _t(
           locale,
-          pt: 'R\$ 20-50 (chip + crédito inicial)',
-          es: 'R\$ 20-50 (chip + credito inicial)',
-          en: 'R\$ 20-50 (SIM + initial credit)',
+          pt: 'Varia por operadora, plano, canal de venda e cidade. Confirme o preço total antes de ativar.',
+          es: 'Varía según operadora, plan, canal de venta y ciudad. Confirma el precio total antes de activar.',
+          en: 'Varies by carrier, plan, sales channel, and city. Confirm the total price before activation.',
         ),
         executionModes: const [GuideExecutionMode.inPerson],
         externalOfficialLinks: [
           GuideSupportLink(
-            label: 'TIM',
-            url:
-                'https://www.tim.com.br/para-voce/atendimento/perguntas-frequentes/para-estrangeiros-no-brasil',
+            label: 'Anatel · Mapas de cobertura',
+            url: PreparationResourceLinks.anatelMobileCoverage.toString(),
           ),
           GuideSupportLink(
-            label: 'Claro',
-            url: 'https://www.claro.com.br/celular/prepago',
+            label: 'Anatel · Cadastro pré-pago',
+            url: PreparationResourceLinks.anatelPrepaidRegistration.toString(),
           ),
           GuideSupportLink(
-            label: 'Vivo',
-            url:
-                'https://vivo.com.br/para-voce/produtos-e-servicos/para-o-celular/pre-pago',
+            label: 'TIM · Estrangeiros no Brasil',
+            url: PreparationResourceLinks.timForeignVisitors.toString(),
           ),
         ],
       ),
@@ -6039,18 +6155,24 @@ class ArgentinaBrazilGuideDataSource {
           pt: [
             'Entenda que o SUS atende pessoas no país independentemente da situação migratória.',
             'Diferencie UBS, UPA, SAMU e hospital e localize as referências da cidade.',
+            'Confira sua carteira de vacinação e as recomendações vigentes para viajantes, incluindo febre amarela conforme o destino.',
+            'Avalie assistência ou seguro de viagem para o trajeto e o período inicial; isso não substitui o SUS.',
             'Se quiser plano privado, consulte a ANS e peça cotação para sua idade, cidade, cobertura, carência e coparticipação.',
             'Se usa medicamento contínuo, confira a regra da Anvisa e leve receita e documentação compatíveis com a quantidade.',
           ],
           es: [
             'Entiende que el SUS atiende a personas en el país independientemente de la situación migratoria.',
             'Diferencia UBS, UPA, SAMU y hospital y ubica las referencias de la ciudad.',
+            'Revisa tu carnet de vacunación y las recomendaciones vigentes para viajeros, incluida fiebre amarilla según el destino.',
+            'Evalúa asistencia o seguro de viaje para el trayecto y el período inicial; no reemplaza al SUS.',
             'Si quieres plan privado, consulta ANS y pide cotización para tu edad, ciudad, cobertura, carencia y copago.',
             'Si usas medicación continua, revisa la regla de Anvisa y lleva receta y documentación compatibles con la cantidad.',
           ],
           en: [
             'Understand that SUS serves people in the country regardless of migration status.',
             'Distinguish UBS, UPA, SAMU, and hospitals and find the city’s reference services.',
+            'Review your vaccination record and current traveler recommendations, including yellow fever where relevant to the destination.',
+            'Consider travel assistance or insurance for the journey and initial period; it does not replace SUS.',
             'If considering private insurance, check ANS and request a quote for your age, city, coverage, waiting periods, and copay.',
             'For ongoing medication, check Anvisa rules and carry prescriptions and records matching the quantity.',
           ],
@@ -6071,6 +6193,27 @@ class ArgentinaBrazilGuideDataSource {
           ],
         ),
         communityTips: const <String>[],
+        supportLinks: [
+          GuideSupportLink(
+            label: _t(
+              locale,
+              pt: 'Vacinação de viajantes',
+              es: 'Vacunación para viajeros',
+              en: 'Traveler vaccination',
+            ),
+            url: PreparationResourceLinks.travelerVaccinationGuide.toString(),
+          ),
+          GuideSupportLink(
+            label: _t(
+              locale,
+              pt: 'Recomendações Argentina–Brasil',
+              es: 'Recomendaciones Argentina–Brasil',
+              en: 'Argentina–Brazil recommendations',
+            ),
+            url: PreparationResourceLinks.argentinaBrazilTravelRecommendations
+                .toString(),
+          ),
+        ],
         evidence: GuideEvidence(
           type: GuideEvidenceType.official,
           sourceLabel: 'Ministério da Saúde · Saúde de migrantes',
@@ -6855,6 +6998,12 @@ class ArgentinaBrazilGuideDataSource {
       'item_0_3_budget' => item.copyWith(
         preArrivalRequired: false,
         tier: GuideItemTier.recommended,
+        primaryActionLabel: _t(
+          locale,
+          pt: 'Calcular reserva de chegada',
+          es: 'Calcular reserva de llegada',
+          en: 'Calculate landing budget',
+        ),
       ),
       'item_0_6_medicamentos' => item.copyWith(
         warningFlags: _list(

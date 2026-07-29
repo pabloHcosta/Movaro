@@ -165,7 +165,10 @@ void main() {
           questionId: 'constraints',
           values: ['need_transit', 'avoid_expensive'],
         ),
-        Answer(questionId: 'support_needs', values: ['children_school']),
+        Answer(
+          questionId: 'support_needs',
+          values: ['children_school', 'will_drive'],
+        ),
         Answer(questionId: 'origin_latitude', values: ['-32.8895']),
         Answer(questionId: 'origin_longitude', values: ['-68.8458']),
       ],
@@ -181,7 +184,7 @@ void main() {
     expect(profile.availableCapital, 'medium');
     expect(profile.priorities, ['university', 'safety', 'low_cost']);
     expect(profile.constraints, ['need_transit', 'avoid_expensive']);
-    expect(profile.supportNeeds, ['children_school']);
+    expect(profile.supportNeeds, ['children_school', 'will_drive']);
     expect(profile.originLatitude, -32.8895);
     expect(profile.originLongitude, -68.8458);
   });
@@ -199,6 +202,7 @@ void main() {
           Answer(questionId: 'destination_country', values: ['brasil']),
           Answer(questionId: 'intent', values: ['fresh_start']),
           Answer(questionId: 'timeline', values: ['just_exploring']),
+          Answer(questionId: 'work_arrangement', values: ['remote']),
           Answer(questionId: 'priorities', values: ['balanced_unsure']),
         ],
       );
@@ -232,6 +236,7 @@ void main() {
       expect(plan.recommendationReliabilityBand, 'strong');
       expect(plan.recommendationScoreSeparationBand, 'clear');
       expect(plan.recommendationScenariosEvaluated, 14);
+      expect(plan.workArrangement, 'remote');
 
       final restored = MigrationPlanModel.fromJson(
         MigrationPlanModel.fromEntity(plan).toJson(),
@@ -241,6 +246,7 @@ void main() {
       expect(restored.recommendationReliabilityBand, 'strong');
       expect(restored.recommendationScoreSeparationBand, 'clear');
       expect(restored.recommendationScenariosEvaluated, 14);
+      expect(restored.workArrangement, 'remote');
     },
   );
 }

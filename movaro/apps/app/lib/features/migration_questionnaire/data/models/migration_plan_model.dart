@@ -15,6 +15,7 @@ class MigrationPlanModel {
     this.createdAt,
     this.variant = QuestionnaireVariant.lean,
     this.funding = '',
+    this.workArrangement = '',
     this.travelGroup = '',
     this.childrenCount,
     this.availableCapital = '',
@@ -55,6 +56,7 @@ class MigrationPlanModel {
           QuestionnaireVariantX.fromId(json['variant'] as String?) ??
           QuestionnaireVariant.lean,
       funding: json['funding'] as String? ?? '',
+      workArrangement: json['workArrangement'] as String? ?? '',
       travelGroup: json['travelGroup'] as String? ?? '',
       childrenCount: (json['childrenCount'] as num?)?.toInt(),
       availableCapital: json['availableCapital'] as String? ?? '',
@@ -162,6 +164,7 @@ class MigrationPlanModel {
       timeline: plan.timeline,
       variant: plan.variant,
       funding: plan.funding,
+      workArrangement: plan.workArrangement,
       travelGroup: plan.travelGroup,
       childrenCount: plan.childrenCount,
       availableCapital: plan.availableCapital,
@@ -200,6 +203,7 @@ class MigrationPlanModel {
   final DateTime? createdAt;
   final QuestionnaireVariant variant;
   final String funding;
+  final String workArrangement;
   final String travelGroup;
   final int? childrenCount;
   final String availableCapital;
@@ -237,6 +241,7 @@ class MigrationPlanModel {
     'timeline': timeline,
     'variant': variant.id,
     'funding': funding,
+    'workArrangement': workArrangement,
     'travelGroup': travelGroup,
     'childrenCount': childrenCount,
     'availableCapital': availableCapital,
@@ -281,6 +286,7 @@ class MigrationPlanModel {
     timeline: timeline,
     variant: variant,
     funding: funding,
+    workArrangement: workArrangement,
     travelGroup: travelGroup,
     childrenCount: childrenCount,
     availableCapital: availableCapital,

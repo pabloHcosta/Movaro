@@ -14,14 +14,14 @@ Primary keys:
 `API_BASE_URL` is still supported as a direct override for backward compatibility,
 but the preferred setup is to switch with `API_SOURCE`.
 
-Current checked-in defaults:
+Recommended defaults:
 
-- [`.env.production.json`](/Users/pablocosta/Developer/Movaro/movaro/apps/app/.env.production.json) defaults to `API_SOURCE=local`
-- [`.env.development.json`](/Users/pablocosta/Developer/Movaro/movaro/apps/app/.env.development.json) defaults to `API_SOURCE=local`
+- `.env.production.json` uses `API_SOURCE=railway`
+- `.env.development.json` uses `API_SOURCE=local`
 - Railway remains available in `RAILWAY_API_BASE_URL`
 
-To switch production back to Railway, change only this value in
-[`.env.production.json`](/Users/pablocosta/Developer/Movaro/movaro/apps/app/.env.production.json):
+Production also defaults to Railway in `AppEnvironment` when `API_SOURCE` is
+omitted. To use Railway explicitly, set:
 
 ```json
 {
@@ -29,8 +29,8 @@ To switch production back to Railway, change only this value in
 }
 ```
 
-To update the Cloudflare Tunnel URL, change only `LOCAL_API_BASE_URL` in
-[`.env.production.json`](/Users/pablocosta/Developer/Movaro/movaro/apps/app/.env.production.json).
+To use a Cloudflare Tunnel for a local production-like test, change
+`LOCAL_API_BASE_URL` only in a local override file.
 
 Recommended local-production flow:
 
@@ -41,7 +41,8 @@ Recommended local-production flow:
 bash scripts/prepare_local_production_env.sh
 ```
 
-This creates [`.env.production.local.json`](/Users/pablocosta/Developer/Movaro/movaro/apps/app/.env.production.local.json) without touching the checked-in production env file.
+This creates `.env.production.local.json` without touching the production
+configuration used by the presentation build.
 
 To build an APK already pointed at the fresh tunnel URL:
 

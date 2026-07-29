@@ -239,7 +239,15 @@ class _QuestionPageState extends State<QuestionPage> {
             l10n.bmpRefineTitle,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
+          Text(
+            l10n.bmpRefineSubtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
           Expanded(
             child: Center(
               child: ConstrainedBox(
@@ -800,6 +808,7 @@ class _QuestionPageState extends State<QuestionPage> {
           'children_school' => Icons.family_restroom_rounded,
           'travel_with_pet' => Icons.pets_outlined,
           'continuous_medication' => Icons.medication_outlined,
+          'will_drive' => Icons.directions_car_outlined,
           'foreign_income' => Icons.public_rounded,
           _ => Icons.check_circle_outline_rounded,
         };

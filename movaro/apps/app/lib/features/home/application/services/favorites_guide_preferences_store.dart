@@ -1,11 +1,13 @@
-import 'dart:convert';
 import 'dart:io';
 
+import 'package:movaro_app/core/storage/persistent_json_store.dart';
 import 'package:path_provider/path_provider.dart';
 
 typedef FavoritesGuideDirectoryProvider = Future<Directory> Function();
 
 class FavoritesGuidePreferencesStore {
+  static const _storageKey = 'movaro_favorites_guide';
+
   FavoritesGuidePreferencesStore({
     FavoritesGuideDirectoryProvider? directoryProvider,
   }) : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
@@ -33,17 +35,10 @@ class FavoritesGuidePreferencesStore {
 
   Future<Map<String, dynamic>> _read() async {
     try {
-      final file = await _file();
-      if (!file.existsSync()) {
-        return const <String, dynamic>{};
-      }
-
-      final raw = await file.readAsString();
-      if (raw.trim().isEmpty) {
-        return const <String, dynamic>{};
-      }
-
-      final decoded = jsonDecode(raw);
+      final decoded = await PersistentJsonStore.read(
+        key: _storageKey,
+        fileProvider: _file,
+      );
       return decoded is Map<String, dynamic>
           ? decoded
           : const <String, dynamic>{};
@@ -53,9 +48,11 @@ class FavoritesGuidePreferencesStore {
   }
 
   Future<void> _write(Map<String, dynamic> value) async {
-    final file = await _file();
-    await file.parent.create(recursive: true);
-    await file.writeAsString(jsonEncode(value));
+    await PersistentJsonStore.write(
+      key: _storageKey,
+      data: value,
+      fileProvider: _file,
+    );
   }
 
   Future<File> _file() async {

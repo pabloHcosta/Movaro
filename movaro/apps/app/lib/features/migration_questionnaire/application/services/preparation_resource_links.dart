@@ -131,6 +131,26 @@ class PreparationResourceLinks {
     'https://www.gov.br/saude/pt-br/composicao/saps/equidade-em-saude/migrantes-refugiadas-e-apatridas',
   );
 
+  static final Uri travelerVaccinationGuide = Uri.parse(
+    'https://www.gov.br/saude/pt-br/vacinacao/viajantes',
+  );
+
+  static final Uri argentinaBrazilTravelRecommendations = Uri.parse(
+    'https://www.argentina.gob.ar/aplicaciones/fronteras/recomendaciones/brasil',
+  );
+
+  static final Uri anatelMobileCoverage = Uri.parse(
+    'https://www.gov.br/anatel/pt-br/dados/qualidade/qualidade-dos-servicos/mapa-cobertura',
+  );
+
+  static final Uri anatelPrepaidRegistration = Uri.parse(
+    'https://www.gov.br/anatel/pt-br/dados/utilidade-publica/cadastro-pre-pago',
+  );
+
+  static final Uri timForeignVisitors = Uri.parse(
+    'https://www.tim.com.br/ajuda/perguntas-frequentes/celular/pre-pago/estrangeiros-no-brasil',
+  );
+
   static final Uri petEntryGuide = Uri.parse(
     'https://www.gov.br/agricultura/pt-br/assuntos/vigilancia-agropecuaria/viajantes-e-bagagens/lista-de-bens-agropecuarios-que-podem-ou-nao-ingressar-no-brasil/animais-vivos/caes-e-gatos',
   );

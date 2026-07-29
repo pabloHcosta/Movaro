@@ -83,6 +83,7 @@ class MigrationPlanGenerator {
       timeline: timeline,
       variant: variant,
       funding: funding,
+      workArrangement: workArrangement,
       travelGroup: travelGroup,
       childrenCount: childrenCount,
       availableCapital: availableCapital,

@@ -2498,6 +2498,24 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       GuideFlowMetricsStore.instance.record(GuideFlowMetric.fullPlanOpened),
     );
     final focus = controller.focusSnapshot;
+    final pending = controller.items
+        .where(
+          (item) =>
+              (!item.isCompleted ||
+                  item.dismissReason == GuideDismissReason.later) &&
+              item.dismissReason != GuideDismissReason.notApplicable &&
+              !item.id.startsWith('questionnaire_'),
+        )
+        .toList(growable: false);
+
+    List<GuideActionItem> scheduled(GuideExecutionWindow window) => pending
+        .where(
+          (item) =>
+              item.resolvedExecutionWindow == window &&
+              item.resolvedTier != GuideItemTier.optional,
+        )
+        .toList(growable: false);
+
     final groups =
         <
           ({
@@ -2508,32 +2526,59 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
           })
         >[
           (
-            label: _localizedText(context, pt: 'Agora', es: 'Ahora', en: 'Now'),
-            items: focus.now,
-            collapsed: false,
-            visibleCount: 3,
-          ),
-          (
             label: _localizedText(
               context,
-              pt: 'Depois',
-              es: 'Después',
-              en: 'Later',
+              pt: 'Antes de viajar',
+              es: 'Antes de viajar',
+              en: 'Before travel',
             ),
-            items: focus.later,
+            items: scheduled(GuideExecutionWindow.beforeTravel),
             collapsed: false,
             visibleCount: 5,
           ),
           (
             label: _localizedText(
               context,
-              pt: 'Quando chegar',
-              es: 'Cuando llegues',
-              en: 'When you arrive',
+              pt: 'No dia da chegada',
+              es: 'El día de llegada',
+              en: 'Arrival day',
             ),
-            items: focus.onArrival,
+            items: scheduled(GuideExecutionWindow.arrivalDay),
+            collapsed: false,
+            visibleCount: 4,
+          ),
+          (
+            label: _localizedText(
+              context,
+              pt: 'Na primeira semana',
+              es: 'En la primera semana',
+              en: 'First week',
+            ),
+            items: scheduled(GuideExecutionWindow.firstWeek),
             collapsed: false,
             visibleCount: 5,
+          ),
+          (
+            label: _localizedText(
+              context,
+              pt: 'No primeiro mês',
+              es: 'En el primer mes',
+              en: 'First month',
+            ),
+            items: scheduled(GuideExecutionWindow.firstMonth),
+            collapsed: false,
+            visibleCount: 5,
+          ),
+          (
+            label: _localizedText(
+              context,
+              pt: 'Consolidação',
+              es: 'Consolidación',
+              en: 'Later consolidation',
+            ),
+            items: scheduled(GuideExecutionWindow.later),
+            collapsed: true,
+            visibleCount: 4,
           ),
           (
             label: _localizedText(
@@ -2542,7 +2587,9 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
               es: 'Si tiene sentido',
               en: 'If it applies',
             ),
-            items: focus.optional,
+            items: pending
+                .where((item) => item.resolvedTier == GuideItemTier.optional)
+                .toList(growable: false),
             collapsed: true,
             visibleCount: 4,
           ),
@@ -5034,40 +5081,69 @@ class _GuideActionTag extends StatelessWidget {
       GuidePrimaryActionType.none => AppColors.primary,
     };
 
-    final label = switch (item.resolvedPrimaryActionType) {
-      GuidePrimaryActionType.external => _localizedText(
+    final scheduledLabel = switch (item.resolvedExecutionWindow) {
+      GuideExecutionWindow.arrivalDay => _localizedText(
         context,
-        pt: 'AÇÃO RECOMENDADA',
-        es: 'ACCION RECOMENDADA',
-        en: 'RECOMMENDED ACTION',
+        pt: 'NO DIA DA CHEGADA',
+        es: 'EL DÍA DE LLEGADA',
+        en: 'ARRIVAL DAY',
       ),
-      GuidePrimaryActionType.tool => _localizedText(
+      GuideExecutionWindow.firstWeek => _localizedText(
         context,
-        pt: 'FAÇA AGORA',
-        es: 'HAZLO AHORA',
-        en: 'DO THIS NOW',
+        pt: 'NA PRIMEIRA SEMANA',
+        es: 'EN LA PRIMERA SEMANA',
+        en: 'FIRST WEEK',
       ),
-      GuidePrimaryActionType.checklist => _localizedText(
+      GuideExecutionWindow.firstMonth => _localizedText(
         context,
-        pt: 'RESOLVA AGORA',
-        es: 'RESUELVELO AHORA',
-        en: 'RESOLVE NOW',
+        pt: 'NO PRIMEIRO MÊS',
+        es: 'EN EL PRIMER MES',
+        en: 'FIRST MONTH',
       ),
-      GuidePrimaryActionType.none =>
-        item.hasDecisionOptions
-            ? _localizedText(
-                context,
-                pt: 'DECISÃO IMPORTANTE',
-                es: 'DECISION IMPORTANTE',
-                en: 'IMPORTANT DECISION',
-              )
-            : _localizedText(
-                context,
-                pt: 'PRÓXIMO PASSO',
-                es: 'SIGUIENTE PASO',
-                en: 'NEXT STEP',
-              ),
+      GuideExecutionWindow.later => _localizedText(
+        context,
+        pt: 'MAIS ADIANTE',
+        es: 'MÁS ADELANTE',
+        en: 'LATER',
+      ),
+      GuideExecutionWindow.beforeTravel => null,
     };
+    final label =
+        scheduledLabel ??
+        switch (item.resolvedPrimaryActionType) {
+          GuidePrimaryActionType.external => _localizedText(
+            context,
+            pt: 'AÇÃO RECOMENDADA',
+            es: 'ACCION RECOMENDADA',
+            en: 'RECOMMENDED ACTION',
+          ),
+          GuidePrimaryActionType.tool => _localizedText(
+            context,
+            pt: 'FAÇA AGORA',
+            es: 'HAZLO AHORA',
+            en: 'DO THIS NOW',
+          ),
+          GuidePrimaryActionType.checklist => _localizedText(
+            context,
+            pt: 'RESOLVA AGORA',
+            es: 'RESUELVELO AHORA',
+            en: 'RESOLVE NOW',
+          ),
+          GuidePrimaryActionType.none =>
+            item.hasDecisionOptions
+                ? _localizedText(
+                    context,
+                    pt: 'DECISÃO IMPORTANTE',
+                    es: 'DECISION IMPORTANTE',
+                    en: 'IMPORTANT DECISION',
+                  )
+                : _localizedText(
+                    context,
+                    pt: 'PRÓXIMO PASSO',
+                    es: 'SIGUIENTE PASO',
+                    en: 'NEXT STEP',
+                  ),
+        };
 
     return Row(
       mainAxisSize: MainAxisSize.min,

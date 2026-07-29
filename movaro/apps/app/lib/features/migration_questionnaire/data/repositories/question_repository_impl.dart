@@ -182,7 +182,7 @@ class QuestionRepositoryImpl implements QuestionRepository {
         id: 'support_needs',
         title: 'support_needs',
         type: 'multi_chip',
-        maxSelections: 4,
+        maxSelections: 5,
         variants: const [QuestionnaireVariant.strategic],
         options: const [
           OptionModel(
@@ -199,6 +199,11 @@ class QuestionRepositoryImpl implements QuestionRepository {
             id: 'continuous_medication',
             label: 'continuous_medication',
             value: 'continuous_medication',
+          ),
+          OptionModel(
+            id: 'will_drive',
+            label: 'will_drive',
+            value: 'will_drive',
           ),
           OptionModel(
             id: 'foreign_income',

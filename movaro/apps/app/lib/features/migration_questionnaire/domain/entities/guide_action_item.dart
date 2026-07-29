@@ -12,6 +12,19 @@ enum GuideEstimatedEffort { fast, medium, longer }
 
 enum GuideExecutionMode { online, inPerson }
 
+/// The real-life moment when an action should enter the user's focus.
+///
+/// This is deliberately separate from [GuidePhase], which groups actions by
+/// subject. A health or work action can belong to its thematic phase while
+/// still being something to do before travel or during the first week.
+enum GuideExecutionWindow {
+  beforeTravel,
+  arrivalDay,
+  firstWeek,
+  firstMonth,
+  later,
+}
+
 enum GuideItemTier { critical, recommended, optional }
 
 enum GuideDismissReason { alreadyDone, notApplicable, later }
@@ -170,6 +183,7 @@ class GuideActionItem {
     this.requirements,
     this.estimatedTime,
     this.executionModes,
+    this.executionWindow,
     this.mapLinks,
     this.externalOfficialLinks,
     this.urgencyLevel,
@@ -220,6 +234,7 @@ class GuideActionItem {
   final List<String>? requirements;
   final String? estimatedTime;
   final List<GuideExecutionMode>? executionModes;
+  final GuideExecutionWindow? executionWindow;
   final List<GuideSupportLink>? mapLinks;
   final List<GuideSupportLink>? externalOfficialLinks;
 
@@ -295,6 +310,19 @@ class GuideActionItem {
   bool get hasExternalOfficialLinks =>
       externalOfficialLinks != null && externalOfficialLinks!.isNotEmpty;
 
+  GuideExecutionWindow get resolvedExecutionWindow {
+    if (executionWindow != null) {
+      return executionWindow!;
+    }
+    if (preArrivalRequired) {
+      return GuideExecutionWindow.beforeTravel;
+    }
+    if (phase == GuidePhase.arrival) {
+      return GuideExecutionWindow.firstWeek;
+    }
+    return GuideExecutionWindow.firstMonth;
+  }
+
   String get summaryText => context ?? shortDescription;
 
   GuidePrimaryActionType get resolvedPrimaryActionType {
@@ -357,6 +385,7 @@ class GuideActionItem {
     List<String>? requirements,
     String? estimatedTime,
     List<GuideExecutionMode>? executionModes,
+    GuideExecutionWindow? executionWindow,
     List<GuideSupportLink>? mapLinks,
     List<GuideSupportLink>? externalOfficialLinks,
     GuideUrgencyLevel? urgencyLevel,
@@ -406,6 +435,7 @@ class GuideActionItem {
       requirements: requirements ?? this.requirements,
       estimatedTime: estimatedTime ?? this.estimatedTime,
       executionModes: executionModes ?? this.executionModes,
+      executionWindow: executionWindow ?? this.executionWindow,
       mapLinks: mapLinks ?? this.mapLinks,
       externalOfficialLinks:
           externalOfficialLinks ?? this.externalOfficialLinks,

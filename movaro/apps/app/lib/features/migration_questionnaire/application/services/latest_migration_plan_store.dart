@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 
+import 'package:movaro_app/core/storage/persistent_json_store.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/models/migration_plan_model.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
@@ -8,6 +8,8 @@ import 'package:movaro_app/features/migration_questionnaire/domain/entities/migr
 typedef MigrationPlanDirectoryProvider = Future<Directory> Function();
 
 class LatestMigrationPlanStore {
+  static const _storageKey = 'movaro_latest_migration_plan';
+
   LatestMigrationPlanStore({MigrationPlanDirectoryProvider? directoryProvider})
     : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
 
@@ -15,17 +17,10 @@ class LatestMigrationPlanStore {
 
   Future<MigrationPlan?> read() async {
     try {
-      final file = await _file();
-      if (!file.existsSync()) {
-        return null;
-      }
-
-      final raw = await file.readAsString();
-      if (raw.trim().isEmpty) {
-        return null;
-      }
-
-      final decoded = jsonDecode(raw);
+      final decoded = await PersistentJsonStore.read(
+        key: _storageKey,
+        fileProvider: _file,
+      );
       if (decoded is! Map<String, dynamic>) {
         return null;
       }
@@ -37,17 +32,16 @@ class LatestMigrationPlanStore {
   }
 
   Future<void> write(MigrationPlan plan) async {
-    final file = await _file();
-    await file.parent.create(recursive: true);
     final model = MigrationPlanModel.fromEntity(plan);
-    await file.writeAsString(jsonEncode(model.toJson()));
+    await PersistentJsonStore.write(
+      key: _storageKey,
+      data: model.toJson(),
+      fileProvider: _file,
+    );
   }
 
   Future<void> clear() async {
-    final file = await _file();
-    if (file.existsSync()) {
-      await file.delete();
-    }
+    await PersistentJsonStore.delete(key: _storageKey, fileProvider: _file);
   }
 
   Future<File> _file() async {

@@ -46,6 +46,7 @@ class AppRoutes {
     documentationGuide,
     documentationTopic,
     info,
+    settings,
     cities,
     citiesSearch,
     countries,

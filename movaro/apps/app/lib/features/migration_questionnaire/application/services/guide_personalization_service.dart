@@ -190,26 +190,37 @@ class GuidePersonalizationService {
         (plan.childrenCount ?? 0) > 0 ||
         plan.selectedConstraints.contains('children_school');
 
-    if (goal == 'find_job_br' || goal == 'work') {
+    final seeksLocalWork =
+        goal == 'find_job_br' ||
+        goal == 'work' ||
+        plan.workArrangement == 'local_job' ||
+        plan.workArrangement == 'both_open' ||
+        plan.funding == 'job_search' ||
+        plan.funding == 'job_offer';
+    final hasRemoteIncome =
+        goal == 'remote_income' ||
+        goal == 'remote_work' ||
+        plan.workArrangement == 'remote' ||
+        plan.workArrangement == 'both_open' ||
+        plan.funding == 'remote_income';
+
+    if (seeksLocalWork) {
       conditions.add('job_search_goal');
     }
     if (goal == 'study') {
       conditions.add('study_goal');
     }
-    if (goal == 'remote_income' ||
-        goal == 'remote_work' ||
-        goal == 'entrepreneur') {
+    if (hasRemoteIncome || goal == 'entrepreneur') {
       conditions.add('self_employed_goal');
       conditions.add('remote_income_goal');
     }
-    if (goal == 'find_job_br' || goal == 'work') {
+    if (seeksLocalWork) {
       conditions.add('formal_work_goal');
     }
-    if (goal == 'find_job_br' ||
+    if (seeksLocalWork ||
         goal == 'work' ||
         goal == 'study' ||
-        goal == 'remote_income' ||
-        goal == 'remote_work' ||
+        hasRemoteIncome ||
         goal == 'entrepreneur') {
       conditions.add('income_strategy_goal');
     }
@@ -222,9 +233,11 @@ class GuidePersonalizationService {
     if (plan.selectedConstraints.contains('continuous_medication')) {
       conditions.add('continuous_medication');
     }
+    if (plan.selectedConstraints.contains('will_drive')) {
+      conditions.add('will_drive');
+    }
     if (plan.selectedConstraints.contains('foreign_income') ||
-        goal == 'remote_income' ||
-        goal == 'remote_work') {
+        hasRemoteIncome) {
       conditions.add('foreign_income');
     }
     if (plan.selectedConstraints.contains('temporary_residence_route')) {

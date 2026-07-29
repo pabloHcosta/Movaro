@@ -13,6 +13,7 @@ class MigrationPlan {
     this.createdAt,
     this.variant = QuestionnaireVariant.lean,
     this.funding = '',
+    this.workArrangement = '',
     this.travelGroup = '',
     this.childrenCount,
     this.availableCapital = '',
@@ -50,6 +51,7 @@ class MigrationPlan {
   final DateTime? createdAt;
   final QuestionnaireVariant variant;
   final String funding;
+  final String workArrangement;
   final String travelGroup;
   final int? childrenCount;
   final String availableCapital;
@@ -122,6 +124,7 @@ class MigrationPlan {
     List<MigrationStep>? steps,
     QuestionnaireVariant? variant,
     String? funding,
+    String? workArrangement,
     String? travelGroup,
     Object? childrenCount = _migrationPlanNoChange,
     String? availableCapital,
@@ -159,6 +162,7 @@ class MigrationPlan {
       steps: steps ?? this.steps,
       variant: variant ?? this.variant,
       funding: funding ?? this.funding,
+      workArrangement: workArrangement ?? this.workArrangement,
       travelGroup: travelGroup ?? this.travelGroup,
       childrenCount: identical(childrenCount, _migrationPlanNoChange)
           ? this.childrenCount
