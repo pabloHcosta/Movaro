@@ -301,15 +301,15 @@ class ArgentinaBrazilGuideDataSource {
         urgencyLevel: GuideUrgencyLevel.critical,
         urgencySignal: _t(
           locale,
-          pt: 'Peça AGORA — o certificado tem validade curta. Se você pedir tarde, vai vencer antes de usar.',
-          es: 'Pedilo AHORA — el certificado tiene validez corta. Si lo pides tarde, vencera antes de usarlo.',
-          en: 'Request NOW — the certificate has short validity. If you request too late, it will expire before you use it.',
+          pt: 'Peça AGORA o certificado tem validade curta. Se você pedir tarde, vai vencer antes de usar.',
+          es: 'Pedilo AHORA el certificado tiene validez corta. Si lo pides tarde, vencera antes de usarlo.',
+          en: 'Request NOW the certificate has short validity. If you request too late, it will expire before you use it.',
         ),
         warningFlags: _list(
           locale,
           pt: [
             'Validade de 90 dias: solicite próximo à data de embarque.',
-            'Resolva na Argentina — pedido após a viagem causa semanas de atraso.',
+            'Resolva na Argentina - pedido após a viagem causa semanas de atraso.',
           ],
           es: [
             'Validez de 90 dias: solicita cerca de la fecha de embarque.',
@@ -371,9 +371,9 @@ class ArgentinaBrazilGuideDataSource {
         urgencyLevel: GuideUrgencyLevel.watch,
         urgencySignal: _t(
           locale,
-          pt: 'Faça antes de viajar — uma reserva calculada reduz decisões apressadas diante de imprevistos no primeiro mês.',
+          pt: 'Faça antes de viajar: uma reserva calculada reduz decisões apressadas diante de imprevistos no primeiro mês.',
           es: 'Hazlo antes de viajar: una reserva calculada reduce decisiones apuradas ante imprevistos del primer mes.',
-          en: 'Do this before traveling — a calculated buffer reduces rushed decisions when surprises arise in the first month.',
+          en: 'Do this before traveling: a calculated buffer reduces rushed decisions when surprises arise in the first month.',
         ),
       ),
       GuideActionItem(

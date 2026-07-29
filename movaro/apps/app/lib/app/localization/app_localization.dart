@@ -600,9 +600,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String introRedesignGuideTitle() => _localizedText(
-    pt: 'Saiba o que fazer — e em que ordem',
+    pt: 'Saiba o que fazer e em que ordem',
     es: 'Sabé qué hacer y en qué orden',
-    en: 'Know what to do — and in what order',
+    en: 'Know what to do and in what order',
   );
 
   String introRedesignGuideDescription() => _localizedText(
@@ -1263,9 +1263,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String questionnaireGuideStepTwoBody() => _localizedText(
-    pt: 'Quando você marca algo como obrigatório — como transporte, custo ou universidade — opções incompatíveis ficam fora. A lista não é completada à força.',
-    es: 'Cuando marcás algo como obligatorio — como transporte, costo o universidad — las opciones incompatibles quedan afuera. La lista no se completa a la fuerza.',
-    en: 'When something is mandatory — such as transit, cost, or university access — incompatible options are removed. We do not force a full list.',
+    pt: 'Quando você marca algo como obrigatório como transporte, custo ou universidade, opções incompatíveis ficam fora. A lista não é completada à força.',
+    es: 'Cuando marcás algo como obligatorio como transporte, costo o universidad, las opciones incompatibles quedan afuera. La lista no se completa a la fuerza.',
+    en: 'When something is mandatory such as transit, cost, or university access, incompatible options are removed. We do not force a full list.',
   );
 
   String questionnaireGuideStepThreeTitle() => _localizedText(
@@ -1287,7 +1287,7 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String questionnaireGuideStepFourBody() => _localizedText(
-    pt: 'O resultado mostra uma cidade em destaque, alternativas, estabilidade e limitações. É apoio educacional e comparativo — não consultoria, garantia ou decisão automática.',
+    pt: 'O resultado mostra uma cidade em destaque, alternativas, estabilidade e limitações. É apoio educacional e comparativo, não consultoria, garantia ou decisão automática.',
     es: 'El resultado muestra una ciudad destacada, alternativas, estabilidad y limitaciones. Es apoyo educativo y comparativo, no asesoramiento, garantía ni decisión automática.',
     en: 'The result shows a highlighted city, alternatives, stability, and limitations. It is educational comparison support, not advice, a guarantee, or an automated decision.',
   );

@@ -10817,7 +10817,7 @@ abstract class AppLocalizations {
   /// No description provided for @infoGuideBody.
   ///
   /// In en, this message translates to:
-  /// **'Find answers about documents, housing, health, work, and costs for your destination country — all in one place.'**
+  /// **'Find answers about documents, housing, health, work, and costs for your destination country, all in one place.'**
   String get infoGuideBody;
 
   /// No description provided for @infoGuideStepOneTitle.

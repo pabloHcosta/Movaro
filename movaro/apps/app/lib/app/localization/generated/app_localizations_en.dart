@@ -6440,7 +6440,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get infoGuideBody =>
-      'Find answers about documents, housing, health, work, and costs for your destination country — all in one place.';
+      'Find answers about documents, housing, health, work, and costs for your destination country all in one place.';
 
   @override
   String get infoGuideStepOneTitle => 'Browse by category';
