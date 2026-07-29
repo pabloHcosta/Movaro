@@ -1036,8 +1036,7 @@ class ArgentinaBrazilGuideDataSource {
           en: 'Choose a carrier',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget: PreparationResourceLinks.anatelMobileCoverage
-            .toString(),
+        primaryActionTarget: null,
         steps: _list(
           locale,
           pt: [
@@ -2596,8 +2595,7 @@ class ArgentinaBrazilGuideDataSource {
           en: 'Choose income path',
         ),
         primaryActionType: GuidePrimaryActionType.external,
-        primaryActionTarget: PreparationResourceLinks.officialJobsPortal
-            .toString(),
+        primaryActionTarget: null,
         requirements: _list(
           locale,
           pt: ['CPF', 'CTPS (para CLT)', 'Conta bancária ativa'],
@@ -3898,6 +3896,7 @@ class ArgentinaBrazilGuideDataSource {
         orderIndex: 20,
         isCompleted: false,
         icon: Icons.health_and_safety_outlined,
+        dependencies: const <String>['item_1_1_chip'],
         checklistItems: [
           ChecklistSubItem(
             id: 'emergency_190',
@@ -4932,8 +4931,6 @@ class ArgentinaBrazilGuideDataSource {
     };
 
     return [
-      // Five-minute safety setup: useful before boarding and available offline.
-      'item_4_7_seguranca_emergencia',
       'item_0_1_rule_90_days',
       'item_0_2_document_folder',
       'item_0_2_antecedentes',
@@ -4949,9 +4946,10 @@ class ArgentinaBrazilGuideDataSource {
       'item_1_5_animais',
       'item_0_4_flight',
       'item_1_2_housing_temporary',
-      // Arrival day: prove entry first, then secure connectivity.
+      // Arrival day: prove entry, secure connectivity, then save local help.
       'item_1_0_entry_proof',
       'item_1_1_chip',
+      'item_4_7_seguranca_emergencia',
       // First week: health, regularization and work activation.
       'item_4_2_saude',
       'item_2_2_residencia',
@@ -4969,7 +4967,6 @@ class ArgentinaBrazilGuideDataSource {
 
   static GuideActionItem _applyExecutionSchedule(GuideActionItem item) {
     const beforeTravel = <String>{
-      'item_4_7_seguranca_emergencia',
       'item_0_1_rule_90_days',
       'item_0_2_document_folder',
       'item_0_2_antecedentes',
@@ -4991,7 +4988,11 @@ class ArgentinaBrazilGuideDataSource {
       'item_3_4_trabalho',
       'item_3_4_work_rights',
     };
-    const arrivalDay = <String>{'item_1_0_entry_proof', 'item_1_1_chip'};
+    const arrivalDay = <String>{
+      'item_1_0_entry_proof',
+      'item_1_1_chip',
+      'item_4_7_seguranca_emergencia',
+    };
     const firstWeek = <String>{
       'item_2_2_residencia',
       'item_2_3_ctps',
@@ -5021,8 +5022,8 @@ class ArgentinaBrazilGuideDataSource {
     if (item.id == 'item_4_7_seguranca_emergencia') {
       return item.copyWith(
         executionWindow: window,
-        preArrivalRequired: true,
-        tier: GuideItemTier.critical,
+        preArrivalRequired: false,
+        tier: GuideItemTier.recommended,
         urgencyLevel: GuideUrgencyLevel.urgent,
       );
     }
@@ -5403,16 +5404,28 @@ class ArgentinaBrazilGuideDataSource {
         executionModes: const [GuideExecutionMode.inPerson],
         externalOfficialLinks: [
           GuideSupportLink(
+            label: 'Claro · Planos pré-pagos',
+            url: PreparationResourceLinks.claroPrepaidPlans.toString(),
+          ),
+          GuideSupportLink(
+            label: 'Vivo · Planos pré-pagos',
+            url: PreparationResourceLinks.vivoPrepaidPlans.toString(),
+          ),
+          GuideSupportLink(
+            label: 'TIM · Planos pré-pagos',
+            url: PreparationResourceLinks.timPrepaidPlans.toString(),
+          ),
+          GuideSupportLink(
+            label: 'TIM · Ativação para estrangeiros',
+            url: PreparationResourceLinks.timForeignVisitors.toString(),
+          ),
+          GuideSupportLink(
             label: 'Anatel · Mapas de cobertura',
             url: PreparationResourceLinks.anatelMobileCoverage.toString(),
           ),
           GuideSupportLink(
             label: 'Anatel · Cadastro pré-pago',
             url: PreparationResourceLinks.anatelPrepaidRegistration.toString(),
-          ),
-          GuideSupportLink(
-            label: 'TIM · Estrangeiros no Brasil',
-            url: PreparationResourceLinks.timForeignVisitors.toString(),
           ),
         ],
       ),
@@ -5610,6 +5623,12 @@ class ArgentinaBrazilGuideDataSource {
       ),
       'item_3_4_trabalho' => item.copyWith(
         applicabilityConditions: const <String>['income_strategy_goal'],
+        primaryActionLabel: _t(
+          locale,
+          pt: 'Escolher minha rota de renda',
+          es: 'Elegir mi ruta de ingresos',
+          en: 'Choose my income path',
+        ),
         costInfo: _t(
           locale,
           pt: 'Depende do caminho escolhido.',
@@ -5624,11 +5643,29 @@ class ArgentinaBrazilGuideDataSource {
           GuideSupportLink(
             label: _t(
               locale,
-              pt: 'Portal Emprego Brasil',
-              es: 'Portal Empleo Brasil',
-              en: 'Brazil Jobs Portal',
+              pt: 'Buscar emprego formal (CLT)',
+              es: 'Buscar empleo formal (CLT)',
+              en: 'Find formal employment (CLT)',
             ),
             url: PreparationResourceLinks.officialJobsPortal.toString(),
+          ),
+          GuideSupportLink(
+            label: _t(
+              locale,
+              pt: 'Entender atividade própria e MEI',
+              es: 'Entender trabajo independiente y MEI',
+              en: 'Understand self-employment and MEI',
+            ),
+            url: PreparationResourceLinks.meiGuide.toString(),
+          ),
+          GuideSupportLink(
+            label: _t(
+              locale,
+              pt: 'Revisar renda remota ou do exterior',
+              es: 'Revisar ingresos remotos o del exterior',
+              en: 'Review remote or foreign income',
+            ),
+            url: PreparationResourceLinks.foreignIncomeTaxGuide.toString(),
           ),
         ],
       ),
@@ -5674,7 +5711,7 @@ class ArgentinaBrazilGuideDataSource {
           GuideSupportLink(label: 'Catho', url: 'https://www.catho.com.br'),
           GuideSupportLink(
             label: 'VAGAS.com',
-            url: PreparationResourceLinks.officialJobsPortal.toString(),
+            url: PreparationResourceLinks.vagasJobsPortal.toString(),
           ),
         ],
       ),
@@ -6004,19 +6041,19 @@ class ArgentinaBrazilGuideDataSource {
             'Pesquise vagas comparáveis por cidade, senioridade e tipo de contrato.',
             'Diferencie salário bruto, descontos e benefícios antes de estimar o líquido.',
             'Compare a renda líquida estimada com uma faixa de custo de vida da cidade.',
-            'Use Carteira de Trabalho Digital, Emprega Brasil/SINE e plataformas privadas como fontes distintas.',
+            'Use Emprega Brasil/SINE e plataformas privadas de vagas como fontes distintas.',
           ],
           es: [
             'Busca vacantes comparables por ciudad, experiencia y tipo de contrato.',
             'Diferencia salario bruto, descuentos y beneficios antes de estimar el neto.',
             'Compara el ingreso neto estimado con un rango de costo de vida de la ciudad.',
-            'Usa Carteira de Trabalho Digital, Emprega Brasil/SINE y plataformas privadas como fuentes distintas.',
+            'Usa Emprega Brasil/SINE y plataformas privadas de vacantes como fuentes distintas.',
           ],
           en: [
             'Research comparable openings by city, seniority, and contract type.',
             'Separate gross salary, deductions, and benefits before estimating take-home pay.',
             'Compare estimated take-home pay with a city cost-of-living range.',
-            'Use Digital Work Card, Emprega Brasil/SINE, and private platforms as distinct sources.',
+            'Use Emprega Brasil/SINE and private job platforms as distinct sources.',
           ],
         ),
         tips: _list(
@@ -6050,8 +6087,6 @@ class ArgentinaBrazilGuideDataSource {
       ),
       'item_3_4_trabalho' => item.copyWith(
         dependencies: const <String>[],
-        primaryActionTarget: PreparationResourceLinks.officialJobsPortal
-            .toString(),
         requirements: _list(
           locale,
           pt: [

@@ -25,7 +25,13 @@ class PreparationResourceLinks {
   const PreparationResourceLinks._();
 
   static final Uri officialJobsPortal = Uri.parse(
-    'https://www.gov.br/trabalho-e-emprego/pt-br/servicos/trabalhador/carteira-de-trabalho',
+    'https://empregabrasil.trabalho.gov.br/',
+  );
+
+  static final Uri vagasJobsPortal = Uri.parse('https://www.vagas.com.br/');
+
+  static final Uri meiGuide = Uri.parse(
+    'https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/quero-ser-mei',
   );
 
   static final Uri govBrAccountGuide = Uri.parse(
@@ -149,6 +155,18 @@ class PreparationResourceLinks {
 
   static final Uri timForeignVisitors = Uri.parse(
     'https://www.tim.com.br/ajuda/perguntas-frequentes/celular/pre-pago/estrangeiros-no-brasil',
+  );
+
+  static final Uri claroPrepaidPlans = Uri.parse(
+    'https://www.claro.com.br/celular/planos-pre',
+  );
+
+  static final Uri vivoPrepaidPlans = Uri.parse(
+    'https://vivo.com.br/para-voce/produtos-e-servicos/para-o-celular/pre-pago/vivo-pre',
+  );
+
+  static final Uri timPrepaidPlans = Uri.parse(
+    'https://www.tim.com.br/para-voce/planos/pre-pago',
   );
 
   static final Uri petEntryGuide = Uri.parse(

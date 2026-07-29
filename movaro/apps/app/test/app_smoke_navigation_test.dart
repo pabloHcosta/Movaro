@@ -198,6 +198,28 @@ void main() {
     await tester.pump();
   });
 
+  testWidgets('a confirmed origin city is reused without opening the sheet', (
+    tester,
+  ) async {
+    harness.locationController.confirmedOriginCity = true;
+
+    await tester.pumpWidget(
+      harness.buildApp(initialRoute: AppRoutes.publicHome),
+    );
+    await _pumpScreen(tester);
+
+    final discoverAction = find.byKey(const ValueKey('home-action-discover'));
+    await tester.ensureVisible(discoverAction);
+    await tester.tap(discoverAction);
+    await _pumpScreen(tester);
+
+    expect(find.text('Encontramos sua cidade'), findsNothing);
+    expect(harness.locationController.confirmationChecks, greaterThan(0));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
   testWidgets('city search resolves human-friendly aliases in autocomplete', (
     tester,
   ) async {
@@ -415,7 +437,8 @@ class _AppTestHarness {
   ApiHealthService get apiHealthService => dependencies.apiHealthService;
   JourneyContextController get journeyContextController =>
       dependencies.journeyContextController;
-  LocationController get locationController => dependencies.locationController;
+  _FakeLocationController get locationController =>
+      dependencies.locationController as _FakeLocationController;
   LocaleController get localeController => dependencies.localeController;
   ThemeController get themeController => dependencies.themeController;
 
@@ -682,6 +705,9 @@ class _SmokeCitiesController extends CitiesController {
 class _FakeLocationController extends LocationController {
   _FakeLocationController({required super.journeyContextController});
 
+  bool confirmedOriginCity = false;
+  int confirmationChecks = 0;
+
   @override
   LocationData? get savedLocation => const LocationData(
     cityName: 'San Rafael',
@@ -694,6 +720,17 @@ class _FakeLocationController extends LocationController {
 
   @override
   Future<void> initialize() async {}
+
+  @override
+  Future<bool> hasConfirmedOriginCity() async {
+    confirmationChecks += 1;
+    return confirmedOriginCity;
+  }
+
+  @override
+  Future<void> confirmSavedOriginCity() async {
+    confirmedOriginCity = true;
+  }
 
   @override
   Future<bool> shouldRequestAgain() async => false;

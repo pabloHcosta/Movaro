@@ -181,7 +181,10 @@ void main() {
     });
 
     test('uses current official jobs and foreign-driving sources', () {
-      expect(PreparationResourceLinks.officialJobsPortal.host, 'www.gov.br');
+      expect(
+        PreparationResourceLinks.officialJobsPortal,
+        Uri.parse('https://empregabrasil.trabalho.gov.br/'),
+      );
 
       final cnh = _item(
         ArgentinaBrazilGuideDataSource.build(
@@ -193,6 +196,60 @@ void main() {
       expect(cnh.evidence?.sourceLabel, contains('1.020/2025'));
       expect(cnh.steps?.join(' '), contains('PID quando aplicável'));
       expect(cnh.steps?.join(' '), contains('180 dias'));
+    });
+
+    test('job-market research opens vacancy sources, never the CTPS page', () {
+      final research = _item(
+        ArgentinaBrazilGuideDataSource.build(
+          _plan(goal: 'find_job_br'),
+          localeCode: 'pt',
+        ),
+        'item_0_5_mercado_trabalho',
+      );
+      final links = <String>[
+        research.primaryActionTarget ?? '',
+        ...?research.externalOfficialLinks?.map((link) => link.url),
+      ];
+
+      expect(
+        research.primaryActionTarget,
+        PreparationResourceLinks.officialJobsPortal.toString(),
+      );
+      expect(
+        PreparationResourceLinks.vagasJobsPortal,
+        Uri.parse('https://www.vagas.com.br/'),
+      );
+      expect(links.join(' '), isNot(contains('carteira-de-trabalho')));
+      expect(
+        research.steps?.join(' '),
+        isNot(contains('Carteira de Trabalho')),
+      );
+    });
+
+    test('income strategy offers the three routes instead of opening CTPS', () {
+      final strategy = _item(
+        ArgentinaBrazilGuideDataSource.build(
+          _plan(goal: 'find_job_br'),
+          localeCode: 'pt',
+        ),
+        'item_3_4_trabalho',
+      );
+      final links =
+          strategy.externalOfficialLinks?.map((link) => link.url).toList() ??
+          const <String>[];
+
+      expect(strategy.primaryActionTarget, isNull);
+      expect(links, hasLength(3));
+      expect(
+        links,
+        contains(PreparationResourceLinks.officialJobsPortal.toString()),
+      );
+      expect(links, contains(PreparationResourceLinks.meiGuide.toString()));
+      expect(
+        links,
+        contains(PreparationResourceLinks.foreignIncomeTaxGuide.toString()),
+      );
+      expect(links.join(' '), isNot(contains('carteira-de-trabalho')));
     });
 
     test('supports Pix payments before a Brazilian bank account', () {
@@ -247,7 +304,7 @@ void main() {
 
       expect(
         _item(items, 'item_4_7_seguranca_emergencia').resolvedExecutionWindow,
-        GuideExecutionWindow.beforeTravel,
+        GuideExecutionWindow.arrivalDay,
       );
       expect(
         _item(items, 'item_1_0_entry_proof').resolvedExecutionWindow,
@@ -271,9 +328,11 @@ void main() {
       );
 
       expect(
-        items.indexWhere((item) => item.id == 'item_4_7_seguranca_emergencia'),
+        items.indexWhere((item) => item.id == 'item_1_1_chip'),
         lessThan(
-          items.indexWhere((item) => item.id == 'item_0_1_rule_90_days'),
+          items.indexWhere(
+            (item) => item.id == 'item_4_7_seguranca_emergencia',
+          ),
         ),
       );
       expect(
@@ -281,9 +340,12 @@ void main() {
         lessThan(items.indexWhere((item) => item.id == 'item_1_1_chip')),
       );
       expect(
-        items.indexWhere((item) => item.id == 'item_1_1_chip'),
+        items.indexWhere((item) => item.id == 'item_4_7_seguranca_emergencia'),
         lessThan(items.indexWhere((item) => item.id == 'item_4_2_saude')),
       );
+      final emergency = _item(items, 'item_4_7_seguranca_emergencia');
+      expect(emergency.dependencies, <String>['item_1_1_chip']);
+      expect(emergency.preArrivalRequired, isFalse);
     });
 
     test('guides SIM choice without unsupported carrier rankings', () {
@@ -307,6 +369,7 @@ void main() {
       expect(reviewedText, isNot(contains('mais econômica')));
       expect(sim.costInfo, isNot(contains('R\$ 20-50')));
       expect(sim.dependencies, contains('item_1_0_entry_proof'));
+      expect(sim.primaryActionTarget, isNull);
       expect(
         sim.supportLinks?.map((link) => link.url),
         containsAll(<String>[
@@ -315,55 +378,81 @@ void main() {
           PreparationResourceLinks.timForeignVisitors.toString(),
         ]),
       );
+      expect(
+        sim.externalOfficialLinks?.map((link) => link.url),
+        containsAll(<String>[
+          PreparationResourceLinks.claroPrepaidPlans.toString(),
+          PreparationResourceLinks.vivoPrepaidPlans.toString(),
+          PreparationResourceLinks.timPrepaidPlans.toString(),
+          PreparationResourceLinks.timForeignVisitors.toString(),
+          PreparationResourceLinks.anatelMobileCoverage.toString(),
+          PreparationResourceLinks.anatelPrepaidRegistration.toString(),
+        ]),
+      );
     });
 
-    test('transitions from arrival proof to SIM and then SUS', () {
-      final plan = _plan(goal: 'find_job_br');
-      final personalized = GuidePersonalizationService.personalize(
-        plan: plan,
-        items: ArgentinaBrazilGuideDataSource.build(plan, localeCode: 'pt'),
-        explicitCompletedIds: const <String>{},
-        explicitDismissedReasons: const <String, GuideDismissReason>{},
-      );
-      var state = personalized
-          .map(
-            (item) =>
-                item.resolvedExecutionWindow ==
-                    GuideExecutionWindow.beforeTravel
-                ? item.copyWith(isCompleted: true)
-                : item,
-          )
-          .toList();
+    test(
+      'transitions from arrival proof to SIM, emergency contacts and SUS',
+      () {
+        final plan = _plan(goal: 'find_job_br');
+        final personalized = GuidePersonalizationService.personalize(
+          plan: plan,
+          items: ArgentinaBrazilGuideDataSource.build(plan, localeCode: 'pt'),
+          explicitCompletedIds: const <String>{},
+          explicitDismissedReasons: const <String, GuideDismissReason>{},
+        );
+        var state = personalized
+            .map(
+              (item) =>
+                  item.resolvedExecutionWindow ==
+                      GuideExecutionWindow.beforeTravel
+                  ? item.copyWith(isCompleted: true)
+                  : item,
+            )
+            .toList();
 
-      expect(
-        GuideFocusEngine.build(plan: plan, items: state).current?.id,
-        'item_1_0_entry_proof',
-      );
+        expect(
+          GuideFocusEngine.build(plan: plan, items: state).current?.id,
+          'item_1_0_entry_proof',
+        );
 
-      state = state
-          .map(
-            (item) => item.id == 'item_1_0_entry_proof'
-                ? item.copyWith(isCompleted: true)
-                : item,
-          )
-          .toList();
-      expect(
-        GuideFocusEngine.build(plan: plan, items: state).current?.id,
-        'item_1_1_chip',
-      );
+        state = state
+            .map(
+              (item) => item.id == 'item_1_0_entry_proof'
+                  ? item.copyWith(isCompleted: true)
+                  : item,
+            )
+            .toList();
+        expect(
+          GuideFocusEngine.build(plan: plan, items: state).current?.id,
+          'item_1_1_chip',
+        );
 
-      state = state
-          .map(
-            (item) => item.id == 'item_1_1_chip'
-                ? item.copyWith(isCompleted: true)
-                : item,
-          )
-          .toList();
-      expect(
-        GuideFocusEngine.build(plan: plan, items: state).current?.id,
-        'item_4_2_saude',
-      );
-    });
+        state = state
+            .map(
+              (item) => item.id == 'item_1_1_chip'
+                  ? item.copyWith(isCompleted: true)
+                  : item,
+            )
+            .toList();
+        expect(
+          GuideFocusEngine.build(plan: plan, items: state).current?.id,
+          'item_4_7_seguranca_emergencia',
+        );
+
+        state = state
+            .map(
+              (item) => item.id == 'item_4_7_seguranca_emergencia'
+                  ? item.copyWith(isCompleted: true)
+                  : item,
+            )
+            .toList();
+        expect(
+          GuideFocusEngine.build(plan: plan, items: state).current?.id,
+          'item_4_2_saude',
+        );
+      },
+    );
   });
 
   group('GuidePersonalizationService reviewed conditions', () {
@@ -431,7 +520,7 @@ void main() {
       },
     );
 
-    test('starts every profile with the universal safety sequence', () {
+    test('starts every profile with pre-travel foundations', () {
       final scenarios = <MigrationPlan>[
         _plan(goal: 'find_job_br'),
         _plan(goal: 'study'),
@@ -454,10 +543,14 @@ void main() {
         expect(
           focus.now.map((item) => item.id),
           orderedEquals(<String>[
-            'item_4_7_seguranca_emergencia',
             'item_0_1_rule_90_days',
             'item_0_2_document_folder',
+            'item_0_6_saude_entender',
           ]),
+        );
+        expect(
+          focus.now.map((item) => item.id),
+          isNot(contains('item_4_7_seguranca_emergencia')),
         );
       }
     });

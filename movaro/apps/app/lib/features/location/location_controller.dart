@@ -184,6 +184,39 @@ class LocationController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> hasConfirmedOriginCity() async {
+    if (!_isInitialized) {
+      await initialize();
+    }
+    final location = _savedLocation;
+    if (!_isArgentineCity(location)) {
+      return false;
+    }
+    if (await _storage.isOriginLocationConfirmed(location!)) {
+      return true;
+    }
+
+    // Existing installations did not persist the confirmation separately.
+    // A completed Argentina -> Brazil journey could only be reached through
+    // the former confirmation flow, so migrate it without asking again.
+    final isPreviouslyConfirmedJourney =
+        _journeyContextController.originCountryId == 'argentina' &&
+        _journeyContextController.destinationCountryId == 'brasil';
+    if (isPreviouslyConfirmedJourney) {
+      await _storage.confirmOriginLocation(location);
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> confirmSavedOriginCity() async {
+    final location = _savedLocation;
+    if (!_isArgentineCity(location)) {
+      return;
+    }
+    await _storage.confirmOriginLocation(location!);
+  }
+
   Future<LocationData> selectOriginLocality(ArgentinaLocality locality) async {
     final location = LocationData(
       cityName: locality.name,
@@ -285,6 +318,15 @@ class LocationController extends ChangeNotifier {
     }
 
     return null;
+  }
+
+  bool _isArgentineCity(LocationData? location) {
+    if (location == null || location.cityName.trim().isEmpty) {
+      return false;
+    }
+    final code = location.countryCode.trim().toUpperCase();
+    final country = location.countryName.trim().toLowerCase();
+    return code == 'AR' || country == 'argentina';
   }
 
   void _setBusy(bool value) {

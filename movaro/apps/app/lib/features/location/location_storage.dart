@@ -8,6 +8,8 @@ class LocationStorage {
   static const keyPermissionStatus = 'location_permission_status';
   static const keyPermissionAsked = 'location_permission_asked';
   static const keyLastAskedAt = 'location_permission_last_asked_at';
+  static const keyConfirmedOriginLocation =
+      'confirmed_origin_location_fingerprint';
 
   Future<void> saveLocation(LocationData data) async {
     final prefs = await SharedPreferences.getInstance();
@@ -35,6 +37,21 @@ class LocationStorage {
   Future<void> clearLocation() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(keyLocationData);
+    await prefs.remove(keyConfirmedOriginLocation);
+  }
+
+  Future<void> confirmOriginLocation(LocationData data) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      keyConfirmedOriginLocation,
+      _locationFingerprint(data),
+    );
+  }
+
+  Future<bool> isOriginLocationConfirmed(LocationData data) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(keyConfirmedOriginLocation) ==
+        _locationFingerprint(data);
   }
 
   Future<void> savePermissionStatus(String status) async {
@@ -61,5 +78,14 @@ class LocationStorage {
       return null;
     }
     return DateTime.tryParse(raw);
+  }
+
+  String _locationFingerprint(LocationData data) {
+    String normalized(String value) => value.trim().toLowerCase();
+    return [
+      normalized(data.cityName),
+      normalized(data.stateName),
+      normalized(data.countryCode),
+    ].join('|');
   }
 }

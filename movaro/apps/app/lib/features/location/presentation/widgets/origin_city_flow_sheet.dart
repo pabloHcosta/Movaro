@@ -11,6 +11,10 @@ Future<bool> showOriginCityFlowSheet({
 }) async {
   await locationController.initialize();
   if (!context.mounted) return false;
+  if (await locationController.hasConfirmedOriginCity()) {
+    return true;
+  }
+  if (!context.mounted) return false;
 
   return await showModalBottomSheet<bool>(
         context: context,
@@ -145,6 +149,12 @@ class _OriginCityFlowSheetState extends State<_OriginCityFlowSheet> {
     await widget.locationController.selectOriginLocality(locality);
     if (!mounted) return;
     setState(() => _step = _OriginCityStep.confirm);
+  }
+
+  Future<void> _confirmCurrentCity() async {
+    await widget.locationController.confirmSavedOriginCity();
+    if (!mounted) return;
+    Navigator.pop(context, true);
   }
 
   String _copy({required String pt, required String es, required String en}) {
@@ -367,7 +377,7 @@ class _OriginCityFlowSheetState extends State<_OriginCityFlowSheet> {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: _confirmCurrentCity,
               child: Text(
                 _copy(
                   pt: 'Sim, esta é minha cidade',

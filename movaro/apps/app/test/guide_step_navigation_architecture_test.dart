@@ -41,6 +41,52 @@ void main() {
     expect(executor, isNot(contains('CheckboxListTile')));
   });
 
+  test('every step uses the same visible three-part execution hierarchy', () {
+    final executor = methodBody(
+      'Future<void> _showExecutionPage(',
+      'Future<void> _completeGuideItem(',
+    );
+
+    expect('_GuideWorkflowSection('.allMatches(executor), hasLength(3));
+    expect(executor, contains("pt: 'Prepare o necessário'"));
+    expect(executor, contains("pt: 'Execute a etapa'"));
+    expect(executor, contains("pt: 'Confirme o resultado'"));
+    expect(executor, contains("'guide-confirmation-checklist'"));
+    expect(executor, isNot(contains('shouldDeferChecklist')));
+  });
+
+  test(
+    'completion criteria and checklist are not hidden in expandable cards',
+    () {
+      final executor = methodBody(
+        'Future<void> _showExecutionPage(',
+        'Future<void> _completeGuideItem(',
+      );
+      final confirmationStart = executor.indexOf("pt: 'Confirme o resultado'");
+      final detailsStart = executor.indexOf('_GuideSupplementaryDetails(');
+      final confirmation = executor.substring(confirmationStart, detailsStart);
+
+      expect(confirmation, contains('_GuideDoneCriteriaContent('));
+      expect(confirmation, contains('_GuideOutcomeProgress('));
+      expect(confirmation, isNot(contains('_GuideExpandableSection(')));
+    },
+  );
+
+  test('core workflow cards and preparation content cannot be collapsed', () {
+    final workflowSection = methodBody(
+      'class _GuideWorkflowSection',
+      'class _GuideExpandableSection',
+    );
+    final quickReference = methodBody(
+      'class _QuickReferenceCard',
+      'class _RefRow',
+    );
+
+    expect(workflowSection, isNot(contains('ExpansionTile')));
+    expect(quickReference, isNot(contains('GestureDetector')));
+    expect(quickReference, isNot(contains('ExpansionTile')));
+  });
+
   test('CPF route choice filters the instructions in the same page', () {
     final executor = methodBody(
       'Future<void> _showExecutionPage(',

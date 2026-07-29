@@ -48,7 +48,6 @@ import 'package:movaro_app/features/migration_questionnaire/domain/entities/guid
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/housing_selection_screen.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/models/guide_task_presentation_policy.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/arrival_execution_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/guide_event_suggestion_sheet.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/landing_budget_estimator_section.dart';
@@ -486,6 +485,13 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
           es: 'Elige donde quieres buscar vacantes',
           en: 'Choose where you want to search for jobs',
         );
+      case 'item_1_1_chip':
+        return _localizedText(
+          context,
+          pt: 'Compare operadoras e escolha seu chip',
+          es: 'Compara operadoras y elige tu chip',
+          en: 'Compare carriers and choose your SIM',
+        );
       default:
         return _localizedText(
           context,
@@ -518,6 +524,13 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
           pt: 'Abra a plataforma que faz mais sentido para o seu perfil e para o tipo de vaga que você quer buscar.',
           es: 'Abre la plataforma que tenga mas sentido para tu perfil y para el tipo de vacante que quieres buscar.',
           en: 'Open the platform that best fits your profile and the type of role you want to search for.',
+        );
+      case 'item_1_1_chip':
+        return _localizedText(
+          context,
+          pt: 'Veja os planos das principais operadoras. Antes de comprar, compare a cobertura da Anatel no endereço onde você vai morar e confirme os documentos de ativação.',
+          es: 'Mira los planes de las principales operadoras. Antes de comprar, compara la cobertura de Anatel en tu domicilio y confirma los documentos de activación.',
+          en: 'Review plans from the main carriers. Before buying, compare Anatel coverage at your address and confirm activation documents.',
         );
       default:
         return _localizedText(
@@ -1130,29 +1143,20 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                   checklistCompletedCount > 0 &&
                   !sheetItem.isCompleted;
               final isCpfStep = sheetItem.id == 'item_2_1_cpf';
-              final isPermanentResidenceStep =
-                  sheetItem.id == 'item_4_3_permanencia';
-              final isPixStep = sheetItem.id == 'item_3_3_pix';
-              final isChipStep = sheetItem.id == 'item_1_1_chip';
-              final isCnhStep = sheetItem.id == 'item_4_1_cnh';
               final isBankAccountStep =
                   sheetItem.id == 'item_3_1_conta_bancaria' &&
                   (sheetItem.externalOfficialLinks?.isNotEmpty ?? false);
               final isMoneySetupStep =
                   sheetItem.id == 'item_1_3_money' &&
                   (sheetItem.externalOfficialLinks?.isNotEmpty ?? false);
-              final shouldDeferChecklist =
-                  isCpfStep ||
-                  isChipStep ||
-                  isCnhStep ||
-                  isPermanentResidenceStep ||
-                  isPixStep ||
-                  sheetItem.id == 'item_0_2_antecedentes' ||
-                  sheetItem.id == 'item_1_3_money';
-              final presentationPolicy = GuideTaskPresentationPolicy.fromItem(
-                sheetItem,
-                deferChecklist: shouldDeferChecklist,
-              );
+              final hasPrimaryExecutionAction =
+                  !isPreview &&
+                  ((sheetItem.resolvedPrimaryActionType !=
+                              GuidePrimaryActionType.none &&
+                          sheetItem.resolvedPrimaryActionType !=
+                              GuidePrimaryActionType.checklist) ||
+                      isBankAccountStep ||
+                      isMoneySetupStep);
 
               Future<void> handlePrimaryAction() async {
                 if ((isBankAccountStep || isMoneySetupStep) &&
@@ -1430,122 +1434,65 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                           ),
                                           const SizedBox(height: 12),
                                         ],
-                                        if (!isPreview &&
-                                            ((sheetItem.resolvedPrimaryActionType !=
-                                                        GuidePrimaryActionType
-                                                            .none &&
-                                                    sheetItem
-                                                            .resolvedPrimaryActionType !=
-                                                        GuidePrimaryActionType
-                                                            .checklist) ||
-                                                isBankAccountStep ||
-                                                isMoneySetupStep)) ...[
-                                          _GuideNextMoveCard(
-                                            actionType: sheetItem
-                                                .resolvedPrimaryActionType,
-                                            actionLabel: actionOpened
-                                                ? _localizedText(
+                                        _GuideWorkflowSection(
+                                          number: 1,
+                                          icon: Icons.inventory_2_outlined,
+                                          title: _localizedText(
+                                            sheetContext,
+                                            pt: 'Prepare o necessário',
+                                            es: 'Prepara lo necesario',
+                                            en: 'Prepare what you need',
+                                          ),
+                                          description: _localizedText(
+                                            sheetContext,
+                                            pt: 'Separe o que será necessário antes de começar.',
+                                            es: 'Separa lo que necesitarás antes de comenzar.',
+                                            en: 'Gather what you need before starting.',
+                                          ),
+                                          child:
+                                              sheetItem.hasSurvivalPhrases ||
+                                                  sheetItem.hasRequirements
+                                              ? _QuickReferenceCard(
+                                                  item: sheetItem,
+                                                )
+                                              : _GuideWorkflowMessage(
+                                                  text: _localizedText(
                                                     sheetContext,
-                                                    pt: 'Abrir novamente',
-                                                    es: 'Abrir de novo',
-                                                    en: 'Open again',
-                                                  )
-                                                : (sheetItem
-                                                          .primaryActionLabel ??
-                                                      _localizedText(
-                                                        sheetContext,
-                                                        pt: 'Abrir ação principal',
-                                                        es: 'Abrir acción principal',
-                                                        en: 'Open primary action',
-                                                      )),
-                                            actionOpened: actionOpened,
-                                            onPressed: handlePrimaryAction,
+                                                    pt: 'Esta etapa não exige preparação adicional. Você pode seguir para a execução.',
+                                                    es: 'Esta etapa no exige preparación adicional. Puedes seguir con la ejecución.',
+                                                    en: 'This step needs no additional preparation. You can continue to execution.',
+                                                  ),
+                                                ),
+                                        ),
+                                        _GuideWorkflowSection(
+                                          number: 2,
+                                          icon: Icons.play_arrow_rounded,
+                                          title: isInProgress
+                                              ? _localizedText(
+                                                  sheetContext,
+                                                  pt: 'Continue a execução',
+                                                  es: 'Continúa la ejecución',
+                                                  en: 'Continue execution',
+                                                )
+                                              : _localizedText(
+                                                  sheetContext,
+                                                  pt: 'Execute a etapa',
+                                                  es: 'Ejecuta la etapa',
+                                                  en: 'Execute the step',
+                                                ),
+                                          description: _localizedText(
+                                            sheetContext,
+                                            pt: 'Siga a ordem abaixo e use a ação indicada quando necessário.',
+                                            es: 'Sigue el orden de abajo y usa la acción indicada cuando sea necesario.',
+                                            en: 'Follow the order below and use the indicated action when needed.',
                                           ),
-                                          const SizedBox(height: 10),
-                                        ],
-                                        if (sheetItem.hasChecklist &&
-                                            !shouldDeferChecklist) ...[
-                                          _GuideExpandableSection(
-                                            title: _localizedText(
-                                              sheetContext,
-                                              pt: sheetItem.id == 'item_2_1_cpf'
-                                                  ? 'Mini-checklist para fechar este passo'
-                                                  : sheetItem.id ==
-                                                        'item_3_1_conta_bancaria'
-                                                  ? 'Depois que abrir a conta, marque isso'
-                                                  : 'Checklist da etapa',
-                                              es: sheetItem.id == 'item_2_1_cpf'
-                                                  ? 'Mini checklist para cerrar este paso'
-                                                  : sheetItem.id ==
-                                                        'item_3_1_conta_bancaria'
-                                                  ? 'Despues de abrir la cuenta, marca esto'
-                                                  : 'Checklist de la etapa',
-                                              en: sheetItem.id == 'item_2_1_cpf'
-                                                  ? 'Mini checklist to close this step'
-                                                  : sheetItem.id ==
-                                                        'item_3_1_conta_bancaria'
-                                                  ? 'After opening the account, check this off'
-                                                  : 'Step checklist',
-                                            ),
-                                            initiallyExpanded:
-                                                presentationPolicy
-                                                    .startsExpanded(
-                                                      GuideTaskSectionKind
-                                                          .checklist,
-                                                    ),
-                                            child: _GuideOutcomeProgress(
-                                              items: sheetItem.checklistItems!,
-                                              enabled: !isPreview,
-                                              onToggle: handleChecklistToggle,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 12),
-                                        ],
-                                        // ── Companion quick reference ──
-                                        // Shown for ANY incomplete item with phrases
-                                        // or requirements — not just mid-checklist.
-                                        // Documents, housing, and work items all have
-                                        // "what to say" / "what to bring" content that
-                                        // is useful whether or not a checklist exists.
-                                        if (!sheetItem.isCompleted &&
-                                            (sheetItem.hasSurvivalPhrases ||
-                                                sheetItem.hasRequirements))
-                                          _GuideExpandableSection(
-                                            title: _localizedText(
-                                              sheetContext,
-                                              pt: 'O que preparar',
-                                              es: 'Qué preparar',
-                                              en: 'What to prepare',
-                                            ),
-                                            initiallyExpanded:
-                                                presentationPolicy
-                                                    .startsExpanded(
-                                                      GuideTaskSectionKind
-                                                          .preparation,
-                                                    ),
-                                            child: _QuickReferenceCard(
-                                              item: sheetItem,
-                                            ),
-                                          ),
-                                        if (isCpfStep &&
-                                            (sheetItem.hasDecisionOptions ||
-                                                sheetItem
-                                                    .hasLocationAwareOptions)) ...[
-                                          _GuideExpandableSection(
-                                            title: _localizedText(
-                                              sheetContext,
-                                              pt: '1. Escolha sua rota',
-                                              es: '1. Elige tu ruta',
-                                              en: '1. Choose your route',
-                                            ),
-                                            initiallyExpanded:
-                                                presentationPolicy
-                                                    .startsExpanded(
-                                                      GuideTaskSectionKind
-                                                          .route,
-                                                    ),
-                                            child: Column(
-                                              children: [
+                                          child: Column(
+                                            children: [
+                                              if (isCpfStep &&
+                                                  (sheetItem
+                                                          .hasDecisionOptions ||
+                                                      sheetItem
+                                                          .hasLocationAwareOptions)) ...[
                                                 _CpfDecisionContent(
                                                   item: sheetItem,
                                                   selectedIndex:
@@ -1571,45 +1518,11 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                         uri: Uri.parse(url),
                                                       ),
                                                 ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                        if (!isCpfStep &&
-                                            (sheetItem.hasDecisionOptions ||
-                                                sheetItem.hasSteps ||
-                                                sheetItem
-                                                    .hasLocationAwareOptions))
-                                          _GuideExpandableSection(
-                                            title:
-                                                sheetItem.id == 'item_2_1_cpf'
-                                                ? _localizedText(
-                                                    sheetContext,
-                                                    pt: 'Compare os dois caminhos',
-                                                    es: 'Compara las dos rutas',
-                                                    en: 'Compare the two routes',
-                                                  )
-                                                : isInProgress
-                                                ? _localizedText(
-                                                    sheetContext,
-                                                    pt: '▶ Em andamento — próximos passos',
-                                                    es: '▶ En progreso — próximos pasos',
-                                                    en: '▶ In progress — next steps',
-                                                  )
-                                                : _localizedText(
-                                                    sheetContext,
-                                                    pt: 'Como fazer',
-                                                    es: 'Cómo hacerlo',
-                                                    en: 'How to do it',
-                                                  ),
-                                            initiallyExpanded:
-                                                presentationPolicy
-                                                    .startsExpanded(
-                                                      GuideTaskSectionKind
-                                                          .instructions,
-                                                    ),
-                                            child: Column(
-                                              children: [
+                                              ] else if (sheetItem
+                                                      .hasDecisionOptions ||
+                                                  sheetItem.hasSteps ||
+                                                  sheetItem
+                                                      .hasLocationAwareOptions) ...[
                                                 if (sheetItem
                                                     .hasLocationAwareOptions)
                                                   _GuideExecutionBlock(
@@ -1637,75 +1550,104 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                           uri: Uri.parse(url),
                                                         ),
                                                   ),
+                                              ] else
+                                                _GuideWorkflowMessage(
+                                                  text:
+                                                      sheetItem.context ??
+                                                      sheetItem
+                                                          .shortDescription,
+                                                ),
+                                              if (hasPrimaryExecutionAction) ...[
+                                                const SizedBox(height: 14),
+                                                _GuideNextMoveCard(
+                                                  actionType: sheetItem
+                                                      .resolvedPrimaryActionType,
+                                                  actionLabel: actionOpened
+                                                      ? _localizedText(
+                                                          sheetContext,
+                                                          pt: 'Abrir novamente',
+                                                          es: 'Abrir de novo',
+                                                          en: 'Open again',
+                                                        )
+                                                      : (sheetItem
+                                                                .primaryActionLabel ??
+                                                            _localizedText(
+                                                              sheetContext,
+                                                              pt: 'Abrir ação principal',
+                                                              es: 'Abrir acción principal',
+                                                              en: 'Open primary action',
+                                                            )),
+                                                  actionOpened: actionOpened,
+                                                  onPressed:
+                                                      handlePrimaryAction,
+                                                ),
                                               ],
-                                            ),
+                                            ],
                                           ),
-                                        if (sheetItem.hasChecklist &&
-                                            shouldDeferChecklist) ...[
-                                          const SizedBox(height: 12),
-                                          _GuideExpandableSection(
-                                            title: isCpfStep
-                                                ? _localizedText(
-                                                    sheetContext,
-                                                    pt: '3. Confirme quando concluir',
-                                                    es: '3. Confirma cuando termines',
-                                                    en: '3. Confirm when done',
-                                                  )
-                                                : isChipStep
-                                                ? _localizedText(
-                                                    sheetContext,
-                                                    pt: 'Depois de comprar e testar, confirme aqui',
-                                                    es: 'Despues de comprar y probar, confirma aqui',
-                                                    en: 'After buying and testing it, confirm here',
-                                                  )
-                                                : isCnhStep
-                                                ? _localizedText(
-                                                    sheetContext,
-                                                    pt: 'Depois de iniciar no DETRAN, confirme aqui',
-                                                    es: 'Despues de iniciar en el DETRAN, confirma aqui',
-                                                    en: 'After starting with DETRAN, confirm here',
-                                                  )
-                                                : isPermanentResidenceStep
-                                                ? _localizedText(
-                                                    sheetContext,
-                                                    pt: 'Depois de protocolar, confirme aqui',
-                                                    es: 'Despues de presentar la solicitud, confirma aqui',
-                                                    en: 'After filing it, confirm here',
-                                                  )
-                                                : isPixStep
-                                                ? _localizedText(
-                                                    sheetContext,
-                                                    pt: 'Depois de testar, confirme aqui',
-                                                    es: 'Despues de probar, confirma aqui',
-                                                    en: 'After testing it, confirm here',
-                                                  )
-                                                : sheetItem.id ==
-                                                      'item_1_3_money'
-                                                ? _localizedText(
-                                                    sheetContext,
-                                                    pt: 'Depois de configurar, confirme aqui',
-                                                    es: 'Despues de configurarlo, confirma aqui',
-                                                    en: 'After setting it up, confirm here',
-                                                  )
-                                                : _localizedText(
-                                                    sheetContext,
-                                                    pt: 'Depois de solicitar, confirme aqui',
-                                                    es: 'Despues de solicitarlo, confirma aqui',
-                                                    en: 'After requesting it, confirm here',
+                                        ),
+                                        _GuideWorkflowSection(
+                                          number: 3,
+                                          icon: Icons.fact_check_outlined,
+                                          title: _localizedText(
+                                            sheetContext,
+                                            pt: 'Confirme o resultado',
+                                            es: 'Confirma el resultado',
+                                            en: 'Confirm the result',
+                                          ),
+                                          description: sheetItem.hasChecklist
+                                              ? _localizedText(
+                                                  sheetContext,
+                                                  pt: 'Marque cada resultado abaixo. A etapa será liberada quando todos estiverem concluídos.',
+                                                  es: 'Marca cada resultado abajo. La etapa se habilitará cuando todos estén completos.',
+                                                  en: 'Check each result below. The step will unlock when all are complete.',
+                                                )
+                                              : _localizedText(
+                                                  sheetContext,
+                                                  pt: 'Confira o critério e use o botão “Concluir etapa” no final da tela.',
+                                                  es: 'Revisa el criterio y usa el botón “Completar etapa” al final de la pantalla.',
+                                                  en: 'Review the criterion and use the “Complete step” button at the bottom.',
+                                                ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              if (sheetItem.doneCriteria !=
+                                                  null)
+                                                _GuideDoneCriteriaContent(
+                                                  item: sheetItem,
+                                                )
+                                              else
+                                                _GuideWorkflowMessage(
+                                                  text: sheetItem.hasChecklist
+                                                      ? _localizedText(
+                                                          sheetContext,
+                                                          pt: 'Considere a etapa concluída quando todos os resultados abaixo estiverem confirmados.',
+                                                          es: 'Considera la etapa terminada cuando todos los resultados de abajo estén confirmados.',
+                                                          en: 'Consider the step complete when all results below are confirmed.',
+                                                        )
+                                                      : _localizedText(
+                                                          sheetContext,
+                                                          pt: 'Considere a etapa concluída depois de executar a ação indicada.',
+                                                          es: 'Considera la etapa terminada después de ejecutar la acción indicada.',
+                                                          en: 'Consider the step complete after carrying out the indicated action.',
+                                                        ),
+                                                ),
+                                              if (sheetItem.hasChecklist) ...[
+                                                const SizedBox(height: 12),
+                                                _GuideOutcomeProgress(
+                                                  key: const ValueKey<String>(
+                                                    'guide-confirmation-checklist',
                                                   ),
-                                            initiallyExpanded:
-                                                presentationPolicy
-                                                    .startsExpanded(
-                                                      GuideTaskSectionKind
-                                                          .confirmation,
-                                                    ),
-                                            child: _GuideOutcomeProgress(
-                                              items: sheetItem.checklistItems!,
-                                              enabled: !isPreview,
-                                              onToggle: handleChecklistToggle,
-                                            ),
+                                                  items:
+                                                      sheetItem.checklistItems!,
+                                                  enabled: !isPreview,
+                                                  onToggle:
+                                                      handleChecklistToggle,
+                                                ),
+                                              ],
+                                            ],
                                           ),
-                                        ],
+                                        ),
                                         _GuideSupplementaryDetails(
                                           item: sheetItem,
                                           quickReferenceShown:
@@ -1816,19 +1758,6 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                           ),
                                           const SizedBox(height: 12),
                                         ],
-                                        if (sheetItem.doneCriteria != null)
-                                          _GuideExpandableSection(
-                                            title: _localizedText(
-                                              sheetContext,
-                                              pt: 'Quando considerar concluído',
-                                              es: 'Cuando considerarlo terminado',
-                                              en: 'When to mark it done',
-                                            ),
-                                            initiallyExpanded: false,
-                                            child: _GuideDoneCriteriaContent(
-                                              item: sheetItem,
-                                            ),
-                                          ),
                                         if (!isPreview &&
                                             !sheetItem.isCompleted &&
                                             eventSuggestion != null) ...[
@@ -5684,6 +5613,7 @@ class _GuideNextMoveCard extends StatelessWidget {
 
 class _GuideOutcomeProgress extends StatelessWidget {
   const _GuideOutcomeProgress({
+    super.key,
     required this.items,
     required this.enabled,
     required this.onToggle,
@@ -5947,6 +5877,117 @@ class _GuideTaskFooter extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _GuideWorkflowSection extends StatelessWidget {
+  const _GuideWorkflowSection({
+    required this.number,
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.child,
+  });
+
+  final int number;
+  final IconData icon;
+  final String title;
+  final String description;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: ValueKey<String>('guide-workflow-section-$number'),
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMutedFor(context),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.borderFor(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Text(
+                  '$number',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(icon, size: 18, color: AppColors.primary),
+                        const SizedBox(width: 7),
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _GuideWorkflowMessage extends StatelessWidget {
+  const _GuideWorkflowMessage({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundFor(context).withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.borderFor(context)),
+      ),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.45),
       ),
     );
   }
@@ -6635,9 +6676,9 @@ class _CpfExecutionBlock extends StatelessWidget {
           Text(
             _localizedText(
               context,
-              pt: '2. Abra a rota escolhida',
-              es: '2. Abre la ruta elegida',
-              en: '2. Open the chosen route',
+              pt: 'Abra a rota escolhida',
+              es: 'Abre la ruta elegida',
+              en: 'Open the chosen route',
             ),
             style: Theme.of(
               context,
@@ -9780,111 +9821,88 @@ class _InlineActionTag extends StatelessWidget {
 
 // ─── Companion Quick Reference Card ──────────────────────────────────────────
 
-class _QuickReferenceCard extends StatefulWidget {
+class _QuickReferenceCard extends StatelessWidget {
   const _QuickReferenceCard({required this.item});
 
   final GuideActionItem item;
 
   @override
-  State<_QuickReferenceCard> createState() => _QuickReferenceCardState();
-}
-
-class _QuickReferenceCardState extends State<_QuickReferenceCard> {
-  bool _expanded = true;
-
-  @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
-    final item = widget.item;
     final locale = Localizations.localeOf(context).languageCode;
 
-    final firstPhrase = item.survivalPhrases?.firstOrNull;
-    final firstReqs = (item.requirements ?? const []).take(2).toList();
+    final phrases = item.survivalPhrases ?? const <SurvivalPhrase>[];
+    final requirements = item.requirements ?? const <String>[];
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF0F1E35) : const Color(0xFFF0F7FF),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isDark ? const Color(0xFF1A3060) : const Color(0xFFBFDBFE),
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0F1E35) : const Color(0xFFF0F7FF),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1A3060) : const Color(0xFFBFDBFE),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: () => setState(() => _expanded = !_expanded),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.flash_on_rounded,
-                      size: 14,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.flash_on_rounded,
+                  size: 14,
+                  color: Color(0xFF3B7CC8),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    _headerLabel(locale),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
                       color: Color(0xFF3B7CC8),
+                      height: 1,
                     ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        _headerLabel(locale),
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF3B7CC8),
-                          height: 1,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      _expanded
-                          ? Icons.expand_less_rounded
-                          : Icons.expand_more_rounded,
-                      size: 16,
-                      color: const Color(0xFF3B7CC8),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-            if (_expanded) ...[
-              const Divider(height: 1, thickness: 0.5),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (firstPhrase != null) ...[
-                      _RefRow(
-                        icon: Icons.record_voice_over_rounded,
-                        label: _sayLabel(locale),
-                        value: firstPhrase.phrase,
-                        isDark: isDark,
-                      ),
-                      if (firstReqs.isNotEmpty) const SizedBox(height: 8),
-                    ],
-                    if (firstReqs.isNotEmpty)
-                      _RefRow(
-                        icon: Icons.inventory_2_outlined,
-                        label: _bringLabel(locale),
-                        value: firstReqs.join(' · '),
-                        isDark: isDark,
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
+          ),
+          const Divider(height: 1, thickness: 0.5),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (phrases.isNotEmpty) ...[
+                  _RefRow(
+                    icon: Icons.record_voice_over_rounded,
+                    label: _sayLabel(locale),
+                    value: phrases.map((phrase) => phrase.phrase).join(' • '),
+                    isDark: isDark,
+                  ),
+                  if (requirements.isNotEmpty) const SizedBox(height: 8),
+                ],
+                if (requirements.isNotEmpty)
+                  _RefRow(
+                    icon: Icons.inventory_2_outlined,
+                    label: _bringLabel(locale),
+                    value: requirements.join(' • '),
+                    isDark: isDark,
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
   String _headerLabel(String locale) => switch (locale) {
-    'pt' => 'Referência rápida — você está executando agora',
-    'es' => 'Referencia rapida — estas ejecutando ahora',
-    _ => 'Quick reference — you\'re executing now',
+    'pt' => 'DOCUMENTOS E FRASES ÚTEIS',
+    'es' => 'DOCUMENTOS Y FRASES ÚTILES',
+    _ => 'USEFUL DOCUMENTS AND PHRASES',
   };
 
   String _sayLabel(String locale) => switch (locale) {
