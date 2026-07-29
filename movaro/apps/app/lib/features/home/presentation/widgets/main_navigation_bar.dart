@@ -16,6 +16,7 @@ class MainNavigationBar extends StatelessWidget {
     required this.journeyContextController,
     required this.citiesController,
     required this.migrationQuestionnaireController,
+    this.reselectNavigatesToRoot = false,
     super.key,
   });
 
@@ -23,6 +24,7 @@ class MainNavigationBar extends StatelessWidget {
   final JourneyContextController journeyContextController;
   final CitiesController citiesController;
   final MigrationQuestionnaireController migrationQuestionnaireController;
+  final bool reselectNavigatesToRoot;
 
   @override
   Widget build(BuildContext context) {
@@ -79,8 +81,6 @@ class MainNavigationBar extends StatelessWidget {
   }
 
   List<_NavItemData> _items(BuildContext context) {
-    final hasPlan = migrationQuestionnaireController.generatedPlan != null;
-
     return [
       _NavItemData(
         slot: 0,
@@ -94,73 +94,62 @@ class MainNavigationBar extends StatelessWidget {
         icon: Icons.explore_outlined,
         activeIcon: Icons.explore,
       ),
-      if (hasPlan)
-        _NavItemData(
-          slot: 2,
-          label: context.l10n.mainNavExecution,
-          icon: Icons.route_outlined,
-          activeIcon: Icons.route,
-        ),
+      _NavItemData(
+        slot: 2,
+        label: _navText(context, pt: 'Plano', es: 'Plan', en: 'Plan'),
+        icon: Icons.route_outlined,
+        activeIcon: Icons.route,
+      ),
       _NavItemData(
         slot: 3,
-        label: context.l10n.aiChatTitle,
-        icon: Icons.auto_awesome_outlined,
-        activeIcon: Icons.auto_awesome,
+        label: _navText(
+          context,
+          pt: 'Ferramentas',
+          es: 'Herramientas',
+          en: 'Tools',
+        ),
+        icon: Icons.grid_view_outlined,
+        activeIcon: Icons.grid_view_rounded,
       ),
       _NavItemData(
         slot: 4,
-        label: context.l10n.favoritesPageTitle,
-        icon: Icons.favorite_outline,
-        activeIcon: Icons.favorite,
+        label: _navText(context, pt: 'Mais', es: 'Más', en: 'More'),
+        icon: Icons.more_horiz_rounded,
+        activeIcon: Icons.more_horiz_rounded,
       ),
     ];
   }
 
   void _handleTap(BuildContext context, int slot) {
-    if (slot == currentIndex) return;
+    if (slot == currentIndex && !reselectNavigatesToRoot) return;
 
-    final plan = migrationQuestionnaireController.generatedPlan;
-    if (slot == 2 && plan == null) {
-      final locale = Localizations.localeOf(context).languageCode;
-      final message = switch (locale) {
-        'pt' => 'Crie seu plano para acessar sua rota',
-        'es' => 'Crea tu plan para acceder a tu ruta',
-        _ => 'Create your plan to access your route',
-      };
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 3),
-          action: SnackBarAction(
-            label: switch (locale) {
-              'pt' => 'Criar plano',
-              'es' => 'Crear plan',
-              _ => 'Create plan',
-            },
-            onPressed: () =>
-                Navigator.pushNamed(context, AppRoutes.migrationQuestionnaire),
-          ),
-        ),
-      );
-      return;
-    }
-    final hasConfirmedCity = plan?.confirmedCity != null;
     final route = switch (slot) {
       0 => AppRoutes.publicHome,
       1 => AppRoutes.explore,
-      2 =>
-        hasConfirmedCity
-            ? AppRoutes.migrationPlanCopilot
-            : (plan != null
-                  ? AppRoutes.migrationResultReveal
-                  : AppRoutes.migrationQuestionnaire),
-      3 => AppRoutes.info,
-      _ => AppRoutes.favorites,
+      2 => AppRoutes.plan,
+      3 => AppRoutes.tools,
+      _ => AppRoutes.more,
     };
 
+    if (reselectNavigatesToRoot) {
+      Navigator.pushNamedAndRemoveUntil(context, route, (route) => false);
+      return;
+    }
     Navigator.pushReplacementNamed(context, route);
   }
+}
+
+String _navText(
+  BuildContext context, {
+  required String pt,
+  required String es,
+  required String en,
+}) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 }
 
 class _NavItemData {

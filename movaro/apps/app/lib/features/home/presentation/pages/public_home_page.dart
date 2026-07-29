@@ -377,10 +377,6 @@ class _PublicHomePageState extends State<PublicHomePage>
     return true;
   }
 
-  void _openSettings() {
-    Navigator.pushNamed(context, AppRoutes.settings);
-  }
-
   void _openComparison(City city) {
     Navigator.push(
       context,
@@ -697,7 +693,6 @@ class _PublicHomePageState extends State<PublicHomePage>
                                       planTimeline: plan.timeline,
                                       recommendationReasons:
                                           plan.cityRecommendationReasons,
-                                      onOpenSettings: _openSettings,
                                       onViewAction: (_) => Navigator.pushNamed(
                                         context,
                                         AppRoutes.migrationPlanCopilot,
@@ -1149,7 +1144,6 @@ class _ActiveHomeState extends StatelessWidget {
     required this.planGoal,
     required this.planTimeline,
     required this.recommendationReasons,
-    required this.onOpenSettings,
     required this.onViewAction,
     required this.onCompare,
     required this.onViewCity,
@@ -1163,7 +1157,6 @@ class _ActiveHomeState extends StatelessWidget {
   final _HomeGuideState guideState;
   final VoidCallback onCompare;
   final VoidCallback onNewPlan;
-  final VoidCallback onOpenSettings;
   final ValueChanged<GuideActionItem> onViewAction;
   final VoidCallback onViewCity;
   final MigrationPlan plan;
@@ -1275,12 +1268,7 @@ class _ActiveHomeState extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. City header — height grows with screen size
-            _ActiveHero(
-              city: city,
-              weather: weather,
-              height: heroH,
-              onOpenSettings: onOpenSettings,
-            ),
+            _ActiveHero(city: city, weather: weather, height: heroH),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(bottom: 16),
@@ -1304,7 +1292,7 @@ class _ActiveHomeState extends StatelessWidget {
                           cityBudget: null,
                           onCreatePlan: () => Navigator.pushNamed(
                             context,
-                            AppRoutes.migrationQuestionnaire,
+                            AppRoutes.migrationPlanCopilot,
                           ),
                         ),
                       ),
@@ -1640,7 +1628,6 @@ class _ActiveHero extends StatelessWidget {
     required this.city,
     required this.weather,
     required this.height,
-    required this.onOpenSettings,
   });
 
   final City city;
@@ -1648,7 +1635,6 @@ class _ActiveHero extends StatelessWidget {
   /// Total hero height in logical pixels, including the top safe-area inset.
   final double height;
 
-  final VoidCallback onOpenSettings;
   final CityWeather? weather;
 
   @override
@@ -1748,11 +1734,6 @@ class _ActiveHero extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 6,
-              right: 14,
-              child: _SettingsButton(onTap: onOpenSettings),
             ),
             Positioned(
               left: 14,
@@ -2309,46 +2290,6 @@ class _HeroImageFallback extends StatelessWidget {
   }
 }
 
-class _SettingsButton extends StatelessWidget {
-  const _SettingsButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(999),
-        onTap: onTap,
-        child: Ink(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isDark
-                ? Colors.black.withValues(alpha: 0.25)
-                : Colors.black.withValues(alpha: 0.08),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.10)
-                  : Colors.black.withValues(alpha: 0.10),
-            ),
-          ),
-          child: Icon(
-            Icons.settings_outlined,
-            size: 20,
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.60)
-                : Colors.black.withValues(alpha: 0.50),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _HomeGuideState {
   const _HomeGuideState({
     required this.items,
@@ -2866,9 +2807,9 @@ class _ExplorerStageCard extends StatelessWidget {
               child: Text(
                 _localizedText(
                   context,
-                  pt: 'Criar meu plano de migração',
-                  es: 'Crear mi plan de migración',
-                  en: 'Create my migration plan',
+                  pt: 'Abrir meu plano para ${city.name}',
+                  es: 'Abrir mi plan para ${city.name}',
+                  en: 'Open my plan for ${city.name}',
                 ),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(

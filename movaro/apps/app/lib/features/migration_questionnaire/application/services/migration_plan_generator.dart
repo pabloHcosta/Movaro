@@ -27,9 +27,11 @@ class MigrationPlanGenerator {
 
     final originCountry = _firstValue(answerMap['origin_country']);
     final destinationCountry = _firstValue(answerMap['destination_country']);
-    final intent = _firstValue(answerMap['intent']);
+    final rawIntent = _firstValue(answerMap['intent']);
+    final intent = rawIntent.isEmpty ? 'explore_unsure' : rawIntent;
     final funding = _firstValue(answerMap['funding']);
-    final timeline = _firstValue(answerMap['timeline']);
+    final rawTimeline = _firstValue(answerMap['timeline']);
+    final timeline = rawTimeline.isEmpty ? 'depends' : rawTimeline;
     final travelGroup = _firstValue(answerMap['travel_group']);
     final childrenCount = _parseChildrenCount(
       _firstValue(answerMap['travel_group_children_count']),

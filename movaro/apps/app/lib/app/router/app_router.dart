@@ -13,7 +13,10 @@ import 'package:movaro_app/features/explore/presentation/pages/documentation_gui
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/pages/favorites_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/home_page.dart';
+import 'package:movaro_app/features/home/presentation/pages/more_page.dart';
+import 'package:movaro_app/features/home/presentation/pages/plan_entry_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/public_home_page.dart';
+import 'package:movaro_app/features/home/presentation/pages/tools_hub_page.dart';
 import 'package:movaro_app/features/info/presentation/pages/assistant_page.dart';
 import 'package:movaro_app/features/intro/presentation/pages/intro_page.dart';
 import 'package:movaro_app/features/language/presentation/pages/portuguese_phrasebook_page.dart';
@@ -22,6 +25,7 @@ import 'package:movaro_app/features/migration_questionnaire/presentation/pages/m
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_plan_save_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/migration_result_reveal_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/question_page.dart';
+import 'package:movaro_app/features/safety_check/presentation/pages/proposal_safety_check_page.dart';
 import 'package:movaro_app/app/presentation/pages/app_settings_page.dart';
 import 'package:movaro_app/app/presentation/pages/protected_placeholder_page.dart';
 import 'package:movaro_app/features/splash/presentation/pages/splash_page.dart';
@@ -145,6 +149,71 @@ class AppRouter {
             migrationQuestionnaireController:
                 dependencies.migrationQuestionnaireController,
             locationController: dependencies.locationController,
+          ),
+        );
+      case AppRoutes.plan:
+        final currentPlan =
+            dependencies.migrationQuestionnaireController.generatedPlan;
+        if (currentPlan?.isCityConfirmed == true) {
+          return _buildRoute(
+            settings,
+            MigrationPlanCopilotPage(
+              controller: dependencies.migrationQuestionnaireController,
+              exchangeRatesService: dependencies.copilotExchangeRatesService,
+              citiesController: dependencies.citiesController,
+              journeyContextController: dependencies.journeyContextController,
+              locationController: dependencies.locationController,
+            ),
+          );
+        }
+        if (currentPlan != null) {
+          return _buildRoute(
+            settings,
+            MigrationResultRevealPage(
+              controller: dependencies.migrationQuestionnaireController,
+              citiesController: dependencies.citiesController,
+              locationController: dependencies.locationController,
+            ),
+          );
+        }
+        return _buildRoute(
+          settings,
+          PlanEntryPage(
+            journeyContextController: dependencies.journeyContextController,
+            citiesController: dependencies.citiesController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
+          ),
+        );
+      case AppRoutes.tools:
+        return _buildRoute(
+          settings,
+          ToolsHubPage(
+            journeyContextController: dependencies.journeyContextController,
+            citiesController: dependencies.citiesController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
+          ),
+        );
+      case AppRoutes.proposalSafetyCheck:
+        return _buildRoute(
+          settings,
+          ProposalSafetyCheckPage(
+            cityName: dependencies
+                .migrationQuestionnaireController
+                .generatedPlan
+                ?.confirmedCity
+                ?.name,
+          ),
+        );
+      case AppRoutes.more:
+        return _buildRoute(
+          settings,
+          MorePage(
+            journeyContextController: dependencies.journeyContextController,
+            citiesController: dependencies.citiesController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
           ),
         );
       case AppRoutes.favorites:
@@ -437,6 +506,9 @@ class AppRouter {
   Route<void> _buildRoute(RouteSettings settings, Widget child) {
     const primaryNavRoutes = <String>{
       AppRoutes.publicHome,
+      AppRoutes.plan,
+      AppRoutes.tools,
+      AppRoutes.more,
       AppRoutes.explore,
       AppRoutes.favorites,
       AppRoutes.migrationPlanCopilot,

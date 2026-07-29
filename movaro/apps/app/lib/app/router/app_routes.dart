@@ -5,6 +5,9 @@ class AppRoutes {
   static const intro = '/intro';
   static const journeySetup = '/journey/setup';
   static const publicHome = '/home';
+  static const plan = '/plan';
+  static const tools = '/tools';
+  static const more = '/more';
   static const favorites = '/favorites';
   static const cityComparison = '/favorites/compare';
   static const explore = '/explore';
@@ -27,12 +30,16 @@ class AppRoutes {
   static const communityCreate = '/community/create';
   static const migrationSave = '/migration/save';
   static const phrasebook = '/language/phrasebook';
+  static const proposalSafetyCheck = '/tools/safety-check';
 
   static const publicPaths = <String>{
     splash,
     intro,
     journeySetup,
     publicHome,
+    plan,
+    tools,
+    more,
     favorites,
     cityComparison,
     explore,
@@ -50,6 +57,7 @@ class AppRoutes {
     migrationResultReveal,
     migrationPlanCopilot,
     phrasebook,
+    proposalSafetyCheck,
   };
 
   static const privatePaths = <String>{

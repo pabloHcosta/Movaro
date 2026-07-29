@@ -4858,7 +4858,7 @@ abstract class AppLocalizations {
   /// No description provided for @stageDecisionAction.
   ///
   /// In en, this message translates to:
-  /// **'Answer and view matches'**
+  /// **'Compare or confirm before starting preparation'**
   String get stageDecisionAction;
 
   /// No description provided for @stageExecutionTitle.
@@ -11201,7 +11201,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeEntrySupportLine.
   ///
   /// In en, this message translates to:
-  /// **'Takes about 2 minutes'**
+  /// **'Takes less than 1 minute'**
   String get homeEntrySupportLine;
 
   /// No description provided for @homeEntryDiscoverAction.

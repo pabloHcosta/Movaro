@@ -1363,14 +1363,14 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String questionnaireSelectionHelper(int maxSelections) => _localizedText(
-    pt: 'Selecione ate $maxSelections',
-    es: 'Elegi hasta $maxSelections',
+    pt: 'Selecione até $maxSelections',
+    es: 'Elegí hasta $maxSelections',
     en: 'Pick up to $maxSelections',
   );
 
   String questionnaireSelectionValidation(int maxSelections) => _localizedText(
-    pt: 'Voce pode marcar ate $maxSelections',
-    es: 'Podes marcar hasta $maxSelections',
+    pt: 'Você pode marcar até $maxSelections',
+    es: 'Podés marcar hasta $maxSelections',
     en: 'You can pick up to $maxSelections',
   );
 
@@ -1593,13 +1593,13 @@ extension AppLocalizationsFormatting on AppLocalizations {
             en: 'Jobs',
           ),
           'safety' => _localizedText(
-            pt: 'Seguranca',
+            pt: 'Segurança',
             es: 'Seguridad',
             en: 'Safety',
           ),
           'warm_climate_beach' => _localizedText(
             pt: 'Costa quente',
-            es: 'Costa calida',
+            es: 'Costa cálida',
             en: 'Warm coast',
           ),
           'transit_infra' => _localizedText(
@@ -2357,6 +2357,18 @@ extension AppLocalizationsFormatting on AppLocalizations {
           pt: 'Proximidade da Argentina',
           es: 'Proximidad a Argentina',
           en: 'Proximity to Argentina',
+        );
+      case 'family_fit':
+        return _localizedText(
+          pt: 'Rotina para família',
+          es: 'Rutina para familias',
+          en: 'Family fit',
+        );
+      case 'language':
+        return _localizedText(
+          pt: 'Adaptação de idioma',
+          es: 'Adaptación de idioma',
+          en: 'Language adaptation',
         );
       default:
         return key;

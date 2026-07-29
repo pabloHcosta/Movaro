@@ -381,7 +381,7 @@ class ArgentinaBrazilGuideDataSource {
         title: _t(
           locale,
           pt: 'Pesquise o mercado de trabalho na sua área',
-          es: 'Investiga el mercado laboral en tu area',
+          es: 'Investigá el mercado laboral en tu área',
           en: 'Research the job market in your field',
         ),
         shortDescription: _t(
@@ -399,7 +399,7 @@ class ArgentinaBrazilGuideDataSource {
         context: _t(
           locale,
           pt: 'O mercado de trabalho brasileiro tem dinâmicas e faixas salariais bem diferentes da Argentina. Entender isso antes de chegar te dá uma vantagem real no planejamento.',
-          es: 'El mercado laboral brasileno tiene dinamicas y rangos salariales muy diferentes a los de Argentina. Entender esto antes de llegar te da una ventaja real en la planificacion.',
+          es: 'El mercado laboral brasileño tiene dinámicas y rangos salariales muy diferentes a los de Argentina. Entender esto antes de llegar te da una ventaja real en la planificación.',
           en: 'The Brazilian job market has very different dynamics and salary ranges from Argentina. Understanding this before arriving gives you a real advantage in planning.',
         ),
         whyItMatters: _t(

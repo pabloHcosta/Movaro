@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { AppConfigService } from '../../../../common/config/app-config.service';
+import { AppException } from '../../../../common/errors/app-exception';
 import { AppErrorFactory } from '../../../../common/errors/app-error.factory';
 import { SupabaseAdminService } from '../../../../common/supabase/supabase-admin.service';
 import { CitiesCatalogService } from '../../../cities/application/services/cities-catalog.service';
@@ -95,7 +96,13 @@ const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 const GEMINI_ENDPOINT =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-const OVERPASS_ENDPOINT = 'https://overpass-api.de/api/interpreter';
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+] as const;
+const OVERPASS_RATE_LIMIT_COOLDOWN_MS = 1000 * 60;
+const OVERPASS_NETWORK_COOLDOWN_MS = 1000 * 15;
+const SUPABASE_CACHE_COOLDOWN_MS = 1000 * 60;
 const WIKIPEDIA_API_BASE = 'https://wikipedia.org/w/api.php';
 const WIKIMEDIA_COMMONS_API_BASE = 'https://commons.wikimedia.org/w/api.php';
 
@@ -665,6 +672,12 @@ export class CityInsightsService {
   >();
   private readonly wikipediaImageCache = new Map<string, string | null>();
   private readonly commonsImageCache = new Map<string, string | null>();
+  private readonly inFlightOverpassRequests = new Map<
+    string,
+    Promise<OverpassElement[]>
+  >();
+  private readonly overpassEndpointUnavailableUntil = new Map<string, number>();
+  private supabaseCacheUnavailableUntil = 0;
   private readonly cacheTtlMs = 1000 * 60 * 60 * 24;
 
   constructor(
@@ -689,12 +702,7 @@ export class CityInsightsService {
 
     const city = await this.citiesCatalogService.getCityById(resolvedCityId);
     const locale = this.normalizeLocale(input.locale);
-    const cacheKey = [
-      city.id,
-      input.theme,
-      input.seedPlace ?? 'none',
-      locale,
-    ]
+    const cacheKey = [city.id, input.theme, input.seedPlace ?? 'none', locale]
       .join('::')
       .toLowerCase();
 
@@ -725,7 +733,9 @@ export class CityInsightsService {
         return filteredItems.slice(0, input.limit);
       }
     } catch (error) {
-      this.logger.warn(`City explore places fetch failed: ${String(error)}`);
+      this.logger.warn(
+        `City explore places fetch failed: ${this.describeError(error)}`,
+      );
     }
 
     const fallback = await this.buildExplorePlacesFallback({
@@ -895,7 +905,10 @@ export class CityInsightsService {
       return memoryHit.payload;
     }
 
-    if (!this.supabaseAdminService.isConfigured) {
+    if (
+      !this.supabaseAdminService.isConfigured ||
+      this.supabaseCacheUnavailableUntil > Date.now()
+    ) {
       return null;
     }
 
@@ -905,7 +918,11 @@ export class CityInsightsService {
         .select('payload, expires_at')
         .eq('cache_key', cacheKey)
         .maybeSingle();
-      if (error || !data?.payload || !data?.expires_at) {
+      if (error) {
+        this.markSupabaseCacheUnavailable('read', error);
+        return null;
+      }
+      if (!data?.payload || !data?.expires_at) {
         return null;
       }
 
@@ -924,7 +941,7 @@ export class CityInsightsService {
       this.memoryCache.set(cacheKey, { payload, expiresAt });
       return payload;
     } catch (error) {
-      this.logger.warn(`Supabase cache read failed: ${String(error)}`);
+      this.markSupabaseCacheUnavailable('read', error);
       return null;
     }
   }
@@ -943,7 +960,10 @@ export class CityInsightsService {
     const expiresAt = Date.now() + this.cacheTtlMs;
     this.memoryCache.set(cacheKey, { payload, expiresAt });
 
-    if (!this.supabaseAdminService.isConfigured) {
+    if (
+      !this.supabaseAdminService.isConfigured ||
+      this.supabaseCacheUnavailableUntil > Date.now()
+    ) {
       return;
     }
 
@@ -962,11 +982,22 @@ export class CityInsightsService {
           updated_at: new Date().toISOString(),
         });
       if (error) {
-        this.logger.warn(`Supabase cache write failed: ${error.message}`);
+        this.markSupabaseCacheUnavailable('write', error);
       }
     } catch (error) {
-      this.logger.warn(`Supabase cache write failed: ${String(error)}`);
+      this.markSupabaseCacheUnavailable('write', error);
     }
+  }
+
+  private markSupabaseCacheUnavailable(
+    operation: 'read' | 'write',
+    error: unknown,
+  ): void {
+    this.supabaseCacheUnavailableUntil =
+      Date.now() + SUPABASE_CACHE_COOLDOWN_MS;
+    this.logger.warn(
+      `Supabase cache ${operation} failed; remote cache paused for 60s: ${this.describeError(error)}`,
+    );
   }
 
   private getCachedExplorePlaces(
@@ -1003,37 +1034,119 @@ export class CityInsightsService {
     population: number;
   }): Promise<CityInsightExplorePlaceEntity[]> {
     const query = this.buildOverpassQuery(input);
-    const response = await fetch(OVERPASS_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=UTF-8',
-        'User-Agent': 'Movaro/1.0 city-insights',
-      },
-      body: query,
-      signal: AbortSignal.timeout(14_000),
-    });
-
-    if (!response.ok) {
-      throw AppErrorFactory.networkError(
-        `Overpass ${response.status}: ${await response.text().catch(() => '')}`,
-      );
-    }
-
-    const data = (await response.json()) as { elements?: OverpassElement[] };
-    const elements = Array.isArray(data.elements) ? data.elements : [];
+    const elements = await this.fetchOverpassElements(query);
     const candidates = await Promise.all(
       elements.map((element) => this.mapExplorePlace(element, input)),
     );
 
     return this.dedupeExplorePlaces(
-      candidates.filter((item): item is CityInsightExplorePlaceEntity => item != null),
+      candidates.filter(
+        (item): item is CityInsightExplorePlaceEntity => item != null,
+      ),
     )
       .filter((item) => !this.isWeakPlaceName(item.name))
       .filter((item): item is CityInsightExplorePlaceEntity => item != null)
-      .sort((left, right) =>
-        this.rankExplorePlace(right, input) - this.rankExplorePlace(left, input),
+      .sort(
+        (left, right) =>
+          this.rankExplorePlace(right, input) -
+          this.rankExplorePlace(left, input),
       )
       .slice(0, input.limit);
+  }
+
+  private async fetchOverpassElements(
+    query: string,
+  ): Promise<OverpassElement[]> {
+    const inFlight = this.inFlightOverpassRequests.get(query);
+    if (inFlight) {
+      return inFlight;
+    }
+
+    const request = this.requestOverpassElements(query);
+    this.inFlightOverpassRequests.set(query, request);
+    try {
+      return await request;
+    } finally {
+      if (this.inFlightOverpassRequests.get(query) === request) {
+        this.inFlightOverpassRequests.delete(query);
+      }
+    }
+  }
+
+  private async requestOverpassElements(
+    query: string,
+  ): Promise<OverpassElement[]> {
+    const now = Date.now();
+    const availableEndpoints = OVERPASS_ENDPOINTS.filter(
+      (endpoint) =>
+        (this.overpassEndpointUnavailableUntil.get(endpoint) ?? 0) <= now,
+    );
+    if (availableEndpoints.length === 0) {
+      throw AppErrorFactory.networkError(
+        'All Overpass endpoints are temporarily cooling down.',
+      );
+    }
+
+    const failures: string[] = [];
+    for (const endpoint of availableEndpoints) {
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=UTF-8',
+            'User-Agent': 'Movaro/1.0 city-insights',
+          },
+          body: query,
+          signal: AbortSignal.timeout(14_000),
+        });
+
+        if (!response.ok) {
+          const responseBody = this.normalizeText(
+            await response.text().catch(() => ''),
+            240,
+          );
+          const detail = `Overpass ${response.status} from ${new URL(endpoint).host}${
+            responseBody ? `: ${responseBody}` : ''
+          }`;
+          if (response.status === 429 || response.status >= 500) {
+            const retryAfterSeconds = Number(
+              response.headers?.get?.('retry-after'),
+            );
+            const cooldownMs =
+              Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0
+                ? retryAfterSeconds * 1000
+                : OVERPASS_RATE_LIMIT_COOLDOWN_MS;
+            this.overpassEndpointUnavailableUntil.set(
+              endpoint,
+              Date.now() + cooldownMs,
+            );
+            failures.push(detail);
+            continue;
+          }
+          throw AppErrorFactory.networkError(detail);
+        }
+
+        const data = (await response.json()) as {
+          elements?: OverpassElement[];
+        };
+        return Array.isArray(data.elements) ? data.elements : [];
+      } catch (error) {
+        if (error instanceof AppException) {
+          throw error;
+        }
+        this.overpassEndpointUnavailableUntil.set(
+          endpoint,
+          Date.now() + OVERPASS_NETWORK_COOLDOWN_MS,
+        );
+        failures.push(
+          `${new URL(endpoint).host}: ${this.describeError(error)}`,
+        );
+      }
+    }
+
+    throw AppErrorFactory.networkError(
+      `All Overpass endpoints failed: ${failures.join(' | ')}`,
+    );
   }
 
   private buildOverpassQuery(input: {
@@ -1140,15 +1253,14 @@ out tags center;`;
     const neighborhood =
       this.normalizeText(
         tags['addr:suburb'] ??
-            tags['addr:neighbourhood'] ??
-            tags.neighbourhood ??
-            tags.neighborhood ??
-            tags.suburb ??
-            tags['is_in:suburb'] ??
-            tags['addr:city_district'],
+          tags['addr:neighbourhood'] ??
+          tags.neighbourhood ??
+          tags.neighborhood ??
+          tags.suburb ??
+          tags['is_in:suburb'] ??
+          tags['addr:city_district'],
         48,
-      ) ??
-      this.normalizeText(tags['addr:district'], 48);
+      ) ?? this.normalizeText(tags['addr:district'], 48);
     const region =
       this.normalizeText(tags['addr:city_district'], 48) ??
       this.normalizeText(tags['is_in:city'], 48) ??
@@ -1215,7 +1327,8 @@ out tags center;`;
       }
       if (
         normalizedNeighborhood.length > 0 &&
-        (normalizedNeighborhood.includes(seed) || seed.includes(normalizedNeighborhood))
+        (normalizedNeighborhood.includes(seed) ||
+          seed.includes(normalizedNeighborhood))
       ) {
         score += 4;
       }
@@ -1295,24 +1408,23 @@ out tags center;`;
             `Empieza por ${input.cityName}`,
             `Start with ${input.cityName}`,
           ));
-    const fallbackQuery =
-      normalizedSeedPlace && normalizedSeedPlace.length > 0
-        ? `${normalizedSeedPlace} ${input.cityName}`
-        : `${this.fallbackPlaceCategory(input.locale, input.theme)} ${input.cityName}`;
     const fallbackImage =
       normalizedSeedPlace && normalizedSeedPlace.length > 0
         ? ((await this.searchWikimediaCommonsImage({
             placeName: normalizedSeedPlace,
             cityName: input.cityName,
             stateName: input.stateName,
-          })) ??
-          this.cityImageUrl(input.cityId))
+          })) ?? this.cityImageUrl(input.cityId))
         : this.cityImageUrl(input.cityId);
 
-    const names =
-      suggestedPlaces.length > 0
-        ? suggestedPlaces
-        : [fallbackName, fallbackName, fallbackName];
+    const names = Array.from(
+      new Map(
+        (suggestedPlaces.length > 0 ? suggestedPlaces : [fallbackName])
+          .map((name) => name.trim())
+          .filter((name) => name.length > 0)
+          .map((name) => [this.normalizePlaceKey(name), name]),
+      ).values(),
+    );
 
     return Promise.all(
       names.slice(0, 3).map(async (name, index) => {
@@ -1376,7 +1488,10 @@ out tags center;`;
       CityInsightTheme.Viewpoints,
     ]);
 
-    const themedCache = new Map<CityInsightTheme, CityInsightExplorePlaceEntity[]>();
+    const themedCache = new Map<
+      CityInsightTheme,
+      CityInsightExplorePlaceEntity[]
+    >();
 
     const loadPlaces = async (theme: CityInsightTheme) => {
       const cached = themedCache.get(theme);
@@ -1400,7 +1515,7 @@ out tags center;`;
         return places;
       } catch (error) {
         this.logger.warn(
-          `City insight enrichment failed for ${theme}: ${String(error)}`,
+          `City insight enrichment failed for ${theme}: ${this.describeError(error)}`,
         );
         themedCache.set(theme, []);
         return [];
@@ -1448,8 +1563,11 @@ out tags center;`;
         const dedupedHighlights = Array.from(
           new Set(mergedHighlights.map((name) => name.toLowerCase())),
         )
-          .map((normalized) =>
-            mergedHighlights.find((candidate) => candidate.toLowerCase() === normalized)!,
+          .map(
+            (normalized) =>
+              mergedHighlights.find(
+                (candidate) => candidate.toLowerCase() === normalized,
+              )!,
           )
           .slice(0, 4);
 
@@ -1485,12 +1603,18 @@ out tags center;`;
     const buckets = await Promise.all(
       items.map(async (item) => {
         const highlights = this.normalizeHighlights(item.placeHighlights);
-        if (!item.theme || !placeDrivenThemes.has(item.theme) || highlights.length === 0) {
+        if (
+          !item.theme ||
+          !placeDrivenThemes.has(item.theme) ||
+          highlights.length === 0
+        ) {
           return [item];
         }
 
         const alignedHighlights = highlights
-          .filter((placeName) => this.highlightMatchesTheme(item.theme!, placeName))
+          .filter((placeName) =>
+            this.highlightMatchesTheme(item.theme!, placeName),
+          )
           .slice(0, 2);
 
         const spotlightItems = await Promise.all(
@@ -1524,7 +1648,8 @@ out tags center;`;
               imageUrl:
                 wikimediaImage ??
                 webContext?.imageUrl ??
-                (item.imageUrl && !this.isCityHeroImage(item.imageUrl, input.cityId)
+                (item.imageUrl &&
+                !this.isCityHeroImage(item.imageUrl, input.cityId)
                   ? item.imageUrl
                   : undefined),
               ctaLabel: this.defaultPlaceCtaLabel(input.locale, item.theme!),
@@ -1574,7 +1699,9 @@ out tags center;`;
           index,
           score: this.rankBannerInsightRelevance(item, input),
         }))
-        .sort((left, right) => right.score - left.score || left.index - right.index)
+        .sort(
+          (left, right) => right.score - left.score || left.index - right.index,
+        )
         .map((entry) => entry.item),
     );
   }
@@ -1605,7 +1732,10 @@ out tags center;`;
     if (item.source === 'generated') {
       score += 3;
     }
-    if (item.type === CityInsightType.Motivation || item.type === CityInsightType.Lifestyle) {
+    if (
+      item.type === CityInsightType.Motivation ||
+      item.type === CityInsightType.Lifestyle
+    ) {
       score += 3;
     }
     if (item.type === CityInsightType.PracticalTip) {
@@ -2385,10 +2515,13 @@ Make the set feel varied and useful:
       uri.searchParams.set('titles', title);
       uri.searchParams.set('origin', '*');
 
-      const response = await fetch(uri.toString().replace('wikipedia.org', `${language}.wikipedia.org`), {
-        headers: { 'User-Agent': 'Movaro/1.0 city-insights' },
-        signal: AbortSignal.timeout(8_000),
-      });
+      const response = await fetch(
+        uri.toString().replace('wikipedia.org', `${language}.wikipedia.org`),
+        {
+          headers: { 'User-Agent': 'Movaro/1.0 city-insights' },
+          signal: AbortSignal.timeout(8_000),
+        },
+      );
       if (!response.ok) {
         this.wikipediaImageCache.set(normalized, null);
         return undefined;
@@ -2414,13 +2547,9 @@ Make the set feel varied and useful:
     cityName: string;
     stateName: string;
   }): Promise<string | undefined> {
-    const cacheKey = [
-      input.placeName,
-      input.cityName,
-      input.stateName,
-    ]
-        .join('::')
-        .toLowerCase();
+    const cacheKey = [input.placeName, input.cityName, input.stateName]
+      .join('::')
+      .toLowerCase();
     const cached = this.commonsImageCache.get(cacheKey);
     if (cached !== undefined) {
       return cached ?? undefined;
@@ -2511,7 +2640,11 @@ Make the set feel varied and useful:
         this.cleanSearchTitle(match.title, input.placeName, input.cityName);
       const payload: WebPlaceContext = {
         title: this.cleanSpotlightTitle(title, input.placeName, input.cityName),
-        shortText: this.cleanSearchSnippet(description, input.placeName, input.cityName),
+        shortText: this.cleanSearchSnippet(
+          description,
+          input.placeName,
+          input.cityName,
+        ),
         imageUrl,
         sourceUrl: match.url,
       };
@@ -2565,7 +2698,9 @@ Make the set feel varied and useful:
                 input.cityName,
               ),
             )
-            .filter((candidate) => this.highlightMatchesTheme(input.theme, candidate))
+            .filter((candidate) =>
+              this.highlightMatchesTheme(input.theme, candidate),
+            )
             .filter((candidate) => !this.isWeakPlaceName(candidate))
             .slice(0, 6),
         ),
@@ -2659,21 +2794,61 @@ Make the set feel varied and useful:
     const themeHint = (() => {
       switch (input.theme) {
         case CityInsightTheme.Neighborhoods:
-          return this.localized(input.locale, 'bairro morar', 'barrio vivir', 'neighborhood live');
+          return this.localized(
+            input.locale,
+            'bairro morar',
+            'barrio vivir',
+            'neighborhood live',
+          );
         case CityInsightTheme.Beaches:
-          return this.localized(input.locale, 'praia famosa', 'playa famosa', 'famous beach');
+          return this.localized(
+            input.locale,
+            'praia famosa',
+            'playa famosa',
+            'famous beach',
+          );
         case CityInsightTheme.Parks:
-          return this.localized(input.locale, 'parque cidade', 'parque ciudad', 'city park');
+          return this.localized(
+            input.locale,
+            'parque cidade',
+            'parque ciudad',
+            'city park',
+          );
         case CityInsightTheme.Nightlife:
-          return this.localized(input.locale, 'bar vida noturna', 'bar vida nocturna', 'bar nightlife');
+          return this.localized(
+            input.locale,
+            'bar vida noturna',
+            'bar vida nocturna',
+            'bar nightlife',
+          );
         case CityInsightTheme.FoodAndCafes:
-          return this.localized(input.locale, 'cafe restaurante', 'cafe restaurante', 'cafe restaurant');
+          return this.localized(
+            input.locale,
+            'cafe restaurante',
+            'cafe restaurante',
+            'cafe restaurant',
+          );
         case CityInsightTheme.CultureAndEvents:
-          return this.localized(input.locale, 'cultura museu evento', 'cultura museo evento', 'culture museum event');
+          return this.localized(
+            input.locale,
+            'cultura museu evento',
+            'cultura museo evento',
+            'culture museum event',
+          );
         case CityInsightTheme.Viewpoints:
-          return this.localized(input.locale, 'mirante vista', 'mirador vista', 'viewpoint scenic');
+          return this.localized(
+            input.locale,
+            'mirante vista',
+            'mirador vista',
+            'viewpoint scenic',
+          );
         case CityInsightTheme.LocalRoutine:
-          return this.localized(input.locale, 'o que fazer', 'que hacer', 'things to do');
+          return this.localized(
+            input.locale,
+            'o que fazer',
+            'que hacer',
+            'things to do',
+          );
       }
     })();
 
@@ -2853,34 +3028,51 @@ Make the set feel varied and useful:
       .trim();
     const patterns = this.placeExtractionPatterns(theme);
     const candidates = patterns.flatMap((pattern) =>
-      Array.from(cleaned.matchAll(pattern)).map((match) => match[1]?.trim() ?? ''),
+      Array.from(cleaned.matchAll(pattern)).map(
+        (match) => match[1]?.trim() ?? '',
+      ),
     );
 
     return candidates
       .map((candidate) =>
         candidate
           .replace(new RegExp(`\\b${cityName}\\b`, 'i'), '')
-          .replace(/\b(Rio de Janeiro|São Paulo|Porto Alegre|Florianópolis)\b/gi, '')
+          .replace(
+            /\b(Rio de Janeiro|São Paulo|Porto Alegre|Florianópolis)\b/gi,
+            '',
+          )
           .replace(/^[,;:\-\s]+|[,;:\-\s]+$/g, '')
           .trim(),
       )
       .filter((candidate) => candidate.length >= 4)
       .filter((candidate) => candidate.split(' ').length <= 5)
-      .filter((candidate) => !this.normalizePlaceKey(candidate).includes('melhores'))
-      .filter((candidate) => !this.normalizePlaceKey(candidate).includes('best'))
+      .filter(
+        (candidate) => !this.normalizePlaceKey(candidate).includes('melhores'),
+      )
+      .filter(
+        (candidate) => !this.normalizePlaceKey(candidate).includes('best'),
+      )
       .slice(0, 8);
   }
 
   private placeExtractionPatterns(theme: CityInsightTheme): RegExp[] {
     switch (theme) {
       case CityInsightTheme.Beaches:
-        return [/\b(Praia(?: do| da| de)? [A-ZÀ-ÿ][\wÀ-ÿ'’-]+(?: [A-ZÀ-ÿ][\wÀ-ÿ'’-]+){0,3})/g];
+        return [
+          /\b(Praia(?: do| da| de)? [A-ZÀ-ÿ][\wÀ-ÿ'’-]+(?: [A-ZÀ-ÿ][\wÀ-ÿ'’-]+){0,3})/g,
+        ];
       case CityInsightTheme.Parks:
-        return [/\b((?:Parque|Park|Jardim) [A-ZÀ-ÿ][\wÀ-ÿ'’-]+(?: [A-ZÀ-ÿ][\wÀ-ÿ'’-]+){0,3})/g];
+        return [
+          /\b((?:Parque|Park|Jardim) [A-ZÀ-ÿ][\wÀ-ÿ'’-]+(?: [A-ZÀ-ÿ][\wÀ-ÿ'’-]+){0,3})/g,
+        ];
       case CityInsightTheme.Viewpoints:
-        return [/\b((?:Mirante|Morro|Vista|Viewpoint) [A-ZÀ-ÿ][\wÀ-ÿ'’-]+(?: [A-ZÀ-ÿ][\wÀ-ÿ'’-]+){0,3})/g];
+        return [
+          /\b((?:Mirante|Morro|Vista|Viewpoint) [A-ZÀ-ÿ][\wÀ-ÿ'’-]+(?: [A-ZÀ-ÿ][\wÀ-ÿ'’-]+){0,3})/g,
+        ];
       case CityInsightTheme.CultureAndEvents:
-        return [/\b((?:Museu|Museum|Teatro|Theatro|Centro Cultural|Mercado Público) [A-ZÀ-ÿ][\wÀ-ÿ'’-]+(?: [A-ZÀ-ÿ][\wÀ-ÿ'’-]+){0,3})/g];
+        return [
+          /\b((?:Museu|Museum|Teatro|Theatro|Centro Cultural|Mercado Público) [A-ZÀ-ÿ][\wÀ-ÿ'’-]+(?: [A-ZÀ-ÿ][\wÀ-ÿ'’-]+){0,3})/g,
+        ];
       case CityInsightTheme.FoodAndCafes:
       case CityInsightTheme.Nightlife:
         return [/\b([A-ZÀ-ÿ][\wÀ-ÿ'’-]+(?: [A-ZÀ-ÿ][\wÀ-ÿ'’-]+){0,3})\b/g];
@@ -2892,7 +3084,10 @@ Make the set feel varied and useful:
   }
 
   private stripHtml(value: string): string {
-    return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    return value
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   private decodeHtmlEntities(value: string): string {
@@ -2915,24 +3110,49 @@ Make the set feel varied and useful:
   ): string {
     if (theme == CityInsightTheme.FoodAndCafes) {
       if (tags.amenity === 'restaurant') {
-        return this.localized(locale, 'Restaurante', 'Restaurante', 'Restaurant');
+        return this.localized(
+          locale,
+          'Restaurante',
+          'Restaurante',
+          'Restaurant',
+        );
       }
       if (tags.shop === 'bakery') {
         return this.localized(locale, 'Padaria', 'Panadería', 'Bakery');
       }
-      return this.localized(locale, 'Café e encontro', 'Café y encuentro', 'Cafe and routine');
+      return this.localized(
+        locale,
+        'Café e encontro',
+        'Café y encuentro',
+        'Cafe and routine',
+      );
     }
     if (theme == CityInsightTheme.Nightlife) {
       if (tags.amenity === 'nightclub') {
-        return this.localized(locale, 'Casa noturna', 'Club nocturno', 'Night club');
+        return this.localized(
+          locale,
+          'Casa noturna',
+          'Club nocturno',
+          'Night club',
+        );
       }
-      return this.localized(locale, 'Bar e noite', 'Bar y noche', 'Bars and nightlife');
+      return this.localized(
+        locale,
+        'Bar e noite',
+        'Bar y noche',
+        'Bars and nightlife',
+      );
     }
     if (theme == CityInsightTheme.Beaches) {
       return this.localized(locale, 'Praia', 'Playa', 'Beach');
     }
     if (theme == CityInsightTheme.Parks) {
-      return this.localized(locale, 'Parque e respiro', 'Parque y respiro', 'Park and reset');
+      return this.localized(
+        locale,
+        'Parque e respiro',
+        'Parque y respiro',
+        'Park and reset',
+      );
     }
     if (theme == CityInsightTheme.Viewpoints) {
       return this.localized(locale, 'Mirante', 'Mirador', 'Viewpoint');
@@ -2944,12 +3164,22 @@ Make the set feel varied and useful:
       if (tags.amenity === 'theatre') {
         return this.localized(locale, 'Teatro', 'Teatro', 'Theater');
       }
-      return this.localized(locale, 'Cultura local', 'Cultura local', 'Local culture');
+      return this.localized(
+        locale,
+        'Cultura local',
+        'Cultura local',
+        'Local culture',
+      );
     }
     if (theme == CityInsightTheme.Neighborhoods) {
       return this.localized(locale, 'Bairro', 'Barrio', 'Neighborhood');
     }
-    return this.localized(locale, 'Rotina local', 'Rutina local', 'Local routine');
+    return this.localized(
+      locale,
+      'Rotina local',
+      'Rutina local',
+      'Local routine',
+    );
   }
 
   private fallbackPlaceCategory(
@@ -2966,7 +3196,8 @@ Make the set feel varied and useful:
     neighborhood?: string;
     cityName: string;
   }): string {
-    const placeContext = input.neighborhood == null
+    const placeContext =
+      input.neighborhood == null
         ? input.cityName
         : `${input.neighborhood}, ${input.cityName}`;
 
@@ -3200,7 +3431,10 @@ Make the set feel varied and useful:
     ].some((item) => normalized.includes(item));
   }
 
-  private isSignaturePlaceName(value: string, theme: CityInsightTheme): boolean {
+  private isSignaturePlaceName(
+    value: string,
+    theme: CityInsightTheme,
+  ): boolean {
     const normalized = this.normalizePlaceKey(value);
     switch (theme) {
       case CityInsightTheme.Beaches:
@@ -3460,19 +3694,54 @@ Make the set feel varied and useful:
   ): string {
     switch (theme) {
       case CityInsightTheme.Beaches:
-        return this.localized(locale, 'Conhecer praia', 'Conocer playa', 'See beach');
+        return this.localized(
+          locale,
+          'Conhecer praia',
+          'Conocer playa',
+          'See beach',
+        );
       case CityInsightTheme.Neighborhoods:
-        return this.localized(locale, 'Conhecer bairro', 'Conocer barrio', 'See neighborhood');
+        return this.localized(
+          locale,
+          'Conhecer bairro',
+          'Conocer barrio',
+          'See neighborhood',
+        );
       case CityInsightTheme.Nightlife:
-        return this.localized(locale, 'Conhecer bar', 'Conocer bar', 'See nightlife');
+        return this.localized(
+          locale,
+          'Conhecer bar',
+          'Conocer bar',
+          'See nightlife',
+        );
       case CityInsightTheme.FoodAndCafes:
-        return this.localized(locale, 'Conhecer lugar', 'Conocer lugar', 'See place');
+        return this.localized(
+          locale,
+          'Conhecer lugar',
+          'Conocer lugar',
+          'See place',
+        );
       case CityInsightTheme.Parks:
-        return this.localized(locale, 'Conhecer parque', 'Conocer parque', 'See park');
+        return this.localized(
+          locale,
+          'Conhecer parque',
+          'Conocer parque',
+          'See park',
+        );
       case CityInsightTheme.CultureAndEvents:
-        return this.localized(locale, 'Conhecer lugar', 'Conocer lugar', 'See place');
+        return this.localized(
+          locale,
+          'Conhecer lugar',
+          'Conocer lugar',
+          'See place',
+        );
       case CityInsightTheme.Viewpoints:
-        return this.localized(locale, 'Conhecer vista', 'Conocer vista', 'See view');
+        return this.localized(
+          locale,
+          'Conhecer vista',
+          'Conocer vista',
+          'See view',
+        );
       case CityInsightTheme.LocalRoutine:
         return this.localized(locale, 'Ver dica', 'Ver dica', 'See tip');
     }
@@ -3505,6 +3774,47 @@ Make the set feel varied and useful:
       ` Como tu plazo es ${timeline}, prioriza decisiones simples y reversibles al inicio.`,
       ` Since your timeline is ${timeline}, prioritize simple and reversible early decisions.`,
     );
+  }
+
+  private describeError(error: unknown): string {
+    if (!error || typeof error !== 'object') {
+      return String(error);
+    }
+
+    const errorRecord = error as {
+      name?: unknown;
+      message?: unknown;
+      code?: unknown;
+      cause?: unknown;
+    };
+    const errorName =
+      typeof errorRecord.name === 'string' ? errorRecord.name : 'Error';
+    const errorMessage =
+      typeof errorRecord.message === 'string'
+        ? errorRecord.message
+        : 'Unknown object error';
+    const errorCode =
+      typeof errorRecord.code === 'string' ? ` [${errorRecord.code}]` : '';
+    const cause = errorRecord.cause;
+    if (!cause || typeof cause !== 'object') {
+      return `${errorName}${errorCode}: ${errorMessage}`;
+    }
+
+    const causeRecord = cause as {
+      name?: unknown;
+      message?: unknown;
+      code?: unknown;
+    };
+    const causeName =
+      typeof causeRecord.name === 'string' ? causeRecord.name : 'Error';
+    const causeMessage =
+      typeof causeRecord.message === 'string'
+        ? causeRecord.message
+        : 'Unknown object cause';
+    const causeCode =
+      typeof causeRecord.code === 'string' ? ` [${causeRecord.code}]` : '';
+
+    return `${errorName}${errorCode}: ${errorMessage}; cause=${causeName}${causeCode}: ${causeMessage}`;
   }
 }
 

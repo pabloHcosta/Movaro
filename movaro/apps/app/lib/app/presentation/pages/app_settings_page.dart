@@ -896,7 +896,7 @@ class _SettingCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          child,
+          Material(color: Colors.transparent, child: child),
         ],
       ),
     );
@@ -1146,7 +1146,6 @@ class _SystemSettingsAction extends StatelessWidget {
             border: Border.all(color: AppColors.borderFor(context)),
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 32,
@@ -1162,11 +1161,13 @@ class _SystemSettingsAction extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Text(
-                label,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+                ),
               ),
             ],
           ),

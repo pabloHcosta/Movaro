@@ -82,7 +82,9 @@ void main() {
       );
       await _pumpScreen(tester);
 
-      expect(find.text('Plano'), findsNothing);
+      expect(find.text('Plano'), findsOneWidget);
+      expect(find.text('Ferramentas'), findsOneWidget);
+      expect(find.text('Mais'), findsOneWidget);
       expect(
         find.byKey(const ValueKey('home-action-discover')),
         findsOneWidget,
@@ -136,6 +138,34 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
+  });
+
+  testWidgets('primary navigation stays stable without a plan', (tester) async {
+    await tester.pumpWidget(
+      harness.buildApp(initialRoute: AppRoutes.publicHome),
+    );
+    await _pumpScreen(tester);
+
+    await tester.tap(find.text('Plano'));
+    await _pumpScreen(tester);
+    expect(
+      find.text('Transforme uma cidade em um caminho claro'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Ferramentas'));
+    await _pumpScreen(tester);
+    expect(find.text('Resolver agora'), findsOneWidget);
+    expect(find.text('Buscar voos'), findsOneWidget);
+
+    await tester.tap(find.text('Mais'));
+    await _pumpScreen(tester);
+    expect(find.text('Configurações'), findsOneWidget);
+    expect(find.text('Cidades favoritas'), findsOneWidget);
+
+    await tester.tap(find.text('Configurações'));
+    await _pumpScreen(tester);
+    expect(find.text('Experiência do app'), findsOneWidget);
   });
 
   testWidgets('public home known-city action confirms the origin city first', (
@@ -290,7 +320,7 @@ void main() {
     );
     await _pumpScreen(tester);
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded).first);
     await _pumpScreen(tester);
     await tester.tap(find.text('Novo plano'));
     await _pumpScreen(tester);
@@ -323,7 +353,7 @@ void main() {
     );
     await _pumpScreen(tester);
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded).first);
     await _pumpScreen(tester);
     await tester.tap(find.text('Novo plano'));
     await _pumpScreen(tester);

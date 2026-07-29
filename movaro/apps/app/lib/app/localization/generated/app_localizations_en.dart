@@ -2855,7 +2855,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Get an initial shortlist and review the cities that seem most relevant now.';
 
   @override
-  String get stageDecisionAction => 'Answer and view matches';
+  String get stageDecisionAction =>
+      'Compare or confirm before starting preparation';
 
   @override
   String get stageExecutionTitle => 'Execution';
@@ -6662,7 +6663,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Compare cost of living, opportunities, and quality of life to decide where to start.';
 
   @override
-  String get homeEntrySupportLine => 'Takes about 2 minutes';
+  String get homeEntrySupportLine => 'Takes less than 1 minute';
 
   @override
   String get homeEntryDiscoverAction => 'Discover cities for me';

@@ -527,7 +527,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                       Expanded(
                         child: ListView(
                           controller: _scrollController,
-                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 224),
+                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 156),
                           children: [
                             JourneyStageBanner(
                               title: context.l10n.stageDecisionTitle,
@@ -1791,45 +1791,7 @@ class _SeasonalityConflictChip extends StatelessWidget {
 // ─── Dimension helpers ────────────────────────────────────────────────────────
 
 String _dimensionLabel(BuildContext context, String key) {
-  final locale = Localizations.localeOf(context).languageCode;
-  return switch (key) {
-    'affordability' => switch (locale) {
-      'pt' => 'Custo de vida',
-      'es' => 'Costo de vida',
-      _ => 'Cost of living',
-    },
-    'job_market' => switch (locale) {
-      'pt' => 'Mercado de trabalho',
-      'es' => 'Mercado laboral',
-      _ => 'Job market',
-    },
-    'safety' => switch (locale) {
-      'pt' => 'Segurança',
-      'es' => 'Seguridad',
-      _ => 'Safety',
-    },
-    'climate_warmth' => switch (locale) {
-      'pt' => 'Clima',
-      'es' => 'Clima',
-      _ => 'Climate',
-    },
-    'transit_infra' => switch (locale) {
-      'pt' => 'Infraestrutura',
-      'es' => 'Infraestructura',
-      _ => 'Infrastructure',
-    },
-    'nature' => switch (locale) {
-      'pt' => 'Natureza',
-      'es' => 'Naturaleza',
-      _ => 'Nature',
-    },
-    'community' => switch (locale) {
-      'pt' => 'Comunidade AR',
-      'es' => 'Comunidad AR',
-      _ => 'AR Community',
-    },
-    _ => key,
-  };
+  return context.l10n.dimensionLabel(key);
 }
 
 IconData _dimensionIcon(String key) => switch (key) {
@@ -1840,6 +1802,10 @@ IconData _dimensionIcon(String key) => switch (key) {
   'transit_infra' => Icons.directions_transit_outlined,
   'nature' => Icons.park_outlined,
   'community' => Icons.people_outline_rounded,
+  'proximity_argentina' => Icons.near_me_outlined,
+  'family_fit' => Icons.family_restroom_outlined,
+  'university' => Icons.school_outlined,
+  'language' => Icons.translate_rounded,
   _ => Icons.tune_rounded,
 };
 
@@ -2901,12 +2867,11 @@ class _FooterCtaState extends State<_FooterCta> {
                     ),
             ),
           ),
-          const SizedBox(height: 10),
-          Column(
+          const SizedBox(height: 6),
+          Row(
             children: [
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
+              Expanded(
+                child: TextButton.icon(
                   onPressed: _isOpeningDetails ? null : _handleViewDetails,
                   icon: _isOpeningDetails
                       ? const SizedBox(
@@ -2921,15 +2886,14 @@ class _FooterCtaState extends State<_FooterCta> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextButton.icon(
                   onPressed: widget.hasAlternatives && !_isComparing
                       ? _handleCompare
                       : null,
@@ -2946,8 +2910,8 @@ class _FooterCtaState extends State<_FooterCta> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
               ),

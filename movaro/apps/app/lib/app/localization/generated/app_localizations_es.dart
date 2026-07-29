@@ -2861,7 +2861,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'Recibí una recomendación inicial y validá la ciudad que más sentido tiene ahora.';
 
   @override
-  String get stageDecisionAction => 'Respondé y avanzá al resultado';
+  String get stageDecisionAction =>
+      'Compará o confirmá antes de empezar la preparación';
 
   @override
   String get stageExecutionTitle => 'Ejecución';
@@ -6688,7 +6689,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Compará costo de vida, oportunidades y calidad de vida para decidir por dónde empezar.';
 
   @override
-  String get homeEntrySupportLine => 'Lleva cerca de 2 minutos';
+  String get homeEntrySupportLine => 'Lleva menos de 1 minuto';
 
   @override
   String get homeEntryDiscoverAction => 'Descubrir ciudades para mí';

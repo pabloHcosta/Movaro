@@ -130,6 +130,7 @@ class FavoritesPage extends StatelessWidget {
       ),
       bottomNavigationBar: MainNavigationBar(
         currentIndex: 4,
+        reselectNavigatesToRoot: true,
         journeyContextController: journeyContextController,
         citiesController: citiesController,
         migrationQuestionnaireController: migrationQuestionnaireController,

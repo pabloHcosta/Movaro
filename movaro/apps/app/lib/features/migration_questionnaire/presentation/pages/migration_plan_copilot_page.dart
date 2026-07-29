@@ -324,7 +324,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       }
       final city = plan.confirmedCity;
       unawaited(
-        _showExecutionSheet(
+        _showExecutionPage(
           controller,
           previewItem,
           plan,
@@ -530,50 +530,73 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   }
 
   Future<GuideSupportLink?> _showExternalLinksChooser(
-    BuildContext sheetContext,
+    BuildContext pageContext,
     GuideActionItem item,
   ) {
-    return showModalBottomSheet<GuideSupportLink>(
-      context: sheetContext,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            child: FrostedPanel(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _GuideUtilitySheetHeader(
-                    title: _externalLinksChooserTitle(context, item),
-                    onClose: () => Navigator.of(context).pop(),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _externalLinksChooserBody(context, item),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSoftFor(context),
-                      height: 1.4,
+    return Navigator.of(pageContext).push<GuideSupportLink>(
+      MaterialPageRoute<GuideSupportLink>(
+        settings: const RouteSettings(name: '/plan/step/resources'),
+        builder: (context) {
+          return Scaffold(
+            backgroundColor: AppColors.backgroundFor(context),
+            body: Stack(
+              children: [
+                const Positioned.fill(child: AmbientBackground()),
+                SafeArea(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 680),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          context.isMobileLayout ? 16 : 24,
+                          8,
+                          context.isMobileLayout ? 16 : 24,
+                          24,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _GuidePageHeader(
+                              title: _externalLinksChooserTitle(context, item),
+                              onBack: () => Navigator.of(context).pop(),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _externalLinksChooserBody(context, item),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: AppColors.textSoftFor(context),
+                                    height: 1.4,
+                                  ),
+                            ),
+                            const SizedBox(height: 18),
+                            Expanded(
+                              child: ListView.separated(
+                                itemCount: item.externalOfficialLinks!.length,
+                                separatorBuilder: (_, _) =>
+                                    const SizedBox(height: 10),
+                                itemBuilder: (context, index) {
+                                  final link =
+                                      item.externalOfficialLinks![index];
+                                  return _GuideResourceChoiceCard(
+                                    link: link,
+                                    onTap: () =>
+                                        Navigator.of(context).pop(link),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  for (final link in item.externalOfficialLinks!) ...[
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      minTileHeight: 52,
-                      leading: const Icon(Icons.open_in_new_rounded),
-                      title: Text(link.label),
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () => Navigator.of(context).pop(link),
-                    ),
-                  ],
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -959,7 +982,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     } else {
       controller.startCurrentItem();
     }
-    await _showExecutionSheet(controller, item, plan, city);
+    await _showExecutionPage(controller, item, plan, city);
   }
 
   /// Confirms the city and transitions the copilot from preview to execution
@@ -1058,7 +1081,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     }
   }
 
-  Future<void> _showExecutionSheet(
+  Future<void> _showExecutionPage(
     GuideGpsController controller,
     GuideActionItem item,
     MigrationPlan plan,
@@ -1068,6 +1091,11 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   }) async {
     var sheetItem = item;
     var actionOpened = false;
+    var selectedCpfRouteIndex =
+        item.decisionOptions?.indexWhere((option) => option.recommended) ?? 0;
+    if (selectedCpfRouteIndex < 0) {
+      selectedCpfRouteIndex = 0;
+    }
     final eventSuggestion = _buildEventSuggestion(
       plan: plan,
       item: item,
@@ -1082,787 +1110,838 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
         ),
       );
     }
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (sheetContext, setSheetState) {
-            final allChecklistDone =
-                sheetItem.checklistItems?.every((sub) => sub.isCompleted) ??
-                false;
-            final canComplete = !sheetItem.hasChecklist || allChecklistDone;
-            final checklistCompletedCount =
-                sheetItem.checklistItems
-                    ?.where((sub) => sub.isCompleted)
-                    .length ??
-                0;
-            final isInProgress =
-                sheetItem.hasChecklist &&
-                checklistCompletedCount > 0 &&
-                !sheetItem.isCompleted;
-            final isCpfStep = sheetItem.id == 'item_2_1_cpf';
-            final isPermanentResidenceStep =
-                sheetItem.id == 'item_4_3_permanencia';
-            final isPixStep = sheetItem.id == 'item_3_3_pix';
-            final isChipStep = sheetItem.id == 'item_1_1_chip';
-            final isCnhStep = sheetItem.id == 'item_4_1_cnh';
-            final isBankAccountStep =
-                sheetItem.id == 'item_3_1_conta_bancaria' &&
-                (sheetItem.externalOfficialLinks?.isNotEmpty ?? false);
-            final isMoneySetupStep =
-                sheetItem.id == 'item_1_3_money' &&
-                (sheetItem.externalOfficialLinks?.isNotEmpty ?? false);
-            final shouldDeferChecklist =
-                isCpfStep ||
-                isChipStep ||
-                isCnhStep ||
-                isPermanentResidenceStep ||
-                isPixStep ||
-                sheetItem.id == 'item_0_2_antecedentes' ||
-                sheetItem.id == 'item_1_3_money';
-            final presentationPolicy = GuideTaskPresentationPolicy.fromItem(
-              sheetItem,
-              deferChecklist: shouldDeferChecklist,
-            );
-
-            Future<void> handlePrimaryAction() async {
-              if ((isBankAccountStep || isMoneySetupStep) &&
-                  (sheetItem.externalOfficialLinks?.isNotEmpty ?? false)) {
-                final links = sheetItem.externalOfficialLinks!;
-                final selected = links.length == 1
-                    ? links.first
-                    : await _showExternalLinksChooser(sheetContext, sheetItem);
-                if (selected != null) {
-                  await _openExternalPreparationLink(
-                    title: selected.label,
-                    uri: Uri.parse(selected.url),
-                  );
-                  setSheetState(() {
-                    actionOpened = true;
-                  });
-                }
-                return;
-              }
-              switch (sheetItem.resolvedPrimaryActionType) {
-                case GuidePrimaryActionType.external:
-                  final target = sheetItem.resolvedPrimaryActionTarget;
-                  if (target != null) {
-                    await _openExternalPreparationLink(
-                      title: sheetItem.title,
-                      uri: Uri.parse(target),
-                    );
-                  } else if ((sheetItem.externalOfficialLinks?.length ?? 0) >
-                      1) {
-                    final selected = await _showExternalLinksChooser(
-                      sheetContext,
-                      sheetItem,
-                    );
-                    if (selected != null) {
-                      await _openExternalPreparationLink(
-                        title: selected.label,
-                        uri: Uri.parse(selected.url),
-                      );
-                    }
-                  }
-                  setSheetState(() {
-                    actionOpened = true;
-                  });
-                case GuidePrimaryActionType.tool:
-                  await _openToolForItem(sheetItem, plan, city);
-                  setSheetState(() {
-                    actionOpened = true;
-                  });
-                case GuidePrimaryActionType.none:
-                case GuidePrimaryActionType.checklist:
-                  break;
-              }
-            }
-
-            Future<void> handleChecklistToggle(ChecklistSubItem subItem) async {
-              await controller.toggleChecklistSubItem(sheetItem.id, subItem.id);
-              final updatedSubItems = (sheetItem.checklistItems ?? const [])
-                  .map(
-                    (entry) => entry.id == subItem.id
-                        ? entry.copyWith(isCompleted: !entry.isCompleted)
-                        : entry,
-                  )
-                  .toList(growable: false);
-              final done = updatedSubItems.every((entry) => entry.isCompleted);
-              setSheetState(() {
-                sheetItem = sheetItem.copyWith(
-                  checklistItems: updatedSubItems,
-                  isCompleted: done,
-                );
-              });
-              if (done) {
-                unawaited(HapticFeedback.mediumImpact());
-              } else {
-                unawaited(HapticFeedback.selectionClick());
-              }
-              setState(() {
-                _syncFromGpsController(controller);
-              });
-            }
-
-            void syncUpdatedItem() {
-              final updated = controller.items.firstWhere(
-                (entry) => entry.id == sheetItem.id,
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        settings: RouteSettings(name: '/plan/step/${item.id}'),
+        builder: (sheetContext) {
+          return StatefulBuilder(
+            builder: (sheetContext, setSheetState) {
+              final allChecklistDone =
+                  sheetItem.checklistItems?.every((sub) => sub.isCompleted) ??
+                  false;
+              final canComplete = !sheetItem.hasChecklist || allChecklistDone;
+              final checklistCompletedCount =
+                  sheetItem.checklistItems
+                      ?.where((sub) => sub.isCompleted)
+                      .length ??
+                  0;
+              final isInProgress =
+                  sheetItem.hasChecklist &&
+                  checklistCompletedCount > 0 &&
+                  !sheetItem.isCompleted;
+              final isCpfStep = sheetItem.id == 'item_2_1_cpf';
+              final isPermanentResidenceStep =
+                  sheetItem.id == 'item_4_3_permanencia';
+              final isPixStep = sheetItem.id == 'item_3_3_pix';
+              final isChipStep = sheetItem.id == 'item_1_1_chip';
+              final isCnhStep = sheetItem.id == 'item_4_1_cnh';
+              final isBankAccountStep =
+                  sheetItem.id == 'item_3_1_conta_bancaria' &&
+                  (sheetItem.externalOfficialLinks?.isNotEmpty ?? false);
+              final isMoneySetupStep =
+                  sheetItem.id == 'item_1_3_money' &&
+                  (sheetItem.externalOfficialLinks?.isNotEmpty ?? false);
+              final shouldDeferChecklist =
+                  isCpfStep ||
+                  isChipStep ||
+                  isCnhStep ||
+                  isPermanentResidenceStep ||
+                  isPixStep ||
+                  sheetItem.id == 'item_0_2_antecedentes' ||
+                  sheetItem.id == 'item_1_3_money';
+              final presentationPolicy = GuideTaskPresentationPolicy.fromItem(
+                sheetItem,
+                deferChecklist: shouldDeferChecklist,
               );
-              setSheetState(() {
-                sheetItem = updated;
-              });
-              if (mounted) {
+
+              Future<void> handlePrimaryAction() async {
+                if ((isBankAccountStep || isMoneySetupStep) &&
+                    (sheetItem.externalOfficialLinks?.isNotEmpty ?? false)) {
+                  final links = sheetItem.externalOfficialLinks!;
+                  final selected = links.length == 1
+                      ? links.first
+                      : await _showExternalLinksChooser(
+                          sheetContext,
+                          sheetItem,
+                        );
+                  if (selected != null) {
+                    await _openExternalPreparationLink(
+                      title: selected.label,
+                      uri: Uri.parse(selected.url),
+                    );
+                    setSheetState(() {
+                      actionOpened = true;
+                    });
+                  }
+                  return;
+                }
+                switch (sheetItem.resolvedPrimaryActionType) {
+                  case GuidePrimaryActionType.external:
+                    final target = sheetItem.resolvedPrimaryActionTarget;
+                    if (target != null) {
+                      await _openExternalPreparationLink(
+                        title: sheetItem.title,
+                        uri: Uri.parse(target),
+                      );
+                    } else if ((sheetItem.externalOfficialLinks?.length ?? 0) >
+                        1) {
+                      final selected = await _showExternalLinksChooser(
+                        sheetContext,
+                        sheetItem,
+                      );
+                      if (selected != null) {
+                        await _openExternalPreparationLink(
+                          title: selected.label,
+                          uri: Uri.parse(selected.url),
+                        );
+                      }
+                    }
+                    setSheetState(() {
+                      actionOpened = true;
+                    });
+                  case GuidePrimaryActionType.tool:
+                    await _openToolForItem(sheetItem, plan, city);
+                    setSheetState(() {
+                      actionOpened = true;
+                    });
+                  case GuidePrimaryActionType.none:
+                  case GuidePrimaryActionType.checklist:
+                    break;
+                }
+              }
+
+              Future<void> handleChecklistToggle(
+                ChecklistSubItem subItem,
+              ) async {
+                await controller.toggleChecklistSubItem(
+                  sheetItem.id,
+                  subItem.id,
+                );
+                final updatedSubItems = (sheetItem.checklistItems ?? const [])
+                    .map(
+                      (entry) => entry.id == subItem.id
+                          ? entry.copyWith(isCompleted: !entry.isCompleted)
+                          : entry,
+                    )
+                    .toList(growable: false);
+                final done = updatedSubItems.every(
+                  (entry) => entry.isCompleted,
+                );
+                setSheetState(() {
+                  sheetItem = sheetItem.copyWith(
+                    checklistItems: updatedSubItems,
+                    isCompleted: done,
+                  );
+                });
+                if (done) {
+                  unawaited(HapticFeedback.mediumImpact());
+                } else {
+                  unawaited(HapticFeedback.selectionClick());
+                }
                 setState(() {
                   _syncFromGpsController(controller);
                 });
               }
-            }
 
-            Future<void> handlePrioritize() async {
-              await controller.togglePrioritizeItem(sheetItem.id);
-              syncUpdatedItem();
-            }
-
-            Future<void> handleRestore() async {
-              await controller.restoreDismissedItem(sheetItem.id);
-              syncUpdatedItem();
-            }
-
-            Future<void> handleDismiss(GuideDismissReason reason) async {
-              final completedPhasesBefore = _completedGuidePhases(controller);
-              await controller.dismissItem(sheetItem.id, reason);
-              syncUpdatedItem();
-              await _maybeShowPhaseCelebration(
-                completedPhasesBefore: completedPhasesBefore,
-                controller: controller,
-              );
-            }
-
-            Future<void> handleComplete() async {
-              unawaited(HapticFeedback.mediumImpact());
-              Navigator.of(sheetContext).pop();
-              if (!sheetItem.hasChecklist) {
-                await _completeGuideItem(controller, sheetItem.id);
-                return;
-              }
-              if (canComplete) {
-                setState(() {
-                  _showCelebration = true;
-                  _readinessCompletedIds = Set<String>.from(
-                    controller.readinessCompletedIds,
-                  );
-                  _documentCompletedIds = Set<String>.from(
-                    controller.documentCompletedIds,
-                  );
-                  _arrivalCompletedIds = Set<String>.from(
-                    controller.arrivalCompletedIds,
-                  );
-                  _completedAtById = Map<String, String>.from(
-                    controller.completedAtById,
-                  );
-                  _loadedActiveItemId = controller.activeItemId;
+              void syncUpdatedItem() {
+                final updated = controller.items.firstWhere(
+                  (entry) => entry.id == sheetItem.id,
+                );
+                setSheetState(() {
+                  sheetItem = updated;
                 });
-                await Future<void>.delayed(const Duration(milliseconds: 1800));
-                if (!mounted) {
+                if (mounted) {
+                  setState(() {
+                    _syncFromGpsController(controller);
+                  });
+                }
+              }
+
+              Future<void> handlePrioritize() async {
+                await controller.togglePrioritizeItem(sheetItem.id);
+                syncUpdatedItem();
+              }
+
+              Future<void> handleRestore() async {
+                await controller.restoreDismissedItem(sheetItem.id);
+                syncUpdatedItem();
+              }
+
+              Future<void> handleDismiss(GuideDismissReason reason) async {
+                final completedPhasesBefore = _completedGuidePhases(controller);
+                await controller.dismissItem(sheetItem.id, reason);
+                syncUpdatedItem();
+                await _maybeShowPhaseCelebration(
+                  completedPhasesBefore: completedPhasesBefore,
+                  controller: controller,
+                );
+              }
+
+              Future<void> handleComplete() async {
+                unawaited(HapticFeedback.mediumImpact());
+                Navigator.of(sheetContext).pop();
+                if (!sheetItem.hasChecklist) {
+                  await _completeGuideItem(controller, sheetItem.id);
                   return;
                 }
-                setState(() {
-                  _showCelebration = false;
-                });
+                if (canComplete) {
+                  setState(() {
+                    _showCelebration = true;
+                    _readinessCompletedIds = Set<String>.from(
+                      controller.readinessCompletedIds,
+                    );
+                    _documentCompletedIds = Set<String>.from(
+                      controller.documentCompletedIds,
+                    );
+                    _arrivalCompletedIds = Set<String>.from(
+                      controller.arrivalCompletedIds,
+                    );
+                    _completedAtById = Map<String, String>.from(
+                      controller.completedAtById,
+                    );
+                    _loadedActiveItemId = controller.activeItemId;
+                  });
+                  await Future<void>.delayed(
+                    const Duration(milliseconds: 1800),
+                  );
+                  if (!mounted) {
+                    return;
+                  }
+                  setState(() {
+                    _showCelebration = false;
+                  });
+                }
               }
-            }
 
-            return SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: FrostedPanel(
-                  padding: const EdgeInsets.all(18),
-                  borderRadius: BorderRadius.circular(28),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(sheetContext).size.height * 0.92,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _GuideTaskSheetHeader(
-                          item: sheetItem,
-                          overallProgress: controller.progress,
-                          completedChecklistItems: checklistCompletedCount,
-                          totalChecklistItems:
-                              sheetItem.checklistItems?.length ?? 0,
-                          isPreview: isPreview,
-                          onClose: () => Navigator.of(sheetContext).pop(),
-                          onHelp: () => _showTaskGuidanceSheet(
-                            sheetContext,
-                            sheetItem,
-                            controller.items,
-                          ),
-                          onPrioritize: handlePrioritize,
-                          onRestore: handleRestore,
-                          onDismiss: handleDismiss,
-                        ),
-                        const SizedBox(height: 16),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.only(bottom: 8),
+              return Scaffold(
+                backgroundColor: AppColors.backgroundFor(sheetContext),
+                body: Stack(
+                  children: [
+                    const Positioned.fill(child: AmbientBackground()),
+                    SafeArea(
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 760),
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              sheetContext.isMobileLayout ? 16 : 24,
+                              8,
+                              sheetContext.isMobileLayout ? 16 : 24,
+                              12,
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // ── CPF Unlock Chain Banner ──
-                                if (sheetItem.id == 'item_2_1_cpf')
-                                  _CpfUnlockBanner(allItems: controller.items),
-                                if (isPreview) ...[
-                                  _FocusedTipPreviewBanner(
-                                    item: sheetItem,
-                                    currentPriorityItem: currentPriorityItem,
+                                _GuideTaskPageHeader(
+                                  item: sheetItem,
+                                  overallProgress: controller.progress,
+                                  completedChecklistItems:
+                                      checklistCompletedCount,
+                                  totalChecklistItems:
+                                      sheetItem.checklistItems?.length ?? 0,
+                                  isPreview: isPreview,
+                                  onClose: () =>
+                                      Navigator.of(sheetContext).pop(),
+                                  onHelp: () => _showTaskGuidanceSheet(
+                                    sheetContext,
+                                    sheetItem,
+                                    controller.items,
                                   ),
-                                  const SizedBox(height: 12),
-                                ],
-                                // ── Urgency Signal Banner ──
-                                if (sheetItem.urgencySignal != null) ...[
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 10,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: _urgencyBannerColor(
-                                        sheetContext,
-                                        sheetItem.urgencyLevel,
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Row(
+                                  onPrioritize: handlePrioritize,
+                                  onRestore: handleRestore,
+                                  onDismiss: handleDismiss,
+                                ),
+                                const SizedBox(height: 16),
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Icon(
-                                          Icons.warning_amber_rounded,
-                                          size: 16,
-                                          color: _urgencyTextColor(
-                                            sheetContext,
-                                            sheetItem.urgencyLevel,
+                                        // ── CPF Unlock Chain Banner ──
+                                        if (sheetItem.id == 'item_2_1_cpf')
+                                          _CpfUnlockBanner(
+                                            allItems: controller.items,
                                           ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            sheetItem.urgencySignal!,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              color: _urgencyTextColor(
+                                        if (isPreview) ...[
+                                          _FocusedTipPreviewBanner(
+                                            item: sheetItem,
+                                            currentPriorityItem:
+                                                currentPriorityItem,
+                                          ),
+                                          const SizedBox(height: 12),
+                                        ],
+                                        // ── Urgency Signal Banner ──
+                                        if (sheetItem.urgencySignal !=
+                                            null) ...[
+                                          Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 10,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: _urgencyBannerColor(
                                                 sheetContext,
                                                 sheetItem.urgencyLevel,
                                               ),
-                                              height: 1.4,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Icon(
+                                                  Icons.warning_amber_rounded,
+                                                  size: 16,
+                                                  color: _urgencyTextColor(
+                                                    sheetContext,
+                                                    sheetItem.urgencyLevel,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Expanded(
+                                                  child: Text(
+                                                    sheetItem.urgencySignal!,
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: _urgencyTextColor(
+                                                        sheetContext,
+                                                        sheetItem.urgencyLevel,
+                                                      ),
+                                                      height: 1.4,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                ],
-                                if (!isPreview &&
-                                    sheetItem.preArrivalRequired &&
-                                    !sheetItem.isCompleted) ...[
-                                  _PreArrivalTimingBanner(
-                                    timeline: plan.timeline,
-                                  ),
-                                  const SizedBox(height: 12),
-                                ],
-                                if (!isPreview &&
-                                    ((sheetItem.resolvedPrimaryActionType !=
-                                                GuidePrimaryActionType.none &&
-                                            sheetItem
-                                                    .resolvedPrimaryActionType !=
-                                                GuidePrimaryActionType
-                                                    .checklist) ||
-                                        isBankAccountStep ||
-                                        isMoneySetupStep)) ...[
-                                  _GuideNextMoveCard(
-                                    actionType:
-                                        sheetItem.resolvedPrimaryActionType,
-                                    actionLabel: actionOpened
-                                        ? _localizedText(
-                                            sheetContext,
-                                            pt: 'Abrir novamente',
-                                            es: 'Abrir de novo',
-                                            en: 'Open again',
-                                          )
-                                        : (sheetItem.primaryActionLabel ??
-                                              _localizedText(
-                                                sheetContext,
-                                                pt: 'Abrir ação principal',
-                                                es: 'Abrir acción principal',
-                                                en: 'Open primary action',
-                                              )),
-                                    actionOpened: actionOpened,
-                                    onPressed: handlePrimaryAction,
-                                  ),
-                                  const SizedBox(height: 10),
-                                ],
-                                if (sheetItem.hasChecklist &&
-                                    !shouldDeferChecklist) ...[
-                                  _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: sheetItem.id == 'item_2_1_cpf'
-                                          ? 'Mini-checklist para fechar este passo'
-                                          : sheetItem.id ==
-                                                'item_3_1_conta_bancaria'
-                                          ? 'Depois que abrir a conta, marque isso'
-                                          : 'Checklist da etapa',
-                                      es: sheetItem.id == 'item_2_1_cpf'
-                                          ? 'Mini checklist para cerrar este paso'
-                                          : sheetItem.id ==
-                                                'item_3_1_conta_bancaria'
-                                          ? 'Despues de abrir la cuenta, marca esto'
-                                          : 'Checklist de la etapa',
-                                      en: sheetItem.id == 'item_2_1_cpf'
-                                          ? 'Mini checklist to close this step'
-                                          : sheetItem.id ==
-                                                'item_3_1_conta_bancaria'
-                                          ? 'After opening the account, check this off'
-                                          : 'Step checklist',
-                                    ),
-                                    initiallyExpanded: presentationPolicy
-                                        .startsExpanded(
-                                          GuideTaskSectionKind.checklist,
-                                        ),
-                                    child: Column(
-                                      children: [
-                                        for (final subItem
-                                            in sheetItem.checklistItems!) ...[
-                                          CheckboxListTile(
-                                            value: subItem.isCompleted,
-                                            contentPadding: EdgeInsets.zero,
-                                            title: Text(subItem.title),
-                                            onChanged: isPreview
-                                                ? null
-                                                : (_) => handleChecklistToggle(
-                                                    subItem,
-                                                  ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                ],
-                                // ── Companion quick reference ──
-                                // Shown for ANY incomplete item with phrases
-                                // or requirements — not just mid-checklist.
-                                // Documents, housing, and work items all have
-                                // "what to say" / "what to bring" content that
-                                // is useful whether or not a checklist exists.
-                                if (!sheetItem.isCompleted &&
-                                    (sheetItem.hasSurvivalPhrases ||
-                                        sheetItem.hasRequirements))
-                                  _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: 'O que preparar',
-                                      es: 'Qué preparar',
-                                      en: 'What to prepare',
-                                    ),
-                                    initiallyExpanded: presentationPolicy
-                                        .startsExpanded(
-                                          GuideTaskSectionKind.preparation,
-                                        ),
-                                    child: _QuickReferenceCard(item: sheetItem),
-                                  ),
-                                if (isCpfStep &&
-                                    (sheetItem.hasDecisionOptions ||
-                                        sheetItem.hasLocationAwareOptions)) ...[
-                                  _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: '1. Escolha sua rota',
-                                      es: '1. Elige tu ruta',
-                                      en: '1. Choose your route',
-                                    ),
-                                    initiallyExpanded: presentationPolicy
-                                        .startsExpanded(
-                                          GuideTaskSectionKind.route,
-                                        ),
-                                    child: Column(
-                                      children: [
-                                        _CpfDecisionContent(
-                                          item: sheetItem,
-                                          onLinkTap: (url, label) =>
-                                              _openExternalPreparationLink(
-                                                title: label,
-                                                uri: Uri.parse(url),
-                                              ),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        _CpfExecutionBlock(
-                                          item: sheetItem,
-                                          onLinkTap: (url, label) =>
-                                              _openExternalPreparationLink(
-                                                title: label,
-                                                uri: Uri.parse(url),
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                                if (!isCpfStep &&
-                                    (sheetItem.hasDecisionOptions ||
-                                        sheetItem.hasSteps ||
-                                        sheetItem.hasLocationAwareOptions))
-                                  _GuideExpandableSection(
-                                    title: sheetItem.id == 'item_2_1_cpf'
-                                        ? _localizedText(
-                                            sheetContext,
-                                            pt: 'Compare os dois caminhos',
-                                            es: 'Compara las dos rutas',
-                                            en: 'Compare the two routes',
-                                          )
-                                        : isInProgress
-                                        ? _localizedText(
-                                            sheetContext,
-                                            pt: '▶ Em andamento — próximos passos',
-                                            es: '▶ En progreso — próximos pasos',
-                                            en: '▶ In progress — next steps',
-                                          )
-                                        : _localizedText(
-                                            sheetContext,
-                                            pt: 'Como fazer',
-                                            es: 'Como hacerlo',
-                                            en: 'How to do it',
-                                          ),
-                                    initiallyExpanded: presentationPolicy
-                                        .startsExpanded(
-                                          GuideTaskSectionKind.instructions,
-                                        ),
-                                    child: Column(
-                                      children: [
-                                        if (sheetItem.hasLocationAwareOptions)
-                                          _GuideExecutionBlock(
-                                            item: sheetItem,
-                                            onLinkTap: (url, label) =>
-                                                _openExternalPreparationLink(
-                                                  title: label,
-                                                  uri: Uri.parse(url),
-                                                ),
-                                          ),
-                                        if (sheetItem.hasLocationAwareOptions &&
-                                            (sheetItem.hasDecisionOptions ||
-                                                sheetItem.hasSteps))
                                           const SizedBox(height: 12),
-                                        if (sheetItem.hasDecisionOptions ||
-                                            sheetItem.hasSteps)
-                                          _GuideExecutionContent(
-                                            item: sheetItem,
-                                            onLinkTap: (url, label) =>
-                                                _openExternalPreparationLink(
-                                                  title: label,
-                                                  uri: Uri.parse(url),
+                                        ],
+                                        if (!isPreview &&
+                                            sheetItem.preArrivalRequired &&
+                                            !sheetItem.isCompleted) ...[
+                                          _PreArrivalTimingBanner(
+                                            timeline: plan.timeline,
+                                          ),
+                                          const SizedBox(height: 12),
+                                        ],
+                                        if (!isPreview &&
+                                            ((sheetItem.resolvedPrimaryActionType !=
+                                                        GuidePrimaryActionType
+                                                            .none &&
+                                                    sheetItem
+                                                            .resolvedPrimaryActionType !=
+                                                        GuidePrimaryActionType
+                                                            .checklist) ||
+                                                isBankAccountStep ||
+                                                isMoneySetupStep)) ...[
+                                          _GuideNextMoveCard(
+                                            actionType: sheetItem
+                                                .resolvedPrimaryActionType,
+                                            actionLabel: actionOpened
+                                                ? _localizedText(
+                                                    sheetContext,
+                                                    pt: 'Abrir novamente',
+                                                    es: 'Abrir de novo',
+                                                    en: 'Open again',
+                                                  )
+                                                : (sheetItem
+                                                          .primaryActionLabel ??
+                                                      _localizedText(
+                                                        sheetContext,
+                                                        pt: 'Abrir ação principal',
+                                                        es: 'Abrir acción principal',
+                                                        en: 'Open primary action',
+                                                      )),
+                                            actionOpened: actionOpened,
+                                            onPressed: handlePrimaryAction,
+                                          ),
+                                          const SizedBox(height: 10),
+                                        ],
+                                        if (sheetItem.hasChecklist &&
+                                            !shouldDeferChecklist) ...[
+                                          _GuideExpandableSection(
+                                            title: _localizedText(
+                                              sheetContext,
+                                              pt: sheetItem.id == 'item_2_1_cpf'
+                                                  ? 'Mini-checklist para fechar este passo'
+                                                  : sheetItem.id ==
+                                                        'item_3_1_conta_bancaria'
+                                                  ? 'Depois que abrir a conta, marque isso'
+                                                  : 'Checklist da etapa',
+                                              es: sheetItem.id == 'item_2_1_cpf'
+                                                  ? 'Mini checklist para cerrar este paso'
+                                                  : sheetItem.id ==
+                                                        'item_3_1_conta_bancaria'
+                                                  ? 'Despues de abrir la cuenta, marca esto'
+                                                  : 'Checklist de la etapa',
+                                              en: sheetItem.id == 'item_2_1_cpf'
+                                                  ? 'Mini checklist to close this step'
+                                                  : sheetItem.id ==
+                                                        'item_3_1_conta_bancaria'
+                                                  ? 'After opening the account, check this off'
+                                                  : 'Step checklist',
+                                            ),
+                                            initiallyExpanded:
+                                                presentationPolicy
+                                                    .startsExpanded(
+                                                      GuideTaskSectionKind
+                                                          .checklist,
+                                                    ),
+                                            child: _GuideOutcomeProgress(
+                                              items: sheetItem.checklistItems!,
+                                              enabled: !isPreview,
+                                              onToggle: handleChecklistToggle,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                        ],
+                                        // ── Companion quick reference ──
+                                        // Shown for ANY incomplete item with phrases
+                                        // or requirements — not just mid-checklist.
+                                        // Documents, housing, and work items all have
+                                        // "what to say" / "what to bring" content that
+                                        // is useful whether or not a checklist exists.
+                                        if (!sheetItem.isCompleted &&
+                                            (sheetItem.hasSurvivalPhrases ||
+                                                sheetItem.hasRequirements))
+                                          _GuideExpandableSection(
+                                            title: _localizedText(
+                                              sheetContext,
+                                              pt: 'O que preparar',
+                                              es: 'Qué preparar',
+                                              en: 'What to prepare',
+                                            ),
+                                            initiallyExpanded:
+                                                presentationPolicy
+                                                    .startsExpanded(
+                                                      GuideTaskSectionKind
+                                                          .preparation,
+                                                    ),
+                                            child: _QuickReferenceCard(
+                                              item: sheetItem,
+                                            ),
+                                          ),
+                                        if (isCpfStep &&
+                                            (sheetItem.hasDecisionOptions ||
+                                                sheetItem
+                                                    .hasLocationAwareOptions)) ...[
+                                          _GuideExpandableSection(
+                                            title: _localizedText(
+                                              sheetContext,
+                                              pt: '1. Escolha sua rota',
+                                              es: '1. Elige tu ruta',
+                                              en: '1. Choose your route',
+                                            ),
+                                            initiallyExpanded:
+                                                presentationPolicy
+                                                    .startsExpanded(
+                                                      GuideTaskSectionKind
+                                                          .route,
+                                                    ),
+                                            child: Column(
+                                              children: [
+                                                _CpfDecisionContent(
+                                                  item: sheetItem,
+                                                  selectedIndex:
+                                                      selectedCpfRouteIndex,
+                                                  onSelected: (index) {
+                                                    setSheetState(() {
+                                                      selectedCpfRouteIndex =
+                                                          index;
+                                                    });
+                                                    unawaited(
+                                                      HapticFeedback.selectionClick(),
+                                                    );
+                                                  },
+                                                ),
+                                                const SizedBox(height: 12),
+                                                _CpfExecutionBlock(
+                                                  item: sheetItem,
+                                                  selectedIndex:
+                                                      selectedCpfRouteIndex,
+                                                  onLinkTap: (url, label) =>
+                                                      _openExternalPreparationLink(
+                                                        title: label,
+                                                        uri: Uri.parse(url),
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                        if (!isCpfStep &&
+                                            (sheetItem.hasDecisionOptions ||
+                                                sheetItem.hasSteps ||
+                                                sheetItem
+                                                    .hasLocationAwareOptions))
+                                          _GuideExpandableSection(
+                                            title:
+                                                sheetItem.id == 'item_2_1_cpf'
+                                                ? _localizedText(
+                                                    sheetContext,
+                                                    pt: 'Compare os dois caminhos',
+                                                    es: 'Compara las dos rutas',
+                                                    en: 'Compare the two routes',
+                                                  )
+                                                : isInProgress
+                                                ? _localizedText(
+                                                    sheetContext,
+                                                    pt: '▶ Em andamento — próximos passos',
+                                                    es: '▶ En progreso — próximos pasos',
+                                                    en: '▶ In progress — next steps',
+                                                  )
+                                                : _localizedText(
+                                                    sheetContext,
+                                                    pt: 'Como fazer',
+                                                    es: 'Cómo hacerlo',
+                                                    en: 'How to do it',
+                                                  ),
+                                            initiallyExpanded:
+                                                presentationPolicy
+                                                    .startsExpanded(
+                                                      GuideTaskSectionKind
+                                                          .instructions,
+                                                    ),
+                                            child: Column(
+                                              children: [
+                                                if (sheetItem
+                                                    .hasLocationAwareOptions)
+                                                  _GuideExecutionBlock(
+                                                    item: sheetItem,
+                                                    onLinkTap: (url, label) =>
+                                                        _openExternalPreparationLink(
+                                                          title: label,
+                                                          uri: Uri.parse(url),
+                                                        ),
+                                                  ),
+                                                if (sheetItem
+                                                        .hasLocationAwareOptions &&
+                                                    (sheetItem
+                                                            .hasDecisionOptions ||
+                                                        sheetItem.hasSteps))
+                                                  const SizedBox(height: 12),
+                                                if (sheetItem
+                                                        .hasDecisionOptions ||
+                                                    sheetItem.hasSteps)
+                                                  _GuideExecutionContent(
+                                                    item: sheetItem,
+                                                    onLinkTap: (url, label) =>
+                                                        _openExternalPreparationLink(
+                                                          title: label,
+                                                          uri: Uri.parse(url),
+                                                        ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                        if (sheetItem.hasChecklist &&
+                                            shouldDeferChecklist) ...[
+                                          const SizedBox(height: 12),
+                                          _GuideExpandableSection(
+                                            title: isCpfStep
+                                                ? _localizedText(
+                                                    sheetContext,
+                                                    pt: '3. Confirme quando concluir',
+                                                    es: '3. Confirma cuando termines',
+                                                    en: '3. Confirm when done',
+                                                  )
+                                                : isChipStep
+                                                ? _localizedText(
+                                                    sheetContext,
+                                                    pt: 'Depois de comprar e testar, confirme aqui',
+                                                    es: 'Despues de comprar y probar, confirma aqui',
+                                                    en: 'After buying and testing it, confirm here',
+                                                  )
+                                                : isCnhStep
+                                                ? _localizedText(
+                                                    sheetContext,
+                                                    pt: 'Depois de iniciar no DETRAN, confirme aqui',
+                                                    es: 'Despues de iniciar en el DETRAN, confirma aqui',
+                                                    en: 'After starting with DETRAN, confirm here',
+                                                  )
+                                                : isPermanentResidenceStep
+                                                ? _localizedText(
+                                                    sheetContext,
+                                                    pt: 'Depois de protocolar, confirme aqui',
+                                                    es: 'Despues de presentar la solicitud, confirma aqui',
+                                                    en: 'After filing it, confirm here',
+                                                  )
+                                                : isPixStep
+                                                ? _localizedText(
+                                                    sheetContext,
+                                                    pt: 'Depois de testar, confirme aqui',
+                                                    es: 'Despues de probar, confirma aqui',
+                                                    en: 'After testing it, confirm here',
+                                                  )
+                                                : sheetItem.id ==
+                                                      'item_1_3_money'
+                                                ? _localizedText(
+                                                    sheetContext,
+                                                    pt: 'Depois de configurar, confirme aqui',
+                                                    es: 'Despues de configurarlo, confirma aqui',
+                                                    en: 'After setting it up, confirm here',
+                                                  )
+                                                : _localizedText(
+                                                    sheetContext,
+                                                    pt: 'Depois de solicitar, confirme aqui',
+                                                    es: 'Despues de solicitarlo, confirma aqui',
+                                                    en: 'After requesting it, confirm here',
+                                                  ),
+                                            initiallyExpanded:
+                                                presentationPolicy
+                                                    .startsExpanded(
+                                                      GuideTaskSectionKind
+                                                          .confirmation,
+                                                    ),
+                                            child: _GuideOutcomeProgress(
+                                              items: sheetItem.checklistItems!,
+                                              enabled: !isPreview,
+                                              onToggle: handleChecklistToggle,
+                                            ),
+                                          ),
+                                        ],
+                                        _GuideSupplementaryDetails(
+                                          item: sheetItem,
+                                          quickReferenceShown:
+                                              !sheetItem.isCompleted &&
+                                              (sheetItem.hasSurvivalPhrases ||
+                                                  sheetItem.hasRequirements),
+                                          onLinkTap: (url, label) =>
+                                              _openExternalPreparationLink(
+                                                title: label,
+                                                uri: Uri.parse(url),
+                                              ),
+                                        ),
+                                        // ── Warning Flags (protective, after reassurance) ──
+                                        if (sheetItem.hasWarningFlags) ...[
+                                          Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.tintedSurfaceFor(
+                                                sheetContext,
+                                                tint: AppColors.danger,
+                                                lightColor: const Color(
+                                                  0xFFFFF1F0,
+                                                ),
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              border: Border.all(
+                                                color:
+                                                    AppColors.tintedBorderFor(
+                                                      sheetContext,
+                                                      tint: AppColors.danger,
+                                                      lightColor: const Color(
+                                                        0xFFF2B8B5,
+                                                      ),
+                                                    ),
+                                              ),
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.gpp_bad_rounded,
+                                                      size: 14,
+                                                      color: AppColors.danger,
+                                                    ),
+                                                    const SizedBox(width: 6),
+                                                    Text(
+                                                      _localizedText(
+                                                        sheetContext,
+                                                        pt: 'Alertas importantes',
+                                                        es: 'Alertas importantes',
+                                                        en: 'Important warnings',
+                                                      ),
+                                                      style: TextStyle(
+                                                        fontSize: 11,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        color: AppColors.danger,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 8),
+                                                for (final flag
+                                                    in sheetItem
+                                                        .warningFlags!) ...[
+                                                  Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      const Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                              top: 5,
+                                                              right: 6,
+                                                            ),
+                                                        child: Icon(
+                                                          Icons.circle,
+                                                          size: 5,
+                                                          color:
+                                                              AppColors.danger,
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        child: Text(
+                                                          flag,
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                            color:
+                                                                AppColors.textPrimaryFor(
+                                                                  sheetContext,
+                                                                ),
+                                                            height: 1.4,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                ],
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                        ],
+                                        if (sheetItem.doneCriteria != null)
+                                          _GuideExpandableSection(
+                                            title: _localizedText(
+                                              sheetContext,
+                                              pt: 'Quando considerar concluído',
+                                              es: 'Cuando considerarlo terminado',
+                                              en: 'When to mark it done',
+                                            ),
+                                            initiallyExpanded: false,
+                                            child: _GuideDoneCriteriaContent(
+                                              item: sheetItem,
+                                            ),
+                                          ),
+                                        if (!isPreview &&
+                                            !sheetItem.isCompleted &&
+                                            eventSuggestion != null) ...[
+                                          const SizedBox(height: 12),
+                                          _GuideCalendarSuggestionCard(
+                                            suggestion: eventSuggestion,
+                                            onTap: () =>
+                                                _showCalendarSuggestionSheet(
+                                                  plan: plan,
+                                                  suggestion: eventSuggestion,
                                                 ),
                                           ),
+                                        ],
                                       ],
                                     ),
                                   ),
-                                if (sheetItem.hasChecklist &&
-                                    shouldDeferChecklist) ...[
-                                  const SizedBox(height: 12),
-                                  _GuideExpandableSection(
-                                    title: isCpfStep
+                                ),
+                                const SizedBox(height: 14),
+                                if (isPreview && city != null)
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: FilledButton.icon(
+                                      onPressed: () async {
+                                        Navigator.of(sheetContext).pop();
+                                        await _confirmCity(city);
+                                      },
+                                      icon: const Icon(
+                                        Icons.check_circle_rounded,
+                                        size: 18,
+                                      ),
+                                      label: Text(
+                                        _localizedText(
+                                          sheetContext,
+                                          pt: 'Confirmar ${city.name} e começar',
+                                          es: 'Confirmar ${city.name} y comenzar',
+                                          en: 'Confirm ${city.name} and start',
+                                        ),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  _GuideTaskFooter(
+                                    primaryLabel: sheetItem.isDismissed
                                         ? _localizedText(
                                             sheetContext,
-                                            pt: '3. Confirme quando concluir',
-                                            es: '3. Confirma cuando termines',
-                                            en: '3. Confirm when done',
+                                            pt: 'Etapa dispensada',
+                                            es: 'Etapa descartada',
+                                            en: 'Step dismissed',
                                           )
-                                        : isChipStep
+                                        : canComplete && sheetItem.hasChecklist
                                         ? _localizedText(
                                             sheetContext,
-                                            pt: 'Depois de comprar e testar, confirme aqui',
-                                            es: 'Despues de comprar y probar, confirma aqui',
-                                            en: 'After buying and testing it, confirm here',
+                                            pt: 'Continuar para a próxima etapa',
+                                            es: 'Continuar al siguiente paso',
+                                            en: 'Continue to the next step',
                                           )
-                                        : isCnhStep
+                                        : canComplete
                                         ? _localizedText(
                                             sheetContext,
-                                            pt: 'Depois de iniciar no DETRAN, confirme aqui',
-                                            es: 'Despues de iniciar en el DETRAN, confirma aqui',
-                                            en: 'After starting with DETRAN, confirm here',
-                                          )
-                                        : isPermanentResidenceStep
-                                        ? _localizedText(
-                                            sheetContext,
-                                            pt: 'Depois de protocolar, confirme aqui',
-                                            es: 'Despues de presentar la solicitud, confirma aqui',
-                                            en: 'After filing it, confirm here',
-                                          )
-                                        : isPixStep
-                                        ? _localizedText(
-                                            sheetContext,
-                                            pt: 'Depois de testar, confirme aqui',
-                                            es: 'Despues de probar, confirma aqui',
-                                            en: 'After testing it, confirm here',
-                                          )
-                                        : sheetItem.id == 'item_1_3_money'
-                                        ? _localizedText(
-                                            sheetContext,
-                                            pt: 'Depois de configurar, confirme aqui',
-                                            es: 'Despues de configurarlo, confirma aqui',
-                                            en: 'After setting it up, confirm here',
+                                            pt: 'Concluir etapa',
+                                            es: 'Completar etapa',
+                                            en: 'Complete step',
                                           )
                                         : _localizedText(
                                             sheetContext,
-                                            pt: 'Depois de solicitar, confirme aqui',
-                                            es: 'Despues de solicitarlo, confirma aqui',
-                                            en: 'After requesting it, confirm here',
+                                            pt: '$checklistCompletedCount de ${sheetItem.checklistItems?.length ?? 0} itens concluídos',
+                                            es: '$checklistCompletedCount de ${sheetItem.checklistItems?.length ?? 0} elementos completados',
+                                            en: '$checklistCompletedCount of ${sheetItem.checklistItems?.length ?? 0} items complete',
                                           ),
-                                    initiallyExpanded: presentationPolicy
-                                        .startsExpanded(
-                                          GuideTaskSectionKind.confirmation,
-                                        ),
-                                    child: Column(
-                                      children: [
-                                        for (final subItem
-                                            in sheetItem.checklistItems!) ...[
-                                          CheckboxListTile(
-                                            value: subItem.isCompleted,
-                                            contentPadding: EdgeInsets.zero,
-                                            title: Text(subItem.title),
-                                            onChanged: isPreview
-                                                ? null
-                                                : (_) => handleChecklistToggle(
-                                                    subItem,
-                                                  ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
+                                    helperText:
+                                        sheetItem.hasChecklist && !canComplete
+                                        ? _localizedText(
+                                            sheetContext,
+                                            pt: 'Seu progresso fica salvo. Confirme cada resultado quando acontecer.',
+                                            es: 'Tu progreso queda guardado. Confirma cada resultado cuando ocurra.',
+                                            en: 'Your progress is saved. Confirm each outcome as it happens.',
+                                          )
+                                        : null,
+                                    primaryEnabled:
+                                        !sheetItem.isDismissed && canComplete,
+                                    onPrimary: handleComplete,
+                                    onWaiting:
+                                        !sheetItem.isDismissed &&
+                                            !sheetItem.isCompleted
+                                        ? () async {
+                                            Navigator.of(sheetContext).pop();
+                                            await controller
+                                                .markCurrentItemWaiting();
+                                            if (!mounted) return;
+                                            setState(() {
+                                              _syncFromGpsController(
+                                                controller,
+                                              );
+                                            });
+                                          }
+                                        : null,
                                   ),
-                                ],
-                                _GuideSupplementaryDetails(
-                                  item: sheetItem,
-                                  quickReferenceShown:
-                                      !sheetItem.isCompleted &&
-                                      (sheetItem.hasSurvivalPhrases ||
-                                          sheetItem.hasRequirements),
-                                  onLinkTap: (url, label) =>
-                                      _openExternalPreparationLink(
-                                        title: label,
-                                        uri: Uri.parse(url),
-                                      ),
-                                ),
-                                // ── Warning Flags (protective, after reassurance) ──
-                                if (sheetItem.hasWarningFlags) ...[
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.tintedSurfaceFor(
-                                        sheetContext,
-                                        tint: AppColors.danger,
-                                        lightColor: const Color(0xFFFFF1F0),
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: AppColors.tintedBorderFor(
-                                          sheetContext,
-                                          tint: AppColors.danger,
-                                          lightColor: const Color(0xFFF2B8B5),
-                                        ),
-                                      ),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.gpp_bad_rounded,
-                                              size: 14,
-                                              color: AppColors.danger,
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              _localizedText(
-                                                sheetContext,
-                                                pt: 'Alertas importantes',
-                                                es: 'Alertas importantes',
-                                                en: 'Important warnings',
-                                              ),
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
-                                                color: AppColors.danger,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        for (final flag
-                                            in sheetItem.warningFlags!) ...[
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              const Padding(
-                                                padding: EdgeInsets.only(
-                                                  top: 5,
-                                                  right: 6,
-                                                ),
-                                                child: Icon(
-                                                  Icons.circle,
-                                                  size: 5,
-                                                  color: AppColors.danger,
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Text(
-                                                  flag,
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color:
-                                                        AppColors.textPrimaryFor(
-                                                          sheetContext,
-                                                        ),
-                                                    height: 1.4,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                ],
-                                if (sheetItem.doneCriteria != null)
-                                  _GuideExpandableSection(
-                                    title: _localizedText(
-                                      sheetContext,
-                                      pt: 'Quando considerar concluído',
-                                      es: 'Cuando considerarlo terminado',
-                                      en: 'When to mark it done',
-                                    ),
-                                    initiallyExpanded: false,
-                                    child: _GuideDoneCriteriaContent(
-                                      item: sheetItem,
-                                    ),
-                                  ),
-                                if (!isPreview &&
-                                    !sheetItem.isCompleted &&
-                                    eventSuggestion != null) ...[
-                                  const SizedBox(height: 12),
-                                  _GuideCalendarSuggestionCard(
-                                    suggestion: eventSuggestion,
-                                    onTap: () => _showCalendarSuggestionSheet(
-                                      plan: plan,
-                                      suggestion: eventSuggestion,
-                                    ),
-                                  ),
-                                ],
                               ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 14),
-                        if (isPreview && city != null)
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton.icon(
-                              onPressed: () async {
-                                Navigator.of(sheetContext).pop();
-                                await _confirmCity(city);
-                              },
-                              icon: const Icon(
-                                Icons.check_circle_rounded,
-                                size: 18,
-                              ),
-                              label: Text(
-                                _localizedText(
-                                  sheetContext,
-                                  pt: 'Confirmar ${city.name} e começar',
-                                  es: 'Confirmar ${city.name} y comenzar',
-                                  en: 'Confirm ${city.name} and start',
-                                ),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          )
-                        else
-                          _GuideTaskFooter(
-                            primaryLabel: sheetItem.isDismissed
-                                ? _localizedText(
-                                    sheetContext,
-                                    pt: 'Etapa dispensada',
-                                    es: 'Etapa descartada',
-                                    en: 'Step dismissed',
-                                  )
-                                : canComplete && sheetItem.hasChecklist
-                                ? _localizedText(
-                                    sheetContext,
-                                    pt: 'Continuar para a próxima etapa',
-                                    es: 'Continuar al siguiente paso',
-                                    en: 'Continue to the next step',
-                                  )
-                                : canComplete
-                                ? _localizedText(
-                                    sheetContext,
-                                    pt: 'Concluir etapa',
-                                    es: 'Completar etapa',
-                                    en: 'Complete step',
-                                  )
-                                : _localizedText(
-                                    sheetContext,
-                                    pt: '$checklistCompletedCount de ${sheetItem.checklistItems?.length ?? 0} itens concluídos',
-                                    es: '$checklistCompletedCount de ${sheetItem.checklistItems?.length ?? 0} elementos completados',
-                                    en: '$checklistCompletedCount of ${sheetItem.checklistItems?.length ?? 0} items complete',
-                                  ),
-                            helperText: sheetItem.hasChecklist && !canComplete
-                                ? _localizedText(
-                                    sheetContext,
-                                    pt: 'Seu progresso fica salvo. Marque os itens quando acontecerem.',
-                                    es: 'Tu progreso queda guardado. Marca los elementos cuando ocurran.',
-                                    en: 'Your progress is saved. Check items off as they happen.',
-                                  )
-                                : null,
-                            primaryEnabled:
-                                !sheetItem.isDismissed && canComplete,
-                            onPrimary: handleComplete,
-                            onWaiting:
-                                !sheetItem.isDismissed && !sheetItem.isCompleted
-                                ? () async {
-                                    Navigator.of(sheetContext).pop();
-                                    await controller.markCurrentItemWaiting();
-                                    if (!mounted) return;
-                                    setState(() {
-                                      _syncFromGpsController(controller);
-                                    });
-                                  }
-                                : null,
-                          ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ),
-            );
-          },
-        );
-      },
+              );
+            },
+          );
+        },
+      ),
     );
     if (!isPreview) {
       final latestItem = controller.items.cast<GuideActionItem?>().firstWhere(
@@ -2194,7 +2273,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                               const SizedBox(height: 12),
                               _GuideAllItemsList(
                                 items: gpsController.items,
-                                onSelectItem: (item) => _showExecutionSheet(
+                                onSelectItem: (item) => _showExecutionPage(
                                   gpsController,
                                   item,
                                   plan,
@@ -3221,36 +3300,137 @@ Future<void> _showPreparationSheet(
   required String title,
   required Widget child,
 }) {
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) {
-      return SafeArea(
-        top: false,
-        child: FractionallySizedBox(
-          heightFactor: 0.9,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-            child: FrostedPanel(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
-              borderRadius: BorderRadius.circular(28),
-              child: Column(
-                children: [
-                  _GuideUtilitySheetHeader(
-                    title: title,
-                    onClose: () => Navigator.of(context).pop(),
+  return Navigator.of(context).push<void>(
+    MaterialPageRoute<void>(
+      settings: const RouteSettings(name: '/plan/tool'),
+      builder: (pageContext) {
+        return Scaffold(
+          backgroundColor: AppColors.backgroundFor(pageContext),
+          body: Stack(
+            children: [
+              const Positioned.fill(child: AmbientBackground()),
+              SafeArea(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 760),
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        pageContext.isMobileLayout ? 16 : 24,
+                        8,
+                        pageContext.isMobileLayout ? 16 : 24,
+                        16,
+                      ),
+                      child: Column(
+                        children: [
+                          _GuidePageHeader(
+                            title: title,
+                            onBack: () => Navigator.of(pageContext).pop(),
+                          ),
+                          const SizedBox(height: 8),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.only(bottom: 24),
+                              child: child,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Expanded(child: SingleChildScrollView(child: child)),
-                ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    ),
+  );
+}
+
+class _GuidePageHeader extends StatelessWidget {
+  const _GuidePageHeader({required this.title, required this.onBack});
+
+  final String title;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 56,
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: onBack,
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Semantics(
+              header: true,
+              child: Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GuideResourceChoiceCard extends StatelessWidget {
+  const _GuideResourceChoiceCard({required this.link, required this.onTap});
+
+  final GuideSupportLink link;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surfaceFor(context),
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.11),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: const Icon(
+                  Icons.open_in_new_rounded,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  link.label,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded),
+            ],
+          ),
         ),
-      );
-    },
-  );
+      ),
+    );
+  }
 }
 
 class _PreparationHero extends StatelessWidget {
@@ -4739,7 +4919,7 @@ class _GuideDominantActionCard extends StatelessWidget {
                           _localizedText(
                             context,
                             pt: 'Por que isso importa',
-                            es: 'Por que importa',
+                            es: 'Por qué importa',
                             en: 'Why this matters',
                           ),
                           style: Theme.of(context).textTheme.labelLarge
@@ -5075,8 +5255,8 @@ class _GuideTaskGuidanceSection extends StatelessWidget {
   }
 }
 
-class _GuideTaskSheetHeader extends StatelessWidget {
-  const _GuideTaskSheetHeader({
+class _GuideTaskPageHeader extends StatelessWidget {
+  const _GuideTaskPageHeader({
     required this.item,
     required this.overallProgress,
     required this.completedChecklistItems,
@@ -5111,19 +5291,15 @@ class _GuideTaskSheetHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Center(
-          child: Container(
-            width: 38,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.borderFor(context),
-              borderRadius: BorderRadius.circular(999),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
         Row(
           children: [
+            IconButton(
+              onPressed: onClose,
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              constraints: const BoxConstraints.tightFor(width: 48, height: 48),
+              icon: const Icon(Icons.arrow_back_rounded),
+            ),
+            const SizedBox(width: 4),
             Container(
               width: 38,
               height: 38,
@@ -5249,12 +5425,6 @@ class _GuideTaskSheetHeader extends StatelessWidget {
                   ],
                 ],
               ),
-            IconButton(
-              onPressed: onClose,
-              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-              constraints: const BoxConstraints.tightFor(width: 48, height: 48),
-              icon: const Icon(Icons.close_rounded),
-            ),
           ],
         ),
         const SizedBox(height: 12),
@@ -5432,6 +5602,209 @@ class _GuideNextMoveCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _GuideOutcomeProgress extends StatelessWidget {
+  const _GuideOutcomeProgress({
+    required this.items,
+    required this.enabled,
+    required this.onToggle,
+  });
+
+  final List<ChecklistSubItem> items;
+  final bool enabled;
+  final Future<void> Function(ChecklistSubItem item) onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final completed = items.where((item) => item.isCompleted).toList();
+    final pending = items.where((item) => !item.isCompleted).toList();
+    final current = pending.isEmpty ? null : pending.first;
+    final upcoming = pending.skip(1).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (completed.isNotEmpty) ...[
+          for (final item in completed)
+            Semantics(
+              button: enabled,
+              checked: true,
+              child: InkWell(
+                onTap: enabled ? () => onToggle(item) : null,
+                borderRadius: BorderRadius.circular(14),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 9,
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        size: 22,
+                        color: AppColors.success,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          item.title,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: AppColors.textSoftFor(context),
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                        ),
+                      ),
+                      if (enabled)
+                        Icon(
+                          Icons.undo_rounded,
+                          size: 17,
+                          color: AppColors.textSoftFor(context),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (current != null) const SizedBox(height: 8),
+        ],
+        if (current != null)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.tintedSurfaceFor(
+                context,
+                tint: AppColors.primary,
+                lightColor: const Color(0xFFF2F7FF),
+              ),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: AppColors.tintedBorderFor(
+                  context,
+                  tint: AppColors.primary,
+                  lightColor: const Color(0xFFCFE2FF),
+                ),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _localizedText(context, pt: 'AGORA', es: 'AHORA', en: 'NOW'),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  current.title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (enabled) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.tonalIcon(
+                      onPressed: () => onToggle(current),
+                      icon: const Icon(Icons.check_rounded, size: 18),
+                      label: Text(
+                        _localizedText(
+                          context,
+                          pt: 'Confirmar que fiz',
+                          es: 'Confirmar que lo hice',
+                          en: 'Confirm I did this',
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          )
+        else
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.verified_rounded, color: AppColors.success),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _localizedText(
+                      context,
+                      pt: 'Tudo confirmado. Esta etapa está pronta.',
+                      es: 'Todo confirmado. Esta etapa está lista.',
+                      en: 'Everything is confirmed. This step is ready.',
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        if (upcoming.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          Text(
+            _localizedText(context, pt: 'Depois', es: 'Después', en: 'Next'),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          for (var index = 0; index < upcoming.length; index++)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceFor(context),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.borderFor(context)),
+                    ),
+                    child: Text(
+                      '${completed.length + index + 2}',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      upcoming[index].title,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ],
     );
   }
 }
@@ -5910,30 +6283,27 @@ class _GuideExecutionContent extends StatelessWidget {
 }
 
 class _CpfDecisionContent extends StatelessWidget {
-  const _CpfDecisionContent({required this.item, required this.onLinkTap});
+  const _CpfDecisionContent({
+    required this.item,
+    required this.selectedIndex,
+    required this.onSelected,
+  });
 
   final GuideActionItem item;
-  final void Function(String url, String label) onLinkTap;
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    final recommended = item.decisionOptions!.firstWhere((o) => o.recommended);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _GuideBestOptionBanner(
-          item: item,
-          option: recommended,
-          onLinkTap: onLinkTap,
-        ),
-        const SizedBox(height: 12),
         Text(
           _localizedText(
             context,
-            pt: 'Primeiro escolha onde vai tirar o CPF. Depois use o checklist só da rota que você decidiu seguir.',
-            es: 'Primero elige donde vas a sacar el CPF. Despues usa el checklist solo de la ruta que decidiste seguir.',
-            en: 'First choose where you will get your CPF. Then use the checklist only for the route you decided to follow.',
+            pt: 'Escolha um caminho. O Movaro mostra apenas as instruções dessa rota e você pode trocar quando quiser.',
+            es: 'Elige un camino. Movaro muestra solo las instrucciones de esa ruta y puedes cambiar cuando quieras.',
+            en: 'Choose one path. Movaro shows only that route’s instructions, and you can switch at any time.',
           ),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: AppColors.textSoftFor(context),
@@ -5941,10 +6311,159 @@ class _CpfDecisionContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        for (final option in item.decisionOptions!) ...[
-          _GuideDecisionOptionCard(option: option),
+        for (var index = 0; index < item.decisionOptions!.length; index++) ...[
+          _CpfRouteChoiceCard(
+            option: item.decisionOptions![index],
+            selected: selectedIndex == index,
+            onTap: () => onSelected(index),
+          ),
           const SizedBox(height: 10),
         ],
+      ],
+    );
+  }
+}
+
+class _CpfRouteChoiceCard extends StatelessWidget {
+  const _CpfRouteChoiceCard({
+    required this.option,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final GuideDecisionOption option;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: Material(
+        color: selected
+            ? AppColors.primary.withValues(alpha: 0.10)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: selected
+                    ? AppColors.primary
+                    : AppColors.borderFor(context),
+                width: selected ? 1.5 : 1,
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  selected
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_off_rounded,
+                  size: 22,
+                  color: selected
+                      ? AppColors.primary
+                      : AppColors.textSoftFor(context),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              option.title,
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                          if (option.recommended)
+                            _GuideMetaChip(
+                              label: _localizedText(
+                                context,
+                                pt: 'Sugerida',
+                                es: 'Sugerida',
+                                en: 'Suggested',
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        option.description,
+                        maxLines: selected ? 4 : 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSoftFor(context),
+                          height: 1.4,
+                        ),
+                      ),
+                      if (selected &&
+                          (option.pros.isNotEmpty ||
+                              option.cons.isNotEmpty)) ...[
+                        const SizedBox(height: 9),
+                        if (option.pros.isNotEmpty)
+                          _CpfRouteSignal(
+                            icon: Icons.add_circle_outline_rounded,
+                            color: AppColors.success,
+                            text: option.pros.first,
+                          ),
+                        if (option.cons.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          _CpfRouteSignal(
+                            icon: Icons.info_outline_rounded,
+                            color: AppColors.warning,
+                            text: option.cons.first,
+                          ),
+                        ],
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CpfRouteSignal extends StatelessWidget {
+  const _CpfRouteSignal({
+    required this.icon,
+    required this.color,
+    required this.text,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 7),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(height: 1.35),
+          ),
+        ),
       ],
     );
   }
@@ -6000,19 +6519,31 @@ class _GuideExecutionBlock extends StatelessWidget {
 }
 
 class _CpfExecutionBlock extends StatelessWidget {
-  const _CpfExecutionBlock({required this.item, required this.onLinkTap});
+  const _CpfExecutionBlock({
+    required this.item,
+    required this.selectedIndex,
+    required this.onLinkTap,
+  });
 
   final GuideActionItem item;
+  final int selectedIndex;
   final void Function(String url, String label) onLinkTap;
 
   @override
   Widget build(BuildContext context) {
-    final recommended = item.decisionOptions
-        ?.cast<GuideDecisionOption?>()
-        .firstWhere(
-          (option) => option?.recommended == true,
-          orElse: () => null,
-        );
+    final routes = item.locationAwareOptions!;
+    final decisionCount = item.decisionOptions?.length ?? 0;
+    final safeIndex = selectedIndex < 0
+        ? 0
+        : selectedIndex >= decisionCount
+        ? decisionCount - 1
+        : selectedIndex;
+    final selectedRoutes = safeIndex == 0
+        ? routes.take(routes.length - 1).toList(growable: false)
+        : <GuideLocationAwareOption>[routes.last];
+    final selectedDecision = decisionCount > safeIndex
+        ? item.decisionOptions![safeIndex]
+        : null;
 
     return Container(
       width: double.infinity,
@@ -6040,44 +6571,33 @@ class _CpfExecutionBlock extends StatelessWidget {
           Text(
             _localizedText(
               context,
-              pt: recommended == null
-                  ? 'Depois de decidir entre Argentina ou Brasil, abra só um caminho de cada vez para não misturar exigências.'
-                  : 'Depois de decidir, abra primeiro a rota recomendada abaixo. A outra fica só como alternativa.',
-              es: recommended == null
-                  ? 'Despues de decidir entre Argentina o Brasil, abre solo una ruta por vez para no mezclar requisitos.'
-                  : 'Despues de decidir, abre primero la ruta recomendada abajo. La otra queda solo como alternativa.',
-              en: recommended == null
-                  ? 'After deciding between Argentina or Brazil, open only one route at a time so requirements do not get mixed up.'
-                  : 'After deciding, open the recommended route below first. The other remains only as a fallback.',
+              pt: 'Abra a fonte oficial da rota escolhida. As exigências da outra rota ficam ocultas para não misturar orientações.',
+              es: 'Abre la fuente oficial de la ruta elegida. Los requisitos de la otra ruta quedan ocultos para no mezclar orientaciones.',
+              en: 'Open the official source for your chosen route. The other route stays hidden so the guidance does not get mixed.',
             ),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSoftFor(context),
               height: 1.45,
             ),
           ),
-          if (recommended != null) ...[
+          if (selectedDecision != null) ...[
             const SizedBox(height: 10),
             _GuideMetaChip(
               label: _localizedText(
                 context,
-                pt: 'Rota recomendada: ${recommended.title}',
-                es: 'Ruta recomendada: ${recommended.title}',
-                en: 'Recommended route: ${recommended.title}',
+                pt: 'Rota ativa: ${selectedDecision.title}',
+                es: 'Ruta activa: ${selectedDecision.title}',
+                en: 'Active route: ${selectedDecision.title}',
               ),
             ),
           ],
           const SizedBox(height: 12),
-          for (
-            var index = 0;
-            index < item.locationAwareOptions!.length;
-            index++
-          ) ...[
+          for (var index = 0; index < selectedRoutes.length; index++) ...[
             _GuideLocationOptionCard(
-              option: item.locationAwareOptions![index],
+              option: selectedRoutes[index],
               onLinkTap: onLinkTap,
             ),
-            if (index < item.locationAwareOptions!.length - 1)
-              const SizedBox(height: 10),
+            if (index < selectedRoutes.length - 1) const SizedBox(height: 10),
           ],
         ],
       ),
@@ -8879,7 +9399,7 @@ String _guideEffortLabel(BuildContext context, GuideEstimatedEffort effort) {
     GuideEstimatedEffort.fast => _localizedText(
       context,
       pt: 'rápido',
-      es: 'rapido',
+      es: 'rápido',
       en: 'fast',
     ),
     GuideEstimatedEffort.medium => _localizedText(

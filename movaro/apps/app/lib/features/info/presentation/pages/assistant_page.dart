@@ -326,6 +326,7 @@ class _AssistantPageState extends State<AssistantPage> {
       ),
       bottomNavigationBar: MainNavigationBar(
         currentIndex: 3,
+        reselectNavigatesToRoot: true,
         journeyContextController: widget.journeyContextController,
         citiesController: widget.citiesController,
         migrationQuestionnaireController:

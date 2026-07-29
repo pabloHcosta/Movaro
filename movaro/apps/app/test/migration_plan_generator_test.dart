@@ -39,6 +39,21 @@ void main() {
       );
     });
 
+    test('uses safe defaults when a plan starts from a chosen city', () async {
+      final plan = await generator.generate(
+        variant: QuestionnaireVariant.lean,
+        answers: const [
+          Answer(questionId: 'origin_country', values: ['argentina']),
+          Answer(questionId: 'destination_country', values: ['brasil']),
+        ],
+      );
+
+      expect(plan.goal, 'explore_unsure');
+      expect(plan.timeline, 'depends');
+      expect(plan.archetypeKey, 'explorer');
+      expect(plan.highlightedCity, isNotNull);
+    });
+
     test(
       'returns deterministic top city for remote worker preferences',
       () async {

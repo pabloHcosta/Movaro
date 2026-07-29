@@ -14,6 +14,7 @@ class CitySearchMatcher {
     // São Paulo
     'san pablo': 'sao paulo',
     'san paulo': 'sao paulo',
+    'so paulo': 'sao paulo',
     'sampa': 'sao paulo',
     'sp': 'sao paulo',
 

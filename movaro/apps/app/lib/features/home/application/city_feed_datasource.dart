@@ -196,7 +196,7 @@ class CityFeedDatasource {
           title: _t(
             locale,
             pt: 'Quanto custa viver em ${city.name}',
-            es: 'Cuanto cuesta vivir en ${city.name}',
+            es: 'Cuánto cuesta vivir en ${city.name}',
             en: 'What it costs to live in ${city.name}',
           ),
           body: '',
@@ -322,13 +322,13 @@ class CityFeedDatasource {
             badge: _t(
               locale,
               pt: 'Sinal social',
-              es: 'Senal social',
+              es: 'Señal social',
               en: 'Social signal',
             ),
             title: _t(
               locale,
               pt: 'Como ${socialProof.cityName} aparece para quem já vive aí',
-              es: 'Como se ve ${socialProof.cityName} para quien ya vive ahi',
+              es: 'Cómo se ve ${socialProof.cityName} para quien ya vive ahí',
               en: 'How ${socialProof.cityName} reads to people already there',
             ),
             body: text,

@@ -319,9 +319,73 @@ describe('CityInsightsService', () => {
       limit: 3,
     });
 
-    expect(result).toHaveLength(3);
+    expect(result).toHaveLength(1);
     expect(result[0]?.source).toBe('template');
     expect(result[0]?.category).toBe('Praia');
+    expect(new Set(result.map((item) => item.name)).size).toBe(result.length);
+  });
+
+  it('tries a secondary overpass instance after a rate limit response', async () => {
+    const fetchSpy = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 429,
+        headers: {
+          get: jest.fn().mockReturnValue(null),
+        },
+        text: () => Promise.resolve('rate limited'),
+      } as unknown as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ elements: [] }),
+      } as Response);
+    const service = makeService('rio-de-janeiro-rj', 'Rio de Janeiro');
+    const fetchOverpassElements = (
+      service as unknown as {
+        fetchOverpassElements: (query: string) => Promise<unknown[]>;
+      }
+    ).fetchOverpassElements.bind(service);
+
+    const result = await fetchOverpassElements(
+      '[out:json];node(0,0,1,1);out;',
+    );
+
+    expect(result).toEqual([]);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(fetchSpy.mock.calls[0]?.[0]).toBe(
+      'https://overpass-api.de/api/interpreter',
+    );
+    expect(fetchSpy.mock.calls[1]?.[0]).toBe(
+      'https://overpass.private.coffee/api/interpreter',
+    );
+  });
+
+  it('shares an in-flight overpass request for identical queries', async () => {
+    let resolveFetch: ((response: Response) => void) | undefined;
+    const fetchSpy = jest.spyOn(global, 'fetch').mockImplementation(
+      () =>
+        new Promise<Response>((resolve) => {
+          resolveFetch = resolve;
+        }),
+    );
+    const service = makeService('rio-de-janeiro-rj', 'Rio de Janeiro');
+    const query = '[out:json];node(0,0,1,1);out;';
+    const fetchOverpassElements = (
+      service as unknown as {
+        fetchOverpassElements: (input: string) => Promise<unknown[]>;
+      }
+    ).fetchOverpassElements.bind(service);
+
+    const first = fetchOverpassElements(query);
+    const second = fetchOverpassElements(query);
+    resolveFetch?.({
+      ok: true,
+      json: () => Promise.resolve({ elements: [] }),
+    } as Response);
+
+    await expect(Promise.all([first, second])).resolves.toEqual([[], []]);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
   it('searches wikimedia commons for a place image when osm tags do not provide one', async () => {
@@ -352,7 +416,8 @@ describe('CityInsightsService', () => {
             pages: {
               1: {
                 thumbnail: {
-                  source: 'https://upload.wikimedia.org/commons/example-market.jpg',
+                  source:
+                    'https://upload.wikimedia.org/commons/example-market.jpg',
                 },
               },
             },
@@ -463,9 +528,10 @@ describe('CityInsightsService', () => {
     );
     expect(
       result.filter((item) =>
-        ['Como pode ser viver em Porto Alegre', 'Procure a agenda que faz a cidade mexer'].includes(
-          item.title,
-        ),
+        [
+          'Como pode ser viver em Porto Alegre',
+          'Procure a agenda que faz a cidade mexer',
+        ].includes(item.title),
       ).length,
     ).toBeLessThanOrEqual(1);
   });

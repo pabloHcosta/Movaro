@@ -418,7 +418,8 @@ class _DocumentationGuidePageState extends State<DocumentationGuidePage> {
               widget.journeyContextController != null &&
               widget.migrationQuestionnaireController != null
           ? MainNavigationBar(
-              currentIndex: isExecutionStage ? 2 : 1,
+              currentIndex: 3,
+              reselectNavigatesToRoot: true,
               journeyContextController: widget.journeyContextController!,
               citiesController: widget.citiesController!,
               migrationQuestionnaireController:

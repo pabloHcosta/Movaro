@@ -124,6 +124,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
   final _opinionSectionKey = GlobalKey();
   final _analysisSectionKey = GlobalKey();
   final _sourcesSectionKey = GlobalKey();
+  bool _isCreatingPlan = false;
 
   @override
   void initState() {
@@ -469,10 +470,18 @@ class _CityDetailPageState extends State<CityDetailPage> {
               );
 
         return Scaffold(
-          bottomNavigationBar: (widget.fromMigrationResult && city != null)
+          bottomNavigationBar: city == null
+              ? null
+              : widget.fromMigrationResult
               ? _MigrationResultBar(
                   city: city,
                   controller: widget.migrationQuestionnaireController,
+                )
+              : widget.validationFlow
+              ? _ValidationCityActionBar(
+                  cityName: city.name,
+                  isLoading: _isCreatingPlan,
+                  onConfirm: () => _runPrimaryPlanAction(context, city),
                 )
               : null,
           body: Stack(
@@ -698,18 +707,19 @@ class _CityDetailPageState extends State<CityDetailPage> {
                           ],
 
                           // ── Block 5: CTA after evidence ──────────────────
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _CtaPrimaryRow(
-                              city: city,
-                              planContext: planContext,
-                              validationFlow: widget.validationFlow,
-                              onPrimaryAction: () =>
-                                  _handlePrimaryPlanAction(context, city),
-                              onCompareAction: () =>
-                                  _handleCompareCity(context, city),
+                          if (!widget.validationFlow)
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 1160),
+                              child: _CtaPrimaryRow(
+                                city: city,
+                                planContext: planContext,
+                                validationFlow: widget.validationFlow,
+                                onPrimaryAction: () =>
+                                    _runPrimaryPlanAction(context, city),
+                                onCompareAction: () =>
+                                    _handleCompareCity(context, city),
+                              ),
                             ),
-                          ),
                           const SizedBox(height: 12),
 
                           ConstrainedBox(
@@ -1190,6 +1200,55 @@ class _CityDetailPageState extends State<CityDetailPage> {
       AppRoutes.publicHome,
       (route) => false,
     );
+  }
+
+  Future<void> _runPrimaryPlanAction(BuildContext context, City city) async {
+    if (_isCreatingPlan) {
+      return;
+    }
+
+    setState(() => _isCreatingPlan = true);
+    final hadPlan =
+        widget.migrationQuestionnaireController?.generatedPlan != null;
+    try {
+      await _handlePrimaryPlanAction(context, city);
+      if (context.mounted &&
+          widget.validationFlow &&
+          !hadPlan &&
+          widget.migrationQuestionnaireController?.generatedPlan == null) {
+        final locale = Localizations.localeOf(context).languageCode;
+        final message = switch (locale) {
+          'pt' =>
+            'Confirme seu país de origem para criar um plano para ${city.name}.',
+          'es' =>
+            'Confirmá tu país de origen para crear un plan para ${city.name}.',
+          _ => 'Confirm your origin country to create a plan for ${city.name}.',
+        };
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(message)));
+      }
+    } catch (_) {
+      if (!context.mounted) {
+        return;
+      }
+      final locale = Localizations.localeOf(context).languageCode;
+      final message = switch (locale) {
+        'pt' =>
+          'Não conseguimos criar o plano agora. Confira a conexão e tente novamente.',
+        'es' =>
+          'No pudimos crear el plan ahora. Revisá la conexión e intentá de nuevo.',
+        _ =>
+          'We could not create the plan right now. Check your connection and try again.',
+      };
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(message)));
+    } finally {
+      if (mounted) {
+        setState(() => _isCreatingPlan = false);
+      }
+    }
   }
 
   _PlanCityContext? _resolvePlanContext(BuildContext context, City city) {
@@ -2180,6 +2239,70 @@ class _MoreAboutCityCard extends StatelessWidget {
       'es' => 'Ir al análisis',
       _ => 'Jump to analysis',
     };
+  }
+}
+
+// ─── Persistent action for the "I already know my city" flow ─────────────────
+
+class _ValidationCityActionBar extends StatelessWidget {
+  const _ValidationCityActionBar({
+    required this.cityName,
+    required this.isLoading,
+    required this.onConfirm,
+  });
+
+  final String cityName;
+  final bool isLoading;
+  final VoidCallback onConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final locale = Localizations.localeOf(context).languageCode;
+    final label = switch (locale) {
+      'pt' => 'Criar meu plano para $cityName',
+      'es' => 'Crear mi plan para $cityName',
+      _ => 'Create my plan for $cityName',
+    };
+
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+        decoration: BoxDecoration(
+          color: isDark
+              ? const Color(0xFF07101C).withValues(alpha: 0.97)
+              : Colors.white.withValues(alpha: 0.97),
+          border: Border(
+            top: BorderSide(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.08),
+            ),
+          ),
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: isLoading ? null : onConfirm,
+            icon: isLoading
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.4,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.route_rounded),
+            label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 15),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
