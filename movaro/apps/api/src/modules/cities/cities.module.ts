@@ -13,6 +13,7 @@ import { CityMergeService } from './application/services/city-merge.service';
 import { CityOfficialMetricsService } from './application/services/city-official-metrics.service';
 import { CityPublicOpinionSeedService } from './application/services/city-public-opinion-seed.service';
 import { CityRankingService } from './application/services/city-ranking.service';
+import { CityRecommendationService } from './application/services/city-recommendation.service';
 import { CitySeasonalitySnapshotService } from './application/services/city-seasonality-snapshot.service';
 import { TravelRouteInsightService } from './application/services/travel-route-insight.service';
 import { LocalCityMetricsRepository } from './data/repositories/local-city-metrics.repository';
@@ -36,6 +37,7 @@ import { CitiesController } from './presentation/cities.controller';
     CityPublicOpinionSeedService,
     CitySeasonalitySnapshotService,
     CityRankingService,
+    CityRecommendationService,
     TravelRouteInsightService,
     CityOfficialMetricsService,
     CityMergeService,

@@ -7,11 +7,13 @@ class FeatureGuideStep {
     required this.number,
     required this.title,
     required this.body,
+    this.icon,
   });
 
   final String number;
   final String title;
   final String body;
+  final IconData? icon;
 }
 
 class FeatureGuideDialog extends StatefulWidget {

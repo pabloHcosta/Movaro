@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
@@ -20,7 +22,7 @@ import 'package:movaro_app/features/flight_search/presentation/widgets/flight_se
 import 'package:movaro_app/app/theme/app_typography.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
@@ -28,8 +30,8 @@ import 'package:movaro_app/features/location/location_controller.dart';
 
 /// Shown immediately after the questionnaire completes.
 ///
-/// Surfaces the current shortlist with a cinematic hero image, compatibility
-/// signals, leading reasons, and alternative cities the user can explore
+/// Surfaces the current shortlist with a cinematic hero image, relative match
+/// bands, leading reasons, and alternative cities the user can explore
 /// before choosing how to continue the guided plan.
 class MigrationResultRevealPage extends StatefulWidget {
   const MigrationResultRevealPage({
@@ -54,6 +56,8 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
   late final Animation<double> _fadeIn;
   late final Animation<Offset> _slideUp;
   final ScrollController _scrollController = ScrollController();
+  bool _hasRecordedRecommendationView = false;
+  bool _feedbackSubmitted = false;
 
   @override
   void initState() {
@@ -72,6 +76,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
       await widget.controller.initialize();
       await _prefetchRecommendationSignals();
       if (!mounted) return;
+      _recordRecommendationMetric(GuideFlowMetric.recommendationViewed);
       _anim.forward();
     });
   }
@@ -87,6 +92,14 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
 
   Future<void> _openCityDetail(City city) async {
     if (!mounted) return;
+    final plan = widget.controller.generatedPlan;
+    final primaryCity = plan?.currentPlanCity;
+    _recordRecommendationMetric(
+      primaryCity?.id == city.id
+          ? GuideFlowMetric.primaryCityExplored
+          : GuideFlowMetric.alternativeCityExplored,
+      city: city,
+    );
     await precacheCityImage(context, city);
     if (!mounted) return;
     Navigator.pushNamed(
@@ -100,6 +113,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
     City highlightedCity,
     List<City> alternatives,
   ) async {
+    _recordRecommendationMetric(GuideFlowMetric.comparisonOpened);
     _showCityComparisonSheet(
       context,
       widget.controller.generatedPlan!,
@@ -109,6 +123,10 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
   }
 
   Future<void> _startPreparation(City city) async {
+    _recordRecommendationMetric(
+      GuideFlowMetric.recommendationAccepted,
+      city: city,
+    );
     await widget.controller.confirmPlanCity(city);
     if (!mounted) {
       return;
@@ -117,6 +135,43 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
       context,
       AppRoutes.publicHome,
       (route) => false,
+    );
+  }
+
+  void _recordRecommendationMetric(GuideFlowMetric metric, {City? city}) {
+    if (metric == GuideFlowMetric.recommendationViewed) {
+      if (_hasRecordedRecommendationView) return;
+      _hasRecordedRecommendationView = true;
+    }
+    final plan = widget.controller.generatedPlan;
+    if (plan == null) return;
+    final cityIndex = city == null
+        ? -1
+        : plan.candidateCities.indexWhere((item) => item.id == city.id);
+    unawaited(
+      GuideFlowMetricsStore.instance.record(
+        metric,
+        methodologyVersion: plan.recommendationMethodologyVersion,
+        stabilityBand: plan.recommendationStabilityBand,
+        coverageBand: _coverageBand(plan.recommendationDataCoverage),
+        rankPosition: cityIndex < 0 ? null : cityIndex + 1,
+      ),
+    );
+  }
+
+  String _coverageBand(double coverage) {
+    if (coverage >= 0.75) return 'broad';
+    if (coverage >= 0.5) return 'partial';
+    return 'limited';
+  }
+
+  void _submitRecommendationFeedback(bool positive) {
+    if (_feedbackSubmitted) return;
+    setState(() => _feedbackSubmitted = true);
+    _recordRecommendationMetric(
+      positive
+          ? GuideFlowMetric.recommendationFeedbackPositive
+          : GuideFlowMetric.recommendationFeedbackNegative,
     );
   }
 
@@ -140,22 +195,15 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
     );
   }
 
-  void _showCompatibilityBreakdown(City city, int compatibilityPct) {
+  void _showCompatibilityBreakdown(
+    City city,
+    double? matchScore,
+    Map<String, double> dimensions,
+  ) {
     final l10n = context.l10n;
-    final dims = MigrationPlanGenerator.cityDimensionsPublic(city);
-    final overallStars = _pctToStars(compatibilityPct);
-
-    final overallStarColor = compatibilityPct >= 80
-        ? AppColors.success
-        : compatibilityPct >= 60
-        ? AppColors.warning
-        : const Color(0xFF0088FF);
-
-    final compatLabel = compatibilityPct >= 80
-        ? l10n.migrationPlanResultCompatibilityHigh
-        : compatibilityPct >= 60
-        ? l10n.migrationPlanResultCompatibilityMedium
-        : l10n.migrationPlanResultCompatibilityInitial;
+    final dims = dimensions;
+    final matchColor = _matchBandColor(matchScore);
+    final matchLabel = _matchBandLabel(context, matchScore);
 
     showModalBottomSheet<void>(
       context: context,
@@ -193,7 +241,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Overall star score ────────────────────────────────
+                  // ── Qualitative match band ───────────────────────────
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
@@ -201,10 +249,10 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                       horizontal: 16,
                     ),
                     decoration: BoxDecoration(
-                      color: overallStarColor.withValues(alpha: 0.08),
+                      color: matchColor.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: overallStarColor.withValues(alpha: 0.18),
+                        color: matchColor.withValues(alpha: 0.18),
                       ),
                     ),
                     child: Column(
@@ -219,37 +267,21 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               ),
                         ),
                         const SizedBox(height: 8),
-                        Wrap(
-                          alignment: WrapAlignment.spaceBetween,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 10,
-                          runSpacing: 8,
+                        Row(
                           children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                _StarRow(
-                                  stars: overallStars,
-                                  size: 28,
-                                  color: overallStarColor,
-                                ),
-                              ],
+                            Icon(
+                              Icons.tune_rounded,
+                              size: 20,
+                              color: matchColor,
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: overallStarColor.withValues(alpha: 0.14),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
+                            const SizedBox(width: 10),
+                            Expanded(
                               child: Text(
-                                compatLabel,
+                                matchLabel,
                                 overflow: TextOverflow.ellipsis,
-                                style: Theme.of(sheetCtx).textTheme.labelSmall
+                                style: Theme.of(sheetCtx).textTheme.titleSmall
                                     ?.copyWith(
-                                      color: overallStarColor,
+                                      color: matchColor,
                                       fontWeight: FontWeight.w700,
                                     ),
                               ),
@@ -279,7 +311,7 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                   ),
                   const SizedBox(height: 20),
 
-                  // ── How compatibility works ───────────────────────────
+                  // ── How the ordering works ────────────────────────────
                   const _CompatibilityExplanationCard(),
                 ],
               ),
@@ -420,9 +452,14 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
             .where((c) => c.id != primaryCity.id)
             .toList(growable: false);
 
-        final compatibilityPct = (plan.confidence * 100).round().clamp(0, 100);
+        final primaryMatchScore = plan.candidateCityMatchScores[primaryCity.id];
+        final primaryDimensionScores =
+            plan.candidateCityDimensionScores[primaryCity.id] ?? const {};
 
-        final reasons = plan.cityRecommendationReasons.isNotEmpty
+        final cityReasons = plan.candidateCityReasons[primaryCity.id];
+        final reasons = cityReasons?.isNotEmpty == true
+            ? cityReasons!
+            : plan.cityRecommendationReasons.isNotEmpty
             ? plan.cityRecommendationReasons
             : primaryCity.recommendationReasons;
 
@@ -508,6 +545,8 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               _AntiAnchorComparisonSection(
                                 preferredCity: preferredCity,
                                 highlightedCity: primaryCity,
+                                dimensionScores:
+                                    plan.candidateCityDimensionScores,
                                 onGoWithPreferred: () =>
                                     _openCityDetail(preferredCity),
                                 onTryHighlighted: () =>
@@ -518,10 +557,11 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
 
                             _CompatibilityCard(
                               city: primaryCity,
-                              compatibilityPct: compatibilityPct,
+                              matchScore: primaryMatchScore,
                               onTap: () => _showCompatibilityBreakdown(
                                 primaryCity,
-                                compatibilityPct,
+                                primaryMatchScore,
+                                primaryDimensionScores,
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -545,6 +585,19 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                             ],
                             const SizedBox(height: 16),
                             _TimelineContextBar(plan: plan),
+                            if (plan
+                                .recommendationMethodologyVersion
+                                .isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              _RecommendationIntegrityCard(plan: plan),
+                              if (GuideFlowMetricsStore.instance.isEnabled) ...[
+                                const SizedBox(height: 12),
+                                _RecommendationFeedbackCard(
+                                  submitted: _feedbackSubmitted,
+                                  onSubmit: _submitRecommendationFeedback,
+                                ),
+                              ],
+                            ],
                             if (reasons.isNotEmpty) ...[
                               const SizedBox(height: 16),
                               _WhyCitySection(
@@ -556,7 +609,9 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               const SizedBox(height: 16),
                               _AlternativesSection(
                                 cities: alternatives,
-                                confidence: plan.confidence,
+                                matchScores: plan.candidateCityMatchScores,
+                                dimensionScores:
+                                    plan.candidateCityDimensionScores,
                                 highlightedCity: primaryCity,
                                 planTimeline: plan.timeline,
                                 onTap: (city) => _openCityDetail(city),
@@ -891,44 +946,25 @@ class _OriginLogisticsAlert extends StatelessWidget {
   }
 }
 
-// ─── Compatibility star rating helper ─────────────────────────────────────────
-
-/// Converts a 0–100 compatibility percentage to a 0.0–5.0 star rating,
-/// snapped to the nearest half-star.
-double _pctToStars(int pct) {
-  final raw = (pct / 100) * 5;
-  return (raw * 2).round() / 2; // snap to 0.5 increments
+String _matchBandLabel(BuildContext context, double? score) {
+  final l10n = context.l10n;
+  if (score != null && score >= 0.72) {
+    return l10n.migrationPlanResultCompatibilityHigh;
+  }
+  if (score != null && score >= 0.55) {
+    return l10n.migrationPlanResultCompatibilityMedium;
+  }
+  return l10n.migrationPlanResultCompatibilityInitial;
 }
 
-// ─── Star row widget ─────────────────────────────────────────────────────────
-
-class _StarRow extends StatelessWidget {
-  const _StarRow({required this.stars, this.size = 22, this.color});
-
-  final double stars; // 0.0 – 5.0 in 0.5 increments
-  final double size;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    final starColor = color ?? AppColors.warning;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(5, (i) {
-        final full = i + 1;
-        final half = i + 0.5;
-        IconData icon;
-        if (stars >= full) {
-          icon = Icons.star_rounded;
-        } else if (stars >= half) {
-          icon = Icons.star_half_rounded;
-        } else {
-          icon = Icons.star_outline_rounded;
-        }
-        return Icon(icon, size: size, color: starColor);
-      }),
-    );
+Color _matchBandColor(double? score) {
+  if (score != null && score >= 0.72) {
+    return AppColors.success;
   }
+  if (score != null && score >= 0.55) {
+    return AppColors.warning;
+  }
+  return const Color(0xFF0088FF);
 }
 
 // ─── Compatibility card ────────────────────────────────────────────────────────
@@ -936,30 +972,19 @@ class _StarRow extends StatelessWidget {
 class _CompatibilityCard extends StatelessWidget {
   const _CompatibilityCard({
     required this.city,
-    required this.compatibilityPct,
+    required this.matchScore,
     required this.onTap,
   });
 
   final City city;
-  final int compatibilityPct;
+  final double? matchScore;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final stars = _pctToStars(compatibilityPct);
-
-    final compatLabel = compatibilityPct >= 80
-        ? l10n.migrationPlanResultCompatibilityHigh
-        : compatibilityPct >= 60
-        ? l10n.migrationPlanResultCompatibilityMedium
-        : l10n.migrationPlanResultCompatibilityInitial;
-
-    final starColor = compatibilityPct >= 80
-        ? AppColors.success
-        : compatibilityPct >= 60
-        ? AppColors.warning
-        : const Color(0xFF0088FF);
+    final matchLabel = _matchBandLabel(context, matchScore);
+    final matchColor = _matchBandColor(matchScore);
 
     return GestureDetector(
       onTap: onTap,
@@ -971,7 +996,7 @@ class _CompatibilityCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    compatLabel,
+                    matchLabel,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -985,14 +1010,20 @@ class _CompatibilityCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            _StarRow(stars: stars, size: 26, color: starColor),
-            const SizedBox(height: 6),
-            Text(
-              l10n.migrationResultRevealTapToSeeDetails(),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSoftFor(context),
-                fontSize: 11,
-              ),
+            Row(
+              children: [
+                Icon(Icons.tune_rounded, size: 18, color: matchColor),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.migrationResultRevealTapToSeeDetails(),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -1068,19 +1099,474 @@ class _WhyCitySection extends StatelessWidget {
   }
 }
 
+class _RecommendationIntegrityCard extends StatelessWidget {
+  const _RecommendationIntegrityCard({required this.plan});
+
+  final MigrationPlan plan;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final isDark = AppColors.isDark(context);
+    final coverageLabel = switch (plan.recommendationDataCoverage) {
+      >= 0.75 => switch (locale) {
+        'pt' => 'Cobertura ampla',
+        'es' => 'Cobertura amplia',
+        _ => 'Broad coverage',
+      },
+      >= 0.5 => switch (locale) {
+        'pt' => 'Cobertura parcial',
+        'es' => 'Cobertura parcial',
+        _ => 'Partial coverage',
+      },
+      _ => switch (locale) {
+        'pt' => 'Cobertura limitada',
+        'es' => 'Cobertura limitada',
+        _ => 'Limited coverage',
+      },
+    };
+    final freshnessLabel = switch (plan.recommendationFreshnessStatus) {
+      'fresh' => switch (locale) {
+        'pt' => 'Dados atuais',
+        'es' => 'Datos actuales',
+        _ => 'Current data',
+      },
+      'stale' => switch (locale) {
+        'pt' => 'Há fontes para revisar',
+        'es' => 'Hay fuentes por revisar',
+        _ => 'Some sources need review',
+      },
+      _ => switch (locale) {
+        'pt' => 'Atualização não confirmada',
+        'es' => 'Actualización no confirmada',
+        _ => 'Update not confirmed',
+      },
+    };
+    final stabilityLabel = switch (plan.recommendationStabilityBand) {
+      'robust' => switch (locale) {
+        'pt' => 'Resultado estável',
+        'es' => 'Resultado estable',
+        _ => 'Stable result',
+      },
+      'moderate' => switch (locale) {
+        'pt' => 'Sensibilidade moderada',
+        'es' => 'Sensibilidad moderada',
+        _ => 'Moderate sensitivity',
+      },
+      'sensitive' => switch (locale) {
+        'pt' => 'Resultado sensível',
+        'es' => 'Resultado sensible',
+        _ => 'Sensitive result',
+      },
+      _ => switch (locale) {
+        'pt' => 'Estabilidade não avaliada',
+        'es' => 'Estabilidad no evaluada',
+        _ => 'Stability not evaluated',
+      },
+    };
+    final reliabilityLabel = switch (plan.recommendationReliabilityBand) {
+      'strong' => switch (locale) {
+        'pt' => 'Confiabilidade forte',
+        'es' => 'Confiabilidad fuerte',
+        _ => 'Strong reliability',
+      },
+      'moderate' => switch (locale) {
+        'pt' => 'Confiabilidade moderada',
+        'es' => 'Confiabilidad moderada',
+        _ => 'Moderate reliability',
+      },
+      _ => switch (locale) {
+        'pt' => 'Confiabilidade limitada',
+        'es' => 'Confiabilidad limitada',
+        _ => 'Limited reliability',
+      },
+    };
+    final separationLabel = switch (plan.recommendationScoreSeparationBand) {
+      'close' => switch (locale) {
+        'pt' => 'Alternativas próximas',
+        'es' => 'Alternativas cercanas',
+        _ => 'Close alternatives',
+      },
+      'clear' => switch (locale) {
+        'pt' => 'Vantagem clara',
+        'es' => 'Ventaja clara',
+        _ => 'Clear lead',
+      },
+      'strong' => switch (locale) {
+        'pt' => 'Vantagem consistente',
+        'es' => 'Ventaja consistente',
+        _ => 'Consistent lead',
+      },
+      _ => switch (locale) {
+        'pt' => 'Resultado único',
+        'es' => 'Resultado único',
+        _ => 'Single result',
+      },
+    };
+    final title = switch (locale) {
+      'pt' => 'Como esta indicação foi construída',
+      'es' => 'Cómo se construyó esta recomendación',
+      _ => 'How this recommendation was built',
+    };
+    final sourcesTitle = switch (locale) {
+      'pt' => 'Fontes consideradas',
+      'es' => 'Fuentes consideradas',
+      _ => 'Sources considered',
+    };
+    final methodologyLabel = switch (locale) {
+      'pt' => 'Metodologia',
+      'es' => 'Metodología',
+      _ => 'Methodology',
+    };
+    final generatedLabel = switch (locale) {
+      'pt' => 'Gerada em',
+      'es' => 'Generada el',
+      _ => 'Generated',
+    };
+    final evaluationNote = switch (locale) {
+      'pt' =>
+        'A estabilidade verifica se a primeira cidade se mantém com pequenas variações nos pesos. As faixas não representam probabilidade de acerto.',
+      'es' =>
+        'La estabilidad verifica si la primera ciudad se mantiene con pequeñas variaciones en los pesos. Las franjas no representan probabilidad de acierto.',
+      _ =>
+        'Stability checks whether the leading city remains first under small weight changes. These bands are not a probability of being correct.',
+    };
+    final generatedDate = _displayDate(plan.recommendationGeneratedAt, locale);
+    final warning = plan.recommendationWarnings.isEmpty
+        ? null
+        : _warningText(plan.recommendationWarnings.first, locale);
+
+    return FrostedPanel(
+      padding: const EdgeInsets.all(18),
+      borderRadius: BorderRadius.circular(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.verified_user_outlined,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _IntegrityChip(
+                icon: Icons.dataset_outlined,
+                label: coverageLabel,
+              ),
+              _IntegrityChip(
+                icon: plan.recommendationFreshnessStatus == 'fresh'
+                    ? Icons.update_rounded
+                    : Icons.info_outline_rounded,
+                label: freshnessLabel,
+              ),
+              _IntegrityChip(
+                icon: Icons.balance_rounded,
+                label: stabilityLabel,
+              ),
+              _IntegrityChip(
+                icon: Icons.fact_check_outlined,
+                label: reliabilityLabel,
+              ),
+              _IntegrityChip(
+                icon: Icons.compare_arrows_rounded,
+                label: separationLabel,
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            evaluationNote,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '$methodologyLabel · ${plan.recommendationMethodologyVersion}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
+          ),
+          if (generatedDate.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              '$generatedLabel · $generatedDate',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+              ),
+            ),
+          ],
+          if (plan.recommendationSourceLabels.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              sourcesTitle,
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              plan.recommendationSourceLabels.take(4).join(' · '),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.4,
+              ),
+            ),
+          ],
+          if (warning != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.warning.withValues(
+                  alpha: isDark ? 0.12 : 0.08,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                warning,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  static String _displayDate(String raw, String locale) {
+    final date = DateTime.tryParse(raw)?.toLocal();
+    if (date == null) return '';
+    if (locale == 'en') {
+      return '${date.month.toString().padLeft(2, '0')}/'
+          '${date.day.toString().padLeft(2, '0')}/${date.year}';
+    }
+    return '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  static String _warningText(String key, String locale) {
+    return switch (key) {
+      'recommendation_warning_origin_distance_unavailable' => switch (locale) {
+        'pt' =>
+          'A distância até sua origem não entrou no cálculo porque a localização não foi confirmada.',
+        'es' =>
+          'La distancia hasta tu origen no entró en el cálculo porque la ubicación no fue confirmada.',
+        _ =>
+          'Distance from your origin was not included because the location was not confirmed.',
+      },
+      'recommendation_warning_climate_normals_unavailable' => switch (locale) {
+        'pt' =>
+          'Clima não foi estimado sem uma base de normais climáticas validada.',
+        'es' =>
+          'El clima no fue estimado sin una base validada de normales climáticas.',
+        _ => 'Climate was not estimated without validated climate normals.',
+      },
+      'recommendation_warning_few_eligible_cities' => switch (locale) {
+        'pt' =>
+          'Poucas cidades atendem simultaneamente aos critérios obrigatórios.',
+        'es' =>
+          'Pocas ciudades cumplen simultáneamente los criterios obligatorios.',
+        _ => 'Few cities meet all mandatory criteria at the same time.',
+      },
+      'recommendation_warning_missing_dimensions' => switch (locale) {
+        'pt' =>
+          'Algumas dimensões ficaram fora do índice por falta de dados comparáveis.',
+        'es' =>
+          'Algunas dimensiones quedaron fuera del índice por falta de datos comparables.',
+        _ =>
+          'Some dimensions were left out because comparable data was unavailable.',
+      },
+      _ => switch (locale) {
+        'pt' => 'Há uma limitação de dados nesta indicação.',
+        'es' => 'Hay una limitación de datos en esta recomendación.',
+        _ => 'This recommendation has a data limitation.',
+      },
+    };
+  }
+}
+
+class _RecommendationFeedbackCard extends StatelessWidget {
+  const _RecommendationFeedbackCard({
+    required this.submitted,
+    required this.onSubmit,
+  });
+
+  final bool submitted;
+  final ValueChanged<bool> onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final title = submitted
+        ? switch (locale) {
+            'pt' => 'Obrigado pelo retorno',
+            'es' => 'Gracias por tu opinión',
+            _ => 'Thanks for your feedback',
+          }
+        : switch (locale) {
+            'pt' => 'Esta indicação fez sentido para você?',
+            'es' => '¿Esta recomendación tuvo sentido para ti?',
+            _ => 'Did this recommendation make sense to you?',
+          };
+    final body = submitted
+        ? switch (locale) {
+            'pt' =>
+              'O retorno ajuda a avaliar a metodologia de forma agregada. Suas respostas, cidade e localização não são enviadas.',
+            'es' =>
+              'Tu opinión ayuda a evaluar la metodología de forma agregada. Tus respuestas, ciudad y ubicación no se envían.',
+            _ =>
+              'Feedback helps evaluate the methodology in aggregate. Your answers, city and location are not sent.',
+          }
+        : switch (locale) {
+            'pt' =>
+              'Seu retorno é opcional e segue a preferência de diagnóstico definida no aplicativo.',
+            'es' =>
+              'Tu opinión es opcional y sigue la preferencia de diagnóstico definida en la aplicación.',
+            _ =>
+              'Feedback is optional and follows the diagnostics preference set in the app.',
+          };
+
+    return FrostedPanel(
+      padding: const EdgeInsets.all(16),
+      borderRadius: BorderRadius.circular(18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  body,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (!submitted) ...[
+            const SizedBox(width: 10),
+            IconButton.filledTonal(
+              tooltip: switch (locale) {
+                'pt' => 'Não fez sentido',
+                'es' => 'No tuvo sentido',
+                _ => 'Did not make sense',
+              },
+              onPressed: () => onSubmit(false),
+              icon: const Icon(Icons.thumb_down_alt_outlined, size: 19),
+            ),
+            const SizedBox(width: 6),
+            IconButton.filled(
+              tooltip: switch (locale) {
+                'pt' => 'Fez sentido',
+                'es' => 'Tuvo sentido',
+                _ => 'Made sense',
+              },
+              onPressed: () => onSubmit(true),
+              icon: const Icon(Icons.thumb_up_alt_outlined, size: 19),
+            ),
+          ] else
+            const Padding(
+              padding: EdgeInsets.only(left: 12),
+              child: Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.success,
+                size: 26,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IntegrityChip extends StatelessWidget {
+  const _IntegrityChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.16)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: AppColors.primary),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ─── Alternatives ──────────────────────────────────────────────────────────────
 
 class _AlternativesSection extends StatelessWidget {
   const _AlternativesSection({
     required this.cities,
-    required this.confidence,
+    required this.matchScores,
+    required this.dimensionScores,
     required this.highlightedCity,
     required this.onTap,
     this.planTimeline,
   });
 
   final List<City> cities;
-  final double confidence;
+  final Map<String, double> matchScores;
+  final Map<String, Map<String, double>> dimensionScores;
   final City highlightedCity;
   final void Function(City) onTap;
 
@@ -1092,9 +1578,7 @@ class _AlternativesSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final l10n = context.l10n;
-    final recDims = MigrationPlanGenerator.cityDimensionsPublic(
-      highlightedCity,
-    );
+    final recDims = dimensionScores[highlightedCity.id] ?? const {};
     final locale = Localizations.localeOf(context).languageCode;
 
     return Column(
@@ -1109,12 +1593,10 @@ class _AlternativesSection extends StatelessWidget {
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
         ),
-        ...cities.take(2).indexed.map((entry) {
-          final (index, city) = entry;
+        ...cities.take(2).map((city) {
           final imageUrl = cityImageUrlFor(city.id);
-          final altPct = ((confidence * (index == 0 ? 0.85 : 0.70)) * 100)
-              .round()
-              .clamp(0, 100);
+          final matchScore = matchScores[city.id];
+          final matchColor = _matchBandColor(matchScore);
 
           // Seasonality conflict check
           final seasonConflict = planTimeline != null
@@ -1125,7 +1607,7 @@ class _AlternativesSection extends StatelessWidget {
               : null;
 
           // Compute dimension diff chips
-          final altDims = MigrationPlanGenerator.cityDimensionsPublic(city);
+          final altDims = dimensionScores[city.id] ?? const {};
           // Biggest advantage of alt over highlighted city
           String? altWinsDim;
           double altWinsDelta = 0;
@@ -1199,10 +1681,17 @@ class _AlternativesSection extends StatelessWidget {
                               ],
                             ),
                           ),
-                          _StarRow(
-                            stars: _pctToStars(altPct),
-                            size: 13,
-                            color: AppColors.warning,
+                          Flexible(
+                            child: Text(
+                              _matchBandLabel(context, matchScore),
+                              textAlign: TextAlign.end,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: matchColor,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
                           ),
                           const SizedBox(width: 6),
                           Icon(
@@ -1550,10 +2039,11 @@ class _CityComparisonSheetState extends State<_CityComparisonSheet> {
 
     final compareCity =
         alternatives[_selectedIndex.clamp(0, alternatives.length - 1)];
-    final recDims = MigrationPlanGenerator.cityDimensionsPublic(
-      widget.highlightedCity,
-    );
-    final altDims = MigrationPlanGenerator.cityDimensionsPublic(compareCity);
+    final recDims =
+        widget.plan.candidateCityDimensionScores[widget.highlightedCity.id] ??
+        const {};
+    final altDims =
+        widget.plan.candidateCityDimensionScores[compareCity.id] ?? const {};
 
     // Sort by absolute delta — most decisive dimensions first
     final keys = recDims.keys.toList();
@@ -1564,8 +2054,12 @@ class _CityComparisonSheetState extends State<_CityComparisonSheet> {
     });
 
     // Overall average score gap
-    final recAvg = recDims.values.fold(0.0, (s, v) => s + v) / recDims.length;
-    final altAvg = altDims.values.fold(0.0, (s, v) => s + v) / altDims.length;
+    final recAvg = recDims.isEmpty
+        ? 0.0
+        : recDims.values.fold(0.0, (s, v) => s + v) / recDims.length;
+    final altAvg = altDims.isEmpty
+        ? 0.0
+        : altDims.values.fold(0.0, (s, v) => s + v) / altDims.length;
     final gapPct = ((recAvg - altAvg) * 100).round().abs();
     final recWinsOverall = recAvg >= altAvg;
 
@@ -1775,9 +2269,9 @@ class _ScoreGapBanner extends StatelessWidget {
 
     final gapLabel = switch (gapPct) {
       <= 3 => switch (locale) {
-        'pt' => 'empate técnico',
-        'es' => 'empate técnico',
-        _ => 'statistical tie',
+        'pt' => 'resultado muito próximo',
+        'es' => 'resultado muy cercano',
+        _ => 'very close result',
       },
       <= 8 => switch (locale) {
         'pt' => 'diferença leve',
@@ -1797,9 +2291,9 @@ class _ScoreGapBanner extends StatelessWidget {
     };
 
     final bodyText = switch (locale) {
-      'pt' => '$winner tem $gapPct pt a mais no índice geral — $gapLabel.',
-      'es' => '$winner tiene $gapPct pt más en el índice general — $gapLabel.',
-      _ => '$winner scores $gapPct pt higher overall — $gapLabel.',
+      'pt' => '$winner aparece à frente no índice geral — $gapLabel.',
+      'es' => '$winner aparece por delante en el índice general — $gapLabel.',
+      _ => '$winner ranks ahead overall — $gapLabel.',
     };
 
     final color = recWins ? AppColors.primary : AppColors.caution;
@@ -1899,9 +2393,9 @@ class _BarRow extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         SizedBox(
-          width: 30,
+          width: 64,
           child: Text(
-            '${(score * 100).round()}',
+            _dimensionBandLabel(context, score),
             textAlign: TextAlign.right,
             style: TextStyle(
               fontSize: 11,
@@ -1919,6 +2413,29 @@ class _BarRow extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _dimensionBandLabel(BuildContext context, double value) {
+    final locale = Localizations.localeOf(context).languageCode;
+    if (value >= 0.72) {
+      return switch (locale) {
+        'pt' => 'Alta',
+        'es' => 'Alta',
+        _ => 'High',
+      };
+    }
+    if (value >= 0.5) {
+      return switch (locale) {
+        'pt' => 'Média',
+        'es' => 'Media',
+        _ => 'Medium',
+      };
+    }
+    return switch (locale) {
+      'pt' => 'Baixa',
+      'es' => 'Baja',
+      _ => 'Low',
+    };
   }
 }
 
@@ -2164,7 +2681,7 @@ class _AltCityPlaceholder extends StatelessWidget {
   }
 }
 
-// ─── Dimension row (icon + label + mini-stars) ────────────────────────────────
+// ─── Dimension row (icon + label + relative signal) ──────────────────────────
 
 class _DimensionRow extends StatelessWidget {
   const _DimensionRow({
@@ -2179,7 +2696,6 @@ class _DimensionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stars = _pctToStars((value * 100).round());
     final cs = Theme.of(context).colorScheme;
 
     return Padding(
@@ -2196,7 +2712,20 @@ class _DimensionRow extends StatelessWidget {
               ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
             ),
           ),
-          _StarRow(stars: stars, size: 14, color: AppColors.warning),
+          SizedBox(
+            width: 72,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                value: value,
+                minHeight: 6,
+                backgroundColor: cs.onSurface.withValues(alpha: 0.08),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  cs.primary.withValues(alpha: 0.72),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -2254,71 +2783,8 @@ class _CompatibilityExplanationCard extends StatelessWidget {
               height: 1.45,
             ),
           ),
-          const SizedBox(height: 10),
-          _HowStarsWorkExplanation(),
         ],
       ),
-    );
-  }
-}
-
-// ─── How stars work row ───────────────────────────────────────────────────────
-
-class _HowStarsWorkExplanation extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final lang = Localizations.localeOf(context).languageCode;
-
-    final rows = switch (lang) {
-      'pt' => const [
-        (5.0, '★★★★★', 'Excelente match para o seu perfil'),
-        (4.0, '★★★★☆', 'Muito boa compatibilidade'),
-        (3.0, '★★★☆☆', 'Boa compatibilidade'),
-        (2.0, '★★☆☆☆', 'Compatibilidade inicial'),
-      ],
-      'es' => const [
-        (5.0, '★★★★★', 'Excelente match con tu perfil'),
-        (4.0, '★★★★☆', 'Muy buena compatibilidad'),
-        (3.0, '★★★☆☆', 'Buena compatibilidad'),
-        (2.0, '★★☆☆☆', 'Compatibilidad inicial'),
-      ],
-      _ => const [
-        (5.0, '★★★★★', 'Excellent match for your profile'),
-        (4.0, '★★★★☆', 'Very good compatibility'),
-        (3.0, '★★★☆☆', 'Good compatibility'),
-        (2.0, '★★☆☆☆', 'Initial compatibility'),
-      ],
-    };
-
-    return Column(
-      children: rows.map((row) {
-        final (_, stars, label) = row;
-        return Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Row(
-            children: [
-              Text(
-                stars,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: AppColors.warning,
-                  letterSpacing: 1,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSoftFor(context),
-                    fontSize: 11,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
     );
   }
 }
@@ -2912,12 +3378,14 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
   const _AntiAnchorComparisonSection({
     required this.preferredCity,
     required this.highlightedCity,
+    required this.dimensionScores,
     required this.onGoWithPreferred,
     required this.onTryHighlighted,
   });
 
   final City preferredCity;
   final City highlightedCity;
+  final Map<String, Map<String, double>> dimensionScores;
   final VoidCallback onGoWithPreferred;
   final VoidCallback onTryHighlighted;
 
@@ -2926,10 +3394,8 @@ class _AntiAnchorComparisonSection extends StatelessWidget {
     final l10n = context.l10n;
     final textSoft = AppColors.textSoftFor(context);
 
-    final prefDims = MigrationPlanGenerator.cityDimensionsPublic(preferredCity);
-    final recDims = MigrationPlanGenerator.cityDimensionsPublic(
-      highlightedCity,
-    );
+    final prefDims = dimensionScores[preferredCity.id] ?? const {};
+    final recDims = dimensionScores[highlightedCity.id] ?? const {};
 
     final strengths = <String>[];
     final attentionPoints = <String>[];

@@ -1,0 +1,27 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="lightRibbon" x1="220" y1="920" x2="742" y2="498" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="0.34" stop-color="#F7FCFF"/>
+      <stop offset="0.7" stop-color="#52E6F2"/>
+      <stop offset="1" stop-color="#009BF7"/>
+    </linearGradient>
+    <linearGradient id="blueRibbon" x1="580" y1="920" x2="1018" y2="470" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0644DF"/>
+      <stop offset="0.52" stop-color="#006BFF"/>
+      <stop offset="1" stop-color="#178DFF"/>
+    </linearGradient>
+    <linearGradient id="coral" x1="948" y1="469" x2="1060" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF8A78"/>
+      <stop offset="1" stop-color="#FF5F55"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(84 51) scale(0.69)">
+    <path d="M921 486L981 423C1005 398 1034 397 1052 414C1061 423 1064 437 1064 454L1061 548L1014 500L969 478L921 486Z" fill="url(#coral)"/>
+    <path d="M939 468L982 424C1005 401 1033 401 1050 417" stroke="#FFC0B6" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+    <path d="M181 868L487 525C506 504 529 494 557 494H622C653 494 675 506 695 530L779 631L681 733L589 619C575 602 557 608 547 633L464 844C444 895 417 932 371 932H220C183 932 163 902 181 868Z" fill="url(#lightRibbon)"/>
+    <path d="M517 731C511 763 527 794 554 822L610 894C628 918 649 933 679 933H703C732 933 752 918 773 894L1030 606C1059 574 1065 546 1058 519C1052 490 1028 469 1000 460C971 450 949 457 929 478L681 733L605 808C588 825 570 827 552 813C527 794 512 763 517 731Z" fill="url(#blueRibbon)"/>
+    <path d="M517 731C511 763 527 794 554 813C571 826 589 824 606 807L620 793C597 815 578 810 561 793C540 772 531 748 535 716L517 731Z" fill="#128FF6" opacity="0.92"/>
+    <path d="M929 478C949 457 971 450 1000 460C1028 469 1052 490 1058 519" stroke="#44A4FF" stroke-width="5" stroke-linecap="round" opacity="0.55"/>
+  </g>
+</svg>

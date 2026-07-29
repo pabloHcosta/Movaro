@@ -1,8 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
 
 class SplashLoadingView extends StatefulWidget {
   const SplashLoadingView({
@@ -20,317 +20,302 @@ class SplashLoadingView extends StatefulWidget {
 
 class _SplashLoadingViewState extends State<SplashLoadingView>
     with TickerProviderStateMixin {
-  // One-shot entrance sequence
   late final AnimationController _entranceController = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1100),
-  )..forward();
+    duration: const Duration(milliseconds: 1150),
+  );
 
-  // Continuous breathing cycle
-  late final AnimationController _pulseController = AnimationController(
+  late final AnimationController _ambientController = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 2400),
-  )..repeat(reverse: true);
-
-  // ── Entrance animations ──────────────────────────────────────────────────
-  late final Animation<double> _markFade = CurvedAnimation(
-    parent: _entranceController,
-    curve: const Interval(0.00, 0.45, curve: Curves.easeOut),
+    duration: const Duration(milliseconds: 4200),
   );
 
-  late final Animation<double> _markScale =
-      Tween<double>(begin: 0.80, end: 1.00).animate(
+  late final Animation<double> _heroOpacity = CurvedAnimation(
+    parent: _entranceController,
+    curve: const Interval(0, 0.5, curve: Curves.easeOutCubic),
+  );
+
+  late final Animation<double> _heroScale = Tween<double>(begin: 0.92, end: 1)
+      .animate(
         CurvedAnimation(
           parent: _entranceController,
-          curve: const Interval(0.00, 0.58, curve: Curves.easeOutBack),
+          curve: const Interval(0, 0.65, curve: Curves.easeOutCubic),
         ),
       );
 
-  late final Animation<double> _wordmarkFade = CurvedAnimation(
+  late final Animation<double> _copyOpacity = CurvedAnimation(
     parent: _entranceController,
-    curve: const Interval(0.30, 0.68, curve: Curves.easeOut),
+    curve: const Interval(0.28, 0.78, curve: Curves.easeOutCubic),
   );
 
-  late final Animation<double> _wordmarkSlide =
-      Tween<double>(begin: 14.0, end: 0.0).animate(
-        CurvedAnimation(
-          parent: _entranceController,
-          curve: const Interval(0.30, 0.74, curve: Curves.easeOutCubic),
-        ),
-      );
-
-  late final Animation<double> _taglineFade = CurvedAnimation(
+  late final Animation<double> _statusOpacity = CurvedAnimation(
     parent: _entranceController,
-    curve: const Interval(0.50, 0.86, curve: Curves.easeOut),
+    curve: const Interval(0.62, 1, curve: Curves.easeOut),
   );
 
-  late final Animation<double> _dotsFade = CurvedAnimation(
-    parent: _entranceController,
-    curve: const Interval(0.70, 1.00, curve: Curves.easeOut),
-  );
+  bool _motionConfigured = false;
 
-  // ── Breathing glow ───────────────────────────────────────────────────────
-  late final Animation<double> _glowPulse = CurvedAnimation(
-    parent: _pulseController,
-    curve: Curves.easeInOut,
-  );
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_motionConfigured) return;
+    _motionConfigured = true;
+
+    final mediaQuery = MediaQuery.of(context);
+    final reduceMotion =
+        mediaQuery.disableAnimations || mediaQuery.accessibleNavigation;
+
+    if (reduceMotion) {
+      _entranceController.value = 1;
+      _ambientController.value = 0.5;
+    } else {
+      _entranceController.forward();
+      _ambientController.repeat();
+    }
+  }
 
   @override
   void dispose() {
     _entranceController.dispose();
-    _pulseController.dispose();
+    _ambientController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final isCompact = screenWidth < 520;
-    final markSize = isCompact ? 88.0 : 108.0;
-
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          const AmbientBackground(),
-
-          // Animated background (glows breathe with pulse)
-          AnimatedBuilder(
-            animation: _pulseController,
-            builder: (context, _) =>
-                _SplashBackground(glowValue: _glowPulse.value),
-          ),
-
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Spacer(flex: 2),
-
-                  // ── Logo mark — entrance: fade + scale ──────────────────
-                  FadeTransition(
-                    opacity: _markFade,
-                    child: ScaleTransition(
-                      scale: _markScale,
-                      child: AnimatedBuilder(
-                        animation: _pulseController,
-                        builder: (context, _) => _SplashMark(
-                          size: markSize,
-                          glowValue: _glowPulse.value,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // ── Wordmark — entrance: fade + slide up ────────────────
-                  FadeTransition(
-                    opacity: _wordmarkFade,
-                    child: AnimatedBuilder(
-                      animation: _entranceController,
-                      builder: (context, _) => Transform.translate(
-                        offset: Offset(0, _wordmarkSlide.value),
-                        child: Text(
-                          'Movaro',
-                          style: Theme.of(context).textTheme.displaySmall
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -2.2,
-                                height: 1.0,
-                              ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // ── Tagline — entrance: fade ────────────────────────────
-                  FadeTransition(
-                    opacity: _taglineFade,
-                    child: Text(
-                      context.l10n.splashHeroTitle,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.55),
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-
-                  const Spacer(flex: 3),
-
-                  // ── Pulsing dots — replaces fake progress bar ───────────
-                  FadeTransition(
-                    opacity: _dotsFade,
-                    child: _LoadingDots(controller: _pulseController),
-                  ),
-
-                  const SizedBox(height: 52),
-                ],
+      backgroundColor: const Color(0xFF020B1D),
+      body: RepaintBoundary(
+        key: const ValueKey('splash-visual-root'),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            AnimatedBuilder(
+              animation: _ambientController,
+              builder: (context, _) => CustomPaint(
+                painter: _SplashAtmospherePainter(_ambientController.value),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+            SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isLandscapeHero =
+                      constraints.maxWidth >= 760 &&
+                      constraints.maxWidth / constraints.maxHeight > 1.25;
 
-// ── Animated background ──────────────────────────────────────────────────────
-
-class _SplashBackground extends StatelessWidget {
-  const _SplashBackground({required this.glowValue});
-
-  final double glowValue;
-
-  @override
-  Widget build(BuildContext context) {
-    final topAlpha = 0.16 + (glowValue * 0.12);
-    final bottomAlpha = 0.22 + (glowValue * 0.14);
-    final centerAlpha = 0.06 + (glowValue * 0.05);
-
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.heroStart,
-            AppColors.heroMiddle,
-            AppColors.heroEnd,
+                  return Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      constraints.maxWidth < 420 ? 22 : 36,
+                      24,
+                      constraints.maxWidth < 420 ? 22 : 36,
+                      24,
+                    ),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 980),
+                              child: isLandscapeHero
+                                  ? _buildLandscapeHero(context, constraints)
+                                  : _buildPortraitHero(context, constraints),
+                            ),
+                          ),
+                        ),
+                        FadeTransition(
+                          opacity: _statusOpacity,
+                          child: _LaunchStatus(
+                            label: widget.loadingLabel,
+                            semanticsLabel: widget.initializingLabel,
+                            controller: _ambientController,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
-          stops: [0.0, 0.50, 1.0],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
       ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Top-left lavender glow — breathes with pulse
-          Positioned(
-            top: -140,
-            left: -100,
-            child: IgnorePointer(
-              child: Container(
-                width: 440,
-                height: 440,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      AppColors.glowLavender.withValues(alpha: topAlpha),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+    );
+  }
 
-          // Bottom-right blue glow — breathes with pulse
-          Positioned(
-            right: -130,
-            bottom: -170,
-            child: IgnorePointer(
-              child: Container(
-                width: 500,
-                height: 500,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      AppColors.glowBlue.withValues(alpha: bottomAlpha),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+  Widget _buildPortraitHero(BuildContext context, BoxConstraints constraints) {
+    final heroWidth = math.min(constraints.maxWidth * 0.88, 460.0);
 
-          // Center radial accent (subtle primary hue)
-          Positioned.fill(
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    center: const Alignment(0.05, -0.10),
-                    radius: 0.58,
-                    colors: [
-                      AppColors.primary.withValues(alpha: centerAlpha),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _AnimatedHeroMark(
+          width: heroWidth,
+          opacity: _heroOpacity,
+          scale: _heroScale,
+          ambientController: _ambientController,
+        ),
+        SizedBox(height: constraints.maxHeight < 650 ? 12 : 24),
+        _BrandCopy(
+          opacity: _copyOpacity,
+          centered: true,
+          compact: constraints.maxHeight < 650,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLandscapeHero(BuildContext context, BoxConstraints constraints) {
+    final heroWidth = math.min(constraints.maxWidth * 0.48, 500.0);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Flexible(
+          child: _AnimatedHeroMark(
+            width: heroWidth,
+            opacity: _heroOpacity,
+            scale: _heroScale,
+            ambientController: _ambientController,
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 58),
+        Flexible(
+          child: _BrandCopy(
+            opacity: _copyOpacity,
+            centered: false,
+            compact: constraints.maxHeight < 560,
+          ),
+        ),
+      ],
     );
   }
 }
 
-// ── Logo mark with double glow ───────────────────────────────────────────────
+class _AnimatedHeroMark extends StatelessWidget {
+  const _AnimatedHeroMark({
+    required this.width,
+    required this.opacity,
+    required this.scale,
+    required this.ambientController,
+  });
 
-class _SplashMark extends StatelessWidget {
-  const _SplashMark({required this.size, required this.glowValue});
-
-  final double size;
-  final double glowValue;
+  final double width;
+  final Animation<double> opacity;
+  final Animation<double> scale;
+  final AnimationController ambientController;
 
   @override
   Widget build(BuildContext context) {
-    final outerAlpha = 0.12 + (glowValue * 0.10);
-    final innerAlpha = 0.07 + (glowValue * 0.06);
-    final outerSize = size + 108.0;
-    final innerSize = size + 40.0;
+    return Semantics(
+      image: true,
+      label: 'Movaro',
+      child: FadeTransition(
+        opacity: opacity,
+        child: ScaleTransition(
+          scale: scale,
+          child: AnimatedBuilder(
+            animation: ambientController,
+            builder: (context, child) {
+              final wave = math.sin(ambientController.value * math.pi * 2);
+              return Transform.translate(
+                offset: Offset(0, wave * 3),
+                child: child,
+              );
+            },
+            child: SizedBox(
+              width: width,
+              height: width * 0.63,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          radius: 0.56,
+                          colors: [
+                            const Color(0xFF0876FF).withValues(alpha: 0.22),
+                            const Color(0xFF0876FF).withValues(alpha: 0.06),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: width * 0.04),
+                    child: SvgPicture.asset(
+                      'assets/brand/movaro_splash_hero.svg',
+                      width: width,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-    return SizedBox(
-      width: outerSize,
-      height: outerSize,
-      child: Stack(
-        alignment: Alignment.center,
+class _BrandCopy extends StatelessWidget {
+  const _BrandCopy({
+    required this.opacity,
+    required this.centered,
+    required this.compact,
+  });
+
+  final Animation<double> opacity;
+  final bool centered;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final textAlign = centered ? TextAlign.center : TextAlign.left;
+    final crossAxisAlignment = centered
+        ? CrossAxisAlignment.center
+        : CrossAxisAlignment.start;
+
+    return AnimatedBuilder(
+      animation: opacity,
+      builder: (context, child) => Opacity(
+        opacity: opacity.value,
+        child: Transform.translate(
+          offset: Offset(0, 12 * (1 - opacity.value)),
+          child: child,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: crossAxisAlignment,
         children: [
-          // Outer diffuse glow
-          Container(
-            width: outerSize,
-            height: outerSize,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  AppColors.glowBlue.withValues(alpha: outerAlpha),
-                  Colors.transparent,
-                ],
-              ),
+          Text(
+            'Movaro',
+            textAlign: textAlign,
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              color: Colors.white,
+              fontSize: compact ? 38 : 46,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -2.2,
+              height: 1,
             ),
           ),
-
-          // Inner tight glow
-          Container(
-            width: innerSize,
-            height: innerSize,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  Colors.white.withValues(alpha: innerAlpha),
-                  Colors.transparent,
-                ],
+          SizedBox(height: compact ? 10 : 14),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 390),
+            child: Text(
+              context.l10n.splashHeroTitle,
+              textAlign: textAlign,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: const Color(0xFFC8D8F4),
+                fontSize: compact ? 15 : 17,
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.2,
+                height: 1.4,
               ),
             ),
-          ),
-
-          // Brand mark
-          SvgPicture.asset(
-            'assets/brand/movaro_mark_light.svg',
-            width: size,
-            height: size,
           ),
         ],
       ),
@@ -338,57 +323,188 @@ class _SplashMark extends StatelessWidget {
   }
 }
 
-// ── Pulsing loading dots ─────────────────────────────────────────────────────
+class _LaunchStatus extends StatelessWidget {
+  const _LaunchStatus({
+    required this.label,
+    required this.semanticsLabel,
+    required this.controller,
+  });
 
-class _LoadingDots extends StatelessWidget {
-  const _LoadingDots({required this.controller});
+  final String label;
+  final String semanticsLabel;
+  final AnimationController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      label: semanticsLabel,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 310),
+        padding: const EdgeInsets.fromLTRB(16, 12, 18, 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.055),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x33000000),
+              blurRadius: 28,
+              offset: Offset(0, 12),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _ShimmerTrack(controller: controller),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.72),
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.1,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ShimmerTrack extends StatelessWidget {
+  const _ShimmerTrack({required this.controller});
 
   final AnimationController controller;
 
-  static const _count = 3;
-  static const _size = 6.0;
-  static const _spacing = 9.0;
-
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, _) {
-        final t = Curves.easeInOut.transform(controller.value);
-        return Row(
-          mainAxisSize: MainAxisSize.min,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(999),
+      child: SizedBox(
+        width: 46,
+        height: 4,
+        child: Stack(
           children: [
-            for (var i = 0; i < _count; i++) ...[
-              if (i > 0) const SizedBox(width: _spacing),
-              _buildDot(i, t),
-            ],
+            Positioned.fill(
+              child: ColoredBox(color: Colors.white.withValues(alpha: 0.12)),
+            ),
+            AnimatedBuilder(
+              animation: controller,
+              builder: (context, _) {
+                final position =
+                    Curves.easeInOut.transform(controller.value) * 34 - 8;
+                return Transform.translate(
+                  offset: Offset(position, 0),
+                  child: Container(
+                    width: 20,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF56E5F3), Color(0xFF1288FF)],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
-        );
-      },
-    );
-  }
-
-  Widget _buildDot(int index, double t) {
-    // Each dot peaks at a different phase in the 0→1 cycle:
-    // dot 0 peaks at t=0.0, dot 1 at t=0.5, dot 2 at t=1.0
-    // The controller reverses (0→1→0→1...) creating a pendulum wave.
-    final phase = index / (_count - 1); // 0.0, 0.5, 1.0
-    final dist = (t - phase).abs();
-    final brightness = (1.0 - dist * 2.2).clamp(0.0, 1.0);
-
-    final alpha = 0.22 + (brightness * 0.78);
-    final scale = 0.62 + (brightness * 0.38);
-
-    return Transform.scale(
-      scale: scale,
-      child: Container(
-        width: _size,
-        height: _size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: alpha),
         ),
       ),
     );
   }
+}
+
+class _SplashAtmospherePainter extends CustomPainter {
+  const _SplashAtmospherePainter(this.progress);
+
+  final double progress;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    const background = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF020B1D), Color(0xFF061839), Color(0xFF062A83)],
+      stops: [0, 0.56, 1],
+    );
+    canvas.drawRect(rect, Paint()..shader = background.createShader(rect));
+
+    final blueGlow = Paint()
+      ..shader =
+          RadialGradient(
+            colors: [
+              const Color(0xFF0B70FF).withValues(alpha: 0.2),
+              Colors.transparent,
+            ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width * 0.78, size.height * 0.7),
+              radius: math.max(size.width, size.height) * 0.62,
+            ),
+          );
+    canvas.drawRect(rect, blueGlow);
+
+    final cyanGlow = Paint()
+      ..shader =
+          RadialGradient(
+            colors: [
+              const Color(0xFF36DDEA).withValues(alpha: 0.08),
+              Colors.transparent,
+            ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width * 0.28, size.height * 0.38),
+              radius: math.max(size.width, size.height) * 0.42,
+            ),
+          );
+    canvas.drawRect(rect, cyanGlow);
+
+    final shift = math.sin(progress * math.pi * 2) * size.width * 0.015;
+    final route = Path()
+      ..moveTo(-size.width * 0.08 + shift, size.height * 0.78)
+      ..cubicTo(
+        size.width * 0.22 + shift,
+        size.height * 0.62,
+        size.width * 0.48 + shift,
+        size.height * 0.96,
+        size.width * 1.08 + shift,
+        size.height * 0.73,
+      );
+    canvas.drawPath(
+      route,
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.035)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2,
+    );
+
+    final fineRoute = Path()
+      ..moveTo(size.width * 0.04 - shift, size.height * 0.18)
+      ..cubicTo(
+        size.width * 0.32 - shift,
+        size.height * 0.04,
+        size.width * 0.63 - shift,
+        size.height * 0.32,
+        size.width * 1.04 - shift,
+        size.height * 0.13,
+      );
+    canvas.drawPath(
+      fineRoute,
+      Paint()
+        ..color = const Color(0xFF61DCEB).withValues(alpha: 0.045)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_SplashAtmospherePainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }

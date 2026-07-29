@@ -26,7 +26,20 @@ class MigrationPlanModel {
     this.preferredCity,
     this.candidateCities = const [],
     this.candidateCityMatchScores = const {},
+    this.candidateCityDimensionScores = const {},
+    this.candidateCityReasons = const {},
     this.cityRecommendationReasons = const [],
+    this.recommendationId = '',
+    this.recommendationMethodologyVersion = '',
+    this.recommendationGeneratedAt = '',
+    this.recommendationDataCoverage = 0,
+    this.recommendationFreshnessStatus = 'unknown',
+    this.recommendationWarnings = const [],
+    this.recommendationSourceLabels = const [],
+    this.recommendationStabilityBand = 'insufficient_data',
+    this.recommendationReliabilityBand = 'limited',
+    this.recommendationScoreSeparationBand = 'single_result',
+    this.recommendationScenariosEvaluated = 0,
     this.isCityConfirmed = false,
   });
 
@@ -84,10 +97,57 @@ class MigrationPlanModel {
               .map(
                 (key, value) => MapEntry(key, (value as num?)?.toDouble() ?? 0),
               ),
+      candidateCityDimensionScores:
+          (json['candidateCityDimensionScores'] as Map<String, dynamic>? ??
+                  const <String, dynamic>{})
+              .map(
+                (cityId, value) => MapEntry(
+                  cityId,
+                  (value as Map<String, dynamic>).map(
+                    (key, score) =>
+                        MapEntry(key, (score as num?)?.toDouble() ?? 0),
+                  ),
+                ),
+              ),
+      candidateCityReasons:
+          (json['candidateCityReasons'] as Map<String, dynamic>? ??
+                  const <String, dynamic>{})
+              .map(
+                (cityId, value) => MapEntry(
+                  cityId,
+                  (value as List<dynamic>).whereType<String>().toList(),
+                ),
+              ),
       cityRecommendationReasons:
           (json['cityRecommendationReasons'] as List<dynamic>? ?? const [])
               .map((item) => item as String)
               .toList(),
+      recommendationId: json['recommendationId'] as String? ?? '',
+      recommendationMethodologyVersion:
+          json['recommendationMethodologyVersion'] as String? ?? '',
+      recommendationGeneratedAt:
+          json['recommendationGeneratedAt'] as String? ?? '',
+      recommendationDataCoverage:
+          (json['recommendationDataCoverage'] as num?)?.toDouble() ?? 0,
+      recommendationFreshnessStatus:
+          json['recommendationFreshnessStatus'] as String? ?? 'unknown',
+      recommendationWarnings:
+          (json['recommendationWarnings'] as List<dynamic>? ?? const [])
+              .whereType<String>()
+              .toList(),
+      recommendationSourceLabels:
+          (json['recommendationSourceLabels'] as List<dynamic>? ?? const [])
+              .whereType<String>()
+              .toList(),
+      recommendationStabilityBand:
+          json['recommendationStabilityBand'] as String? ?? 'insufficient_data',
+      recommendationReliabilityBand:
+          json['recommendationReliabilityBand'] as String? ?? 'limited',
+      recommendationScoreSeparationBand:
+          json['recommendationScoreSeparationBand'] as String? ??
+          'single_result',
+      recommendationScenariosEvaluated:
+          (json['recommendationScenariosEvaluated'] as num?)?.toInt() ?? 0,
       isCityConfirmed: json['isCityConfirmed'] as bool? ?? false,
     );
   }
@@ -114,7 +174,20 @@ class MigrationPlanModel {
       preferredCity: plan.preferredCity,
       candidateCities: plan.candidateCities,
       candidateCityMatchScores: plan.candidateCityMatchScores,
+      candidateCityDimensionScores: plan.candidateCityDimensionScores,
+      candidateCityReasons: plan.candidateCityReasons,
       cityRecommendationReasons: plan.cityRecommendationReasons,
+      recommendationId: plan.recommendationId,
+      recommendationMethodologyVersion: plan.recommendationMethodologyVersion,
+      recommendationGeneratedAt: plan.recommendationGeneratedAt,
+      recommendationDataCoverage: plan.recommendationDataCoverage,
+      recommendationFreshnessStatus: plan.recommendationFreshnessStatus,
+      recommendationWarnings: plan.recommendationWarnings,
+      recommendationSourceLabels: plan.recommendationSourceLabels,
+      recommendationStabilityBand: plan.recommendationStabilityBand,
+      recommendationReliabilityBand: plan.recommendationReliabilityBand,
+      recommendationScoreSeparationBand: plan.recommendationScoreSeparationBand,
+      recommendationScenariosEvaluated: plan.recommendationScenariosEvaluated,
       isCityConfirmed: plan.isCityConfirmed,
     );
   }
@@ -139,7 +212,20 @@ class MigrationPlanModel {
   final City? preferredCity;
   final List<City> candidateCities;
   final Map<String, double> candidateCityMatchScores;
+  final Map<String, Map<String, double>> candidateCityDimensionScores;
+  final Map<String, List<String>> candidateCityReasons;
   final List<String> cityRecommendationReasons;
+  final String recommendationId;
+  final String recommendationMethodologyVersion;
+  final String recommendationGeneratedAt;
+  final double recommendationDataCoverage;
+  final String recommendationFreshnessStatus;
+  final List<String> recommendationWarnings;
+  final List<String> recommendationSourceLabels;
+  final String recommendationStabilityBand;
+  final String recommendationReliabilityBand;
+  final String recommendationScoreSeparationBand;
+  final int recommendationScenariosEvaluated;
   final bool isCityConfirmed;
 
   Map<String, dynamic> toJson() => {
@@ -169,7 +255,20 @@ class MigrationPlanModel {
         .map((city) => CityModel.fromEntity(city).toJson())
         .toList(),
     'candidateCityMatchScores': candidateCityMatchScores,
+    'candidateCityDimensionScores': candidateCityDimensionScores,
+    'candidateCityReasons': candidateCityReasons,
     'cityRecommendationReasons': cityRecommendationReasons,
+    'recommendationId': recommendationId,
+    'recommendationMethodologyVersion': recommendationMethodologyVersion,
+    'recommendationGeneratedAt': recommendationGeneratedAt,
+    'recommendationDataCoverage': recommendationDataCoverage,
+    'recommendationFreshnessStatus': recommendationFreshnessStatus,
+    'recommendationWarnings': recommendationWarnings,
+    'recommendationSourceLabels': recommendationSourceLabels,
+    'recommendationStabilityBand': recommendationStabilityBand,
+    'recommendationReliabilityBand': recommendationReliabilityBand,
+    'recommendationScoreSeparationBand': recommendationScoreSeparationBand,
+    'recommendationScenariosEvaluated': recommendationScenariosEvaluated,
     'isCityConfirmed': isCityConfirmed,
   };
 
@@ -194,7 +293,20 @@ class MigrationPlanModel {
     preferredCity: preferredCity,
     candidateCities: candidateCities,
     candidateCityMatchScores: candidateCityMatchScores,
+    candidateCityDimensionScores: candidateCityDimensionScores,
+    candidateCityReasons: candidateCityReasons,
     cityRecommendationReasons: cityRecommendationReasons,
+    recommendationId: recommendationId,
+    recommendationMethodologyVersion: recommendationMethodologyVersion,
+    recommendationGeneratedAt: recommendationGeneratedAt,
+    recommendationDataCoverage: recommendationDataCoverage,
+    recommendationFreshnessStatus: recommendationFreshnessStatus,
+    recommendationWarnings: recommendationWarnings,
+    recommendationSourceLabels: recommendationSourceLabels,
+    recommendationStabilityBand: recommendationStabilityBand,
+    recommendationReliabilityBand: recommendationReliabilityBand,
+    recommendationScoreSeparationBand: recommendationScoreSeparationBand,
+    recommendationScenariosEvaluated: recommendationScenariosEvaluated,
     isCityConfirmed: isCityConfirmed,
   );
 }

@@ -6,6 +6,7 @@ import 'package:movaro_app/features/catalog/data/repositories/catalog_repository
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/journey/journey_preferences_store.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_scores.dart';
@@ -134,11 +135,13 @@ void main() {
         expect(controller.activeQuestions.map((question) => question.id), [
           'intent',
           'timeline',
+          'travel_group',
+          'work_arrangement',
           'priorities',
           'support_needs',
           'funding',
         ]);
-        expect(controller.currentQuestion?.id, 'support_needs');
+        expect(controller.currentQuestion?.id, 'travel_group');
       },
     );
 
@@ -148,6 +151,8 @@ void main() {
       expect(controller.activeQuestions.map((question) => question.id), [
         'intent',
         'timeline',
+        'travel_group',
+        'work_arrangement',
         'priorities',
         'support_needs',
         'funding',
@@ -158,6 +163,8 @@ void main() {
       expect(controller.activeQuestions.map((question) => question.id), [
         'intent',
         'timeline',
+        'travel_group',
+        'work_arrangement',
         'priorities',
         'support_needs',
         'funding',
@@ -169,6 +176,8 @@ void main() {
       expect(controller.activeQuestions.map((question) => question.id), [
         'intent',
         'timeline',
+        'travel_group',
+        'work_arrangement',
         'priorities',
         'support_needs',
         'funding',
@@ -324,6 +333,37 @@ class _FakeCitiesRepository implements CitiesRepository {
       regionName: 'Sul',
     ),
   ];
+
+  @override
+  Future<CityRecommendationResult> recommendCities(
+    CityRecommendationProfile profile,
+  ) async {
+    final cities = await getCities();
+    return CityRecommendationResult(
+      methodologyVersion: 'city-recommendation-v2.0.0-test',
+      generatedAt: '2026-07-29T12:00:00.000Z',
+      catalogSize: cities.length,
+      eligibleCityCount: cities.length,
+      profileCompleteness: 0.8,
+      dataCoverage: 0.75,
+      appliedHardFilters: profile.constraints,
+      unavailableDimensions: const [],
+      warnings: const [],
+      recommendations: [
+        RecommendedCity(
+          city: cities.first,
+          score: 0.82,
+          dimensions: const {'affordability': 0.78, 'safety': 0.8},
+          reasons: const ['plan_reason_budget_fit'],
+          tradeoffs: const [],
+          dataCoverage: 0.75,
+          freshnessStatus: 'fresh',
+          evidence: const [],
+        ),
+      ],
+      sourceSummary: const [],
+    );
+  }
 
   @override
   Future<City> getCityById(String id) async => (await getCities()).first;

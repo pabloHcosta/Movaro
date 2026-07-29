@@ -30,6 +30,7 @@ import 'package:movaro_app/features/city_insights/domain/entities/city_insight_e
 import 'package:movaro_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
 import 'package:movaro_app/features/city_insights/domain/repositories/city_insight_repository.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_scores.dart';
@@ -541,6 +542,38 @@ class _FakeCitiesRepository implements CitiesRepository {
     String? countryCode,
   }) async {
     return _allCities;
+  }
+
+  @override
+  Future<CityRecommendationResult> recommendCities(
+    CityRecommendationProfile profile,
+  ) async {
+    return CityRecommendationResult(
+      methodologyVersion: 'city-recommendation-v2.0.0-test',
+      generatedAt: '2026-07-29T12:00:00.000Z',
+      catalogSize: _allCities.length,
+      eligibleCityCount: _allCities.length,
+      profileCompleteness: 0.8,
+      dataCoverage: 0.8,
+      appliedHardFilters: profile.constraints,
+      unavailableDimensions: const [],
+      warnings: const [],
+      recommendations: _allCities.indexed
+          .map(
+            (entry) => RecommendedCity(
+              city: entry.$2,
+              score: 0.88 - entry.$1 * 0.08,
+              dimensions: const {'affordability': 0.78, 'safety': 0.8},
+              reasons: const ['plan_reason_budget_fit'],
+              tradeoffs: const [],
+              dataCoverage: 0.8,
+              freshnessStatus: 'fresh',
+              evidence: const [],
+            ),
+          )
+          .toList(growable: false),
+      sourceSummary: const [],
+    );
   }
 
   @override

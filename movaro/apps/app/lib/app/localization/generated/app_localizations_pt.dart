@@ -20,11 +20,10 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get splashLoadingLabel => 'Organizando sua experiência';
+  String get splashLoadingLabel => 'Preparando seu caminho';
 
   @override
-  String get splashHeroTitle =>
-      'Compare cidades. Organize sua mudança. Avance com clareza.';
+  String get splashHeroTitle => 'Seu próximo passo começa com clareza.';
 
   @override
   String get splashHeroBody =>
@@ -5329,22 +5328,24 @@ class AppLocalizationsPt extends AppLocalizations {
   String get migrationPlanResultOpenPlanAction => 'Ver plano completo';
 
   @override
-  String get migrationPlanResultCompatibilityHigh => 'Alta compatibilidade';
+  String get migrationPlanResultCompatibilityHigh =>
+      'Maior aderência ao seu perfil';
 
   @override
-  String get migrationPlanResultCompatibilityMedium => 'Boa compatibilidade';
+  String get migrationPlanResultCompatibilityMedium =>
+      'Boa aderência ao seu perfil';
 
   @override
   String get migrationPlanResultCompatibilityInitial =>
-      'Compatibilidade inicial';
+      'Sugestão para explorar';
 
   @override
   String get migrationPlanResultCompatibilityHelpTitle =>
-      'Como funciona a compatibilidade';
+      'Como esta sugestão foi ordenada';
 
   @override
   String get migrationPlanResultCompatibilityHelpBody =>
-      'A compatibilidade combina suas prioridades, seu prazo e seu objetivo de mudança com os sinais disponíveis de cada cidade. É uma leitura direcional pensada para comparar opções e explorar um ponto de partida.';
+      'A ordem compara seu objetivo e suas prioridades com os sinais disponíveis nas cidades do catálogo. É uma leitura direcional para explorar opções, não uma garantia de que esta seja a melhor cidade do Brasil para você.';
 
   @override
   String get migrationPlanResultUnavailableTitle =>
@@ -5362,8 +5363,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get migrationPlanResultCityDataTitle => 'Dados da cidade';
 
   @override
-  String get migrationPlanResultOtherCitiesTitle =>
-      'Outras cidades compatíveis';
+  String get migrationPlanResultOtherCitiesTitle => 'Outras cidades sugeridas';
 
   @override
   String get migrationPlanResultReviewsMetricTitle => 'Avaliação pública';
@@ -6630,18 +6630,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'Erro de conexão. Verifique sua internet e tente novamente.';
 
   @override
-  String get migrationResultRevealEyebrow => 'Encaixe de cidade atual';
+  String get migrationResultRevealEyebrow => 'Comparação atual';
 
   @override
-  String get migrationResultRevealHeaderTitle => 'Recomendação';
+  String get migrationResultRevealHeaderTitle => 'Cidades sugeridas';
 
   @override
   String get migrationResultRevealRedoAction => 'Refazer questionário';
-
-  @override
-  String migrationResultRevealCompatibilityLabel(int pct) {
-    return '$pct% compatível';
-  }
 
   @override
   String migrationResultRevealWhyTitle(String city) {

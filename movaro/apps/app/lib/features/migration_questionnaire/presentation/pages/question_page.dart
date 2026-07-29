@@ -53,7 +53,6 @@ class _QuestionPageState extends State<QuestionPage> {
   String? _inlineHint;
   bool _showProcessingScreen = false;
   bool _didPromptOriginLocation = false;
-  bool _didTryAutoHelp = false;
   final ScrollController _optionsScrollController = ScrollController();
   String? _scrollScopeKey;
   bool _showScrollHint = false;
@@ -72,22 +71,6 @@ class _QuestionPageState extends State<QuestionPage> {
 
   Future<void> _initializeQuestionnaire() async {
     await controller.initializeForQuestionnaire();
-    if (!mounted) {
-      return;
-    }
-    await _maybeShowHelp();
-  }
-
-  Future<void> _maybeShowHelp() async {
-    if (_didTryAutoHelp) {
-      return;
-    }
-    _didTryAutoHelp = true;
-    await maybeShowContextualHelpGuide(
-      context,
-      preferenceKey: _helpPreferenceKey,
-      content: _helpContent(context),
-    );
   }
 
   Future<void> _showHelp() {
@@ -100,25 +83,35 @@ class _QuestionPageState extends State<QuestionPage> {
 
   ContextualHelpContent _helpContent(BuildContext context) {
     return ContextualHelpContent(
-      eyebrow: context.l10n.questionnaireVariantPageTitle(),
-      contextIcon: Icons.quiz_outlined,
+      eyebrow: context.l10n.questionnaireGuideEyebrow(),
+      contextIcon: Icons.route_outlined,
       title: context.l10n.questionnaireGuideTitle(),
       body: context.l10n.questionnaireGuideBody(),
+      showHideAgainControl: false,
       steps: [
         FeatureGuideStep(
           number: '1',
+          icon: Icons.tune_rounded,
           title: context.l10n.questionnaireGuideStepOneTitle(),
           body: context.l10n.questionnaireGuideStepOneBody(),
         ),
         FeatureGuideStep(
           number: '2',
+          icon: Icons.filter_alt_outlined,
           title: context.l10n.questionnaireGuideStepTwoTitle(),
           body: context.l10n.questionnaireGuideStepTwoBody(),
         ),
         FeatureGuideStep(
           number: '3',
+          icon: Icons.fact_check_outlined,
           title: context.l10n.questionnaireGuideStepThreeTitle(),
           body: context.l10n.questionnaireGuideStepThreeBody(),
+        ),
+        FeatureGuideStep(
+          number: '4',
+          icon: Icons.balance_outlined,
+          title: context.l10n.questionnaireGuideStepFourTitle(),
+          body: context.l10n.questionnaireGuideStepFourBody(),
         ),
       ],
     );

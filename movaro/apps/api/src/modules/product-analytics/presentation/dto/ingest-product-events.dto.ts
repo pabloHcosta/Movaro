@@ -17,6 +17,13 @@ const allowedEventNames = [
   'questionnaireStarted',
   'questionAnswered',
   'planGenerated',
+  'recommendationViewed',
+  'primaryCityExplored',
+  'alternativeCityExplored',
+  'comparisonOpened',
+  'recommendationAccepted',
+  'recommendationFeedbackPositive',
+  'recommendationFeedbackNegative',
   'taskSelected',
   'taskStarted',
   'taskWaiting',
@@ -41,6 +48,25 @@ class ProductFlowEventDto {
   @Min(0)
   @Max(100)
   stepIndex?: number;
+
+  @IsOptional()
+  @IsString()
+  @Length(3, 64)
+  methodologyVersion?: string;
+
+  @IsOptional()
+  @IsIn(['robust', 'moderate', 'sensitive', 'insufficient_data'])
+  stabilityBand?: string;
+
+  @IsOptional()
+  @IsIn(['broad', 'partial', 'limited'])
+  coverageBand?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(3)
+  rankPosition?: number;
 }
 
 export class IngestProductEventsDto {

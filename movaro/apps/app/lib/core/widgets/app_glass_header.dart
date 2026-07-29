@@ -29,6 +29,7 @@ class AppGlassHeader extends StatelessWidget {
         : _HeaderIconButton(
             onPressed: onHelp,
             icon: Icons.help_outline_rounded,
+            tooltip: _helpTooltip(context),
           );
     final hasTrailingActions =
         (helpAction != null ? 1 : 0) + (trailing != null ? 1 : 0);
@@ -57,6 +58,9 @@ class AppGlassHeader extends StatelessWidget {
                         child: _HeaderIconButton(
                           onPressed: onBack,
                           icon: Icons.arrow_back_rounded,
+                          tooltip: MaterialLocalizations.of(
+                            context,
+                          ).backButtonTooltip,
                         ),
                       ),
               ),
@@ -128,6 +132,14 @@ class AppGlassHeader extends StatelessWidget {
   }
 }
 
+String _helpTooltip(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'pt' => 'Ajuda',
+    'es' => 'Ayuda',
+    _ => 'Help',
+  };
+}
+
 double _headerSideWidthFor(BuildContext context, {required int actionCount}) {
   final width = MediaQuery.sizeOf(context).width;
   final slotWidth = width < 380 ? 40.0 : 44.0;
@@ -154,10 +166,15 @@ class _HeaderActionSlot extends StatelessWidget {
 }
 
 class _HeaderIconButton extends StatelessWidget {
-  const _HeaderIconButton({required this.onPressed, required this.icon});
+  const _HeaderIconButton({
+    required this.onPressed,
+    required this.icon,
+    this.tooltip,
+  });
 
   final VoidCallback? onPressed;
   final IconData icon;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +182,7 @@ class _HeaderIconButton extends StatelessWidget {
     final side = width < 380 ? 40.0 : 44.0;
     final isDark = AppColors.isDark(context);
 
-    return Material(
+    final button = Material(
       color: isDark
           ? Colors.white.withValues(alpha: 0.08)
           : Colors.white.withValues(alpha: 0.76),
@@ -187,5 +204,6 @@ class _HeaderIconButton extends StatelessWidget {
         ),
       ),
     );
+    return tooltip == null ? button : Tooltip(message: tooltip!, child: button);
   }
 }

@@ -24,7 +24,20 @@ class MigrationPlan {
     this.preferredCity,
     this.candidateCities = const [],
     this.candidateCityMatchScores = const {},
+    this.candidateCityDimensionScores = const {},
+    this.candidateCityReasons = const {},
     this.cityRecommendationReasons = const [],
+    this.recommendationId = '',
+    this.recommendationMethodologyVersion = '',
+    this.recommendationGeneratedAt = '',
+    this.recommendationDataCoverage = 0,
+    this.recommendationFreshnessStatus = 'unknown',
+    this.recommendationWarnings = const [],
+    this.recommendationSourceLabels = const [],
+    this.recommendationStabilityBand = 'insufficient_data',
+    this.recommendationReliabilityBand = 'limited',
+    this.recommendationScoreSeparationBand = 'single_result',
+    this.recommendationScenariosEvaluated = 0,
     this.isCityConfirmed = false,
   });
 
@@ -41,6 +54,10 @@ class MigrationPlan {
   final int? childrenCount;
   final String availableCapital;
   final String? archetypeKey;
+
+  /// Completeness of the answers used to build the shortlist.
+  ///
+  /// This is not a probability and must not be displayed as a city match.
   final double confidence;
   final List<String> selectedPriorities;
   final List<String> selectedConstraints;
@@ -48,7 +65,20 @@ class MigrationPlan {
   final City? preferredCity;
   final List<City> candidateCities;
   final Map<String, double> candidateCityMatchScores;
+  final Map<String, Map<String, double>> candidateCityDimensionScores;
+  final Map<String, List<String>> candidateCityReasons;
   final List<String> cityRecommendationReasons;
+  final String recommendationId;
+  final String recommendationMethodologyVersion;
+  final String recommendationGeneratedAt;
+  final double recommendationDataCoverage;
+  final String recommendationFreshnessStatus;
+  final List<String> recommendationWarnings;
+  final List<String> recommendationSourceLabels;
+  final String recommendationStabilityBand;
+  final String recommendationReliabilityBand;
+  final String recommendationScoreSeparationBand;
+  final int recommendationScenariosEvaluated;
   final bool isCityConfirmed;
 
   City? get confirmedCity =>
@@ -103,7 +133,20 @@ class MigrationPlan {
     Object? preferredCity = _migrationPlanNoChange,
     List<City>? candidateCities,
     Map<String, double>? candidateCityMatchScores,
+    Map<String, Map<String, double>>? candidateCityDimensionScores,
+    Map<String, List<String>>? candidateCityReasons,
     List<String>? cityRecommendationReasons,
+    String? recommendationId,
+    String? recommendationMethodologyVersion,
+    String? recommendationGeneratedAt,
+    double? recommendationDataCoverage,
+    String? recommendationFreshnessStatus,
+    List<String>? recommendationWarnings,
+    List<String>? recommendationSourceLabels,
+    String? recommendationStabilityBand,
+    String? recommendationReliabilityBand,
+    String? recommendationScoreSeparationBand,
+    int? recommendationScenariosEvaluated,
     bool? isCityConfirmed,
   }) {
     return MigrationPlan(
@@ -132,8 +175,35 @@ class MigrationPlan {
       candidateCities: candidateCities ?? this.candidateCities,
       candidateCityMatchScores:
           candidateCityMatchScores ?? this.candidateCityMatchScores,
+      candidateCityDimensionScores:
+          candidateCityDimensionScores ?? this.candidateCityDimensionScores,
+      candidateCityReasons: candidateCityReasons ?? this.candidateCityReasons,
       cityRecommendationReasons:
           cityRecommendationReasons ?? this.cityRecommendationReasons,
+      recommendationId: recommendationId ?? this.recommendationId,
+      recommendationMethodologyVersion:
+          recommendationMethodologyVersion ??
+          this.recommendationMethodologyVersion,
+      recommendationGeneratedAt:
+          recommendationGeneratedAt ?? this.recommendationGeneratedAt,
+      recommendationDataCoverage:
+          recommendationDataCoverage ?? this.recommendationDataCoverage,
+      recommendationFreshnessStatus:
+          recommendationFreshnessStatus ?? this.recommendationFreshnessStatus,
+      recommendationWarnings:
+          recommendationWarnings ?? this.recommendationWarnings,
+      recommendationSourceLabels:
+          recommendationSourceLabels ?? this.recommendationSourceLabels,
+      recommendationStabilityBand:
+          recommendationStabilityBand ?? this.recommendationStabilityBand,
+      recommendationReliabilityBand:
+          recommendationReliabilityBand ?? this.recommendationReliabilityBand,
+      recommendationScoreSeparationBand:
+          recommendationScoreSeparationBand ??
+          this.recommendationScoreSeparationBand,
+      recommendationScenariosEvaluated:
+          recommendationScenariosEvaluated ??
+          this.recommendationScenariosEvaluated,
       isCityConfirmed: isCityConfirmed ?? this.isCityConfirmed,
     );
   }

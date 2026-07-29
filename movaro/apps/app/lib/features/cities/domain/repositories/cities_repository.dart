@@ -1,4 +1,5 @@
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
@@ -6,6 +7,10 @@ import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 
 abstract class CitiesRepository {
+  Future<CityRecommendationResult> recommendCities(
+    CityRecommendationProfile profile,
+  );
+
   Future<CityHighlights> getHighlights();
 
   Future<List<City>> getCities({

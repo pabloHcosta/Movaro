@@ -54,10 +54,23 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: assets/brand/movaro_app_icon.png
-  adaptive_icon_background: "#09111F"
+  adaptive_icon_background: "#071A35"
   adaptive_icon_foreground: assets/brand/movaro_app_icon_foreground.png
   adaptive_icon_monochrome: assets/brand/movaro_app_icon_monochrome.png
+  adaptive_icon_foreground_inset: 0
   image_path_ios_dark_transparent: assets/brand/movaro_app_icon_ios_dark.png
   image_path_ios_tinted_grayscale: assets/brand/movaro_app_icon_ios_tinted.png
   desaturate_tinted_to_grayscale_ios: true
   remove_alpha_ios: true
+  macos:
+    generate: true
+    image_path: assets/brand/movaro_app_icon_macos.png
+  web:
+    generate: true
+    image_path: assets/brand/movaro_app_icon.png
+    background_color: "#050B15"
+    theme_color: "#071A35"
+  windows:
+    generate: true
+    image_path: assets/brand/movaro_app_icon.png
+    icon_size: 256

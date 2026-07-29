@@ -3,19 +3,31 @@ import {
   Controller,
   Get,
   Param,
+  Post,
+  Body,
   Query,
 } from '@nestjs/common';
 
 import { AppErrorFactory } from '../../../common/errors/app-error.factory';
 import { CitiesCatalogService } from '../application/services/cities-catalog.service';
+import { CityRecommendationService } from '../application/services/city-recommendation.service';
 import { GetCitiesQueryDto } from './dto/get-cities-query.dto';
+import { RecommendCitiesDto } from './dto/recommend-cities.dto';
 
 @Controller({
   path: 'cities',
   version: '1',
 })
 export class CitiesController {
-  constructor(private readonly citiesCatalogService: CitiesCatalogService) {}
+  constructor(
+    private readonly citiesCatalogService: CitiesCatalogService,
+    private readonly cityRecommendationService: CityRecommendationService,
+  ) {}
+
+  @Post('recommendations')
+  recommend(@Body() body: RecommendCitiesDto) {
+    return this.cityRecommendationService.recommend(body);
+  }
 
   @Get('highlights')
   getHighlights() {

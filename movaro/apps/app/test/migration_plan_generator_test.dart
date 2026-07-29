@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_scores.dart';
@@ -181,6 +182,48 @@ class _FakeCitiesRepository implements CitiesRepository {
   const _FakeCitiesRepository(this.cities);
 
   final List<City> cities;
+
+  @override
+  Future<CityRecommendationResult> recommendCities(
+    CityRecommendationProfile profile,
+  ) async {
+    final completeness = profile.priorities.contains('balanced_unsure')
+        ? 0.42
+        : 0.86;
+    return CityRecommendationResult(
+      methodologyVersion: 'city-recommendation-v2.0.0-test',
+      generatedAt: '2026-07-29T12:00:00.000Z',
+      catalogSize: cities.length,
+      eligibleCityCount: cities.length,
+      profileCompleteness: completeness,
+      dataCoverage: 0.8,
+      appliedHardFilters: profile.constraints,
+      unavailableDimensions: const [],
+      warnings: const [],
+      recommendations: cities.indexed
+          .map(
+            (entry) => RecommendedCity(
+              city: entry.$2,
+              score: 0.9 - entry.$1 * 0.1,
+              dimensions: const {'affordability': 0.8, 'safety': 0.75},
+              reasons: const ['plan_reason_budget_fit'],
+              tradeoffs: const [],
+              dataCoverage: 0.8,
+              freshnessStatus: 'fresh',
+              evidence: const [],
+            ),
+          )
+          .toList(growable: false),
+      sourceSummary: const [
+        CityRecommendationEvidence(
+          dimension: 'affordability',
+          provider: 'Official test source',
+          sourceType: 'official',
+          freshnessStatus: 'fresh',
+        ),
+      ],
+    );
+  }
 
   // City-detail payload methods are not exercised here; route any
   // unimplemented repository member to a clear failure instead of breaking

@@ -2237,9 +2237,7 @@ class _MigrationResultBarState extends State<_MigrationResultBar> {
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final plan = widget.controller?.generatedPlan;
-    final compatibilityPct = plan != null
-        ? (plan.confidence * 100).round().clamp(0, 100)
-        : null;
+    final matchScore = plan?.candidateCityMatchScores[widget.city.id];
 
     return Container(
       decoration: BoxDecoration(
@@ -2273,12 +2271,10 @@ class _MigrationResultBarState extends State<_MigrationResultBar> {
                     context,
                   ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
-                if (compatibilityPct != null) ...[
+                if (matchScore != null) ...[
                   const SizedBox(height: 2),
                   Text(
-                    context.l10n.migrationResultRevealCompatibilityLabel(
-                      compatibilityPct,
-                    ),
+                    _cityMatchBandLabel(context, matchScore),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSoftFor(context),
                     ),
@@ -6870,6 +6866,16 @@ String _cityDetailLocalizedText(
     'en' => en,
     _ => pt,
   };
+}
+
+String _cityMatchBandLabel(BuildContext context, double score) {
+  if (score >= 0.72) {
+    return context.l10n.migrationPlanResultCompatibilityHigh;
+  }
+  if (score >= 0.55) {
+    return context.l10n.migrationPlanResultCompatibilityMedium;
+  }
+  return context.l10n.migrationPlanResultCompatibilityInitial;
 }
 
 /// "Dá pra viver com o salário daqui?" — compact, always-on affordability

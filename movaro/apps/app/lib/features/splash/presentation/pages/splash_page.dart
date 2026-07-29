@@ -35,7 +35,7 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-  static const _minimumBrandExposure = Duration(milliseconds: 2400);
+  static const _minimumBrandExposure = Duration(milliseconds: 1500);
 
   bool _started = false;
 

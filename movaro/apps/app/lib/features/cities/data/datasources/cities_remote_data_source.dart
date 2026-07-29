@@ -17,6 +17,15 @@ class CitiesRemoteDataSource {
   final JsonResponseCache _cache;
   final CitiesAssetFallback _assetFallback;
 
+  Future<Map<String, dynamic>> postJsonMap(
+    String path,
+    Map<String, dynamic> body,
+  ) {
+    // Personalized recommendations deliberately have no local fallback. A
+    // stale or different on-device ranking would create a second methodology.
+    return _networkClient.postJsonMap(path, body);
+  }
+
   Future<Map<String, dynamic>> getJsonMap(String path) async {
     try {
       final data = await _networkClient.getJsonMap(path);

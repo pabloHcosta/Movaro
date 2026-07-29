@@ -10,8 +10,8 @@
       }
     }
   },
-  "splashLoadingLabel": "Getting your experience ready",
-  "splashHeroTitle": "Compare cities. Organize your move. Move forward with clarity.",
+  "splashLoadingLabel": "Preparing your path",
+  "splashHeroTitle": "Your next step starts with clarity.",
   "splashHeroBody": "Preparing cities, costs, and guidance for your next step.",
   "splashInitializingLabel": "Initializing your experience",
   "loadingCountriesLabel": "Loading countries",
@@ -2117,16 +2117,16 @@
   "migrationPlanResultStartPlanAction": "Open this route",
   "migrationPlanResultOpenPlanTitle": "View full plan",
   "migrationPlanResultOpenPlanAction": "View full plan",
-  "migrationPlanResultCompatibilityHigh": "High compatibility",
-  "migrationPlanResultCompatibilityMedium": "Good compatibility",
-  "migrationPlanResultCompatibilityInitial": "Initial compatibility",
-  "migrationPlanResultCompatibilityHelpTitle": "How compatibility works",
-  "migrationPlanResultCompatibilityHelpBody": "Compatibility combines your priorities, timeline, and migration goal with the signals available for each city. It is a directional match meant to help you compare options and explore a starting point.",
+  "migrationPlanResultCompatibilityHigh": "Stronger fit for your profile",
+  "migrationPlanResultCompatibilityMedium": "Good fit for your profile",
+  "migrationPlanResultCompatibilityInitial": "Suggestion to explore",
+  "migrationPlanResultCompatibilityHelpTitle": "How this suggestion was ordered",
+  "migrationPlanResultCompatibilityHelpBody": "The order compares your goal and priorities with the signals available for cities in the catalog. It is directional guidance for exploring options, not a guarantee that this is the best city in Brazil for you.",
   "migrationPlanResultUnavailableTitle": "We could not load your city result.",
   "migrationPlanResultUnavailableBody": "Try again to reopen your city matches and continue from the quick questions.",
   "migrationPlanResultBasedOnAnswersTitle": "Based on your answers",
   "migrationPlanResultCityDataTitle": "City data",
-  "migrationPlanResultOtherCitiesTitle": "Other compatible cities",
+  "migrationPlanResultOtherCitiesTitle": "Other suggested cities",
   "migrationPlanResultReviewsMetricTitle": "Public reviews",
   "migrationPlanResultSafetyMetricTitle": "Safety",
   "migrationPlanResultPrimaryAction": "Start my plan in {city} ->",
@@ -2646,15 +2646,9 @@
   "aiChatUnavailable": "Assistant unavailable",
   "aiChatRetry": "The assistant is still loading. Please try again in a moment.",
   "aiChatNetworkError": "Connection error. Check your internet and try again.",
-  "migrationResultRevealEyebrow": "Current city match",
-  "migrationResultRevealHeaderTitle": "Recommendation",
+  "migrationResultRevealEyebrow": "Current comparison",
+  "migrationResultRevealHeaderTitle": "Suggested cities",
   "migrationResultRevealRedoAction": "Answer quick questions again",
-  "migrationResultRevealCompatibilityLabel": "{pct}% compatible",
-  "@migrationResultRevealCompatibilityLabel": {
-    "placeholders": {
-      "pct": { "type": "int" }
-    }
-  },
   "migrationResultRevealWhyTitle": "Why {city}?",
   "@migrationResultRevealWhyTitle": {
     "placeholders": {

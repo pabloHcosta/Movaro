@@ -946,7 +946,7 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String helpHideAgainLabel() => _localizedText(
-    pt: 'Nao mostrar novamente',
+    pt: 'Não mostrar novamente',
     es: 'No mostrar de nuevo',
     en: "Don't show again",
   );
@@ -1185,16 +1185,22 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'You can continue to the questionnaire or browse cities and content without finishing setup first.',
   );
 
+  String questionnaireGuideEyebrow() => _localizedText(
+    pt: 'Motor de sugestão de cidades',
+    es: 'Motor de sugerencia de ciudades',
+    en: 'City suggestion engine',
+  );
+
   String questionnaireGuideTitle() => _localizedText(
-    pt: 'Responda algumas perguntas rápidas',
-    es: 'Respondé algunas preguntas rápidas',
-    en: 'Answer a few quick questions',
+    pt: 'Como a Movaro sugere cidades',
+    es: 'Cómo Movaro sugiere ciudades',
+    en: 'How Movaro suggests cities',
   );
 
   String questionnaireGuideBody() => _localizedText(
-    pt: 'A gente usa essas respostas para organizar sua rota, salvar seu progresso e montar um plano claro para seguir. Hoje, o beta esta focado no corredor Argentina -> Brasil.',
-    es: 'Usamos estas respuestas para ordenar tu ruta, guardar tu progreso y armar un plan claro para seguir. Hoy, el beta esta enfocado en el corredor Argentina -> Brasil.',
-    en: 'We use these answers to organize your route, save your progress, and build a clear plan to follow. Today, the beta is focused on the Argentina -> Brazil corridor.',
+    pt: 'Suas respostas viram critérios de comparação. Primeiro filtramos o que é obrigatório; depois ordenamos as cidades com dados comparáveis e mostramos as limitações.',
+    es: 'Tus respuestas se convierten en criterios de comparación. Primero filtramos lo obligatorio; después ordenamos las ciudades con datos comparables y mostramos las limitaciones.',
+    en: 'Your answers become comparison criteria. We first apply mandatory filters, then rank cities using comparable data and show the limitations.',
   );
 
   String discoverFlowBannerTitle() => _localizedText(
@@ -1234,39 +1240,51 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String questionnaireGuideStepOneTitle() => _localizedText(
-    pt: 'Confirme a base',
-    es: 'Confirmá la base',
-    en: 'Confirm the setup',
+    pt: 'Você define o que importa',
+    es: 'Vos definís lo que importa',
+    en: 'You define what matters',
   );
 
   String questionnaireGuideStepOneBody() => _localizedText(
-    pt: 'Comece pela origem e responda o essencial primeiro. O destino do MVP atual e Brasil, mas o fluxo ja foi pensado para crescer.',
-    es: 'Empezá por el origen y respondé primero lo esencial. El destino del MVP actual es Brasil, pero el flujo ya esta pensado para crecer.',
-    en: 'Start with your origin and answer the essentials first. Brazil is the current MVP destination, but the flow is already designed to grow.',
+    pt: 'Objetivo, orçamento, trabalho, família, estudo e prioridades ajustam a análise. Você pode revisar suas respostas.',
+    es: 'Objetivo, presupuesto, trabajo, familia, estudio y prioridades ajustan el análisis. Podés revisar tus respuestas.',
+    en: 'Your goal, budget, work, family, studies, and priorities shape the analysis. You can review your answers.',
   );
 
   String questionnaireGuideStepTwoTitle() => _localizedText(
-    pt: 'Avance quando quiser',
-    es: 'Avanzá cuando quieras',
-    en: 'Move forward when ready',
+    pt: 'Exigências viram filtros',
+    es: 'Los requisitos se vuelven filtros',
+    en: 'Requirements become filters',
   );
 
   String questionnaireGuideStepTwoBody() => _localizedText(
-    pt: 'Voce pode voltar a qualquer momento sem perder respostas nem progresso.',
-    es: 'Podés volver en cualquier momento sin perder respuestas ni progreso.',
-    en: 'You can go back anytime without losing answers or progress.',
+    pt: 'Quando você marca algo como obrigatório — como transporte, custo ou universidade — opções incompatíveis ficam fora. A lista não é completada à força.',
+    es: 'Cuando marcás algo como obligatorio — como transporte, costo o universidad — las opciones incompatibles quedan afuera. La lista no se completa a la fuerza.',
+    en: 'When something is mandatory — such as transit, cost, or university access — incompatible options are removed. We do not force a full list.',
   );
 
   String questionnaireGuideStepThreeTitle() => _localizedText(
-    pt: 'Gere o resultado',
-    es: 'Generá el resultado',
-    en: 'Generate the result',
+    pt: 'Cada dado tem um papel claro',
+    es: 'Cada dato tiene un papel claro',
+    en: 'Every data point has a clear role',
   );
 
   String questionnaireGuideStepThreeBody() => _localizedText(
-    pt: 'A etapa final cria a recomendacao e envia todo o contexto da jornada para a tela de resultado.',
-    es: 'La etapa final crea la recomendacion y pasa todo el contexto del recorrido a la pantalla de resultado.',
-    en: 'The final step creates the recommendation and passes the full journey context to the result screen.',
+    pt: 'Combinamos fontes públicas e oficiais, como IBGE, INEP e Ipea, com sinais derivados ou curados identificados. O que não tem base comparável fica fora do cálculo.',
+    es: 'Combinamos fuentes públicas y oficiales, como IBGE, INEP e Ipea, con señales derivadas o curadas identificadas. Lo que no tiene una base comparable queda fuera del cálculo.',
+    en: 'We combine public and official sources such as IBGE, INEP, and Ipea with clearly identified derived or curated signals. Data without a comparable basis stays out of the calculation.',
+  );
+
+  String questionnaireGuideStepFourTitle() => _localizedText(
+    pt: 'É uma direção, não um veredito',
+    es: 'Es una orientación, no un veredicto',
+    en: 'It is guidance, not a verdict',
+  );
+
+  String questionnaireGuideStepFourBody() => _localizedText(
+    pt: 'O resultado mostra uma cidade em destaque, alternativas, estabilidade e limitações. É apoio educacional e comparativo — não consultoria, garantia ou decisão automática.',
+    es: 'El resultado muestra una ciudad destacada, alternativas, estabilidad y limitaciones. Es apoyo educativo y comparativo, no asesoramiento, garantía ni decisión automática.',
+    en: 'The result shows a highlighted city, alternatives, stability, and limitations. It is educational comparison support, not advice, a guarantee, or an automated decision.',
   );
 
   String migrationStartPageTitle() => _localizedText(
@@ -2274,9 +2292,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String migrationResultRevealBreakdownOverall() => _localizedText(
-    pt: 'Compatibilidade geral',
-    es: 'Compatibilidad general',
-    en: 'Overall compatibility',
+    pt: 'Faixa de aderência',
+    es: 'Nivel de afinidad',
+    en: 'Match band',
   );
 
   String migrationResultRevealTapToSeeDetails() => _localizedText(
@@ -2291,8 +2309,7 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: 'View details of $cityName',
   );
 
-  /// Labels for individual scoring dimensions shown in the compatibility
-  /// breakdown bottom sheet.
+  /// Labels for city signals shown in the recommendation breakdown.
   String dimensionLabel(String key) {
     switch (key) {
       case 'affordability':

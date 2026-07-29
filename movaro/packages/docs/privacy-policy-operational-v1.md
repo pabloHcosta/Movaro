@@ -1,6 +1,6 @@
 # Política de privacidade operacional — Movaro
 
-Versão: 2026.07.26  
+Versão: 2026.07.29
 Status: minuta operacional para validação; requer revisão jurídica antes da publicação comercial.
 
 ## Escopo
@@ -14,7 +14,12 @@ O Movaro oferece orientação educacional baseada em dados para pessoas que aval
 - plano, progresso, itens dispensados e favoritos;
 - idioma, moeda e tema escolhidos.
 
-A localização precisa não é armazenada. A localização é opcional e o usuário pode informar a cidade manualmente. O histórico do assistente determinístico permanece somente na sessão ativa.
+A localização precisa não é armazenada. Quando autorizada, a coordenada é
+reduzida a duas casas decimais antes de ser enviada à API para comparar
+distâncias entre municípios. O endpoint de recomendação não persiste a
+coordenada nem as respostas. A localização é opcional e o usuário pode informar
+a cidade manualmente. O histórico do assistente determinístico permanece
+somente na sessão ativa.
 
 ## Finalidades
 
@@ -31,9 +36,12 @@ O conteúdo é educacional e comparativo. Não constitui consultoria jurídica, 
 
 - A coleta é desativada até uma autorização explícita no aplicativo.
 - São enviados somente nome do evento do funil, horário, índice opcional da
-  etapa, ambiente do aplicativo e um token aleatório da instalação.
+  etapa, ambiente do aplicativo, versão da metodologia, faixas de estabilidade
+  e cobertura, posição opcional entre as três recomendações e um token aleatório
+  da instalação.
 - Não são enviados respostas, cidade, localização, documentos, valores,
-  conteúdo de tarefas nem identificadores de conta.
+  conteúdo de tarefas, identificador da recomendação nem identificadores de
+  conta.
 - O usuário pode desativar a coleta e apagar a fila e o token local em
   Configurações.
 - Falhas de rede mantêm uma fila limitada no aparelho e nunca bloqueiam o uso.

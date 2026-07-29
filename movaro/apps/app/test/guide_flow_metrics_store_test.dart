@@ -62,6 +62,37 @@ void main() {
     expect(sink.events.single.metric, GuideFlowMetric.taskStarted);
     expect(sink.installationToken, hasLength(48));
   });
+
+  test(
+    'uploads bounded recommendation quality bands without profile data',
+    () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final preferences = await SharedPreferences.getInstance();
+      final sink = _RecordingSink();
+      final store = GuideFlowMetricsStore(preferences: preferences, sink: sink);
+
+      await store.setConsent(ProductAnalyticsConsent.granted);
+      await store.record(
+        GuideFlowMetric.recommendationAccepted,
+        referenceId: 'private-recommendation-id',
+        methodologyVersion: 'city-recommendation-v2.1.0',
+        stabilityBand: 'robust',
+        coverageBand: 'broad',
+        rankPosition: 1,
+      );
+
+      final event = sink.events.single;
+      expect(event.metric, GuideFlowMetric.recommendationAccepted);
+      expect(event.methodologyVersion, 'city-recommendation-v2.1.0');
+      expect(event.stabilityBand, 'robust');
+      expect(event.coverageBand, 'broad');
+      expect(event.rankPosition, 1);
+      expect(
+        preferences.getString(GuideFlowMetricsStore.storageKey),
+        contains('private-recommendation-id'),
+      );
+    },
+  );
 }
 
 class _RecordingSink implements GuideFlowMetricsSink {

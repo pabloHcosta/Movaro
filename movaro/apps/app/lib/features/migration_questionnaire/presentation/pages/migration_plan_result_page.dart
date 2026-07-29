@@ -277,7 +277,7 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
                           weather: weather,
                           compatibilityLabel: _compatibilityLabel(
                             context,
-                            plan.confidence,
+                            plan.candidateCityMatchScores[city.id],
                           ),
                           isFavorite: widget.citiesController.isFavorite(
                             city.id,
@@ -381,12 +381,12 @@ class _MigrationPlanResultPageState extends State<MigrationPlanResultPage> {
     );
   }
 
-  String _compatibilityLabel(BuildContext context, double confidence) {
+  String _compatibilityLabel(BuildContext context, double? matchScore) {
     final l10n = context.l10n;
-    if (confidence >= 0.72) {
+    if (matchScore != null && matchScore >= 0.72) {
       return l10n.migrationPlanResultCompatibilityHigh;
     }
-    if (confidence >= 0.52) {
+    if (matchScore != null && matchScore >= 0.55) {
       return l10n.migrationPlanResultCompatibilityMedium;
     }
     return l10n.migrationPlanResultCompatibilityInitial;

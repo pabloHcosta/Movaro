@@ -30,6 +30,14 @@ class GuideFlowMetricsRemoteSink implements GuideFlowMetricsSink {
                 'eventName': event.metric.name,
                 'occurredAt': event.occurredAt.toUtc().toIso8601String(),
                 if (event.stepIndex != null) 'stepIndex': event.stepIndex,
+                if (event.methodologyVersion != null)
+                  'methodologyVersion': event.methodologyVersion,
+                if (event.stabilityBand != null)
+                  'stabilityBand': event.stabilityBand,
+                if (event.coverageBand != null)
+                  'coverageBand': event.coverageBand,
+                if (event.rankPosition != null)
+                  'rankPosition': event.rankPosition,
               },
             )
             .toList(growable: false),

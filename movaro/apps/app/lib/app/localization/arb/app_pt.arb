@@ -10,8 +10,8 @@
       }
     }
   },
-  "splashLoadingLabel": "Organizando sua experiência",
-  "splashHeroTitle": "Compare cidades. Organize sua mudança. Avance com clareza.",
+  "splashLoadingLabel": "Preparando seu caminho",
+  "splashHeroTitle": "Seu próximo passo começa com clareza.",
   "splashHeroBody": "Preparando cidades, custos e orientações para o seu próximo passo.",
   "splashInitializingLabel": "Inicializando experiência",
   "loadingCountriesLabel": "Carregando países",
@@ -1910,16 +1910,16 @@
   "migrationPlanResultStartPlanAction": "Abrir esta rota",
   "migrationPlanResultOpenPlanTitle": "Ver plano completo",
   "migrationPlanResultOpenPlanAction": "Ver plano completo",
-  "migrationPlanResultCompatibilityHigh": "Alta compatibilidade",
-  "migrationPlanResultCompatibilityMedium": "Boa compatibilidade",
-  "migrationPlanResultCompatibilityInitial": "Compatibilidade inicial",
-  "migrationPlanResultCompatibilityHelpTitle": "Como funciona a compatibilidade",
-  "migrationPlanResultCompatibilityHelpBody": "A compatibilidade combina suas prioridades, seu prazo e seu objetivo de mudança com os sinais disponíveis de cada cidade. É uma leitura direcional pensada para comparar opções e explorar um ponto de partida.",
+  "migrationPlanResultCompatibilityHigh": "Maior aderência ao seu perfil",
+  "migrationPlanResultCompatibilityMedium": "Boa aderência ao seu perfil",
+  "migrationPlanResultCompatibilityInitial": "Sugestão para explorar",
+  "migrationPlanResultCompatibilityHelpTitle": "Como esta sugestão foi ordenada",
+  "migrationPlanResultCompatibilityHelpBody": "A ordem compara seu objetivo e suas prioridades com os sinais disponíveis nas cidades do catálogo. É uma leitura direcional para explorar opções, não uma garantia de que esta seja a melhor cidade do Brasil para você.",
   "migrationPlanResultUnavailableTitle": "Não foi possível carregar o resultado da sua cidade.",
   "migrationPlanResultUnavailableBody": "Tente novamente para abrir suas cidades sugeridas e continuar a partir do questionário.",
   "migrationPlanResultBasedOnAnswersTitle": "Baseado nas suas respostas",
   "migrationPlanResultCityDataTitle": "Dados da cidade",
-  "migrationPlanResultOtherCitiesTitle": "Outras cidades compatíveis",
+  "migrationPlanResultOtherCitiesTitle": "Outras cidades sugeridas",
   "migrationPlanResultReviewsMetricTitle": "Avaliação pública",
   "migrationPlanResultSafetyMetricTitle": "Segurança",
   "migrationPlanResultPrimaryAction": "Iniciar meu plano em {city} ->",
@@ -2646,15 +2646,9 @@
   "aiChatUnavailable": "Assistente indisponível",
   "aiChatRetry": "O assistente ainda está carregando. Tente novamente em instantes.",
   "aiChatNetworkError": "Erro de conexão. Verifique sua internet e tente novamente.",
-  "migrationResultRevealEyebrow": "Encaixe de cidade atual",
-  "migrationResultRevealHeaderTitle": "Recomendação",
+  "migrationResultRevealEyebrow": "Comparação atual",
+  "migrationResultRevealHeaderTitle": "Cidades sugeridas",
   "migrationResultRevealRedoAction": "Refazer questionário",
-  "migrationResultRevealCompatibilityLabel": "{pct}% compatível",
-  "@migrationResultRevealCompatibilityLabel": {
-    "placeholders": {
-      "pct": { "type": "int" }
-    }
-  },
   "migrationResultRevealWhyTitle": "Por que {city}?",
   "@migrationResultRevealWhyTitle": {
     "placeholders": {

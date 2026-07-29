@@ -121,13 +121,13 @@ abstract class AppLocalizations {
   /// No description provided for @splashLoadingLabel.
   ///
   /// In en, this message translates to:
-  /// **'Getting your experience ready'**
+  /// **'Preparing your path'**
   String get splashLoadingLabel;
 
   /// No description provided for @splashHeroTitle.
   ///
   /// In en, this message translates to:
-  /// **'Compare cities. Organize your move. Move forward with clarity.'**
+  /// **'Your next step starts with clarity.'**
   String get splashHeroTitle;
 
   /// No description provided for @splashHeroBody.
@@ -8908,31 +8908,31 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanResultCompatibilityHigh.
   ///
   /// In en, this message translates to:
-  /// **'High compatibility'**
+  /// **'Stronger fit for your profile'**
   String get migrationPlanResultCompatibilityHigh;
 
   /// No description provided for @migrationPlanResultCompatibilityMedium.
   ///
   /// In en, this message translates to:
-  /// **'Good compatibility'**
+  /// **'Good fit for your profile'**
   String get migrationPlanResultCompatibilityMedium;
 
   /// No description provided for @migrationPlanResultCompatibilityInitial.
   ///
   /// In en, this message translates to:
-  /// **'Initial compatibility'**
+  /// **'Suggestion to explore'**
   String get migrationPlanResultCompatibilityInitial;
 
   /// No description provided for @migrationPlanResultCompatibilityHelpTitle.
   ///
   /// In en, this message translates to:
-  /// **'How compatibility works'**
+  /// **'How this suggestion was ordered'**
   String get migrationPlanResultCompatibilityHelpTitle;
 
   /// No description provided for @migrationPlanResultCompatibilityHelpBody.
   ///
   /// In en, this message translates to:
-  /// **'Compatibility combines your priorities, timeline, and migration goal with the signals available for each city. It is a directional match meant to help you compare options and explore a starting point.'**
+  /// **'The order compares your goal and priorities with the signals available for cities in the catalog. It is directional guidance for exploring options, not a guarantee that this is the best city in Brazil for you.'**
   String get migrationPlanResultCompatibilityHelpBody;
 
   /// No description provided for @migrationPlanResultUnavailableTitle.
@@ -8962,7 +8962,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanResultOtherCitiesTitle.
   ///
   /// In en, this message translates to:
-  /// **'Other compatible cities'**
+  /// **'Other suggested cities'**
   String get migrationPlanResultOtherCitiesTitle;
 
   /// No description provided for @migrationPlanResultReviewsMetricTitle.
@@ -11105,13 +11105,13 @@ abstract class AppLocalizations {
   /// No description provided for @migrationResultRevealEyebrow.
   ///
   /// In en, this message translates to:
-  /// **'Current city match'**
+  /// **'Current comparison'**
   String get migrationResultRevealEyebrow;
 
   /// No description provided for @migrationResultRevealHeaderTitle.
   ///
   /// In en, this message translates to:
-  /// **'Recommendation'**
+  /// **'Suggested cities'**
   String get migrationResultRevealHeaderTitle;
 
   /// No description provided for @migrationResultRevealRedoAction.
@@ -11119,12 +11119,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Answer quick questions again'**
   String get migrationResultRevealRedoAction;
-
-  /// No description provided for @migrationResultRevealCompatibilityLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'{pct}% compatible'**
-  String migrationResultRevealCompatibilityLabel(int pct);
 
   /// No description provided for @migrationResultRevealWhyTitle.
   ///

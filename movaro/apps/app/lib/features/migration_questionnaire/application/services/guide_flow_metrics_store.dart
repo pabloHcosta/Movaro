@@ -8,6 +8,13 @@ enum GuideFlowMetric {
   questionnaireStarted,
   questionAnswered,
   planGenerated,
+  recommendationViewed,
+  primaryCityExplored,
+  alternativeCityExplored,
+  comparisonOpened,
+  recommendationAccepted,
+  recommendationFeedbackPositive,
+  recommendationFeedbackNegative,
   taskSelected,
   taskStarted,
   taskWaiting,
@@ -31,12 +38,20 @@ class GuideFlowUploadEvent {
     required this.metric,
     required this.occurredAt,
     this.stepIndex,
+    this.methodologyVersion,
+    this.stabilityBand,
+    this.coverageBand,
+    this.rankPosition,
   });
 
   final String eventId;
   final GuideFlowMetric metric;
   final DateTime occurredAt;
   final int? stepIndex;
+  final String? methodologyVersion;
+  final String? stabilityBand;
+  final String? coverageBand;
+  final int? rankPosition;
 }
 
 class GuideFlowMetricEvent {
@@ -46,6 +61,10 @@ class GuideFlowMetricEvent {
     required this.occurredAt,
     this.referenceId,
     this.stepIndex,
+    this.methodologyVersion,
+    this.stabilityBand,
+    this.coverageBand,
+    this.rankPosition,
   });
 
   factory GuideFlowMetricEvent.fromJson(Map<String, dynamic> json) {
@@ -59,6 +78,10 @@ class GuideFlowMetricEvent {
       occurredAt: DateTime.parse(json['occurredAt'] as String),
       referenceId: json['referenceId'] as String?,
       stepIndex: json['stepIndex'] as int?,
+      methodologyVersion: json['methodologyVersion'] as String?,
+      stabilityBand: json['stabilityBand'] as String?,
+      coverageBand: json['coverageBand'] as String?,
+      rankPosition: json['rankPosition'] as int?,
     );
   }
 
@@ -70,6 +93,10 @@ class GuideFlowMetricEvent {
   /// to the aggregate endpoint because it can reveal a document or task.
   final String? referenceId;
   final int? stepIndex;
+  final String? methodologyVersion;
+  final String? stabilityBand;
+  final String? coverageBand;
+  final int? rankPosition;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'eventId': eventId,
@@ -77,15 +104,19 @@ class GuideFlowMetricEvent {
     'occurredAt': occurredAt.toUtc().toIso8601String(),
     if (referenceId != null) 'referenceId': referenceId,
     if (stepIndex != null) 'stepIndex': stepIndex,
+    if (methodologyVersion != null) 'methodologyVersion': methodologyVersion,
+    if (stabilityBand != null) 'stabilityBand': stabilityBand,
+    if (coverageBand != null) 'coverageBand': coverageBand,
+    if (rankPosition != null) 'rankPosition': rankPosition,
   };
 }
 
 /// Consent-gated, privacy-preserving product telemetry.
 ///
-/// Events contain funnel names, timestamps and an optional step number. Answer
-/// values, city, document, money, location, task reference and account data are
-/// never uploaded. A random installation token supports aggregate retention
-/// cohorts and is deleted when the user clears diagnostics.
+/// Events contain funnel names, timestamps and bounded diagnostic bands.
+/// Answer values, city, recommendation id, document, money, location, task
+/// reference and account data are never uploaded. A random installation token
+/// supports aggregate retention cohorts and is deleted with diagnostics.
 class GuideFlowMetricsStore extends ChangeNotifier {
   GuideFlowMetricsStore({
     SharedPreferences? preferences,
@@ -147,6 +178,10 @@ class GuideFlowMetricsStore extends ChangeNotifier {
     GuideFlowMetric metric, {
     String? referenceId,
     int? stepIndex,
+    String? methodologyVersion,
+    String? stabilityBand,
+    String? coverageBand,
+    int? rankPosition,
   }) async {
     try {
       if (!_initialized) {
@@ -167,6 +202,10 @@ class GuideFlowMetricsStore extends ChangeNotifier {
           occurredAt: now,
           referenceId: referenceId,
           stepIndex: stepIndex,
+          methodologyVersion: methodologyVersion,
+          stabilityBand: stabilityBand,
+          coverageBand: coverageBand,
+          rankPosition: rankPosition,
         ),
       ];
       final bounded = next.length <= _maxEvents
@@ -228,6 +267,10 @@ class GuideFlowMetricsStore extends ChangeNotifier {
                 metric: event.metric,
                 occurredAt: event.occurredAt,
                 stepIndex: event.stepIndex,
+                methodologyVersion: event.methodologyVersion,
+                stabilityBand: event.stabilityBand,
+                coverageBand: event.coverageBand,
+                rankPosition: event.rankPosition,
               ),
             )
             .toList(growable: false),

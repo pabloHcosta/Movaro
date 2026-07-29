@@ -1,13 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HelpStep {
-  const HelpStep({required this.title, required this.body});
+  const HelpStep({required this.title, required this.body, this.icon});
 
   final String title;
   final String body;
+  final IconData? icon;
 }
 
 class HelpBottomSheet extends StatefulWidget {
@@ -20,6 +22,7 @@ class HelpBottomSheet extends StatefulWidget {
     required this.preferenceKey,
     required this.hideAgainLabel,
     required this.confirmLabel,
+    this.showHideAgainControl = true,
     super.key,
   });
 
@@ -31,21 +34,26 @@ class HelpBottomSheet extends StatefulWidget {
   final String preferenceKey;
   final String hideAgainLabel;
   final String confirmLabel;
+  final bool showHideAgainControl;
 
   @override
   State<HelpBottomSheet> createState() => _HelpBottomSheetState();
 }
 
 class _HelpBottomSheetState extends State<HelpBottomSheet> {
-  bool _doNotShowAgain = true;
+  bool _doNotShowAgain = false;
   bool _isSaving = false;
   bool _hasPersistedPreference = false;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = AppColors.isDark(context);
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     final safeBottom = MediaQuery.paddingOf(context).bottom;
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.82;
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.86;
+    final sheetColor = AppColors.surfaceFor(context);
+    final dividerColor = AppColors.borderFor(context);
 
     return PopScope(
       onPopInvokedWithResult: (didPop, _) {
@@ -57,227 +65,184 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
         top: false,
         child: Padding(
           padding: EdgeInsets.only(bottom: bottomInset),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: maxHeight),
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFF111827),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                border: Border(top: BorderSide(color: Color(0xFF1E2636))),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 32,
-                    height: 3,
-                    margin: const EdgeInsets.only(top: 10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2D333B),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 680, maxHeight: maxHeight),
+              child: Material(
+                color: sheetColor,
+                elevation: isDark ? 0 : 18,
+                shadowColor: Colors.black.withValues(alpha: 0.16),
+                surfaceTintColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(28),
                   ),
-                  Stack(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                  side: BorderSide(color: dividerColor),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _DragHandle(isDark: isDark),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 12, 16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(
+                                alpha: isDark ? 0.18 : 0.10,
+                              ),
+                              borderRadius: BorderRadius.circular(13),
+                              border: Border.all(
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.18,
+                                ),
+                              ),
+                            ),
+                            child: Icon(
+                              widget.contextIcon,
+                              color: AppColors.primary,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 13),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  width: 18,
-                                  height: 18,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF0D2137),
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                  child: Icon(
-                                    widget.contextIcon,
-                                    size: 12,
-                                    color: const Color(0xFF58A6FF),
+                                Text(
+                                  widget.contextLabel.toUpperCase(),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.7,
                                   ),
                                 ),
-                                const SizedBox(width: 6),
-                                Expanded(
+                                const SizedBox(height: 5),
+                                Semantics(
+                                  header: true,
                                   child: Text(
-                                    widget.contextLabel.toUpperCase(),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF58A6FF),
-                                      letterSpacing: 0.6,
+                                    widget.title,
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      color: AppColors.textPrimaryFor(context),
+                                      fontWeight: FontWeight.w800,
+                                      height: 1.14,
+                                      letterSpacing: -0.3,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 10),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 28),
-                              child: Text(
-                                widget.title,
-                                style: const TextStyle(
-                                  fontSize: 21,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFFF0F6FC),
-                                  height: 1.2,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                        top: 14,
-                        right: 12,
-                        child: InkWell(
-                          onTap: _isSaving ? null : _dismiss,
-                          borderRadius: BorderRadius.circular(999),
-                          child: Container(
-                            width: 22,
-                            height: 22,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1C2128),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xFF2D333B),
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.close,
-                              size: 10,
-                              color: Color(0xFF6B7280),
-                            ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: Color(0xFF0D1117),
-                  ),
-                  Flexible(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.description,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF8B949E),
-                              height: 1.5,
-                            ),
+                          IconButton(
+                            tooltip: MaterialLocalizations.of(
+                              context,
+                            ).closeButtonTooltip,
+                            onPressed: _isSaving ? null : _dismiss,
+                            icon: const Icon(Icons.close_rounded),
+                            color: AppColors.textSoftFor(context),
                           ),
-                          const SizedBox(height: 12),
-                          for (
-                            var index = 0;
-                            index < widget.steps.length;
-                            index++
-                          )
-                            _HelpStepRow(
-                              index: index,
-                              step: widget.steps[index],
-                              isLast: index == widget.steps.length - 1,
-                            ),
                         ],
                       ),
                     ),
-                  ),
-                  const Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: Color(0xFF0D1117),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(10, 10, 10, 18 + safeBottom),
-                    child: Column(
-                      children: [
-                        InkWell(
-                          onTap: _isSaving
-                              ? null
-                              : () => setState(() {
-                                  _doNotShowAgain = !_doNotShowAgain;
-                                }),
-                          borderRadius: BorderRadius.circular(8),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 16,
-                                  height: 16,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF0D2137),
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(
-                                      color: const Color(0xFF1D4A70),
-                                    ),
-                                  ),
-                                  child: _doNotShowAgain
-                                      ? const Icon(
-                                          Icons.check,
-                                          size: 12,
-                                          color: Color(0xFF58A6FF),
-                                        )
-                                      : null,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    widget.hideAgainLabel,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: Color(0xFF6B7280),
-                                      height: 1.4,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton.icon(
-                            onPressed: _isSaving ? null : _confirm,
-                            style: FilledButton.styleFrom(
-                              backgroundColor: const Color(0xFF1F6FEB),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              textStyle: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
+                    Divider(height: 1, thickness: 1, color: dividerColor),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.description,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: AppColors.textSoftFor(context),
+                                height: 1.48,
                               ),
                             ),
-                            icon: _isSaving
-                                ? const SizedBox(
-                                    width: 14,
-                                    height: 14,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Icon(Icons.check, size: 16),
-                            label: Text(widget.confirmLabel),
-                          ),
+                            const SizedBox(height: 18),
+                            for (
+                              var index = 0;
+                              index < widget.steps.length;
+                              index++
+                            ) ...[
+                              _HelpStepCard(
+                                index: index,
+                                step: widget.steps[index],
+                              ),
+                              if (index < widget.steps.length - 1)
+                                const SizedBox(height: 10),
+                            ],
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                    Divider(height: 1, thickness: 1, color: dividerColor),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16, 10, 16, 14 + safeBottom),
+                      child: Column(
+                        children: [
+                          if (widget.showHideAgainControl) ...[
+                            CheckboxListTile(
+                              value: _doNotShowAgain,
+                              onChanged: _isSaving
+                                  ? null
+                                  : (value) => setState(
+                                      () => _doNotShowAgain = value ?? false,
+                                    ),
+                              controlAffinity: ListTileControlAffinity.leading,
+                              contentPadding: EdgeInsets.zero,
+                              dense: true,
+                              visualDensity: VisualDensity.compact,
+                              activeColor: AppColors.primary,
+                              title: Text(
+                                widget.hideAgainLabel,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSoftFor(context),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton.icon(
+                              onPressed: _isSaving ? null : _confirm,
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size.fromHeight(50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                textStyle: theme.textTheme.labelLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              icon: _isSaving
+                                  ? const SizedBox(
+                                      width: 17,
+                                      height: 17,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Icon(Icons.check_rounded, size: 19),
+                              label: Text(widget.confirmLabel),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -304,9 +269,11 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
     if (_isSaving || _hasPersistedPreference) {
       return;
     }
-    setState(() {
-      _isSaving = true;
-    });
+    if (!widget.showHideAgainControl) {
+      _hasPersistedPreference = true;
+      return;
+    }
+    setState(() => _isSaving = true);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('help_${widget.preferenceKey}', _doNotShowAgain);
     if (mounted) {
@@ -320,83 +287,102 @@ class _HelpBottomSheetState extends State<HelpBottomSheet> {
   }
 }
 
-class _HelpStepRow extends StatelessWidget {
-  const _HelpStepRow({
-    required this.index,
-    required this.step,
-    required this.isLast,
-  });
+class _DragHandle extends StatelessWidget {
+  const _DragHandle({required this.isDark});
 
-  final int index;
-  final HelpStep step;
-  final bool isLast;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
+    return Semantics(
+      container: true,
+      child: Container(
+        width: 38,
+        height: 4,
+        margin: const EdgeInsets.only(top: 10, bottom: 4),
+        decoration: BoxDecoration(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.20)
+              : Colors.black.withValues(alpha: 0.16),
+          borderRadius: BorderRadius.circular(999),
+        ),
+      ),
+    );
+  }
+}
+
+class _HelpStepCard extends StatelessWidget {
+  const _HelpStepCard({required this.index, required this.step});
+
+  final int index;
+  final HelpStep step;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = AppColors.isDark(context);
+    final icon = step.icon ?? _fallbackIcon(index);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.tintedSurfaceFor(
+          context,
+          tint: AppColors.primary,
+          lightColor: const Color(0xFFF5F8FD),
+          darkAlpha: 0.09,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: isDark ? 0.18 : 0.10),
+        ),
+      ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0D2137),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFF1D4A70)),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '${index + 1}',
-                  style: const TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF58A6FF),
-                  ),
-                ),
-              ),
-              if (!isLast)
-                Expanded(
-                  child: Container(
-                    width: 1.5,
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    color: const Color(0xFF1E2636),
-                  ),
-                ),
-            ],
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: isDark ? 0.20 : 0.11),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 19),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    step.title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFFF0F6FC),
-                    ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  step.title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: AppColors.textPrimaryFor(context),
+                    fontWeight: FontWeight.w700,
+                    height: 1.25,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    step.body,
-                    style: const TextStyle(
-                      fontSize: 12.5,
-                      color: Color(0xFF6B7280),
-                      height: 1.4,
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  step.body,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.42,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+
+  IconData _fallbackIcon(int index) => switch (index) {
+    0 => Icons.looks_one_outlined,
+    1 => Icons.looks_two_outlined,
+    2 => Icons.looks_3_outlined,
+    _ => Icons.check_circle_outline_rounded,
+  };
 }

@@ -11,6 +11,7 @@ class ContextualHelpContent {
     required this.title,
     required this.body,
     required this.steps,
+    this.showHideAgainControl = true,
   });
 
   final String eyebrow;
@@ -18,6 +19,7 @@ class ContextualHelpContent {
   final String title;
   final String body;
   final List<FeatureGuideStep> steps;
+  final bool showHideAgainControl;
 }
 
 Future<void> maybeShowContextualHelpGuide(
@@ -27,8 +29,13 @@ Future<void> maybeShowContextualHelpGuide(
   FeatureGuidePreferencesStore? store,
 }) async {
   final guideStore = store ?? FeatureGuidePreferencesStore();
-  final shouldShow = await guideStore.shouldShowGuide(preferenceKey);
-  if (!context.mounted || !shouldShow) {
+  final results = await Future.wait([
+    guideStore.hasSeenIntro(preferenceKey),
+    guideStore.shouldShowGuide(preferenceKey),
+  ]);
+  final hasSeenIntro = results[0];
+  final shouldShow = results[1];
+  if (!context.mounted || hasSeenIntro || !shouldShow) {
     return;
   }
 
@@ -63,11 +70,15 @@ Future<void> showContextualHelpGuide(
       title: content.title,
       description: content.body,
       steps: content.steps
-          .map((step) => HelpStep(title: step.title, body: step.body))
+          .map(
+            (step) =>
+                HelpStep(title: step.title, body: step.body, icon: step.icon),
+          )
           .toList(growable: false),
       preferenceKey: preferenceKey,
       hideAgainLabel: l10n.helpHideAgainLabel(),
       confirmLabel: l10n.documentationGuidePrimaryAction,
+      showHideAgainControl: content.showHideAgainControl,
     ),
   );
 }

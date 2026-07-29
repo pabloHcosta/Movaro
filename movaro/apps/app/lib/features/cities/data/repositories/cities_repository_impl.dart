@@ -3,9 +3,11 @@ import 'package:movaro_app/features/cities/data/models/city_detail_payloads_mode
 import 'package:movaro_app/features/cities/data/models/city_highlights_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_methodology_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_model.dart';
+import 'package:movaro_app/features/cities/data/models/city_recommendation_model.dart';
 import 'package:movaro_app/features/cities/data/models/travel_route_insight_model.dart';
 import 'package:movaro_app/features/cities/data/models/city_weather_model.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
@@ -18,6 +20,36 @@ class CitiesRepositoryImpl implements CitiesRepository {
     : _remoteDataSource = remoteDataSource;
 
   final CitiesRemoteDataSource _remoteDataSource;
+
+  @override
+  Future<CityRecommendationResult> recommendCities(
+    CityRecommendationProfile profile,
+  ) async {
+    final response = await _remoteDataSource
+        .postJsonMap('/api/v1/cities/recommendations', <String, dynamic>{
+          'destinationCountryCode': profile.destinationCountryCode,
+          'intent': profile.intent,
+          'funding': profile.funding,
+          'workArrangement': profile.workArrangement,
+          'travelGroup': profile.travelGroup,
+          if (profile.childrenCount != null)
+            'childrenCount': profile.childrenCount,
+          'availableCapital': profile.availableCapital,
+          'priorities': profile.priorities,
+          'constraints': profile.constraints,
+          'supportNeeds': profile.supportNeeds,
+          if (profile.originLatitude != null)
+            'originLatitude': _roundedCoordinate(profile.originLatitude!),
+          if (profile.originLongitude != null)
+            'originLongitude': _roundedCoordinate(profile.originLongitude!),
+        });
+    return CityRecommendationModel.fromJson(response);
+  }
+
+  // City-level precision is sufficient for distance ordering and avoids
+  // transmitting device-grade location precision to the recommendation API.
+  static double _roundedCoordinate(double value) =>
+      (value * 100).roundToDouble() / 100;
 
   @override
   Future<City> getCityById(String id) async {

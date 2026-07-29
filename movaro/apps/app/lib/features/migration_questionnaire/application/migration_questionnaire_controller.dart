@@ -98,6 +98,8 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       QuestionnaireVariant.strategic => const [
         'intent',
         'timeline',
+        'travel_group',
+        'work_arrangement',
         'priorities',
         'support_needs',
         'funding',
@@ -625,6 +627,13 @@ class MigrationQuestionnaireController extends ChangeNotifier {
         _metricsStore.record(
           GuideFlowMetric.planGenerated,
           stepIndex: _activeQuestions.length,
+          methodologyVersion: plan.recommendationMethodologyVersion,
+          stabilityBand: plan.recommendationStabilityBand,
+          coverageBand: plan.recommendationDataCoverage >= 0.75
+              ? 'broad'
+              : plan.recommendationDataCoverage >= 0.5
+              ? 'partial'
+              : 'limited',
         ),
       );
       notifyListeners();
@@ -800,6 +809,8 @@ class MigrationQuestionnaireController extends ChangeNotifier {
           (answer) =>
               answer.questionId != 'origin_country' &&
               answer.questionId != 'destination_country' &&
+              answer.questionId != 'origin_latitude' &&
+              answer.questionId != 'origin_longitude' &&
               (!hasArgentineOriginCity ||
                   (answer.questionId != 'origin_city' &&
                       answer.questionId != 'argentina_origin')),
@@ -823,6 +834,23 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       nextAnswers.add(
         Answer(questionId: 'destination_country', values: [destinationValue]),
       );
+    }
+
+    if (detectedLocation?.latitude != null &&
+        detectedLocation?.longitude != null) {
+      nextAnswers
+        ..add(
+          Answer(
+            questionId: 'origin_latitude',
+            values: [detectedLocation!.latitude!.toString()],
+          ),
+        )
+        ..add(
+          Answer(
+            questionId: 'origin_longitude',
+            values: [detectedLocation.longitude!.toString()],
+          ),
+        );
     }
 
     if (hasArgentineOriginCity) {
