@@ -15,7 +15,7 @@ export interface DocResolverResult {
 const KEYWORD_TO_IDS: Array<{ keywords: string[]; ids: string[] }> = [
   {
     keywords: ['cpf', 'cadastro de pessoa física', 'cadastro pessoa'],
-    ids: ['doc-01'],
+    ids: ['item_2_1_cpf'],
   },
   {
     keywords: [
@@ -27,27 +27,33 @@ const KEYWORD_TO_IDS: Array<{ keywords: string[]; ids: string[] }> = [
       'vitem',
       'visto',
     ],
-    ids: ['doc-02'],
+    ids: ['item_2_2_residencia'],
   },
   {
-    keywords: ['apostila', 'apostille'],
-    ids: ['doc-04', 'prep-04'],
+    keywords: [
+      'apostila',
+      'apostille',
+      'tradução',
+      'traduccion',
+      'translation',
+    ],
+    ids: ['item_0_2_document_folder'],
   },
   {
     keywords: ['diploma', 'revalidação', 'revalida', 'mec'],
-    ids: ['wor-03'],
+    ids: ['item_3_5_revalidacao_estudos'],
   },
   {
     keywords: ['ctps', 'carteira de trabalho', 'work booklet'],
-    ids: ['wor-02'],
+    ids: ['item_2_3_ctps'],
   },
   {
     keywords: ['crnm', 'carteira de registro', 'registro nacional'],
-    ids: ['arr-01'],
+    ids: ['item_4_5_registro_rnm'],
   },
   {
     keywords: ['cnh', 'carteira de motorista', 'driver', 'habilitação'],
-    ids: ['arr-03'],
+    ids: ['item_4_1_cnh'],
   },
   {
     keywords: [
@@ -57,11 +63,11 @@ const KEYWORD_TO_IDS: Array<{ keywords: string[]; ids: string[] }> = [
       'banco',
       'bank',
     ],
-    ids: ['wor-01'],
+    ids: ['item_3_1_conta_bancaria'],
   },
   {
     keywords: ['sus', 'saúde', 'salud', 'health', 'plano de saúde'],
-    ids: ['arr-02'],
+    ids: ['item_4_2_saude'],
   },
   {
     keywords: [
@@ -73,7 +79,7 @@ const KEYWORD_TO_IDS: Array<{ keywords: string[]; ids: string[] }> = [
       'alquiler',
       'contrato',
     ],
-    ids: ['prep-03', 'hou-01', 'hou-03'],
+    ids: ['item_1_2_housing_temporary', 'item_3_2_aluguel_fixo'],
   },
   {
     keywords: [
@@ -84,7 +90,7 @@ const KEYWORD_TO_IDS: Array<{ keywords: string[]; ids: string[] }> = [
       'grana',
       'custos mudança',
     ],
-    ids: ['prep-02'],
+    ids: ['item_0_3_budget', 'item_1_3_money'],
   },
   {
     keywords: [
@@ -94,7 +100,7 @@ const KEYWORD_TO_IDS: Array<{ keywords: string[]; ids: string[] }> = [
       'papelada',
       'papeleria',
     ],
-    ids: ['prep-04', 'doc-01', 'doc-02'],
+    ids: ['item_0_2_document_folder', 'item_2_1_cpf', 'item_2_2_residencia'],
   },
 ];
 

@@ -66,7 +66,7 @@ class ChatService {
     this.migrationGoal,
     this.planTimeline,
     this.completedItemIds = const [],
-    this.useRemoteKnowledge = false,
+    this.useRemoteKnowledge = true,
   }) : _client = networkClient,
        _originCountry = originCountry,
        _destinationCountry = destinationCountry,

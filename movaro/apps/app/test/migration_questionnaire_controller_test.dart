@@ -72,6 +72,8 @@ void main() {
     tearDown(() async {
       try {
         await tempDirectory.delete(recursive: true);
+      } on PathNotFoundException {
+        // A background reset may already have removed the isolated directory.
       } on FileSystemException {
         // Background persistence can finish between existsSync and delete.
         // Cleanup is already complete when the directory no longer exists.

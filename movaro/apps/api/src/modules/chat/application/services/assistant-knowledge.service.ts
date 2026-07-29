@@ -171,7 +171,9 @@ const STATIC_LANGUAGE_RULES: LanguageRule[] = [
       'residencia',
       'quiero',
     ],
-    regexPatterns: ['\\b(necesit[oá]s|quer[eé]s|vivienda|alquiler|cu[aá]l|cu[aá]nto)\\b'],
+    regexPatterns: [
+      '\\b(necesit[oá]s|quer[eé]s|vivienda|alquiler|cu[aá]l|cu[aá]nto)\\b',
+    ],
     fallbackLanguageCode: 'en',
   },
   {
@@ -192,7 +194,9 @@ const STATIC_LANGUAGE_RULES: LanguageRule[] = [
       'rent',
       'job',
     ],
-    regexPatterns: ['\\b(how|what|which|where|need|housing|documents|move|rent|job)\\b'],
+    regexPatterns: [
+      '\\b(how|what|which|where|need|housing|documents|move|rent|job)\\b',
+    ],
     fallbackLanguageCode: 'en',
   },
 ];
@@ -201,25 +205,30 @@ const STATIC_LANGUAGE_RULES: LanguageRule[] = [
 export class AssistantKnowledgeService {
   private readonly logger = new Logger(AssistantKnowledgeService.name);
 
-  private languageRulesCache:
-    | { expiresAt: number; value: LanguageRule[] }
-    | null = null;
+  private languageRulesCache: {
+    expiresAt: number;
+    value: LanguageRule[];
+  } | null = null;
 
-  private faqEntriesCache:
-    | { expiresAt: number; value: AssistantFaqEntry[] }
-    | null = null;
+  private faqEntriesCache: {
+    expiresAt: number;
+    value: AssistantFaqEntry[];
+  } | null = null;
 
-  private documentEntriesCache:
-    | { expiresAt: number; value: AssistantDocumentEntry[] }
-    | null = null;
+  private documentEntriesCache: {
+    expiresAt: number;
+    value: AssistantDocumentEntry[];
+  } | null = null;
 
-  private quickPromptTemplatesCache:
-    | { expiresAt: number; value: AssistantQuickPromptTemplate[] }
-    | null = null;
+  private quickPromptTemplatesCache: {
+    expiresAt: number;
+    value: AssistantQuickPromptTemplate[];
+  } | null = null;
 
-  private guideAnswersCache:
-    | { expiresAt: number; value: AssistantGuideAnswer[] }
-    | null = null;
+  private guideAnswersCache: {
+    expiresAt: number;
+    value: AssistantGuideAnswer[];
+  } | null = null;
 
   constructor(private readonly supabaseAdminService: SupabaseAdminService) {}
 
@@ -258,14 +267,14 @@ export class AssistantKnowledgeService {
       return bestLanguage;
     }
 
-    const tokenCount = message
-      .trim()
-      .split(/\s+/)
-      .filter((token) => token.length > 0).length;
-
+    // The explicit app locale is the deterministic fallback whenever the
+    // message does not contain enough evidence to identify another language.
+    // This avoids returning English merely because a short or uncommon
+    // Portuguese/Spanish sentence missed the keyword rules.
     if (
-      tokenCount <= 2 &&
-      (requestedLocale === 'pt' || requestedLocale === 'es' || requestedLocale === 'en')
+      requestedLocale === 'pt' ||
+      requestedLocale === 'es' ||
+      requestedLocale === 'en'
     ) {
       return requestedLocale;
     }
@@ -349,7 +358,9 @@ export class AssistantKnowledgeService {
 
     const normalizedMessage = message.toLowerCase();
     const matched = entries
-      .filter((entry) => !entry.corridorKey || entry.corridorKey === corridorKey)
+      .filter(
+        (entry) => !entry.corridorKey || entry.corridorKey === corridorKey,
+      )
       .map((entry) => {
         let score = entry.priority * 0.002;
         for (const keyword of entry.keywords) {
@@ -368,14 +379,11 @@ export class AssistantKnowledgeService {
       .map(({ entry }) => ({
         id: entry.documentCode,
         phase: entry.phase,
-        title:
-          entry.titles[locale] ?? entry.titles.en ?? entry.documentCode,
-        summary:
-          entry.summaries[locale] ?? entry.summaries.en ?? '',
+        title: entry.titles[locale] ?? entry.titles.en ?? entry.documentCode,
+        summary: entry.summaries[locale] ?? entry.summaries.en ?? '',
         ...(entry.notes[locale] || entry.notes.en
           ? {
-              notes:
-                entry.notes[locale] ?? entry.notes.en ?? undefined,
+              notes: entry.notes[locale] ?? entry.notes.en ?? undefined,
             }
           : {}),
       }))
@@ -442,7 +450,8 @@ export class AssistantKnowledgeService {
       .filter((entry) => {
         const destinationMatches =
           !entry.destinationCountry ||
-          entry.destinationCountry.toLowerCase().trim() === normalizedDestination;
+          entry.destinationCountry.toLowerCase().trim() ===
+            normalizedDestination;
         const corridorMatches =
           !entry.corridorKey || entry.corridorKey === corridorKey;
         return destinationMatches && corridorMatches;
@@ -450,10 +459,8 @@ export class AssistantKnowledgeService {
       .sort((a, b) => b.priority - a.priority)
       .map((entry) => ({
         section: entry.section,
-        question:
-          entry.questions[locale] ?? entry.questions.en ?? '',
-        answer:
-          entry.answers[locale] ?? entry.answers.en ?? '',
+        question: entry.questions[locale] ?? entry.questions.en ?? '',
+        answer: entry.answers[locale] ?? entry.answers.en ?? '',
         keywords: entry.keywords[locale] ?? entry.keywords.en ?? [],
       }))
       .filter((entry) => entry.question.length > 0 && entry.answer.length > 0);
@@ -465,7 +472,11 @@ export class AssistantKnowledgeService {
     destinationCountry: string,
     corridorKey?: string,
   ): Promise<{ found: boolean; confidence: number; answer: string }> {
-    const entries = await this.getGuideAnswers(locale, destinationCountry, corridorKey);
+    const entries = await this.getGuideAnswers(
+      locale,
+      destinationCountry,
+      corridorKey,
+    );
     if (entries.length === 0) {
       return { found: false, confidence: 0, answer: '' };
     }
@@ -488,7 +499,11 @@ export class AssistantKnowledgeService {
       if (question && normalizedMessage.includes(question)) {
         score += 4;
       }
-      if (answer && answer.length > 0 && normalizedMessage.includes(answer.slice(0, 24))) {
+      if (
+        answer &&
+        answer.length > 0 &&
+        normalizedMessage.includes(answer.slice(0, 24))
+      ) {
         score += 0.6;
       }
       score += Math.max(0, 0.8 - entries.indexOf(entry) * 0.02);
@@ -549,7 +564,9 @@ export class AssistantKnowledgeService {
 
       return rules;
     } catch (error) {
-      this.logger.warn(`Assistant language rules fallback enabled: ${String(error)}`);
+      this.logger.warn(
+        `Assistant language rules fallback enabled: ${String(error)}`,
+      );
       return fallback;
     }
   }
@@ -583,28 +600,31 @@ export class AssistantKnowledgeService {
       }
 
       const keywordsByEntry = new Map<string, AssistantFaqKeywordRecord[]>();
-      for (const keyword of (keywordsResult.data ?? []) as AssistantFaqKeywordRecord[]) {
+      for (const keyword of (keywordsResult.data ??
+        []) as AssistantFaqKeywordRecord[]) {
         const current = keywordsByEntry.get(keyword.entry_id) ?? [];
         current.push(keyword);
         keywordsByEntry.set(keyword.entry_id, current);
       }
 
-      const entries = (entriesResult.data as AssistantFaqEntryRecord[]).map((row) => ({
-        id: row.id,
-        corridorKey: row.corridor_key,
-        priority: row.priority,
-        answers: {
-          ...(row.answer_pt ? { pt: row.answer_pt } : {}),
-          ...(row.answer_es ? { es: row.answer_es } : {}),
-          ...(row.answer_en ? { en: row.answer_en } : {}),
-        },
-        answerDefault: row.answer_default,
-        keywords: (keywordsByEntry.get(row.id) ?? []).map((keyword) => ({
-          languageCode: keyword.language_code,
-          keyword: keyword.keyword,
-          weight: Number(keyword.weight ?? 1),
-        })),
-      }));
+      const entries = (entriesResult.data as AssistantFaqEntryRecord[]).map(
+        (row) => ({
+          id: row.id,
+          corridorKey: row.corridor_key,
+          priority: row.priority,
+          answers: {
+            ...(row.answer_pt ? { pt: row.answer_pt } : {}),
+            ...(row.answer_es ? { es: row.answer_es } : {}),
+            ...(row.answer_en ? { en: row.answer_en } : {}),
+          },
+          answerDefault: row.answer_default,
+          keywords: (keywordsByEntry.get(row.id) ?? []).map((keyword) => ({
+            languageCode: keyword.language_code,
+            keyword: keyword.keyword,
+            weight: Number(keyword.weight ?? 1),
+          })),
+        }),
+      );
 
       this.faqEntriesCache = {
         expiresAt: Date.now() + CACHE_TTL_MS,
@@ -646,8 +666,12 @@ export class AssistantKnowledgeService {
         return [];
       }
 
-      const keywordsByEntry = new Map<string, AssistantDocumentKeywordRecord[]>();
-      for (const keyword of (keywordsResult.data ?? []) as AssistantDocumentKeywordRecord[]) {
+      const keywordsByEntry = new Map<
+        string,
+        AssistantDocumentKeywordRecord[]
+      >();
+      for (const keyword of (keywordsResult.data ??
+        []) as AssistantDocumentKeywordRecord[]) {
         const current = keywordsByEntry.get(keyword.entry_id) ?? [];
         current.push(keyword);
         keywordsByEntry.set(keyword.entry_id, current);
@@ -689,12 +713,16 @@ export class AssistantKnowledgeService {
 
       return entries;
     } catch (error) {
-      this.logger.warn(`Assistant document knowledge fallback enabled: ${String(error)}`);
+      this.logger.warn(
+        `Assistant document knowledge fallback enabled: ${String(error)}`,
+      );
       return [];
     }
   }
 
-  private async getQuickPromptTemplates(): Promise<AssistantQuickPromptTemplate[]> {
+  private async getQuickPromptTemplates(): Promise<
+    AssistantQuickPromptTemplate[]
+  > {
     const cached = this.quickPromptTemplatesCache;
     if (cached && cached.expiresAt > Date.now()) {
       return cached.value;
@@ -739,7 +767,9 @@ export class AssistantKnowledgeService {
 
       return templates;
     } catch (error) {
-      this.logger.warn(`Assistant quick prompt fallback enabled: ${String(error)}`);
+      this.logger.warn(
+        `Assistant quick prompt fallback enabled: ${String(error)}`,
+      );
       return [];
     }
   }
@@ -792,7 +822,9 @@ export class AssistantKnowledgeService {
 
       return answers;
     } catch (error) {
-      this.logger.warn(`Assistant guide answers fallback enabled: ${String(error)}`);
+      this.logger.warn(
+        `Assistant guide answers fallback enabled: ${String(error)}`,
+      );
       return [];
     }
   }

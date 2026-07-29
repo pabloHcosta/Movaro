@@ -47,8 +47,8 @@ void main() {
       snapshot.completed.map((item) => item.id),
       isNot(contains('questionnaire_goal_defined')),
     );
-    expect(snapshot.coreTotalCount, 4);
-    expect(snapshot.coreCompletedCount, 1);
+    expect(snapshot.coreTotalCount, 0);
+    expect(snapshot.coreCompletedCount, 0);
     expect(snapshot.pendingBeforeTravelCount, 1);
   });
 
@@ -65,15 +65,112 @@ void main() {
     expect(snapshot.current?.id, 'chosen');
     expect(snapshot.now.first.id, 'chosen');
   });
+
+  test('counts a compact set of outcome milestones instead of every task', () {
+    final snapshot = GuideFocusEngine.build(
+      plan: _plan(),
+      items: [
+        _item(
+          id: 'item_0_2_document_folder',
+          order: 0,
+          tier: GuideItemTier.critical,
+        ),
+        _item(
+          id: 'item_2_1_cpf',
+          order: 1,
+          tier: GuideItemTier.critical,
+          completed: true,
+        ),
+        _item(
+          id: 'item_0_5_mercado_trabalho',
+          order: 2,
+          tier: GuideItemTier.recommended,
+        ),
+        _item(id: 'supporting_tip', order: 3, tier: GuideItemTier.recommended),
+      ],
+    );
+
+    expect(snapshot.coreTotalCount, 3);
+    expect(snapshot.coreCompletedCount, 1);
+  });
+
+  test('study-specific critical work outranks generic preparation', () {
+    final snapshot = GuideFocusEngine.build(
+      plan: _plan(goal: 'study', timeline: 'in_6_12m'),
+      items: [
+        _item(
+          id: 'item_0_2_document_folder',
+          order: 0,
+          tier: GuideItemTier.critical,
+          preArrival: true,
+        ),
+        _item(
+          id: 'item_0_7_ingresso_ensino_superior',
+          order: 20,
+          tier: GuideItemTier.critical,
+          preArrival: true,
+        ),
+        _item(
+          id: 'item_2_7_documentos_academicos',
+          order: 21,
+          tier: GuideItemTier.critical,
+          preArrival: true,
+        ),
+      ],
+    );
+
+    expect(snapshot.current?.id, 'item_0_7_ingresso_ensino_superior');
+    expect(
+      snapshot.upcoming.map((item) => item.id),
+      contains('item_2_7_documentos_academicos'),
+    );
+  });
+
+  test('postponed work stays pending and never unlocks dependencies', () {
+    final postponed = _item(
+      id: 'item_0_2_document_folder',
+      order: 0,
+      tier: GuideItemTier.critical,
+      completed: true,
+    ).copyWith(dismissReason: GuideDismissReason.later);
+    final dependent = GuideActionItem(
+      id: 'dependent',
+      title: 'dependent',
+      shortDescription: 'dependent',
+      type: GuideActionType.informative,
+      phase: GuidePhase.documents,
+      orderIndex: 1,
+      isCompleted: false,
+      tier: GuideItemTier.recommended,
+      dependencies: const ['item_0_2_document_folder'],
+    );
+
+    final snapshot = GuideFocusEngine.build(
+      plan: _plan(),
+      items: [postponed, dependent],
+    );
+
+    expect(snapshot.current, isNull);
+    expect(snapshot.later.map((item) => item.id), contains(postponed.id));
+    expect(
+      snapshot.completed.map((item) => item.id),
+      isNot(contains(postponed.id)),
+    );
+    expect(snapshot.coreTotalCount, 1);
+    expect(snapshot.coreCompletedCount, 0);
+  });
 }
 
-MigrationPlan _plan() {
-  return const MigrationPlan(
+MigrationPlan _plan({
+  String goal = 'find_job_br',
+  String timeline = 'in_0_3m',
+}) {
+  return MigrationPlan(
     originCountry: 'Argentina',
     destinationCountry: 'Brasil',
-    goal: 'find_job_br',
-    timeline: 'in_0_3m',
-    steps: [],
+    goal: goal,
+    timeline: timeline,
+    steps: const [],
   );
 }
 

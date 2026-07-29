@@ -257,6 +257,7 @@ void main() {
     await _pumpScreen(tester);
 
     expect(find.text('Execução'), findsWidgets);
+    expect(find.text('Ver plano completo'), findsOneWidget);
 
     await tester.tap(
       find.byIcon(Icons.arrow_back_rounded).first,

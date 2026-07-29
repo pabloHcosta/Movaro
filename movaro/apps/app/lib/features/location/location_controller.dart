@@ -8,7 +8,6 @@ import 'package:movaro_app/features/location/argentina_locality_catalog.dart';
 import 'package:movaro_app/features/location/location_data.dart';
 import 'package:movaro_app/features/location/location_service.dart';
 import 'package:movaro_app/features/location/location_storage.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class LocationController extends ChangeNotifier {
   LocationController({
@@ -53,12 +52,15 @@ class LocationController extends ChangeNotifier {
     _lastAskedAt = await _storage.getLastAskedDate();
     _savedLocation = await _storage.getSavedLocation();
 
-    final nativeStatus = await Permission.locationWhenInUse.status;
-    if (nativeStatus.isPermanentlyDenied && _permissionStatus != 'granted') {
+    final nativeStatus = await Geolocator.checkPermission();
+    if (nativeStatus == LocationPermission.deniedForever &&
+        _permissionStatus != 'granted') {
       _permissionStatus = 'permanently_denied';
       await _storage.savePermissionStatus(_permissionStatus);
       _lastAskedAt = await _storage.getLastAskedDate();
-    } else if (nativeStatus.isGranted && _permissionStatus != 'granted') {
+    } else if ((nativeStatus == LocationPermission.always ||
+            nativeStatus == LocationPermission.whileInUse) &&
+        _permissionStatus != 'granted') {
       _permissionStatus = 'granted';
       await _storage.savePermissionStatus(_permissionStatus);
       _lastAskedAt = await _storage.getLastAskedDate();

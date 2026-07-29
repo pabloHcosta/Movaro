@@ -2,6 +2,7 @@ import { findRegisteredGuideCatalogByCorridor } from '../../../data/guide-catalo
 import type { GuideItem } from '../../../data/argentina-brazil-guide.datasource';
 
 export type GuidanceTopic =
+  | 'next_step'
   | 'documents'
   | 'cpf'
   | 'visa'
@@ -71,7 +72,7 @@ export const argentinaBrazilGuidanceProfile: CorridorGuidanceProfile = {
   buildAnswer(topic, locale, context, helpers) {
     switch (topic) {
       case 'cpf': {
-        const alreadyDone = context.completedItemIds.includes('doc-01');
+        const alreadyDone = context.completedItemIds.includes('item_2_1_cpf');
         if (locale === 'es') {
           return alreadyDone
             ? `El CPF ya aparece como resuelto en tu progreso. Si todavía falta usarlo en la práctica, el siguiente paso suele ser banco, alquiler o registro laboral.`
@@ -106,7 +107,9 @@ ${helpers.phaseHint(locale, context.currentPhase, context.completedItemIds)}`;
       }
 
       case 'visa': {
-        const hasResidence = context.completedItemIds.includes('doc-02');
+        const hasResidence = context.completedItemIds.includes(
+          'item_2_2_residencia',
+        );
         if (locale === 'es') {
           return hasResidence
             ? `La residencia MERCOSUR ya aparece en tu progreso. Lo importante ahora es usar esa regularización para avanzar con CRNM, banco y trabajo formal.`
@@ -138,6 +141,29 @@ ${helpers.phaseHint(locale, context.currentPhase, context.completedItemIds)}`;
 - Se seu plano já está em execução, essa etapa não vale deixar para o final
 
 ${helpers.phaseHint(locale, context.currentPhase, context.completedItemIds)}`;
+      }
+
+      case 'next_step': {
+        const nextItem = helpers.nextPendingItem(
+          context.currentPhase,
+          context.completedItemIds,
+        );
+        if (!nextItem) {
+          if (locale === 'es') {
+            return 'No aparece otro paso pendiente en el catálogo revisado de tu plan.';
+          }
+          if (locale === 'en') {
+            return 'There is no other pending step in the reviewed plan catalog.';
+          }
+          return 'Não aparece outra etapa pendente no catálogo revisado do seu plano.';
+        }
+        if (locale === 'es') {
+          return `Por tu etapa y por lo que ya marcaste como concluido, el próximo paso práctico es: ${nextItem}. Abrí esa tarea en tu plan para ver requisitos, fuente oficial y criterio de conclusión.`;
+        }
+        if (locale === 'en') {
+          return `Based on your current stage and completed items, your next practical step is: ${nextItem}. Open that task in your plan to see requirements, the official source, and completion criteria.`;
+        }
+        return `Pela sua etapa atual e pelo que já foi concluído, o próximo passo prático é: ${nextItem}. Abra essa tarefa no plano para ver requisitos, fonte oficial e critério de conclusão.`;
       }
 
       case 'costs':
@@ -277,8 +303,8 @@ ${helpers.phaseHint(locale, context.currentPhase, context.completedItemIds)}`;
 - Pasaporte o DNI válido
 - CPF
 - Ruta de residencia MERCOSUR
-- Antecedentes apostillados si vas a regularizar residencia
-- Documentos personales que después puedan exigir apostilla o traducción
+- Certificados de antecedentes según la lista oficial de la ruta
+- Apostilla o traducción solo cuando el trámite específico lo exija
 
 ${progress}${cityLine ? `\n\n${cityLine}` : ''}`;
         }
@@ -288,8 +314,8 @@ ${progress}${cityLine ? `\n\n${cityLine}` : ''}`;
 - Valid passport or ID
 - CPF
 - MERCOSUR residency path
-- Apostilled criminal record if you are regularizing residency
-- Personal documents that may later require apostille or sworn translation
+- Criminal-record certificates required by the route's official list
+- Apostille or translation only when the specific procedure requires it
 
 ${progress}${cityLine ? `\n\n${cityLine}` : ''}`;
         }
@@ -298,8 +324,8 @@ ${progress}${cityLine ? `\n\n${cityLine}` : ''}`;
 - Passaporte ou DNI válido
 - CPF
 - Caminho de residência MERCOSUL
-- Antecedentes apostilados se você for regularizar residência
-- Documentos pessoais que depois possam exigir apostila ou tradução
+- Certificados de antecedentes conforme a lista oficial da rota
+- Apostila ou tradução somente quando o procedimento específico exigir
 
 ${progress}${cityLine ? `\n\n${cityLine}` : ''}`;
       }

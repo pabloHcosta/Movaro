@@ -16,10 +16,18 @@ enum GuideFlowMetric {
   recommendationFeedbackPositive,
   recommendationFeedbackNegative,
   taskSelected,
+  taskSheetOpened,
+  taskSheetClosedIncomplete,
+  taskBlocked,
   taskStarted,
   taskWaiting,
   taskResumed,
+  taskDismissed,
   taskCompleted,
+  officialLinkOpened,
+  officialLinkReturned,
+  officialLinkFailed,
+  detailsExpanded,
   fullPlanOpened,
 }
 

@@ -15,7 +15,7 @@ describe('AssistantKnowledgeService', () => {
     expect(locale).toBe('es');
   });
 
-  it('falls back to English when the message is in an unsupported language', async () => {
+  it('falls back to the explicit app locale when language evidence is weak', async () => {
     const service = new AssistantKnowledgeService({
       isConfigured: false,
     } as SupabaseAdminService);
@@ -25,7 +25,20 @@ describe('AssistantKnowledgeService', () => {
       'pt',
     );
 
-    expect(locale).toBe('en');
+    expect(locale).toBe('pt');
+  });
+
+  it('keeps a long Portuguese progress update in Portuguese', async () => {
+    const service = new AssistantKnowledgeService({
+      isConfigured: false,
+    } as SupabaseAdminService);
+
+    const locale = await service.detectLanguage(
+      'Já concluí meus documentos e agora preciso saber qual é a próxima etapa do plano',
+      'pt',
+    );
+
+    expect(locale).toBe('pt');
   });
 
   it('uses FAQ content from Supabase when a published entry matches the corridor', async () => {

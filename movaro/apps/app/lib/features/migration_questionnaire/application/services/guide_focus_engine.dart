@@ -72,17 +72,24 @@ class GuideFocusEngine {
   }) {
     final completedIds = <String>{
       for (final item in items)
-        if (item.isCompleted) item.id,
+        if (item.isCompleted && item.dismissReason != GuideDismissReason.later)
+          item.id,
     };
     final pending = items
-        .where((item) => !item.isCompleted && !_isQuestionnaireMilestone(item))
+        .where(
+          (item) =>
+              (!item.isCompleted ||
+                  item.dismissReason == GuideDismissReason.later) &&
+              !_isQuestionnaireMilestone(item),
+        )
         .toList(growable: false);
     final unlockImpact = <String, int>{
       for (final item in items)
         item.id: items
             .where(
               (candidate) =>
-                  !candidate.isCompleted &&
+                  (!candidate.isCompleted ||
+                      candidate.dismissReason == GuideDismissReason.later) &&
                   candidate.dependencies.contains(item.id),
             )
             .length,
@@ -91,10 +98,18 @@ class GuideFocusEngine {
     bool isUnlocked(GuideActionItem item) =>
         item.dependencies.every(completedIds.contains);
 
-    final actionable = pending.where(isUnlocked).toList()
-      ..sort(
-        (a, b) => _compare(plan: plan, a: a, b: b, unlockImpact: unlockImpact),
-      );
+    final actionable =
+        pending
+            .where(
+              (item) =>
+                  isUnlocked(item) &&
+                  item.dismissReason != GuideDismissReason.later,
+            )
+            .toList()
+          ..sort(
+            (a, b) =>
+                _compare(plan: plan, a: a, b: b, unlockImpact: unlockImpact),
+          );
 
     final active = activeItemId == null
         ? null
@@ -121,10 +136,18 @@ class GuideFocusEngine {
     final now = rankedForNow.take(3).toList(growable: false);
     final nowIds = now.map((item) => item.id).toSet();
 
-    final onArrival = pending.where(_belongsOnArrival).toList(growable: false)
-      ..sort(
-        (a, b) => _compare(plan: plan, a: a, b: b, unlockImpact: unlockImpact),
-      );
+    final onArrival =
+        pending
+            .where(
+              (item) =>
+                  _belongsOnArrival(item) &&
+                  item.dismissReason != GuideDismissReason.later,
+            )
+            .toList(growable: false)
+          ..sort(
+            (a, b) =>
+                _compare(plan: plan, a: a, b: b, unlockImpact: unlockImpact),
+          );
     final onArrivalIds = onArrival.map((item) => item.id).toSet();
 
     final optional =
@@ -132,6 +155,7 @@ class GuideFocusEngine {
             .where(
               (item) =>
                   _tierForFocus(item) == GuideItemTier.optional &&
+                  item.dismissReason != GuideDismissReason.later &&
                   !onArrivalIds.contains(item.id) &&
                   !nowIds.contains(item.id),
             )
@@ -146,9 +170,10 @@ class GuideFocusEngine {
         pending
             .where(
               (item) =>
-                  !nowIds.contains(item.id) &&
-                  !onArrivalIds.contains(item.id) &&
-                  !optionalIds.contains(item.id),
+                  item.dismissReason == GuideDismissReason.later ||
+                  (!nowIds.contains(item.id) &&
+                      !onArrivalIds.contains(item.id) &&
+                      !optionalIds.contains(item.id)),
             )
             .toList(growable: false)
           ..sort(
@@ -162,12 +187,15 @@ class GuideFocusEngine {
               (item) =>
                   item.isCompleted &&
                   !_isQuestionnaireMilestone(item) &&
+                  item.dismissReason != GuideDismissReason.later &&
                   item.dismissReason != GuideDismissReason.notApplicable,
             )
             .toList(growable: false)
           ..sort((a, b) => b.orderIndex.compareTo(a.orderIndex));
 
-    final coreItems = items.where(_countsTowardsCoreProgress).toList();
+    final coreItems = items
+        .where((item) => _countsTowardsCoreProgress(plan, item))
+        .toList();
     final coreCompletedCount = coreItems
         .where(
           (item) =>
@@ -194,8 +222,9 @@ class GuideFocusEngine {
           .where(
             (item) =>
                 item.preArrivalRequired &&
-                !item.isCompleted &&
-                item.dismissReason == null,
+                (!item.isCompleted ||
+                    item.dismissReason == GuideDismissReason.later) &&
+                item.dismissReason != GuideDismissReason.notApplicable,
           )
           .length,
       currentReason: current == null
@@ -204,13 +233,67 @@ class GuideFocusEngine {
     );
   }
 
-  static bool _countsTowardsCoreProgress(GuideActionItem item) {
+  /// Returns whether [item] is one of the outcome milestones shown in the
+  /// primary progress indicator. The full guide remains available, but small
+  /// supporting actions no longer make the journey look like a 25-step form.
+  static bool isCoreMilestone(MigrationPlan plan, GuideActionItem item) =>
+      _countsTowardsCoreProgress(plan, item);
+
+  static bool _countsTowardsCoreProgress(
+    MigrationPlan plan,
+    GuideActionItem item,
+  ) {
     if (_isQuestionnaireMilestone(item) ||
         _tierForFocus(item) == GuideItemTier.optional ||
         item.dismissReason == GuideDismissReason.notApplicable) {
       return false;
     }
-    return true;
+
+    const baseMilestones = <String>{
+      'item_0_2_document_folder',
+      'item_0_2_antecedentes',
+      'item_0_3_budget',
+      'item_1_2_housing_temporary',
+      'item_1_0_entry_proof',
+      'item_2_1_cpf',
+      'item_2_2_residencia',
+      'item_4_5_registro_rnm',
+      'item_4_2_saude',
+    };
+    if (baseMilestones.contains(item.id)) {
+      return true;
+    }
+
+    final goalMilestones = switch (plan.goal) {
+      'find_job_br' || 'work' => const <String>{
+        'item_0_5_mercado_trabalho',
+        'item_3_4_work_rights',
+        'item_3_4_formal_work_ready',
+      },
+      'study' => const <String>{
+        'item_0_7_ingresso_ensino_superior',
+        'item_2_7_documentos_academicos',
+        'item_3_5_revalidacao_estudos',
+      },
+      'remote_income' || 'remote_work' || 'entrepreneur' => const <String>{
+        'item_2_6_impostos_exterior',
+        'item_3_4_trabalho',
+        'item_4_4_mei',
+      },
+      _ => const <String>{},
+    };
+    if (goalMilestones.contains(item.id)) {
+      return true;
+    }
+
+    final hasChildren =
+        plan.travelGroup == 'family_kids' ||
+        plan.travelGroup == 'solo_parent' ||
+        (plan.childrenCount ?? 0) > 0 ||
+        plan.selectedConstraints.contains('children_school');
+    return hasChildren &&
+        (item.id == 'item_0_7_family_documents' ||
+            item.id == 'item_3_6_familia_escola');
   }
 
   static bool _isQuestionnaireMilestone(GuideActionItem item) =>
@@ -255,6 +338,7 @@ class GuideFocusEngine {
       score += 120;
     }
     score += (unlockCount.clamp(0, 4) * 20);
+    score += _profileItemBonus(plan, item);
     score += _goalPhaseBonus(plan.goal, item.phase);
     score += _timelinePhaseBonus(plan.timeline, item.phase);
     score += switch (item.estimatedEffort) {
@@ -316,6 +400,41 @@ class GuideFocusEngine {
       ('fresh_start', GuidePhase.housing) => 35,
       _ => 0,
     };
+  }
+
+  static int _profileItemBonus(MigrationPlan plan, GuideActionItem item) {
+    final goalBonusIds = switch (plan.goal) {
+      'find_job_br' || 'work' => const <String>{
+        'item_0_5_mercado_trabalho',
+        'item_3_4_work_rights',
+        'item_3_4_formal_work_ready',
+        'item_2_3_ctps',
+      },
+      'study' => const <String>{
+        'item_0_7_ingresso_ensino_superior',
+        'item_2_7_documentos_academicos',
+        'item_3_5_revalidacao_estudos',
+      },
+      'remote_income' || 'remote_work' || 'entrepreneur' => const <String>{
+        'item_2_6_impostos_exterior',
+        'item_3_4_trabalho',
+        'item_4_4_mei',
+      },
+      _ => const <String>{},
+    };
+    var bonus = goalBonusIds.contains(item.id) ? 320 : 0;
+
+    final hasChildren =
+        plan.travelGroup == 'family_kids' ||
+        plan.travelGroup == 'solo_parent' ||
+        (plan.childrenCount ?? 0) > 0 ||
+        plan.selectedConstraints.contains('children_school');
+    if (hasChildren &&
+        (item.id == 'item_0_7_family_documents' ||
+            item.id == 'item_3_6_familia_escola')) {
+      bonus += 300;
+    }
+    return bonus;
   }
 
   static int _timelinePhaseBonus(String timeline, GuidePhase phase) {

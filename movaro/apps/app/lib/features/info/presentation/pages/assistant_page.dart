@@ -20,7 +20,9 @@ import 'package:movaro_app/features/info/application/chat_service.dart';
 import 'package:movaro_app/features/info/domain/entities/chat_message.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 enum _AssistantMode { conversation, guides }
 
@@ -107,7 +109,11 @@ class _AssistantPageState extends State<AssistantPage> {
         destinationCountry: destinationCountry,
         locale: locale,
         highlightedCityId: plan?.currentPlanCity?.id,
-        currentPhase: _resolveCurrentPhase(progressSnapshot.activeItemId),
+        currentPhase: _resolveCurrentPhase(
+          plan,
+          progressSnapshot.activeItemId,
+          locale,
+        ),
         completedItemIds: completedItemIds,
         migrationGoal: plan?.goal.isNotEmpty == true ? plan!.goal : null,
         planTimeline: plan?.timeline.isNotEmpty == true ? plan!.timeline : null,
@@ -128,16 +134,26 @@ class _AssistantPageState extends State<AssistantPage> {
     }
   }
 
-  String? _resolveCurrentPhase(String? activeItemId) {
-    if (activeItemId == null || activeItemId.isEmpty) {
+  String? _resolveCurrentPhase(
+    MigrationPlan? plan,
+    String? activeItemId,
+    String locale,
+  ) {
+    if (plan == null || activeItemId == null || activeItemId.isEmpty) {
       return null;
     }
-    if (activeItemId.startsWith('item_0_')) return 'preparation';
-    if (activeItemId.startsWith('item_1_')) return 'housing';
-    if (activeItemId.startsWith('item_2_')) return 'documents';
-    if (activeItemId.startsWith('item_3_')) return 'work';
-    if (activeItemId.startsWith('item_4_')) return 'arrival';
-    return null;
+    if (!ArgentinaBrazilGuideDataSource.isArgentinaToBrazil(
+      plan.originCountry,
+      plan.destinationCountry,
+    )) {
+      return null;
+    }
+
+    final activeItem = ArgentinaBrazilGuideDataSource.build(
+      plan,
+      localeCode: locale,
+    ).where((item) => item.id == activeItemId).firstOrNull;
+    return activeItem?.phase.name;
   }
 
   Future<void> _showAssistantGuide() {

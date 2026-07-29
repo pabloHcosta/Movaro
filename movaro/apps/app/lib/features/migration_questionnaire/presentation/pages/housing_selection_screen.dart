@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
+import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
+import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
@@ -50,7 +52,12 @@ class HousingSelectionScreen extends StatelessWidget {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  padding: EdgeInsets.fromLTRB(
+                    context.pageHorizontalPadding,
+                    context.pageVerticalPadding,
+                    context.pageHorizontalPadding,
+                    0,
+                  ),
                   child: AppGlassHeader(
                     title: context.l10n.housingSelectionTitle,
                     onBack: () => Navigator.of(context).pop(),
@@ -59,7 +66,12 @@ class HousingSelectionScreen extends StatelessWidget {
                 ),
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                    padding: EdgeInsets.fromLTRB(
+                      context.pageHorizontalPadding,
+                      18,
+                      context.pageHorizontalPadding,
+                      28,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -129,8 +141,6 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
         name: 'Hostelworld',
         emoji: '🛏️',
         description: context.l10n.housingTemporaryPortalHostelworld,
-        bgColor: const Color(0xFF0A1808),
-        borderColor: const Color(0xFF1A3A10),
         urlBuilder: (city, _) =>
             PreparationResourceLinks.buildHostelworldSearch(city),
       ),
@@ -138,8 +148,6 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
         name: 'Airbnb',
         emoji: '🏠',
         description: context.l10n.housingTemporaryPortalAirbnb,
-        bgColor: const Color(0xFF1C0808),
-        borderColor: const Color(0xFF4A0D0D),
         urlBuilder: (city, duration) =>
             PreparationResourceLinks.buildAirbnbSearch(city, duration),
       ),
@@ -147,8 +155,6 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
         name: 'Booking',
         emoji: '🌐',
         description: context.l10n.housingTemporaryPortalBooking,
-        bgColor: const Color(0xFF08081C),
-        borderColor: const Color(0xFF0D0D4A),
         urlBuilder: (city, duration) =>
             PreparationResourceLinks.buildBookingSearch(city, duration),
       ),
@@ -156,8 +162,6 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
         name: 'QuintoAndar',
         emoji: '⭐',
         description: context.l10n.housingLongTermPortalQuintoAndar,
-        bgColor: const Color(0xFF17120A),
-        borderColor: const Color(0xFF5A451B),
         urlBuilder: (city, _) =>
             PreparationResourceLinks.buildQuintoAndarSearch(city),
       ),
@@ -165,8 +169,6 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
         name: 'Viva Real',
         emoji: '🏢',
         description: context.l10n.housingTemporaryPortalVivaReal,
-        bgColor: const Color(0xFF0D1F38),
-        borderColor: const Color(0xFF1D4A70),
         urlBuilder: (city, duration) =>
             PreparationResourceLinks.buildVivaRealTemporarySearch(
               city,
@@ -177,8 +179,6 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
         name: 'Zap Imoveis',
         emoji: '🔑',
         description: context.l10n.housingTemporaryPortalZap,
-        bgColor: const Color(0xFF0D1F38),
-        borderColor: const Color(0xFF1D4A70),
         urlBuilder: (city, duration) =>
             PreparationResourceLinks.buildZapTemporarySearch(city, duration),
       ),
@@ -193,7 +193,12 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  padding: EdgeInsets.fromLTRB(
+                    context.pageHorizontalPadding,
+                    context.pageVerticalPadding,
+                    context.pageHorizontalPadding,
+                    0,
+                  ),
                   child: AppGlassHeader(
                     title: context.l10n.housingTemporaryTitle,
                     onBack: () => Navigator.of(context).pop(),
@@ -202,7 +207,12 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
                 ),
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                    padding: EdgeInsets.fromLTRB(
+                      context.pageHorizontalPadding,
+                      18,
+                      context.pageHorizontalPadding,
+                      28,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -223,7 +233,7 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
                                 crossAxisCount: 2,
                                 mainAxisSpacing: 10,
                                 crossAxisSpacing: 10,
-                                childAspectRatio: 1.28,
+                                mainAxisExtent: 168,
                               ),
                           itemBuilder: (context, index) {
                             final portal = portals[index];
@@ -237,51 +247,34 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
                           },
                         ),
                         const SizedBox(height: 16),
-                        GestureDetector(
-                          onTap: () {
-                            final uri = selectedPortal.urlBuilder(
-                              widget.city,
-                              _duration,
-                            );
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => PreparationWebViewPage(
-                                  title: context.l10n.housingStayInCityTitle(
-                                    widget.city.name,
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: () {
+                              final uri = selectedPortal.urlBuilder(
+                                widget.city,
+                                _duration,
+                              );
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => PreparationWebViewPage(
+                                    title: context.l10n.housingStayInCityTitle(
+                                      widget.city.name,
+                                    ),
+                                    uri: uri,
                                   ),
-                                  uri: uri,
                                 ),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 13),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1F6FEB),
-                              borderRadius: BorderRadius.circular(13),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.open_in_new_rounded,
+                              size: 18,
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.open_in_new_rounded,
-                                  color: Colors.white,
-                                  size: 14,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  context.l10n.housingTemporarySearchAction(
-                                    widget.city.name,
-                                    _durationLabel(context, _duration),
-                                  ),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
+                            label: Text(
+                              context.l10n.housingTemporarySearchAction(
+                                widget.city.name,
+                                _durationLabel(context, _duration),
+                              ),
                             ),
                           ),
                         ),
@@ -290,7 +283,9 @@ class _TemporaryHousingScreenState extends State<TemporaryHousingScreen> {
                           child: Text(
                             context.l10n.housingOpenSelectedSourceHint,
                             style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: const Color(0xFF6B7280)),
+                                ?.copyWith(
+                                  color: AppColors.textSoftFor(context),
+                                ),
                           ),
                         ),
                       ],
@@ -366,7 +361,12 @@ class LongTermHousingScreen extends StatelessWidget {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  padding: EdgeInsets.fromLTRB(
+                    context.pageHorizontalPadding,
+                    context.pageVerticalPadding,
+                    context.pageHorizontalPadding,
+                    0,
+                  ),
                   child: AppGlassHeader(
                     title: context.l10n.housingLongTermTitle,
                     onBack: () => Navigator.of(context).pop(),
@@ -375,7 +375,12 @@ class LongTermHousingScreen extends StatelessWidget {
                 ),
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                    padding: EdgeInsets.fromLTRB(
+                      context.pageHorizontalPadding,
+                      18,
+                      context.pageHorizontalPadding,
+                      28,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -429,8 +434,18 @@ class _SelectionBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF0D2818),
-        border: Border.all(color: const Color(0xFF1A4428)),
+        color: AppColors.tintedSurfaceFor(
+          context,
+          tint: AppColors.success,
+          lightColor: const Color(0xFFEAF7EF),
+        ),
+        border: Border.all(
+          color: AppColors.tintedBorderFor(
+            context,
+            tint: AppColors.success,
+            lightColor: const Color(0xFFB9DFC8),
+          ),
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -445,7 +460,7 @@ class _SelectionBanner extends StatelessWidget {
                 Text(
                   context.l10n.housingPlanCityBanner(city.name, city.stateCode),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: const Color(0xFF3FB950),
+                    color: AppColors.success,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -453,7 +468,7 @@ class _SelectionBanner extends StatelessWidget {
                 Text(
                   context.l10n.housingPlanCityBannerBody,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF6B7280),
+                    color: AppColors.textSoftFor(context),
                     height: 1.5,
                   ),
                 ),
@@ -473,133 +488,149 @@ class _TemporaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0D1F38),
-          border: Border.all(color: const Color(0xFF1D4A70), width: 1.5),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              top: -20,
-              right: -20,
-              child: Container(
-                width: 70,
-                height: 70,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1D4A70).withValues(alpha: 0.25),
-                  shape: BoxShape.circle,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.tintedSurfaceFor(
+              context,
+              tint: AppColors.primary,
+              lightColor: const Color(0xFFF2F7FF),
+            ),
+            border: Border.all(
+              color: AppColors.tintedBorderFor(
+                context,
+                tint: AppColors.primary,
+                lightColor: const Color(0xFFCFE2FF),
+              ),
+              width: 1.5,
+            ),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                top: -20,
+                right: -20,
+                child: Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.10),
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0A1A2E),
-                    border: Border.all(color: const Color(0xFF1D4A70)),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.access_time_rounded,
-                        size: 10,
-                        color: Color(0xFF58A6FF),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.22),
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        context.l10n.housingTemporaryBadge,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: const Color(0xFF58A6FF),
-                          fontWeight: FontWeight.w700,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 10,
+                          color: AppColors.primary,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  context.l10n.housingTemporaryCardTitle,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: const Color(0xFFF0F6FC),
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  context.l10n.housingTemporaryCardBody,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF8B949E),
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    _buildStat(
-                      context: context,
-                      value: context.l10n.housingTemporaryStatDurationValue,
-                      label: context.l10n.housingTemporaryStatDurationLabel,
-                      color: const Color(0xFF58A6FF),
+                        const SizedBox(width: 4),
+                        Text(
+                          context.l10n.housingTemporaryBadge,
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 6),
-                    _buildStat(
-                      context: context,
-                      value: context.l10n.housingTemporaryStatNoGuarantor,
-                      label: '',
-                      color: const Color(0xFF58A6FF),
-                    ),
-                    const SizedBox(width: 6),
-                    _buildStat(
-                      context: context,
-                      value: context.l10n.housingTemporaryStatFurnished,
-                      label: '',
-                      color: const Color(0xFF58A6FF),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1F6FEB),
-                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  const SizedBox(height: 10),
+                  Text(
+                    context.l10n.housingTemporaryCardTitle,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppColors.textPrimaryFor(context),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    context.l10n.housingTemporaryCardBody,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
                     children: [
-                      const Icon(
-                        Icons.arrow_forward_rounded,
-                        color: Colors.white,
-                        size: 14,
+                      _buildStat(
+                        context: context,
+                        value: context.l10n.housingTemporaryStatDurationValue,
+                        label: context.l10n.housingTemporaryStatDurationLabel,
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        context.l10n.housingTemporaryCardAction,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      _buildStat(
+                        context: context,
+                        value: context.l10n.housingTemporaryStatNoGuarantor,
+                        label: '',
+                      ),
+                      const SizedBox(width: 6),
+                      _buildStat(
+                        context: context,
+                        value: context.l10n.housingTemporaryStatFurnished,
+                        label: '',
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          context.l10n.housingTemporaryCardAction,
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -613,80 +644,86 @@ class _LongTermCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF111827),
-          border: Border.all(color: const Color(0xFF1E2636)),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1A1200),
-                border: Border.all(color: const Color(0xFF3D2800)),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.home_outlined,
-                    size: 10,
-                    color: Color(0xFFF59E0B),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceFor(context),
+            border: Border.all(color: AppColors.borderFor(context)),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(alpha: 0.10),
+                  border: Border.all(
+                    color: AppColors.warning.withValues(alpha: 0.24),
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    context.l10n.housingLongTermBadge,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: const Color(0xFFF59E0B),
-                      fontWeight: FontWeight.w700,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.home_outlined,
+                      size: 10,
+                      color: AppColors.warning,
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              context.l10n.housingLongTermCardTitle,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: const Color(0xFFF0F6FC),
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              context.l10n.housingLongTermCardBody,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF8B949E),
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1C2128),
-                border: Border.all(color: const Color(0xFF2D333B)),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                context.l10n.housingLongTermCardAction,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: const Color(0xFF8B949E),
-                  fontWeight: FontWeight.w600,
+                    const SizedBox(width: 4),
+                    Text(
+                      context.l10n.housingLongTermBadge,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: AppColors.warning,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+              Text(
+                context.l10n.housingLongTermCardTitle,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppColors.textPrimaryFor(context),
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                context.l10n.housingLongTermCardBody,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMutedFor(context),
+                  border: Border.all(color: AppColors.borderFor(context)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  context.l10n.housingLongTermCardAction,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -703,8 +740,8 @@ class _TemporaryHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF0D1F38),
-        border: Border.all(color: const Color(0xFF1D3A5E)),
+        color: AppColors.surfaceFor(context),
+        border: Border.all(color: AppColors.borderFor(context)),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -713,22 +750,22 @@ class _TemporaryHeader extends StatelessWidget {
           Text(
             context.l10n.housingTemporaryHeaderTitle(city.name),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: const Color(0xFFF0F6FC),
+              color: AppColors.textPrimaryFor(context),
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             context.l10n.housingTemporaryHeaderBody,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: const Color(0xFF6B7280)),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF0A1220),
+              color: AppColors.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -740,7 +777,7 @@ class _TemporaryHeader extends StatelessWidget {
                   child: Text(
                     context.l10n.housingTemporaryAirbnbTip,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFF58A6FF),
+                      color: AppColors.primary,
                       height: 1.4,
                     ),
                   ),
@@ -767,31 +804,10 @@ class _DurationSelector extends StatelessWidget {
       runSpacing: 8,
       children: [
         for (final option in TemporaryHousingDuration.values)
-          GestureDetector(
-            onTap: () => onChanged(option),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: option == value
-                    ? const Color(0xFF0D2137)
-                    : const Color(0xFF111827),
-                border: Border.all(
-                  color: option == value
-                      ? const Color(0xFF1D4A70)
-                      : const Color(0xFF1E2636),
-                ),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                _durationLabel(context, option),
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: option == value
-                      ? const Color(0xFF58A6FF)
-                      : const Color(0xFF4B5563),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+          ChoiceChip(
+            selected: option == value,
+            onSelected: (_) => onChanged(option),
+            label: Text(_durationLabel(context, option)),
           ),
       ],
     );
@@ -811,39 +827,49 @@ class _TemporaryPortalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: portal.bgColor,
-          border: Border.all(
-            color: selected ? const Color(0xFF58A6FF) : portal.borderColor,
-            width: selected ? 1.5 : 1,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.primary.withValues(alpha: 0.10)
+                : AppColors.surfaceFor(context),
+            border: Border.all(
+              color: selected
+                  ? AppColors.primary
+                  : AppColors.borderFor(context),
+              width: selected ? 1.5 : 1,
+            ),
+            borderRadius: BorderRadius.circular(14),
           ),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(portal.emoji, style: const TextStyle(fontSize: 18)),
-            const Spacer(),
-            Text(
-              portal.name,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: const Color(0xFFF0F6FC),
-                fontWeight: FontWeight.w800,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(portal.emoji, style: const TextStyle(fontSize: 18)),
+              const Spacer(),
+              Text(
+                portal.name,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.textPrimaryFor(context),
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              portal.description,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: const Color(0xFF8B949E),
-                height: 1.35,
+              const SizedBox(height: 4),
+              Text(
+                portal.description,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.35,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -862,8 +888,8 @@ class _LongTermHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
-        border: Border.all(color: const Color(0xFF1E2636)),
+        color: AppColors.surfaceFor(context),
+        border: Border.all(color: AppColors.borderFor(context)),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -872,16 +898,16 @@ class _LongTermHeader extends StatelessWidget {
           Text(
             context.l10n.housingLongTermHeaderTitle(city.name),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: const Color(0xFFF0F6FC),
+              color: AppColors.textPrimaryFor(context),
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             context.l10n.housingLongTermHeaderBody,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: const Color(0xFF6B7280)),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
           ),
           const SizedBox(height: 8),
           Row(
@@ -933,8 +959,18 @@ class _LongTermAlert extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C0000),
-        border: Border.all(color: const Color(0xFF4A0000)),
+        color: AppColors.tintedSurfaceFor(
+          context,
+          tint: AppColors.danger,
+          lightColor: const Color(0xFFFFF1F0),
+        ),
+        border: Border.all(
+          color: AppColors.tintedBorderFor(
+            context,
+            tint: AppColors.danger,
+            lightColor: const Color(0xFFF2B8B5),
+          ),
+        ),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -949,7 +985,7 @@ class _LongTermAlert extends StatelessWidget {
                 Text(
                   context.l10n.housingLongTermAlertTitle,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: const Color(0xFFE24B4A),
+                    color: AppColors.danger,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -957,7 +993,7 @@ class _LongTermAlert extends StatelessWidget {
                 Text(
                   context.l10n.housingLongTermAlertBody,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF6B7280),
+                    color: AppColors.textSoftFor(context),
                     height: 1.45,
                   ),
                 ),
@@ -978,81 +1014,85 @@ class _LongTermPortalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: portal.isRecommended
-              ? const Color(0xFF071A2E)
-              : const Color(0xFF111827),
-          border: Border.all(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
             color: portal.isRecommended
-                ? const Color(0xFF1F6FEB).withValues(alpha: 0.5)
-                : const Color(0xFF1E2636),
+                ? AppColors.primary.withValues(alpha: 0.09)
+                : AppColors.surfaceFor(context),
+            border: Border.all(
+              color: portal.isRecommended
+                  ? AppColors.primary.withValues(alpha: 0.35)
+                  : AppColors.borderFor(context),
+            ),
+            borderRadius: BorderRadius.circular(14),
           ),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Row(
-          children: [
-            Text(portal.emoji, style: const TextStyle(fontSize: 18)),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        portal.name,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: const Color(0xFFF0F6FC),
-                              fontWeight: FontWeight.w700,
-                            ),
-                      ),
-                      if (portal.isRecommended) ...[
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFF1F6FEB,
-                            ).withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            context.l10n.housingLongTermForeignersBadge,
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  color: const Color(0xFF58A6FF),
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          ),
+          child: Row(
+            children: [
+              Text(portal.emoji, style: const TextStyle(fontSize: 18)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          portal.name,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: AppColors.textPrimaryFor(context),
+                                fontWeight: FontWeight.w700,
+                              ),
                         ),
+                        if (portal.isRecommended) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              context.l10n.housingLongTermForeignersBadge,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    portal.description,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFF8B949E),
-                      height: 1.35,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 3),
+                    Text(
+                      portal.description,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: Color(0xFF1F6FEB),
-              size: 20,
-            ),
-          ],
+              Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.primary,
+                size: 20,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1065,8 +1105,8 @@ class _ForeignTipsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(11),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1200),
-        border: Border.all(color: const Color(0xFF3D2800)),
+        color: AppColors.warning.withValues(alpha: 0.10),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.24)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -1076,11 +1116,13 @@ class _ForeignTipsCard extends StatelessWidget {
             children: [
               const Text('💡', style: TextStyle(fontSize: 12)),
               const SizedBox(width: 6),
-              Text(
-                context.l10n.housingForeignTipsTitle,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: const Color(0xFFF59E0B),
-                  fontWeight: FontWeight.w700,
+              Expanded(
+                child: Text(
+                  context.l10n.housingForeignTipsTitle,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.warning,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
@@ -1108,16 +1150,16 @@ class _TipRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 2),
-            child: Icon(Icons.circle, size: 5, color: Color(0xFFF59E0B)),
+            child: Icon(Icons.circle, size: 5, color: AppColors.warning),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: const Color(0xFF8B949E),
+                color: AppColors.textSoftFor(context),
                 height: 1.45,
               ),
             ),
@@ -1132,13 +1174,12 @@ Widget _buildStat({
   required BuildContext context,
   required String value,
   required String label,
-  required Color color,
 }) {
   return Expanded(
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.25),
+        color: AppColors.surfaceMutedFor(context),
         borderRadius: BorderRadius.circular(9),
       ),
       child: Column(
@@ -1150,18 +1191,16 @@ Widget _buildStat({
             style: _housingTextStyle(
               context,
               base: Theme.of(context).textTheme.labelLarge,
-              color: color == const Color(0xFF58A6FF)
-                  ? const Color(0xFFF0F6FC)
-                  : color,
+              color: AppColors.textPrimaryFor(context),
               fontWeight: FontWeight.w700,
             ),
           ),
           if (label.isNotEmpty)
             Text(
               label,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: const Color(0xFF4B5563)),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+              ),
             ),
         ],
       ),
@@ -1177,9 +1216,9 @@ Widget _buildStatChip({
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
     decoration: BoxDecoration(
-      color: const Color(0xFF1C2128),
+      color: AppColors.surfaceMutedFor(context),
       borderRadius: BorderRadius.circular(10),
-      border: Border.all(color: const Color(0xFF2D333B)),
+      border: Border.all(color: AppColors.borderFor(context)),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1187,16 +1226,16 @@ Widget _buildStatChip({
         Text(
           value,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: const Color(0xFFF0F6FC),
+            color: AppColors.textPrimaryFor(context),
             fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: const Color(0xFF6B7280)),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppColors.textSoftFor(context),
+          ),
         ),
       ],
     ),
@@ -1229,16 +1268,12 @@ class _TemporaryPortal {
     required this.name,
     required this.emoji,
     required this.description,
-    required this.bgColor,
-    required this.borderColor,
     required this.urlBuilder,
   });
 
   final String name;
   final String emoji;
   final String description;
-  final Color bgColor;
-  final Color borderColor;
   final Uri Function(City city, TemporaryHousingDuration duration) urlBuilder;
 }
 

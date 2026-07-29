@@ -19,7 +19,7 @@ void main() {
 
   const items = [
     GuideActionItem(
-      id: 'prep_done',
+      id: 'item_0_2_document_folder',
       title: 'Definir documentos',
       shortDescription: 'Passo concluído',
       type: GuideActionType.checklist,
@@ -28,7 +28,7 @@ void main() {
       isCompleted: true,
     ),
     GuideActionItem(
-      id: 'prep_now',
+      id: 'item_0_2_antecedentes',
       title: 'Conferir a regra de entrada',
       shortDescription: 'Leia antes de viajar',
       type: GuideActionType.informative,
@@ -37,7 +37,7 @@ void main() {
       isCompleted: false,
     ),
     GuideActionItem(
-      id: 'housing_next',
+      id: 'item_1_2_housing_temporary',
       title: 'Planejar os primeiros dias',
       shortDescription: 'Organize a chegada',
       type: GuideActionType.informative,

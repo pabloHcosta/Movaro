@@ -74,7 +74,8 @@ class GuideGpsController extends ChangeNotifier {
 
   Set<String> get allCompletedIds => <String>{
     for (final item in _items)
-      if (item.isCompleted) item.id,
+      if (item.isCompleted && item.dismissReason != GuideDismissReason.later)
+        item.id,
   };
 
   GuideFocusSnapshot get focusSnapshot => GuideFocusEngine.build(
@@ -100,7 +101,7 @@ class GuideGpsController extends ChangeNotifier {
   }
 
   bool isItemUnlocked(GuideActionItem item) {
-    if (item.isCompleted) {
+    if (item.isCompleted && item.dismissReason != GuideDismissReason.later) {
       return true;
     }
     if (item.dependencies.isEmpty) {
@@ -108,6 +109,17 @@ class GuideGpsController extends ChangeNotifier {
     }
     final completed = allCompletedIds;
     return item.dependencies.every(completed.contains);
+  }
+
+  List<String> unmetDependencyTitles(GuideActionItem item) {
+    final completed = allCompletedIds;
+    final titlesById = <String, String>{
+      for (final candidate in _items) candidate.id: candidate.title,
+    };
+    return item.dependencies
+        .where((dependencyId) => !completed.contains(dependencyId))
+        .map((dependencyId) => titlesById[dependencyId] ?? dependencyId)
+        .toList(growable: false);
   }
 
   bool get currentItemStarted => _currentItemStarted;
@@ -118,7 +130,8 @@ class GuideGpsController extends ChangeNotifier {
       (entry) => entry?.id == itemId,
       orElse: () => null,
     );
-    if (item?.isCompleted ?? false) {
+    if ((item?.isCompleted ?? false) &&
+        item?.dismissReason != GuideDismissReason.later) {
       return GuideTaskState.completed;
     }
     return _taskStatesById[itemId] ?? GuideTaskState.notStarted;
@@ -247,22 +260,35 @@ class GuideGpsController extends ChangeNotifier {
       return;
     }
 
+    final isPostponed = reason == GuideDismissReason.later;
     _items[index] = item.copyWith(
-      isCompleted: true,
+      isCompleted: !isPostponed,
       dismissReason: reason,
       isUserPrioritized: false,
     );
     _dismissedReasonsById[itemId] = reason;
-    _taskStatesById[itemId] = GuideTaskState.completed;
+    if (isPostponed) {
+      _taskStatesById[itemId] = GuideTaskState.waiting;
+      _unsetCompleted(item);
+      _completedAtById = <String, String>{..._completedAtById}..remove(itemId);
+    } else {
+      _taskStatesById[itemId] = GuideTaskState.completed;
+      _setCompleted(item);
+      _setCompletedAt(itemId);
+    }
     _prioritizedItemIds.remove(itemId);
-    _setCompleted(item);
-    _setCompletedAt(itemId);
     if (_activeItemId == itemId) {
       _activeItemId = null;
       _currentItemStarted = false;
       _awaitingConfirmation = false;
     }
     notifyListeners();
+    unawaited(
+      _metricsStore.record(
+        GuideFlowMetric.taskDismissed,
+        referenceId: '${item.id}:${reason.name}',
+      ),
+    );
     await _persist();
   }
 
@@ -287,22 +313,36 @@ class GuideGpsController extends ChangeNotifier {
         continue;
       }
 
+      final isPostponed = reason == GuideDismissReason.later;
       _items[index] = item.copyWith(
-        isCompleted: true,
+        isCompleted: !isPostponed,
         dismissReason: reason,
         isUserPrioritized: false,
       );
       _dismissedReasonsById[itemId] = reason;
-      _taskStatesById[itemId] = GuideTaskState.completed;
+      if (isPostponed) {
+        _taskStatesById[itemId] = GuideTaskState.waiting;
+        _unsetCompleted(item);
+        _completedAtById = <String, String>{..._completedAtById}
+          ..remove(itemId);
+      } else {
+        _taskStatesById[itemId] = GuideTaskState.completed;
+        _setCompleted(item);
+        _setCompletedAt(itemId);
+      }
       _prioritizedItemIds.remove(itemId);
-      _setCompleted(item);
-      _setCompletedAt(itemId);
       if (_activeItemId == itemId) {
         _activeItemId = null;
         _currentItemStarted = false;
         _awaitingConfirmation = false;
       }
       changed = true;
+      unawaited(
+        _metricsStore.record(
+          GuideFlowMetric.taskDismissed,
+          referenceId: '${item.id}:${reason.name}',
+        ),
+      );
     }
 
     if (!changed) {
@@ -436,8 +476,17 @@ class GuideGpsController extends ChangeNotifier {
   void _hydrateUserState() {
     for (var i = 0; i < _items.length; i++) {
       final item = _items[i];
+      final dismissReason = _dismissedReasonsById[item.id];
+      final isPostponed = dismissReason == GuideDismissReason.later;
+      if (isPostponed) {
+        _unsetCompleted(item);
+        _completedAtById = <String, String>{..._completedAtById}
+          ..remove(item.id);
+        _taskStatesById[item.id] = GuideTaskState.waiting;
+      }
       _items[i] = item.copyWith(
-        dismissReason: _dismissedReasonsById[item.id],
+        isCompleted: isPostponed ? false : item.isCompleted,
+        dismissReason: dismissReason,
         isUserPrioritized: _prioritizedItemIds.contains(item.id),
       );
     }

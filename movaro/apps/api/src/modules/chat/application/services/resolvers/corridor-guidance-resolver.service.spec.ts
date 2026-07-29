@@ -151,4 +151,44 @@ describe('CorridorGuidanceResolverService', () => {
     expect(result.answer).toContain('passagem');
     expect(result.answer).toContain('aluguel');
   });
+
+  it('uses canonical app progress when answering the next-step question', async () => {
+    const service = new CorridorGuidanceResolverService(
+      citiesCatalogService,
+      assistantKnowledgeService,
+    );
+
+    const result = await service.resolve({
+      message: 'Já concluí o CPF. O que faço agora?',
+      originCountry: 'argentina',
+      destinationCountry: 'brasil',
+      locale: 'pt',
+      currentPhase: 'documents',
+      completedItemIds: ['item_2_1_cpf'],
+    });
+
+    expect(result.found).toBe(true);
+    expect(result.topic).toBe('next_step');
+    expect(result.answer).toContain('Criar e validar a conta Gov.br');
+    expect(result.answer).not.toContain('Obter CPF na Receita Federal');
+  });
+
+  it('normalizes legacy progress IDs before selecting the next task', async () => {
+    const service = new CorridorGuidanceResolverService(
+      citiesCatalogService,
+      assistantKnowledgeService,
+    );
+
+    const result = await service.resolve({
+      message: 'Qual é o próximo passo?',
+      originCountry: 'argentina',
+      destinationCountry: 'brasil',
+      locale: 'pt',
+      currentPhase: 'documents',
+      completedItemIds: ['doc-01'],
+    });
+
+    expect(result.answer).toContain('Criar e validar a conta Gov.br');
+    expect(result.answer).not.toContain('Obter CPF na Receita Federal');
+  });
 });

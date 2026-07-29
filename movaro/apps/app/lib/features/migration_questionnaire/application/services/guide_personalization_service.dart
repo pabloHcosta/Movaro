@@ -202,7 +202,7 @@ class GuidePersonalizationService {
       conditions.add('self_employed_goal');
       conditions.add('remote_income_goal');
     }
-    if (goal == 'find_job_br' || goal == 'work' || goal == 'study') {
+    if (goal == 'find_job_br' || goal == 'work') {
       conditions.add('formal_work_goal');
     }
     if (goal == 'find_job_br' ||

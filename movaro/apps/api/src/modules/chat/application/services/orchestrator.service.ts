@@ -76,20 +76,23 @@ export class OrchestratorService {
       `[Orchestrator] ask: "${message.substring(0, 60)}" | locale=${locale}`,
     );
 
-    const exactQuickPrompt = await this.corridorGuidanceResolver.resolve({
-      ...dto,
-      locale,
-    });
+    const initialCorridorGuidance = await this.corridorGuidanceResolver.resolve(
+      {
+        ...dto,
+        locale,
+      },
+    );
     if (
-      exactQuickPrompt.found &&
-      exactQuickPrompt.topic &&
-      this.corridorGuidanceResolver.isExactQuickPrompt(message)
+      initialCorridorGuidance.found &&
+      initialCorridorGuidance.topic &&
+      (this.corridorGuidanceResolver.isExactQuickPrompt(message) ||
+        initialCorridorGuidance.topic === 'next_step')
     ) {
       const result: OrchestratorAnswer = {
-        answer: exactQuickPrompt.answer,
+        answer: initialCorridorGuidance.answer,
         source: 'app_data',
         intent: 'general',
-        confidence: exactQuickPrompt.confidence,
+        confidence: initialCorridorGuidance.confidence,
       };
       this.putCache(cacheKey, result);
       return result;
@@ -108,9 +111,7 @@ export class OrchestratorService {
     switch (intent.intent) {
       case 'city_info': {
         const cityId =
-          intent.entities['cityId'] ??
-          dto.highlightedCityId ??
-          null;
+          intent.entities['cityId'] ?? dto.highlightedCityId ?? null;
         const result = await this.cityResolver.resolve(
           cityId ?? undefined,
           locale,

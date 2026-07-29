@@ -9,7 +9,6 @@ import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class AppSettingsPage extends StatelessWidget {
   const AppSettingsPage({
@@ -335,7 +334,8 @@ class AppSettingsPage extends StatelessWidget {
                                           child: _SystemSettingsAction(
                                             label: context.l10n
                                                 .settingsOpenAction(),
-                                            onTap: openAppSettings,
+                                            onTap: locationController
+                                                .openAppSettings,
                                           ),
                                         ),
                                       ),

@@ -4567,6 +4567,89 @@ class ArgentinaBrazilGuideDataSource {
         ),
       ),
       GuideActionItem(
+        id: 'item_3_4_formal_work_ready',
+        title: _t(
+          locale,
+          pt: 'Confirme que você pode iniciar o trabalho formal',
+          es: 'Confirma que puedes iniciar el trabajo formal',
+          en: 'Confirm you can start formal work',
+        ),
+        shortDescription: _t(
+          locale,
+          pt: 'Antes da contratação, confira situação migratória, CPF e acesso aos registros trabalhistas.',
+          es: 'Antes de la contratación, revisa situación migratoria, CPF y acceso a los registros laborales.',
+          en: 'Before hiring, confirm migration status, CPF, and access to employment records.',
+        ),
+        type: GuideActionType.checklist,
+        phase: GuidePhase.work,
+        orderIndex: 19,
+        isCompleted: false,
+        icon: Icons.fact_check_outlined,
+        dependencies: const <String>['item_2_1_cpf', 'item_2_2_residencia'],
+        applicabilityConditions: const <String>['formal_work_goal'],
+        steps: _list(
+          locale,
+          pt: [
+            'Confirme que sua autorização ou situação migratória permite exercer atividade remunerada.',
+            'Confirme que o CPF está regular.',
+            'Acesse a CTPS Digital pelo Gov.br e confira seus dados.',
+            'Antes de começar, confirme empregador, função, remuneração, jornada e local por escrito.',
+            'Depois da contratação, acompanhe o vínculo registrado pelo empregador.',
+          ],
+          es: [
+            'Confirma que tu autorización o situación migratoria permite actividad remunerada.',
+            'Confirma que el CPF está regular.',
+            'Accede a la CTPS Digital con Gov.br y revisa tus datos.',
+            'Antes de empezar, confirma empleador, función, remuneración, jornada y lugar por escrito.',
+            'Después de la contratación, controla el vínculo registrado por el empleador.',
+          ],
+          en: [
+            'Confirm your authorization or migration status permits paid work.',
+            'Confirm your CPF is regular.',
+            'Access the Digital Work Card through Gov.br and check your data.',
+            'Before starting, confirm the employer, role, pay, hours, and workplace in writing.',
+            'After hiring, monitor the employment relationship registered by the employer.',
+          ],
+        ),
+        requirements: _list(
+          locale,
+          pt: [
+            'Situação migratória que permita trabalho',
+            'CPF regular',
+            'Acesso ao Gov.br e à CTPS Digital',
+          ],
+          es: [
+            'Situación migratoria que permita trabajar',
+            'CPF regular',
+            'Acceso a Gov.br y CTPS Digital',
+          ],
+          en: [
+            'Migration status that permits work',
+            'Regular CPF',
+            'Access to Gov.br and the Digital Work Card',
+          ],
+        ),
+        doneCriteria: _t(
+          locale,
+          pt: 'Você confirmou os requisitos, entende as condições da vaga e consegue acompanhar o registro do vínculo.',
+          es: 'Confirmaste los requisitos, entiendes las condiciones de la vacante y puedes controlar el registro laboral.',
+          en: 'You confirmed the requirements, understand the job terms, and can monitor the employment registration.',
+        ),
+        blockingReason: _t(
+          locale,
+          pt: 'Para liberar esta etapa, conclua CPF e residência. A pesquisa de vagas e a preparação do currículo continuam disponíveis antes disso.',
+          es: 'Para liberar este paso, completa CPF y residencia. La búsqueda de vacantes y la preparación del CV siguen disponibles antes.',
+          en: 'To unlock this step, complete CPF and residence. Job research and CV preparation remain available beforehand.',
+        ),
+        tier: GuideItemTier.critical,
+        evidence: GuideEvidence(
+          type: GuideEvidenceType.official,
+          sourceLabel: 'Ministério do Trabalho e Emprego · Migrantes',
+          sourceUrl: PreparationResourceLinks.migrantWorkerGuide.toString(),
+          lastVerified: DateTime(2026, 7, 29),
+        ),
+      ),
+      GuideActionItem(
         id: 'item_0_7_family_documents',
         title: _t(
           locale,
@@ -4794,6 +4877,7 @@ class ArgentinaBrazilGuideDataSource {
         'item_0_5_mercado_trabalho',
         'item_2_3_ctps',
         'item_3_4_work_rights',
+        'item_3_4_formal_work_ready',
         'item_3_4_trabalho',
       ],
       'remote_income' || 'remote_work' || 'entrepreneur' => const [
@@ -4803,8 +4887,9 @@ class ArgentinaBrazilGuideDataSource {
         'item_3_4_work_rights',
       ],
       'study' => const [
+        'item_0_7_ingresso_ensino_superior',
+        'item_2_7_documentos_academicos',
         'item_3_5_revalidacao_estudos',
-        'item_3_6_familia_escola',
       ],
       _ => const <String>[],
     };
@@ -4813,6 +4898,7 @@ class ArgentinaBrazilGuideDataSource {
       'item_0_1_rule_90_days',
       'item_0_2_document_folder',
       'item_0_2_antecedentes',
+      ...goalSpecific,
       'item_2_1_cpf',
       'item_0_3_budget',
       'item_1_3_money',
@@ -4832,7 +4918,6 @@ class ArgentinaBrazilGuideDataSource {
       'item_4_5_registro_rnm',
       'item_3_1_conta_bancaria',
       'item_3_2_aluguel_fixo',
-      ...goalSpecific,
       'item_3_6_familia_escola',
       'item_4_1_cnh',
       'item_4_3_permanencia',
@@ -5601,6 +5686,17 @@ class ArgentinaBrazilGuideDataSource {
           ),
         ),
       ),
+      'item_1_2_housing_temporary' => item.copyWith(
+        tier: GuideItemTier.critical,
+        preArrivalRequired: true,
+        urgencyLevel: GuideUrgencyLevel.urgent,
+        blockingReason: _t(
+          locale,
+          pt: 'Chegar sem uma hospedagem inicial segura aumenta risco, custo e pressão para aceitar contratos ruins.',
+          es: 'Llegar sin alojamiento inicial seguro aumenta riesgo, costo y presión para aceptar contratos desfavorables.',
+          en: 'Arriving without safe initial accommodation increases risk, cost, and pressure to accept poor contracts.',
+        ),
+      ),
       'item_2_2_residencia' => item.copyWith(
         dependencies: const <String>[
           'item_0_2_document_folder',
@@ -5775,9 +5871,9 @@ class ArgentinaBrazilGuideDataSource {
         ),
       ),
       'item_0_5_mercado_trabalho' => item.copyWith(
-        preArrivalRequired: false,
+        preArrivalRequired: true,
         tier: GuideItemTier.recommended,
-        applicabilityConditions: const <String>['income_strategy_goal'],
+        applicabilityConditions: const <String>['job_search_goal'],
         primaryActionLabel: _t(
           locale,
           pt: 'Consultar Emprega Brasil e SINE',

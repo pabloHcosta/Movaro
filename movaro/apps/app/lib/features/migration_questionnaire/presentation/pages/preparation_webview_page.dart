@@ -10,11 +10,13 @@ class PreparationWebViewPage extends StatefulWidget {
   const PreparationWebViewPage({
     required this.title,
     required this.uri,
+    this.onMainFrameError,
     super.key,
   });
 
   final String title;
   final Uri uri;
+  final VoidCallback? onMainFrameError;
 
   @override
   State<PreparationWebViewPage> createState() => _PreparationWebViewPageState();
@@ -43,6 +45,11 @@ class _PreparationWebViewPageState extends State<PreparationWebViewPage> {
               return;
             }
             setState(() => _progress = value);
+          },
+          onWebResourceError: (error) {
+            if (error.isForMainFrame ?? true) {
+              widget.onMainFrameError?.call();
+            }
           },
         ),
       )

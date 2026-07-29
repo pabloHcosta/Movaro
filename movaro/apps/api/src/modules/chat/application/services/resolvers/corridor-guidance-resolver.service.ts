@@ -26,6 +26,7 @@ type SeasonalityProfileKey =
   | 'north';
 
 const EXACT_QUICK_PROMPTS: Record<GuidanceTopic, string[]> = {
+  next_step: [],
   documents: [],
   cpf: [
     'como tirar o cpf',
@@ -218,6 +219,17 @@ const DESTINATION_TRAVEL_PROFILES: Record<
 };
 
 const TOPIC_KEYWORDS: Record<GuidanceTopic, string[]> = {
+  next_step: [
+    'próximo passo',
+    'proximo passo',
+    'o que faço agora',
+    'o que fazer agora',
+    'siguiente paso',
+    'qué hago ahora',
+    'que hago ahora',
+    'next step',
+    'what should i do now',
+  ],
   documents: [
     'documentos',
     'documents',
@@ -343,21 +355,31 @@ export class CorridorGuidanceResolverService {
       found: true,
       confidence: 0.93,
       topic,
-      answer: profile.buildAnswer(topic, locale, {
-        cityName,
-        currentPhase: dto.currentPhase,
-        completedItemIds: normalizedCompletedItemIds,
-      }, {
-        phaseHint: (currentLocale, currentPhase, completedItemIds) =>
-          this.phaseHint(profile, currentLocale, currentPhase, completedItemIds),
-        nextPendingItem: (currentPhase, completedItemIds, preferredPhases) =>
-          this.nextPendingItem(
-            profile,
-            currentPhase,
-            completedItemIds,
-            preferredPhases,
-          ),
-      }),
+      answer: profile.buildAnswer(
+        topic,
+        locale,
+        {
+          cityName,
+          currentPhase: dto.currentPhase,
+          completedItemIds: normalizedCompletedItemIds,
+        },
+        {
+          phaseHint: (currentLocale, currentPhase, completedItemIds) =>
+            this.phaseHint(
+              profile,
+              currentLocale,
+              currentPhase,
+              completedItemIds,
+            ),
+          nextPendingItem: (currentPhase, completedItemIds, preferredPhases) =>
+            this.nextPendingItem(
+              profile,
+              currentPhase,
+              completedItemIds,
+              preferredPhases,
+            ),
+        },
+      ),
     };
   }
 
@@ -366,13 +388,17 @@ export class CorridorGuidanceResolverService {
     destinationCountry: string,
     locale: string,
   ): Promise<string> {
-    const corridorKey = this.normalizeCorridor(originCountry, destinationCountry);
-    const normalizedLocale = this.normalizeLocale(locale);
-    const template = await this.assistantKnowledgeService.getQuickPromptTemplate(
-      'first_local_document',
-      normalizedLocale,
-      corridorKey,
+    const corridorKey = this.normalizeCorridor(
+      originCountry,
+      destinationCountry,
     );
+    const normalizedLocale = this.normalizeLocale(locale);
+    const template =
+      await this.assistantKnowledgeService.getQuickPromptTemplate(
+        'first_local_document',
+        normalizedLocale,
+        corridorKey,
+      );
     if (template) {
       return template.label;
     }
@@ -389,13 +415,17 @@ export class CorridorGuidanceResolverService {
     destinationCountry: string,
     locale: string,
   ): Promise<string> {
-    const corridorKey = this.normalizeCorridor(originCountry, destinationCountry);
-    const normalizedLocale = this.normalizeLocale(locale);
-    const template = await this.assistantKnowledgeService.getQuickPromptTemplate(
-      'first_local_document',
-      normalizedLocale,
-      corridorKey,
+    const corridorKey = this.normalizeCorridor(
+      originCountry,
+      destinationCountry,
     );
+    const normalizedLocale = this.normalizeLocale(locale);
+    const template =
+      await this.assistantKnowledgeService.getQuickPromptTemplate(
+        'first_local_document',
+        normalizedLocale,
+        corridorKey,
+      );
     if (template) {
       return template.message;
     }
@@ -447,7 +477,10 @@ export class CorridorGuidanceResolverService {
     originCountry: string,
     destinationCountry: string,
   ): CorridorGuidanceProfile | null {
-    const corridorKey = this.normalizeCorridor(originCountry, destinationCountry);
+    const corridorKey = this.normalizeCorridor(
+      originCountry,
+      destinationCountry,
+    );
     return (
       corridorGuidanceProfiles.find((item) => item.key === corridorKey) ?? null
     );
@@ -537,9 +570,9 @@ export class CorridorGuidanceResolverService {
       }
     }
 
-    return profile.guideItems.find(
-      (item) => !completed.has(item.id),
-    )?.title ?? null;
+    return (
+      profile.guideItems.find((item) => !completed.has(item.id))?.title ?? null
+    );
   }
 
   private orderedPhasesFrom(
@@ -629,7 +662,7 @@ export class CorridorGuidanceResolverService {
     locale: GuidanceLocale,
     completedItemIds: string[],
   ): string {
-    const alreadyDone = completedItemIds.includes('doc-01');
+    const alreadyDone = completedItemIds.includes('item_2_1_cpf');
     if (locale === 'es') {
       return alreadyDone
         ? 'El CPF ya aparece como concluido en tu progreso. Es lo que destraba banco, alquiler y trabajo formal.'
@@ -691,7 +724,7 @@ export class CorridorGuidanceResolverService {
     }
 
     const seasonalProfile = cityId
-      ? CITY_TO_SEASONALITY_PROFILE[cityId] ?? 'default'
+      ? (CITY_TO_SEASONALITY_PROFILE[cityId] ?? 'default')
       : 'default';
     return LOW_MONTHS_BY_PROFILE[seasonalProfile];
   }
@@ -751,7 +784,7 @@ export class CorridorGuidanceResolverService {
     }
 
     const profile = city?.id
-      ? CITY_TO_SEASONALITY_PROFILE[city.id] ?? 'default'
+      ? (CITY_TO_SEASONALITY_PROFILE[city.id] ?? 'default')
       : 'default';
     return this.climateNote(profile, locale, cityReference);
   }
@@ -791,10 +824,7 @@ export class CorridorGuidanceResolverService {
     return `Na passagem, ${cheapestWindowLabel} costuma ser a janela mais leve. ${warning ?? ''}`.trim();
   }
 
-  private flightWarning(
-    locale: GuidanceLocale,
-    key: string,
-  ): string | null {
+  private flightWarning(locale: GuidanceLocale, key: string): string | null {
     switch (key) {
       case 'fln':
         return locale === 'es'
@@ -831,7 +861,9 @@ export class CorridorGuidanceResolverService {
     }
   }
 
-  private async safeGetCityById(cityId: string): Promise<CityCardEntity | null> {
+  private async safeGetCityById(
+    cityId: string,
+  ): Promise<CityCardEntity | null> {
     try {
       return await this.citiesCatalogService.getCityById(cityId);
     } catch {
@@ -841,9 +873,48 @@ export class CorridorGuidanceResolverService {
 
   private monthLabel(month: number, locale: GuidanceLocale): string {
     const labels: Record<GuidanceLocale, string[]> = {
-      pt: ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'],
-      es: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
-      en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      pt: [
+        'jan',
+        'fev',
+        'mar',
+        'abr',
+        'mai',
+        'jun',
+        'jul',
+        'ago',
+        'set',
+        'out',
+        'nov',
+        'dez',
+      ],
+      es: [
+        'ene',
+        'feb',
+        'mar',
+        'abr',
+        'may',
+        'jun',
+        'jul',
+        'ago',
+        'sep',
+        'oct',
+        'nov',
+        'dic',
+      ],
+      en: [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ],
     };
     return labels[locale][month - 1] ?? String(month);
   }
@@ -854,7 +925,8 @@ export class CorridorGuidanceResolverService {
     }
     const last = months[months.length - 1];
     const head = months.slice(0, -1).join(', ');
-    const conjunction = locale === 'es' ? ' y ' : locale === 'en' ? ' and ' : ' e ';
+    const conjunction =
+      locale === 'es' ? ' y ' : locale === 'en' ? ' and ' : ' e ';
     return `${head}${conjunction}${last}`;
   }
 
@@ -904,7 +976,9 @@ export class CorridorGuidanceResolverService {
     currentPhase?: string,
   ): string {
     const documentationOpen =
-      !currentPhase || currentPhase === 'preparation' || currentPhase === 'documents';
+      !currentPhase ||
+      currentPhase === 'preparation' ||
+      currentPhase === 'documents';
     if (locale === 'es') {
       return documentationOpen
         ? 'Si tu documentación todavía no está cerrada, no conviene comprar antes de resolver eso.'
