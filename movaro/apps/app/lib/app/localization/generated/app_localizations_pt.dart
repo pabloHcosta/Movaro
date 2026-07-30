@@ -6654,10 +6654,10 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get migrationResultRevealExploreCity => 'Ver detalhes da cidade';
+  String get migrationResultRevealExploreCity => 'Ver detalhes';
 
   @override
-  String get migrationResultRevealCompareCta => 'Comparar com alternativas';
+  String get migrationResultRevealCompareCta => 'Explorar alternativas';
 
   @override
   String migrationResultRevealStartPreparationCta(String city) {

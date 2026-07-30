@@ -2662,8 +2662,8 @@
       "city": { "type": "String" }
     }
   },
-  "migrationResultRevealExploreCity": "Ver detalhes da cidade",
-  "migrationResultRevealCompareCta": "Comparar com alternativas",
+  "migrationResultRevealExploreCity": "Ver detalhes",
+  "migrationResultRevealCompareCta": "Explorar alternativas",
   "migrationResultRevealStartPreparationCta": "Começar preparação com {city}",
   "@migrationResultRevealStartPreparationCta": {
     "placeholders": {
