@@ -2782,7 +2782,7 @@ abstract class AppLocalizations {
   /// No description provided for @questionnairePageTitle.
   ///
   /// In en, this message translates to:
-  /// **'Answer a few quick questions'**
+  /// **'Your profile'**
   String get questionnairePageTitle;
 
   /// No description provided for @questionnaireLoadingLabel.

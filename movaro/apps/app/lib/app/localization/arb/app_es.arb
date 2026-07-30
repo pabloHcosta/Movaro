@@ -543,7 +543,7 @@
     }
   },
   "startNewPlanAction": "Iniciar un nuevo plan",
-  "questionnairePageTitle": "Responder algunas preguntas rápidas",
+  "questionnairePageTitle": "Tu perfil",
   "questionnaireLoadingLabel": "Preparando tus preguntas rápidas",
   "questionnaireSupportText": "Toma menos de un minuto. Una pregunta por vez.",
   "questionnaireSectionOrigin": "Origen",

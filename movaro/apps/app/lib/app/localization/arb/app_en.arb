@@ -605,7 +605,7 @@
     }
   },
   "startNewPlanAction": "Start a new plan",
-  "questionnairePageTitle": "Answer a few quick questions",
+  "questionnairePageTitle": "Your profile",
   "questionnaireLoadingLabel": "Preparing your quick questions",
   "questionnaireSupportText": "It takes less than a minute. One question at a time.",
   "questionnaireSectionOrigin": "Origin",

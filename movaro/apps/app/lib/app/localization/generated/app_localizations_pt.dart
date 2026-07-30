@@ -1629,7 +1629,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get startNewPlanAction => 'Montar novo plano';
 
   @override
-  String get questionnairePageTitle => 'Responder algumas perguntas rápidas';
+  String get questionnairePageTitle => 'Seu perfil';
 
   @override
   String get questionnaireLoadingLabel => 'Preparando suas perguntas rápidas';

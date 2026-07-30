@@ -1627,7 +1627,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startNewPlanAction => 'Start a new plan';
 
   @override
-  String get questionnairePageTitle => 'Answer a few quick questions';
+  String get questionnairePageTitle => 'Your profile';
 
   @override
   String get questionnaireLoadingLabel => 'Preparing your quick questions';

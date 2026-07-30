@@ -956,11 +956,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
     en: "Don't show again",
   );
 
-  String questionnaireVariantPageTitle() => _localizedText(
-    pt: 'Responder algumas perguntas rápidas',
-    es: 'Responder algunas preguntas rápidas',
-    en: 'Answer a few quick questions',
-  );
+  String questionnaireVariantPageTitle() =>
+      _localizedText(pt: 'Seu perfil', es: 'Tu perfil', en: 'Your profile');
 
   String questionnaireVariantEyebrow() =>
       _localizedText(pt: 'PRIMEIRO PASSO', es: 'PRIMER PASO', en: 'FIRST STEP');
