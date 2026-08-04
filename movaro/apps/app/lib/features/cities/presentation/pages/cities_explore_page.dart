@@ -185,24 +185,37 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _ExplorePanelHeading(
-                              icon: isValidationMode
-                                  ? Icons.location_searching_rounded
-                                  : Icons.travel_explore_rounded,
-                              eyebrow: isValidationMode
-                                  ? l10n.citiesSearchTitle
+                            Text(
+                              isValidationMode
+                                  ? l10n.citiesSearchHeadline
                                   : _exploreText(
                                       context,
-                                      pt: 'DESCUBRA SEU LUGAR',
-                                      es: 'DESCUBRÍ TU LUGAR',
-                                      en: 'FIND YOUR PLACE',
+                                      pt: 'Encontre uma cidade',
+                                      es: 'Encontrá una ciudad',
+                                      en: 'Find a city',
                                     ),
-                              title: isValidationMode
-                                  ? l10n.citiesSearchHeadline
-                                  : l10n.citiesExploreHeadline,
-                              body: isValidationMode
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    color: AppColors.textPrimaryFor(context),
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -0.35,
+                                  ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              isValidationMode
                                   ? l10n.citiesSearchDescription
-                                  : l10n.citiesExploreDescription,
+                                  : _exploreText(
+                                      context,
+                                      pt: 'Busque pelo nome ou filtre pelos aspectos que quer comparar.',
+                                      es: 'Buscá por nombre o filtrá por los aspectos que querés comparar.',
+                                      en: 'Search by name or filter by what you want to compare.',
+                                    ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: AppColors.textSoftFor(context),
+                                    height: 1.35,
+                                  ),
                             ),
                             const SizedBox(height: 15),
                             Row(
@@ -212,7 +225,14 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                                   child: _CitiesSearchField(
                                     controller: _searchController,
                                     hintText: l10n.citiesSearchHint,
-                                    labelText: l10n.citiesSearchFieldLabel,
+                                    labelText: isValidationMode
+                                        ? l10n.citiesSearchFieldLabel
+                                        : _exploreText(
+                                            context,
+                                            pt: 'Buscar por cidade ou estado',
+                                            es: 'Buscar por ciudad o provincia',
+                                            en: 'Search by city or state',
+                                          ),
                                     onChanged: _handleSearchChanged,
                                     onSubmitted: (_) =>
                                         _handlePrimarySearchAction(suggestions),
@@ -240,7 +260,12 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                             ],
                             const SizedBox(height: 16),
                             Text(
-                              l10n.citiesQuickChoicesTitle,
+                              _exploreText(
+                                context,
+                                pt: 'Filtros rápidos',
+                                es: 'Filtros rápidos',
+                                en: 'Quick filters',
+                              ),
                               style: Theme.of(context).textTheme.labelMedium
                                   ?.copyWith(
                                     color: AppColors.textSoftFor(context),
@@ -249,17 +274,39 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                                   ),
                             ),
                             const SizedBox(height: 9),
-                            _CityQuickFilterRail(
-                              filters: _CityQuickFilter.values
-                                  .where(
-                                    (filter) => filter != _CityQuickFilter.all,
-                                  )
-                                  .toList(),
-                              selectedFilter: _quickFilter,
-                              labelBuilder: (filter) =>
-                                  _quickFilterLabel(l10n, filter),
-                              onSelected: _handleQuickFilterSelection,
-                              clearLabel: l10n.citiesQuickFilterAll,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _CityQuickFilterRail(
+                                    filters: const [
+                                      _CityQuickFilter.popular,
+                                      _CityQuickFilter.lowCost,
+                                      _CityQuickFilter.work,
+                                      _CityQuickFilter.housingEasy,
+                                      _CityQuickFilter.coastal,
+                                    ],
+                                    selectedFilter: _quickFilter,
+                                    labelBuilder: (filter) =>
+                                        _quickFilterLabel(l10n, filter),
+                                    onSelected: _handleQuickFilterSelection,
+                                    clearLabel: l10n.citiesQuickFilterAll,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                IconButton.filledTonal(
+                                  tooltip: _exploreText(
+                                    context,
+                                    pt: 'Todos os filtros',
+                                    es: 'Todos los filtros',
+                                    en: 'All filters',
+                                  ),
+                                  onPressed: _showAllFilters,
+                                  icon: const Icon(
+                                    Icons.tune_rounded,
+                                    size: 20,
+                                  ),
+                                ),
+                              ],
                             ),
                             if (_quickFilter == _CityQuickFilter.work) ...[
                               const SizedBox(height: 12),
@@ -343,16 +390,23 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _ResultsHeader(
-                              title: l10n.citiesResultsTitle,
+                              title: (!hasQuery && _quickFilter == null)
+                                  ? _exploreText(
+                                      context,
+                                      pt: 'Cidades',
+                                      es: 'Ciudades',
+                                      en: 'Cities',
+                                    )
+                                  : l10n.citiesResultsTitle,
                               filterLabel: _quickFilter == null
                                   ? null
                                   : _quickFilterLabel(l10n, _quickFilter!),
                               body: (!hasQuery && _quickFilter == null)
                                   ? _exploreText(
                                       context,
-                                      pt: '${visibleCities.length} cidades no catálogo para explorar.',
-                                      es: '${visibleCities.length} ciudades en el catálogo para explorar.',
-                                      en: '${visibleCities.length} cities in the catalog to explore.',
+                                      pt: '${visibleCities.length} cidades disponíveis.',
+                                      es: '${visibleCities.length} ciudades disponibles.',
+                                      en: '${visibleCities.length} cities available.',
                                     )
                                   : l10n.citiesResultsBody(
                                       visibleCities.length,
@@ -362,10 +416,6 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
                             for (final city in pagedCities) ...[
                               CityCard(
                                 city: city,
-                                highlightLabel: _highlightLabel(
-                                  l10n,
-                                  _quickFilter ?? _CityQuickFilter.all,
-                                ),
                                 citiesController: widget.citiesController,
                                 isFavorite: widget.citiesController.isFavorite(
                                   city.id,
@@ -531,6 +581,95 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
       await widget.citiesController.loadCatalog();
     }
   }
+
+  Future<void> _showAllFilters() async {
+    final l10n = context.l10n;
+    final selected = await showModalBottomSheet<_CityQuickFilter>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _exploreText(
+                context,
+                pt: 'Todos os filtros',
+                es: 'Todos los filtros',
+                en: 'All filters',
+              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              _exploreText(
+                context,
+                pt: 'Escolha um critério para ordenar ou recortar as cidades.',
+                es: 'Elegí un criterio para ordenar o recortar las ciudades.',
+                en: 'Choose one criterion to sort or narrow the cities.',
+              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  for (final filter in _CityQuickFilter.values.where(
+                    (item) => item != _CityQuickFilter.all,
+                  ))
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        _filterIconFor(filter),
+                        color: _quickFilter == filter
+                            ? AppColors.primary
+                            : AppColors.textSoftFor(context),
+                      ),
+                      title: Text(_quickFilterLabel(l10n, filter)),
+                      trailing: _quickFilter == filter
+                          ? const Icon(
+                              Icons.check_circle_rounded,
+                              color: AppColors.primary,
+                            )
+                          : null,
+                      onTap: () => Navigator.pop(sheetContext, filter),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (selected != null && mounted) {
+      await _handleQuickFilterSelection(selected);
+    }
+  }
+
+  IconData _filterIconFor(_CityQuickFilter filter) => switch (filter) {
+    _CityQuickFilter.all => Icons.apps_rounded,
+    _CityQuickFilter.popular => Icons.local_fire_department_outlined,
+    _CityQuickFilter.lowCost => Icons.savings_outlined,
+    _CityQuickFilter.work => Icons.work_outline_rounded,
+    _CityQuickFilter.language => Icons.translate_rounded,
+    _CityQuickFilter.housingEasy => Icons.home_outlined,
+    _CityQuickFilter.housingPressure => Icons.trending_up_rounded,
+    _CityQuickFilter.softLanding => Icons.flight_land_rounded,
+    _CityQuickFilter.familyStability => Icons.family_restroom_rounded,
+    _CityQuickFilter.incomeStart => Icons.payments_outlined,
+    _CityQuickFilter.coastal => Icons.waves_rounded,
+    _CityQuickFilter.metropolis => Icons.apartment_rounded,
+    _CityQuickFilter.inland => Icons.nature_people_outlined,
+    _CityQuickFilter.border => Icons.swap_horiz_rounded,
+  };
 
   void _handleWorkAreaSelection(String? area) {
     setState(() {
@@ -807,38 +946,6 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
     }
   }
 
-  String _highlightLabel(dynamic l10n, _CityQuickFilter filter) {
-    switch (filter) {
-      case _CityQuickFilter.all:
-      case _CityQuickFilter.popular:
-        return l10n.citiesHighlightPopularLabel;
-      case _CityQuickFilter.lowCost:
-        return l10n.citiesHighlightEconomicalLabel;
-      case _CityQuickFilter.work:
-        return l10n.citiesHighlightWorkLabel;
-      case _CityQuickFilter.language:
-        return l10n.citiesHighlightLanguageLabel;
-      case _CityQuickFilter.housingEasy:
-        return l10n.citiesHighlightHousingEasyLabel;
-      case _CityQuickFilter.housingPressure:
-        return l10n.citiesHighlightHousingPressureLabel;
-      case _CityQuickFilter.softLanding:
-        return l10n.citiesHighlightSoftLandingLabel;
-      case _CityQuickFilter.familyStability:
-        return l10n.citiesHighlightFamilyStabilityLabel;
-      case _CityQuickFilter.incomeStart:
-        return l10n.citiesHighlightIncomeStartLabel;
-      case _CityQuickFilter.coastal:
-        return l10n.citiesHighlightCoastalLabel;
-      case _CityQuickFilter.metropolis:
-        return l10n.citiesHighlightMetropolisLabel;
-      case _CityQuickFilter.inland:
-        return l10n.citiesHighlightInlandLabel;
-      case _CityQuickFilter.border:
-        return l10n.citiesHighlightBorderLabel;
-    }
-  }
-
   void _openCityDetail(City city) {
     widget.citiesController.prefetchCityDetail(city.id);
     widget.citiesController.prefetchMethodology();
@@ -854,85 +961,6 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
 }
 
 enum CitiesExploreEntryMode { explore, validation }
-
-class _ExplorePanelHeading extends StatelessWidget {
-  const _ExplorePanelHeading({
-    required this.icon,
-    required this.eyebrow,
-    required this.title,
-    required this.body,
-  });
-
-  final IconData icon;
-  final String eyebrow;
-  final String title;
-  final String body;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF168BFF), Color(0xFF15B8FF)],
-            ),
-            borderRadius: BorderRadius.circular(13),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF168BFF).withValues(alpha: 0.24),
-                blurRadius: 14,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Icon(icon, color: Colors.white, size: 21),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                eyebrow,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.7,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppColors.textPrimaryFor(context),
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.2,
-                  height: 1.15,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                body,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                  height: 1.35,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class _CitiesSearchField extends StatelessWidget {
   const _CitiesSearchField({
@@ -1365,29 +1393,10 @@ class _ResultsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceFor(context).withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.borderFor(context)),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
       child: Row(
         children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.view_agenda_outlined,
-              size: 19,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(width: 11),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

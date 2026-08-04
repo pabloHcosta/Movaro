@@ -157,6 +157,33 @@ class _CitySeasonalitySectionState extends State<CitySeasonalitySection> {
           ),
         ),
 
+        if (data.sourceType != 'official') ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(
+                Icons.info_outline_rounded,
+                size: 14,
+                color: AppColors.textSoftFor(context),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  switch (widget.locale) {
+                    'pt' => 'Estimativa Movaro · não é dado oficial',
+                    'es' => 'Estimación de Movaro · no es un dato oficial',
+                    _ => 'Movaro estimate · not official data',
+                  },
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+
         const SizedBox(height: 14),
 
         // ── 12-month calendar ───────────────────────────────────────────────

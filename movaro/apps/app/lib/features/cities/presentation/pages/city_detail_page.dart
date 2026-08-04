@@ -1,19 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/currency/currency_scope.dart';
 import 'package:movaro_app/app/router/app_routes.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/errors/error_handler.dart';
-import 'package:movaro_app/core/exchange_rates/exchange_rates_scope.dart';
 import 'package:movaro_app/features/journey/detected_location.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
-import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
-import 'package:movaro_app/features/location/presentation/widgets/location_banner_widget.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/utils/number_formatters.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
@@ -27,14 +24,10 @@ import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
 import 'package:movaro_app/core/utils/share_card_service.dart';
 import 'package:movaro_app/core/widgets/practical_info_disclaimer.dart';
 import 'package:movaro_app/core/widgets/skeletons.dart';
-import 'package:movaro_app/core/widgets/visual_data_cards.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
 import 'package:movaro_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
-import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
 import 'package:movaro_app/features/cities/application/services/city_affordability_check.dart';
 import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
-import 'package:movaro_app/features/cities/application/services/city_seasonality_conflict_service.dart';
 import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
 import 'package:movaro_app/features/cities/application/services/city_strength_story_service.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
@@ -44,13 +37,13 @@ import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_map_card.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_metric_insight_sheet.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_public_opinion_section.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_seasonality_section.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_share_card.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_sources_section.dart';
+import 'package:movaro_app/features/flight_search/data/airport_database.dart';
 import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
 import 'package:movaro_app/features/city_insights/domain/entities/city_insight_entity.dart';
 import 'package:movaro_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
@@ -58,7 +51,6 @@ import 'package:movaro_app/features/home/presentation/pages/city_comparison_scre
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/landing_budget_estimator.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
 
@@ -102,24 +94,20 @@ class _CityDetailPageState extends State<CityDetailPage> {
   List<CityInsightEntity> _cityInsights = const [];
   List<CityInsightExplorePlaceEntity> _neighborhoodPlaces = const [];
   final ScrollController _scrollController = ScrollController();
-  late Future<bool> _locationBannerFuture;
   final ExpansibleController _analysisTileController = ExpansibleController();
   final GlobalKey<_SecondaryContentSectionState> _secondaryContentKey =
       GlobalKey<_SecondaryContentSectionState>();
   final _snapshotSectionKey = GlobalKey();
   final _summarySectionKey = GlobalKey();
-  final _categoriesSectionKey = GlobalKey();
-  final _strengthsSectionKey = GlobalKey();
-  final _arrivalSectionKey = GlobalKey();
-  final _narrativeSectionKey = GlobalKey();
+  final _advantagesSectionKey = GlobalKey();
+  final _workSectionKey = GlobalKey();
+  final _dailyLifeSectionKey = GlobalKey();
   final _climateSectionKey = GlobalKey();
-  final _socialSectionKey = GlobalKey();
   final _neighborhoodSectionKey = GlobalKey();
+  final _mobilitySectionKey = GlobalKey();
   final _compareSectionKey = GlobalKey();
-  final _flightBurdenSectionKey = GlobalKey();
   final _mapSectionKey = GlobalKey();
   final _costSectionKey = GlobalKey();
-  final _flightsSectionKey = GlobalKey();
   final _seasonalitySectionKey = GlobalKey();
   final _opinionSectionKey = GlobalKey();
   final _analysisSectionKey = GlobalKey();
@@ -129,27 +117,13 @@ class _CityDetailPageState extends State<CityDetailPage> {
   @override
   void initState() {
     super.initState();
-    _locationBannerFuture = widget.locationController.shouldShowInlineBanner();
-    widget.locationController.addListener(_handleLocationChanged);
     _load();
   }
 
   @override
   void dispose() {
-    widget.locationController.removeListener(_handleLocationChanged);
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _handleLocationChanged() {
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _locationBannerFuture = widget.locationController
-          .shouldShowInlineBanner();
-    });
   }
 
   Future<void> _load() async {
@@ -174,65 +148,19 @@ class _CityDetailPageState extends State<CityDetailPage> {
   }
 
   Future<void> _prefetchCitySignals(City city) async {
-    final plan = widget.migrationQuestionnaireController?.generatedPlan;
-    final savedLocation = widget.locationController.savedLocation;
-    final originCountryIso = FlightRouteContextResolver.resolveOriginCountryIso(
-      savedCountryCode: savedLocation?.countryCode,
-      planOriginCountry: plan?.originCountry,
-    );
-    final originAirport = FlightRouteContextResolver.resolveOriginAirport(
-      savedLocation: savedLocation,
-      originCountryIso: originCountryIso,
-    );
-    final destinationAirport =
-        FlightRouteContextResolver.resolveDestinationAirport(
-          destinationCityName: city.name,
-          destinationCountryIso:
-              FlightRouteContextResolver.resolveDestinationCountryIso(
-                cityCountryCode: city.countryCode,
-                planDestinationCountry: plan?.destinationCountry,
-              ),
-          destinationLatitude: city.latitude,
-          destinationLongitude: city.longitude,
-        );
-
-    final requests = <Future<Object?>>[
-      widget.citiesController.loadWeatherForCity(city.id),
-    ];
-
-    if (originAirport?.iataCode != null &&
-        destinationAirport?.iataCode != null) {
-      requests.add(
-        widget.citiesController.loadTravelInsightForCity(
-          city.id,
-          originIata: originAirport?.iataCode,
-          destIata: destinationAirport?.iataCode,
-        ),
-      );
-    }
-
-    await Future.wait(requests);
+    await widget.citiesController.loadWeatherForCity(city.id);
   }
 
   Future<void> _loadCityInsightContext(City city) async {
     final locale = Localizations.localeOf(context).languageCode;
-    final plan = widget.migrationQuestionnaireController?.generatedPlan;
-    final comparisonIds = _comparisonCitiesFor(
-      city,
-    ).map((item) => item.id).toList(growable: false);
-
     try {
       final loadInsights = widget.cityInsightsController.load(
         cityId: city.id,
-        goal: plan?.goal,
-        timeline: plan?.timeline,
         locale: locale,
       );
       final loadSocialProof = widget.citiesController.loadCityDetailSocialProof(
         city.id,
         locale: locale,
-        goal: plan?.goal,
-        timeline: plan?.timeline,
       );
       final loadClimate = widget.citiesController.loadCityDetailClimateSummary(
         city.id,
@@ -241,16 +169,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
       final loadArrival = widget.citiesController.loadCityDetailArrivalStory(
         city.id,
         locale: locale,
-        goal: plan?.goal,
-        timeline: plan?.timeline,
       );
-      final loadComparison = comparisonIds.isEmpty
-          ? Future<CityDetailComparison?>.value(null)
-          : widget.citiesController.loadCityDetailComparison(
-              city.id,
-              compareTo: comparisonIds,
-              locale: locale,
-            );
 
       await loadInsights;
       final placesFuture = widget.cityInsightsController.getExplorePlaces(
@@ -259,12 +178,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
         locale: locale,
       );
       final places = await placesFuture;
-      await Future.wait([
-        loadSocialProof,
-        loadClimate,
-        loadArrival,
-        loadComparison,
-      ]);
+      await Future.wait([loadSocialProof, loadClimate, loadArrival]);
       if (!mounted) {
         return;
       }
@@ -320,32 +234,6 @@ class _CityDetailPageState extends State<CityDetailPage> {
     );
   }
 
-  DetectedLocation? _resolvedDetectedLocation() {
-    final journeyDetected = widget
-        .migrationQuestionnaireController
-        ?.journeyContextController
-        .detectedLocation;
-    if (journeyDetected?.latitude != null &&
-        journeyDetected?.longitude != null) {
-      return journeyDetected;
-    }
-
-    final saved = widget.locationController.savedLocation;
-    if (saved == null) {
-      return journeyDetected;
-    }
-
-    return DetectedLocation(
-      countryName: saved.countryName,
-      countryId: saved.countryCode,
-      city: saved.cityName,
-      region: saved.stateName,
-      latitude: saved.latitude,
-      longitude: saved.longitude,
-      detectedAt: null,
-    );
-  }
-
   Future<void> _openCityMapSheet(City city) {
     return showModalBottomSheet<void>(
       context: context,
@@ -354,10 +242,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => FractionallySizedBox(
         heightFactor: 0.9,
-        child: _CityMapBottomSheet(
-          city: city,
-          detectedLocation: _resolvedDetectedLocation(),
-        ),
+        child: _CityMapBottomSheet(city: city, detectedLocation: null),
       ),
     );
   }
@@ -378,10 +263,6 @@ class _CityDetailPageState extends State<CityDetailPage> {
     await state.expandAndWait();
   }
 
-  Future<void> _openSecondarySection(GlobalKey key) async {
-    await _navigateToSection(key, expandSecondary: true);
-  }
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -390,60 +271,15 @@ class _CityDetailPageState extends State<CityDetailPage> {
         final city = _city;
         final l10n = context.l10n;
         final localeName = Localizations.localeOf(context).toString();
-        final planContext = city == null
-            ? null
-            : _resolvePlanContext(context, city);
-        final plan = widget.migrationQuestionnaireController?.generatedPlan;
         final locale = Localizations.localeOf(context).languageCode;
-        final savedLocation = widget.locationController.savedLocation;
-        final originCountryIso =
-            FlightRouteContextResolver.resolveOriginCountryIso(
-              savedCountryCode: savedLocation?.countryCode,
-              planOriginCountry: plan?.originCountry,
-            );
-        final originAirport = FlightRouteContextResolver.resolveOriginAirport(
-          savedLocation: savedLocation,
-          originCountryIso: originCountryIso,
-        );
-        final destinationAirport = city == null
-            ? null
-            : FlightRouteContextResolver.resolveDestinationAirport(
-                destinationCityName: city.name,
-                destinationCountryIso:
-                    FlightRouteContextResolver.resolveDestinationCountryIso(
-                      cityCountryCode: city.countryCode,
-                      planDestinationCountry: plan?.destinationCountry,
-                    ),
-                destinationLatitude: city.latitude,
-                destinationLongitude: city.longitude,
-              );
-        final routeInsight = city == null
-            ? null
-            : widget.citiesController.travelInsightFor(
-                city.id,
-                originIata: originAirport?.iataCode,
-                destIata: destinationAirport?.iataCode,
-              );
         final budget = city?.budgetSnapshot;
         final strengths = city == null
             ? const <CityStrengthSignal>[]
             : CityStrengthStoryService.strongest(context, city);
-        final comparisonCities = city == null
-            ? const <City>[]
-            : _comparisonCitiesFor(city);
         final detailContextKey = city == null
             ? null
             : widget.citiesController.cityDetailContextKey(
                 city.id,
-                locale: locale,
-                goal: plan?.goal,
-                timeline: plan?.timeline,
-              );
-        final comparisonKey = city == null
-            ? null
-            : widget.citiesController.cityDetailComparisonKey(
-                city.id,
-                compareTo: comparisonCities.map((item) => item.id).toList(),
                 locale: locale,
               );
         final socialProof = detailContextKey == null
@@ -455,19 +291,9 @@ class _CityDetailPageState extends State<CityDetailPage> {
         final arrivalStory = detailContextKey == null
             ? null
             : widget.citiesController.arrivalStoryFor(detailContextKey);
-        final comparison = comparisonKey == null
-            ? null
-            : widget.citiesController.comparisonFor(comparisonKey);
         final quickActions = city == null
             ? const <_DetailQuickAction>[]
-            : _buildQuickActions(
-                context,
-                city: city,
-                strengths: strengths,
-                budget: budget,
-                routeInsight: routeInsight,
-                comparisonCities: comparisonCities,
-              );
+            : _buildQuickActions(context, budget: budget);
 
         return Scaffold(
           bottomNavigationBar: city == null
@@ -523,470 +349,413 @@ class _CityDetailPageState extends State<CityDetailPage> {
               else
                 Column(
                   children: [
-                    // ── Full-width hero ─────────────────────────────────────
-                    _DetailHeroSection(
-                      city: city,
-                      scrollController: _scrollController,
-                      citiesController: widget.citiesController,
-                      onToggleFavorite: () =>
-                          _toggleFavoriteCity(context, city),
-                    ),
-                    if (quickActions.isNotEmpty)
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          context.pageHorizontalPadding,
-                          12,
-                          context.pageHorizontalPadding,
-                          0,
-                        ),
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1160),
-                          child: _SecondaryActionsRow(actions: quickActions),
-                        ),
-                      ),
-                    // ── Scrollable panels ───────────────────────────────────
                     Expanded(
-                      child: ListView(
+                      child: NestedScrollView(
                         controller: _scrollController,
-                        padding: EdgeInsets.fromLTRB(
-                          context.pageHorizontalPadding,
-                          16,
-                          context.pageHorizontalPadding,
-                          context.pageVerticalPadding + 96,
-                        ),
-                        children: [
-                          if (widget.validationFlow && planContext == null) ...[
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 1160),
-                              child: FrostedPanel(
-                                child: _ValidationFlowBanner(city: city),
+                        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                          SliverAppBar(
+                            pinned: true,
+                            centerTitle: true,
+                            toolbarHeight: 68,
+                            expandedHeight: _DetailHeroSection.heightFor(
+                              context,
+                            ),
+                            backgroundColor: const Color(0xFF0A1628),
+                            surfaceTintColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            systemOverlayStyle: SystemUiOverlayStyle.light,
+                            title: Text(
+                              l10n.cityDetailHeaderTitle(),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    shadows: const [
+                                      Shadow(
+                                        color: Color(0x66000000),
+                                        blurRadius: 10,
+                                      ),
+                                    ],
+                                  ),
+                            ),
+                            leadingWidth: 76,
+                            leading: Padding(
+                              padding: const EdgeInsets.only(left: 16),
+                              child: _HeroNavIconButton(
+                                icon: Icons.arrow_back_rounded,
+                                tooltip: MaterialLocalizations.of(
+                                  context,
+                                ).backButtonTooltip,
+                                onTap: _goBackToCities,
                               ),
                             ),
-                            const SizedBox(height: 12),
-                          ],
-                          // ── Block 1: CTA Principal ──────────────────────
-                          // ── Block 1: Decision verdict ───────────────────
-                          ConstrainedBox(
-                            key: _snapshotSectionKey,
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _DecisionSnapshotPanel(
-                              city: city,
-                              planContext: planContext,
-                              plan: plan,
-                              budget: budget,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // ── Block 2: Compact evidence ───────────────────
-                          ConstrainedBox(
-                            key: _summarySectionKey,
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _QuickSummaryCard(
-                              city: city,
-                              plan: plan,
-                              alternatives: comparisonCities,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          ConstrainedBox(
-                            key: _categoriesSectionKey,
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _CategoryListCard(city: city),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // ── Block 3: Cost of Living (always visible) ────
-                          if (budget case final budget?) ...[
-                            ConstrainedBox(
-                              key: _costSectionKey,
-                              constraints: const BoxConstraints(maxWidth: 1160),
-                              child: CityCostOfLivingCard(
-                                budget: budget,
-                                preferredCountryId: plan?.originCountry,
+                            actions: [
+                              Padding(
+                                padding: const EdgeInsets.only(right: 16),
+                                child: _HeroNavIconButton(
+                                  icon: Icons.help_outline_rounded,
+                                  tooltip: _cityDetailLocalizedText(
+                                    context,
+                                    pt: 'Ajuda',
+                                    es: 'Ayuda',
+                                    en: 'Help',
+                                  ),
+                                  onTap: _showHelp,
+                                ),
+                              ),
+                            ],
+                            flexibleSpace: FlexibleSpaceBar(
+                              collapseMode: CollapseMode.parallax,
+                              background: _DetailHeroSection(
+                                city: city,
+                                scrollController: _scrollController,
+                                citiesController: widget.citiesController,
+                                onToggleFavorite: () =>
+                                    _toggleFavoriteCity(context, city),
+                                onShare: () =>
+                                    unawaited(_shareCityCard(context, city)),
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 1160),
-                              child: _AffordabilityNote(city: city),
-                            ),
-                            const SizedBox(height: 12),
-                          ],
-
-                          // ── Block 4: Arrival viability (always visible) ─
-                          ConstrainedBox(
-                            key: _arrivalSectionKey,
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _ArrivalViabilityCard(
-                              city: city,
-                              budget: budget,
-                              preferredCountryId: plan?.originCountry,
-                              routeInsight: routeInsight,
-                              insights: _cityInsights,
-                              arrivalStory: arrivalStory,
-                            ),
                           ),
-                          const SizedBox(height: 12),
-
-                          ConstrainedBox(
-                            key: _narrativeSectionKey,
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _CityNarrativeCard(
-                              city: city,
-                              plan: plan,
-                              planContext: planContext,
-                              insights: _cityInsights,
-                              arrivalStory: arrivalStory,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          ConstrainedBox(
-                            key: _climateSectionKey,
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _ClimateSummaryCard(
-                              city: city,
-                              weather: widget.citiesController.weatherFor(
-                                city.id,
+                          if (quickActions.isNotEmpty)
+                            SliverPersistentHeader(
+                              pinned: true,
+                              delegate: _PinnedSectionNavDelegate(
+                                actions: quickActions,
+                                horizontalPadding:
+                                    context.pageHorizontalPadding,
                               ),
-                              climateSummary: climateSummary,
                             ),
+                        ],
+                        body: ListView(
+                          padding: EdgeInsets.fromLTRB(
+                            context.pageHorizontalPadding,
+                            16,
+                            context.pageHorizontalPadding,
+                            context.pageVerticalPadding + 96,
                           ),
-                          const SizedBox(height: 12),
-
-                          ConstrainedBox(
-                            key: _socialSectionKey,
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _PeopleLikeYouCard(
-                              city: city,
-                              socialProof: socialProof,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          ConstrainedBox(
-                            key: _neighborhoodSectionKey,
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _NeighborhoodGuidanceCard(
-                              city: city,
-                              places: _neighborhoodPlaces,
-                              insights: _cityInsights,
-                              arrivalStory: arrivalStory,
-                              socialProof: socialProof,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          if (strengths.isNotEmpty) ...[
+                          children: [
+                            // The city detail is deliberately profile-neutral.
+                            // Recommendation, fit and migration-plan context
+                            // belong to the suggested-cities and plan screens.
                             ConstrainedBox(
-                              key: _strengthsSectionKey,
+                              key: _snapshotSectionKey,
                               constraints: const BoxConstraints(maxWidth: 1160),
-                              child: _CityStrengthsPanel(
+                              child: _CityOverviewPanel(
                                 city: city,
                                 strengths: strengths,
                               ),
                             ),
                             const SizedBox(height: 12),
-                          ],
 
-                          if (comparisonCities.isNotEmpty) ...[
                             ConstrainedBox(
-                              key: _compareSectionKey,
+                              key: _summarySectionKey,
                               constraints: const BoxConstraints(maxWidth: 1160),
-                              child: _InlineComparisonCard(
+                              child: _QuickSummaryCard(city: city),
+                            ),
+                            const SizedBox(height: 12),
+
+                            ConstrainedBox(
+                              key: _advantagesSectionKey,
+                              constraints: const BoxConstraints(maxWidth: 1160),
+                              child: _CityStrengthsAndChallengesCard(
                                 city: city,
-                                plan: plan,
-                                alternatives: comparisonCities,
-                                comparison: comparison,
-                                onCompare: () =>
-                                    _handleCompareCity(context, city),
+                                strengths: strengths,
                               ),
                             ),
                             const SizedBox(height: 12),
-                          ],
 
-                          // ── Block 5: CTA after evidence ──────────────────
-                          if (!widget.validationFlow)
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 1160),
-                              child: _CtaPrimaryRow(
-                                city: city,
-                                planContext: planContext,
-                                validationFlow: widget.validationFlow,
-                                onPrimaryAction: () =>
-                                    _runPrimaryPlanAction(context, city),
-                                onCompareAction: () =>
-                                    _handleCompareCity(context, city),
-                              ),
-                            ),
-                          const SizedBox(height: 12),
-
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1160),
-                            child: _MoreAboutCityCard(
-                              cityName: city.name,
-                              onExploreMore: () => _navigateToSection(
-                                _secondaryContentKey,
-                                expandSecondary: true,
-                              ),
-                              onJumpToAnalysis: _openAnalysisSection,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // ── Secondary sections (progressive disclosure) ──
-                          _SecondaryContentSection(
-                            key: _secondaryContentKey,
-                            cityName: city.name,
-                            children: [
-                              if (CitySeasonalityProfile.hasSeason(city)) ...[
-                                ConstrainedBox(
-                                  key: _seasonalitySectionKey,
-                                  constraints: const BoxConstraints(
-                                    maxWidth: 1160,
-                                  ),
-                                  child: Card(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(20),
-                                      child: CitySeasonalitySection(
-                                        city: city,
-                                        locale: localeName.startsWith('pt')
-                                            ? 'pt'
-                                            : localeName.startsWith('es')
-                                            ? 'es'
-                                            : 'en',
-                                        planTimeline: plan?.timeline,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                              ],
-
-                              // Flight burden
-                              if (routeInsight != null) ...[
-                                ConstrainedBox(
-                                  key: _flightBurdenSectionKey,
-                                  constraints: const BoxConstraints(
-                                    maxWidth: 1160,
-                                  ),
-                                  child: _FlightBurdenCard(
-                                    routeInsight: routeInsight,
-                                    budget: budget,
-                                    preferredCountryId: plan?.originCountry,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                              ],
-
-                              // Location banner
-                              FutureBuilder<bool>(
-                                future: _locationBannerFuture,
-                                builder: (context, snapshot) {
-                                  if (snapshot.data != true) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return ConstrainedBox(
-                                    constraints: const BoxConstraints(
-                                      maxWidth: 1160,
-                                    ),
-                                    child: LocationBannerWidget(
-                                      onActivate: () async {
-                                        final granted = await Navigator.pushNamed(
-                                          context,
-                                          AppRoutes.locationPermission,
-                                          arguments:
-                                              const LocationPermissionScreenArgs(
-                                                returnToPrevious: true,
-                                              ),
-                                        );
-                                        if (!mounted) return;
-                                        setState(() {
-                                          _locationBannerFuture = widget
-                                              .locationController
-                                              .shouldShowInlineBanner();
-                                        });
-                                        if (granted == true &&
-                                            widget
-                                                    .locationController
-                                                    .savedLocation !=
-                                                null) {
-                                          await _load();
-                                        }
-                                      },
-                                    ),
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 12),
-
-                              // Map
+                            if (budget case final budget?) ...[
                               ConstrainedBox(
-                                key: _mapSectionKey,
+                                key: _costSectionKey,
                                 constraints: const BoxConstraints(
                                   maxWidth: 1160,
                                 ),
-                                child: _CityLocationPanel(
-                                  city: city,
-                                  detectedLocation: _resolvedDetectedLocation(),
-                                  isActivePlanCity:
-                                      widget
-                                          .migrationQuestionnaireController
-                                          ?.generatedPlan
-                                          ?.currentPlanCity
-                                          ?.id ==
-                                      city.id,
-                                  onOpenMap: () => _openCityMapSheet(city),
+                                child: CityCostOfLivingCard(
+                                  budget: budget,
+                                  preferredCountryId: null,
                                 ),
                               ),
                               const SizedBox(height: 12),
-
-                              // Public opinion
-                              if (city.publicOpinion != null) ...[
-                                ConstrainedBox(
-                                  key: _opinionSectionKey,
-                                  constraints: const BoxConstraints(
-                                    maxWidth: 1160,
-                                  ),
-                                  child: CityPublicOpinionSection(
-                                    opinion: city.publicOpinion!,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                              ],
-
-                              // Deep Dive (Analysis)
                               ConstrainedBox(
-                                key: _analysisSectionKey,
+                                constraints: const BoxConstraints(
+                                  maxWidth: 1160,
+                                ),
+                                child: _AffordabilityNote(city: city),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+
+                            ConstrainedBox(
+                              key: _workSectionKey,
+                              constraints: const BoxConstraints(maxWidth: 1160),
+                              child: _WorkAndEconomyCard(city: city),
+                            ),
+                            const SizedBox(height: 12),
+
+                            ConstrainedBox(
+                              key: _dailyLifeSectionKey,
+                              constraints: const BoxConstraints(maxWidth: 1160),
+                              child: _DailyLifeCard(
+                                city: city,
+                                insights: _cityInsights,
+                                arrivalStory: arrivalStory,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+
+                            ConstrainedBox(
+                              key: _neighborhoodSectionKey,
+                              constraints: const BoxConstraints(maxWidth: 1160),
+                              child: _NeighborhoodGuidanceCard(
+                                city: city,
+                                places: _neighborhoodPlaces,
+                                insights: _cityInsights,
+                                arrivalStory: arrivalStory,
+                                socialProof: socialProof,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+
+                            ConstrainedBox(
+                              key: _climateSectionKey,
+                              constraints: const BoxConstraints(maxWidth: 1160),
+                              child: _ClimateSummaryCard(
+                                city: city,
+                                weather: widget.citiesController.weatherFor(
+                                  city.id,
+                                ),
+                                climateSummary: climateSummary,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+
+                            if (CitySeasonalityProfile.hasSeason(city)) ...[
+                              ConstrainedBox(
+                                key: _seasonalitySectionKey,
                                 constraints: const BoxConstraints(
                                   maxWidth: 1160,
                                 ),
                                 child: Card(
-                                  child: ExpansionTile(
-                                    controller: _analysisTileController,
-                                    tilePadding: const EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                      vertical: 6,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: CitySeasonalitySection(
+                                      city: city,
+                                      locale: localeName.startsWith('pt')
+                                          ? 'pt'
+                                          : localeName.startsWith('es')
+                                          ? 'es'
+                                          : 'en',
+                                      planTimeline: null,
                                     ),
-                                    childrenPadding: const EdgeInsets.fromLTRB(
-                                      16,
-                                      0,
-                                      16,
-                                      16,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+
+                            ConstrainedBox(
+                              key: _mobilitySectionKey,
+                              constraints: const BoxConstraints(maxWidth: 1160),
+                              child: _MobilityAndConnectionsCard(
+                                city: city,
+                                insights: _cityInsights,
+                                budget: budget,
+                                onOpenMap: () => _openCityMapSheet(city),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+
+                            if (widget.migrationQuestionnaireController !=
+                                null) ...[
+                              ConstrainedBox(
+                                key: _compareSectionKey,
+                                constraints: const BoxConstraints(
+                                  maxWidth: 1160,
+                                ),
+                                child: _InlineComparisonCard(
+                                  city: city,
+                                  onCompare: () =>
+                                      _handleCompareCity(context, city),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 1160),
+                              child: _MoreAboutCityCard(
+                                cityName: city.name,
+                                onExploreMore: () => _navigateToSection(
+                                  _secondaryContentKey,
+                                  expandSecondary: true,
+                                ),
+                                onJumpToAnalysis: _openAnalysisSection,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+
+                            _SecondaryContentSection(
+                              key: _secondaryContentKey,
+                              cityName: city.name,
+                              children: [
+                                ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 1160,
+                                  ),
+                                  child: _ArrivalViabilityCard(
+                                    city: city,
+                                    budget: budget,
+                                    preferredCountryId: null,
+                                    routeInsight: null,
+                                    insights: _cityInsights,
+                                    arrivalStory: arrivalStory,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ConstrainedBox(
+                                  key: _mapSectionKey,
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 1160,
+                                  ),
+                                  child: _CityLocationPanel(
+                                    city: city,
+                                    detectedLocation: null,
+                                    isActivePlanCity: false,
+                                    onOpenMap: () => _openCityMapSheet(city),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+
+                                if (city.publicOpinion != null) ...[
+                                  ConstrainedBox(
+                                    key: _opinionSectionKey,
+                                    constraints: const BoxConstraints(
+                                      maxWidth: 1160,
                                     ),
-                                    title: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            l10n.cityDetailDeepDiveTitle,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.w800,
-                                                ),
+                                    child: CityPublicOpinionSection(
+                                      opinion: city.publicOpinion!,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+
+                                ConstrainedBox(
+                                  key: _analysisSectionKey,
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 1160,
+                                  ),
+                                  child: Card(
+                                    child: ExpansionTile(
+                                      controller: _analysisTileController,
+                                      tilePadding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 6,
+                                      ),
+                                      childrenPadding:
+                                          const EdgeInsets.fromLTRB(
+                                            16,
+                                            0,
+                                            16,
+                                            16,
                                           ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        _OverallScoreChip(
-                                          score: city.movaroScores.overall,
+                                      title: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              l10n.cityDetailDeepDiveTitle,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          _OverallScoreChip(
+                                            score: city.movaroScores.overall,
+                                          ),
+                                        ],
+                                      ),
+                                      children: [
+                                        _CityAnalysisContent(
+                                          city: city,
+                                          budget: budget,
+                                          localeName: localeName,
                                         ),
                                       ],
                                     ),
-                                    children: [
-                                      _CityAnalysisContent(
-                                        city: city,
-                                        budget: budget,
-                                        localeName: localeName,
-                                      ),
-                                    ],
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
-
-                              // Flights
-                              ConstrainedBox(
-                                key: _flightsSectionKey,
-                                constraints: const BoxConstraints(
-                                  maxWidth: 1160,
-                                ),
-                                child: FlightSeasonalityCard(
-                                  originCountryIso: originCountryIso,
-                                  originIata: originAirport?.iataCode,
-                                  destIata: destinationAirport?.iataCode,
-                                  routeInsight: routeInsight,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-
-                              // Sources
-                              ConstrainedBox(
-                                key: _sourcesSectionKey,
-                                constraints: const BoxConstraints(
-                                  maxWidth: 1160,
-                                ),
-                                child: _DataTransparencyCard(
-                                  city: city,
-                                  updatedLabel: _formatUpdatedAt(
-                                    context,
-                                    city.updatedAt,
+                                const SizedBox(height: 12),
+                                ConstrainedBox(
+                                  key: _sourcesSectionKey,
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 1160,
+                                  ),
+                                  child: _DataTransparencyCard(
+                                    city: city,
+                                    updatedLabel: _formatUpdatedAt(
+                                      context,
+                                      city.updatedAt,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
 
               // ── Floating glass nav bar (always on top) ─────────────────────
-              SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    context.pageHorizontalPadding,
-                    context.pageVerticalPadding,
-                    context.pageHorizontalPadding,
-                    0,
-                  ),
-                  child: AnimatedBuilder(
-                    animation: _scrollController,
-                    builder: (context, _) {
-                      final locale = Localizations.localeOf(
-                        context,
-                      ).languageCode;
-                      final breadcrumb = widget.fromMigrationResult
-                          ? switch (locale) {
-                              'pt' => 'Resultado do plano',
-                              'es' => 'Resultado del plan',
-                              _ => 'Plan result',
-                            }
-                          : widget.selectForPlan
-                          ? switch (locale) {
-                              'pt' => 'Selecionar cidade',
-                              'es' => 'Seleccionar ciudad',
-                              _ => 'Select city',
-                            }
-                          : widget.validationFlow
-                          ? switch (locale) {
-                              'pt' => 'Explorar cidades',
-                              'es' => 'Explorar ciudades',
-                              _ => 'Explore cities',
-                            }
-                          : null;
-                      return AppGlassHeader(
-                        title: l10n.cityDetailHeaderTitle(),
-                        subtitle: breadcrumb,
-                        onBack: _goBackToCities,
-                        onHelp: _showHelp,
-                      );
-                    },
+              if (city == null)
+                SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      context.pageHorizontalPadding,
+                      context.pageVerticalPadding,
+                      context.pageHorizontalPadding,
+                      0,
+                    ),
+                    child: AnimatedBuilder(
+                      animation: _scrollController,
+                      builder: (context, _) {
+                        final locale = Localizations.localeOf(
+                          context,
+                        ).languageCode;
+                        final breadcrumb = widget.fromMigrationResult
+                            ? switch (locale) {
+                                'pt' => 'Resultado do plano',
+                                'es' => 'Resultado del plan',
+                                _ => 'Plan result',
+                              }
+                            : widget.selectForPlan
+                            ? switch (locale) {
+                                'pt' => 'Selecionar cidade',
+                                'es' => 'Seleccionar ciudad',
+                                _ => 'Select city',
+                              }
+                            : widget.validationFlow
+                            ? switch (locale) {
+                                'pt' => 'Explorar cidades',
+                                'es' => 'Explorar ciudades',
+                                _ => 'Explore cities',
+                              }
+                            : null;
+                        return AppGlassHeader(
+                          title: l10n.cityDetailHeaderTitle(),
+                          subtitle: breadcrumb,
+                          onBack: _goBackToCities,
+                          onHelp: _showHelp,
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         );
@@ -1249,56 +1018,6 @@ class _CityDetailPageState extends State<CityDetailPage> {
         setState(() => _isCreatingPlan = false);
       }
     }
-  }
-
-  _PlanCityContext? _resolvePlanContext(BuildContext context, City city) {
-    final plan = widget.migrationQuestionnaireController?.generatedPlan;
-    if (plan == null) {
-      return null;
-    }
-
-    final isRecommended = plan.currentPlanCity?.id == city.id;
-    final isCandidate = plan.reviewCities.any(
-      (candidate) => candidate.id == city.id,
-    );
-    if (!isRecommended && !isCandidate) {
-      return null;
-    }
-
-    final primaryPriority = plan.selectedPriorities.isEmpty
-        ? null
-        : plan.selectedPriorities.first;
-    final focusLabel = primaryPriority != null
-        ? context.l10n.priorityLabel(primaryPriority)
-        : (plan.archetypeKey != null
-              ? context.l10n.archetypeLabel(plan.archetypeKey!)
-              : context.l10n.cityDetailWorkLabel);
-    final reasons = isRecommended && plan.cityRecommendationReasons.isNotEmpty
-        ? plan.cityRecommendationReasons
-        : city.recommendationReasons;
-
-    return _PlanCityContext(
-      isRecommended: isRecommended,
-      primaryPriority: primaryPriority,
-      focusLabel: focusLabel,
-      reasons: reasons,
-      heroSummary: isRecommended
-          ? context.l10n.cityDetailDecisionSnapshotRecommendedSubtitle(
-              focusLabel,
-            )
-          : context.l10n.cityDetailDecisionSnapshotPlanSubtitle(focusLabel),
-      watchout: _planAwareWatchout(context, city, plan),
-      priorityChips: plan.selectedPriorities
-          .where((value) => value != 'balanced_unsure')
-          .take(2)
-          .map(context.l10n.priorityLabel)
-          .toList(growable: false),
-      constraintChips: plan.selectedConstraints
-          .where((value) => value != 'no_constraints')
-          .take(2)
-          .map(context.l10n.constraintLabel)
-          .toList(growable: false),
-    );
   }
 
   Future<void> _scrollToKey(GlobalKey key) async {
@@ -1635,99 +1354,56 @@ class _CityDetailPageState extends State<CityDetailPage> {
 
   List<_DetailQuickAction> _buildQuickActions(
     BuildContext context, {
-    required City city,
-    required List<CityStrengthSignal> strengths,
     required CityBudgetSnapshot? budget,
-    required TravelRouteInsight? routeInsight,
-    required List<City> comparisonCities,
   }) {
-    final actions = <_DetailQuickAction>[
+    return <_DetailQuickAction>[
       _DetailQuickAction(
-        icon: Icons.lightbulb_outline_rounded,
-        label: _cityDetailLocalizedText(
-          context,
-          pt: 'Decisão',
-          es: 'Decisión',
-          en: 'Decision',
-        ),
-        onTap: () => _scrollToKey(_snapshotSectionKey),
-        priority: 0,
-      ),
-      _DetailQuickAction(
-        icon: Icons.fact_check_outlined,
+        icon: Icons.location_city_outlined,
         label: _cityDetailLocalizedText(
           context,
           pt: 'Resumo',
           es: 'Resumen',
           en: 'Summary',
         ),
-        onTap: () => _scrollToKey(_summarySectionKey),
+        onTap: () => _scrollToKey(_snapshotSectionKey),
+        priority: 0,
+      ),
+      _DetailQuickAction(
+        icon: Icons.payments_outlined,
+        label: _cityDetailLocalizedText(
+          context,
+          pt: 'Custo e moradia',
+          es: 'Costo y vivienda',
+          en: 'Cost & housing',
+        ),
+        onTap: () =>
+            _scrollToKey(budget == null ? _workSectionKey : _costSectionKey),
         priority: 1,
       ),
       _DetailQuickAction(
-        icon: Icons.tune_rounded,
+        icon: Icons.work_outline_rounded,
         label: _cityDetailLocalizedText(
           context,
-          pt: 'Critérios',
-          es: 'Criterios',
-          en: 'Criteria',
+          pt: 'Trabalho',
+          es: 'Trabajo',
+          en: 'Work',
         ),
-        onTap: () => _scrollToKey(_categoriesSectionKey),
+        onTap: () => _scrollToKey(_workSectionKey),
         priority: 2,
       ),
       _DetailQuickAction(
-        icon: Icons.login_rounded,
+        icon: Icons.directions_bus_outlined,
         label: _cityDetailLocalizedText(
           context,
-          pt: 'Chegada',
-          es: 'Llegada',
-          en: 'Arrival',
+          pt: 'Vida cotidiana',
+          es: 'Vida cotidiana',
+          en: 'Daily life',
         ),
-        onTap: () => _scrollToKey(_arrivalSectionKey),
+        onTap: () => _scrollToKey(_dailyLifeSectionKey),
         priority: 3,
       ),
       _DetailQuickAction(
-        icon: Icons.auto_stories_outlined,
-        label: _cityDetailLocalizedText(
-          context,
-          pt: 'Rotina',
-          es: 'Rutina',
-          en: 'Living',
-        ),
-        onTap: () => _scrollToKey(_narrativeSectionKey),
-        priority: 4,
-      ),
-      if (budget != null)
-        _DetailQuickAction(
-          icon: Icons.payments_outlined,
-          label: context.l10n.cityDetailCostAction(),
-          onTap: () => _scrollToKey(_costSectionKey),
-          priority: 5,
-        ),
-      _DetailQuickAction(
-        icon: Icons.cloud_outlined,
-        label: _cityDetailLocalizedText(
-          context,
-          pt: 'Clima',
-          es: 'Clima',
-          en: 'Climate',
-        ),
-        onTap: () => _scrollToKey(_climateSectionKey),
-        priority: 6,
-      ),
-      _DetailQuickAction(
-        icon: Icons.people_alt_outlined,
-        label: _cityDetailLocalizedText(
-          context,
-          pt: 'Pessoas',
-          es: 'Personas',
-          en: 'People',
-        ),
-        onTap: () => _scrollToKey(_socialSectionKey),
-        priority: 7,
-      ),
-      _DetailQuickAction(
-        icon: Icons.place_outlined,
+        icon: Icons.holiday_village_outlined,
         label: _cityDetailLocalizedText(
           context,
           pt: 'Bairros',
@@ -1735,110 +1411,32 @@ class _CityDetailPageState extends State<CityDetailPage> {
           en: 'Areas',
         ),
         onTap: () => _scrollToKey(_neighborhoodSectionKey),
-        priority: 8,
-      ),
-      if (strengths.isNotEmpty)
-        _DetailQuickAction(
-          icon: Icons.thumb_up_alt_outlined,
-          label: _cityDetailLocalizedText(
-            context,
-            pt: 'Pontos fortes',
-            es: 'Fortalezas',
-            en: 'Strengths',
-          ),
-          onTap: () => _scrollToKey(_strengthsSectionKey),
-          priority: 9,
-        ),
-      if (comparisonCities.isNotEmpty)
-        _DetailQuickAction(
-          icon: Icons.compare_arrows_rounded,
-          label: _cityDetailLocalizedText(
-            context,
-            pt: 'Comparar',
-            es: 'Comparar',
-            en: 'Compare',
-          ),
-          onTap: () => _scrollToKey(_compareSectionKey),
-          priority: 10,
-        ),
-      if (routeInsight != null)
-        _DetailQuickAction(
-          icon: Icons.flight_takeoff_rounded,
-          label: _cityDetailLocalizedText(
-            context,
-            pt: 'Passagem',
-            es: 'Pasaje',
-            en: 'Flight',
-          ),
-          onTap: () => _openSecondarySection(_flightBurdenSectionKey),
-          priority: 11,
-        ),
-      _DetailQuickAction(
-        icon: Icons.map_outlined,
-        label: context.l10n.cityDetailMapAction(),
-        onTap: () => _openSecondarySection(_mapSectionKey),
-        priority: 12,
-      ),
-      if (CitySeasonalityProfile.hasSeason(city))
-        _DetailQuickAction(
-          icon: Icons.wb_sunny_outlined,
-          label: context.l10n.cityDetailSeasonalityAction(),
-          onTap: () => _openSecondarySection(_seasonalitySectionKey),
-          priority: 13,
-        ),
-      if (city.publicOpinion != null)
-        _DetailQuickAction(
-          icon: Icons.forum_outlined,
-          label: _cityDetailLocalizedText(
-            context,
-            pt: 'Opinião',
-            es: 'Opinión',
-            en: 'Opinion',
-          ),
-          onTap: () => _openSecondarySection(_opinionSectionKey),
-          priority: 14,
-        ),
-      _DetailQuickAction(
-        icon: Icons.analytics_outlined,
-        label: context.l10n.cityDetailAnalysisAction(),
-        onTap: _openAnalysisSection,
-        priority: 15,
+        priority: 4,
       ),
       _DetailQuickAction(
-        icon: Icons.flight_outlined,
-        label: context.l10n.cityDetailFlightsAction(),
-        onTap: () => _openSecondarySection(_flightsSectionKey),
-        priority: 16,
-      ),
-      _DetailQuickAction(
-        icon: Icons.source_outlined,
+        icon: Icons.wb_sunny_outlined,
         label: _cityDetailLocalizedText(
           context,
-          pt: 'Fontes',
-          es: 'Fuentes',
-          en: 'Sources',
+          pt: 'Clima',
+          es: 'Clima',
+          en: 'Climate',
         ),
-        onTap: () => _openSecondarySection(_sourcesSectionKey),
-        priority: 17,
+        onTap: () => _scrollToKey(_climateSectionKey),
+        priority: 5,
+      ),
+      _DetailQuickAction(
+        icon: Icons.fact_check_outlined,
+        label: _cityDetailLocalizedText(
+          context,
+          pt: 'Dados e fontes',
+          es: 'Datos y fuentes',
+          en: 'Data & sources',
+        ),
+        onTap: () =>
+            _navigateToSection(_secondaryContentKey, expandSecondary: true),
+        priority: 6,
       ),
     ];
-
-    actions.add(
-      _DetailQuickAction(
-        icon: Icons.ios_share_rounded,
-        label: _cityDetailLocalizedText(
-          context,
-          pt: 'Compartilhar',
-          es: 'Compartir',
-          en: 'Share',
-        ),
-        onTap: () => unawaited(_shareCityCard(context, city)),
-        priority: 90,
-      ),
-    );
-
-    actions.sort((a, b) => a.priority.compareTo(b.priority));
-    return actions;
   }
 
   Future<void> _shareCityCard(BuildContext context, City city) async {
@@ -1921,81 +1519,6 @@ class _CityDetailPageState extends State<CityDetailPage> {
       fileName: 'movaro_${city.id}.png',
     );
   }
-
-  List<City> _comparisonCitiesFor(City city) {
-    final plan = widget.migrationQuestionnaireController?.generatedPlan;
-    if (plan == null) {
-      return const <City>[];
-    }
-
-    final candidates = plan.reviewCities.where(
-      (candidate) => candidate.id != city.id,
-    );
-
-    final seen = <String>{};
-    final unique = <City>[];
-    for (final candidate in candidates) {
-      if (seen.add(candidate.id)) {
-        unique.add(candidate);
-      }
-    }
-    return unique.take(2).toList(growable: false);
-  }
-
-  String _planAwareWatchout(
-    BuildContext context,
-    City city,
-    MigrationPlan plan,
-  ) {
-    // ── Seasonality conflict takes highest priority ────────────────────────
-    // If the user is arriving during peak season in a HIGH-severity city,
-    // that is the single most important watchout — housing availability will
-    // be severely impacted.
-    final conflict = CitySeasonalityConflictService.evaluate(
-      city: city,
-      timeline: plan.timeline,
-    );
-    if (conflict != null &&
-        conflict.level == SeasonalityConflictLevel.critical) {
-      final locale = Localizations.localeOf(context).languageCode;
-      return conflict.conflictMessage(locale);
-    }
-
-    if (plan.selectedPriorities.contains('low_cost') && city.rentScore < 55) {
-      return CityHousingViabilityPresenter.resolve(
-        context,
-        rentScore: city.rentScore,
-      ).supporting;
-    }
-    if (plan.selectedPriorities.contains('safety') && city.safetyScore < 60) {
-      return CityMetricPresentation.resolve(
-        context,
-        kind: CityMetricKind.safety,
-        value: city.safetyScore,
-      ).supporting;
-    }
-    if (plan.selectedPriorities.contains('job_opportunities') &&
-        city.movaroScores.workOpportunity < 62) {
-      return CityMetricPresentation.resolve(
-        context,
-        kind: CityMetricKind.work,
-        value: city.movaroScores.workOpportunity,
-      ).supporting;
-    }
-    if (plan.selectedPriorities.contains('community') &&
-        city.argentinaPopularityScore < 60) {
-      return _popularitySupporting(context, city.argentinaPopularityScore);
-    }
-    if (plan.selectedConstraints.contains('avoid_expensive') &&
-        city.rentScore < 60) {
-      return CityHousingViabilityPresenter.resolve(
-        context,
-        rentScore: city.rentScore,
-      ).supporting;
-    }
-
-    return _DecisionSnapshotPanel.defaultWatchoutText(context, city);
-  }
 }
 
 // ─── Progressive disclosure wrapper ──────────────────────────────────────────
@@ -2046,28 +1569,28 @@ class _SecondaryContentSectionState extends State<_SecondaryContentSection> {
 
   static String _expandLabel(BuildContext context, String cityName) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => 'Abrir análise extra de $cityName',
-      'es' => 'Abrir análisis extra de $cityName',
-      _ => 'Open extra analysis for $cityName',
+      'pt' => 'Ver detalhes completos de $cityName',
+      'es' => 'Ver detalles completos de $cityName',
+      _ => 'See full details for $cityName',
     };
   }
 
   static String _collapseLabel(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => 'Fechar análise extra',
-      'es' => 'Cerrar análisis extra',
-      _ => 'Close extra analysis',
+      'pt' => 'Ocultar detalhes completos',
+      'es' => 'Ocultar detalles completos',
+      _ => 'Hide full details',
     };
   }
 
   static String _description(BuildContext context, String cityName) {
     return switch (Localizations.localeOf(context).languageCode) {
       'pt' =>
-        'Mapa, clima por temporada, opinião local, voos e fontes para validar $cityName com mais profundidade.',
+        'Sazonalidade, mapa, opinião pública, indicadores, metodologia e fontes para conhecer $cityName com mais profundidade.',
       'es' =>
-        'Mapa, clima por temporada, opinión local, vuelos y fuentes para validar $cityName con más profundidad.',
+        'Estacionalidad, mapa, opinión pública, indicadores, metodología y fuentes para conocer $cityName con más profundidad.',
       _ =>
-        'Map, seasonal climate, local opinion, flights, and sources to validate $cityName in more depth.',
+        'Seasonality, map, public opinion, indicators, methodology, and sources for a deeper view of $cityName.',
     };
   }
 
@@ -2208,28 +1731,28 @@ class _MoreAboutCityCard extends StatelessWidget {
 
   String _title(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => 'Quer ir mais fundo em $cityName?',
-      'es' => 'Quieres profundizar más en $cityName?',
-      _ => 'Want to go deeper on $cityName?',
+      'pt' => 'Quer conhecer $cityName em profundidade?',
+      'es' => '¿Quieres conocer $cityName en profundidad?',
+      _ => 'Want a deeper view of $cityName?',
     };
   }
 
   String _body(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
       'pt' =>
-        'Abra mapa, clima por temporada, voos, opinião local e fontes sem precisar caçar essas informações no fim da página.',
+        'A camada principal fica curta. Aqui você abre sazonalidade, mapa, opinião pública, indicadores detalhados e todas as fontes.',
       'es' =>
-        'Abre mapa, clima por temporada, vuelos, opinión local y fuentes sin tener que buscar todo al final de la página.',
+        'La capa principal se mantiene breve. Aquí puedes abrir estacionalidad, mapa, opinión pública, indicadores detallados y todas las fuentes.',
       _ =>
-        'Open maps, seasonal climate, flights, local opinion, and sources without hunting for them at the end of the page.',
+        'The main layer stays concise. Open seasonality, map, public opinion, detailed indicators, and every source here.',
     };
   }
 
   String _primaryAction(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'pt' => 'Explorar mais sobre $cityName',
-      'es' => 'Explorar más sobre $cityName',
-      _ => 'Explore more about $cityName',
+      'pt' => 'Abrir detalhes completos',
+      'es' => 'Abrir detalles completos',
+      _ => 'Open full details',
     };
   }
 
@@ -2494,30 +2017,6 @@ class _ResultBarCelebration extends StatelessWidget {
   }
 }
 
-// ─── End of migration result bar ──────────────────────────────────────────────
-
-class _PlanCityContext {
-  const _PlanCityContext({
-    required this.isRecommended,
-    required this.focusLabel,
-    required this.reasons,
-    required this.heroSummary,
-    required this.watchout,
-    required this.priorityChips,
-    required this.constraintChips,
-    this.primaryPriority,
-  });
-
-  final bool isRecommended;
-  final String? primaryPriority;
-  final String focusLabel;
-  final List<String> reasons;
-  final String heroSummary;
-  final String watchout;
-  final List<String> priorityChips;
-  final List<String> constraintChips;
-}
-
 // ── Full-width hero section (matches recommendation screen style) ─────────────
 
 class _DetailHeroSection extends StatelessWidget {
@@ -2526,19 +2025,22 @@ class _DetailHeroSection extends StatelessWidget {
     required this.scrollController,
     required this.citiesController,
     required this.onToggleFavorite,
+    required this.onShare,
   });
 
   final City city;
   final ScrollController scrollController;
   final CitiesController citiesController;
   final VoidCallback onToggleFavorite;
+  final VoidCallback onShare;
+
+  static double heightFor(BuildContext context) {
+    return (MediaQuery.sizeOf(context).height * 0.34).clamp(290.0, 340.0);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final heroHeight = (MediaQuery.of(context).size.height * 0.34).clamp(
-      260.0,
-      340.0,
-    );
+    final heroHeight = heightFor(context);
     final weather = citiesController.weatherFor(city.id);
     final isFav = citiesController.isFavorite(city.id);
     final tempLabel = weather != null
@@ -2553,6 +2055,7 @@ class _DetailHeroSection extends StatelessWidget {
       metaBelowTitle: true,
       showCollapseControl: false,
       maxHeight: heroHeight,
+      minHeight: heroHeight,
       topContentInset: 88,
       bottomContentOffset: -10,
       meta: Row(
@@ -2569,6 +2072,8 @@ class _DetailHeroSection extends StatelessWidget {
             ),
             const SizedBox(width: 10),
           ],
+          _HeroIconButton(icon: Icons.ios_share_rounded, onTap: onShare),
+          const SizedBox(width: 8),
           _HeroIconButton(
             icon: isFav
                 ? Icons.favorite_rounded
@@ -2577,6 +2082,42 @@ class _DetailHeroSection extends StatelessWidget {
             onTap: onToggleFavorite,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HeroNavIconButton extends StatelessWidget {
+  const _HeroNavIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.white.withValues(alpha: 0.82),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(17),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.55)),
+        ),
+        elevation: 0,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(17),
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Icon(icon, color: const Color(0xFF111827)),
+          ),
+        ),
       ),
     );
   }
@@ -3341,415 +2882,85 @@ class _ExploreMediaCardState extends State<_ExploreMediaCard> {
   }
 }
 
-({String label, Color color, IconData icon}) _overallFitSummary(
-  BuildContext context,
-  City city,
-  MigrationPlan? plan,
-) {
-  final priorities = plan?.selectedPriorities ?? const <String>[];
-  final weighted = priorities.isEmpty
-      ? [
-              city.movaroScores.economical,
-              city.rentScore,
-              city.safetyScore,
-              city.movaroScores.workOpportunity,
-              city.movaroScores.languageAdaptation,
-            ].reduce((a, b) => a + b) /
-            5
-      : priorities
-                .map(
-                  (priority) => switch (priority) {
-                    'low_cost' => city.movaroScores.economical,
-                    'safety' => city.safetyScore,
-                    'job_opportunities' => city.movaroScores.workOpportunity,
-                    'community' => city.argentinaPopularityScore,
-                    'quality_life' =>
-                      ((city.idhmScore * 100).round() + city.safetyScore) ~/ 2,
-                    _ => city.movaroScores.languageAdaptation,
-                  },
-                )
-                .reduce((a, b) => a + b) /
-            priorities.length;
-
-  if (weighted >= 72) {
-    return (
-      label: _cityDetailLocalizedText(
-        context,
-        pt: 'Boa escolha',
-        es: 'Buena opción',
-        en: 'Strong fit',
-      ),
-      color: AppColors.success,
-      icon: Icons.check_circle_outline_rounded,
-    );
-  }
-  if (weighted >= 58) {
-    return (
-      label: _cityDetailLocalizedText(
-        context,
-        pt: 'Pede comparação',
-        es: 'Pide comparación',
-        en: 'Needs comparison',
-      ),
-      color: AppColors.warning,
-      icon: Icons.balance_rounded,
-    );
-  }
-  return (
-    label: _cityDetailLocalizedText(
-      context,
-      pt: 'Exige validação',
-      es: 'Exige validación',
-      en: 'Needs proof',
-    ),
-    color: AppColors.danger,
-    icon: Icons.error_outline_rounded,
-  );
-}
-
-({String label, Color color, IconData icon}) _budgetFitSummary(
-  BuildContext context,
-  City city,
-  MigrationPlan? plan,
-) {
-  final budget = city.budgetSnapshot;
-  if (plan == null || budget == null) {
-    return (
-      label: _cityDetailLocalizedText(
-        context,
-        pt: 'Use o custo base',
-        es: 'Usa el costo base',
-        en: 'Use base cost',
-      ),
-      color: AppColors.primary,
-      icon: Icons.savings_outlined,
-    );
-  }
-
-  final estimate = LandingBudgetEstimator.build(
-    plan: plan,
-    explicitPreviewCity: city,
-  );
-  final selectedScenario = switch (plan.availableCapital) {
-    'low' => LandingBudgetScenario.lean,
-    'medium' => LandingBudgetScenario.balanced,
-    'high' || 'very_high' => LandingBudgetScenario.comfortable,
-    _ => null,
-  };
-
-  if (selectedScenario == null) {
-    final salaryRatio = budget.fairLivingCoverageRatio;
-    if (salaryRatio >= 1.1) {
-      return (
-        label: _cityDetailLocalizedText(
-          context,
-          pt: 'Entrada mais viável',
-          es: 'Entrada más viable',
-          en: 'More viable landing',
-        ),
-        color: AppColors.success,
-        icon: Icons.check_circle_outline_rounded,
-      );
-    }
-    if (salaryRatio >= 0.9) {
-      return (
-        label: _cityDetailLocalizedText(
-          context,
-          pt: 'Pede reserva',
-          es: 'Pide reserva',
-          en: 'Needs reserve',
-        ),
-        color: AppColors.warning,
-        icon: Icons.warning_amber_rounded,
-      );
-    }
-    return (
-      label: _cityDetailLocalizedText(
-        context,
-        pt: 'Entrada apertada',
-        es: 'Entrada ajustada',
-        en: 'Tight landing',
-      ),
-      color: AppColors.danger,
-      icon: Icons.error_outline_rounded,
-    );
-  }
-
-  final requestedEstimate = estimate.scenarios.firstWhere(
-    (scenario) => scenario.scenario == selectedScenario,
-  );
-  final requestedMonthlyBase = requestedEstimate.breakdown.monthlyBaseBrl;
-  final cityMonthlyBase = budget.fairLivingTotal;
-  final monthlyRatio = requestedMonthlyBase / cityMonthlyBase;
-
-  if (monthlyRatio >= 1.05) {
-    return (
-      label: _cityDetailLocalizedText(
-        context,
-        pt: 'Compatível com seu capital',
-        es: 'Compatible con tu capital',
-        en: 'Compatible with your capital',
-      ),
-      color: AppColors.success,
-      icon: Icons.check_circle_outline_rounded,
-    );
-  }
-  if (monthlyRatio >= 0.9) {
-    return (
-      label: _cityDetailLocalizedText(
-        context,
-        pt: 'Pede ajuste de chegada',
-        es: 'Pide ajustar la llegada',
-        en: 'Needs a tighter landing',
-      ),
-      color: AppColors.warning,
-      icon: Icons.warning_amber_rounded,
-    );
-  }
-  return (
-    label: _cityDetailLocalizedText(
-      context,
-      pt: 'Pesado para o capital declarado',
-      es: 'Pesado para el capital declarado',
-      en: 'Heavy for declared capital',
-    ),
-    color: AppColors.danger,
-    icon: Icons.error_outline_rounded,
-  );
-}
-
-({String label, Color color, IconData icon}) _safetyBaselineSummary(
-  BuildContext context,
-  City city,
-  List<City> alternatives,
-) {
-  if (alternatives.isNotEmpty) {
-    final avg =
-        alternatives.fold<int>(0, (sum, item) => sum + item.safetyScore) /
-        alternatives.length;
-    final diff = city.safetyScore - avg;
-    if (diff >= 6) {
-      return (
-        label: _cityDetailLocalizedText(
-          context,
-          pt: 'Acima das opções',
-          es: 'Por encima de tus opciones',
-          en: 'Above alternatives',
-        ),
-        color: AppColors.success,
-        icon: Icons.shield_outlined,
-      );
-    }
-    if (diff <= -6) {
-      return (
-        label: _cityDetailLocalizedText(
-          context,
-          pt: 'Abaixo das opções',
-          es: 'Por debajo de tus opciones',
-          en: 'Below alternatives',
-        ),
-        color: AppColors.danger,
-        icon: Icons.gpp_bad_outlined,
-      );
-    }
-    return (
-      label: _cityDetailLocalizedText(
-        context,
-        pt: 'Parecida com as opções',
-        es: 'Parecida a tus opciones',
-        en: 'Close to alternatives',
-      ),
-      color: AppColors.warning,
-      icon: Icons.gpp_maybe_outlined,
-    );
-  }
-
-  if (city.safetyScore >= 68) {
-    return (
-      label: _cityDetailLocalizedText(
-        context,
-        pt: 'Sinal estável',
-        es: 'Señal estable',
-        en: 'Stable signal',
-      ),
-      color: AppColors.success,
-      icon: Icons.shield_outlined,
-    );
-  }
-  if (city.safetyScore >= 55) {
-    return (
-      label: _cityDetailLocalizedText(
-        context,
-        pt: 'Exige critério',
-        es: 'Exige criterio',
-        en: 'Needs judgment',
-      ),
-      color: AppColors.warning,
-      icon: Icons.gpp_maybe_outlined,
-    );
-  }
-  return (
-    label: _cityDetailLocalizedText(
-      context,
-      pt: 'Pede rotina mais fechada',
-      es: 'Pide rutina más cerrada',
-      en: 'Needs tighter routine',
-    ),
-    color: AppColors.danger,
-    icon: Icons.gpp_bad_outlined,
-  );
-}
-
-// ─── Block 1: CTA Principal ───────────────────────────────────────────────────
-
-class _CtaPrimaryRow extends StatelessWidget {
-  const _CtaPrimaryRow({
-    required this.city,
-    required this.planContext,
-    required this.validationFlow,
-    required this.onPrimaryAction,
-    required this.onCompareAction,
-  });
-
-  final City city;
-  final _PlanCityContext? planContext;
-  final bool validationFlow;
-  final VoidCallback onPrimaryAction;
-  final VoidCallback onCompareAction;
-
-  static String _chooseCityLabel(BuildContext context) =>
-      switch (Localizations.localeOf(context).languageCode) {
-        'pt' => 'Escolher esta cidade',
-        'es' => 'Elegir esta ciudad',
-        _ => 'Choose this city',
-      };
-
-  @override
-  Widget build(BuildContext context) {
-    // Determine the primary CTA label based on plan state.
-    // Rule: ONE clear action — always about choosing the city.
-    final primaryLabel = planContext?.isRecommended == true
-        ? context.l10n.migrationPlanChooseCityAction
-        : validationFlow
-        ? context.l10n.migrationPlanChooseCityAction
-        : _chooseCityLabel(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Single dominant primary action
-        FilledButton.icon(
-          onPressed: onPrimaryAction,
-          icon: const Icon(Icons.check_circle_outline_rounded),
-          label: Text(primaryLabel),
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-          ),
-        ),
-        const SizedBox(height: 8),
-        // Secondary action: text button — visually subordinate
-        TextButton.icon(
-          onPressed: onCompareAction,
-          icon: const Icon(Icons.compare_arrows_rounded, size: 16),
-          label: Text(context.l10n.cityDetailCompareAction),
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.textSoftFor(context),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ValidationFlowBanner extends StatelessWidget {
-  const _ValidationFlowBanner({required this.city});
-
-  final City city;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.l10n.validateCityBannerTitle().toUpperCase(),
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: scheme.primary,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          context.l10n.validateCityBannerBody(),
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.35),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          context.l10n.cityDetailDecisionSnapshotPlanSubtitle(city.name),
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.textSoftFor(context),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─── Block 2: Quick Summary ───────────────────────────────────────────────────
-
 class _QuickSummaryCard extends StatelessWidget {
-  const _QuickSummaryCard({
-    required this.city,
-    required this.plan,
-    required this.alternatives,
-  });
+  const _QuickSummaryCard({required this.city});
 
   final City city;
-  final MigrationPlan? plan;
-  final List<City> alternatives;
 
   @override
   Widget build(BuildContext context) {
-    final fit = _overallFitSummary(context, city, plan);
-    final budgetFit = _budgetFitSummary(context, city, plan);
-    final safety = _safetyBaselineSummary(context, city, alternatives);
-    final isCompact = MediaQuery.sizeOf(context).width < 390;
+    final budget = city.budgetSnapshot;
+    final industries = city.topIndustries
+        .take(2)
+        .map(context.l10n.workAreaLabel)
+        .join(' · ');
     final cards = [
       _SummaryIndicator(
         label: _cityDetailLocalizedText(
           context,
-          pt: 'Leitura geral',
-          es: 'Lectura general',
-          en: 'Overall read',
+          pt: 'População',
+          es: 'Población',
+          en: 'Population',
         ),
-        value: fit.label,
-        color: fit.color,
-        icon: fit.icon,
+        value: NumberFormat.compact(
+          locale: Localizations.localeOf(context).toString(),
+        ).format(city.population),
+        color: AppColors.primary,
+        icon: Icons.groups_outlined,
       ),
       _SummaryIndicator(
         label: _cityDetailLocalizedText(
           context,
-          pt: 'No seu cenário',
-          es: 'En tu escenario',
-          en: 'For your setup',
+          pt: 'Custo mensal estimado',
+          es: 'Costo mensual estimado',
+          en: 'Estimated monthly cost',
         ),
-        value: budgetFit.label,
-        color: budgetFit.color,
-        icon: budgetFit.icon,
+        value: budget == null
+            ? _cityDetailLocalizedText(
+                context,
+                pt: 'Sem referência',
+                es: 'Sin referencia',
+                en: 'No reference',
+              )
+            : '${_formatMoney(context, budget.fairLivingTotal)}–${_formatMoney(context, budget.wellLivingTotal)}',
+        color: AppColors.warning,
+        icon: Icons.payments_outlined,
       ),
       _SummaryIndicator(
         label: _cityDetailLocalizedText(
           context,
-          pt: 'Segurança',
-          es: 'Seguridad',
-          en: 'Safety',
+          pt: 'Aluguel de referência',
+          es: 'Alquiler de referencia',
+          en: 'Reference rent',
         ),
-        value: safety.label,
-        color: safety.color,
-        icon: safety.icon,
+        value: budget == null
+            ? _cityDetailLocalizedText(
+                context,
+                pt: 'Sem referência',
+                es: 'Sin referencia',
+                en: 'No reference',
+              )
+            : '${_formatMoney(context, budget.planningRentLow)}–${_formatMoney(context, budget.planningRentHigh)}',
+        color: AppColors.success,
+        icon: Icons.home_work_outlined,
+      ),
+      _SummaryIndicator(
+        label: _cityDetailLocalizedText(
+          context,
+          pt: 'Base econômica',
+          es: 'Base económica',
+          en: 'Economic base',
+        ),
+        value: industries.isEmpty
+            ? _cityDetailLocalizedText(
+                context,
+                pt: 'Dados limitados',
+                es: 'Datos limitados',
+                en: 'Limited data',
+              )
+            : industries,
+        color: AppColors.primary,
+        icon: Icons.business_center_outlined,
       ),
     ];
 
@@ -3758,30 +2969,32 @@ class _QuickSummaryCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            context.l10n.cityDetailQuickSummaryTitle(),
+            _cityDetailLocalizedText(
+              context,
+              pt: 'Números principais',
+              es: 'Números principales',
+              en: 'Key figures',
+            ),
             style: Theme.of(
               context,
             ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 12),
-          if (isCompact)
-            Column(
-              children: [
-                for (var i = 0; i < cards.length; i++) ...[
-                  cards[i],
-                  if (i < cards.length - 1) const SizedBox(height: 8),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = constraints.maxWidth >= 820 ? 4 : 2;
+              final itemWidth =
+                  (constraints.maxWidth - (columns - 1) * 8) / columns;
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final card in cards)
+                    SizedBox(width: itemWidth, child: card),
                 ],
-              ],
-            )
-          else
-            Row(
-              children: [
-                for (var i = 0; i < cards.length; i++) ...[
-                  Expanded(child: cards[i]),
-                  if (i < cards.length - 1) const SizedBox(width: 8),
-                ],
-              ],
-            ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -3851,182 +3064,694 @@ class _SummaryIndicator extends StatelessWidget {
   }
 }
 
-// ─── Block 3: Category List ───────────────────────────────────────────────────
+class _CityStrengthsAndChallengesCard extends StatelessWidget {
+  const _CityStrengthsAndChallengesCard({
+    required this.city,
+    required this.strengths,
+  });
 
-class _CategoryListCard extends StatelessWidget {
-  const _CategoryListCard({required this.city});
+  final City city;
+  final List<CityStrengthSignal> strengths;
+
+  @override
+  Widget build(BuildContext context) {
+    final strengthItems = strengths.isNotEmpty
+        ? strengths.take(4).map((item) => item.title).toList(growable: false)
+        : <String>[
+            CityMetricPresentation.resolve(
+              context,
+              kind: CityMetricKind.safety,
+              value: city.safetyScore,
+            ).headline,
+            if (city.topIndustries.isNotEmpty)
+              _cityDetailLocalizedText(
+                context,
+                pt: 'Economia apoiada em ${city.topIndustries.take(2).map(context.l10n.workAreaLabel).join(' e ')}',
+                es: 'Economía apoyada en ${city.topIndustries.take(2).map(context.l10n.workAreaLabel).join(' y ')}',
+                en: 'Economy supported by ${city.topIndustries.take(2).map(context.l10n.workAreaLabel).join(' and ')}',
+              ),
+          ];
+    final challenges = <String>[
+      if (city.budgetSnapshot != null)
+        _cityDetailLocalizedText(
+          context,
+          pt: 'Moradia representa uma parte relevante do custo mensal e muda entre regiões.',
+          es: 'La vivienda representa una parte relevante del costo mensual y cambia entre zonas.',
+          en: 'Housing is a meaningful part of monthly cost and varies by area.',
+        ),
+      if (city.seasonalitySnapshot case final seasonality?)
+        seasonality.rentNotes(Localizations.localeOf(context).languageCode),
+      if (CityCoastalProfile.lifestyleKind(city) == CityLifestyleKind.coastal)
+        _cityDetailLocalizedText(
+          context,
+          pt: 'Turismo, distâncias entre regiões e trânsito podem alterar a rotina.',
+          es: 'El turismo, las distancias entre zonas y el tránsito pueden alterar la rutina.',
+          en: 'Tourism, distance between areas, and traffic can reshape daily routines.',
+        ),
+      _cityDetailLocalizedText(
+        context,
+        pt: 'Os indicadores municipais não descrevem igualmente todos os bairros.',
+        es: 'Los indicadores municipales no describen por igual todos los barrios.',
+        en: 'Citywide indicators do not describe every area equally.',
+      ),
+    ];
+
+    return FrostedPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _cityDetailLocalizedText(
+              context,
+              pt: 'Principais vantagens e desafios',
+              es: 'Principales ventajas y desafíos',
+              en: 'Main strengths and challenges',
+            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _cityDetailLocalizedText(
+              context,
+              pt: 'Uma leitura equilibrada dos trade-offs da cidade, sem classificar se ela é boa ou ruim para uma pessoa.',
+              es: 'Una lectura equilibrada de los trade-offs de la ciudad, sin clasificar si es buena o mala para una persona.',
+              en: 'A balanced read of city trade-offs, without labeling it good or bad for any one person.',
+            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 14),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final panels = [
+                _EditorialListPanel(
+                  title: _cityDetailLocalizedText(
+                    context,
+                    pt: 'Pontos fortes',
+                    es: 'Puntos fuertes',
+                    en: 'Strengths',
+                  ),
+                  icon: Icons.add_circle_outline_rounded,
+                  color: AppColors.success,
+                  items: strengthItems,
+                ),
+                _EditorialListPanel(
+                  title: _cityDetailLocalizedText(
+                    context,
+                    pt: 'Pontos de atenção',
+                    es: 'Puntos de atención',
+                    en: 'Watch-outs',
+                  ),
+                  icon: Icons.error_outline_rounded,
+                  color: AppColors.warning,
+                  items: challenges.take(4).toList(growable: false),
+                ),
+              ];
+              if (constraints.maxWidth < 680) {
+                return Column(
+                  children: [
+                    panels.first,
+                    const SizedBox(height: 10),
+                    panels.last,
+                  ],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: panels.first),
+                  const SizedBox(width: 10),
+                  Expanded(child: panels.last),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EditorialListPanel extends StatelessWidget {
+  const _EditorialListPanel({
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.items,
+  });
+
+  final String title;
+  final IconData icon;
+  final Color color;
+  final List<String> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          for (var index = 0; index < items.length; index++) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 7),
+                  child: Container(
+                    width: 5,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    items[index],
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+            if (index != items.length - 1) const SizedBox(height: 7),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _WorkAndEconomyCard extends StatelessWidget {
+  const _WorkAndEconomyCard({required this.city});
 
   final City city;
 
   @override
   Widget build(BuildContext context) {
-    final rows = [
-      (
-        icon: Icons.home_work_outlined,
-        label: context.l10n.cityDetailAffordabilityTitle,
-        presentation: CityHousingViabilityPresenter.resolve(
-          context,
-          rentScore: city.rentScore,
-        ),
-        onTap: () => showCityMetricInsightSheet(
-          context,
-          city: city,
-          topic: CityMetricInsightTopic.housing,
-        ),
-      ),
-      (
-        icon: Icons.shield_outlined,
-        label: context.l10n.cityDetailSafetyLabel,
-        presentation: CityMetricPresentation.resolve(
-          context,
-          kind: CityMetricKind.safety,
-          value: city.safetyScore,
-        ),
-        onTap: () => showCityMetricInsightSheet(
-          context,
-          city: city,
-          topic: CityMetricInsightTopic.safety,
-        ),
-      ),
-      (
-        icon: Icons.work_outline_rounded,
-        label: context.l10n.cityDetailWorkLabel,
-        presentation: city.sources.employment == null
-            ? CityMetricPresentation.preliminaryWork(context)
-            : CityMetricPresentation.resolve(
-                context,
-                kind: CityMetricKind.work,
-                value: city.movaroScores.workOpportunity,
-              ),
-        onTap: () => showCityMetricInsightSheet(
-          context,
-          city: city,
-          topic: CityMetricInsightTopic.work,
-        ),
-      ),
-      (
-        icon: Icons.language_outlined,
-        label: context.l10n.cityDetailLanguageLabel,
-        presentation: CityMetricPresentation.resolve(
-          context,
-          kind: CityMetricKind.language,
-          value: city.movaroScores.languageAdaptation,
-        ),
-        onTap: () => showCityMetricInsightSheet(
-          context,
-          city: city,
-          topic: CityMetricInsightTopic.language,
-        ),
-      ),
-    ];
-
+    final budget = city.budgetSnapshot;
+    final source = city.sources.employment;
+    final presentation = CityMetricPresentation.resolve(
+      context,
+      kind: CityMetricKind.work,
+      value: city.movaroScores.workOpportunity,
+    );
     return FrostedPanel(
-      padding: EdgeInsets.zero,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          children: [
-            for (var i = 0; i < rows.length; i++) ...[
-              _CategoryRow(
-                icon: rows[i].icon,
-                label: rows[i].label,
-                presentation: rows[i].presentation,
-                onTap: rows[i].onTap,
-                isFirst: i == 0,
-                isLast: i == rows.length - 1,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _cityDetailLocalizedText(
+              context,
+              pt: 'Trabalho e economia',
+              es: 'Trabajo y economía',
+              en: 'Work and economy',
+            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _cityDetailLocalizedText(
+              context,
+              pt: 'O mercado é apresentado por setores, salário, desemprego e sazonalidade — não apenas por um score.',
+              es: 'El mercado se presenta por sectores, salario, desempleo y estacionalidad, no solo por un puntaje.',
+              en: 'The market is described through industries, salary, unemployment, and seasonality—not just a score.',
+            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 10),
+          _DetailFactRow(
+            icon: Icons.business_center_outlined,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Leitura do mercado',
+              es: 'Lectura del mercado',
+              en: 'Market read',
+            ),
+            value: presentation.headline,
+            supporting: presentation.supporting,
+          ),
+          _DetailFactRow(
+            icon: Icons.payments_outlined,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Salário líquido médio de referência',
+              es: 'Salario neto medio de referencia',
+              en: 'Reference average net salary',
+            ),
+            value: budget == null
+                ? _cityDetailLocalizedText(
+                    context,
+                    pt: 'Sem dado verificado',
+                    es: 'Sin dato verificado',
+                    en: 'No verified data',
+                  )
+                : _formatMoney(context, budget.averageMonthlyNetSalary),
+          ),
+          _DetailFactRow(
+            icon: Icons.trending_down_rounded,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Desemprego de referência',
+              es: 'Desempleo de referencia',
+              en: 'Reference unemployment',
+            ),
+            value: '${city.unemploymentRate.toStringAsFixed(1)}%',
+            supporting: source?.referencePeriod,
+          ),
+          if (city.topIndustries.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            _AreaLabel(
+              title: _cityDetailLocalizedText(
+                context,
+                pt: 'Setores predominantes',
+                es: 'Sectores predominantes',
+                en: 'Main industries',
               ),
-              if (i < rows.length - 1)
-                Divider(
-                  height: 1,
-                  indent: 16,
-                  endIndent: 16,
-                  color: AppColors.borderFor(context),
-                ),
-            ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: city.topIndustries
+                  .map(
+                    (industry) => _InsightPill(
+                      icon: Icons.apartment_rounded,
+                      label: context.l10n.workAreaLabel(industry),
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
           ],
-        ),
+          if (city.seasonalitySnapshot case final seasonality?) ...[
+            const SizedBox(height: 14),
+            _CoverageNotice(
+              icon: Icons.calendar_month_outlined,
+              text: seasonality.jobNotes(
+                Localizations.localeOf(context).languageCode,
+              ),
+            ),
+          ],
+          const SizedBox(height: 10),
+          Text(
+            source == null
+                ? _cityDetailLocalizedText(
+                    context,
+                    pt: 'Ainda não há fonte oficial de emprego vinculada. Áreas empresariais e formalização não são exibidas para evitar falsa precisão.',
+                    es: 'Todavía no hay una fuente oficial de empleo vinculada. Las áreas empresariales y la formalización no se muestran para evitar falsa precisión.',
+                    en: 'No official employment source is linked yet. Business districts and formalization are omitted to avoid false precision.',
+                  )
+                : '${source.provider} · ${source.referencePeriod ?? source.updatedAt ?? city.updatedAt}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.4,
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _CategoryRow extends StatelessWidget {
-  const _CategoryRow({
+class _DailyLifeCard extends StatelessWidget {
+  const _DailyLifeCard({
+    required this.city,
+    required this.insights,
+    required this.arrivalStory,
+  });
+
+  final City city;
+  final List<CityInsightEntity> insights;
+  final CityDetailArrivalStory? arrivalStory;
+
+  @override
+  Widget build(BuildContext context) {
+    final narrative = _cityNarrative(context, city, insights, arrivalStory);
+    final safety = CityMetricPresentation.resolve(
+      context,
+      kind: CityMetricKind.safety,
+      value: city.safetyScore,
+    );
+    final language = CityMetricPresentation.resolve(
+      context,
+      kind: CityMetricKind.language,
+      value: city.movaroScores.languageAdaptation,
+    );
+    final safetySource = city.sources.safety;
+    return FrostedPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _cityDetailLocalizedText(
+              context,
+              pt: 'Vida cotidiana',
+              es: 'Vida cotidiana',
+              en: 'Daily life',
+            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            narrative.$1,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 10),
+          _DetailFactRow(
+            icon: Icons.shield_outlined,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Segurança',
+              es: 'Seguridad',
+              en: 'Safety',
+            ),
+            value: safety.headline,
+            supporting: safetySource == null
+                ? safety.supporting
+                : '${safety.supporting} ${safetySource.description} ${safetySource.referencePeriod ?? ''}'
+                      .trim(),
+          ),
+          _DetailFactRow(
+            icon: Icons.directions_bus_outlined,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Mobilidade e ritmo',
+              es: 'Movilidad y ritmo',
+              en: 'Mobility and pace',
+            ),
+            value: narrative.$2,
+          ),
+          _DetailFactRow(
+            icon: Icons.translate_rounded,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Idioma e serviços',
+              es: 'Idioma y servicios',
+              en: 'Language and services',
+            ),
+            value: language.headline,
+            supporting: language.supporting,
+          ),
+          _DetailFactRow(
+            icon: Icons.insights_outlined,
+            label: 'IDHM ${city.idhmReferenceYear}',
+            value: city.idhmScore.toStringAsFixed(3),
+            supporting: _cityDetailLocalizedText(
+              context,
+              pt: 'Contexto histórico amplo; não substitui indicadores atuais de saúde, educação ou infraestrutura.',
+              es: 'Contexto histórico amplio; no reemplaza indicadores actuales de salud, educación o infraestructura.',
+              en: 'Broad historical context; it does not replace current health, education, or infrastructure indicators.',
+            ),
+          ),
+          const SizedBox(height: 8),
+          _CoverageNotice(
+            icon: Icons.fact_check_outlined,
+            text: _cityDetailLocalizedText(
+              context,
+              pt: 'Saúde, educação e internet ainda não têm indicadores comparáveis e verificados neste conjunto de dados. Eles não são inferidos a partir do IDHM.',
+              es: 'Salud, educación e internet todavía no tienen indicadores comparables y verificados en este conjunto de datos. No se infieren a partir del IDHM.',
+              en: 'Health, education, and internet do not yet have comparable verified indicators in this dataset. They are not inferred from HDI.',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MobilityAndConnectionsCard extends StatelessWidget {
+  const _MobilityAndConnectionsCard({
+    required this.city,
+    required this.insights,
+    required this.budget,
+    required this.onOpenMap,
+  });
+
+  final City city;
+  final List<CityInsightEntity> insights;
+  final CityBudgetSnapshot? budget;
+  final VoidCallback onOpenMap;
+
+  @override
+  Widget build(BuildContext context) {
+    final airport = AirportDatabase.forCityName(city.name, city.countryCode);
+    final airportDistance = airport == null
+        ? null
+        : const Distance().as(
+            LengthUnit.Kilometer,
+            LatLng(city.latitude, city.longitude),
+            LatLng(airport.latitude, airport.longitude),
+          );
+    final mobilityInsights = insights.where(
+      (item) =>
+          item.theme == CityInsightTheme.localRoutine ||
+          item.theme == CityInsightTheme.neighborhoods,
+    );
+    final mobilityText = mobilityInsights.isEmpty
+        ? _cityDetailLocalizedText(
+            context,
+            pt: 'A forma urbana e as distâncias entre regiões devem ser lidas junto do mapa e do transporte local.',
+            es: 'La forma urbana y las distancias entre zonas deben leerse junto con el mapa y el transporte local.',
+            en: 'Urban form and distances between areas should be read alongside the map and local transport.',
+          )
+        : _compactInsightCopy(
+            mobilityInsights.first.shortText.isNotEmpty
+                ? mobilityInsights.first.shortText
+                : mobilityInsights.first.content,
+            maxSentences: 2,
+          );
+    return FrostedPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _cityDetailLocalizedText(
+              context,
+              pt: 'Mobilidade e conexões',
+              es: 'Movilidad y conexiones',
+              en: 'Mobility and connections',
+            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            mobilityText,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 10),
+          _DetailFactRow(
+            icon: Icons.flight_outlined,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Aeroporto da cidade',
+              es: 'Aeropuerto de la ciudad',
+              en: 'City airport',
+            ),
+            value: airport == null
+                ? _cityDetailLocalizedText(
+                    context,
+                    pt: 'Sem aeroporto vinculado',
+                    es: 'Sin aeropuerto vinculado',
+                    en: 'No linked airport',
+                  )
+                : '${airport.name} (${airport.iataCode})',
+            supporting: airportDistance == null
+                ? null
+                : _cityDetailLocalizedText(
+                    context,
+                    pt: 'Aproximadamente ${airportDistance.round()} km do ponto central usado no mapa.',
+                    es: 'Aproximadamente a ${airportDistance.round()} km del punto central usado en el mapa.',
+                    en: 'Approximately ${airportDistance.round()} km from the central point used on the map.',
+                  ),
+          ),
+          _DetailFactRow(
+            icon: Icons.directions_bus_outlined,
+            label: _cityDetailLocalizedText(
+              context,
+              pt: 'Passe mensal de transporte',
+              es: 'Pase mensual de transporte',
+              en: 'Monthly transport pass',
+            ),
+            value: budget == null
+                ? _cityDetailLocalizedText(
+                    context,
+                    pt: 'Sem dado verificado',
+                    es: 'Sin dato verificado',
+                    en: 'No verified data',
+                  )
+                : _formatMoney(context, budget!.monthlyTransportPass),
+          ),
+          const SizedBox(height: 8),
+          _CoverageNotice(
+            icon: Icons.route_outlined,
+            text: _cityDetailLocalizedText(
+              context,
+              pt: 'A tela mostra conexões próprias da cidade. Voo desde a origem do usuário não entra aqui. Rodoviária e rotas diretas só serão exibidas quando houver fonte estruturada.',
+              es: 'La pantalla muestra conexiones propias de la ciudad. El vuelo desde el origen del usuario no aparece aquí. La terminal y las rutas directas solo se mostrarán con una fuente estructurada.',
+              en: 'This screen shows city-level connections. Flights from a user’s origin do not belong here. Bus terminals and direct routes are shown only when structured sources exist.',
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: onOpenMap,
+            icon: const Icon(Icons.map_outlined),
+            label: Text(
+              _cityDetailLocalizedText(
+                context,
+                pt: 'Abrir mapa da cidade',
+                es: 'Abrir mapa de la ciudad',
+                en: 'Open city map',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailFactRow extends StatelessWidget {
+  const _DetailFactRow({
     required this.icon,
     required this.label,
-    required this.presentation,
-    required this.onTap,
-    this.isFirst = false,
-    this.isLast = false,
+    required this.value,
+    this.supporting,
   });
 
   final IconData icon;
   final String label;
-  final dynamic presentation;
-  final VoidCallback onTap;
-  final bool isFirst;
-  final bool isLast;
+  final String value;
+  final String? supporting;
 
   @override
   Widget build(BuildContext context) {
-    final tint = presentation.tint as Color;
-    final headline = presentation.headline as String;
-
-    final topRadius = isFirst ? const Radius.circular(16) : Radius.zero;
-    final bottomRadius = isLast ? const Radius.circular(16) : Radius.zero;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.only(
-          topLeft: topRadius,
-          topRight: topRadius,
-          bottomLeft: bottomRadius,
-          bottomRight: bottomRadius,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: tint.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: tint, size: 18),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 9),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 19, color: AppColors.primary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
                   label,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              Text(
-                headline,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: tint,
-                  fontWeight: FontWeight.w700,
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    height: 1.35,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 16,
-                color: AppColors.textSoftFor(context),
-              ),
-            ],
+                if (supporting?.trim().isNotEmpty == true) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    supporting!,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
+
+class _CoverageNotice extends StatelessWidget {
+  const _CoverageNotice({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.13)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 17, color: AppColors.primary),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Block 3: Category List ───────────────────────────────────────────────────
 
 class _ArrivalViabilityCard extends StatelessWidget {
   const _ArrivalViabilityCard({
@@ -4479,125 +4204,6 @@ class _ArrivalViabilityCard extends StatelessWidget {
   }
 }
 
-class _FlightBurdenCard extends StatelessWidget {
-  const _FlightBurdenCard({
-    required this.routeInsight,
-    required this.budget,
-    required this.preferredCountryId,
-  });
-
-  final TravelRouteInsight routeInsight;
-  final CityBudgetSnapshot? budget;
-  final String? preferredCountryId;
-
-  @override
-  Widget build(BuildContext context) {
-    final routeRange = _usdRange(
-      context,
-      routeInsight.lowUsdMin,
-      routeInsight.lowUsdMax,
-    );
-    final pressure = FlightRoutePriceInsightService.classifyPressure(
-      route: routeInsight,
-      baseArrivalBudgetBrl: budget?.fairLivingTotal,
-    );
-    final (headline, tint, supporting) = switch (pressure.label) {
-      'high' => (
-        context.l10n.cityDetailFlightBurdenPressureHigh(),
-        AppColors.danger,
-        context.l10n.cityDetailFlightBurdenPressureHighBody(),
-      ),
-      'medium' => (
-        context.l10n.cityDetailFlightBurdenPressureMedium(),
-        AppColors.warning,
-        context.l10n.cityDetailFlightBurdenPressureMediumBody(),
-      ),
-      _ => (
-        context.l10n.cityDetailFlightBurdenPressureLow(),
-        AppColors.success,
-        context.l10n.cityDetailFlightBurdenPressureLowBody(),
-      ),
-    };
-
-    return FrostedPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  context.l10n.cityDetailFlightBurdenTitle(),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                ),
-              ),
-              TextButton(
-                onPressed: () => _showInsightSheet(
-                  context,
-                  title: context.l10n.cityDetailFlightBurdenTitle(),
-                  summary: context.l10n.cityDetailFlightBurdenBody(),
-                ),
-                child: Text(_detailActionLabel(context)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: _ArrivalInfoTile(
-                    icon: Icons.flight_takeoff_rounded,
-                    label: context.l10n.cityDetailFlightBurdenRangeLabel(),
-                    value: routeRange,
-                    tint: AppColors.primary,
-                    supporting: context.l10n
-                        .cityDetailFlightBurdenRangeSupporting(
-                          routeInsight.originIata,
-                          routeInsight.destIata,
-                        ),
-                    basis: context.l10n.cityDetailFlightBurdenPressureBasis(
-                      routeRange,
-                      '${routeInsight.originIata} -> ${routeInsight.destIata}',
-                    ),
-                    source: context.l10n.cityDetailFlightBurdenSource(),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _ArrivalInfoTile(
-                    icon: Icons.compare_arrows_rounded,
-                    label: context.l10n.cityDetailFlightBurdenPressureLabel(),
-                    value: headline,
-                    tint: tint,
-                    supporting: supporting,
-                    basis: context.l10n.cityDetailFlightBurdenPressureBasis(
-                      routeRange,
-                      '${routeInsight.originIata} -> ${routeInsight.destIata}',
-                    ),
-                    source: context.l10n.cityDetailFlightBurdenSource(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _usdRange(BuildContext context, int min, int max) {
-    return MultiCurrencyAmount.formatRangeFromUsd(
-      context: context,
-      minUsd: min,
-      maxUsd: max,
-    );
-  }
-}
-
 class _ArrivalInfoTile extends StatelessWidget {
   const _ArrivalInfoTile({
     required this.icon,
@@ -4897,9 +4503,9 @@ class _SecondaryActionsRow extends StatelessWidget {
           child: Text(
             _cityDetailLocalizedText(
               context,
-              pt: 'Acesso rápido',
-              es: 'Acceso rápido',
-              en: 'Quick access',
+              pt: 'Explore por tema',
+              es: 'Explora por tema',
+              en: 'Explore by topic',
             ),
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: AppColors.textSoftFor(context),
@@ -4908,7 +4514,7 @@ class _SecondaryActionsRow extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 40,
+          height: 48,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: actions.length,
@@ -4925,6 +4531,63 @@ class _SecondaryActionsRow extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class _PinnedSectionNavDelegate extends SliverPersistentHeaderDelegate {
+  const _PinnedSectionNavDelegate({
+    required this.actions,
+    required this.horizontalPadding,
+  });
+
+  final List<_DetailQuickAction> actions;
+  final double horizontalPadding;
+
+  @override
+  double get minExtent => 84;
+
+  @override
+  double get maxExtent => 84;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.backgroundFor(context).withValues(alpha: 0.97),
+        border: Border(bottom: BorderSide(color: AppColors.borderFor(context))),
+        boxShadow: overlapsContent
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
+                ),
+              ]
+            : const [],
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          horizontalPadding,
+          6,
+          horizontalPadding,
+          4,
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1160),
+          child: _SecondaryActionsRow(actions: actions),
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _PinnedSectionNavDelegate oldDelegate) {
+    return oldDelegate.actions != actions ||
+        oldDelegate.horizontalPadding != horizontalPadding;
   }
 }
 
@@ -5099,340 +4762,273 @@ class _DataTransparencyCard extends StatelessWidget {
   }
 }
 
-class _DecisionSnapshotPanel extends StatelessWidget {
-  const _DecisionSnapshotPanel({
-    required this.city,
-    this.planContext,
-    this.plan,
-    this.budget,
-  });
+class _CityOverviewPanel extends StatelessWidget {
+  const _CityOverviewPanel({required this.city, required this.strengths});
 
   final City city;
-  final _PlanCityContext? planContext;
-  final MigrationPlan? plan;
-  final CityBudgetSnapshot? budget;
+  final List<CityStrengthSignal> strengths;
 
   @override
   Widget build(BuildContext context) {
     final verdict = _buildVerdict(context);
-    final bestFor = planContext?.focusLabel ?? _bestForLabel(context, city);
-    final reasons = (planContext?.reasons ?? city.recommendationReasons)
-        .map(context.l10n.recommendationReasonLabel)
-        .toSet()
-        .take(3)
-        .toList(growable: false);
     final watchouts = _buildWatchouts(context);
+    final location = city.regionName?.trim().isNotEmpty == true
+        ? '${city.stateCode} · ${city.regionName!.trim()}'
+        : '${city.stateName} · ${city.countryCode}';
 
-    return FrostedPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: verdict.tint.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: verdict.tint.withValues(alpha: 0.18)),
+    return Semantics(
+      container: true,
+      label: verdict.title,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.heroStart,
+                Color(0xFF123B6D),
+                Color(0xFF0B6A8A),
+              ],
+              stops: [0, 0.58, 1],
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0A4B78).withValues(alpha: 0.24),
+                blurRadius: 34,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              const Positioned(
+                top: -88,
+                right: -56,
+                child: _OverviewHeroGlow(size: 220, color: Color(0xFF67D6F5)),
+              ),
+              const Positioned(
+                bottom: -120,
+                left: -72,
+                child: _OverviewHeroGlow(size: 250, color: Color(0xFF587CFF)),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: verdict.tint.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(verdict.icon, color: verdict.tint, size: 18),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.16),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                verdict.icon,
+                                size: 14,
+                                color: const Color(0xFF8DE4FF),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                _cityDetailLocalizedText(
+                                  context,
+                                  pt: 'VISÃO GERAL',
+                                  es: 'VISTA GENERAL',
+                                  en: 'CITY OVERVIEW',
+                                ),
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.8,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Spacer(),
+                        Flexible(
+                          child: Text(
+                            location,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.68),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
+                    const SizedBox(height: 22),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final overview = _OverviewHeroCopy(verdict: verdict);
+                        final map = _BrazilLocationMiniMap(city: city);
+
+                        if (constraints.maxWidth >= 680) {
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: overview),
+                              const SizedBox(width: 24),
+                              SizedBox(width: 210, height: 166, child: map),
+                            ],
+                          );
+                        }
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            overview,
+                            const SizedBox(height: 18),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 154,
+                              child: map,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    if (watchouts.isNotEmpty) ...[
+                      const SizedBox(height: 20),
+                      Divider(
+                        height: 1,
+                        color: Colors.white.withValues(alpha: 0.14),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            verdict.title,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w800),
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: AppColors.warning.withValues(alpha: 0.18),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.warning_amber_rounded,
+                              color: Color(0xFFFFCE54),
+                              size: 20,
+                            ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            verdict.summary,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: AppColors.textSoftFor(context),
-                                  height: 1.45,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _cityDetailLocalizedText(
+                                    context,
+                                    pt: 'Ponto de atenção',
+                                    es: 'Punto de atención',
+                                    en: 'Worth noting',
+                                  ),
+                                  style: Theme.of(context).textTheme.labelLarge
+                                      ?.copyWith(
+                                        color: const Color(0xFFFFCE54),
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                 ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  watchouts.first,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.82,
+                                        ),
+                                        height: 1.4,
+                                      ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  verdict.nextStep,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: verdict.tint,
-                    fontWeight: FontWeight.w700,
-                    height: 1.35,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            _cityDetailLocalizedText(
-              context,
-              pt: 'Por que esta cidade faz sentido',
-              es: 'Por qué esta ciudad tiene sentido',
-              en: 'Why this city makes sense',
-            ),
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            bestFor,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceMutedFor(context),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (final reason in reasons) ...[
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(top: 6),
-                        child: Icon(
-                          Icons.circle,
-                          size: 8,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          reason,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(height: 1.4),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (reason != reasons.last) const SizedBox(height: 10),
-                ],
-              ],
-            ),
-          ),
-          if (watchouts.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            Text(
-              _cityDetailLocalizedText(
-                context,
-                pt: 'Antes de decidir, valide isto',
-                es: 'Antes de decidir, valida esto',
-                en: 'Validate this before deciding',
               ),
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 10),
-            for (final (index, watchout) in watchouts.indexed) ...[
-              InsightCard(
-                title: index == 0
-                    ? context.l10n.cityDetailWatchoutTitle
-                    : _cityDetailLocalizedText(
-                        context,
-                        pt: 'Outro ponto a validar',
-                        es: 'Otro punto a validar',
-                        en: 'Also worth checking',
-                      ),
-                body: watchout,
-                icon: Icons.warning_amber_rounded,
-                tint: AppColors.warning,
-              ),
-              if (index < watchouts.length - 1) const SizedBox(height: 8),
             ],
-          ],
-        ],
+          ),
+        ),
       ),
     );
   }
 
   _DecisionVerdict _buildVerdict(BuildContext context) {
-    final weightedScore = _weightedDecisionScore();
-    final cityName = city.name;
-    final focusLabel = planContext?.focusLabel ?? _bestForLabel(context, city);
-    final arrivalFit = _arrivalFitLabel(context);
+    final population = NumberFormat.compact(
+      locale: Localizations.localeOf(context).toString(),
+    ).format(city.population);
+    final industries = city.topIndustries
+        .take(3)
+        .map(context.l10n.workAreaLabel)
+        .join(' · ');
+    final strongest = strengths.isEmpty ? null : strengths.first.title;
+    final region = city.regionName?.trim();
+    final location = region == null || region.isEmpty
+        ? '${city.stateName} · ${city.countryCode}'
+        : '${city.stateName} · $region';
 
-    if (weightedScore >= 72) {
-      return _DecisionVerdict(
-        title: _cityDetailLocalizedText(
-          context,
-          pt: 'Boa escolha para seguir',
-          es: 'Buena opción para avanzar',
-          en: 'Strong option to move forward',
-        ),
-        summary: _cityDetailLocalizedText(
-          context,
-          pt: '$cityName parece combinar bem com seu momento atual. O sinal mais forte aqui é $focusLabel, e a leitura de chegada hoje está em $arrivalFit.',
-          es: '$cityName parece encajar bien con tu momento actual. La señal más fuerte aquí es $focusLabel, y la lectura de llegada hoy está en $arrivalFit.',
-          en: '$cityName looks aligned with your current plan. The strongest signal here is $focusLabel, and the arrival read right now is $arrivalFit.',
-        ),
-        nextStep: _timelineNextStep(context),
-        tint: AppColors.success,
-        icon: Icons.check_circle_outline_rounded,
-      );
-    }
-    if (weightedScore >= 58) {
-      return _DecisionVerdict(
-        title: _cityDetailLocalizedText(
-          context,
-          pt: 'Vale comparar com calma',
-          es: 'Vale compararla con calma',
-          en: 'Worth comparing carefully',
-        ),
-        summary: _cityDetailLocalizedText(
-          context,
-          pt: '$cityName tem sinais reais de encaixe, mas ainda pede validação prática antes de virar decisão. O melhor caminho é comparar custo, chegada e rotina com mais uma alternativa.',
-          es: '$cityName tiene señales reales de encaje, pero todavía pide validación práctica antes de convertirse en decisión. El mejor camino es comparar costo, llegada y rutina con otra alternativa.',
-          en: '$cityName shows real fit signals, but it still needs practical validation before becoming the decision. The best next move is to compare cost, arrival, and routine against another option.',
-        ),
-        nextStep: _timelineNextStep(context),
-        tint: AppColors.warning,
-        icon: Icons.balance_rounded,
-      );
-    }
     return _DecisionVerdict(
       title: _cityDetailLocalizedText(
         context,
-        pt: 'Precisa de validação extra',
-        es: 'Necesita validación extra',
-        en: 'Needs extra validation',
+        pt: '${city.name} em resumo',
+        es: '${city.name} en resumen',
+        en: '${city.name} at a glance',
       ),
       summary: _cityDetailLocalizedText(
         context,
-        pt: '$cityName ainda parece uma aposta mais difícil para o seu cenário. O problema não é um único dado, e sim o conjunto entre chegada, adaptação e custo.',
-        es: '$cityName todavía parece una apuesta más difícil para tu escenario. El problema no es un único dato, sino el conjunto entre llegada, adaptación y costo.',
-        en: '$cityName still looks like a tougher bet for your current setup. The issue is not one isolated metric, but the combined weight of arrival, adaptation, and cost.',
+        pt: 'Cidade de aproximadamente $population habitantes em $location. Esta página reúne uma leitura geral de custo, moradia, trabalho, rotina e infraestrutura.',
+        es: 'Ciudad de aproximadamente $population habitantes en $location. Esta página reúne una lectura general de costo, vivienda, trabajo, rutina e infraestructura.',
+        en: 'A city of roughly $population people in $location. This page brings together a general view of cost, housing, work, daily life, and infrastructure.',
       ),
-      nextStep: _timelineNextStep(context),
-      tint: AppColors.danger,
-      icon: Icons.error_outline_rounded,
+      nextStep: strongest != null
+          ? _cityDetailLocalizedText(
+              context,
+              pt: 'Destaque nos dados: $strongest.',
+              es: 'Aspecto destacado en los datos: $strongest.',
+              en: 'A standout in the available data: $strongest.',
+            )
+          : industries.isEmpty
+          ? _cityDetailLocalizedText(
+              context,
+              pt: 'Os indicadores abaixo são referências da cidade, não uma recomendação pessoal.',
+              es: 'Los indicadores de abajo son referencias de la ciudad, no una recomendación personal.',
+              en: 'The indicators below describe the city; they are not a personal recommendation.',
+            )
+          : _cityDetailLocalizedText(
+              context,
+              pt: 'Setores em destaque: $industries.',
+              es: 'Sectores destacados: $industries.',
+              en: 'Key sectors: $industries.',
+            ),
+      icon: Icons.location_city_outlined,
     );
-  }
-
-  double _weightedDecisionScore() {
-    final scoreMap = <String, int>{
-      'low_cost': city.movaroScores.economical,
-      'safety': city.safetyScore,
-      'job_opportunities': city.movaroScores.workOpportunity,
-      'community': city.argentinaPopularityScore,
-      'quality_life': ((city.idhmScore * 100).round() + city.safetyScore) ~/ 2,
-      'warm_climate': city.movaroScores.economical,
-    };
-
-    final selected =
-        plan?.selectedPriorities
-            .where((value) => scoreMap.containsKey(value))
-            .toList(growable: false) ??
-        const <String>[];
-    if (selected.isNotEmpty) {
-      final total = selected
-          .map((value) => scoreMap[value]!)
-          .fold<int>(0, (sum, value) => sum + value);
-      return total / selected.length;
-    }
-
-    final baseline = <int>[
-      city.movaroScores.economical,
-      city.rentScore,
-      city.safetyScore,
-      city.movaroScores.workOpportunity,
-      city.movaroScores.languageAdaptation,
-    ];
-    return baseline.fold<int>(0, (sum, value) => sum + value) / baseline.length;
-  }
-
-  String _arrivalFitLabel(BuildContext context) {
-    final base =
-        ((city.rentScore +
-                    city.movaroScores.languageAdaptation +
-                    city.safetyScore) /
-                3)
-            .round();
-    if (base >= 68) {
-      return _cityDetailLocalizedText(
-        context,
-        pt: 'baixa pressão',
-        es: 'baja presión',
-        en: 'lower pressure',
-      );
-    }
-    if (base >= 54) {
-      return _cityDetailLocalizedText(
-        context,
-        pt: 'pressão média',
-        es: 'presión media',
-        en: 'medium pressure',
-      );
-    }
-    return _cityDetailLocalizedText(
-      context,
-      pt: 'pressão alta',
-      es: 'presión alta',
-      en: 'high pressure',
-    );
-  }
-
-  String _timelineNextStep(BuildContext context) {
-    return switch (plan?.timeline) {
-      'in_0_3m' => _cityDetailLocalizedText(
-        context,
-        pt: 'Se você pretende chegar logo, foque primeiro em reserva de entrada, moradia temporária e custo real do primeiro mês.',
-        es: 'Si planeas llegar pronto, enfócate primero en reserva de entrada, vivienda temporal y costo real del primer mes.',
-        en: 'If you plan to arrive soon, focus first on entry reserve, temporary housing, and the real cost of month one.',
-      ),
-      'in_3_6m' || 'in_6_12m' => _cityDetailLocalizedText(
-        context,
-        pt: 'Você ainda tem tempo para validar rotina, bairro, custo e passagem sem decidir no impulso.',
-        es: 'Todavía tienes tiempo para validar rutina, barrio, costo y vuelo sin decidir por impulso.',
-        en: 'You still have time to validate routine, neighborhood, cost, and flight without deciding on impulse.',
-      ),
-      _ => _cityDetailLocalizedText(
-        context,
-        pt: 'Trate esta página como filtro: compare com outra cidade antes de transformar curiosidade em plano.',
-        es: 'Toma esta página como filtro: compárala con otra ciudad antes de transformar curiosidad en plan.',
-        en: 'Treat this page as a filter: compare it with another city before turning curiosity into a plan.',
-      ),
-    };
   }
 
   List<String> _buildWatchouts(BuildContext context) {
     final items = <String>[
-      if (planContext != null) planContext!.watchout,
       defaultWatchoutText(context, city),
       if (city.rentScore < 60)
         CityHousingViabilityPresenter.resolve(
@@ -5460,19 +5056,6 @@ class _DecisionSnapshotPanel extends StatelessWidget {
     ];
 
     return items.toSet().take(3).toList(growable: false);
-  }
-
-  String _bestForLabel(BuildContext context, City city) {
-    final scores = <String, int>{
-      context.l10n.cityDetailCostLabel: city.movaroScores.economical,
-      context.l10n.cityDetailSafetyLabel: city.safetyScore,
-      context.l10n.cityDetailLanguageLabel:
-          city.movaroScores.languageAdaptation,
-      context.l10n.cityDetailWorkLabel: city.movaroScores.workOpportunity,
-    };
-    final sorted = scores.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    return sorted.first.key;
   }
 
   static String defaultWatchoutText(BuildContext context, City city) {
@@ -5512,119 +5095,267 @@ class _DecisionSnapshotPanel extends StatelessWidget {
   }
 }
 
+class _OverviewHeroGlow extends StatelessWidget {
+  const _OverviewHeroGlow({required this.size, required this.color});
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [color.withValues(alpha: 0.22), Colors.transparent],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OverviewHeroCopy extends StatelessWidget {
+  const _OverviewHeroCopy({required this.verdict});
+
+  final _DecisionVerdict verdict;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          verdict.title,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.8,
+            height: 1.05,
+          ),
+        ),
+        const SizedBox(height: 10),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: Text(
+            verdict.summary,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withValues(alpha: 0.76),
+              height: 1.5,
+            ),
+          ),
+        ),
+        const SizedBox(height: 18),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          decoration: BoxDecoration(
+            color: const Color(0xFF8DE4FF).withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: const Color(0xFF8DE4FF).withValues(alpha: 0.22),
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.auto_awesome_rounded,
+                color: Color(0xFF8DE4FF),
+                size: 16,
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  verdict.nextStep,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BrazilLocationMiniMap extends StatelessWidget {
+  const _BrazilLocationMiniMap({required this.city});
+
+  final City city;
+
+  @override
+  Widget build(BuildContext context) {
+    final cityPoint = LatLng(city.latitude, city.longitude);
+
+    return Semantics(
+      image: true,
+      label: _cityDetailLocalizedText(
+        context,
+        pt: 'Localização de ${city.name} no mapa do Brasil',
+        es: 'Ubicación de ${city.name} en el mapa de Brasil',
+        en: '${city.name} on the map of Brazil',
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            IgnorePointer(
+              child: FlutterMap(
+                options: MapOptions(
+                  initialCameraFit: CameraFit.bounds(
+                    bounds: LatLngBounds(
+                      const LatLng(-34.2, -74.0),
+                      const LatLng(5.5, -32.0),
+                    ),
+                    padding: const EdgeInsets.fromLTRB(10, 20, 10, 8),
+                    minZoom: 1.5,
+                    maxZoom: 4,
+                  ),
+                  minZoom: 1.5,
+                  maxZoom: 4,
+                  backgroundColor: const Color(0xFFDCEAF1),
+                  interactionOptions: const InteractionOptions(
+                    flags: InteractiveFlag.none,
+                  ),
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.movaro.app',
+                  ),
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: cityPoint,
+                        width: 38,
+                        height: 38,
+                        child: const _OverviewMapMarker(),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.34),
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        const Color(0xFF0A2540).withValues(alpha: 0.05),
+                        const Color(0xFF0A2540).withValues(alpha: 0.22),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 9,
+              left: 10,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xE60A2540),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  _cityDetailLocalizedText(
+                    context,
+                    pt: 'NO BRASIL',
+                    es: 'EN BRASIL',
+                    en: 'IN BRAZIL',
+                  ),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.7,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 6,
+              bottom: 5,
+              child: Text(
+                '© OpenStreetMap',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: const Color(0xFF102A43).withValues(alpha: 0.72),
+                  fontSize: 7,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OverviewMapMarker extends StatelessWidget {
+  const _OverviewMapMarker();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 22,
+        height: 22,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0071E3).withValues(alpha: 0.24),
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 2.5),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x660071E3),
+                blurRadius: 10,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _DecisionVerdict {
   const _DecisionVerdict({
     required this.title,
     required this.summary,
     required this.nextStep,
-    required this.tint,
     required this.icon,
   });
 
   final String title;
   final String summary;
   final String nextStep;
-  final Color tint;
   final IconData icon;
-}
-
-class _CityNarrativeCard extends StatelessWidget {
-  const _CityNarrativeCard({
-    required this.city,
-    required this.plan,
-    required this.planContext,
-    required this.insights,
-    required this.arrivalStory,
-  });
-
-  final City city;
-  final MigrationPlan? plan;
-  final _PlanCityContext? planContext;
-  final List<CityInsightEntity> insights;
-  final CityDetailArrivalStory? arrivalStory;
-
-  @override
-  Widget build(BuildContext context) {
-    final narrative = _cityNarrative(
-      context,
-      city,
-      planContext,
-      insights,
-      arrivalStory,
-    );
-    final timeline = _timelineAdvice(context, plan, city);
-
-    return FrostedPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _cityDetailLocalizedText(
-              context,
-              pt: 'Como é viver aqui na prática',
-              es: 'Cómo es vivir aquí en la práctica',
-              en: 'What living here feels like',
-            ),
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            narrative.$1,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.45,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            narrative.$2,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(height: 1.45),
-          ),
-          const SizedBox(height: 14),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: timeline.$2.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: timeline.$2.withValues(alpha: 0.16)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.timeline_rounded, size: 18, color: timeline.$2),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        timeline.$1,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: timeline.$2,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  timeline.$3,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(height: 1.45),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _ClimateSummaryCard extends StatelessWidget {
@@ -5684,80 +5415,6 @@ class _ClimateSummaryCard extends StatelessWidget {
   }
 }
 
-class _PeopleLikeYouCard extends StatelessWidget {
-  const _PeopleLikeYouCard({required this.city, required this.socialProof});
-
-  final City city;
-  final CityDetailSocialProof? socialProof;
-
-  @override
-  Widget build(BuildContext context) {
-    final read = _peopleLikeYouRead(context, city, socialProof);
-
-    return FrostedPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _cityDetailLocalizedText(
-              context,
-              pt: 'Sinal de adaptação para pessoas como você',
-              es: 'Señal de adaptación para personas como tú',
-              en: 'Adaptation signal for people like you',
-            ),
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            read.$1,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.45,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: read.$2.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: read.$2.withValues(alpha: 0.16)),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.people_alt_outlined, size: 18, color: read.$2),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    read.$3,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(height: 1.45),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (read.$4.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final chip in read.$4)
-                  _InsightPill(icon: Icons.check_circle_outline, label: chip),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
 class _NeighborhoodGuidanceCard extends StatelessWidget {
   const _NeighborhoodGuidanceCard({
     required this.city,
@@ -5783,6 +5440,8 @@ class _NeighborhoodGuidanceCard extends StatelessWidget {
       arrivalStory,
       socialProof,
     );
+    final apiPlaces = arrivalStory?.neighborhoods.take(4).toList() ?? const [];
+    final explorePlaces = places.take(4).toList(growable: false);
 
     return FrostedPanel(
       child: Column(
@@ -5791,9 +5450,9 @@ class _NeighborhoodGuidanceCard extends StatelessWidget {
           Text(
             _cityDetailLocalizedText(
               context,
-              pt: 'Por onde começar a procurar bairro',
-              es: 'Por dónde empezar a buscar barrio',
-              en: 'Where to start looking for areas',
+              pt: 'Bairros e regiões',
+              es: 'Barrios y zonas',
+              en: 'Areas and neighborhoods',
             ),
             style: Theme.of(
               context,
@@ -5808,23 +5467,42 @@ class _NeighborhoodGuidanceCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          if (guidance.recommended.isNotEmpty) ...[
+          if (apiPlaces.isNotEmpty || explorePlaces.isNotEmpty) ...[
             _AreaLabel(
               title: _cityDetailLocalizedText(
                 context,
-                pt: 'Bons pontos de partida',
-                es: 'Buenas zonas para empezar',
-                en: 'Good starting areas',
+                pt: 'Áreas mapeadas',
+                es: 'Zonas mapeadas',
+                en: 'Mapped areas',
               ),
             ),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final item in guidance.recommended)
-                  _InsightPill(icon: Icons.place_outlined, label: item),
+            if (apiPlaces.isNotEmpty)
+              for (final place in apiPlaces) ...[
+                _NeighborhoodDetailTile(
+                  name: _formatNeighborhoodPlace(place),
+                  description: place.shortText,
+                  source: place.source,
+                ),
+                const SizedBox(height: 8),
+              ]
+            else
+              for (final place in explorePlaces) ...[
+                _NeighborhoodDetailTile(
+                  name: _formatExplorePlace(place),
+                  description: place.shortText,
+                  source: place.source,
+                ),
+                const SizedBox(height: 8),
               ],
+            _CoverageNotice(
+              icon: Icons.home_work_outlined,
+              text: _cityDetailLocalizedText(
+                context,
+                pt: 'Faixa de aluguel, tempo de deslocamento e cobertura de transporte por bairro ainda não têm dados comparáveis verificados; por isso, não são estimados nesta lista.',
+                es: 'El alquiler, el tiempo de viaje y la cobertura de transporte por barrio aún no tienen datos comparables verificados; por eso no se estiman en esta lista.',
+                en: 'Area-level rent, commute time, and transit coverage do not yet have comparable verified data, so they are not estimated here.',
+              ),
             ),
           ],
           if (guidance.caution != null) ...[
@@ -5866,25 +5544,78 @@ class _NeighborhoodGuidanceCard extends StatelessWidget {
   }
 }
 
-class _InlineComparisonCard extends StatelessWidget {
-  const _InlineComparisonCard({
-    required this.city,
-    required this.plan,
-    required this.alternatives,
-    required this.comparison,
-    required this.onCompare,
+class _NeighborhoodDetailTile extends StatelessWidget {
+  const _NeighborhoodDetailTile({
+    required this.name,
+    required this.description,
+    required this.source,
   });
 
+  final String name;
+  final String description;
+  final String source;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.045),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.place_outlined, size: 19, color: AppColors.primary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                ),
+                if (description.trim().isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+                if (source.trim().isNotEmpty) ...[
+                  const SizedBox(height: 5),
+                  Text(
+                    source,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.textSoftFor(context),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InlineComparisonCard extends StatelessWidget {
+  const _InlineComparisonCard({required this.city, required this.onCompare});
+
   final City city;
-  final MigrationPlan? plan;
-  final List<City> alternatives;
-  final CityDetailComparison? comparison;
   final VoidCallback onCompare;
 
   @override
   Widget build(BuildContext context) {
-    final read = _comparisonRead(context, city, alternatives, plan, comparison);
-
     return FrostedPanel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -5892,9 +5623,9 @@ class _InlineComparisonCard extends StatelessWidget {
           Text(
             _cityDetailLocalizedText(
               context,
-              pt: 'Como esta cidade se compara às suas alternativas',
-              es: 'Cómo esta ciudad se compara con tus alternativas',
-              en: 'How this city compares with your alternatives',
+              pt: 'Quer colocar os dados lado a lado?',
+              es: '¿Quieres ver los datos lado a lado?',
+              en: 'Want to see the data side by side?',
             ),
             style: Theme.of(
               context,
@@ -5902,49 +5633,15 @@ class _InlineComparisonCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            read.$1,
+            _cityDetailLocalizedText(
+              context,
+              pt: 'Compare ${city.name} com qualquer outra cidade. Custo, moradia, trabalho e qualidade de vida serão mostrados com os mesmos critérios.',
+              es: 'Compara ${city.name} con cualquier otra ciudad. Costo, vivienda, trabajo y calidad de vida se mostrarán con los mismos criterios.',
+              en: 'Compare ${city.name} with any other city. Cost, housing, work, and quality of life will use the same criteria.',
+            ),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSoftFor(context),
               height: 1.45,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final cityName in alternatives.map((item) => item.name))
-                _InsightPill(
-                  icon: Icons.compare_arrows_rounded,
-                  label: cityName,
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceMutedFor(context),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  read.$2,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  read.$3,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(height: 1.45),
-                ),
-              ],
             ),
           ),
           const SizedBox(height: 12),
@@ -6028,7 +5725,6 @@ class _NeighborhoodGuidance {
 (String, String) _cityNarrative(
   BuildContext context,
   City city,
-  _PlanCityContext? planContext,
   List<CityInsightEntity> insights,
   CityDetailArrivalStory? arrivalStory,
 ) {
@@ -6055,9 +5751,9 @@ class _NeighborhoodGuidance {
       ),
       _cityDetailLocalizedText(
         context,
-        pt: 'Use custo, primeiro mês e comparação como base até surgirem sinais editoriais mais específicos vindos da API.',
-        es: 'Usa costo, primer mes y comparación como base hasta que aparezcan señales editoriales más específicas desde la API.',
-        en: 'Use cost, first month, and comparison as your base until the API provides more specific editorial signals.',
+        pt: 'Os blocos de custo, bairros e indicadores continuam disponíveis como referências objetivas da cidade.',
+        es: 'Los bloques de costo, barrios e indicadores siguen disponibles como referencias objetivas de la ciudad.',
+        en: 'Cost, areas, and indicator sections remain available as objective city references.',
       ),
     );
   }
@@ -6096,9 +5792,6 @@ class _NeighborhoodGuidance {
     );
   }
 
-  final bestFor =
-      planContext?.focusLabel ??
-      _DecisionSnapshotPanel(city: city)._bestForLabel(context, city);
   final lifestyle = CityCoastalProfile.lifestyleKind(city);
   final lifestyleText = switch (lifestyle) {
     CityLifestyleKind.coastal => _cityDetailLocalizedText(
@@ -6129,108 +5822,39 @@ class _NeighborhoodGuidance {
 
   final practical = _cityDetailLocalizedText(
     context,
-    pt: '${city.name} funciona melhor para quem procura $bestFor e aceita $lifestyleText.',
-    es: '${city.name} funciona mejor para quien busca $bestFor y acepta $lifestyleText.',
-    en: '${city.name} works best for someone prioritizing $bestFor and comfortable with $lifestyleText.',
+    pt: 'A vida cotidiana em ${city.name} costuma ter $lifestyleText.',
+    es: 'La vida cotidiana en ${city.name} suele tener $lifestyleText.',
+    en: 'Everyday life in ${city.name} tends to have $lifestyleText.',
   );
 
   final tradeoff = switch (_lowestScoreKey(city)) {
     'housing' => _cityDetailLocalizedText(
       context,
-      pt: 'O principal atrito aparece na moradia: vale validar bairro, exigências de entrada e reserva antes de assumir aluguel fixo.',
-      es: 'La principal fricción aparece en vivienda: conviene validar barrio, requisitos de entrada y reserva antes de asumir un alquiler fijo.',
-      en: 'The main friction shows up in housing: validate area, move-in requirements, and reserve before committing to a long-term rental.',
+      pt: 'A moradia é o indicador que merece mais contexto: preço, disponibilidade e deslocamento mudam bastante entre bairros.',
+      es: 'La vivienda es el indicador que merece más contexto: precio, disponibilidad y desplazamiento cambian bastante entre barrios.',
+      en: 'Housing is the indicator needing the most context: price, availability, and commute vary widely by area.',
     ),
     'safety' => _cityDetailLocalizedText(
       context,
-      pt: 'O cuidado maior aqui é montar rotina e deslocamento com critério, porque a sensação de segurança pesa mais na adaptação do primeiro mês.',
-      es: 'El mayor cuidado aquí es montar rutina y desplazamiento con criterio, porque la sensación de seguridad pesa más en la adaptación del primer mes.',
-      en: 'The main caution here is building a deliberate routine and commute, because perceived safety weighs heavily in first-month adaptation.',
+      pt: 'O indicador de segurança é municipal e não representa igualmente todos os bairros, horários ou tipos de ocorrência.',
+      es: 'El indicador de seguridad es municipal y no representa por igual todos los barrios, horarios o tipos de hechos.',
+      en: 'The safety indicator is citywide and does not represent every area, time of day, or type of incident equally.',
     ),
     'language' => _cityDetailLocalizedText(
       context,
-      pt: 'A adaptação tende a depender mais de rede, linguagem e paciência prática do que de um encaixe automático.',
-      es: 'La adaptación tiende a depender más de red, lenguaje y paciencia práctica que de un encaje automático.',
-      en: 'Adaptation here depends more on network, language, and practical patience than on instant fit.',
+      pt: 'O português concentra trabalho, contratos e serviços; os índices de idioma são referências gerais, não garantias de adaptação.',
+      es: 'El portugués concentra trabajo, contratos y servicios; los índices de idioma son referencias generales, no garantías de adaptación.',
+      en: 'Portuguese dominates work, contracts, and services; language indexes are broad references, not guarantees of adaptation.',
     ),
     _ => _cityDetailLocalizedText(
       context,
-      pt: 'O ponto de atenção é gerar renda com ritmo: vale chegar com reserva e plano mais claro de trabalho ou clientes.',
-      es: 'El punto de atención es generar ingresos con ritmo: conviene llegar con reserva y un plan más claro de trabajo o clientes.',
-      en: 'The main concern is income pace: arrive with runway and a clearer job or client plan.',
+      pt: 'O mercado de trabalho precisa ser lido junto dos setores econômicos, salários e sazonalidade, não apenas por um score agregado.',
+      es: 'El mercado laboral debe leerse junto con los sectores económicos, salarios y estacionalidad, no solo con un puntaje agregado.',
+      en: 'The job market should be read alongside industries, salaries, and seasonality, not through an aggregate score alone.',
     ),
   };
 
   return (practical, tradeoff);
-}
-
-(String, Color, String) _timelineAdvice(
-  BuildContext context,
-  MigrationPlan? plan,
-  City city,
-) {
-  return switch (plan?.timeline) {
-    'in_0_3m' => (
-      _cityDetailLocalizedText(
-        context,
-        pt: 'Próximas semanas definem a qualidade da chegada',
-        es: 'Las próximas semanas definen la calidad de la llegada',
-        en: 'The next few weeks define arrival quality',
-      ),
-      AppColors.danger,
-      _cityDetailLocalizedText(
-        context,
-        pt: 'Se a mudança é em até 3 meses, ${city.name} pede três validações rápidas: custo do primeiro mês, moradia temporária e bairro de entrada. Não vale decidir só pela foto geral da cidade.',
-        es: 'Si la mudanza es en hasta 3 meses, ${city.name} pide tres validaciones rápidas: costo del primer mes, vivienda temporal y barrio de entrada. No conviene decidir solo por la foto general de la ciudad.',
-        en: 'If the move is within 3 months, ${city.name} needs three fast validations: first-month cost, temporary housing, and your landing area. Do not decide from the high-level picture alone.',
-      ),
-    ),
-    'in_3_6m' => (
-      _cityDetailLocalizedText(
-        context,
-        pt: 'Você ainda consegue testar sem pressa',
-        es: 'Todavía puedes validar sin correr',
-        en: 'You still have time to validate calmly',
-      ),
-      AppColors.warning,
-      _cityDetailLocalizedText(
-        context,
-        pt: 'Com 3 a 6 meses, o melhor uso desta fase é comparar ${city.name} com mais uma cidade, simular orçamento real e descobrir em quais bairros faz sentido começar.',
-        es: 'Con 3 a 6 meses, el mejor uso de esta fase es comparar ${city.name} con otra ciudad, simular presupuesto real y descubrir en qué barrios tiene sentido empezar.',
-        en: 'With 3 to 6 months, the best use of this phase is comparing ${city.name} with one more city, simulating a real budget, and understanding which areas make sense to start in.',
-      ),
-    ),
-    'in_6_12m' => (
-      _cityDetailLocalizedText(
-        context,
-        pt: 'Momento ideal para reduzir risco agora',
-        es: 'Momento ideal para reducir riesgo ahora',
-        en: 'Best moment to reduce risk early',
-      ),
-      AppColors.primary,
-      _cityDetailLocalizedText(
-        context,
-        pt: 'Com mais fôlego, use ${city.name} para montar um plano de entrada mais inteligente: trabalho, documentação e bairro podem ser validados antes de virar urgência.',
-        es: 'Con más margen, usa ${city.name} para armar un plan de entrada más inteligente: trabajo, documentación y barrio pueden validarse antes de volverse urgencia.',
-        en: 'With more runway, use ${city.name} to build a smarter landing plan: work, documents, and area choice can be validated before they become urgent.',
-      ),
-    ),
-    _ => (
-      _cityDetailLocalizedText(
-        context,
-        pt: 'Use esta leitura para filtrar antes de se apegar',
-        es: 'Usa esta lectura para filtrar antes de apegarte',
-        en: 'Use this read to filter before getting attached',
-      ),
-      AppColors.primary,
-      _cityDetailLocalizedText(
-        context,
-        pt: 'Sem data fechada, o melhor uso desta página é separar curiosidade de viabilidade. Se ${city.name} continuar forte depois de custo, rotina e bairros, aí sim vale levar adiante.',
-        es: 'Sin fecha cerrada, el mejor uso de esta página es separar curiosidad de viabilidad. Si ${city.name} sigue fuerte después de costo, rutina y barrios, recién ahí vale avanzar.',
-        en: 'Without a fixed date, the best use of this page is separating curiosity from viability. If ${city.name} stays strong after cost, routine, and area checks, then it is worth taking further.',
-      ),
-    ),
-  };
 }
 
 (String, String, String, String) _climateSummary(
@@ -6345,78 +5969,24 @@ class _NeighborhoodGuidance {
   return (summary, tempChip, windChip, seasonalWindow);
 }
 
-(String, Color, String, List<String>) _peopleLikeYouRead(
-  BuildContext context,
-  City city,
-  CityDetailSocialProof? socialProofPayload,
-) {
-  final popularity =
-      socialProofPayload?.argentinaPopularityScore ??
-      city.argentinaPopularityScore;
-  final tone = popularity >= 70
-      ? AppColors.success
-      : popularity >= 55
-      ? AppColors.warning
-      : AppColors.danger;
-  final headline = popularity >= 70
-      ? _cityDetailLocalizedText(
-          context,
-          pt: 'Entre argentinos, a cidade já desperta afinidade forte.',
-          es: 'Entre argentinos, la ciudad ya genera afinidad fuerte.',
-          en: 'Among Argentinians, this city already shows strong affinity.',
-        )
-      : popularity >= 55
-      ? _cityDetailLocalizedText(
-          context,
-          pt: 'Há curiosidade real, mas a adaptação depende mais de execução.',
-          es: 'Hay curiosidad real, pero la adaptación depende más de la ejecución.',
-          en: 'There is real interest, but adaptation depends more on execution.',
-        )
-      : _cityDetailLocalizedText(
-          context,
-          pt: 'O encaixe tende a ser menos automático para quem está chegando.',
-          es: 'El encaje tiende a ser menos automático para quien está llegando.',
-          en: 'Fit tends to be less automatic for newcomers here.',
-        );
+String _formatNeighborhoodPlace(CityDetailNeighborhoodPlace place) {
+  final values = <String?>[place.name, place.neighborhood, place.region];
+  final seen = <String>{};
+  return values
+      .whereType<String>()
+      .map((value) => value.trim())
+      .where((value) => value.isNotEmpty && seen.add(value.toLowerCase()))
+      .join(' · ');
+}
 
-  final opinion = socialProofPayload?.publicOpinion ?? city.publicOpinion;
-  final routineInsight = socialProofPayload?.routineInsight;
-  final socialProofText =
-      opinion != null &&
-          opinion.rating != null &&
-          opinion.userRatingCount != null
-      ? _cityDetailLocalizedText(
-          context,
-          pt: 'Além disso, a leitura pública de ${opinion.placeName ?? city.name} hoje está em ${opinion.rating!.toStringAsFixed(1)}/5 com ${opinion.userRatingCount} avaliações.',
-          es: 'Además, la lectura pública de ${opinion.placeName ?? city.name} hoy está en ${opinion.rating!.toStringAsFixed(1)}/5 con ${opinion.userRatingCount} reseñas.',
-          en: 'Public sentiment for ${opinion.placeName ?? city.name} currently sits at ${opinion.rating!.toStringAsFixed(1)}/5 across ${opinion.userRatingCount} reviews.',
-        )
-      : _cityDetailLocalizedText(
-          context,
-          pt: 'Use esse sinal como termômetro de adaptação, não como prova final.',
-          es: 'Usa esta señal como termómetro de adaptación, no como prueba final.',
-          en: 'Use this as an adaptation signal, not as final proof.',
-        );
-
-  final chips = <String>[
-    _cityDetailLocalizedText(
-      context,
-      pt: 'Afinidade argentina $popularity/100',
-      es: 'Afinidad argentina $popularity/100',
-      en: 'Argentine affinity $popularity/100',
-    ),
-    if (socialProofPayload?.socialSignals.isNotEmpty == true)
-      for (final signal in socialProofPayload!.socialSignals.take(2))
-        '${signal.label} ${signal.value}${signal.unit}',
-    if (routineInsight != null && routineInsight.shortText.trim().isNotEmpty)
-      _compactInsightCopy(routineInsight.shortText, maxSentences: 1),
-    if (opinion?.positivePoints.isNotEmpty == true)
-      opinion!.positivePoints.first,
-    if (opinion?.criticalPoints.isNotEmpty == true)
-      opinion!.criticalPoints.first,
-  ];
-
-  return (headline, tone, socialProofText, chips);
+String _formatExplorePlace(CityInsightExplorePlaceEntity place) {
+  final values = <String?>[place.name, place.neighborhood, place.region];
+  final seen = <String>{};
+  return values
+      .whereType<String>()
+      .map((value) => value.trim())
+      .where((value) => value.isNotEmpty && seen.add(value.toLowerCase()))
+      .join(' · ');
 }
 
 _NeighborhoodGuidance _neighborhoodGuidance(
@@ -6446,12 +6016,7 @@ _NeighborhoodGuidance _neighborhoodGuidance(
 
   if (apiNeighborhoods.isNotEmpty) {
     final recommended = apiNeighborhoods
-        .map((place) {
-          final location = [place.neighborhood, place.region]
-              .where((value) => value != null && value.trim().isNotEmpty)
-              .join(' • ');
-          return location.isEmpty ? place.name : '${place.name} · $location';
-        })
+        .map(_formatNeighborhoodPlace)
         .toSet()
         .take(4)
         .toList(growable: false);
@@ -6502,12 +6067,7 @@ _NeighborhoodGuidance _neighborhoodGuidance(
 
   if (places.isNotEmpty) {
     final recommended = places
-        .map((place) {
-          final location = [place.neighborhood, place.region]
-              .where((value) => value != null && value.trim().isNotEmpty)
-              .join(' • ');
-          return location.isEmpty ? place.name : '${place.name} · $location';
-        })
+        .map(_formatExplorePlace)
         .toSet()
         .take(4)
         .toList(growable: false);
@@ -6575,185 +6135,6 @@ _NeighborhoodGuidance _neighborhoodGuidance(
     caution: neighborhoodInsight.id.isNotEmpty
         ? _compactInsightCopy(neighborhoodInsight.content, maxSentences: 2)
         : null,
-  );
-}
-
-(String, String, String) _comparisonRead(
-  BuildContext context,
-  City city,
-  List<City> alternatives,
-  MigrationPlan? plan,
-  CityDetailComparison? comparison,
-) {
-  if (alternatives.isEmpty) {
-    return ('', '', '');
-  }
-
-  if (comparison != null && comparison.metrics.isNotEmpty) {
-    final focus = plan?.selectedPriorities.isNotEmpty == true
-        ? context.l10n.priorityLabel(plan!.selectedPriorities.first)
-        : null;
-    final strongest = comparison.metrics.firstWhere(
-      (metric) => metric.primaryIsBest,
-      orElse: () => comparison.metrics.first,
-    );
-    final weakest = comparison.metrics.firstWhere(
-      (metric) => !metric.primaryIsBest,
-      orElse: () => comparison.metrics.last,
-    );
-    final comparedCities = comparison.compareTo
-        .map((item) => item.cityName)
-        .join(' · ');
-    final safetyMetric = comparison.metrics.where(
-      (item) => item.id == 'safety',
-    );
-    final safetyRead = safetyMetric.isEmpty
-        ? null
-        : switch (safetyMetric.first.primaryIsBest) {
-            true => _cityDetailLocalizedText(
-              context,
-              pt: 'Em segurança, ela fica acima das alternativas comparadas.',
-              es: 'En seguridad, queda por encima de las alternativas comparadas.',
-              en: 'On safety, it sits above the compared alternatives.',
-            ),
-            false => _cityDetailLocalizedText(
-              context,
-              pt: 'Em segurança, ela perde para pelo menos uma alternativa direta.',
-              es: 'En seguridad, pierde frente a al menos una alternativa directa.',
-              en: 'On safety, it trails at least one direct alternative.',
-            ),
-          };
-
-    return (
-      _cityDetailLocalizedText(
-        context,
-        pt: 'A comparação abaixo já vem estruturada da API para ${city.name} contra $comparedCities.',
-        es: 'La comparación de abajo ya viene estructurada desde la API para ${city.name} frente a $comparedCities.',
-        en: 'The comparison below already comes structured from the API for ${city.name} against $comparedCities.',
-      ),
-      _cityDetailLocalizedText(
-        context,
-        pt: strongest.primaryIsBest
-            ? '${city.name} ganha em ${strongest.label.toLowerCase()}.'
-            : '${city.name} não lidera claramente contra essas alternativas.',
-        es: strongest.primaryIsBest
-            ? '${city.name} gana en ${strongest.label.toLowerCase()}.'
-            : '${city.name} no lidera claramente frente a estas alternativas.',
-        en: strongest.primaryIsBest
-            ? '${city.name} wins on ${strongest.label.toLowerCase()}.'
-            : '${city.name} does not clearly lead against these alternatives.',
-      ),
-      _cityDetailLocalizedText(
-        context,
-        pt: 'Na prática, o maior ganho está em ${strongest.label.toLowerCase()}${focus == null ? '' : ' para quem prioriza $focus'}. O principal custo dessa escolha aparece em ${weakest.label.toLowerCase()}.${safetyRead == null ? '' : ' $safetyRead'}',
-        es: 'En la práctica, la mayor ventaja está en ${strongest.label.toLowerCase()}${focus == null ? '' : ' para quien prioriza $focus'}. El principal costo de esta elección aparece en ${weakest.label.toLowerCase()}.${safetyRead == null ? '' : ' $safetyRead'}',
-        en: 'In practice, the biggest edge is in ${strongest.label.toLowerCase()}${focus == null ? '' : ' for someone prioritizing $focus'}. The main cost of that choice shows up in ${weakest.label.toLowerCase()}.${safetyRead == null ? '' : ' $safetyRead'}',
-      ),
-    );
-  }
-
-  double avg(int Function(City city) selector) {
-    final total = alternatives.fold<int>(
-      0,
-      (sum, item) => sum + selector(item),
-    );
-    return total / alternatives.length;
-  }
-
-  final metrics = <String, double>{
-    _cityDetailLocalizedText(
-      context,
-      pt: 'custo de entrada',
-      es: 'costo de entrada',
-      en: 'entry cost',
-    ): city.rentScore - avg((item) => item.rentScore),
-    _cityDetailLocalizedText(
-      context,
-      pt: 'segurança',
-      es: 'seguridad',
-      en: 'safety',
-    ): city.safetyScore - avg((item) => item.safetyScore),
-    _cityDetailLocalizedText(
-      context,
-      pt: 'trabalho',
-      es: 'trabajo',
-      en: 'work',
-    ): city.movaroScores.workOpportunity -
-        avg((item) => item.movaroScores.workOpportunity),
-    _cityDetailLocalizedText(
-      context,
-      pt: 'adaptação',
-      es: 'adaptación',
-      en: 'adaptation',
-    ): city.movaroScores.languageAdaptation -
-        avg((item) => item.movaroScores.languageAdaptation),
-  };
-
-  final sorted = metrics.entries.toList()
-    ..sort((a, b) => b.value.abs().compareTo(a.value.abs()));
-  final strongest = sorted.firstWhere(
-    (entry) => entry.value >= 0,
-    orElse: () => sorted.first,
-  );
-  final weakest = sorted.firstWhere(
-    (entry) => entry.value < 0,
-    orElse: () => sorted.last,
-  );
-  final names = alternatives.map((item) => item.name).join(' · ');
-  final focus = plan?.selectedPriorities.isNotEmpty == true
-      ? context.l10n.priorityLabel(plan!.selectedPriorities.first)
-      : null;
-  final safetyDelta =
-      city.safetyScore -
-      (alternatives.fold<int>(0, (sum, item) => sum + item.safetyScore) /
-              alternatives.length)
-          .round();
-  final safetyRead = safetyDelta >= 6
-      ? _cityDetailLocalizedText(
-          context,
-          pt: 'Em segurança, ela fica acima das suas alternativas diretas.',
-          es: 'En seguridad, queda por encima de tus alternativas directas.',
-          en: 'On safety, it sits above your direct alternatives.',
-        )
-      : safetyDelta <= -6
-      ? _cityDetailLocalizedText(
-          context,
-          pt: 'Em segurança, ela fica abaixo das suas alternativas diretas.',
-          es: 'En seguridad, queda por debajo de tus alternativas directas.',
-          en: 'On safety, it sits below your direct alternatives.',
-        )
-      : _cityDetailLocalizedText(
-          context,
-          pt: 'Em segurança, ela está na mesma faixa das suas alternativas.',
-          es: 'En seguridad, está en la misma franja que tus alternativas.',
-          en: 'On safety, it sits in the same band as your alternatives.',
-        );
-
-  return (
-    _cityDetailLocalizedText(
-      context,
-      pt: 'Você não precisa sair desta página para entender o trade-off central contra $names.',
-      es: 'No necesitas salir de esta página para entender el trade-off central frente a $names.',
-      en: 'You do not need to leave this page to understand the key trade-off versus $names.',
-    ),
-    _cityDetailLocalizedText(
-      context,
-      pt: strongest.value >= 0
-          ? '${city.name} ganha em ${strongest.key}.'
-          : '${city.name} não lidera claramente contra essas alternativas.',
-      es: strongest.value >= 0
-          ? '${city.name} gana en ${strongest.key}.'
-          : '${city.name} no lidera claramente frente a estas alternativas.',
-      en: strongest.value >= 0
-          ? '${city.name} wins on ${strongest.key}.'
-          : '${city.name} does not clearly lead against these alternatives.',
-    ),
-    _cityDetailLocalizedText(
-      context,
-      pt: 'Na prática, o maior ganho está em ${strongest.key}${focus == null ? '' : ' para quem prioriza $focus'}. O principal custo dessa escolha aparece em ${weakest.key}. $safetyRead',
-      es: 'En la práctica, la mayor ventaja está en ${strongest.key}${focus == null ? '' : ' para quien prioriza $focus'}. El principal costo de esta elección aparece en ${weakest.key}. $safetyRead',
-      en: 'In practice, the biggest edge is in ${strongest.key}${focus == null ? '' : ' for someone prioritizing $focus'}. The main cost of that choice shows up in ${weakest.key}. $safetyRead',
-    ),
   );
 }
 
@@ -6846,138 +6227,6 @@ String _compactInsightCopy(String text, {int maxSentences = 2}) {
       .join(' ');
 }
 
-class _CityStrengthsPanel extends StatelessWidget {
-  const _CityStrengthsPanel({required this.city, required this.strengths});
-
-  final City city;
-  final List<CityStrengthSignal> strengths;
-
-  @override
-  Widget build(BuildContext context) {
-    if (strengths.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return FrostedPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _cityDetailLocalizedText(
-              context,
-              pt: 'O que essa cidade entrega bem',
-              es: 'Lo que esta ciudad entrega bien',
-              en: 'What this city does well',
-            ),
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _cityDetailLocalizedText(
-              context,
-              pt: 'Os pontos que mais ajudam essa cidade a funcionar no dia a dia.',
-              es: 'Los puntos que más ayudan a que esta ciudad funcione en el día a día.',
-              en: 'The strongest signals helping this city work in everyday life.',
-            ),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 14),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final wide = constraints.maxWidth >= 860;
-              final itemWidth = wide
-                  ? (constraints.maxWidth - 16) / 2
-                  : constraints.maxWidth;
-              return Wrap(
-                spacing: 16,
-                runSpacing: 16,
-                children: [
-                  for (final signal in strengths)
-                    SizedBox(
-                      width: itemWidth,
-                      child: _StrengthSignalCard(signal: signal),
-                    ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StrengthSignalCard extends StatelessWidget {
-  const _StrengthSignalCard({required this.signal});
-
-  final CityStrengthSignal signal;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.success.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.success.withValues(alpha: 0.16)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.thumb_up_alt_outlined,
-                  size: 16,
-                  color: AppColors.success,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  signal.title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    height: 1.25,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            signal.supporting,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(height: 1.4),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            signal.sourceLabel,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSoftFor(context),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 String _cityDetailLocalizedText(
   BuildContext context, {
   required String pt,
@@ -7002,56 +6251,19 @@ String _cityMatchBandLabel(BuildContext context, double score) {
 }
 
 /// "Dá pra viver com o salário daqui?" — compact, always-on affordability
-/// verdict comparing a monthly net income against a typical monthly cost of
-/// living. Defaults to the city's local average salary and lets the user try
-/// their own income. Renders nothing when the city has no budget data.
-class _AffordabilityNote extends StatefulWidget {
+/// Neutral city-level comparison between local average salary and typical cost.
+class _AffordabilityNote extends StatelessWidget {
   const _AffordabilityNote({required this.city});
 
-  final City? city;
-
-  @override
-  State<_AffordabilityNote> createState() => _AffordabilityNoteState();
-}
-
-class _AffordabilityNoteState extends State<_AffordabilityNote> {
-  final TextEditingController _incomeController = TextEditingController();
-  int? _customIncome;
-
-  @override
-  void dispose() {
-    _incomeController.dispose();
-    super.dispose();
-  }
-
-  void _onIncomeChanged(BuildContext context, String value) {
-    final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
-    final parsed = int.tryParse(digits);
-    final amountInBrl = parsed == null
-        ? null
-        : MultiCurrencyAmount.convertToBrl(
-            amount: parsed,
-            sourceCurrencyCode: context.preferredCurrencyCode,
-            exchangeRates: ExchangeRatesScope.ratesOf(context),
-          );
-    setState(() {
-      _customIncome = amountInBrl != null && amountInBrl > 0
-          ? amountInBrl.round()
-          : null;
-    });
-  }
+  final City city;
 
   @override
   Widget build(BuildContext context) {
-    final city = widget.city;
-    if (city == null || !CityAffordabilityCheck.isAvailable(city)) {
+    if (!CityAffordabilityCheck.isAvailable(city)) {
       return const SizedBox.shrink();
     }
 
-    final income = _customIncome;
-    final result = income != null
-        ? CityAffordabilityCheck.forIncome(city, income)
-        : CityAffordabilityCheck.forLocalSalary(city);
+    final result = CityAffordabilityCheck.forLocalSalary(city);
     if (result == null) {
       return const SizedBox.shrink();
     }
@@ -7059,19 +6271,12 @@ class _AffordabilityNoteState extends State<_AffordabilityNote> {
     final amount = _formatMoney(context, result.gap.abs());
     final incomeLabel = _formatMoney(context, result.monthlyIncome);
 
-    final incomeLead = result.usesLocalAverageSalary
-        ? _cityDetailLocalizedText(
-            context,
-            pt: 'Com o salário médio local ($incomeLabel), ',
-            es: 'Con el salario promedio local ($incomeLabel), ',
-            en: 'On the local average salary ($incomeLabel), ',
-          )
-        : _cityDetailLocalizedText(
-            context,
-            pt: 'Com $incomeLabel por mês, ',
-            es: 'Con $incomeLabel por mes, ',
-            en: 'On $incomeLabel per month, ',
-          );
+    final incomeLead = _cityDetailLocalizedText(
+      context,
+      pt: 'Como referência da cidade, o salário médio local ($incomeLabel) ',
+      es: 'Como referencia de la ciudad, el salario promedio local ($incomeLabel) ',
+      en: 'As a city-level reference, the local average salary ($incomeLabel) ',
+    );
 
     // Neutral, reference-style comparison (not a verdict / not advice). The
     // color is just a visual cue; the wording stays descriptive.
@@ -7151,24 +6356,6 @@ class _AffordabilityNoteState extends State<_AffordabilityNote> {
             ],
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _incomeController,
-            keyboardType: TextInputType.number,
-            onChanged: (value) => _onIncomeChanged(context, value),
-            decoration: InputDecoration(
-              isDense: true,
-              prefixText:
-                  '${MultiCurrencyAmount.symbolFor(context.preferredCurrencyCode)} ',
-              labelText: _cityDetailLocalizedText(
-                context,
-                pt: 'Ver com o meu salário (por mês)',
-                es: 'Ver con mi sueldo (por mes)',
-                en: 'Try my own salary (per month)',
-              ),
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 12),
           const PracticalInfoDisclaimer(compact: true),
         ],
       ),
@@ -7206,16 +6393,6 @@ Color _salaryCoverageTint(CityBudgetSnapshot budget) {
     return AppColors.warning;
   }
   return AppColors.danger;
-}
-
-String _popularitySupporting(BuildContext context, int score) {
-  if (score >= 80) {
-    return context.l10n.citySnapshotPopularityHighSupporting;
-  }
-  if (score >= 60) {
-    return context.l10n.citySnapshotPopularityMediumSupporting;
-  }
-  return context.l10n.citySnapshotPopularityLowSupporting;
 }
 
 String _unemploymentHeadline(BuildContext context, double value) {

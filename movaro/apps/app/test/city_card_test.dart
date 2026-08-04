@@ -33,7 +33,6 @@ void main() {
             padding: const EdgeInsets.all(16),
             child: CityCard(
               city: _city,
-              highlightLabel: 'Entre las ciudades del catálogo actual',
               onTap: () {},
               citiesController: controller,
             ),
@@ -43,10 +42,13 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Base de datos amplia'), findsOneWidget);
-    expect(find.text('Medio'), findsOneWidget);
-    expect(find.text('Alta'), findsOneWidget);
-    expect(find.text('Moderada'), findsOneWidget);
+    expect(find.text('Curitiba'), findsOneWidget);
+    expect(find.text('Paraná · PR'), findsOneWidget);
+    expect(find.text('Costo mensual'), findsOneWidget);
+    expect(find.text('Alquiler'), findsOneWidget);
+    expect(find.text('Economía'), findsOneWidget);
+    expect(find.text('Base de datos amplia'), findsNothing);
+    expect(find.text('Portugués'), findsNothing);
     expect(find.textContaining('/100'), findsNothing);
     expect(tester.takeException(), isNull);
   });

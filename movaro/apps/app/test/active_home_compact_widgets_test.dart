@@ -37,12 +37,21 @@ void main() {
       isCompleted: false,
     ),
     GuideActionItem(
+      id: 'supporting_preparation_step',
+      title: 'Revisar detalhes da preparação',
+      shortDescription: 'Continue preparando a viagem',
+      type: GuideActionType.informative,
+      phase: GuidePhase.preparation,
+      orderIndex: 2,
+      isCompleted: false,
+    ),
+    GuideActionItem(
       id: 'item_1_2_housing_temporary',
       title: 'Planejar os primeiros dias',
       shortDescription: 'Organize a chegada',
       type: GuideActionType.informative,
       phase: GuidePhase.housing,
-      orderIndex: 2,
+      orderIndex: 3,
       isCompleted: false,
     ),
   ];

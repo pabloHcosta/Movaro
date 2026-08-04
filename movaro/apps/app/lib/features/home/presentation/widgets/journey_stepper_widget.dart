@@ -51,7 +51,10 @@ class JourneyStepperWidget extends StatelessWidget {
           (it) => it.dependencies.contains('item_2_1_cpf') && !it.isCompleted,
         )
         .length;
-    final nextPhase = focus.upcoming.firstOrNull?.phase;
+    final nextPhase = _nextPendingPhase(
+      currentPhase: currentPhase,
+      allItems: allItems,
+    );
     final progress = totalCount == 0 ? 0.0 : completedCount / totalCount;
 
     return Column(
@@ -223,6 +226,29 @@ class JourneyStepperWidget extends StatelessWidget {
     GuidePhase.work => Icons.work_outline_rounded,
     GuidePhase.arrival => Icons.home_rounded,
   };
+
+  static GuidePhase? _nextPendingPhase({
+    required GuidePhase currentPhase,
+    required List<GuideActionItem> allItems,
+  }) {
+    final currentIndex = GuidePhase.values.indexOf(currentPhase);
+
+    for (final phase in GuidePhase.values.skip(currentIndex + 1)) {
+      final hasPendingItem = allItems.any(
+        (item) =>
+            item.phase == phase &&
+            (!item.isCompleted ||
+                item.dismissReason == GuideDismissReason.later) &&
+            item.dismissReason != GuideDismissReason.notApplicable &&
+            !item.id.startsWith('questionnaire_'),
+      );
+      if (hasPendingItem) {
+        return phase;
+      }
+    }
+
+    return null;
+  }
 
   static String _phaseLabel(
     BuildContext context,
