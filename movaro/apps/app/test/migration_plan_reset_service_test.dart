@@ -130,4 +130,63 @@ void main() {
       isEmpty,
     );
   });
+
+  test('city change keeps documents and reopens city-specific work', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'movaro_city_transition_test',
+    );
+    addTearDown(() async {
+      if (directory.existsSync()) {
+        await directory.delete(recursive: true);
+      }
+    });
+    final progressStore = MigrationCopilotProgressStore(
+      directoryProvider: () async => directory,
+    );
+    final resetService = MigrationPlanResetService(
+      copilotProgressStore: progressStore,
+      eventSuggestionStore: GuideEventSuggestionStore(
+        directoryProvider: () async => directory,
+      ),
+      latestPlanStore: LatestMigrationPlanStore(
+        directoryProvider: () async => directory,
+      ),
+    );
+    const plan = MigrationPlan(
+      id: 'active-plan',
+      originCountry: 'argentina',
+      destinationCountry: 'brasil',
+      goal: 'remote_income',
+      timeline: 'in_3_6m',
+      steps: [],
+    );
+
+    await progressStore.write(
+      plan: plan,
+      readinessCompletedIds: const {'item_0_2_antecedentes', 'item_0_3_budget'},
+      documentCompletedIds: const {'item_2_1_cpf'},
+      arrivalCompletedIds: const {'item_3_2_aluguel_fixo'},
+      activeItemId: 'item_3_2_aluguel_fixo',
+      completedAtById: const {
+        'item_0_2_antecedentes': '2026-08-01T10:00:00Z',
+        'item_0_3_budget': '2026-08-02T10:00:00Z',
+        'item_2_1_cpf': '2026-08-03T10:00:00Z',
+      },
+    );
+
+    await resetService.retainTransferableProgressForCityChange(plan);
+    final result = await progressStore.read(plan);
+
+    expect(
+      result.getAllCompletedIds(),
+      containsAll({'item_0_2_antecedentes', 'item_2_1_cpf'}),
+    );
+    expect(result.getAllCompletedIds(), isNot(contains('item_0_3_budget')));
+    expect(
+      result.getAllCompletedIds(),
+      isNot(contains('item_3_2_aluguel_fixo')),
+    );
+    expect(result.activeItemId, isNull);
+    expect(result.completedAtById, isNot(contains('item_0_3_budget')));
+  });
 }

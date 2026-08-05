@@ -115,6 +115,33 @@ void main() {
       expect(requirements, contains('Declaração pessoal'));
     });
 
+    test(
+      'prepares the criminal-record decision flow without false urgency',
+      () {
+        final item = _item(
+          ArgentinaBrazilGuideDataSource.build(
+            _plan(goal: 'quality_of_life'),
+            localeCode: 'pt',
+          ),
+          'item_0_2_antecedentes',
+        );
+
+        expect(
+          item.requirements,
+          contains('DNI argentino para definir a rota online ou presencial'),
+        );
+        expect(
+          item.executionModes,
+          containsAll(<GuideExecutionMode>[
+            GuideExecutionMode.online,
+            GuideExecutionMode.inPerson,
+          ]),
+        );
+        expect(item.urgencySignal, contains('Emitir cedo demais'));
+        expect(item.urgencySignal, isNot(contains('Peça AGORA')));
+      },
+    );
+
     test('removes unsafe salary, health, tax, and rental claims', () {
       final items = ArgentinaBrazilGuideDataSource.build(
         _plan(goal: 'remote_work'),

@@ -120,6 +120,45 @@ void main() {
     expect(controller.focusSnapshot.completed, isEmpty);
     expect(controller.allCompletedIds, contains(_item.id));
   });
+
+  test('persists decision-assistant answers with the current plan', () async {
+    SharedPreferences.setMockInitialValues({});
+    final metrics = GuideFlowMetricsStore(
+      preferences: await SharedPreferences.getInstance(),
+    );
+    await metrics.setConsent(ProductAnalyticsConsent.denied);
+    final directory = await Directory.systemTemp.createTemp(
+      'movaro-guide-decision-data-',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final store = MigrationCopilotProgressStore(
+      directoryProvider: () async => directory,
+    );
+    final controller = GuideGpsController(
+      plan: _plan,
+      progressStore: store,
+      items: [_item],
+      readinessCompletedIds: const {},
+      documentCompletedIds: const {},
+      arrivalCompletedIds: const {},
+      metricsStore: metrics,
+    );
+
+    await controller.saveTaskDecisionData(_item.id, {
+      'ageGroup': 'adult',
+      'countries': ['Argentina', 'Chile'],
+    });
+
+    final persisted = await store.read(_plan);
+    expect(
+      persisted.taskDecisionDataById[_item.id],
+      containsPair('ageGroup', 'adult'),
+    );
+    expect(persisted.taskDecisionDataById[_item.id]?['countries'], [
+      'Argentina',
+      'Chile',
+    ]);
+  });
 }
 
 const _plan = MigrationPlan(

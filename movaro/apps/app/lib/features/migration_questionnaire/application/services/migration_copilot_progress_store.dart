@@ -19,6 +19,7 @@ class MigrationCopilotProgressSnapshot {
     this.prioritizedItemIds = const <String>{},
     this.dismissedReasonsById = const <String, GuideDismissReason>{},
     this.taskStatesById = const <String, GuideTaskState>{},
+    this.taskDecisionDataById = const <String, Map<String, dynamic>>{},
   });
 
   final Set<String> readinessCompletedIds;
@@ -29,6 +30,7 @@ class MigrationCopilotProgressSnapshot {
   final Set<String> prioritizedItemIds;
   final Map<String, GuideDismissReason> dismissedReasonsById;
   final Map<String, GuideTaskState> taskStatesById;
+  final Map<String, Map<String, dynamic>> taskDecisionDataById;
 
   GuideTaskState stateFor(String itemId) {
     if (getAllCompletedIds().contains(itemId)) {
@@ -85,6 +87,9 @@ class MigrationCopilotProgressStore {
           value['dismissedReasonsById'],
         ),
         taskStatesById: _readTaskStates(value['taskStatesById']),
+        taskDecisionDataById: _readNestedDynamicMap(
+          value['taskDecisionDataById'],
+        ),
       );
     } catch (_) {
       return const MigrationCopilotProgressSnapshot();
@@ -113,6 +118,7 @@ class MigrationCopilotProgressStore {
     Set<String>? prioritizedItemIds,
     Map<String, GuideDismissReason>? dismissedReasonsById,
     Map<String, GuideTaskState>? taskStatesById,
+    Map<String, Map<String, dynamic>>? taskDecisionDataById,
   }) async {
     Map<String, dynamic> current = <String, dynamic>{};
     final existing = await PersistentJsonStore.read(
@@ -147,6 +153,9 @@ class MigrationCopilotProgressStore {
       'taskStatesById': _encodeTaskStates(
         taskStatesById ?? _readTaskStates(existingMap['taskStatesById']),
       ),
+      'taskDecisionDataById':
+          taskDecisionDataById ??
+          _readNestedDynamicMap(existingMap['taskDecisionDataById']),
       'updatedAt': DateTime.now().toIso8601String(),
     };
 
@@ -190,6 +199,19 @@ class MigrationCopilotProgressStore {
     rawValue.forEach((key, value) {
       if (key is String && value is String) {
         result[key] = value;
+      }
+    });
+    return result;
+  }
+
+  Map<String, Map<String, dynamic>> _readNestedDynamicMap(Object? rawValue) {
+    if (rawValue is! Map) {
+      return <String, Map<String, dynamic>>{};
+    }
+    final result = <String, Map<String, dynamic>>{};
+    rawValue.forEach((key, value) {
+      if (key is String && value is Map) {
+        result[key] = Map<String, dynamic>.from(value);
       }
     });
     return result;

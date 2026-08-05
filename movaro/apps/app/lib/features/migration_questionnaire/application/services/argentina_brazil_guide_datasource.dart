@@ -301,9 +301,9 @@ class ArgentinaBrazilGuideDataSource {
         urgencyLevel: GuideUrgencyLevel.critical,
         urgencySignal: _t(
           locale,
-          pt: 'Peça AGORA o certificado tem validade curta. Se você pedir tarde, vai vencer antes de usar.',
-          es: 'Pedilo AHORA el certificado tiene validez corta. Si lo pides tarde, vencera antes de usarlo.',
-          en: 'Request NOW the certificate has short validity. If you request too late, it will expire before you use it.',
+          pt: 'Defina primeiro quando fará o protocolo. Emitir cedo demais pode deixar o certificado fora da janela aceita pela Polícia Federal.',
+          es: 'Primero define cuándo presentarás la solicitud. Emitirlo demasiado pronto puede dejar el certificado fuera del plazo aceptado por la Policía Federal.',
+          en: 'First decide when you will file. Requesting too early may put the certificate outside the window accepted by Federal Police.',
         ),
         warningFlags: _list(
           locale,
@@ -5733,6 +5733,40 @@ class ArgentinaBrazilGuideDataSource {
           en: 'Request certificates from countries where you lived in the previous five years, following the current Federal Police list.',
         ),
         dependencies: const <String>['item_0_2_document_folder'],
+        requirements: _list(
+          locale,
+          pt: [
+            'Faixa etária para confirmar se há dispensa',
+            'DNI argentino para definir a rota online ou presencial',
+            'Lista dos países onde viveu nos últimos cinco anos',
+            'E-mail acessível e meio de autenticação/pagamento',
+            'Previsão de quando fará o protocolo na Polícia Federal',
+          ],
+          es: [
+            'Rango de edad para confirmar si existe exención',
+            'DNI argentino para definir la vía en línea o presencial',
+            'Lista de países donde viviste durante los últimos cinco años',
+            'Correo accesible y medio de autenticación/pago',
+            'Previsión de cuándo presentarás la solicitud ante la Policía Federal',
+          ],
+          en: [
+            'Age range to confirm whether an exemption applies',
+            'Argentine DNI to select the online or in-person route',
+            'Countries where you lived during the previous five years',
+            'Accessible email and an authentication/payment method',
+            'Expected Federal Police filing window',
+          ],
+        ),
+        executionModes: const [
+          GuideExecutionMode.online,
+          GuideExecutionMode.inPerson,
+        ],
+        estimatedTimeLabel: _t(
+          locale,
+          pt: '1 hora a 5 dias úteis após o pagamento',
+          es: '1 hora a 5 días hábiles desde el pago',
+          en: '1 hour to 5 business days after payment',
+        ),
         context: _t(
           locale,
           pt: 'O certificado argentino cobre a Argentina. Se você viveu em outro país nos últimos cinco anos, confira também a exigência daquele país.',

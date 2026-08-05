@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_event_suggestion.dart';
@@ -15,6 +13,7 @@ class GuideEventSuggestionEngine {
     required MigrationPlan plan,
     required List<GuideActionItem> items,
     required Map<String, String> completedAtById,
+    required String localeCode,
   }) {
     return items
         .map(
@@ -24,6 +23,7 @@ class GuideEventSuggestionEngine {
             completedAtById: completedAtById,
             completedSteps: completedAtById.length,
             totalSteps: items.length,
+            localeCode: localeCode,
           ),
         )
         .whereType<GuideEventSuggestion>()
@@ -36,7 +36,20 @@ class GuideEventSuggestionEngine {
     required Map<String, String> completedAtById,
     required int completedSteps,
     required int totalSteps,
+    required String localeCode,
   }) {
+    // This stays local so suggestions use the app locale supplied by the UI.
+    // ignore: no_leading_underscores_for_local_identifiers
+    String _text({
+      required String pt,
+      required String es,
+      required String en,
+    }) => switch (localeCode) {
+      'pt' => pt,
+      'es' => es,
+      _ => en,
+    };
+
     final stage = UserJourneyStageDetector.detect(
       timeline: plan.timeline,
       completedSteps: completedSteps,
@@ -398,14 +411,5 @@ class GuideEventSuggestionEngine {
       date = DateTime(date.year, date.month, date.day, hour);
     }
     return date;
-  }
-
-  String _text({required String pt, required String es, required String en}) {
-    final code = PlatformDispatcher.instance.locale.languageCode;
-    return switch (code) {
-      'pt' => pt,
-      'es' => es,
-      _ => en,
-    };
   }
 }

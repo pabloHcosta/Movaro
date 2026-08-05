@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
 
-enum PlanResetChoice { deleteOnly, rebuild }
+enum PlanResetChoice { changeCityKeepProgress, rebuild }
 
 Future<PlanResetChoice?> showPlanResetDialog(
   BuildContext context, {
@@ -38,7 +38,7 @@ Future<PlanResetChoice?> showPlanResetDialog(
             ),
           ],
         ),
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -91,7 +91,14 @@ Future<PlanResetChoice?> showPlanResetDialog(
               ),
               const SizedBox(height: 8),
               Text(
-                copy.dialogBody,
+                switch (Localizations.localeOf(sheetContext).languageCode) {
+                  'pt' =>
+                    'Você pode escolher outra cidade preservando o que ainda é válido ou criar um plano totalmente novo.',
+                  'es' =>
+                    'Puedes elegir otra ciudad conservando lo que todavía es válido o crear un plan completamente nuevo.',
+                  _ =>
+                    'You can choose another city and keep what still applies, or create a completely new plan.',
+                },
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: bodyColor,
                   height: 1.5,
@@ -131,7 +138,13 @@ Future<PlanResetChoice?> showPlanResetDialog(
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            sheetContext.l10n.planResetImpactTitle,
+                            switch (Localizations.localeOf(
+                              sheetContext,
+                            ).languageCode) {
+                              'pt' => 'Seu plano atual está protegido',
+                              'es' => 'Tu plan actual está protegido',
+                              _ => 'Your current plan is protected',
+                            },
                             style: theme.textTheme.labelLarge?.copyWith(
                               color: titleColor,
                               fontWeight: FontWeight.w800,
@@ -163,7 +176,16 @@ Future<PlanResetChoice?> showPlanResetDialog(
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              copy.cityWarning(cityName),
+                              switch (Localizations.localeOf(
+                                sheetContext,
+                              ).languageCode) {
+                                'pt' =>
+                                  'Nada em $cityName será apagado antes de você escolher como continuar.',
+                                'es' =>
+                                  'Nada de $cityName se borrará antes de que elijas cómo continuar.',
+                                _ =>
+                                  'Nothing in $cityName is cleared before you choose how to continue.',
+                              },
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: bodyColor,
                                 height: 1.4,
@@ -189,7 +211,16 @@ Future<PlanResetChoice?> showPlanResetDialog(
                   const SizedBox(width: 9),
                   Expanded(
                     child: Text(
-                      sheetContext.l10n.planResetPreservedNote,
+                      switch (Localizations.localeOf(
+                        sheetContext,
+                      ).languageCode) {
+                        'pt' =>
+                          'Na troca de cidade, documentos e processos pessoais são mantidos; tarefas locais são reabertas.',
+                        'es' =>
+                          'Al cambiar de ciudad, se conservan documentos y procesos personales; las tareas locales se reabren.',
+                        _ =>
+                          'When changing city, personal documents and processes stay completed; local tasks reopen.',
+                      },
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: bodyColor,
                         height: 1.45,
@@ -198,7 +229,64 @@ Future<PlanResetChoice?> showPlanResetDialog(
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () => Navigator.of(
+                    sheetContext,
+                  ).pop(PlanResetChoice.changeCityKeepProgress),
+                  child: Ink(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.tintedSurfaceFor(
+                        sheetContext,
+                        tint: AppColors.success,
+                        lightColor: const Color(0xFFF0FAF5),
+                      ),
+                      border: Border.all(
+                        color: AppColors.tintedBorderFor(
+                          sheetContext,
+                          tint: AppColors.success,
+                          lightColor: const Color(0xFFB9E5CF),
+                        ),
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.swap_horiz_rounded,
+                          color: AppColors.success,
+                        ),
+                        const SizedBox(width: 11),
+                        Expanded(
+                          child: Text(
+                            switch (Localizations.localeOf(
+                              sheetContext,
+                            ).languageCode) {
+                              'pt' => 'Trocar cidade mantendo o progresso',
+                              'es' => 'Cambiar ciudad manteniendo el progreso',
+                              _ => 'Change city and keep progress',
+                            },
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              color: titleColor,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right_rounded),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
               Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -207,7 +295,7 @@ Future<PlanResetChoice?> showPlanResetDialog(
                       Navigator.of(sheetContext).pop(PlanResetChoice.rebuild),
                   child: Ink(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [Color(0xFF238BFF), Color(0xFF0068E8)],
@@ -242,14 +330,14 @@ Future<PlanResetChoice?> showPlanResetDialog(
                   ),
                 ),
               ),
-              const SizedBox(height: 9),
+              const SizedBox(height: 4),
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
                   onPressed: () => Navigator.of(sheetContext).pop(),
                   style: TextButton.styleFrom(
                     foregroundColor: bodyColor,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.symmetric(vertical: 9),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),

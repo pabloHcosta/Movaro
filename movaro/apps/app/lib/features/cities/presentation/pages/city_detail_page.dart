@@ -11,6 +11,7 @@ import 'package:movaro_app/app/theme/app_colors.dart';
 import 'package:movaro_app/core/errors/error_handler.dart';
 import 'package:movaro_app/features/journey/detected_location.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
+import 'package:movaro_app/features/location/presentation/widgets/origin_city_flow_sheet.dart';
 import 'package:movaro_app/core/responsive/responsive_context.dart';
 import 'package:movaro_app/core/utils/number_formatters.dart';
 import 'package:movaro_app/core/widgets/ambient_background.dart';
@@ -51,10 +52,12 @@ import 'package:movaro_app/features/home/presentation/pages/city_comparison_scre
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
 
 enum _SameCityPlanChoice { continuePlan, restartPlan }
+
+enum _DifferentCityPlanChoice { keepProgress, startFresh }
 
 class CityDetailPage extends StatefulWidget {
   const CityDetailPage({
@@ -296,20 +299,21 @@ class _CityDetailPageState extends State<CityDetailPage> {
             : _buildQuickActions(context, budget: budget);
 
         return Scaffold(
-          bottomNavigationBar: city == null
+          bottomNavigationBar:
+              city == null || widget.migrationQuestionnaireController == null
               ? null
               : widget.fromMigrationResult
               ? _MigrationResultBar(
                   city: city,
                   controller: widget.migrationQuestionnaireController,
                 )
-              : widget.validationFlow
-              ? _ValidationCityActionBar(
+              : _ValidationCityActionBar(
                   cityName: city.name,
+                  currentPlan:
+                      widget.migrationQuestionnaireController?.generatedPlan,
                   isLoading: _isCreatingPlan,
                   onConfirm: () => _runPrimaryPlanAction(context, city),
-                )
-              : null,
+                ),
           body: Stack(
             children: [
               const AmbientBackground(),
@@ -822,7 +826,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
   }
 
   Future<void> _handlePrimaryPlanAction(BuildContext context, City city) async {
-    final plan = widget.migrationQuestionnaireController?.generatedPlan;
+    final controller = widget.migrationQuestionnaireController;
+    final plan = controller?.generatedPlan;
     final isConfirmedCity = plan?.confirmedCity?.id == city.id;
     if (isConfirmedCity) {
       final choice = await _showSameCityPlanDialog(city: city, plan: plan!);
@@ -838,132 +843,88 @@ class _CityDetailPageState extends State<CityDetailPage> {
         return;
       }
 
-      await widget.migrationQuestionnaireController?.clearCurrentPlan();
-      if (!context.mounted) {
-        return;
-      }
-      final generated =
-          await widget.migrationQuestionnaireController?.generatePlanFromCity(
-            city,
-          ) ??
-          false;
-      if (!context.mounted || !generated) {
-        return;
-      }
-      await widget.migrationQuestionnaireController?.confirmPlanCity(city);
-      if (!context.mounted) {
-        return;
-      }
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.publicHome,
-        (route) => false,
-      );
+      await _startFreshPlanForCity(context, city);
       return;
     }
 
-    final savedPlan = widget.migrationQuestionnaireController
-        ?.findSavedPlanForCity(city.id);
+    if (plan != null && plan.currentPlanCity?.id != city.id) {
+      final choice = await _showDifferentCityPlanDialog(
+        currentPlan: plan,
+        targetCity: city,
+      );
+      if (!context.mounted || choice == null) return;
+
+      if (choice == _DifferentCityPlanChoice.keepProgress) {
+        final changed =
+            await controller?.changePlanCityKeepingProgress(city) ?? false;
+        if (!context.mounted || !changed) return;
+        _openPlanHome(context);
+        return;
+      }
+
+      await _startFreshPlanForCity(context, city);
+      return;
+    }
+
+    if (plan != null) {
+      await controller?.confirmPlanCity(city);
+      if (!context.mounted) return;
+      _openPlanHome(context);
+      return;
+    }
+
+    final savedPlan = controller?.findSavedPlanForCity(city.id);
     if (savedPlan != null) {
       final choice = await _showSameCityPlanDialog(city: city, plan: savedPlan);
       if (!context.mounted || choice == null) {
         return;
       }
       if (choice == _SameCityPlanChoice.continuePlan) {
-        await widget.migrationQuestionnaireController?.resumePlan(savedPlan);
+        await controller?.resumePlan(savedPlan);
         if (!context.mounted) {
           return;
         }
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          AppRoutes.publicHome,
-          (route) => false,
-        );
+        _openPlanHome(context);
         return;
       }
+      await _startFreshPlanForCity(context, city);
+      return;
+    }
 
-      await widget.migrationQuestionnaireController?.clearCurrentPlan();
-      if (!context.mounted) {
-        return;
-      }
-      final generated =
-          await widget.migrationQuestionnaireController?.generatePlanFromCity(
-            city,
-          ) ??
-          false;
-      if (!context.mounted || !generated) {
-        return;
-      }
-      await widget.migrationQuestionnaireController?.confirmPlanCity(city);
-      if (!context.mounted) {
-        return;
-      }
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.publicHome,
-        (route) => false,
+    await _startFreshPlanForCity(context, city, clearExisting: false);
+  }
+
+  Future<void> _startFreshPlanForCity(
+    BuildContext context,
+    City city, {
+    bool clearExisting = true,
+  }) async {
+    final controller = widget.migrationQuestionnaireController;
+    await controller?.initialize();
+    if (!context.mounted) return;
+    if (controller?.journeyContextController.isJourneyReadyForPlanning !=
+        true) {
+      final confirmed = await showOriginCityFlowSheet(
+        context: context,
+        locationController: widget.locationController,
       );
-      return;
-    }
-
-    if (plan != null) {
-      final isSamePlanCity = plan.currentPlanCity?.id == city.id;
-      if (!isSamePlanCity) {
-        final choice = await showPlanResetDialog(
-          context,
-          currentCityName: plan.currentPlanCity?.name,
-        );
-        if (!context.mounted || choice != PlanResetChoice.rebuild) {
-          return;
-        }
-        await widget.migrationQuestionnaireController?.clearCurrentPlan();
-        if (!context.mounted) {
-          return;
-        }
-        final generated =
-            await widget.migrationQuestionnaireController?.generatePlanFromCity(
-              city,
-            ) ??
-            false;
-        if (!context.mounted || !generated) {
-          return;
-        }
-        await widget.migrationQuestionnaireController?.confirmPlanCity(city);
-        if (!context.mounted) {
-          return;
-        }
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          AppRoutes.publicHome,
-          (route) => false,
-        );
-        return;
-      }
-
-      await widget.migrationQuestionnaireController?.confirmPlanCity(city);
-      if (!context.mounted) {
-        return;
-      }
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.publicHome,
-        (route) => false,
+      if (!confirmed || !context.mounted) return;
+      await controller?.journeyContextController.completeJourney(
+        originCountryId: 'argentina',
+        destinationCountryId: 'brasil',
       );
-      return;
     }
+    if (!context.mounted) return;
+    if (clearExisting) await controller?.clearCurrentPlan();
+    if (!context.mounted) return;
+    final generated = await controller?.generatePlanFromCity(city) ?? false;
+    if (!context.mounted || !generated) return;
+    await controller?.confirmPlanCity(city);
+    if (!context.mounted) return;
+    _openPlanHome(context);
+  }
 
-    final generated =
-        await widget.migrationQuestionnaireController?.generatePlanFromCity(
-          city,
-        ) ??
-        false;
-    if (!context.mounted || !generated) {
-      return;
-    }
-    await widget.migrationQuestionnaireController?.confirmPlanCity(city);
-    if (!context.mounted) {
-      return;
-    }
+  void _openPlanHome(BuildContext context) {
     Navigator.pushNamedAndRemoveUntil(
       context,
       AppRoutes.publicHome,
@@ -982,7 +943,6 @@ class _CityDetailPageState extends State<CityDetailPage> {
     try {
       await _handlePrimaryPlanAction(context, city);
       if (context.mounted &&
-          widget.validationFlow &&
           !hadPlan &&
           widget.migrationQuestionnaireController?.generatedPlan == null) {
         final locale = Localizations.localeOf(context).languageCode;
@@ -1060,6 +1020,155 @@ class _CityDetailPageState extends State<CityDetailPage> {
       await WidgetsBinding.instance.endOfFrame;
       await Future<void>.delayed(const Duration(milliseconds: 40));
     }
+  }
+
+  Future<_DifferentCityPlanChoice?> _showDifferentCityPlanDialog({
+    required MigrationPlan currentPlan,
+    required City targetCity,
+  }) async {
+    final locale = Localizations.localeOf(context).languageCode;
+    final snapshot = await _progressStore.read(currentPlan);
+    if (!mounted) return null;
+    final completedIds = snapshot.getAllCompletedIds();
+    final transferableCount = completedIds
+        .where(
+          (id) => !MigrationPlanResetService.cityScopedTaskIds.contains(id),
+        )
+        .length;
+    final reopenedCount = completedIds.length - transferableCount;
+    final currentCity =
+        currentPlan.currentPlanCity?.name ??
+        switch (locale) {
+          'pt' => 'cidade atual',
+          'es' => 'ciudad actual',
+          _ => 'current city',
+        };
+
+    return showModalBottomSheet<_DifferentCityPlanChoice>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.72),
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetContext) {
+        final theme = Theme.of(sheetContext);
+        final bodyColor = AppColors.textSoftFor(sheetContext);
+        final borderColor = AppColors.borderFor(sheetContext);
+        return Container(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceFor(sheetContext),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+            border: Border(top: BorderSide(color: borderColor)),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: bodyColor.withValues(alpha: 0.28),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                const Icon(
+                  Icons.compare_arrows_rounded,
+                  color: AppColors.primary,
+                  size: 32,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  switch (locale) {
+                    'pt' => 'Mudar de $currentCity para ${targetCity.name}?',
+                    'es' => '¿Cambiar de $currentCity a ${targetCity.name}?',
+                    _ => 'Switch from $currentCity to ${targetCity.name}?',
+                  },
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  switch (locale) {
+                    'pt' =>
+                      'Escolha como o novo destino deve aproveitar o que você já resolveu.',
+                    'es' =>
+                      'Elige cómo el nuevo destino debe aprovechar lo que ya resolviste.',
+                    _ =>
+                      'Choose how the new destination should use what you have already completed.',
+                  },
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: bodyColor,
+                    height: 1.45,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _CityTransitionOption(
+                  icon: Icons.verified_user_outlined,
+                  title: switch (locale) {
+                    'pt' => 'Manter progresso compatível',
+                    'es' => 'Mantener progreso compatible',
+                    _ => 'Keep compatible progress',
+                  },
+                  description: switch (locale) {
+                    'pt' =>
+                      transferableCount > 0
+                          ? '$transferableCount etapas pessoais continuam concluídas. ${reopenedCount > 0 ? '$reopenedCount etapas ligadas à cidade serão reabertas.' : 'Nenhuma etapa concluída precisa ser reaberta.'}'
+                          : 'Documentos e processos pessoais serão mantidos; tarefas ligadas à cidade serão recalculadas.',
+                    'es' =>
+                      'Los documentos y procesos personales se mantienen; las tareas de la ciudad se recalculan.',
+                    _ =>
+                      'Personal documents and processes stay completed; city-specific tasks are recalculated.',
+                  },
+                  emphasized: true,
+                  onTap: () => Navigator.of(
+                    sheetContext,
+                  ).pop(_DifferentCityPlanChoice.keepProgress),
+                ),
+                const SizedBox(height: 10),
+                _CityTransitionOption(
+                  icon: Icons.restart_alt_rounded,
+                  title: switch (locale) {
+                    'pt' => 'Começar do zero',
+                    'es' => 'Empezar desde cero',
+                    _ => 'Start from scratch',
+                  },
+                  description: switch (locale) {
+                    'pt' =>
+                      'Cria um plano novo para ${targetCity.name} e apaga o progresso do plano atual.',
+                    'es' =>
+                      'Crea un plan nuevo para ${targetCity.name} y borra el progreso actual.',
+                    _ =>
+                      'Creates a new plan for ${targetCity.name} and clears current progress.',
+                  },
+                  onTap: () => Navigator.of(
+                    sheetContext,
+                  ).pop(_DifferentCityPlanChoice.startFresh),
+                ),
+                const SizedBox(height: 6),
+                Center(
+                  child: TextButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    child: Text(switch (locale) {
+                      'pt' => 'Cancelar',
+                      'es' => 'Cancelar',
+                      _ => 'Cancel',
+                    }),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<_SameCityPlanChoice?> _showSameCityPlanDialog({
@@ -1767,14 +1876,92 @@ class _MoreAboutCityCard extends StatelessWidget {
 
 // ─── Persistent action for the "I already know my city" flow ─────────────────
 
+class _CityTransitionOption extends StatelessWidget {
+  const _CityTransitionOption({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.onTap,
+    this.emphasized = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+  final bool emphasized;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = emphasized
+        ? AppColors.primary.withValues(alpha: 0.42)
+        : AppColors.borderFor(context);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: emphasized
+                ? AppColors.primary.withValues(alpha: 0.09)
+                : AppColors.surfaceMutedFor(context),
+            border: Border.all(color: borderColor),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                icon,
+                color: emphasized
+                    ? AppColors.primary
+                    : AppColors.textSoftFor(context),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Icon(Icons.chevron_right_rounded, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ValidationCityActionBar extends StatelessWidget {
   const _ValidationCityActionBar({
     required this.cityName,
+    required this.currentPlan,
     required this.isLoading,
     required this.onConfirm,
   });
 
   final String cityName;
+  final MigrationPlan? currentPlan;
   final bool isLoading;
   final VoidCallback onConfirm;
 
@@ -1782,11 +1969,25 @@ class _ValidationCityActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final locale = Localizations.localeOf(context).languageCode;
-    final label = switch (locale) {
-      'pt' => 'Criar meu plano para $cityName',
-      'es' => 'Crear mi plan para $cityName',
-      _ => 'Create my plan for $cityName',
-    };
+    final currentCity = currentPlan?.currentPlanCity;
+    final isCurrentCity = currentCity?.name == cityName;
+    final label = currentPlan == null
+        ? switch (locale) {
+            'pt' => 'Criar meu plano para $cityName',
+            'es' => 'Crear mi plan para $cityName',
+            _ => 'Create my plan for $cityName',
+          }
+        : isCurrentCity
+        ? switch (locale) {
+            'pt' => 'Continuar plano em $cityName',
+            'es' => 'Continuar plan en $cityName',
+            _ => 'Continue plan in $cityName',
+          }
+        : switch (locale) {
+            'pt' => 'Usar $cityName no meu plano',
+            'es' => 'Usar $cityName en mi plan',
+            _ => 'Use $cityName in my plan',
+          };
 
     return SafeArea(
       top: false,

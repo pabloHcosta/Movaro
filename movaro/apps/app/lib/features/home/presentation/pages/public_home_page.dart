@@ -404,6 +404,11 @@ class _PublicHomePageState extends State<PublicHomePage>
       return;
     }
 
+    if (choice == PlanResetChoice.changeCityKeepProgress) {
+      Navigator.pushNamed(context, AppRoutes.citiesSearch);
+      return;
+    }
+
     await widget.migrationQuestionnaireController.clearCurrentPlan();
     if (!context.mounted) {
       return;

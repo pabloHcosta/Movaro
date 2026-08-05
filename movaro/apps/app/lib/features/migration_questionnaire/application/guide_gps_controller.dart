@@ -22,6 +22,8 @@ class GuideGpsController extends ChangeNotifier {
         const <String, GuideDismissReason>{},
     Map<String, GuideTaskState> taskStatesById =
         const <String, GuideTaskState>{},
+    Map<String, Map<String, dynamic>> taskDecisionDataById =
+        const <String, Map<String, dynamic>>{},
     String? activeItemId,
     GuideFlowMetricsStore? metricsStore,
   }) : _plan = plan,
@@ -36,6 +38,10 @@ class GuideGpsController extends ChangeNotifier {
          dismissedReasonsById,
        ),
        _taskStatesById = Map<String, GuideTaskState>.from(taskStatesById),
+       _taskDecisionDataById = {
+         for (final entry in taskDecisionDataById.entries)
+           entry.key: Map<String, dynamic>.from(entry.value),
+       },
        _items = List<GuideActionItem>.from(items)
          ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex)),
        _activeItemId = activeItemId {
@@ -53,6 +59,7 @@ class GuideGpsController extends ChangeNotifier {
   Set<String> _prioritizedItemIds;
   final Map<String, GuideDismissReason> _dismissedReasonsById;
   final Map<String, GuideTaskState> _taskStatesById;
+  final Map<String, Map<String, dynamic>> _taskDecisionDataById;
   final List<GuideActionItem> _items;
   String? _activeItemId;
   bool _currentItemStarted = false;
@@ -71,6 +78,24 @@ class GuideGpsController extends ChangeNotifier {
       Map<String, GuideDismissReason>.unmodifiable(_dismissedReasonsById);
   Map<String, GuideTaskState> get taskStatesById =>
       Map<String, GuideTaskState>.unmodifiable(_taskStatesById);
+  Map<String, dynamic>? taskDecisionDataFor(String itemId) {
+    final value = _taskDecisionDataById[itemId];
+    return value == null ? null : Map<String, dynamic>.unmodifiable(value);
+  }
+
+  Map<String, Map<String, dynamic>> get taskDecisionDataById => {
+    for (final entry in _taskDecisionDataById.entries)
+      entry.key: Map<String, dynamic>.unmodifiable(entry.value),
+  };
+
+  Future<void> saveTaskDecisionData(
+    String itemId,
+    Map<String, dynamic> value,
+  ) async {
+    _taskDecisionDataById[itemId] = Map<String, dynamic>.from(value);
+    notifyListeners();
+    await _persist();
+  }
 
   Set<String> get allCompletedIds => <String>{
     for (final item in _items)
@@ -648,6 +673,7 @@ class GuideGpsController extends ChangeNotifier {
       prioritizedItemIds: _prioritizedItemIds,
       dismissedReasonsById: _dismissedReasonsById,
       taskStatesById: _taskStatesById,
+      taskDecisionDataById: _taskDecisionDataById,
     );
   }
 }

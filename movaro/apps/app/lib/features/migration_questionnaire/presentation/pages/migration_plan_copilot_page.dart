@@ -28,6 +28,7 @@ import 'package:movaro_app/features/home/presentation/widgets/main_navigation_ba
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/guide_gps_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/criminal_record_decision_engine.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/arrival_execution_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/calendar_event_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
@@ -38,6 +39,7 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_personalization_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_folder_engine.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_readiness_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
@@ -103,6 +105,8 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   Map<String, GuideDismissReason> _dismissedReasonsById =
       <String, GuideDismissReason>{};
   Map<String, GuideTaskState> _taskStatesById = <String, GuideTaskState>{};
+  Map<String, Map<String, dynamic>> _taskDecisionDataById =
+      <String, Map<String, dynamic>>{};
   String? _loadedProgressKey;
   String? _loadedActiveItemId;
   GuideGpsController? _gpsController;
@@ -228,6 +232,10 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       _taskStatesById = Map<String, GuideTaskState>.from(
         snapshot.taskStatesById,
       );
+      _taskDecisionDataById = {
+        for (final entry in snapshot.taskDecisionDataById.entries)
+          entry.key: Map<String, dynamic>.from(entry.value),
+      };
     });
   }
 
@@ -274,6 +282,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
               .toList()
             ..sort())
           .join(','),
+      (_taskDecisionDataById.keys.toList()..sort()).join(','),
     ].join('::');
 
     if (_gpsControllerKey == signature && _gpsController != null) {
@@ -291,6 +300,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       prioritizedItemIds: _prioritizedItemIds,
       dismissedReasonsById: _dismissedReasonsById,
       taskStatesById: _taskStatesById,
+      taskDecisionDataById: _taskDecisionDataById,
       activeItemId: _loadedActiveItemId,
     );
     _gpsControllerKey = signature;
@@ -360,6 +370,10 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     _taskStatesById = Map<String, GuideTaskState>.from(
       controller.taskStatesById,
     );
+    _taskDecisionDataById = {
+      for (final entry in controller.taskDecisionDataById.entries)
+        entry.key: Map<String, dynamic>.from(entry.value),
+    };
   }
 
   String _planKey(MigrationPlan plan) {
@@ -1104,6 +1118,16 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   }) async {
     var sheetItem = item;
     var actionOpened = false;
+    var criminalRecordProfile = item.id == 'item_0_2_antecedentes'
+        ? CriminalRecordProfile.fromJson(
+            controller.taskDecisionDataFor(item.id),
+          )
+        : null;
+    var documentFolderProfile = item.id == 'item_0_2_document_folder'
+        ? MigrationDocumentFolderProfile.fromJson(
+            controller.taskDecisionDataFor(item.id),
+          )
+        : null;
     var selectedCpfRouteIndex =
         item.decisionOptions?.indexWhere((option) => option.recommended) ?? 0;
     if (selectedCpfRouteIndex < 0) {
@@ -1129,17 +1153,68 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
         builder: (sheetContext) {
           return StatefulBuilder(
             builder: (sheetContext, setSheetState) {
+              final isCriminalRecordStep =
+                  sheetItem.id == 'item_0_2_antecedentes';
+              final isDocumentFolderStep =
+                  sheetItem.id == 'item_0_2_document_folder';
+              final criminalRecordCalendarSuggestion = isCriminalRecordStep
+                  ? _buildCriminalRecordCalendarSuggestion(
+                      sheetContext,
+                      criminalRecordProfile,
+                    )
+                  : null;
+              final criminalOutcomes =
+                  criminalRecordProfile?.outcomes ??
+                  const <CriminalRecordOutcome>[];
+              final criminalCompletedCount = criminalOutcomes
+                  .where(
+                    (outcome) => criminalRecordProfile!.completedOutcomeIds
+                        .contains(outcome.id),
+                  )
+                  .length;
+              final folderActionIds =
+                  documentFolderProfile?.requiredActionIds ?? const <String>[];
+              final folderCompletedCount = folderActionIds
+                  .where(
+                    documentFolderProfile?.completedActionIds.contains ??
+                        (_) => false,
+                  )
+                  .length;
+              final documentFolderCalendarSuggestion = isDocumentFolderStep
+                  ? _buildDocumentFolderCalendarSuggestion(
+                      sheetContext,
+                      documentFolderProfile,
+                    )
+                  : null;
               final allChecklistDone =
                   sheetItem.checklistItems?.every((sub) => sub.isCompleted) ??
                   false;
-              final canComplete = !sheetItem.hasChecklist || allChecklistDone;
-              final checklistCompletedCount =
-                  sheetItem.checklistItems
-                      ?.where((sub) => sub.isCompleted)
-                      .length ??
-                  0;
+              final canComplete = isCriminalRecordStep
+                  ? (criminalRecordProfile?.isExempt == true ||
+                        criminalRecordProfile?.allOutcomesCompleted == true)
+                  : isDocumentFolderStep
+                  ? documentFolderProfile?.allActionsCompleted == true
+                  : !sheetItem.hasChecklist || allChecklistDone;
+              final checklistCompletedCount = isCriminalRecordStep
+                  ? criminalCompletedCount
+                  : isDocumentFolderStep
+                  ? folderCompletedCount
+                  : sheetItem.checklistItems
+                            ?.where((sub) => sub.isCompleted)
+                            .length ??
+                        0;
+              final checklistTotalCount = isCriminalRecordStep
+                  ? criminalOutcomes.length
+                  : isDocumentFolderStep
+                  ? folderActionIds.length
+                  : sheetItem.checklistItems?.length ?? 0;
+              final hasOutcomeChecklist = isCriminalRecordStep
+                  ? criminalOutcomes.isNotEmpty
+                  : isDocumentFolderStep
+                  ? folderActionIds.isNotEmpty
+                  : sheetItem.hasChecklist;
               final isInProgress =
-                  sheetItem.hasChecklist &&
+                  hasOutcomeChecklist &&
                   checklistCompletedCount > 0 &&
                   !sheetItem.isCompleted;
               final isCpfStep = sheetItem.id == 'item_2_1_cpf';
@@ -1247,6 +1322,65 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                 });
               }
 
+              Future<void> updateCriminalRecordProfile(
+                CriminalRecordProfile profile,
+              ) async {
+                setSheetState(() {
+                  criminalRecordProfile = profile;
+                });
+                await controller.saveTaskDecisionData(
+                  sheetItem.id,
+                  profile.toJson(),
+                );
+                if (mounted) {
+                  setState(() {
+                    _syncFromGpsController(controller);
+                  });
+                }
+              }
+
+              Future<void> toggleCriminalRecordOutcome(
+                CriminalRecordOutcome outcome,
+              ) async {
+                final profile = criminalRecordProfile;
+                if (profile == null) return;
+                final completed = Set<String>.from(profile.completedOutcomeIds);
+                if (!completed.add(outcome.id)) {
+                  completed.remove(outcome.id);
+                }
+                await updateCriminalRecordProfile(
+                  profile.copyWith(completedOutcomeIds: completed),
+                );
+              }
+
+              Future<void> updateDocumentFolderProfile(
+                MigrationDocumentFolderProfile profile,
+              ) async {
+                setSheetState(() {
+                  documentFolderProfile = profile;
+                });
+                await controller.saveTaskDecisionData(
+                  sheetItem.id,
+                  profile.toJson(),
+                );
+                if (mounted) {
+                  setState(() {
+                    _syncFromGpsController(controller);
+                  });
+                }
+              }
+
+              Future<void> toggleDocumentFolderAction(String actionId) async {
+                final profile = documentFolderProfile;
+                if (profile == null) return;
+                final completed = Set<String>.from(profile.completedActionIds);
+                if (!completed.add(actionId)) completed.remove(actionId);
+                await updateDocumentFolderProfile(
+                  profile.copyWith(completedActionIds: completed),
+                );
+                unawaited(HapticFeedback.selectionClick());
+              }
+
               void syncUpdatedItem() {
                 final updated = controller.items.firstWhere(
                   (entry) => entry.id == sheetItem.id,
@@ -1317,6 +1451,35 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                 }
               }
 
+              Future<void> handleCriminalRecordComplete() async {
+                if (!canComplete) return;
+                unawaited(HapticFeedback.mediumImpact());
+                Navigator.of(sheetContext).pop();
+                if (criminalRecordProfile?.isExempt == true) {
+                  await controller.dismissItem(
+                    sheetItem.id,
+                    GuideDismissReason.notApplicable,
+                  );
+                } else {
+                  await _completeGuideItem(controller, sheetItem.id);
+                }
+                if (!mounted) return;
+                setState(() {
+                  _syncFromGpsController(controller);
+                });
+              }
+
+              Future<void> handleDocumentFolderComplete() async {
+                if (!canComplete) return;
+                unawaited(HapticFeedback.mediumImpact());
+                Navigator.of(sheetContext).pop();
+                await _completeGuideItem(controller, sheetItem.id);
+                if (!mounted) return;
+                setState(() {
+                  _syncFromGpsController(controller);
+                });
+              }
+
               return Scaffold(
                 backgroundColor: AppColors.backgroundFor(sheetContext),
                 body: Stack(
@@ -1341,8 +1504,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                   overallProgress: controller.progress,
                                   completedChecklistItems:
                                       checklistCompletedCount,
-                                  totalChecklistItems:
-                                      sheetItem.checklistItems?.length ?? 0,
+                                  totalChecklistItems: checklistTotalCount,
                                   isPreview: isPreview,
                                   onClose: () =>
                                       Navigator.of(sheetContext).pop(),
@@ -1449,9 +1611,54 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                             es: 'Separa lo que necesitarás antes de comenzar.',
                                             en: 'Gather what you need before starting.',
                                           ),
-                                          child:
-                                              sheetItem.hasSurvivalPhrases ||
-                                                  sheetItem.hasRequirements
+                                          child: isCriminalRecordStep
+                                              ? Column(
+                                                  children: [
+                                                    _CriminalRecordDecisionAssistant(
+                                                      profile:
+                                                          criminalRecordProfile ??
+                                                          const CriminalRecordProfile(),
+                                                      onChanged:
+                                                          updateCriminalRecordProfile,
+                                                    ),
+                                                    if (criminalRecordCalendarSuggestion !=
+                                                        null) ...[
+                                                      const SizedBox(
+                                                        height: 12,
+                                                      ),
+                                                      _buildCalendarPrompt(
+                                                        plan: plan,
+                                                        suggestion:
+                                                            criminalRecordCalendarSuggestion,
+                                                      ),
+                                                    ],
+                                                  ],
+                                                )
+                                              : isDocumentFolderStep
+                                              ? Column(
+                                                  children: [
+                                                    _MigrationFolderDecisionAssistant(
+                                                      profile:
+                                                          documentFolderProfile ??
+                                                          const MigrationDocumentFolderProfile(),
+                                                      onChanged:
+                                                          updateDocumentFolderProfile,
+                                                    ),
+                                                    if (documentFolderCalendarSuggestion !=
+                                                        null) ...[
+                                                      const SizedBox(
+                                                        height: 12,
+                                                      ),
+                                                      _buildCalendarPrompt(
+                                                        plan: plan,
+                                                        suggestion:
+                                                            documentFolderCalendarSuggestion,
+                                                      ),
+                                                    ],
+                                                  ],
+                                                )
+                                              : sheetItem.hasSurvivalPhrases ||
+                                                    sheetItem.hasRequirements
                                               ? _QuickReferenceCard(
                                                   item: sheetItem,
                                                 )
@@ -1488,7 +1695,63 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                           ),
                                           child: Column(
                                             children: [
-                                              if (isCpfStep &&
+                                              if (isCriminalRecordStep)
+                                                _CriminalRecordExecutionPlan(
+                                                  profile:
+                                                      criminalRecordProfile ??
+                                                      const CriminalRecordProfile(),
+                                                  onLinkTap: (url, label) =>
+                                                      _openExternalPreparationLink(
+                                                        title: label,
+                                                        uri: Uri.parse(url),
+                                                      ),
+                                                )
+                                              else if (isDocumentFolderStep)
+                                                _MigrationFolderActionRunner(
+                                                  profile:
+                                                      documentFolderProfile ??
+                                                      const MigrationDocumentFolderProfile(),
+                                                  onToggle:
+                                                      toggleDocumentFolderAction,
+                                                  onOpenOfficial: () => _openExternalPreparationLink(
+                                                    title: _localizedText(
+                                                      sheetContext,
+                                                      pt: 'Lista oficial da Polícia Federal',
+                                                      es: 'Lista oficial de la Policía Federal',
+                                                      en: 'Federal Police official checklist',
+                                                    ),
+                                                    uri: PreparationResourceLinks
+                                                        .argentinaResidenceAgreement,
+                                                  ),
+                                                  onCopyStructure: () async {
+                                                    await Clipboard.setData(
+                                                      ClipboardData(
+                                                        text:
+                                                            _migrationFolderStructureText(
+                                                              sheetContext,
+                                                            ),
+                                                      ),
+                                                    );
+                                                    if (!sheetContext.mounted) {
+                                                      return;
+                                                    }
+                                                    ScaffoldMessenger.of(
+                                                      sheetContext,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          _localizedText(
+                                                            sheetContext,
+                                                            pt: 'Estrutura copiada. Use os nomes para criar suas pastas.',
+                                                            es: 'Estructura copiada. Usa los nombres para crear tus carpetas.',
+                                                            en: 'Structure copied. Use the names to create your folders.',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                )
+                                              else if (isCpfStep &&
                                                   (sheetItem
                                                           .hasDecisionOptions ||
                                                       sheetItem
@@ -1557,7 +1820,15 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                       sheetItem
                                                           .shortDescription,
                                                 ),
-                                              if (hasPrimaryExecutionAction) ...[
+                                              if (hasPrimaryExecutionAction &&
+                                                  !isDocumentFolderStep &&
+                                                  (!isCriminalRecordStep ||
+                                                      (criminalRecordProfile
+                                                                  ?.isComplete ==
+                                                              true &&
+                                                          criminalRecordProfile
+                                                                  ?.isExempt !=
+                                                              true))) ...[
                                                 const SizedBox(height: 14),
                                                 _GuideNextMoveCard(
                                                   actionType: sheetItem
@@ -1569,6 +1840,17 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                           es: 'Abrir de novo',
                                                           en: 'Open again',
                                                         )
+                                                      : isCriminalRecordStep &&
+                                                            criminalRecordProfile
+                                                                    ?.protocolWindow !=
+                                                                CriminalRecordProtocolWindow
+                                                                    .withinThirtyDays
+                                                      ? _localizedText(
+                                                          sheetContext,
+                                                          pt: 'Ver requisitos no RNR',
+                                                          es: 'Ver requisitos del RNR',
+                                                          en: 'Review RNR requirements',
+                                                        )
                                                       : (sheetItem
                                                                 .primaryActionLabel ??
                                                             _localizedText(
@@ -1578,6 +1860,19 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                               en: 'Open primary action',
                                                             )),
                                                   actionOpened: actionOpened,
+                                                  description:
+                                                      isCriminalRecordStep &&
+                                                          criminalRecordProfile
+                                                                  ?.protocolWindow !=
+                                                              CriminalRecordProtocolWindow
+                                                                  .withinThirtyDays
+                                                      ? _localizedText(
+                                                          sheetContext,
+                                                          pt: 'Abra a fonte para validar acesso, documentos e preços. Emita somente quando o protocolo estiver mais próximo.',
+                                                          es: 'Abrí la fuente para validar acceso, documentos y precios. Emitilo solo cuando la presentación esté más cerca.',
+                                                          en: 'Open the source to confirm access, documents, and prices. Request only when filing is closer.',
+                                                        )
+                                                      : null,
                                                   onPressed:
                                                       handlePrimaryAction,
                                                 ),
@@ -1594,7 +1889,14 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                             es: 'Confirma el resultado',
                                             en: 'Confirm the result',
                                           ),
-                                          description: sheetItem.hasChecklist
+                                          description: isDocumentFolderStep
+                                              ? _localizedText(
+                                                  sheetContext,
+                                                  pt: 'Confira o resumo. A etapa é liberada quando a estrutura da pasta estiver pronta.',
+                                                  es: 'Revisa el resumen. La etapa se habilita cuando la estructura esté lista.',
+                                                  en: 'Review the summary. The step unlocks when the folder structure is ready.',
+                                                )
+                                              : hasOutcomeChecklist
                                               ? _localizedText(
                                                   sheetContext,
                                                   pt: 'Marque cada resultado abaixo. A etapa será liberada quando todos estiverem concluídos.',
@@ -1611,7 +1913,41 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              if (sheetItem.doneCriteria !=
+                                              if (isCriminalRecordStep &&
+                                                  criminalRecordProfile
+                                                          ?.isComplete !=
+                                                      true)
+                                                _GuideWorkflowMessage(
+                                                  text: _localizedText(
+                                                    sheetContext,
+                                                    pt: 'Responda às perguntas da primeira parte para gerar a confirmação certa para o seu caso.',
+                                                    es: 'Responde las preguntas de la primera parte para generar la confirmación correcta para tu caso.',
+                                                    en: 'Answer the questions in the first section to generate the right confirmation for your case.',
+                                                  ),
+                                                )
+                                              else if (isDocumentFolderStep &&
+                                                  documentFolderProfile
+                                                          ?.isComplete !=
+                                                      true)
+                                                _GuideWorkflowMessage(
+                                                  text: _localizedText(
+                                                    sheetContext,
+                                                    pt: 'Responda às perguntas iniciais para gerar uma pasta adequada ao seu caso.',
+                                                    es: 'Responde las preguntas iniciales para generar una carpeta adecuada a tu caso.',
+                                                    en: 'Answer the initial questions to generate a folder suited to your case.',
+                                                  ),
+                                                )
+                                              else if (isCriminalRecordStep &&
+                                                  criminalRecordProfile
+                                                          ?.isExempt ==
+                                                      true)
+                                                _CriminalRecordExemptionCard()
+                                              else if (isDocumentFolderStep)
+                                                _MigrationFolderCompletionSummary(
+                                                  profile:
+                                                      documentFolderProfile!,
+                                                )
+                                              else if (sheetItem.doneCriteria !=
                                                   null)
                                                 _GuideDoneCriteriaContent(
                                                   item: sheetItem,
@@ -1632,7 +1968,20 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                           en: 'Consider the step complete after carrying out the indicated action.',
                                                         ),
                                                 ),
-                                              if (sheetItem.hasChecklist) ...[
+                                              if (isCriminalRecordStep &&
+                                                  criminalOutcomes
+                                                      .isNotEmpty) ...[
+                                                const SizedBox(height: 12),
+                                                _CriminalRecordOutcomeChecklist(
+                                                  outcomes: criminalOutcomes,
+                                                  completedIds:
+                                                      criminalRecordProfile!
+                                                          .completedOutcomeIds,
+                                                  onToggle:
+                                                      toggleCriminalRecordOutcome,
+                                                ),
+                                              ] else if (!isDocumentFolderStep &&
+                                                  sheetItem.hasChecklist) ...[
                                                 const SizedBox(height: 12),
                                                 _GuideOutcomeProgress(
                                                   key: const ValueKey<String>(
@@ -1648,18 +1997,19 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                             ],
                                           ),
                                         ),
-                                        _GuideSupplementaryDetails(
-                                          item: sheetItem,
-                                          quickReferenceShown:
-                                              !sheetItem.isCompleted &&
-                                              (sheetItem.hasSurvivalPhrases ||
-                                                  sheetItem.hasRequirements),
-                                          onLinkTap: (url, label) =>
-                                              _openExternalPreparationLink(
-                                                title: label,
-                                                uri: Uri.parse(url),
-                                              ),
-                                        ),
+                                        if (!isDocumentFolderStep)
+                                          _GuideSupplementaryDetails(
+                                            item: sheetItem,
+                                            quickReferenceShown:
+                                                !sheetItem.isCompleted &&
+                                                (sheetItem.hasSurvivalPhrases ||
+                                                    sheetItem.hasRequirements),
+                                            onLinkTap: (url, label) =>
+                                                _openExternalPreparationLink(
+                                                  title: label,
+                                                  uri: Uri.parse(url),
+                                                ),
+                                          ),
                                         // ── Warning Flags (protective, after reassurance) ──
                                         if (sheetItem.hasWarningFlags) ...[
                                           Container(
@@ -1759,6 +2109,8 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                           const SizedBox(height: 12),
                                         ],
                                         if (!isPreview &&
+                                            !isCriminalRecordStep &&
+                                            !isDocumentFolderStep &&
                                             !sheetItem.isCompleted &&
                                             eventSuggestion != null) ...[
                                           const SizedBox(height: 12),
@@ -1810,6 +2162,49 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                             es: 'Etapa descartada',
                                             en: 'Step dismissed',
                                           )
+                                        : isCriminalRecordStep &&
+                                              criminalRecordProfile?.isExempt ==
+                                                  true
+                                        ? _localizedText(
+                                            sheetContext,
+                                            pt: 'Concluir como dispensado',
+                                            es: 'Completar como exento',
+                                            en: 'Complete as exempt',
+                                          )
+                                        : isCriminalRecordStep &&
+                                              criminalRecordProfile
+                                                      ?.isComplete !=
+                                                  true
+                                        ? _localizedText(
+                                            sheetContext,
+                                            pt: 'Complete as perguntas acima',
+                                            es: 'Completa las preguntas de arriba',
+                                            en: 'Complete the questions above',
+                                          )
+                                        : isCriminalRecordStep && !canComplete
+                                        ? _localizedText(
+                                            sheetContext,
+                                            pt: '$criminalCompletedCount de ${criminalOutcomes.length} confirmações',
+                                            es: '$criminalCompletedCount de ${criminalOutcomes.length} confirmaciones',
+                                            en: '$criminalCompletedCount of ${criminalOutcomes.length} confirmations',
+                                          )
+                                        : isDocumentFolderStep &&
+                                              documentFolderProfile
+                                                      ?.isComplete !=
+                                                  true
+                                        ? _localizedText(
+                                            sheetContext,
+                                            pt: 'Complete as perguntas acima',
+                                            es: 'Completa las preguntas de arriba',
+                                            en: 'Complete the questions above',
+                                          )
+                                        : isDocumentFolderStep && !canComplete
+                                        ? _localizedText(
+                                            sheetContext,
+                                            pt: '$folderCompletedCount de ${folderActionIds.length} peças preparadas',
+                                            es: '$folderCompletedCount de ${folderActionIds.length} piezas preparadas',
+                                            en: '$folderCompletedCount of ${folderActionIds.length} pieces prepared',
+                                          )
                                         : canComplete && sheetItem.hasChecklist
                                         ? _localizedText(
                                             sheetContext,
@@ -1831,17 +2226,28 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                             en: '$checklistCompletedCount of ${sheetItem.checklistItems?.length ?? 0} items complete',
                                           ),
                                     helperText:
-                                        sheetItem.hasChecklist && !canComplete
-                                        ? _localizedText(
-                                            sheetContext,
-                                            pt: 'Seu progresso fica salvo. Confirme cada resultado quando acontecer.',
-                                            es: 'Tu progreso queda guardado. Confirma cada resultado cuando ocurra.',
-                                            en: 'Your progress is saved. Confirm each outcome as it happens.',
-                                          )
+                                        hasOutcomeChecklist && !canComplete
+                                        ? isDocumentFolderStep
+                                              ? _localizedText(
+                                                  sheetContext,
+                                                  pt: 'Seu progresso fica salvo. Prepare uma peça por vez na seção acima.',
+                                                  es: 'Tu progreso queda guardado. Prepara una pieza por vez arriba.',
+                                                  en: 'Your progress is saved. Prepare one piece at a time above.',
+                                                )
+                                              : _localizedText(
+                                                  sheetContext,
+                                                  pt: 'Seu progresso fica salvo. Confirme cada resultado quando acontecer.',
+                                                  es: 'Tu progreso queda guardado. Confirma cada resultado cuando ocurra.',
+                                                  en: 'Your progress is saved. Confirm each outcome as it happens.',
+                                                )
                                         : null,
                                     primaryEnabled:
                                         !sheetItem.isDismissed && canComplete,
-                                    onPrimary: handleComplete,
+                                    onPrimary: isCriminalRecordStep
+                                        ? handleCriminalRecordComplete
+                                        : isDocumentFolderStep
+                                        ? handleDocumentFolderComplete
+                                        : handleComplete,
                                     onWaiting:
                                         !sheetItem.isDismissed &&
                                             !sheetItem.isCompleted
@@ -2031,6 +2437,258 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       completedAtById: _completedAtById,
       completedSteps: _completedAtById.length,
       totalSteps: allItems.length,
+      localeCode: Localizations.localeOf(context).languageCode,
+    );
+  }
+
+  GuideEventSuggestion? _buildCriminalRecordCalendarSuggestion(
+    BuildContext context,
+    CriminalRecordProfile? profile,
+  ) {
+    if (profile?.isComplete != true || profile?.isExempt == true) {
+      return null;
+    }
+
+    final window = profile!.protocolWindow!;
+    final now = DateTime.now();
+    final daysUntilReminder = switch (window) {
+      CriminalRecordProtocolWindow.withinThirtyDays => 1,
+      CriminalRecordProtocolWindow.oneToThreeMonths => 30,
+      CriminalRecordProtocolWindow.moreThanThreeMonths => 60,
+      CriminalRecordProtocolWindow.unknown => 14,
+    };
+    final start = _nextReminderBusinessDay(
+      now.add(Duration(days: daysUntilReminder)),
+    );
+    final (title, description, assistantCopy) = switch (window) {
+      CriminalRecordProtocolWindow.withinThirtyDays => (
+        _localizedText(
+          context,
+          pt: 'Emitir certificado de antecedentes',
+          es: 'Emitir certificado de antecedentes',
+          en: 'Request criminal record certificate',
+        ),
+        _localizedText(
+          context,
+          pt: 'Abrir o RNR, escolher a modalidade, pagar e guardar os dados de acompanhamento.',
+          es: 'Abrir el RNR, elegir la modalidad, pagar y guardar los datos de seguimiento.',
+          en: 'Open RNR, select the service speed, pay, and save the tracking details.',
+        ),
+        _localizedText(
+          context,
+          pt: 'Seu protocolo está próximo. Quer reservar um horário para emitir sem deixar para a última hora?',
+          es: 'Tu presentación está próxima. ¿Querés reservar un horario para emitirlo sin dejarlo para último momento?',
+          en: 'Your filing date is close. Would you like to reserve time to request it without leaving it until the last minute?',
+        ),
+      ),
+      CriminalRecordProtocolWindow.oneToThreeMonths => (
+        _localizedText(
+          context,
+          pt: 'Revisar data e emitir antecedentes',
+          es: 'Revisar fecha y emitir antecedentes',
+          en: 'Review timing and request records',
+        ),
+        _localizedText(
+          context,
+          pt: 'Confirmar se a data do protocolo já está firme e, se estiver, emitir os certificados aplicáveis.',
+          es: 'Confirmar si la fecha de presentación ya está definida y, si lo está, emitir los certificados aplicables.',
+          en: 'Confirm whether the filing date is firm and, if it is, request the applicable certificates.',
+        ),
+        _localizedText(
+          context,
+          pt: 'Como ainda falta algum tempo, faz mais sentido lembrar de revisar a janela antes de emitir.',
+          es: 'Como todavía falta tiempo, conviene recordar revisar el plazo antes de emitir.',
+          en: 'Because there is still time, it makes more sense to schedule a timing review before requesting.',
+        ),
+      ),
+      CriminalRecordProtocolWindow.moreThanThreeMonths => (
+        _localizedText(
+          context,
+          pt: 'Reavaliar janela dos antecedentes',
+          es: 'Reevaluar el plazo de antecedentes',
+          en: 'Reassess the criminal-record timing',
+        ),
+        _localizedText(
+          context,
+          pt: 'Reabrir esta etapa, revisar a previsão do protocolo e decidir se já chegou o momento de emitir.',
+          es: 'Reabrir esta etapa, revisar la previsión de presentación y decidir si ya es momento de emitir.',
+          en: 'Reopen this step, review the filing estimate, and decide whether it is time to request.',
+        ),
+        _localizedText(
+          context,
+          pt: 'Emitir agora seria cedo. Posso colocar uma revisão futura no calendário para você não precisar lembrar sozinho.',
+          es: 'Emitir ahora sería pronto. Puedo agregar una revisión futura al calendario para que no tengas que recordarlo solo.',
+          en: 'Requesting now would be early. I can add a future review so you do not have to remember it yourself.',
+        ),
+      ),
+      CriminalRecordProtocolWindow.unknown => (
+        _localizedText(
+          context,
+          pt: 'Definir previsão do protocolo na PF',
+          es: 'Definir previsión de presentación ante la PF',
+          en: 'Set a Federal Police filing estimate',
+        ),
+        _localizedText(
+          context,
+          pt: 'Escolher uma previsão de protocolo para calcular o momento seguro de emitir os antecedentes.',
+          es: 'Elegir una previsión de presentación para calcular el momento seguro de emitir los antecedentes.',
+          en: 'Choose a filing estimate to calculate a safer time to request the records.',
+        ),
+        _localizedText(
+          context,
+          pt: 'Sem uma data aproximada, o melhor lembrete é voltar aqui e definir a janela antes de emitir.',
+          es: 'Sin una fecha aproximada, el mejor recordatorio es volver aquí y definir el plazo antes de emitir.',
+          en: 'Without an approximate date, the best reminder is to return here and set the timing before requesting.',
+        ),
+      ),
+    };
+
+    return GuideEventSuggestion(
+      id: 'event_item_0_2_antecedentes_${window.name}',
+      sourceItemId: 'item_0_2_antecedentes',
+      type: GuideEventType.reminder,
+      title: title,
+      description: description,
+      assistantCopy: assistantCopy,
+      startAt: start,
+      endAt: start.add(const Duration(minutes: 30)),
+      suggestedDurationMinutes: 30,
+      defaultReminderOption: GuideEventReminderOption.oneDayBefore,
+      isHighPriority: window == CriminalRecordProtocolWindow.withinThirtyDays,
+    );
+  }
+
+  GuideEventSuggestion? _buildDocumentFolderCalendarSuggestion(
+    BuildContext context,
+    MigrationDocumentFolderProfile? profile,
+  ) {
+    if (profile?.isComplete != true) return null;
+    final window = profile!.protocolWindow!;
+    final days = switch (window) {
+      CriminalRecordProtocolWindow.withinThirtyDays => 1,
+      CriminalRecordProtocolWindow.oneToThreeMonths => 14,
+      CriminalRecordProtocolWindow.moreThanThreeMonths => 45,
+      CriminalRecordProtocolWindow.unknown => 14,
+    };
+    final start = _nextReminderBusinessDay(
+      DateTime.now().add(Duration(days: days)),
+    );
+    final isNear = window == CriminalRecordProtocolWindow.withinThirtyDays;
+    return GuideEventSuggestion(
+      id: 'event_item_0_2_document_folder_${window.name}',
+      sourceItemId: 'item_0_2_document_folder',
+      type: GuideEventType.reminder,
+      title: _localizedText(
+        context,
+        pt: isNear ? 'Finalizar pasta migratória' : 'Revisar pasta migratória',
+        es: isNear
+            ? 'Finalizar carpeta migratoria'
+            : 'Revisar carpeta migratoria',
+        en: isNear
+            ? 'Finish migration document folder'
+            : 'Review migration document folder',
+      ),
+      description: _localizedText(
+        context,
+        pt: isNear
+            ? 'Conferir as peças preparadas, os documentos pendentes e a lista oficial antes do protocolo.'
+            : 'Voltar à pasta, revisar a previsão do protocolo e atualizar os documentos que faltam.',
+        es: isNear
+            ? 'Revisar las piezas preparadas, los documentos pendientes y la lista oficial antes de la presentación.'
+            : 'Volver a la carpeta, revisar la fecha prevista y actualizar los documentos pendientes.',
+        en: isNear
+            ? 'Check prepared pieces, pending documents, and the official list before filing.'
+            : 'Return to the folder, review the filing estimate, and update pending documents.',
+      ),
+      assistantCopy: _localizedText(
+        context,
+        pt: isNear
+            ? 'Seu protocolo está próximo. Reserve um bloco curto para a conferência final.'
+            : 'Como ainda há tempo, agende uma revisão sem emitir documentos cedo demais.',
+        es: isNear
+            ? 'Tu presentación está próxima. Reserva un bloque corto para la revisión final.'
+            : 'Como todavía hay tiempo, agenda una revisión sin emitir documentos demasiado pronto.',
+        en: isNear
+            ? 'Your filing is close. Reserve a short block for the final review.'
+            : 'There is still time, so schedule a review without requesting documents too early.',
+      ),
+      startAt: start,
+      endAt: start.add(const Duration(minutes: 35)),
+      suggestedDurationMinutes: 35,
+      defaultReminderOption: GuideEventReminderOption.oneDayBefore,
+      isHighPriority: isNear,
+    );
+  }
+
+  String _migrationFolderStructureText(BuildContext context) {
+    return _localizedText(
+      context,
+      pt: '''Pasta migratória — Brasil
+01_identidade_e_filiacao
+02_antecedentes
+03_formulario_e_declaracoes
+04_entrada_no_brasil
+05_taxas_e_comprovantes
+06_protocolos_e_recibos''',
+      es: '''Carpeta migratoria — Brasil
+01_identidad_y_filiacion
+02_antecedentes
+03_formulario_y_declaraciones
+04_entrada_a_brasil
+05_tasas_y_comprobantes
+06_protocolos_y_recibos''',
+      en: '''Migration folder — Brazil
+01_identity_and_parentage
+02_criminal_records
+03_form_and_declarations
+04_entry_into_brazil
+05_fees_and_receipts
+06_protocols_and_receipts''',
+    );
+  }
+
+  DateTime _nextReminderBusinessDay(DateTime date) {
+    var result = DateTime(date.year, date.month, date.day, 10);
+    while (result.weekday == DateTime.saturday ||
+        result.weekday == DateTime.sunday) {
+      result = result.add(const Duration(days: 1));
+    }
+    return result;
+  }
+
+  Widget _buildCalendarPrompt({
+    required MigrationPlan plan,
+    required GuideEventSuggestion suggestion,
+  }) {
+    return FutureBuilder<GuideEventSuggestionPreference>(
+      future: _eventSuggestionStore.readPreference(
+        plan: plan,
+        suggestionId: suggestion.id,
+      ),
+      builder: (context, snapshot) {
+        final preference = snapshot.data;
+        if (preference == null) {
+          return const SizedBox.shrink();
+        }
+        if (preference.isAdded) {
+          return _GuideCalendarScheduledCard(title: suggestion.title);
+        }
+        if (preference.isSkipped ||
+            !preference.shouldAutoPrompt(DateTime.now())) {
+          return const SizedBox.shrink();
+        }
+        return _GuideCalendarSuggestionCard(
+          suggestion: suggestion,
+          actionLabel: _localizedText(
+            context,
+            pt: 'Escolher data e lembrete',
+            es: 'Elegir fecha y recordatorio',
+            en: 'Choose date and reminder',
+          ),
+          onTap: () =>
+              _showCalendarSuggestionSheet(plan: plan, suggestion: suggestion),
+        );
+      },
     );
   }
 
@@ -2100,6 +2758,9 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     }
 
     _isPresentingCalendarAssistant = false;
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -2648,6 +3309,11 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       return;
     }
 
+    if (choice == PlanResetChoice.changeCityKeepProgress) {
+      Navigator.pushNamed(context, AppRoutes.citiesSearch);
+      return;
+    }
+
     await widget.controller.clearCurrentPlan();
     if (!mounted) {
       return;
@@ -2692,10 +3358,12 @@ class _GuideCalendarSuggestionCard extends StatelessWidget {
   const _GuideCalendarSuggestionCard({
     required this.suggestion,
     required this.onTap,
+    this.actionLabel,
   });
 
   final GuideEventSuggestion suggestion;
   final VoidCallback onTap;
+  final String? actionLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -2769,13 +3437,65 @@ class _GuideCalendarSuggestionCard extends StatelessWidget {
               onPressed: onTap,
               icon: const Icon(Icons.calendar_month_outlined, size: 16),
               label: Text(
-                _localizedText(
-                  context,
-                  pt: 'Adicionar ao calendário',
-                  es: 'Agregar al calendario',
-                  en: 'Add to calendar',
-                ),
+                actionLabel ??
+                    _localizedText(
+                      context,
+                      pt: 'Adicionar ao calendário',
+                      es: 'Agregar al calendario',
+                      en: 'Add to calendar',
+                    ),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GuideCalendarScheduledCard extends StatelessWidget {
+  const _GuideCalendarScheduledCard({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: AppColors.success.withValues(alpha: 0.09),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.22)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.event_available_rounded, color: AppColors.success),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _localizedText(
+                    context,
+                    pt: 'Lembrete adicionado',
+                    es: 'Recordatorio agregado',
+                    en: 'Reminder added',
+                  ),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.success,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(height: 1.35),
+                ),
+              ],
             ),
           ),
         ],
@@ -5525,12 +6245,14 @@ class _GuideNextMoveCard extends StatelessWidget {
     required this.actionLabel,
     required this.actionOpened,
     required this.onPressed,
+    this.description,
   });
 
   final GuidePrimaryActionType actionType;
   final String actionLabel;
   final bool actionOpened;
   final Future<void> Function() onPressed;
+  final String? description;
 
   @override
   Widget build(BuildContext context) {
@@ -5571,19 +6293,20 @@ class _GuideNextMoveCard extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           Text(
-            isTool
-                ? _localizedText(
-                    context,
-                    pt: 'Use a ferramenta com seus dados. O plano continua salvo aqui.',
-                    es: 'Usa la herramienta con tus datos. El plan seguirá guardado aquí.',
-                    en: 'Use the tool with your details. Your plan stays saved here.',
-                  )
-                : _localizedText(
-                    context,
-                    pt: 'Abra a fonte indicada, execute a ação e volte para confirmar.',
-                    es: 'Abre la fuente indicada, realiza la acción y vuelve para confirmar.',
-                    en: 'Open the indicated source, take action, and return to confirm.',
-                  ),
+            description ??
+                (isTool
+                    ? _localizedText(
+                        context,
+                        pt: 'Use a ferramenta com seus dados. O plano continua salvo aqui.',
+                        es: 'Usa la herramienta con tus datos. El plan seguirá guardado aquí.',
+                        en: 'Use the tool with your details. Your plan stays saved here.',
+                      )
+                    : _localizedText(
+                        context,
+                        pt: 'Abra a fonte indicada, execute a ação e volte para confirmar.',
+                        es: 'Abre la fuente indicada, realiza la acción y vuelve para confirmar.',
+                        en: 'Open the indicated source, take action, and return to confirm.',
+                      )),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSoftFor(context),
               height: 1.4,
@@ -9816,6 +10539,1563 @@ class _InlineActionTag extends StatelessWidget {
       ),
       child: Icon(Icons.arrow_forward_rounded, size: 14, color: tint),
     );
+  }
+}
+
+// ─── Migration-folder execution assistant ────────────────────────────────────
+
+class _MigrationFolderDecisionAssistant extends StatelessWidget {
+  const _MigrationFolderDecisionAssistant({
+    required this.profile,
+    required this.onChanged,
+  });
+
+  final MigrationDocumentFolderProfile profile;
+  final Future<void> Function(MigrationDocumentFolderProfile profile) onChanged;
+
+  void _update(MigrationDocumentFolderProfile value) {
+    unawaited(onChanged(value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = profile.needsCountryHistory ? 5 : 4;
+    final answered = <bool>[
+      profile.ageGroup != null,
+      profile.identityShowsParentage != null,
+      if (profile.needsCountryHistory) profile.livedOutsideArgentina != null,
+      profile.isAlreadyInBrazil != null,
+      profile.protocolWindow != null,
+    ].where((value) => value).length;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.tintedSurfaceFor(
+          context,
+          tint: AppColors.primary,
+          lightColor: const Color(0xFFF3F8FF),
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: AppColors.tintedBorderFor(
+            context,
+            tint: AppColors.primary,
+            lightColor: const Color(0xFFCFE2FF),
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.folder_copy_outlined, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _localizedText(
+                    context,
+                    pt: 'Monte somente a pasta do seu caso',
+                    es: 'Arma solo la carpeta de tu caso',
+                    en: 'Build only the folder your case needs',
+                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                ),
+              ),
+              Text(
+                '$answered/$total',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _localizedText(
+              context,
+              pt: 'Uma pergunta por vez. As peças que não se aplicam desaparecem automaticamente.',
+              es: 'Una pregunta por vez. Las piezas que no aplican desaparecen automáticamente.',
+              en: 'One question at a time. Pieces that do not apply disappear automatically.',
+            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 14),
+          _CriminalRecordQuestion<MigrationFolderAgeGroup>(
+            number: 1,
+            title: _localizedText(
+              context,
+              pt: 'Qual é a faixa etária do solicitante?',
+              es: '¿Cuál es la edad del solicitante?',
+              en: 'What is the applicant’s age group?',
+            ),
+            options: [
+              _DecisionChoice(
+                value: MigrationFolderAgeGroup.adult,
+                label: _localizedText(
+                  context,
+                  pt: '18 anos ou mais',
+                  es: '18 años o más',
+                  en: '18 or older',
+                ),
+              ),
+              _DecisionChoice(
+                value: MigrationFolderAgeGroup.under18,
+                label: _localizedText(
+                  context,
+                  pt: 'Menor de 18 anos',
+                  es: 'Menor de 18 años',
+                  en: 'Under 18',
+                ),
+              ),
+            ],
+            selected: profile.ageGroup,
+            onSelected: (value) => _update(profile.copyWith(ageGroup: value)),
+          ),
+          if (profile.ageGroup != null) ...[
+            const SizedBox(height: 16),
+            _CriminalRecordQuestion<bool>(
+              number: 2,
+              title: _localizedText(
+                context,
+                pt: 'Seu DNI ou passaporte mostra o nome dos seus pais?',
+                es: '¿Tu DNI o pasaporte muestra el nombre de tus padres?',
+                en: 'Does your ID or passport show your parents’ names?',
+              ),
+              helper: _localizedText(
+                context,
+                pt: 'A Polícia Federal chama essa informação de filiação.',
+                es: 'La Policía Federal llama a esta información filiación.',
+                en: 'The Federal Police refers to this as parentage information.',
+              ),
+              options: [
+                _DecisionChoice(
+                  value: true,
+                  label: _localizedText(
+                    context,
+                    pt: 'Sim, mostra',
+                    es: 'Sí, aparece',
+                    en: 'Yes, it does',
+                  ),
+                ),
+                _DecisionChoice(
+                  value: false,
+                  label: _localizedText(
+                    context,
+                    pt: 'Não mostra',
+                    es: 'No aparece',
+                    en: 'No, it does not',
+                  ),
+                ),
+              ],
+              selected: profile.identityShowsParentage,
+              onSelected: (value) =>
+                  _update(profile.copyWith(identityShowsParentage: value)),
+            ),
+          ],
+          if (profile.identityShowsParentage != null &&
+              profile.needsCountryHistory) ...[
+            const SizedBox(height: 16),
+            _CriminalRecordQuestion<bool>(
+              number: 3,
+              title: _localizedText(
+                context,
+                pt: 'Você viveu em outro país além da Argentina nos últimos 5 anos?',
+                es: '¿Viviste en otro país además de Argentina en los últimos 5 años?',
+                en: 'Have you lived outside Argentina in the last 5 years?',
+              ),
+              options: [
+                _DecisionChoice(
+                  value: false,
+                  label: _localizedText(context, pt: 'Não', es: 'No', en: 'No'),
+                ),
+                _DecisionChoice(
+                  value: true,
+                  label: _localizedText(
+                    context,
+                    pt: 'Sim',
+                    es: 'Sí',
+                    en: 'Yes',
+                  ),
+                ),
+              ],
+              selected: profile.livedOutsideArgentina,
+              onSelected: (value) =>
+                  _update(profile.copyWith(livedOutsideArgentina: value)),
+            ),
+          ],
+          if (profile.identityShowsParentage != null &&
+              (!profile.needsCountryHistory ||
+                  profile.livedOutsideArgentina != null)) ...[
+            const SizedBox(height: 16),
+            _CriminalRecordQuestion<bool>(
+              number: profile.needsCountryHistory ? 4 : 3,
+              title: _localizedText(
+                context,
+                pt: 'Você já entrou no Brasil?',
+                es: '¿Ya ingresaste a Brasil?',
+                en: 'Have you already entered Brazil?',
+              ),
+              helper: _localizedText(
+                context,
+                pt: 'Isso define se o comprovante de entrada já pode ser guardado ou ficará como pendência futura.',
+                es: 'Esto define si el comprobante de ingreso ya puede guardarse o quedará pendiente.',
+                en: 'This determines whether entry proof can be stored now or remains a later item.',
+              ),
+              options: [
+                _DecisionChoice(
+                  value: true,
+                  label: _localizedText(
+                    context,
+                    pt: 'Sim, já entrei',
+                    es: 'Sí, ya ingresé',
+                    en: 'Yes, I have',
+                  ),
+                ),
+                _DecisionChoice(
+                  value: false,
+                  label: _localizedText(
+                    context,
+                    pt: 'Ainda não',
+                    es: 'Todavía no',
+                    en: 'Not yet',
+                  ),
+                ),
+              ],
+              selected: profile.isAlreadyInBrazil,
+              onSelected: (value) =>
+                  _update(profile.copyWith(isAlreadyInBrazil: value)),
+            ),
+          ],
+          if (profile.isAlreadyInBrazil != null) ...[
+            const SizedBox(height: 16),
+            _CriminalRecordQuestion<CriminalRecordProtocolWindow>(
+              number: profile.needsCountryHistory ? 5 : 4,
+              title: _localizedText(
+                context,
+                pt: 'Quando você pretende protocolar na Polícia Federal?',
+                es: '¿Cuándo planeas presentar el trámite ante la Policía Federal?',
+                en: 'When do you plan to file with the Federal Police?',
+              ),
+              options: [
+                _DecisionChoice(
+                  value: CriminalRecordProtocolWindow.withinThirtyDays,
+                  label: _localizedText(
+                    context,
+                    pt: 'Nos próximos 30 dias',
+                    es: 'En los próximos 30 días',
+                    en: 'Within 30 days',
+                  ),
+                ),
+                _DecisionChoice(
+                  value: CriminalRecordProtocolWindow.oneToThreeMonths,
+                  label: _localizedText(
+                    context,
+                    pt: 'Entre 1 e 3 meses',
+                    es: 'Entre 1 y 3 meses',
+                    en: 'In 1–3 months',
+                  ),
+                ),
+                _DecisionChoice(
+                  value: CriminalRecordProtocolWindow.moreThanThreeMonths,
+                  label: _localizedText(
+                    context,
+                    pt: 'Mais de 3 meses',
+                    es: 'Más de 3 meses',
+                    en: 'More than 3 months',
+                  ),
+                ),
+                _DecisionChoice(
+                  value: CriminalRecordProtocolWindow.unknown,
+                  label: _localizedText(
+                    context,
+                    pt: 'Ainda não sei',
+                    es: 'Todavía no sé',
+                    en: 'Not sure yet',
+                  ),
+                ),
+              ],
+              selected: profile.protocolWindow,
+              onSelected: (value) =>
+                  _update(profile.copyWith(protocolWindow: value)),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _MigrationFolderActionContent {
+  const _MigrationFolderActionContent({
+    required this.icon,
+    required this.title,
+    required this.instruction,
+  });
+
+  final IconData icon;
+  final String title;
+  final String instruction;
+}
+
+_MigrationFolderActionContent _migrationFolderActionContent(
+  BuildContext context,
+  String id,
+  MigrationDocumentFolderProfile profile,
+) => switch (id) {
+  'folder_structure' => _MigrationFolderActionContent(
+    icon: Icons.create_new_folder_outlined,
+    title: _localizedText(
+      context,
+      pt: 'Crie a estrutura da pasta',
+      es: 'Crea la estructura de la carpeta',
+      en: 'Create the folder structure',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Use uma pasta digital e, se quiser, uma cópia física. Toque em “Copiar estrutura” para usar nomes prontos.',
+      es: 'Usa una carpeta digital y, si quieres, una copia física. Toca “Copiar estructura” para usar nombres listos.',
+      en: 'Use a digital folder and optionally a physical copy. Tap “Copy structure” for ready-made names.',
+    ),
+  ),
+  'official_route' => _MigrationFolderActionContent(
+    icon: Icons.verified_outlined,
+    title: _localizedText(
+      context,
+      pt: 'Salve a lista oficial correta',
+      es: 'Guarda la lista oficial correcta',
+      en: 'Save the correct official checklist',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Abra a modalidade “Acordo Brasil–Argentina” da Polícia Federal. Evite checklists genéricas.',
+      es: 'Abre la modalidad “Acuerdo Brasil–Argentina” de la Policía Federal. Evita listas genéricas.',
+      en: 'Open the Federal Police “Brazil–Argentina Agreement” route. Avoid generic checklists.',
+    ),
+  ),
+  'identity_copy' => _MigrationFolderActionContent(
+    icon: Icons.badge_outlined,
+    title: _localizedText(
+      context,
+      pt: 'Adicione sua identidade',
+      es: 'Agrega tu identidad',
+      en: 'Add your identity document',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Guarde uma cópia legível do DNI ou passaporte válido usado para entrar no Brasil.',
+      es: 'Guarda una copia legible del DNI o pasaporte válido usado para entrar a Brasil.',
+      en: 'Store a legible copy of the valid ID or passport used to enter Brazil.',
+    ),
+  ),
+  'parentage_evidence' => _MigrationFolderActionContent(
+    icon: Icons.family_restroom_outlined,
+    title: _localizedText(
+      context,
+      pt: 'Separe a prova de filiação',
+      es: 'Separa la prueba de filiación',
+      en: 'Prepare parentage evidence',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Como a identidade não mostra filiação, separe certidão de nascimento, casamento ou certidão consular.',
+      es: 'Como la identidad no muestra filiación, separa partida de nacimiento, matrimonio o certificado consular.',
+      en: 'Because the ID lacks parentage, prepare a birth, marriage, or consular certificate.',
+    ),
+  ),
+  'criminal_records_map' => _MigrationFolderActionContent(
+    icon: Icons.gpp_good_outlined,
+    title: _localizedText(
+      context,
+      pt: 'Reserve a seção de antecedentes',
+      es: 'Reserva la sección de antecedentes',
+      en: 'Reserve the criminal-record section',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Não emita às cegas aqui. A etapa “Certificados de antecedentes” calcula os países e o melhor momento.',
+      es: 'No los emitas a ciegas aquí. La etapa “Certificados de antecedentes” calcula países y momento.',
+      en: 'Do not request them blindly here. The criminal-record step determines countries and timing.',
+    ),
+  ),
+  'other_countries_map' => _MigrationFolderActionContent(
+    icon: Icons.public_outlined,
+    title: _localizedText(
+      context,
+      pt: 'Liste os outros países',
+      es: 'Lista los otros países',
+      en: 'List the other countries',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Anote cada país onde viveu nos cinco anos anteriores ao pedido. Cada um pode exigir certidão própria.',
+      es: 'Anota cada país donde viviste en los cinco años anteriores. Cada uno puede exigir su certificado.',
+      en: 'List each country lived in during the previous five years. Each may require its own certificate.',
+    ),
+  ),
+  'formalities_review' => _MigrationFolderActionContent(
+    icon: Icons.translate_outlined,
+    title: _localizedText(
+      context,
+      pt: 'Marque o que exige formalidade',
+      es: 'Marca lo que exige formalidad',
+      en: 'Mark documents needing formalities',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Para cada documento estrangeiro, confirme na fonte oficial se precisa apostila, legalização ou tradução. Não presuma dispensa.',
+      es: 'Para cada documento extranjero, confirma si necesita apostilla, legalización o traducción. No presumas exención.',
+      en: 'For each foreign document, confirm apostille, legalization, or translation requirements. Do not assume a waiver.',
+    ),
+  ),
+  _ => _MigrationFolderActionContent(
+    icon: Icons.pending_actions_outlined,
+    title: _localizedText(
+      context,
+      pt: 'Crie espaços para os documentos posteriores',
+      es: 'Crea espacios para los documentos posteriores',
+      en: 'Create slots for later documents',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: profile.isAlreadyInBrazil == true
+          ? 'Guarde o comprovante de entrada. Deixe formulário, declaração, taxas e protocolo em seções separadas.'
+          : 'Deixe espaços para comprovante de entrada, formulário, declaração, taxas e protocolo. Você preencherá depois, no momento correto.',
+      es: profile.isAlreadyInBrazil == true
+          ? 'Guarda el comprobante de ingreso. Deja formulario, declaración, tasas y protocolo en secciones separadas.'
+          : 'Deja espacios para ingreso, formulario, declaración, tasas y protocolo. Los completarás en el momento correcto.',
+      en: profile.isAlreadyInBrazil == true
+          ? 'Store entry proof. Keep form, declaration, fees, and protocol in separate sections.'
+          : 'Create slots for entry proof, form, declaration, fees, and protocol. Fill them at the right time.',
+    ),
+  ),
+};
+
+class _MigrationFolderActionRunner extends StatelessWidget {
+  const _MigrationFolderActionRunner({
+    required this.profile,
+    required this.onToggle,
+    required this.onOpenOfficial,
+    required this.onCopyStructure,
+  });
+
+  final MigrationDocumentFolderProfile profile;
+  final Future<void> Function(String actionId) onToggle;
+  final VoidCallback onOpenOfficial;
+  final VoidCallback onCopyStructure;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!profile.isComplete) {
+      return _GuideWorkflowMessage(
+        text: _localizedText(
+          context,
+          pt: 'Responda às perguntas acima. A próxima ação aparecerá aqui.',
+          es: 'Responde las preguntas de arriba. La próxima acción aparecerá aquí.',
+          en: 'Answer the questions above. Your next action will appear here.',
+        ),
+      );
+    }
+    final ids = profile.requiredActionIds;
+    final completed = profile.completedActionIds;
+    final currentId = ids.where((id) => !completed.contains(id)).firstOrNull;
+    if (currentId == null) {
+      return _GuideWorkflowMessage(
+        text: _localizedText(
+          context,
+          pt: 'Pasta estruturada. Faça a conferência final abaixo e conclua a etapa.',
+          es: 'Carpeta estructurada. Haz la revisión final y completa la etapa.',
+          en: 'Folder structured. Review the summary below and complete the step.',
+        ),
+      );
+    }
+    final current = _migrationFolderActionContent(context, currentId, profile);
+    final currentIndex = ids.indexOf(currentId);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                _localizedText(
+                  context,
+                  pt: 'Próxima ação',
+                  es: 'Próxima acción',
+                  en: 'Next action',
+                ),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            Text(
+              '${currentIndex + 1}/${ids.length}',
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: AppColors.tintedSurfaceFor(
+              context,
+              tint: AppColors.primary,
+              lightColor: const Color(0xFFF5F9FF),
+            ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.22),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(current.icon, color: AppColors.primary),
+              const SizedBox(height: 10),
+              Text(
+                current.title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                current.instruction,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.45,
+                ),
+              ),
+              if (currentId == 'folder_structure' ||
+                  currentId == 'official_route') ...[
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: currentId == 'folder_structure'
+                      ? onCopyStructure
+                      : onOpenOfficial,
+                  icon: Icon(
+                    currentId == 'folder_structure'
+                        ? Icons.copy_rounded
+                        : Icons.open_in_new_rounded,
+                    size: 17,
+                  ),
+                  label: Text(
+                    currentId == 'folder_structure'
+                        ? _localizedText(
+                            context,
+                            pt: 'Copiar estrutura',
+                            es: 'Copiar estructura',
+                            en: 'Copy structure',
+                          )
+                        : _localizedText(
+                            context,
+                            pt: 'Abrir lista oficial',
+                            es: 'Abrir lista oficial',
+                            en: 'Open official checklist',
+                          ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () => onToggle(currentId),
+                  icon: const Icon(Icons.check_rounded, size: 18),
+                  label: Text(
+                    _localizedText(
+                      context,
+                      pt: 'Pronto, avançar',
+                      es: 'Listo, avanzar',
+                      en: 'Done, continue',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (completed.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          for (final id in ids.where(completed.contains))
+            Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    size: 17,
+                    color: AppColors.success,
+                  ),
+                  const SizedBox(width: 7),
+                  Expanded(
+                    child: Text(
+                      _migrationFolderActionContent(context, id, profile).title,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    tooltip: _localizedText(
+                      context,
+                      pt: 'Reabrir',
+                      es: 'Reabrir',
+                      en: 'Reopen',
+                    ),
+                    onPressed: () => onToggle(id),
+                    icon: const Icon(Icons.undo_rounded, size: 17),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+}
+
+class _MigrationFolderCompletionSummary extends StatelessWidget {
+  const _MigrationFolderCompletionSummary({required this.profile});
+
+  final MigrationDocumentFolderProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = profile.requiredActionIds.length;
+    final completed = profile.requiredActionIds
+        .where(profile.completedActionIds.contains)
+        .length;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: (completed == total ? AppColors.success : AppColors.primary)
+            .withValues(alpha: 0.09),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: (completed == total ? AppColors.success : AppColors.primary)
+              .withValues(alpha: 0.22),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            completed == total
+                ? Icons.task_alt_rounded
+                : Icons.folder_open_rounded,
+            color: completed == total ? AppColors.success : AppColors.primary,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              completed == total
+                  ? _localizedText(
+                      context,
+                      pt: 'Estrutura pronta. Os documentos futuros estão separados das peças que já podem ser organizadas.',
+                      es: 'Estructura lista. Los documentos futuros están separados de las piezas que ya pueden organizarse.',
+                      en: 'Structure ready. Later documents are separated from pieces that can be organized now.',
+                    )
+                  : _localizedText(
+                      context,
+                      pt: '$completed de $total peças preparadas. Continue pela próxima ação acima.',
+                      es: '$completed de $total piezas preparadas. Continúa con la próxima acción.',
+                      en: '$completed of $total pieces prepared. Continue with the next action above.',
+                    ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Criminal-record decision assistant ──────────────────────────────────────
+
+class _CriminalRecordDecisionAssistant extends StatefulWidget {
+  const _CriminalRecordDecisionAssistant({
+    required this.profile,
+    required this.onChanged,
+  });
+
+  final CriminalRecordProfile profile;
+  final Future<void> Function(CriminalRecordProfile profile) onChanged;
+
+  @override
+  State<_CriminalRecordDecisionAssistant> createState() =>
+      _CriminalRecordDecisionAssistantState();
+}
+
+class _CriminalRecordDecisionAssistantState
+    extends State<_CriminalRecordDecisionAssistant> {
+  late final TextEditingController _countriesController;
+
+  @override
+  void initState() {
+    super.initState();
+    _countriesController = TextEditingController(
+      text: widget.profile.otherCountriesText,
+    );
+  }
+
+  @override
+  void didUpdateWidget(_CriminalRecordDecisionAssistant oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_countriesController.selection.isValid &&
+        _countriesController.text != widget.profile.otherCountriesText) {
+      _countriesController.text = widget.profile.otherCountriesText;
+    }
+  }
+
+  @override
+  void dispose() {
+    _countriesController.dispose();
+    super.dispose();
+  }
+
+  void _update(CriminalRecordProfile profile) {
+    unawaited(widget.onChanged(profile));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final profile = widget.profile;
+    final answered = <bool>[
+      profile.ageGroup != null,
+      profile.isExempt || profile.hasArgentineDni != null,
+      profile.isExempt || profile.livedOutsideArgentina != null,
+      profile.isExempt || profile.protocolWindow != null,
+    ].where((value) => value).length;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.tintedSurfaceFor(
+          context,
+          tint: AppColors.primary,
+          lightColor: const Color(0xFFF3F8FF),
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: AppColors.tintedBorderFor(
+            context,
+            tint: AppColors.primary,
+            lightColor: const Color(0xFFCFE2FF),
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.route_rounded,
+                size: 18,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _localizedText(
+                    context,
+                    pt: 'Descubra sua rota em até 4 respostas',
+                    es: 'Descubre tu ruta en hasta 4 respuestas',
+                    en: 'Find your route in up to 4 answers',
+                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                ),
+              ),
+              Text(
+                '$answered/4',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _localizedText(
+              context,
+              pt: 'O Movaro guarda somente estas escolhas de rota. Não pedimos número do DNI nem o arquivo do certificado.',
+              es: 'Movaro guarda solo estas decisiones de ruta. No pedimos el número de DNI ni el archivo del certificado.',
+              en: 'Movaro stores only these route choices. We do not ask for a DNI number or certificate file.',
+            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _CriminalRecordQuestion(
+            number: 1,
+            title: _localizedText(
+              context,
+              pt: 'Qual é a sua faixa etária?',
+              es: '¿Cuál es tu rango de edad?',
+              en: 'What is your age range?',
+            ),
+            options: [
+              _DecisionChoice<CriminalRecordAgeGroup>(
+                value: CriminalRecordAgeGroup.adult,
+                label: _localizedText(
+                  context,
+                  pt: '18 anos ou mais',
+                  es: '18 años o más',
+                  en: '18 or older',
+                ),
+              ),
+              _DecisionChoice<CriminalRecordAgeGroup>(
+                value: CriminalRecordAgeGroup.minor,
+                label: _localizedText(
+                  context,
+                  pt: 'Menos de 18',
+                  es: 'Menos de 18',
+                  en: 'Under 18',
+                ),
+              ),
+            ],
+            selected: profile.ageGroup,
+            onSelected: (value) =>
+                _update(CriminalRecordProfile(ageGroup: value)),
+          ),
+          if (profile.isExempt) ...[
+            const SizedBox(height: 14),
+            const _CriminalRecordExemptionCard(),
+          ] else if (profile.ageGroup == CriminalRecordAgeGroup.adult) ...[
+            const SizedBox(height: 14),
+            _CriminalRecordQuestion(
+              number: 2,
+              title: _localizedText(
+                context,
+                pt: 'Você possui DNI argentino?',
+                es: '¿Tenés DNI argentino?',
+                en: 'Do you have an Argentine DNI?',
+              ),
+              helper: _localizedText(
+                context,
+                pt: 'Sem DNI argentino, o RNR orienta fazer o pedido presencialmente.',
+                es: 'Sin DNI argentino, el RNR indica hacer el trámite presencialmente.',
+                en: 'Without an Argentine DNI, RNR directs you to the in-person route.',
+              ),
+              options: [
+                _DecisionChoice<bool>(
+                  value: true,
+                  label: _localizedText(
+                    context,
+                    pt: 'Sim',
+                    es: 'Sí',
+                    en: 'Yes',
+                  ),
+                ),
+                _DecisionChoice<bool>(
+                  value: false,
+                  label: _localizedText(context, pt: 'Não', es: 'No', en: 'No'),
+                ),
+              ],
+              selected: profile.hasArgentineDni,
+              onSelected: (value) => _update(
+                profile.copyWith(
+                  hasArgentineDni: value,
+                  completedOutcomeIds: const <String>{},
+                ),
+              ),
+            ),
+            if (profile.hasArgentineDni != null) ...[
+              const SizedBox(height: 14),
+              _CriminalRecordQuestion(
+                number: 3,
+                title: _localizedText(
+                  context,
+                  pt: 'Você viveu fora da Argentina nos últimos 5 anos?',
+                  es: '¿Viviste fuera de Argentina en los últimos 5 años?',
+                  en: 'Did you live outside Argentina in the last 5 years?',
+                ),
+                options: [
+                  _DecisionChoice<bool>(
+                    value: false,
+                    label: _localizedText(
+                      context,
+                      pt: 'Não',
+                      es: 'No',
+                      en: 'No',
+                    ),
+                  ),
+                  _DecisionChoice<bool>(
+                    value: true,
+                    label: _localizedText(
+                      context,
+                      pt: 'Sim',
+                      es: 'Sí',
+                      en: 'Yes',
+                    ),
+                  ),
+                ],
+                selected: profile.livedOutsideArgentina,
+                onSelected: (value) {
+                  if (!value) _countriesController.clear();
+                  _update(
+                    profile.copyWith(
+                      livedOutsideArgentina: value,
+                      otherCountriesText: value
+                          ? profile.otherCountriesText
+                          : '',
+                      completedOutcomeIds: const <String>{},
+                    ),
+                  );
+                },
+              ),
+            ],
+            if (profile.livedOutsideArgentina == true) ...[
+              const SizedBox(height: 10),
+              TextField(
+                controller: _countriesController,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(
+                  labelText: _localizedText(
+                    context,
+                    pt: 'Quais países?',
+                    es: '¿Qué países?',
+                    en: 'Which countries?',
+                  ),
+                  hintText: _localizedText(
+                    context,
+                    pt: 'Ex.: Chile, Uruguai',
+                    es: 'Ej.: Chile, Uruguay',
+                    en: 'E.g. Chile, Uruguay',
+                  ),
+                  helperText: _localizedText(
+                    context,
+                    pt: 'Separe mais de um país com vírgulas.',
+                    es: 'Separá varios países con comas.',
+                    en: 'Separate multiple countries with commas.',
+                  ),
+                  prefixIcon: const Icon(Icons.public_rounded),
+                ),
+                onChanged: (value) => _update(
+                  profile.copyWith(
+                    otherCountriesText: value,
+                    completedOutcomeIds: const <String>{},
+                  ),
+                ),
+              ),
+            ],
+            if (profile.livedOutsideArgentina == false ||
+                profile.otherCountries.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              _CriminalRecordQuestion(
+                number: 4,
+                title: _localizedText(
+                  context,
+                  pt: 'Quando pretende protocolar na Polícia Federal?',
+                  es: '¿Cuándo pensás presentar ante la Policía Federal?',
+                  en: 'When do you expect to file with Federal Police?',
+                ),
+                options: [
+                  _DecisionChoice<CriminalRecordProtocolWindow>(
+                    value: CriminalRecordProtocolWindow.withinThirtyDays,
+                    label: _localizedText(
+                      context,
+                      pt: 'Até 30 dias',
+                      es: 'Hasta 30 días',
+                      en: 'Within 30 days',
+                    ),
+                  ),
+                  _DecisionChoice<CriminalRecordProtocolWindow>(
+                    value: CriminalRecordProtocolWindow.oneToThreeMonths,
+                    label: _localizedText(
+                      context,
+                      pt: '1 a 3 meses',
+                      es: '1 a 3 meses',
+                      en: '1–3 months',
+                    ),
+                  ),
+                  _DecisionChoice<CriminalRecordProtocolWindow>(
+                    value: CriminalRecordProtocolWindow.moreThanThreeMonths,
+                    label: _localizedText(
+                      context,
+                      pt: 'Mais de 3 meses',
+                      es: 'Más de 3 meses',
+                      en: 'More than 3 months',
+                    ),
+                  ),
+                  _DecisionChoice<CriminalRecordProtocolWindow>(
+                    value: CriminalRecordProtocolWindow.unknown,
+                    label: _localizedText(
+                      context,
+                      pt: 'Ainda não sei',
+                      es: 'Todavía no sé',
+                      en: 'Not sure yet',
+                    ),
+                  ),
+                ],
+                selected: profile.protocolWindow,
+                onSelected: (value) =>
+                    _update(profile.copyWith(protocolWindow: value)),
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _DecisionChoice<T> {
+  const _DecisionChoice({required this.value, required this.label});
+
+  final T value;
+  final String label;
+}
+
+class _CriminalRecordQuestion<T> extends StatelessWidget {
+  const _CriminalRecordQuestion({
+    required this.number,
+    required this.title,
+    required this.options,
+    required this.selected,
+    required this.onSelected,
+    this.helper,
+  });
+
+  final int number;
+  final String title;
+  final String? helper;
+  final List<_DecisionChoice<T>> options;
+  final T? selected;
+  final ValueChanged<T> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                '$number',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  if (helper != null) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      helper!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 9),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final option in options)
+              ChoiceChip(
+                label: Text(option.label),
+                selected: selected == option.value,
+                onSelected: (_) => onSelected(option.value),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _CriminalRecordExecutionPlan extends StatelessWidget {
+  const _CriminalRecordExecutionPlan({
+    required this.profile,
+    required this.onLinkTap,
+  });
+
+  static const _pfUrl =
+      'https://www.gov.br/pf/pt-br/assuntos/imigracao/autorizacao-residencia/acordo-de-residencia-brasil-e-argentina';
+  static const _rnrFaqUrl =
+      'https://www.argentina.gob.ar/justicia/reincidencia/antecedentespenales/preguntas-frecuentes';
+
+  final CriminalRecordProfile profile;
+  final void Function(String url, String label) onLinkTap;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!profile.isComplete) {
+      return _GuideWorkflowMessage(
+        text: _localizedText(
+          context,
+          pt: 'Responda às perguntas acima. A rota correta aparecerá aqui sem misturar instruções que não se aplicam a você.',
+          es: 'Responde las preguntas de arriba. La ruta correcta aparecerá aquí sin mezclar instrucciones que no se aplican a tu caso.',
+          en: 'Answer the questions above. Your route will appear here without mixing in instructions that do not apply to you.',
+        ),
+      );
+    }
+    if (profile.isExempt) return const _CriminalRecordExemptionCard();
+
+    final isOnline = profile.route == CriminalRecordRoute.onlineOrInPerson;
+    final timing = _timingContent(context, profile.protocolWindow!);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _CriminalRecordRouteCard(
+          icon: isOnline ? Icons.laptop_mac_rounded : Icons.apartment_rounded,
+          color: AppColors.primary,
+          eyebrow: _localizedText(
+            context,
+            pt: 'SUA ROTA NA ARGENTINA',
+            es: 'TU RUTA EN ARGENTINA',
+            en: 'YOUR ARGENTINA ROUTE',
+          ),
+          title: isOnline
+              ? _localizedText(
+                  context,
+                  pt: 'Pela internet ou presencialmente',
+                  es: 'En línea o presencial',
+                  en: 'Online or in person',
+                )
+              : _localizedText(
+                  context,
+                  pt: 'Atendimento presencial',
+                  es: 'Atención presencial',
+                  en: 'In-person service',
+                ),
+          body: isOnline
+              ? _localizedText(
+                  context,
+                  pt: 'Com DNI argentino e mais de 18 anos, você pode usar Mi Argentina, AFIP, ANSES ou Banelco; a rota presencial continua disponível.',
+                  es: 'Con DNI argentino y más de 18 años, podés usar Mi Argentina, AFIP, ANSES o Banelco; la vía presencial sigue disponible.',
+                  en: 'With an Argentine DNI and age 18+, you can use Mi Argentina, AFIP, ANSES, or Banelco; the in-person route remains available.',
+                )
+              : _localizedText(
+                  context,
+                  pt: 'Sem DNI argentino, o RNR orienta maiores de 18 anos a fazer o pedido em uma unidade presencial.',
+                  es: 'Sin DNI argentino, el RNR indica que los mayores de 18 años deben hacer el trámite en una sede presencial.',
+                  en: 'Without an Argentine DNI, RNR directs adults to request the certificate at an in-person office.',
+                ),
+        ),
+        const SizedBox(height: 10),
+        _CriminalRecordRouteCard(
+          icon: timing.$1,
+          color: timing.$2,
+          eyebrow: _localizedText(
+            context,
+            pt: 'MELHOR MOMENTO',
+            es: 'MEJOR MOMENTO',
+            en: 'BEST TIMING',
+          ),
+          title: timing.$3,
+          body: timing.$4,
+        ),
+        if (profile.otherCountries.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          _CriminalRecordRouteCard(
+            icon: Icons.public_rounded,
+            color: AppColors.warning,
+            eyebrow: _localizedText(
+              context,
+              pt: 'OUTROS PAÍSES',
+              es: 'OTROS PAÍSES',
+              en: 'OTHER COUNTRIES',
+            ),
+            title: profile.otherCountries.join(' · '),
+            body: _localizedText(
+              context,
+              pt: 'O certificado argentino não cobre esses países. Solicite cada documento na autoridade oficial correspondente e confirme legalização, tradução e aceitação com a PF.',
+              es: 'El certificado argentino no cubre estos países. Solicitá cada documento ante la autoridad oficial correspondiente y confirmá legalización, traducción y aceptación con la PF.',
+              en: 'The Argentine certificate does not cover these countries. Request each record from its official authority and confirm legalization, translation, and acceptance with Federal Police.',
+            ),
+          ),
+        ],
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton.icon(
+              onPressed: () =>
+                  onLinkTap(_rnrFaqUrl, 'Registro Nacional de Reincidencia'),
+              icon: const Icon(Icons.verified_outlined, size: 16),
+              label: Text(
+                _localizedText(
+                  context,
+                  pt: 'Requisitos do RNR',
+                  es: 'Requisitos del RNR',
+                  en: 'RNR requirements',
+                ),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => onLinkTap(_pfUrl, 'Polícia Federal'),
+              icon: const Icon(Icons.fact_check_outlined, size: 16),
+              label: Text(
+                _localizedText(
+                  context,
+                  pt: 'Exigências da PF',
+                  es: 'Requisitos de la PF',
+                  en: 'Federal Police requirements',
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _CriminalRecordRecoveryCard(),
+      ],
+    );
+  }
+
+  (IconData, Color, String, String) _timingContent(
+    BuildContext context,
+    CriminalRecordProtocolWindow window,
+  ) {
+    return switch (window) {
+      CriminalRecordProtocolWindow.withinThirtyDays => (
+        Icons.play_circle_outline_rounded,
+        AppColors.success,
+        _localizedText(
+          context,
+          pt: 'Você já pode solicitar',
+          es: 'Ya podés solicitarlo',
+          en: 'You can request it now',
+        ),
+        _localizedText(
+          context,
+          pt: 'Como o protocolo está próximo, emita agora e confirme a regra vigente antes do atendimento.',
+          es: 'Como la presentación está próxima, emitilo ahora y confirmá la regla vigente antes del turno.',
+          en: 'Because filing is close, request it now and confirm the current rule before your appointment.',
+        ),
+      ),
+      CriminalRecordProtocolWindow.oneToThreeMonths => (
+        Icons.calendar_month_outlined,
+        AppColors.warning,
+        _localizedText(
+          context,
+          pt: 'Prepare agora e emita mais perto',
+          es: 'Prepará ahora y emitilo más cerca',
+          en: 'Prepare now, request closer to filing',
+        ),
+        _localizedText(
+          context,
+          pt: 'Confirme sua rota e os meios de acesso agora. Solicite quando a data do protocolo estiver mais firme.',
+          es: 'Confirmá ahora tu ruta y medios de acceso. Solicitá cuando la fecha de presentación esté más definida.',
+          en: 'Confirm your route and access methods now. Request once your filing date is firmer.',
+        ),
+      ),
+      CriminalRecordProtocolWindow.moreThanThreeMonths => (
+        Icons.hourglass_top_rounded,
+        AppColors.warning,
+        _localizedText(
+          context,
+          pt: 'Ainda não emita',
+          es: 'Todavía no lo emitas',
+          en: 'Do not request it yet',
+        ),
+        _localizedText(
+          context,
+          pt: 'Mapeie os países e deixe a rota pronta, mas evite emitir cedo demais. Volte quando o protocolo estiver mais próximo.',
+          es: 'Mapeá los países y dejá la ruta lista, pero evitá emitir demasiado pronto. Volvé cuando la presentación esté más cerca.',
+          en: 'Map the countries and prepare the route, but avoid requesting too early. Return when filing is closer.',
+        ),
+      ),
+      CriminalRecordProtocolWindow.unknown => (
+        Icons.event_note_outlined,
+        AppColors.primary,
+        _localizedText(
+          context,
+          pt: 'Defina primeiro o protocolo',
+          es: 'Primero definí la presentación',
+          en: 'Define your filing window first',
+        ),
+        _localizedText(
+          context,
+          pt: 'Entenda a rota agora, mas espere para emitir até ter uma previsão mais segura de atendimento na PF.',
+          es: 'Entendé la ruta ahora, pero esperá para emitir hasta tener una previsión más segura del turno en la PF.',
+          en: 'Understand the route now, but wait to request until you have a safer Federal Police filing estimate.',
+        ),
+      ),
+    };
+  }
+}
+
+class _CriminalRecordRouteCard extends StatelessWidget {
+  const _CriminalRecordRouteCard({
+    required this.icon,
+    required this.color,
+    required this.eyebrow,
+    required this.title,
+    required this.body,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String eyebrow;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: color.withValues(alpha: 0.20)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  eyebrow,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  body,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(height: 1.4),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CriminalRecordExemptionCard extends StatelessWidget {
+  const _CriminalRecordExemptionCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return _CriminalRecordRouteCard(
+      icon: Icons.verified_user_outlined,
+      color: AppColors.success,
+      eyebrow: _localizedText(
+        context,
+        pt: 'DISPENSA PARA ESTA RESIDÊNCIA',
+        es: 'EXENCIÓN PARA ESTA RESIDENCIA',
+        en: 'EXEMPT FOR THIS RESIDENCE ROUTE',
+      ),
+      title: _localizedText(
+        context,
+        pt: 'Menores de 18 anos são dispensados',
+        es: 'Los menores de 18 años están exentos',
+        en: 'Applicants under 18 are exempt',
+      ),
+      body: _localizedText(
+        context,
+        pt: 'A lista atual da Polícia Federal dispensa menores de 18 anos da certidão e da declaração de antecedentes nesta rota. Confirme a página oficial antes do protocolo.',
+        es: 'La lista actual de la Policía Federal exime a menores de 18 años del certificado y la declaración de antecedentes en esta vía. Confirmá la página oficial antes de presentar.',
+        en: 'The current Federal Police list exempts applicants under 18 from the criminal record certificate and declaration for this route. Confirm the official page before filing.',
+      ),
+    );
+  }
+}
+
+class _CriminalRecordRecoveryCard extends StatelessWidget {
+  const _CriminalRecordRecoveryCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionTile(
+      tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+      childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      collapsedShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      backgroundColor: AppColors.surfaceMutedFor(context),
+      collapsedBackgroundColor: AppColors.surfaceMutedFor(context),
+      leading: const Icon(Icons.support_agent_rounded, size: 19),
+      title: Text(
+        _localizedText(
+          context,
+          pt: 'Se algo der errado',
+          es: 'Si algo sale mal',
+          en: 'If something goes wrong',
+        ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+      ),
+      children: [
+        Text(
+          _localizedText(
+            context,
+            pt: '• O prazo começa após a confirmação do pagamento.\n• Se o e-mail não chegar, confira o spam.\n• O RNR permite pedir correção em até 15 dias corridos da emissão.\n• Guarde o PDF original com assinatura digital e os códigos de download.',
+            es: '• El plazo comienza cuando se acredita el pago.\n• Si no llega el correo, revisá spam.\n• El RNR permite pedir correcciones dentro de los 15 días corridos desde la emisión.\n• Guardá el PDF original con firma digital y los códigos de descarga.',
+            en: '• Processing starts after payment is confirmed.\n• If the email does not arrive, check spam.\n• RNR allows correction requests within 15 calendar days of issuance.\n• Keep the original digitally signed PDF and download codes.',
+          ),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.55),
+        ),
+      ],
+    );
+  }
+}
+
+class _CriminalRecordOutcomeChecklist extends StatelessWidget {
+  const _CriminalRecordOutcomeChecklist({
+    required this.outcomes,
+    required this.completedIds,
+    required this.onToggle,
+  });
+
+  final List<CriminalRecordOutcome> outcomes;
+  final Set<String> completedIds;
+  final Future<void> Function(CriminalRecordOutcome outcome) onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (final outcome in outcomes) ...[
+          Semantics(
+            button: true,
+            checked: completedIds.contains(outcome.id),
+            child: InkWell(
+              onTap: () => onToggle(outcome),
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: completedIds.contains(outcome.id)
+                      ? AppColors.success.withValues(alpha: 0.08)
+                      : AppColors.surfaceMutedFor(context),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: completedIds.contains(outcome.id)
+                        ? AppColors.success.withValues(alpha: 0.24)
+                        : AppColors.borderFor(context),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      completedIds.contains(outcome.id)
+                          ? Icons.check_circle_rounded
+                          : Icons.radio_button_unchecked_rounded,
+                      color: completedIds.contains(outcome.id)
+                          ? AppColors.success
+                          : AppColors.textSoftFor(context),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _label(context, outcome),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          decoration: completedIds.contains(outcome.id)
+                              ? TextDecoration.lineThrough
+                              : null,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (outcome != outcomes.last) const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+
+  String _label(BuildContext context, CriminalRecordOutcome outcome) {
+    return switch (outcome.kind) {
+      CriminalRecordOutcomeKind.requested => _localizedText(
+        context,
+        pt: 'Solicitei o certificado de ${outcome.country}',
+        es: 'Solicité el certificado de ${outcome.country}',
+        en: 'Requested the ${outcome.country} certificate',
+      ),
+      CriminalRecordOutcomeKind.receivedAndVerified => _localizedText(
+        context,
+        pt: 'Recebi e guardei o documento de ${outcome.country}',
+        es: 'Recibí y guardé el documento de ${outcome.country}',
+        en: 'Received and saved the ${outcome.country} document',
+      ),
+      CriminalRecordOutcomeKind.acceptanceChecked => _localizedText(
+        context,
+        pt: 'Confirmei validade, legalização e tradução na Polícia Federal',
+        es: 'Confirmé vigencia, legalización y traducción con la Policía Federal',
+        en: 'Confirmed validity, legalization, and translation with Federal Police',
+      ),
+    };
   }
 }
 

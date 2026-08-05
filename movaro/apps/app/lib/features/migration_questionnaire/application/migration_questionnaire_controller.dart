@@ -628,6 +628,42 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     }
   }
 
+  /// Changes only the destination city while keeping person-level progress.
+  /// City-dependent tasks are reopened by the reset service, while completed
+  /// documents and national processes keep their state under the same plan id.
+  Future<bool> changePlanCityKeepingProgress(City city) async {
+    final plan = _generatedPlan;
+    if (plan == null) {
+      return false;
+    }
+
+    await _planResetService?.retainTransferableProgressForCityChange(plan);
+    _preferredCity = city;
+    _generatedPlan = plan.copyWith(
+      preferredCity: city,
+      highlightedCity: city,
+      isCityConfirmed: true,
+    );
+    await _migrationPlanRepository.setCurrentPlan(_generatedPlan);
+    notifyListeners();
+
+    try {
+      await PlanNotificationService.instance.cancelPlanReminders();
+      await PlanNotificationService.instance.cancelPFReminder();
+      await PlanNotificationService.instance.scheduleOnboardingSequence(
+        _generatedPlan!,
+      );
+      await PlanNotificationService.instance.schedulePFAppointmentReminder(
+        _generatedPlan!,
+      );
+    } catch (error) {
+      debugPrint(
+        'Plan reminders unavailable after city change; the plan was preserved: $error',
+      );
+    }
+    return true;
+  }
+
   void _setInitializing(bool value) {
     _isInitializing = value;
     notifyListeners();
