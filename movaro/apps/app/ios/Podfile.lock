@@ -69,7 +69,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
 
 SPEC CHECKSUMS:
-  add_2_calendar_new: 68ef3d90f48e9ae4056357711462e427be6098a0
+  add_2_calendar_new: 981744237a232081c48d1d4943e0c9f7edfa286d
   app_links: a754cbec3c255bd4bbb4d236ecc06f28cd9a7ce8
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_local_notifications: 643a3eda1ce1c0599413ca31672536d423dee214
