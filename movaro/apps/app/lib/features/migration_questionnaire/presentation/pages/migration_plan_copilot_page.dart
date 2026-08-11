@@ -29,6 +29,7 @@ import 'package:movaro_app/features/migration_questionnaire/application/migratio
 import 'package:movaro_app/features/migration_questionnaire/application/guide_gps_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/criminal_record_decision_engine.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/entry_regularization_decision_engine.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/arrival_execution_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/calendar_event_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
@@ -40,6 +41,7 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_folder_engine.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_assistant_answer_bridge.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_readiness_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
@@ -1118,15 +1120,51 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   }) async {
     var sheetItem = item;
     var actionOpened = false;
+    const completedInstructionIndexesKey =
+        'assistant_completed_instruction_indexes';
+    var completedInstructionIndexes = controller.taskDecisionDataFor(
+      item.id,
+    )?[completedInstructionIndexesKey];
+    var completedGenericInstructionIndexes = completedInstructionIndexes is List
+        ? completedInstructionIndexes
+              .whereType<num>()
+              .map((value) => value.toInt())
+              .toSet()
+        : <int>{};
+    final storedEntryProfile = EntryRegularizationProfile.fromJson(
+      controller.taskDecisionDataFor('item_0_1_rule_90_days'),
+    );
+    final storedFolderProfile = MigrationDocumentFolderProfile.fromJson(
+      controller.taskDecisionDataFor('item_0_2_document_folder'),
+    );
+    final storedCriminalProfile = CriminalRecordProfile.fromJson(
+      controller.taskDecisionDataFor('item_0_2_antecedentes'),
+    );
+    final resolvedFolder = MigrationAssistantAnswerBridge.resolveDocumentFolder(
+      stored: storedFolderProfile,
+      entry: storedEntryProfile,
+      criminal: storedCriminalProfile,
+    );
+    final resolvedCriminal =
+        MigrationAssistantAnswerBridge.resolveCriminalRecord(
+          stored: storedCriminalProfile,
+          entry: storedEntryProfile,
+          folder: resolvedFolder.profile,
+        );
     var criminalRecordProfile = item.id == 'item_0_2_antecedentes'
-        ? CriminalRecordProfile.fromJson(
-            controller.taskDecisionDataFor(item.id),
-          )
+        ? resolvedCriminal.profile
         : null;
+    final criminalInheritedFieldIds = item.id == 'item_0_2_antecedentes'
+        ? resolvedCriminal.fieldIds
+        : const <String>{};
     var documentFolderProfile = item.id == 'item_0_2_document_folder'
-        ? MigrationDocumentFolderProfile.fromJson(
-            controller.taskDecisionDataFor(item.id),
-          )
+        ? resolvedFolder.profile
+        : null;
+    final folderInheritedFieldIds = item.id == 'item_0_2_document_folder'
+        ? resolvedFolder.fieldIds
+        : const <String>{};
+    var entryRegularizationProfile = item.id == 'item_0_1_rule_90_days'
+        ? storedEntryProfile
         : null;
     var selectedCpfRouteIndex =
         item.decisionOptions?.indexWhere((option) => option.recommended) ?? 0;
@@ -1157,6 +1195,25 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                   sheetItem.id == 'item_0_2_antecedentes';
               final isDocumentFolderStep =
                   sheetItem.id == 'item_0_2_document_folder';
+              final isEntryRegularizationStep =
+                  sheetItem.id == 'item_0_1_rule_90_days';
+              final isSpecialDecisionAssistant =
+                  isCriminalRecordStep ||
+                  isDocumentFolderStep ||
+                  isEntryRegularizationStep;
+              final hasGuidedInstructions =
+                  !isSpecialDecisionAssistant && sheetItem.hasSteps;
+              final guidedInstructionsAreRequired =
+                  hasGuidedInstructions &&
+                  sheetItem.type != GuideActionType.informative;
+              final guidedInstructionTotal = sheetItem.steps?.length ?? 0;
+              final guidedInstructionCompleted =
+                  completedGenericInstructionIndexes
+                      .where((index) => index < guidedInstructionTotal)
+                      .length;
+              final allGuidedInstructionsDone =
+                  !guidedInstructionsAreRequired ||
+                  guidedInstructionCompleted == guidedInstructionTotal;
               final criminalRecordCalendarSuggestion = isCriminalRecordStep
                   ? _buildCriminalRecordCalendarSuggestion(
                       sheetContext,
@@ -1186,6 +1243,15 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                       documentFolderProfile,
                     )
                   : null;
+              final entryActionIds =
+                  entryRegularizationProfile?.requiredActionIds ??
+                  const <String>[];
+              final entryCompletedCount = entryActionIds
+                  .where(
+                    entryRegularizationProfile?.completedActionIds.contains ??
+                        (_) => false,
+                  )
+                  .length;
               final allChecklistDone =
                   sheetItem.checklistItems?.every((sub) => sub.isCompleted) ??
                   false;
@@ -1194,25 +1260,43 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                         criminalRecordProfile?.allOutcomesCompleted == true)
                   : isDocumentFolderStep
                   ? documentFolderProfile?.allActionsCompleted == true
-                  : !sheetItem.hasChecklist || allChecklistDone;
+                  : isEntryRegularizationStep
+                  ? entryRegularizationProfile?.allActionsCompleted == true
+                  : sheetItem.hasChecklist
+                  ? allChecklistDone
+                  : allGuidedInstructionsDone;
               final checklistCompletedCount = isCriminalRecordStep
                   ? criminalCompletedCount
                   : isDocumentFolderStep
                   ? folderCompletedCount
-                  : sheetItem.checklistItems
+                  : isEntryRegularizationStep
+                  ? entryCompletedCount
+                  : sheetItem.hasChecklist
+                  ? sheetItem.checklistItems
                             ?.where((sub) => sub.isCompleted)
                             .length ??
-                        0;
+                        0
+                  : guidedInstructionsAreRequired
+                  ? guidedInstructionCompleted
+                  : 0;
               final checklistTotalCount = isCriminalRecordStep
                   ? criminalOutcomes.length
                   : isDocumentFolderStep
                   ? folderActionIds.length
-                  : sheetItem.checklistItems?.length ?? 0;
+                  : isEntryRegularizationStep
+                  ? entryActionIds.length
+                  : sheetItem.hasChecklist
+                  ? sheetItem.checklistItems?.length ?? 0
+                  : guidedInstructionsAreRequired
+                  ? guidedInstructionTotal
+                  : 0;
               final hasOutcomeChecklist = isCriminalRecordStep
                   ? criminalOutcomes.isNotEmpty
                   : isDocumentFolderStep
                   ? folderActionIds.isNotEmpty
-                  : sheetItem.hasChecklist;
+                  : isEntryRegularizationStep
+                  ? entryActionIds.isNotEmpty
+                  : sheetItem.hasChecklist || guidedInstructionsAreRequired;
               final isInProgress =
                   hasOutcomeChecklist &&
                   checklistCompletedCount > 0 &&
@@ -1322,6 +1406,27 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                 });
               }
 
+              Future<void> handleInstructionToggle(int index) async {
+                final updated = Set<int>.from(
+                  completedGenericInstructionIndexes,
+                );
+                if (!updated.add(index)) updated.remove(index);
+                final currentData = Map<String, dynamic>.from(
+                  controller.taskDecisionDataFor(sheetItem.id) ??
+                      const <String, dynamic>{},
+                );
+                currentData[completedInstructionIndexesKey] = updated.toList()
+                  ..sort();
+                setSheetState(() {
+                  completedGenericInstructionIndexes = updated;
+                });
+                await controller.saveTaskDecisionData(
+                  sheetItem.id,
+                  currentData,
+                );
+                unawaited(HapticFeedback.selectionClick());
+              }
+
               Future<void> updateCriminalRecordProfile(
                 CriminalRecordProfile profile,
               ) async {
@@ -1376,6 +1481,36 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                 final completed = Set<String>.from(profile.completedActionIds);
                 if (!completed.add(actionId)) completed.remove(actionId);
                 await updateDocumentFolderProfile(
+                  profile.copyWith(completedActionIds: completed),
+                );
+                unawaited(HapticFeedback.selectionClick());
+              }
+
+              Future<void> updateEntryRegularizationProfile(
+                EntryRegularizationProfile profile,
+              ) async {
+                setSheetState(() {
+                  entryRegularizationProfile = profile;
+                });
+                await controller.saveTaskDecisionData(
+                  sheetItem.id,
+                  profile.toJson(),
+                );
+                if (mounted) {
+                  setState(() {
+                    _syncFromGpsController(controller);
+                  });
+                }
+              }
+
+              Future<void> toggleEntryRegularizationAction(
+                String actionId,
+              ) async {
+                final profile = entryRegularizationProfile;
+                if (profile == null) return;
+                final completed = Set<String>.from(profile.completedActionIds);
+                if (!completed.add(actionId)) completed.remove(actionId);
+                await updateEntryRegularizationProfile(
                   profile.copyWith(completedActionIds: completed),
                 );
                 unawaited(HapticFeedback.selectionClick());
@@ -1470,6 +1605,17 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
               }
 
               Future<void> handleDocumentFolderComplete() async {
+                if (!canComplete) return;
+                unawaited(HapticFeedback.mediumImpact());
+                Navigator.of(sheetContext).pop();
+                await _completeGuideItem(controller, sheetItem.id);
+                if (!mounted) return;
+                setState(() {
+                  _syncFromGpsController(controller);
+                });
+              }
+
+              Future<void> handleEntryRegularizationComplete() async {
                 if (!canComplete) return;
                 unawaited(HapticFeedback.mediumImpact());
                 Navigator.of(sheetContext).pop();
@@ -1611,51 +1757,33 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                             es: 'Separa lo que necesitarás antes de comenzar.',
                                             en: 'Gather what you need before starting.',
                                           ),
-                                          child: isCriminalRecordStep
-                                              ? Column(
-                                                  children: [
-                                                    _CriminalRecordDecisionAssistant(
-                                                      profile:
-                                                          criminalRecordProfile ??
-                                                          const CriminalRecordProfile(),
-                                                      onChanged:
-                                                          updateCriminalRecordProfile,
-                                                    ),
-                                                    if (criminalRecordCalendarSuggestion !=
-                                                        null) ...[
-                                                      const SizedBox(
-                                                        height: 12,
-                                                      ),
-                                                      _buildCalendarPrompt(
-                                                        plan: plan,
-                                                        suggestion:
-                                                            criminalRecordCalendarSuggestion,
-                                                      ),
-                                                    ],
-                                                  ],
+                                          child: isEntryRegularizationStep
+                                              ? _EntryRegularizationDecisionAssistant(
+                                                  profile:
+                                                      entryRegularizationProfile ??
+                                                      const EntryRegularizationProfile(),
+                                                  onChanged:
+                                                      updateEntryRegularizationProfile,
+                                                )
+                                              : isCriminalRecordStep
+                                              ? _CriminalRecordDecisionAssistant(
+                                                  profile:
+                                                      criminalRecordProfile ??
+                                                      const CriminalRecordProfile(),
+                                                  inheritedFieldIds:
+                                                      criminalInheritedFieldIds,
+                                                  onChanged:
+                                                      updateCriminalRecordProfile,
                                                 )
                                               : isDocumentFolderStep
-                                              ? Column(
-                                                  children: [
-                                                    _MigrationFolderDecisionAssistant(
-                                                      profile:
-                                                          documentFolderProfile ??
-                                                          const MigrationDocumentFolderProfile(),
-                                                      onChanged:
-                                                          updateDocumentFolderProfile,
-                                                    ),
-                                                    if (documentFolderCalendarSuggestion !=
-                                                        null) ...[
-                                                      const SizedBox(
-                                                        height: 12,
-                                                      ),
-                                                      _buildCalendarPrompt(
-                                                        plan: plan,
-                                                        suggestion:
-                                                            documentFolderCalendarSuggestion,
-                                                      ),
-                                                    ],
-                                                  ],
+                                              ? _MigrationFolderDecisionAssistant(
+                                                  profile:
+                                                      documentFolderProfile ??
+                                                      const MigrationDocumentFolderProfile(),
+                                                  inheritedFieldIds:
+                                                      folderInheritedFieldIds,
+                                                  onChanged:
+                                                      updateDocumentFolderProfile,
                                                 )
                                               : sheetItem.hasSurvivalPhrases ||
                                                     sheetItem.hasRequirements
@@ -1695,7 +1823,47 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                           ),
                                           child: Column(
                                             children: [
-                                              if (isCriminalRecordStep)
+                                              if (isEntryRegularizationStep)
+                                                _EntryRegularizationActionRunner(
+                                                  profile:
+                                                      entryRegularizationProfile ??
+                                                      const EntryRegularizationProfile(),
+                                                  onToggle:
+                                                      toggleEntryRegularizationAction,
+                                                  onOpenEntryGuide: () => _openExternalPreparationLink(
+                                                    title: _localizedText(
+                                                      sheetContext,
+                                                      pt: 'Entrada de argentinos no Brasil',
+                                                      es: 'Entrada de argentinos a Brasil',
+                                                      en: 'Entry into Brazil for Argentine nationals',
+                                                    ),
+                                                    uri: PreparationResourceLinks
+                                                        .argentinaEntryBrazilGuide,
+                                                  ),
+                                                  onOpenBilateralRoute: () =>
+                                                      _openExternalPreparationLink(
+                                                        title: _localizedText(
+                                                          sheetContext,
+                                                          pt: 'Acordo Brasil–Argentina',
+                                                          es: 'Acuerdo Brasil–Argentina',
+                                                          en: 'Brazil–Argentina Agreement',
+                                                        ),
+                                                        uri: PreparationResourceLinks
+                                                            .argentinaResidenceAgreement,
+                                                      ),
+                                                  onOpenServiceSelector: () =>
+                                                      _openExternalPreparationLink(
+                                                        title: _localizedText(
+                                                          sheetContext,
+                                                          pt: 'Escolher serviço migratório',
+                                                          es: 'Elegir servicio migratorio',
+                                                          en: 'Choose migration service',
+                                                        ),
+                                                        uri: PreparationResourceLinks
+                                                            .federalPoliceResidenceServiceSelector,
+                                                      ),
+                                                )
+                                              else if (isCriminalRecordStep)
                                                 _CriminalRecordExecutionPlan(
                                                   profile:
                                                       criminalRecordProfile ??
@@ -1807,6 +1975,11 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                     sheetItem.hasSteps)
                                                   _GuideExecutionContent(
                                                     item: sheetItem,
+                                                    completedStepIndexes:
+                                                        completedGenericInstructionIndexes,
+                                                    enabled: !isPreview,
+                                                    onToggleStep:
+                                                        handleInstructionToggle,
                                                     onLinkTap: (url, label) =>
                                                         _openExternalPreparationLink(
                                                           title: label,
@@ -1822,6 +1995,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                 ),
                                               if (hasPrimaryExecutionAction &&
                                                   !isDocumentFolderStep &&
+                                                  !isEntryRegularizationStep &&
                                                   (!isCriminalRecordStep ||
                                                       (criminalRecordProfile
                                                                   ?.isComplete ==
@@ -1877,6 +2051,55 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                       handlePrimaryAction,
                                                 ),
                                               ],
+                                              if (!isPreview &&
+                                                  !sheetItem.isCompleted) ...[
+                                                if (isCriminalRecordStep &&
+                                                    criminalRecordCalendarSuggestion !=
+                                                        null) ...[
+                                                  const SizedBox(height: 14),
+                                                  _buildCalendarPrompt(
+                                                    plan: plan,
+                                                    suggestion:
+                                                        criminalRecordCalendarSuggestion,
+                                                    onChanged: () =>
+                                                        setSheetState(() {}),
+                                                  ),
+                                                ] else if (isDocumentFolderStep &&
+                                                    documentFolderCalendarSuggestion !=
+                                                        null) ...[
+                                                  const SizedBox(height: 14),
+                                                  _buildCalendarPrompt(
+                                                    plan: plan,
+                                                    suggestion:
+                                                        documentFolderCalendarSuggestion,
+                                                    onChanged: () =>
+                                                        setSheetState(() {}),
+                                                  ),
+                                                ] else if (isEntryRegularizationStep &&
+                                                    entryRegularizationProfile
+                                                            ?.isComplete ==
+                                                        true &&
+                                                    eventSuggestion !=
+                                                        null) ...[
+                                                  const SizedBox(height: 14),
+                                                  _buildCalendarPrompt(
+                                                    plan: plan,
+                                                    suggestion: eventSuggestion,
+                                                    onChanged: () =>
+                                                        setSheetState(() {}),
+                                                  ),
+                                                ] else if (!isSpecialDecisionAssistant &&
+                                                    eventSuggestion !=
+                                                        null) ...[
+                                                  const SizedBox(height: 14),
+                                                  _buildCalendarPrompt(
+                                                    plan: plan,
+                                                    suggestion: eventSuggestion,
+                                                    onChanged: () =>
+                                                        setSheetState(() {}),
+                                                  ),
+                                                ],
+                                              ],
                                             ],
                                           ),
                                         ),
@@ -1889,7 +2112,14 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                             es: 'Confirma el resultado',
                                             en: 'Confirm the result',
                                           ),
-                                          description: isDocumentFolderStep
+                                          description: isEntryRegularizationStep
+                                              ? _localizedText(
+                                                  sheetContext,
+                                                  pt: 'Confira a rota gerada. A etapa termina quando entrada e regularização estiverem separadas com clareza.',
+                                                  es: 'Revisa la ruta generada. La etapa termina cuando ingreso y regularización estén claramente separados.',
+                                                  en: 'Review the generated route. The step is complete when entry and regularization are clearly separated.',
+                                                )
+                                              : isDocumentFolderStep
                                               ? _localizedText(
                                                   sheetContext,
                                                   pt: 'Confira o resumo. A etapa é liberada quando a estrutura da pasta estiver pronta.',
@@ -1925,6 +2155,18 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                     en: 'Answer the questions in the first section to generate the right confirmation for your case.',
                                                   ),
                                                 )
+                                              else if (isEntryRegularizationStep &&
+                                                  entryRegularizationProfile
+                                                          ?.isComplete !=
+                                                      true)
+                                                _GuideWorkflowMessage(
+                                                  text: _localizedText(
+                                                    sheetContext,
+                                                    pt: 'Responda às perguntas iniciais para gerar sua rota de entrada e permanência.',
+                                                    es: 'Responde las preguntas iniciales para generar tu ruta de ingreso y permanencia.',
+                                                    en: 'Answer the initial questions to generate your entry and stay route.',
+                                                  ),
+                                                )
                                               else if (isDocumentFolderStep &&
                                                   documentFolderProfile
                                                           ?.isComplete !=
@@ -1946,6 +2188,11 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                 _MigrationFolderCompletionSummary(
                                                   profile:
                                                       documentFolderProfile!,
+                                                )
+                                              else if (isEntryRegularizationStep)
+                                                _EntryRegularizationCompletionSummary(
+                                                  profile:
+                                                      entryRegularizationProfile!,
                                                 )
                                               else if (sheetItem.doneCriteria !=
                                                   null)
@@ -1981,6 +2228,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                       toggleCriminalRecordOutcome,
                                                 ),
                                               ] else if (!isDocumentFolderStep &&
+                                                  !isEntryRegularizationStep &&
                                                   sheetItem.hasChecklist) ...[
                                                 const SizedBox(height: 12),
                                                 _GuideOutcomeProgress(
@@ -1997,7 +2245,8 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                             ],
                                           ),
                                         ),
-                                        if (!isDocumentFolderStep)
+                                        if (!isDocumentFolderStep &&
+                                            !isEntryRegularizationStep)
                                           _GuideSupplementaryDetails(
                                             item: sheetItem,
                                             quickReferenceShown:
@@ -2012,115 +2261,11 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                           ),
                                         // ── Warning Flags (protective, after reassurance) ──
                                         if (sheetItem.hasWarningFlags) ...[
-                                          Container(
-                                            width: double.infinity,
-                                            padding: const EdgeInsets.all(12),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.tintedSurfaceFor(
-                                                sheetContext,
-                                                tint: AppColors.danger,
-                                                lightColor: const Color(
-                                                  0xFFFFF1F0,
-                                                ),
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              border: Border.all(
-                                                color:
-                                                    AppColors.tintedBorderFor(
-                                                      sheetContext,
-                                                      tint: AppColors.danger,
-                                                      lightColor: const Color(
-                                                        0xFFF2B8B5,
-                                                      ),
-                                                    ),
-                                              ),
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.gpp_bad_rounded,
-                                                      size: 14,
-                                                      color: AppColors.danger,
-                                                    ),
-                                                    const SizedBox(width: 6),
-                                                    Text(
-                                                      _localizedText(
-                                                        sheetContext,
-                                                        pt: 'Alertas importantes',
-                                                        es: 'Alertas importantes',
-                                                        en: 'Important warnings',
-                                                      ),
-                                                      style: TextStyle(
-                                                        fontSize: 11,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                        color: AppColors.danger,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                const SizedBox(height: 8),
-                                                for (final flag
-                                                    in sheetItem
-                                                        .warningFlags!) ...[
-                                                  Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      const Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                              top: 5,
-                                                              right: 6,
-                                                            ),
-                                                        child: Icon(
-                                                          Icons.circle,
-                                                          size: 5,
-                                                          color:
-                                                              AppColors.danger,
-                                                        ),
-                                                      ),
-                                                      Expanded(
-                                                        child: Text(
-                                                          flag,
-                                                          style: TextStyle(
-                                                            fontSize: 12,
-                                                            color:
-                                                                AppColors.textPrimaryFor(
-                                                                  sheetContext,
-                                                                ),
-                                                            height: 1.4,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                ],
-                                              ],
-                                            ),
-                                          ),
-                                          const SizedBox(height: 12),
-                                        ],
-                                        if (!isPreview &&
-                                            !isCriminalRecordStep &&
-                                            !isDocumentFolderStep &&
-                                            !sheetItem.isCompleted &&
-                                            eventSuggestion != null) ...[
-                                          const SizedBox(height: 12),
-                                          _GuideCalendarSuggestionCard(
-                                            suggestion: eventSuggestion,
-                                            onTap: () =>
-                                                _showCalendarSuggestionSheet(
-                                                  plan: plan,
-                                                  suggestion: eventSuggestion,
-                                                ),
+                                          _GuideWarningFlagsDisclosure(
+                                            flags: sheetItem.warningFlags!,
+                                            initiallyExpanded:
+                                                sheetItem.urgencyLevel ==
+                                                GuideUrgencyLevel.critical,
                                           ),
                                         ],
                                       ],
@@ -2205,6 +2350,24 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                             es: '$folderCompletedCount de ${folderActionIds.length} piezas preparadas',
                                             en: '$folderCompletedCount of ${folderActionIds.length} pieces prepared',
                                           )
+                                        : isEntryRegularizationStep &&
+                                              entryRegularizationProfile
+                                                      ?.isComplete !=
+                                                  true
+                                        ? _localizedText(
+                                            sheetContext,
+                                            pt: 'Complete as perguntas acima',
+                                            es: 'Completa las preguntas de arriba',
+                                            en: 'Complete the questions above',
+                                          )
+                                        : isEntryRegularizationStep &&
+                                              !canComplete
+                                        ? _localizedText(
+                                            sheetContext,
+                                            pt: '$entryCompletedCount de ${entryActionIds.length} decisões confirmadas',
+                                            es: '$entryCompletedCount de ${entryActionIds.length} decisiones confirmadas',
+                                            en: '$entryCompletedCount of ${entryActionIds.length} decisions confirmed',
+                                          )
                                         : canComplete && sheetItem.hasChecklist
                                         ? _localizedText(
                                             sheetContext,
@@ -2221,9 +2384,9 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                           )
                                         : _localizedText(
                                             sheetContext,
-                                            pt: '$checklistCompletedCount de ${sheetItem.checklistItems?.length ?? 0} itens concluídos',
-                                            es: '$checklistCompletedCount de ${sheetItem.checklistItems?.length ?? 0} elementos completados',
-                                            en: '$checklistCompletedCount of ${sheetItem.checklistItems?.length ?? 0} items complete',
+                                            pt: '$checklistCompletedCount de $checklistTotalCount passos executados',
+                                            es: '$checklistCompletedCount de $checklistTotalCount pasos realizados',
+                                            en: '$checklistCompletedCount of $checklistTotalCount steps done',
                                           ),
                                     helperText:
                                         hasOutcomeChecklist && !canComplete
@@ -2234,11 +2397,33 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                   es: 'Tu progreso queda guardado. Prepara una pieza por vez arriba.',
                                                   en: 'Your progress is saved. Prepare one piece at a time above.',
                                                 )
+                                              : isEntryRegularizationStep
+                                              ? _localizedText(
+                                                  sheetContext,
+                                                  pt: 'Seu progresso fica salvo. Confirme uma decisão por vez na seção acima.',
+                                                  es: 'Tu progreso queda guardado. Confirma una decisión por vez arriba.',
+                                                  en: 'Your progress is saved. Confirm one decision at a time above.',
+                                                )
                                               : _localizedText(
                                                   sheetContext,
-                                                  pt: 'Seu progresso fica salvo. Confirme cada resultado quando acontecer.',
-                                                  es: 'Tu progreso queda guardado. Confirma cada resultado cuando ocurra.',
-                                                  en: 'Your progress is saved. Confirm each outcome as it happens.',
+                                                  pt:
+                                                      hasGuidedInstructions &&
+                                                          !sheetItem
+                                                              .hasChecklist
+                                                      ? 'Seu progresso fica salvo. Faça somente o passo destacado e confirme para avançar.'
+                                                      : 'Seu progresso fica salvo. Confirme cada resultado quando acontecer.',
+                                                  es:
+                                                      hasGuidedInstructions &&
+                                                          !sheetItem
+                                                              .hasChecklist
+                                                      ? 'Tu progreso queda guardado. Haz solo el paso destacado y confírmalo para avanzar.'
+                                                      : 'Tu progreso queda guardado. Confirma cada resultado cuando ocurra.',
+                                                  en:
+                                                      hasGuidedInstructions &&
+                                                          !sheetItem
+                                                              .hasChecklist
+                                                      ? 'Your progress is saved. Do only the highlighted step, then confirm to move on.'
+                                                      : 'Your progress is saved. Confirm each outcome as it happens.',
                                                 )
                                         : null,
                                     primaryEnabled:
@@ -2247,6 +2432,8 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                         ? handleCriminalRecordComplete
                                         : isDocumentFolderStep
                                         ? handleDocumentFolderComplete
+                                        : isEntryRegularizationStep
+                                        ? handleEntryRegularizationComplete
                                         : handleComplete,
                                     onWaiting:
                                         !sheetItem.isDismissed &&
@@ -2659,6 +2846,7 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
   Widget _buildCalendarPrompt({
     required MigrationPlan plan,
     required GuideEventSuggestion suggestion,
+    VoidCallback? onChanged,
   }) {
     return FutureBuilder<GuideEventSuggestionPreference>(
       future: _eventSuggestionStore.readPreference(
@@ -2685,8 +2873,13 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
             es: 'Elegir fecha y recordatorio',
             en: 'Choose date and reminder',
           ),
-          onTap: () =>
-              _showCalendarSuggestionSheet(plan: plan, suggestion: suggestion),
+          onTap: () async {
+            await _showCalendarSuggestionSheet(
+              plan: plan,
+              suggestion: suggestion,
+            );
+            onChanged?.call();
+          },
         );
       },
     );
@@ -3372,17 +3565,15 @@ class _GuideCalendarSuggestionCard extends StatelessWidget {
         '${start.day.toString().padLeft(2, '0')}/${start.month.toString().padLeft(2, '0')}';
     final timeLabel = TimeOfDay.fromDateTime(start).format(context);
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.tintedSurfaceFor(
-          context,
-          tint: AppColors.success,
-          lightColor: const Color(0xFFF0FAF5),
-        ),
+    return Material(
+      color: AppColors.tintedSurfaceFor(
+        context,
+        tint: AppColors.success,
+        lightColor: const Color(0xFFF0FAF5),
+      ),
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
+        side: BorderSide(
           color: AppColors.tintedBorderFor(
             context,
             tint: AppColors.success,
@@ -3390,64 +3581,70 @@ class _GuideCalendarSuggestionCard extends StatelessWidget {
           ),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(13),
+          child: Row(
             children: [
-              Icon(
-                Icons.event_available_rounded,
-                size: 18,
-                color: AppColors.success,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  suggestion.assistantCopy,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimaryFor(context),
-                    height: 1.4,
-                  ),
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: 0.13),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.notifications_active_outlined,
+                  size: 20,
+                  color: AppColors.success,
                 ),
               ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      actionLabel ??
+                          _localizedText(
+                            context,
+                            pt: 'Lembrar no momento certo',
+                            es: 'Recordar en el momento adecuado',
+                            en: 'Remember at the right time',
+                          ),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: AppColors.success,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      suggestion.assistantCopy,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSoftFor(context),
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      '$dateLabel · $timeLabel',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.success),
             ],
           ),
-          const SizedBox(height: 10),
-          Text(
-            suggestion.title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '$dateLabel • $timeLabel',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSoftFor(context),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: OutlinedButton.icon(
-              onPressed: onTap,
-              icon: const Icon(Icons.calendar_month_outlined, size: 16),
-              label: Text(
-                actionLabel ??
-                    _localizedText(
-                      context,
-                      pt: 'Adicionar ao calendário',
-                      es: 'Agregar al calendario',
-                      en: 'Add to calendar',
-                    ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -6340,11 +6537,13 @@ class _GuideOutcomeProgress extends StatelessWidget {
     required this.items,
     required this.enabled,
     required this.onToggle,
+    this.confirmationLabel,
   });
 
   final List<ChecklistSubItem> items;
   final bool enabled;
   final Future<void> Function(ChecklistSubItem item) onToggle;
+  final String? confirmationLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -6352,6 +6551,8 @@ class _GuideOutcomeProgress extends StatelessWidget {
     final pending = items.where((item) => !item.isCompleted).toList();
     final current = pending.isEmpty ? null : pending.first;
     final upcoming = pending.skip(1).toList();
+    final visibleUpcoming = upcoming.take(3).toList();
+    final hiddenUpcoming = upcoming.skip(3).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -6445,12 +6646,13 @@ class _GuideOutcomeProgress extends StatelessWidget {
                       onPressed: () => onToggle(current),
                       icon: const Icon(Icons.check_rounded, size: 18),
                       label: Text(
-                        _localizedText(
-                          context,
-                          pt: 'Confirmar que fiz',
-                          es: 'Confirmar que lo hice',
-                          en: 'Confirm I did this',
-                        ),
+                        confirmationLabel ??
+                            _localizedText(
+                              context,
+                              pt: 'Confirmar que fiz',
+                              es: 'Confirmar que lo hice',
+                              en: 'Confirm I did this',
+                            ),
                       ),
                     ),
                   ),
@@ -6496,44 +6698,75 @@ class _GuideOutcomeProgress extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          for (var index = 0; index < upcoming.length; index++)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          for (var index = 0; index < visibleUpcoming.length; index++)
+            _upcomingRow(
+              context,
+              item: visibleUpcoming[index],
+              number: completed.length + index + 2,
+            ),
+          if (hiddenUpcoming.isNotEmpty)
+            _GuideExpandableSection(
+              title: _localizedText(
+                context,
+                pt: 'Ver mais ${hiddenUpcoming.length} passos',
+                es: 'Ver ${hiddenUpcoming.length} pasos más',
+                en: 'View ${hiddenUpcoming.length} more steps',
+              ),
+              child: Column(
                 children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceFor(context),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.borderFor(context)),
+                  for (var index = 0; index < hiddenUpcoming.length; index++)
+                    _upcomingRow(
+                      context,
+                      item: hiddenUpcoming[index],
+                      number: completed.length + index + 5,
                     ),
-                    child: Text(
-                      '${completed.length + index + 2}',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.textSoftFor(context),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      upcoming[index].title,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSoftFor(context),
-                        height: 1.35,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
         ],
       ],
+    );
+  }
+
+  Widget _upcomingRow(
+    BuildContext context, {
+    required ChecklistSubItem item,
+    required int number,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceFor(context),
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.borderFor(context)),
+            ),
+            child: Text(
+              '$number',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              item.title,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -6915,6 +7148,64 @@ class _GuideSupplementaryDetails extends StatelessWidget {
   }
 }
 
+class _GuideWarningFlagsDisclosure extends StatelessWidget {
+  const _GuideWarningFlagsDisclosure({
+    required this.flags,
+    required this.initiallyExpanded,
+  });
+
+  final List<String> flags;
+  final bool initiallyExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    return _GuideExpandableSection(
+      title: _localizedText(
+        context,
+        pt: flags.length == 1
+            ? 'Evite este erro antes de continuar'
+            : '${flags.length} cuidados antes de continuar',
+        es: flags.length == 1
+            ? 'Evita este error antes de continuar'
+            : '${flags.length} cuidados antes de continuar',
+        en: flags.length == 1
+            ? 'Avoid this mistake before continuing'
+            : '${flags.length} things to check before continuing',
+      ),
+      initiallyExpanded: initiallyExpanded,
+      child: Column(
+        children: [
+          for (var index = 0; index < flags.length; index++) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Icon(
+                    Icons.gpp_maybe_outlined,
+                    size: 18,
+                    color: AppColors.danger,
+                  ),
+                ),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Text(
+                    flags[index],
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+            if (index < flags.length - 1) const SizedBox(height: 10),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _GuideEvidenceCard extends StatelessWidget {
   const _GuideEvidenceCard({required this.evidence, required this.onOpen});
 
@@ -7067,25 +7358,26 @@ class _GuideEvidenceCard extends StatelessWidget {
 }
 
 class _GuideExecutionContent extends StatelessWidget {
-  const _GuideExecutionContent({required this.item, required this.onLinkTap});
+  const _GuideExecutionContent({
+    required this.item,
+    required this.onLinkTap,
+    this.completedStepIndexes = const <int>{},
+    this.enabled = false,
+    this.onToggleStep,
+  });
 
   final GuideActionItem item;
   final void Function(String url, String label) onLinkTap;
+  final Set<int> completedStepIndexes;
+  final bool enabled;
+  final Future<void> Function(int index)? onToggleStep;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (item.hasSteps) ...[
-          for (var index = 0; index < item.steps!.length; index++) ...[
-            _GuideNumberedRow(number: index + 1, text: item.steps![index]),
-            if (index < item.steps!.length - 1) const SizedBox(height: 10),
-          ],
-        ],
         if (item.hasDecisionOptions) ...[
-          if (item.hasSteps) const SizedBox(height: 14),
-          // Surface the recommended path before the full comparison cards.
           if (item.decisionOptions!.any((o) => o.recommended)) ...[
             _GuideBestOptionBanner(
               item: item,
@@ -7094,10 +7386,46 @@ class _GuideExecutionContent extends StatelessWidget {
             ),
             const SizedBox(height: 10),
           ],
-          for (final option in item.decisionOptions!) ...[
-            _GuideDecisionOptionCard(option: option),
-            const SizedBox(height: 10),
-          ],
+          _GuideExpandableSection(
+            title: _localizedText(
+              context,
+              pt: 'Comparar todas as opções',
+              es: 'Comparar todas las opciones',
+              en: 'Compare all options',
+            ),
+            child: Column(
+              children: [
+                for (final option in item.decisionOptions!) ...[
+                  _GuideDecisionOptionCard(option: option),
+                  if (option != item.decisionOptions!.last)
+                    const SizedBox(height: 10),
+                ],
+              ],
+            ),
+          ),
+        ],
+        if (item.hasSteps) ...[
+          if (item.hasDecisionOptions) const SizedBox(height: 14),
+          _GuideOutcomeProgress(
+            items: [
+              for (var index = 0; index < item.steps!.length; index++)
+                ChecklistSubItem(
+                  id: '$index',
+                  title: item.steps![index],
+                  isCompleted: completedStepIndexes.contains(index),
+                ),
+            ],
+            enabled: enabled && onToggleStep != null,
+            onToggle: (step) => onToggleStep!(int.parse(step.id)),
+            confirmationLabel: item.type == GuideActionType.informative
+                ? _localizedText(
+                    context,
+                    pt: 'Entendi, continuar',
+                    es: 'Entendido, continuar',
+                    en: 'Got it, continue',
+                  )
+                : null,
+          ),
         ],
         if (!item.hasSteps &&
             !item.hasDecisionOptions &&
@@ -8100,50 +8428,6 @@ class _GuideDecisionOptionCard extends StatelessWidget {
           ],
         ],
       ),
-    );
-  }
-}
-
-class _GuideNumberedRow extends StatelessWidget {
-  const _GuideNumberedRow({required this.number, required this.text});
-
-  final int number;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 26,
-          height: 26,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(13),
-          ),
-          child: Text(
-            '$number',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(
-              text,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(height: 1.45),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -10542,15 +10826,810 @@ class _InlineActionTag extends StatelessWidget {
   }
 }
 
-// ─── Migration-folder execution assistant ────────────────────────────────────
+// ─── Entry and regularization execution assistant ────────────────────────────
 
-class _MigrationFolderDecisionAssistant extends StatelessWidget {
-  const _MigrationFolderDecisionAssistant({
+class _EntryRegularizationDecisionAssistant extends StatelessWidget {
+  const _EntryRegularizationDecisionAssistant({
     required this.profile,
     required this.onChanged,
   });
 
+  final EntryRegularizationProfile profile;
+  final Future<void> Function(EntryRegularizationProfile profile) onChanged;
+
+  void _update(EntryRegularizationProfile value) {
+    unawaited(onChanged(value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final answered = <bool>[
+      profile.isArgentineNational != null,
+      profile.entrySituation != null,
+      profile.entryDocument != null,
+      profile.stayIntent != null,
+    ].where((value) => value).length;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.tintedSurfaceFor(
+          context,
+          tint: AppColors.primary,
+          lightColor: const Color(0xFFF3F8FF),
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: AppColors.tintedBorderFor(
+            context,
+            tint: AppColors.primary,
+            lightColor: const Color(0xFFCFE2FF),
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.alt_route_rounded, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _localizedText(
+                    context,
+                    pt: 'Descubra sua rota de entrada e permanência',
+                    es: 'Descubre tu ruta de ingreso y permanencia',
+                    en: 'Find your entry and stay route',
+                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                ),
+              ),
+              Text(
+                '$answered/4',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _localizedText(
+              context,
+              pt: 'Entrada como visitante e residência são decisões diferentes. Vamos separar as duas sem criar urgência artificial.',
+              es: 'El ingreso como visitante y la residencia son decisiones distintas. Vamos a separarlas sin crear urgencia artificial.',
+              en: 'Visitor entry and residence are different decisions. We will separate them without creating false urgency.',
+            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 14),
+          _CriminalRecordQuestion<bool>(
+            number: 1,
+            title: _localizedText(
+              context,
+              pt: 'Você tem nacionalidade argentina?',
+              es: '¿Tienes nacionalidad argentina?',
+              en: 'Are you an Argentine national?',
+            ),
+            helper: _localizedText(
+              context,
+              pt: 'Morar na Argentina não é o mesmo que ter nacionalidade argentina.',
+              es: 'Vivir en Argentina no es lo mismo que tener nacionalidad argentina.',
+              en: 'Living in Argentina is not the same as holding Argentine nationality.',
+            ),
+            options: [
+              _DecisionChoice(
+                value: true,
+                label: _localizedText(context, pt: 'Sim', es: 'Sí', en: 'Yes'),
+              ),
+              _DecisionChoice(
+                value: false,
+                label: _localizedText(context, pt: 'Não', es: 'No', en: 'No'),
+              ),
+            ],
+            selected: profile.isArgentineNational,
+            onSelected: (value) =>
+                _update(profile.copyWith(isArgentineNational: value)),
+          ),
+          if (profile.isArgentineNational != null) ...[
+            const SizedBox(height: 16),
+            _CriminalRecordQuestion<BrazilEntrySituation>(
+              number: 2,
+              title: _localizedText(
+                context,
+                pt: 'Qual é sua situação de entrada no Brasil?',
+                es: '¿Cuál es tu situación de ingreso a Brasil?',
+                en: 'What is your Brazil entry situation?',
+              ),
+              options: [
+                _DecisionChoice(
+                  value: BrazilEntrySituation.notEntered,
+                  label: _localizedText(
+                    context,
+                    pt: 'Ainda não entrei',
+                    es: 'Todavía no ingresé',
+                    en: 'Not entered yet',
+                  ),
+                ),
+                _DecisionChoice(
+                  value: BrazilEntrySituation.enteredWithProof,
+                  label: _localizedText(
+                    context,
+                    pt: 'Entrei e tenho comprovante',
+                    es: 'Ingresé y tengo comprobante',
+                    en: 'Entered with proof',
+                  ),
+                ),
+                _DecisionChoice(
+                  value: BrazilEntrySituation.enteredWithoutProof,
+                  label: _localizedText(
+                    context,
+                    pt: 'Entrei, mas não tenho comprovante',
+                    es: 'Ingresé, pero no tengo comprobante',
+                    en: 'Entered without proof',
+                  ),
+                ),
+                _DecisionChoice(
+                  value: BrazilEntrySituation.unsure,
+                  label: _localizedText(
+                    context,
+                    pt: 'Não tenho certeza',
+                    es: 'No estoy seguro',
+                    en: 'Not sure',
+                  ),
+                ),
+              ],
+              selected: profile.entrySituation,
+              onSelected: (value) =>
+                  _update(profile.copyWith(entrySituation: value)),
+            ),
+          ],
+          if (profile.entrySituation != null) ...[
+            const SizedBox(height: 16),
+            _CriminalRecordQuestion<BrazilEntryDocument>(
+              number: 3,
+              title: _localizedText(
+                context,
+                pt: 'Qual documento físico você usará ou usou na entrada?',
+                es: '¿Qué documento físico usarás o usaste al ingresar?',
+                en: 'Which physical document will or did you use to enter?',
+              ),
+              options: [
+                _DecisionChoice(
+                  value: BrazilEntryDocument.physicalDni,
+                  label: _localizedText(
+                    context,
+                    pt: 'DNI físico vigente',
+                    es: 'DNI físico vigente',
+                    en: 'Current physical DNI',
+                  ),
+                ),
+                _DecisionChoice(
+                  value: BrazilEntryDocument.passport,
+                  label: _localizedText(
+                    context,
+                    pt: 'Passaporte',
+                    es: 'Pasaporte',
+                    en: 'Passport',
+                  ),
+                ),
+                _DecisionChoice(
+                  value: BrazilEntryDocument.neither,
+                  label: _localizedText(
+                    context,
+                    pt: 'Nenhum desses',
+                    es: 'Ninguno de estos',
+                    en: 'Neither',
+                  ),
+                ),
+              ],
+              selected: profile.entryDocument,
+              onSelected: (value) =>
+                  _update(profile.copyWith(entryDocument: value)),
+            ),
+          ],
+          if (profile.entryDocument != null) ...[
+            const SizedBox(height: 16),
+            _CriminalRecordQuestion<BrazilStayIntent>(
+              number: 4,
+              title: _localizedText(
+                context,
+                pt: 'O que você pretende fazer no Brasil?',
+                es: '¿Qué planeas hacer en Brasil?',
+                en: 'What do you plan to do in Brazil?',
+              ),
+              options: [
+                _DecisionChoice(
+                  value: BrazilStayIntent.visitOnly,
+                  label: _localizedText(
+                    context,
+                    pt: 'Somente visitar',
+                    es: 'Solo visitar',
+                    en: 'Visit only',
+                  ),
+                ),
+                _DecisionChoice(
+                  value: BrazilStayIntent.liveInBrazil,
+                  label: _localizedText(
+                    context,
+                    pt: 'Morar ou trabalhar',
+                    es: 'Vivir o trabajar',
+                    en: 'Live or work',
+                  ),
+                ),
+                _DecisionChoice(
+                  value: BrazilStayIntent.unsure,
+                  label: _localizedText(
+                    context,
+                    pt: 'Ainda estou decidindo',
+                    es: 'Todavía estoy decidiendo',
+                    en: 'Still deciding',
+                  ),
+                ),
+              ],
+              selected: profile.stayIntent,
+              onSelected: (value) =>
+                  _update(profile.copyWith(stayIntent: value)),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _EntryActionContent {
+  const _EntryActionContent({
+    required this.icon,
+    required this.title,
+    required this.instruction,
+    required this.source,
+  });
+
+  final IconData icon;
+  final String title;
+  final String instruction;
+  final _EntryOfficialSource source;
+}
+
+enum _EntryOfficialSource { entry, bilateral, selector }
+
+_EntryActionContent _entryActionContent(
+  BuildContext context,
+  String id,
+) => switch (id) {
+  'resolve_travel_document' => _EntryActionContent(
+    icon: Icons.warning_amber_rounded,
+    title: _localizedText(
+      context,
+      pt: 'Resolva o documento de entrada',
+      es: 'Resuelve el documento de ingreso',
+      en: 'Resolve your entry document',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Para argentinos, a orientação consular aceita DNI cartão vigente ou passaporte. DNI digital não substitui o documento físico na entrada.',
+      es: 'Para argentinos, la orientación consular acepta DNI tarjeta vigente o pasaporte. El DNI digital no reemplaza el documento físico.',
+      en: 'For Argentine nationals, consular guidance accepts a current physical DNI card or passport. Digital DNI does not replace it at entry.',
+    ),
+    source: _EntryOfficialSource.entry,
+  ),
+  'check_travel_document' => _EntryActionContent(
+    icon: Icons.badge_outlined,
+    title: _localizedText(
+      context,
+      pt: 'Confira seu documento físico',
+      es: 'Revisa tu documento físico',
+      en: 'Check your physical document',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Confirme validade, estado de conservação e se este é o DNI físico mais recente. Leve o documento original.',
+      es: 'Confirma vigencia, estado y que sea el DNI físico más reciente. Lleva el documento original.',
+      en: 'Confirm validity, condition, and that it is the latest physical DNI. Carry the original.',
+    ),
+    source: _EntryOfficialSource.entry,
+  ),
+  'plan_registered_entry' => _EntryActionContent(
+    icon: Icons.login_rounded,
+    title: _localizedText(
+      context,
+      pt: 'Planeje uma entrada registrada',
+      es: 'Planifica un ingreso registrado',
+      en: 'Plan a registered entry',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Apresente o documento no controle migratório e guarde a prova da entrada. O pré-registro online é opcional, não substitui o controle.',
+      es: 'Presenta el documento en el control migratorio y guarda la prueba de ingreso. El pre-registro online es opcional.',
+      en: 'Present the document at migration control and keep entry proof. Online pre-registration is optional.',
+    ),
+    source: _EntryOfficialSource.entry,
+  ),
+  'store_entry_proof' => _EntryActionContent(
+    icon: Icons.receipt_long_outlined,
+    title: _localizedText(
+      context,
+      pt: 'Guarde a prova da entrada',
+      es: 'Guarda la prueba de ingreso',
+      en: 'Store your entry proof',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Salve uma cópia legível junto da data e do documento usado. A Polícia Federal exige comprovante de ingresso no pedido bilateral.',
+      es: 'Guarda una copia legible con la fecha y el documento usado. La Policía Federal exige comprobante de ingreso.',
+      en: 'Save a legible copy with the date and document used. Federal Police requires entry proof for the bilateral route.',
+    ),
+    source: _EntryOfficialSource.bilateral,
+  ),
+  'recover_entry_proof' || 'confirm_entry_status' => _EntryActionContent(
+    icon: Icons.manage_search_rounded,
+    title: _localizedText(
+      context,
+      pt: 'Confirme o registro da sua entrada',
+      es: 'Confirma el registro de tu ingreso',
+      en: 'Confirm your entry record',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Não invente uma data ou comprovante. Consulte a orientação oficial e, se necessário, a unidade migratória da Polícia Federal.',
+      es: 'No inventes una fecha o comprobante. Consulta la orientación oficial y, si hace falta, la unidad migratoria.',
+      en: 'Do not invent a date or proof. Check official guidance and, if needed, contact the Federal Police migration unit.',
+    ),
+    source: _EntryOfficialSource.entry,
+  ),
+  'confirm_bilateral_route' => _EntryActionContent(
+    icon: Icons.handshake_outlined,
+    title: _localizedText(
+      context,
+      pt: 'Confirme a rota Brasil–Argentina',
+      es: 'Confirma la ruta Brasil–Argentina',
+      en: 'Confirm the Brazil–Argentina route',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Para nacional argentino que pretende morar no Brasil, confira a autorização de residência permanente pelo acordo bilateral. Isso é separado da entrada como visitante.',
+      es: 'Para un nacional argentino que planea vivir en Brasil, revisa la residencia permanente por el acuerdo bilateral. Es distinta del ingreso como visitante.',
+      en: 'For an Argentine national planning to live in Brazil, review permanent residence under the bilateral agreement. It is separate from visitor entry.',
+    ),
+    source: _EntryOfficialSource.bilateral,
+  ),
+  'find_residence_route' => _EntryActionContent(
+    icon: Icons.account_tree_outlined,
+    title: _localizedText(
+      context,
+      pt: 'Encontre a base de residência correta',
+      es: 'Encuentra la base de residencia correcta',
+      en: 'Find the correct residence basis',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'O acordo bilateral depende da nacionalidade argentina. Use o seletor oficial da Polícia Federal para encontrar a modalidade aplicável à sua nacionalidade e objetivo.',
+      es: 'El acuerdo bilateral depende de la nacionalidad argentina. Usa el selector oficial para encontrar la modalidad aplicable.',
+      en: 'The bilateral agreement depends on Argentine nationality. Use the official selector to find the route for your nationality and purpose.',
+    ),
+    source: _EntryOfficialSource.selector,
+  ),
+  'confirm_visitor_rules' => _EntryActionContent(
+    icon: Icons.luggage_outlined,
+    title: _localizedText(
+      context,
+      pt: 'Confirme as condições de visitante',
+      es: 'Confirma las condiciones de visitante',
+      en: 'Confirm visitor conditions',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Como seu objetivo é visitar, não misture esta etapa com um pedido de residência. Confirme entrada, permanência autorizada e saída nos canais oficiais.',
+      es: 'Como tu objetivo es visitar, no mezcles esta etapa con una residencia. Confirma ingreso, permanencia autorizada y salida.',
+      en: 'Because your goal is visiting, do not mix this with residence. Confirm entry, authorized stay, and departure through official channels.',
+    ),
+    source: _EntryOfficialSource.entry,
+  ),
+  _ => _EntryActionContent(
+    icon: Icons.compare_arrows_rounded,
+    title: _localizedText(
+      context,
+      pt: 'Compare visitante e residente',
+      es: 'Compara visitante y residente',
+      en: 'Compare visitor and resident routes',
+    ),
+    instruction: _localizedText(
+      context,
+      pt: 'Visitante é uma condição de entrada e estada; residência é um pedido próprio. Escolha pela sua intenção real, não apenas por um número de dias.',
+      es: 'Visitante es una condición de ingreso y estadía; residencia es una solicitud propia. Elige según tu intención real.',
+      en: 'Visitor status concerns entry and stay; residence is a separate application. Choose based on your real intention, not only a day count.',
+    ),
+    source: _EntryOfficialSource.selector,
+  ),
+};
+
+class _EntryRegularizationActionRunner extends StatelessWidget {
+  const _EntryRegularizationActionRunner({
+    required this.profile,
+    required this.onToggle,
+    required this.onOpenEntryGuide,
+    required this.onOpenBilateralRoute,
+    required this.onOpenServiceSelector,
+  });
+
+  final EntryRegularizationProfile profile;
+  final Future<void> Function(String actionId) onToggle;
+  final VoidCallback onOpenEntryGuide;
+  final VoidCallback onOpenBilateralRoute;
+  final VoidCallback onOpenServiceSelector;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!profile.isComplete) {
+      return _GuideWorkflowMessage(
+        text: _localizedText(
+          context,
+          pt: 'Responda às perguntas acima. A primeira ação aplicável aparecerá aqui.',
+          es: 'Responde las preguntas de arriba. La primera acción aplicable aparecerá aquí.',
+          en: 'Answer the questions above. Your first applicable action will appear here.',
+        ),
+      );
+    }
+    final ids = profile.requiredActionIds;
+    final completed = profile.completedActionIds;
+    String? currentId;
+    for (final id in ids) {
+      if (!completed.contains(id)) {
+        currentId = id;
+        break;
+      }
+    }
+    if (currentId == null) {
+      return _GuideWorkflowMessage(
+        text: _localizedText(
+          context,
+          pt: 'Rota confirmada. Revise o resumo abaixo e conclua a etapa.',
+          es: 'Ruta confirmada. Revisa el resumen y completa la etapa.',
+          en: 'Route confirmed. Review the summary below and complete the step.',
+        ),
+      );
+    }
+    final content = _entryActionContent(context, currentId);
+    final index = ids.indexOf(currentId);
+    final openSource = switch (content.source) {
+      _EntryOfficialSource.entry => onOpenEntryGuide,
+      _EntryOfficialSource.bilateral => onOpenBilateralRoute,
+      _EntryOfficialSource.selector => onOpenServiceSelector,
+    };
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                _localizedText(
+                  context,
+                  pt: 'Faça isso agora',
+                  es: 'Haz esto ahora',
+                  en: 'Do this now',
+                ),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            Text(
+              '${index + 1}/${ids.length}',
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: AppColors.tintedSurfaceFor(
+              context,
+              tint: AppColors.primary,
+              lightColor: const Color(0xFFF5F9FF),
+            ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.22),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(content.icon, color: AppColors.primary),
+              const SizedBox(height: 10),
+              Text(
+                content.title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                content.instruction,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: openSource,
+                icon: const Icon(Icons.open_in_new_rounded, size: 17),
+                label: Text(
+                  _localizedText(
+                    context,
+                    pt: 'Conferir fonte oficial',
+                    es: 'Revisar fuente oficial',
+                    en: 'Check official source',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () => onToggle(currentId!),
+                  icon: const Icon(Icons.check_rounded, size: 18),
+                  label: Text(
+                    _localizedText(
+                      context,
+                      pt: 'Entendi e conferi',
+                      es: 'Entendí y revisé',
+                      en: 'Understood and checked',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (completed.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          for (final id in ids.where(completed.contains))
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.success,
+                size: 19,
+              ),
+              title: Text(
+                _entryActionContent(context, id).title,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  decoration: TextDecoration.lineThrough,
+                ),
+              ),
+              trailing: IconButton(
+                tooltip: _localizedText(
+                  context,
+                  pt: 'Reabrir',
+                  es: 'Reabrir',
+                  en: 'Reopen',
+                ),
+                onPressed: () => onToggle(id),
+                icon: const Icon(Icons.undo_rounded, size: 17),
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+}
+
+class _EntryRegularizationCompletionSummary extends StatelessWidget {
+  const _EntryRegularizationCompletionSummary({required this.profile});
+
+  final EntryRegularizationProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = profile.requiredActionIds.length;
+    final completed = profile.requiredActionIds
+        .where(profile.completedActionIds.contains)
+        .length;
+    final routeLabel = profile.canUseBilateralAgreement
+        ? _localizedText(
+            context,
+            pt: 'Residência permanente pelo acordo Brasil–Argentina',
+            es: 'Residencia permanente por el acuerdo Brasil–Argentina',
+            en: 'Permanent residence under the Brazil–Argentina Agreement',
+          )
+        : profile.stayIntent == BrazilStayIntent.visitOnly
+        ? _localizedText(
+            context,
+            pt: 'Entrada e permanência como visitante',
+            es: 'Ingreso y permanencia como visitante',
+            en: 'Visitor entry and stay',
+          )
+        : _localizedText(
+            context,
+            pt: 'Rota a confirmar no seletor oficial da Polícia Federal',
+            es: 'Ruta a confirmar en el selector oficial de la Policía Federal',
+            en: 'Route to confirm in the official Federal Police selector',
+          );
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: (completed == total ? AppColors.success : AppColors.primary)
+            .withValues(alpha: 0.09),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: (completed == total ? AppColors.success : AppColors.primary)
+              .withValues(alpha: 0.22),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _localizedText(
+              context,
+              pt: 'SUA ROTA',
+              es: 'TU RUTA',
+              en: 'YOUR ROUTE',
+            ),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: completed == total ? AppColors.success : AppColors.primary,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.7,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            routeLabel,
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _localizedText(
+              context,
+              pt: '$completed de $total decisões confirmadas. O prazo de visitante não foi tratado como prazo universal de residência.',
+              es: '$completed de $total decisiones confirmadas. El plazo de visitante no fue tratado como plazo universal de residencia.',
+              en: '$completed of $total decisions confirmed. Visitor timing was not treated as a universal residence deadline.',
+            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Migration-folder execution assistant ────────────────────────────────────
+
+String _protocolWindowShortLabel(
+  BuildContext context,
+  CriminalRecordProtocolWindow window,
+) => switch (window) {
+  CriminalRecordProtocolWindow.withinThirtyDays => _localizedText(
+    context,
+    pt: 'Protocolo em até 30 dias',
+    es: 'Presentación en hasta 30 días',
+    en: 'Filing within 30 days',
+  ),
+  CriminalRecordProtocolWindow.oneToThreeMonths => _localizedText(
+    context,
+    pt: 'Protocolo em 1 a 3 meses',
+    es: 'Presentación en 1 a 3 meses',
+    en: 'Filing in 1–3 months',
+  ),
+  CriminalRecordProtocolWindow.moreThanThreeMonths => _localizedText(
+    context,
+    pt: 'Protocolo após 3 meses',
+    es: 'Presentación después de 3 meses',
+    en: 'Filing after 3 months',
+  ),
+  CriminalRecordProtocolWindow.unknown => _localizedText(
+    context,
+    pt: 'Data do protocolo ainda indefinida',
+    es: 'Fecha de presentación aún no definida',
+    en: 'Filing date not decided yet',
+  ),
+};
+
+class _ReusedAnswersBanner extends StatelessWidget {
+  const _ReusedAnswersBanner({required this.labels});
+
+  final List<String> labels;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(11),
+      decoration: BoxDecoration(
+        color: AppColors.success.withValues(alpha: 0.09),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.22)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.auto_awesome_rounded,
+                size: 17,
+                color: AppColors.success,
+              ),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  _localizedText(
+                    context,
+                    pt: 'Já aproveitamos suas respostas anteriores',
+                    es: 'Ya aprovechamos tus respuestas anteriores',
+                    en: 'We reused your previous answers',
+                  ),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.success,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final label in labels)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceFor(context).withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MigrationFolderDecisionAssistant extends StatelessWidget {
+  const _MigrationFolderDecisionAssistant({
+    required this.profile,
+    required this.inheritedFieldIds,
+    required this.onChanged,
+  });
+
   final MigrationDocumentFolderProfile profile;
+  final Set<String> inheritedFieldIds;
   final Future<void> Function(MigrationDocumentFolderProfile profile) onChanged;
 
   void _update(MigrationDocumentFolderProfile value) {
@@ -10627,38 +11706,100 @@ class _MigrationFolderDecisionAssistant extends StatelessWidget {
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 14),
-          _CriminalRecordQuestion<MigrationFolderAgeGroup>(
-            number: 1,
-            title: _localizedText(
-              context,
-              pt: 'Qual é a faixa etária do solicitante?',
-              es: '¿Cuál es la edad del solicitante?',
-              en: 'What is the applicant’s age group?',
+          if (inheritedFieldIds.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _ReusedAnswersBanner(
+              labels: [
+                if (inheritedFieldIds.contains(
+                  MigrationAssistantAnswerBridge.ageGroup,
+                ))
+                  profile.ageGroup == MigrationFolderAgeGroup.under18
+                      ? _localizedText(
+                          context,
+                          pt: 'Menor de 18 anos',
+                          es: 'Menor de 18 años',
+                          en: 'Under 18',
+                        )
+                      : _localizedText(
+                          context,
+                          pt: '18 anos ou mais',
+                          es: '18 años o más',
+                          en: '18 or older',
+                        ),
+                if (inheritedFieldIds.contains(
+                  MigrationAssistantAnswerBridge.livedOutsideArgentina,
+                ))
+                  profile.livedOutsideArgentina == true
+                      ? _localizedText(
+                          context,
+                          pt: 'Viveu em outros países',
+                          es: 'Vivió en otros países',
+                          en: 'Lived in other countries',
+                        )
+                      : _localizedText(
+                          context,
+                          pt: 'Não viveu em outros países',
+                          es: 'No vivió en otros países',
+                          en: 'Did not live in other countries',
+                        ),
+                if (inheritedFieldIds.contains(
+                  MigrationAssistantAnswerBridge.isAlreadyInBrazil,
+                ))
+                  profile.isAlreadyInBrazil == true
+                      ? _localizedText(
+                          context,
+                          pt: 'Já entrou no Brasil',
+                          es: 'Ya ingresó a Brasil',
+                          en: 'Already entered Brazil',
+                        )
+                      : _localizedText(
+                          context,
+                          pt: 'Ainda não entrou no Brasil',
+                          es: 'Todavía no ingresó a Brasil',
+                          en: 'Has not entered Brazil yet',
+                        ),
+                if (inheritedFieldIds.contains(
+                  MigrationAssistantAnswerBridge.protocolWindow,
+                ))
+                  _protocolWindowShortLabel(context, profile.protocolWindow!),
+              ],
             ),
-            options: [
-              _DecisionChoice(
-                value: MigrationFolderAgeGroup.adult,
-                label: _localizedText(
-                  context,
-                  pt: '18 anos ou mais',
-                  es: '18 años o más',
-                  en: '18 or older',
-                ),
+          ],
+          const SizedBox(height: 14),
+          if (!inheritedFieldIds.contains(
+            MigrationAssistantAnswerBridge.ageGroup,
+          ))
+            _CriminalRecordQuestion<MigrationFolderAgeGroup>(
+              number: 1,
+              title: _localizedText(
+                context,
+                pt: 'Qual é a faixa etária do solicitante?',
+                es: '¿Cuál es la edad del solicitante?',
+                en: 'What is the applicant’s age group?',
               ),
-              _DecisionChoice(
-                value: MigrationFolderAgeGroup.under18,
-                label: _localizedText(
-                  context,
-                  pt: 'Menor de 18 anos',
-                  es: 'Menor de 18 años',
-                  en: 'Under 18',
+              options: [
+                _DecisionChoice(
+                  value: MigrationFolderAgeGroup.adult,
+                  label: _localizedText(
+                    context,
+                    pt: '18 anos ou mais',
+                    es: '18 años o más',
+                    en: '18 or older',
+                  ),
                 ),
-              ),
-            ],
-            selected: profile.ageGroup,
-            onSelected: (value) => _update(profile.copyWith(ageGroup: value)),
-          ),
+                _DecisionChoice(
+                  value: MigrationFolderAgeGroup.under18,
+                  label: _localizedText(
+                    context,
+                    pt: 'Menor de 18 anos',
+                    es: 'Menor de 18 años',
+                    en: 'Under 18',
+                  ),
+                ),
+              ],
+              selected: profile.ageGroup,
+              onSelected: (value) => _update(profile.copyWith(ageGroup: value)),
+            ),
           if (profile.ageGroup != null) ...[
             const SizedBox(height: 16),
             _CriminalRecordQuestion<bool>(
@@ -10701,7 +11842,10 @@ class _MigrationFolderDecisionAssistant extends StatelessWidget {
             ),
           ],
           if (profile.identityShowsParentage != null &&
-              profile.needsCountryHistory) ...[
+              profile.needsCountryHistory &&
+              !inheritedFieldIds.contains(
+                MigrationAssistantAnswerBridge.livedOutsideArgentina,
+              )) ...[
             const SizedBox(height: 16),
             _CriminalRecordQuestion<bool>(
               number: 3,
@@ -10733,7 +11877,10 @@ class _MigrationFolderDecisionAssistant extends StatelessWidget {
           ],
           if (profile.identityShowsParentage != null &&
               (!profile.needsCountryHistory ||
-                  profile.livedOutsideArgentina != null)) ...[
+                  profile.livedOutsideArgentina != null) &&
+              !inheritedFieldIds.contains(
+                MigrationAssistantAnswerBridge.isAlreadyInBrazil,
+              )) ...[
             const SizedBox(height: 16),
             _CriminalRecordQuestion<bool>(
               number: profile.needsCountryHistory ? 4 : 3,
@@ -10774,7 +11921,10 @@ class _MigrationFolderDecisionAssistant extends StatelessWidget {
                   _update(profile.copyWith(isAlreadyInBrazil: value)),
             ),
           ],
-          if (profile.isAlreadyInBrazil != null) ...[
+          if (profile.isAlreadyInBrazil != null &&
+              !inheritedFieldIds.contains(
+                MigrationAssistantAnswerBridge.protocolWindow,
+              )) ...[
             const SizedBox(height: 16),
             _CriminalRecordQuestion<CriminalRecordProtocolWindow>(
               number: profile.needsCountryHistory ? 5 : 4,
@@ -11234,10 +12384,12 @@ class _MigrationFolderCompletionSummary extends StatelessWidget {
 class _CriminalRecordDecisionAssistant extends StatefulWidget {
   const _CriminalRecordDecisionAssistant({
     required this.profile,
+    required this.inheritedFieldIds,
     required this.onChanged,
   });
 
   final CriminalRecordProfile profile;
+  final Set<String> inheritedFieldIds;
   final Future<void> Function(CriminalRecordProfile profile) onChanged;
 
   @override
@@ -11350,101 +12502,117 @@ class _CriminalRecordDecisionAssistantState
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 16),
-          _CriminalRecordQuestion(
-            number: 1,
-            title: _localizedText(
-              context,
-              pt: 'Qual é a sua faixa etária?',
-              es: '¿Cuál es tu rango de edad?',
-              en: 'What is your age range?',
+          if (widget.inheritedFieldIds.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _ReusedAnswersBanner(
+              labels: [
+                if (widget.inheritedFieldIds.contains(
+                  MigrationAssistantAnswerBridge.ageGroup,
+                ))
+                  profile.isExempt
+                      ? _localizedText(
+                          context,
+                          pt: 'Menor de 18 anos',
+                          es: 'Menor de 18 años',
+                          en: 'Under 18',
+                        )
+                      : _localizedText(
+                          context,
+                          pt: '18 anos ou mais',
+                          es: '18 años o más',
+                          en: '18 or older',
+                        ),
+                if (widget.inheritedFieldIds.contains(
+                  MigrationAssistantAnswerBridge.hasArgentineDni,
+                ))
+                  _localizedText(
+                    context,
+                    pt: 'DNI argentino já confirmado',
+                    es: 'DNI argentino ya confirmado',
+                    en: 'Argentine DNI already confirmed',
+                  ),
+                if (widget.inheritedFieldIds.contains(
+                  MigrationAssistantAnswerBridge.livedOutsideArgentina,
+                ))
+                  profile.livedOutsideArgentina == true
+                      ? _localizedText(
+                          context,
+                          pt: 'Viveu fora da Argentina',
+                          es: 'Vivió fuera de Argentina',
+                          en: 'Lived outside Argentina',
+                        )
+                      : _localizedText(
+                          context,
+                          pt: 'Não viveu fora da Argentina',
+                          es: 'No vivió fuera de Argentina',
+                          en: 'Did not live outside Argentina',
+                        ),
+                if (widget.inheritedFieldIds.contains(
+                  MigrationAssistantAnswerBridge.protocolWindow,
+                ))
+                  _protocolWindowShortLabel(context, profile.protocolWindow!),
+              ],
             ),
-            options: [
-              _DecisionChoice<CriminalRecordAgeGroup>(
-                value: CriminalRecordAgeGroup.adult,
-                label: _localizedText(
-                  context,
-                  pt: '18 anos ou mais',
-                  es: '18 años o más',
-                  en: '18 or older',
-                ),
+          ],
+          const SizedBox(height: 16),
+          if (!widget.inheritedFieldIds.contains(
+            MigrationAssistantAnswerBridge.ageGroup,
+          ))
+            _CriminalRecordQuestion(
+              number: 1,
+              title: _localizedText(
+                context,
+                pt: 'Qual é a sua faixa etária?',
+                es: '¿Cuál es tu rango de edad?',
+                en: 'What is your age range?',
               ),
-              _DecisionChoice<CriminalRecordAgeGroup>(
-                value: CriminalRecordAgeGroup.minor,
-                label: _localizedText(
-                  context,
-                  pt: 'Menos de 18',
-                  es: 'Menos de 18',
-                  en: 'Under 18',
+              options: [
+                _DecisionChoice<CriminalRecordAgeGroup>(
+                  value: CriminalRecordAgeGroup.adult,
+                  label: _localizedText(
+                    context,
+                    pt: '18 anos ou mais',
+                    es: '18 años o más',
+                    en: '18 or older',
+                  ),
                 ),
-              ),
-            ],
-            selected: profile.ageGroup,
-            onSelected: (value) =>
-                _update(CriminalRecordProfile(ageGroup: value)),
-          ),
+                _DecisionChoice<CriminalRecordAgeGroup>(
+                  value: CriminalRecordAgeGroup.minor,
+                  label: _localizedText(
+                    context,
+                    pt: 'Menos de 18',
+                    es: 'Menos de 18',
+                    en: 'Under 18',
+                  ),
+                ),
+              ],
+              selected: profile.ageGroup,
+              onSelected: (value) =>
+                  _update(CriminalRecordProfile(ageGroup: value)),
+            ),
           if (profile.isExempt) ...[
             const SizedBox(height: 14),
             const _CriminalRecordExemptionCard(),
           ] else if (profile.ageGroup == CriminalRecordAgeGroup.adult) ...[
-            const SizedBox(height: 14),
-            _CriminalRecordQuestion(
-              number: 2,
-              title: _localizedText(
-                context,
-                pt: 'Você possui DNI argentino?',
-                es: '¿Tenés DNI argentino?',
-                en: 'Do you have an Argentine DNI?',
-              ),
-              helper: _localizedText(
-                context,
-                pt: 'Sem DNI argentino, o RNR orienta fazer o pedido presencialmente.',
-                es: 'Sin DNI argentino, el RNR indica hacer el trámite presencialmente.',
-                en: 'Without an Argentine DNI, RNR directs you to the in-person route.',
-              ),
-              options: [
-                _DecisionChoice<bool>(
-                  value: true,
-                  label: _localizedText(
-                    context,
-                    pt: 'Sim',
-                    es: 'Sí',
-                    en: 'Yes',
-                  ),
-                ),
-                _DecisionChoice<bool>(
-                  value: false,
-                  label: _localizedText(context, pt: 'Não', es: 'No', en: 'No'),
-                ),
-              ],
-              selected: profile.hasArgentineDni,
-              onSelected: (value) => _update(
-                profile.copyWith(
-                  hasArgentineDni: value,
-                  completedOutcomeIds: const <String>{},
-                ),
-              ),
-            ),
-            if (profile.hasArgentineDni != null) ...[
+            if (!widget.inheritedFieldIds.contains(
+              MigrationAssistantAnswerBridge.hasArgentineDni,
+            )) ...[
               const SizedBox(height: 14),
               _CriminalRecordQuestion(
-                number: 3,
+                number: 2,
                 title: _localizedText(
                   context,
-                  pt: 'Você viveu fora da Argentina nos últimos 5 anos?',
-                  es: '¿Viviste fuera de Argentina en los últimos 5 años?',
-                  en: 'Did you live outside Argentina in the last 5 years?',
+                  pt: 'Você possui DNI argentino?',
+                  es: '¿Tenés DNI argentino?',
+                  en: 'Do you have an Argentine DNI?',
+                ),
+                helper: _localizedText(
+                  context,
+                  pt: 'Sem DNI argentino, o RNR orienta fazer o pedido presencialmente.',
+                  es: 'Sin DNI argentino, el RNR indica hacer el trámite presencialmente.',
+                  en: 'Without an Argentine DNI, RNR directs you to the in-person route.',
                 ),
                 options: [
-                  _DecisionChoice<bool>(
-                    value: false,
-                    label: _localizedText(
-                      context,
-                      pt: 'Não',
-                      es: 'No',
-                      en: 'No',
-                    ),
-                  ),
                   _DecisionChoice<bool>(
                     value: true,
                     label: _localizedText(
@@ -11454,21 +12622,73 @@ class _CriminalRecordDecisionAssistantState
                       en: 'Yes',
                     ),
                   ),
-                ],
-                selected: profile.livedOutsideArgentina,
-                onSelected: (value) {
-                  if (!value) _countriesController.clear();
-                  _update(
-                    profile.copyWith(
-                      livedOutsideArgentina: value,
-                      otherCountriesText: value
-                          ? profile.otherCountriesText
-                          : '',
-                      completedOutcomeIds: const <String>{},
+                  _DecisionChoice<bool>(
+                    value: false,
+                    label: _localizedText(
+                      context,
+                      pt: 'Não',
+                      es: 'No',
+                      en: 'No',
                     ),
-                  );
-                },
+                  ),
+                ],
+                selected: profile.hasArgentineDni,
+                onSelected: (value) => _update(
+                  profile.copyWith(
+                    hasArgentineDni: value,
+                    completedOutcomeIds: const <String>{},
+                  ),
+                ),
               ),
+            ],
+            if (profile.hasArgentineDni != null) ...[
+              if (!widget.inheritedFieldIds.contains(
+                MigrationAssistantAnswerBridge.livedOutsideArgentina,
+              )) ...[
+                const SizedBox(height: 14),
+                _CriminalRecordQuestion(
+                  number: 3,
+                  title: _localizedText(
+                    context,
+                    pt: 'Você viveu fora da Argentina nos últimos 5 anos?',
+                    es: '¿Viviste fuera de Argentina en los últimos 5 años?',
+                    en: 'Did you live outside Argentina in the last 5 years?',
+                  ),
+                  options: [
+                    _DecisionChoice<bool>(
+                      value: false,
+                      label: _localizedText(
+                        context,
+                        pt: 'Não',
+                        es: 'No',
+                        en: 'No',
+                      ),
+                    ),
+                    _DecisionChoice<bool>(
+                      value: true,
+                      label: _localizedText(
+                        context,
+                        pt: 'Sim',
+                        es: 'Sí',
+                        en: 'Yes',
+                      ),
+                    ),
+                  ],
+                  selected: profile.livedOutsideArgentina,
+                  onSelected: (value) {
+                    if (!value) _countriesController.clear();
+                    _update(
+                      profile.copyWith(
+                        livedOutsideArgentina: value,
+                        otherCountriesText: value
+                            ? profile.otherCountriesText
+                            : '',
+                        completedOutcomeIds: const <String>{},
+                      ),
+                    );
+                  },
+                ),
+              ],
             ],
             if (profile.livedOutsideArgentina == true) ...[
               const SizedBox(height: 10),
@@ -11506,57 +12726,61 @@ class _CriminalRecordDecisionAssistantState
             ],
             if (profile.livedOutsideArgentina == false ||
                 profile.otherCountries.isNotEmpty) ...[
-              const SizedBox(height: 14),
-              _CriminalRecordQuestion(
-                number: 4,
-                title: _localizedText(
-                  context,
-                  pt: 'Quando pretende protocolar na Polícia Federal?',
-                  es: '¿Cuándo pensás presentar ante la Policía Federal?',
-                  en: 'When do you expect to file with Federal Police?',
+              if (!widget.inheritedFieldIds.contains(
+                MigrationAssistantAnswerBridge.protocolWindow,
+              )) ...[
+                const SizedBox(height: 14),
+                _CriminalRecordQuestion(
+                  number: 4,
+                  title: _localizedText(
+                    context,
+                    pt: 'Quando pretende protocolar na Polícia Federal?',
+                    es: '¿Cuándo pensás presentar ante la Policía Federal?',
+                    en: 'When do you expect to file with Federal Police?',
+                  ),
+                  options: [
+                    _DecisionChoice<CriminalRecordProtocolWindow>(
+                      value: CriminalRecordProtocolWindow.withinThirtyDays,
+                      label: _localizedText(
+                        context,
+                        pt: 'Até 30 dias',
+                        es: 'Hasta 30 días',
+                        en: 'Within 30 days',
+                      ),
+                    ),
+                    _DecisionChoice<CriminalRecordProtocolWindow>(
+                      value: CriminalRecordProtocolWindow.oneToThreeMonths,
+                      label: _localizedText(
+                        context,
+                        pt: '1 a 3 meses',
+                        es: '1 a 3 meses',
+                        en: '1–3 months',
+                      ),
+                    ),
+                    _DecisionChoice<CriminalRecordProtocolWindow>(
+                      value: CriminalRecordProtocolWindow.moreThanThreeMonths,
+                      label: _localizedText(
+                        context,
+                        pt: 'Mais de 3 meses',
+                        es: 'Más de 3 meses',
+                        en: 'More than 3 months',
+                      ),
+                    ),
+                    _DecisionChoice<CriminalRecordProtocolWindow>(
+                      value: CriminalRecordProtocolWindow.unknown,
+                      label: _localizedText(
+                        context,
+                        pt: 'Ainda não sei',
+                        es: 'Todavía no sé',
+                        en: 'Not sure yet',
+                      ),
+                    ),
+                  ],
+                  selected: profile.protocolWindow,
+                  onSelected: (value) =>
+                      _update(profile.copyWith(protocolWindow: value)),
                 ),
-                options: [
-                  _DecisionChoice<CriminalRecordProtocolWindow>(
-                    value: CriminalRecordProtocolWindow.withinThirtyDays,
-                    label: _localizedText(
-                      context,
-                      pt: 'Até 30 dias',
-                      es: 'Hasta 30 días',
-                      en: 'Within 30 days',
-                    ),
-                  ),
-                  _DecisionChoice<CriminalRecordProtocolWindow>(
-                    value: CriminalRecordProtocolWindow.oneToThreeMonths,
-                    label: _localizedText(
-                      context,
-                      pt: '1 a 3 meses',
-                      es: '1 a 3 meses',
-                      en: '1–3 months',
-                    ),
-                  ),
-                  _DecisionChoice<CriminalRecordProtocolWindow>(
-                    value: CriminalRecordProtocolWindow.moreThanThreeMonths,
-                    label: _localizedText(
-                      context,
-                      pt: 'Mais de 3 meses',
-                      es: 'Más de 3 meses',
-                      en: 'More than 3 months',
-                    ),
-                  ),
-                  _DecisionChoice<CriminalRecordProtocolWindow>(
-                    value: CriminalRecordProtocolWindow.unknown,
-                    label: _localizedText(
-                      context,
-                      pt: 'Ainda não sei',
-                      es: 'Todavía no sé',
-                      en: 'Not sure yet',
-                    ),
-                  ),
-                ],
-                selected: profile.protocolWindow,
-                onSelected: (value) =>
-                    _update(profile.copyWith(protocolWindow: value)),
-              ),
+              ],
             ],
           ],
         ],

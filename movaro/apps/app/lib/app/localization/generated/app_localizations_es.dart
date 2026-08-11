@@ -3008,7 +3008,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String cityComparisonStartPlanAction(Object city) {
-    return 'Iniciar plan en $city →';
+    return 'Elegir $city y ver mi plan →';
   }
 
   @override

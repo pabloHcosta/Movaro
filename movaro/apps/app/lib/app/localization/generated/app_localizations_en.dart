@@ -3000,7 +3000,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cityComparisonStartPlanAction(Object city) {
-    return 'Start plan in $city →';
+    return 'Choose $city and view my plan →';
   }
 
   @override

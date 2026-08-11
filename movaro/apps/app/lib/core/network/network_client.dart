@@ -8,8 +8,9 @@ import 'package:movaro_app/core/network/network_exception.dart';
 import 'package:http/http.dart' as http;
 
 class NetworkClient {
-  NetworkClient({required AppEnvironment environment})
+  NetworkClient({required AppEnvironment environment, http.Client? httpClient})
     : _environment = environment,
+      _httpClient = httpClient ?? http.Client(),
       _timeout = environment.isLocalApiSource
           ? const Duration(seconds: 15)
           : const Duration(seconds: 8),
@@ -18,7 +19,7 @@ class NetworkClient {
           : const [Duration(milliseconds: 350), Duration(milliseconds: 700)];
 
   final AppEnvironment _environment;
-  final http.Client _httpClient = http.Client();
+  final http.Client _httpClient;
   final Duration _timeout;
   final List<Duration> _retrySchedule;
 
@@ -81,15 +82,20 @@ class NetworkClient {
   }
 
   Future<Object?> _post(String path, Map<String, dynamic> body) {
-    return _executeWithRetry(() => _requestPost(path, body));
+    return _executeWithFailover(
+      (baseUri) => _requestPost(path, body, baseUri: baseUri),
+    );
   }
 
-  Future<Object?> _requestPost(String path, Map<String, dynamic> body) async {
+  Future<Object?> _requestPost(
+    String path,
+    Map<String, dynamic> body, {
+    required Uri baseUri,
+  }) async {
     if (!path.startsWith('/')) {
       throw const NetworkException('invalid_api_path', isRetryable: false);
     }
 
-    final baseUri = Uri.parse(_environment.apiBaseUrl);
     final uri = baseUri.resolve(path);
     final requestHeaders = <String, String>{
       'accept': 'application/json',
@@ -143,18 +149,20 @@ class NetworkClient {
   }
 
   Future<Object?> _get(String path, {Map<String, String> headers = const {}}) {
-    return _executeWithRetry(() => _request(path, headers: headers));
+    return _executeWithFailover(
+      (baseUri) => _request(path, headers: headers, baseUri: baseUri),
+    );
   }
 
   Future<Object?> _request(
     String path, {
     Map<String, String> headers = const {},
+    required Uri baseUri,
   }) async {
     if (!path.startsWith('/')) {
       throw const NetworkException('invalid_api_path', isRetryable: false);
     }
 
-    final baseUri = Uri.parse(_environment.apiBaseUrl);
     final uri = baseUri.resolve(path);
     final requestHeaders = <String, String>{
       'accept': 'application/json',
@@ -208,22 +216,46 @@ class NetworkClient {
     }
   }
 
-  Future<Object?> _executeWithRetry(
-    Future<Object?> Function() operation,
+  Future<Object?> _executeWithFailover(
+    Future<Object?> Function(Uri baseUri) operation,
   ) async {
-    var attempt = 0;
+    final endpoints = <Uri>[
+      Uri.parse(_environment.apiBaseUrl),
+      if (_environment.isLocalApiSource &&
+          _environment.railwayApiBaseUrl.trim().isNotEmpty &&
+          _environment.railwayApiBaseUrl.trim() !=
+              _environment.apiBaseUrl.trim())
+        Uri.parse(_environment.railwayApiBaseUrl),
+    ];
 
-    while (true) {
-      try {
-        return await operation();
-      } on NetworkException catch (error) {
-        if (!error.isRetryable || attempt >= _retrySchedule.length) {
+    for (
+      var endpointIndex = 0;
+      endpointIndex < endpoints.length;
+      endpointIndex++
+    ) {
+      var attempt = 0;
+      while (true) {
+        try {
+          return await operation(endpoints[endpointIndex]);
+        } on NetworkException catch (error) {
+          final hasFallback = endpointIndex < endpoints.length - 1;
+          if (hasFallback) {
+            break;
+          }
+
+          final canRetryEndpoint =
+              error.isRetryable && attempt < _retrySchedule.length;
+          if (canRetryEndpoint) {
+            await Future<void>.delayed(_retrySchedule[attempt]);
+            attempt += 1;
+            continue;
+          }
+
           rethrow;
         }
-
-        await Future<void>.delayed(_retrySchedule[attempt]);
-        attempt += 1;
       }
     }
+
+    throw const NetworkException('network_unreachable');
   }
 }

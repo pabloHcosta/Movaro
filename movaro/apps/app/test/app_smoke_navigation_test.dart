@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -241,6 +242,42 @@ void main() {
 
     expect(find.text('Porto Alegre'), findsWidgets);
     expect(find.textContaining('cidades encontradas'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('comparison hero fits three cities on a mobile viewport', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      harness.buildApp(initialRoute: AppRoutes.publicHome),
+    );
+    await _pumpScreen(tester);
+
+    final navigator = tester.state<NavigatorState>(
+      find.byType(Navigator).first,
+    );
+    unawaited(
+      navigator.pushNamed(
+        AppRoutes.cityComparison,
+        arguments: const [_curitiba, _portoAlegre, _salvador],
+      ),
+    );
+    await _pumpScreen(tester);
+
+    expect(find.text('Seu melhor encaixe, lado a lado'), findsOneWidget);
+    expect(find.textContaining('MELHOR PARA O SEU PERFIL'), findsOneWidget);
+    expect(find.text('#2'), findsOneWidget);
+    expect(find.text('#3'), findsOneWidget);
+    expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();

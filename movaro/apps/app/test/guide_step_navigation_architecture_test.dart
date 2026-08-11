@@ -41,6 +41,51 @@ void main() {
     expect(executor, isNot(contains('CheckboxListTile')));
   });
 
+  test('generic instructions become a saved one-step-at-a-time assistant', () {
+    final executor = methodBody(
+      'Future<void> _showExecutionPage(',
+      'Future<void> _completeGuideItem(',
+    );
+    final executionContent = methodBody(
+      'class _GuideExecutionContent',
+      'class _CpfDecisionContent',
+    );
+
+    expect(executor, contains('assistant_completed_instruction_indexes'));
+    expect(executor, contains('handleInstructionToggle'));
+    expect(executionContent, contains('_GuideOutcomeProgress('));
+    expect(executionContent, contains('completedStepIndexes.contains(index)'));
+  });
+
+  test(
+    'reminder assistance stays beside execution instead of page details',
+    () {
+      final executor = methodBody(
+        'Future<void> _showExecutionPage(',
+        'Future<void> _completeGuideItem(',
+      );
+      final executionStart = executor.indexOf("pt: 'Execute a etapa'");
+      final confirmationStart = executor.indexOf("pt: 'Confirme o resultado'");
+      final detailsStart = executor.indexOf('_GuideSupplementaryDetails(');
+      final calendarStart = executor.indexOf('_buildCalendarPrompt(');
+
+      expect(calendarStart, greaterThan(executionStart));
+      expect(calendarStart, lessThan(confirmationStart));
+      expect(calendarStart, lessThan(detailsStart));
+    },
+  );
+
+  test('recommended route is immediate and full comparison is secondary', () {
+    final executionContent = methodBody(
+      'class _GuideExecutionContent',
+      'class _CpfDecisionContent',
+    );
+
+    expect(executionContent, contains('_GuideBestOptionBanner('));
+    expect(executionContent, contains("pt: 'Comparar todas as opções'"));
+    expect(executionContent, contains('_GuideExpandableSection('));
+  });
+
   test('every step uses the same visible three-part execution hierarchy', () {
     final executor = methodBody(
       'Future<void> _showExecutionPage(',

@@ -1214,7 +1214,7 @@
   "cityComparisonCommunitySmall": "Small",
   "cityComparisonWinnerLabel": "CURRENT COMPARISON EDGE",
   "cityComparisonUnavailable": "—",
-  "cityComparisonStartPlanAction": "Start plan in {city} →",
+  "cityComparisonStartPlanAction": "Choose {city} and view my plan →",
   "@cityComparisonStartPlanAction": {
     "placeholders": {
       "city": {}

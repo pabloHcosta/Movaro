@@ -5128,7 +5128,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityComparisonStartPlanAction.
   ///
   /// In en, this message translates to:
-  /// **'Start plan in {city} →'**
+  /// **'Choose {city} and view my plan →'**
   String cityComparisonStartPlanAction(Object city);
 
   /// No description provided for @cityComparisonOtherDetailsAction.

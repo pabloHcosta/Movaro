@@ -3010,7 +3010,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String cityComparisonStartPlanAction(Object city) {
-    return 'Iniciar plano em $city →';
+    return 'Escolher $city e ver meu plano →';
   }
 
   @override

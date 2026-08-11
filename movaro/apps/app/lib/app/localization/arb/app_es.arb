@@ -1135,7 +1135,7 @@
   "cityComparisonCommunitySmall": "Pequeña",
   "cityComparisonWinnerLabel": "VENTAJA ACTUAL EN LA COMPARACIÓN",
   "cityComparisonUnavailable": "—",
-  "cityComparisonStartPlanAction": "Iniciar plan en {city} →",
+  "cityComparisonStartPlanAction": "Elegir {city} y ver mi plan →",
   "@cityComparisonStartPlanAction": {
     "placeholders": {
       "city": {}

@@ -383,9 +383,7 @@ class GuideEventSuggestionEngine {
           startAt: start,
           endAt: start.add(const Duration(minutes: 20)),
           suggestedDurationMinutes: 20,
-          hardDeadline: arrivalDate.add(const Duration(days: 90)),
           defaultReminderOption: GuideEventReminderOption.oneDayBefore,
-          isHighPriority: true,
         );
       default:
         return null;

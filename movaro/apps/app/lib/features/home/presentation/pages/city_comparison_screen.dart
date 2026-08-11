@@ -214,7 +214,15 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
       });
       return _buildSelectionState(context);
     }
-    final winner = _winner(cities);
+    final rankedCities = cities.toList(growable: false)
+      ..sort(
+        (a, b) =>
+            _calculateScore(b, cities).compareTo(_calculateScore(a, cities)),
+      );
+    final winner = _CityWinner(
+      city: rankedCities.first.city,
+      score: _calculateScore(rankedCities.first, cities),
+    );
     final compact = cities.length >= 3;
     final lens = _resolveComparisonLens();
 
@@ -249,23 +257,9 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
               context.pageHorizontalPadding,
               0,
             ),
-            child: const SizedBox(height: 0),
-          ),
-        ),
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _ComparisonHeaderDelegate(
-            minExtentValue: compact ? 188 : 204,
-            maxExtentValue: compact ? 188 : 204,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: context.pageHorizontalPadding,
-              ),
-              child: _ComparisonHeader(
-                cities: cities,
-                winner: winner,
-                compact: compact,
-              ),
+            child: _ComparisonHero(
+              rankedCities: rankedCities,
+              winnerScore: winner.score,
             ),
           ),
         ),
@@ -284,10 +278,6 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
                   winner: winner,
                   lens: lens,
                 ),
-                if (cities.any((city) => city.hasBudgetSnapshot)) ...[
-                  const SizedBox(height: 16),
-                ],
-                _WinnerBanner(winner: winner),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () => _startPlanWithWinner(winner.city),
@@ -593,18 +583,6 @@ class _CityComparisonScreenState extends State<CityComparisonScreen> {
       return detectedCountry;
     }
     return widget.migrationQuestionnaireController.generatedPlan?.originCountry;
-  }
-
-  _CityWinner _winner(List<_ComparisonCityData> cities) {
-    final scored = {
-      for (final city in cities) city.city.id: _calculateScore(city, cities),
-    };
-    final sorted = cities.toList()
-      ..sort(
-        (a, b) => (scored[b.city.id] ?? 0).compareTo(scored[a.city.id] ?? 0),
-      );
-    final winner = sorted.first;
-    return _CityWinner(city: winner.city, score: scored[winner.city.id] ?? 0);
   }
 
   int _calculateScore(
@@ -1075,309 +1053,281 @@ class _SelectionCompareCard extends StatelessWidget {
   }
 }
 
-class _ComparisonHeaderDelegate extends SliverPersistentHeaderDelegate {
-  const _ComparisonHeaderDelegate({
-    required this.minExtentValue,
-    required this.maxExtentValue,
-    required this.child,
+class _ComparisonHero extends StatelessWidget {
+  const _ComparisonHero({
+    required this.rankedCities,
+    required this.winnerScore,
   });
 
-  final double minExtentValue;
-  final double maxExtentValue;
-  final Widget child;
-
-  @override
-  double get minExtent => minExtentValue;
-
-  @override
-  double get maxExtent => maxExtentValue;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return ColoredBox(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: SizedBox.expand(
-        child: Padding(padding: const EdgeInsets.only(bottom: 8), child: child),
-      ),
-    );
-  }
-
-  @override
-  bool shouldRebuild(covariant _ComparisonHeaderDelegate oldDelegate) {
-    return oldDelegate.minExtentValue != minExtentValue ||
-        oldDelegate.maxExtentValue != maxExtentValue ||
-        oldDelegate.child != child;
-  }
-}
-
-class _ComparisonHeader extends StatelessWidget {
-  const _ComparisonHeader({
-    required this.cities,
-    required this.winner,
-    required this.compact,
-  });
-
-  final List<_ComparisonCityData> cities;
-  final _CityWinner winner;
-  final bool compact;
+  final List<_ComparisonCityData> rankedCities;
+  final int winnerScore;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final labelWidth = compact ? 72.0 : 80.0;
-    final gap = compact ? 8.0 : 10.0;
+    final winner = rankedCities.first;
+    final alternatives = rankedCities.skip(1).toList(growable: false);
 
-    return FrostedPanel(
-      padding: EdgeInsets.all(compact ? 12 : 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Section label ─────────────────────────────────────────────
-          Row(
-            children: [
-              Text(
-                context.l10n.cityComparisonHeaderLabel.toUpperCase(),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontSize: 9,
-                  letterSpacing: 1.1,
-                  color: AppColors.textSoftFor(context),
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  height: 1,
-                  margin: const EdgeInsets.only(left: 10),
-                  color: scheme.outlineVariant.withValues(alpha: 0.30),
-                ),
-              ),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _localizedText(
+            context,
+            pt: 'Seu melhor encaixe, lado a lado',
+            es: 'Tu mejor encaje, lado a lado',
+            en: 'Your best fit, side by side',
           ),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w900,
+            height: 1.05,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          _localizedText(
+            context,
+            pt: 'A recomendação principal aparece primeiro; as alternativas continuam visíveis para você entender a diferença.',
+            es: 'La recomendación principal aparece primero; las alternativas siguen visibles para que entiendas la diferencia.',
+            en: 'The leading recommendation comes first; alternatives stay visible so you can understand the difference.',
+          ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: AppColors.textSoftFor(context),
+            height: 1.45,
+          ),
+        ),
+        const SizedBox(height: 16),
+        _ComparisonWinnerHero(city: winner, score: winnerScore),
+        if (alternatives.isNotEmpty) ...[
           const SizedBox(height: 12),
-          // ── City columns ──────────────────────────────────────────────
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Spacer aligning with metric label column below
-              SizedBox(width: labelWidth),
-              SizedBox(width: gap),
-              for (final city in cities) ...[
+              for (var index = 0; index < alternatives.length; index++) ...[
                 Expanded(
-                  child: _CityHeaderColumn(
-                    city: city,
-                    isWinner: city.city.id == winner.city.id,
-                    compact: compact,
+                  child: _ComparisonAlternativeCard(
+                    city: alternatives[index],
+                    rank: index + 2,
                   ),
                 ),
-                if (city != cities.last) SizedBox(width: gap),
+                if (index < alternatives.length - 1) const SizedBox(width: 10),
               ],
             ],
           ),
         ],
+      ],
+    );
+  }
+}
+
+class _ComparisonWinnerHero extends StatelessWidget {
+  const _ComparisonWinnerHero({required this.city, required this.score});
+
+  final _ComparisonCityData city;
+  final int score;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: _localizedText(
+        context,
+        pt: '${city.city.name}, melhor encaixe atual',
+        es: '${city.city.name}, mejor encaje actual',
+        en: '${city.city.name}, current best fit',
+      ),
+      child: CityImageHeader(
+        city: city.city,
+        height: 226,
+        borderRadius: const BorderRadius.all(Radius.circular(28)),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: _HeroBadge(
+                  icon: Icons.auto_awesome_rounded,
+                  label: _localizedText(
+                    context,
+                    pt: 'MELHOR PARA O SEU PERFIL',
+                    es: 'MEJOR PARA TU PERFIL',
+                    en: 'BEST FOR YOUR PROFILE',
+                  ),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${city.city.stateCode} · ${city.cityCode}',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.82),
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    city.city.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      height: 1.0,
+                      shadows: const [
+                        Shadow(color: Colors.black45, blurRadius: 10),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _HeroBadge(
+                    label: _decisionTierLabel(context, score),
+                    icon: Icons.trending_up_rounded,
+                    compact: true,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-class _CityHeaderColumn extends StatelessWidget {
-  const _CityHeaderColumn({
-    required this.city,
-    required this.isWinner,
-    required this.compact,
-  });
+class _ComparisonAlternativeCard extends StatelessWidget {
+  const _ComparisonAlternativeCard({required this.city, required this.rank});
 
   final _ComparisonCityData city;
-  final bool isWinner;
+  final int rank;
+
+  @override
+  Widget build(BuildContext context) {
+    return CityImageHeader(
+      city: city.city,
+      height: 142,
+      borderRadius: const BorderRadius.all(Radius.circular(22)),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _HeroBadge(label: '#$rank', compact: true),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  city.city.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    height: 1.05,
+                    shadows: const [
+                      Shadow(color: Colors.black54, blurRadius: 8),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${city.city.stateCode} · ${city.cityCode}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.78),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroBadge extends StatelessWidget {
+  const _HeroBadge({required this.label, this.icon, this.compact = false});
+
+  final String label;
+  final IconData? icon;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    final scheme = Theme.of(context).colorScheme;
-
-    // Compute a composite score 0–100 for the bar
-    final composite =
-        ((city.city.rentScore +
-                    city.city.movaroScores.languageAdaptation +
-                    city.city.safetyScore +
-                    city.city.costOfLivingScore) /
-                4)
-            .clamp(0, 100)
-            .toDouble();
-
-    final initials = city.city.name
-        .split(' ')
-        .take(2)
-        .map((w) => w.isNotEmpty ? w[0] : '')
-        .join()
-        .toUpperCase();
-
-    final cardBg = isWinner
-        ? LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.primary, const Color(0xFF0055EE)],
-          )
-        : null;
-
-    final cardColor = isWinner
-        ? null
-        : (isDark
-              ? scheme.surfaceContainerHighest.withValues(alpha: 0.72)
-              : scheme.surfaceContainerLow);
-
-    final onCard = isWinner ? Colors.white : scheme.onSurface;
-    final onCardMuted = isWinner
-        ? Colors.white.withValues(alpha: 0.65)
-        : AppColors.textSoftFor(context);
-
-    return Container(
-      padding: EdgeInsets.all(compact ? 10 : 12),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: cardBg,
-        color: cardColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isWinner
-              ? AppColors.primary.withValues(alpha: 0.0)
-              : scheme.outlineVariant.withValues(alpha: 0.40),
-        ),
-        boxShadow: isWinner
-            ? [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.28),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
-                ),
-              ]
-            : null,
+        color: const Color(0xFF07111F).withValues(alpha: 0.68),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // ── Initials avatar ────────────────────────────────────────
-          Container(
-            width: compact ? 32 : 36,
-            height: compact ? 32 : 36,
-            decoration: BoxDecoration(
-              color: isWinner
-                  ? Colors.white.withValues(alpha: 0.18)
-                  : AppColors.primary.withValues(alpha: 0.10),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                initials,
-                style: TextStyle(
-                  fontSize: compact ? 11 : 12,
-                  fontWeight: FontWeight.w800,
-                  color: isWinner ? Colors.white : AppColors.primary,
-                  letterSpacing: 0.5,
-                  height: 1,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: compact ? 8 : 10),
-
-          // ── City name ──────────────────────────────────────────────
-          Text(
-            city.city.name,
-            maxLines: 2,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: _nameFontSize(city.city.name),
-              fontWeight: FontWeight.w800,
-              color: onCard,
-              height: 1.15,
-            ),
-          ),
-          SizedBox(height: compact ? 4 : 5),
-
-          // ── State · code ───────────────────────────────────────────
-          Text(
-            '${city.city.stateCode} · ${city.cityCode}',
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: compact ? 8 : 8.5,
-              color: onCardMuted,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.3,
-            ),
-          ),
-          SizedBox(height: compact ? 10 : 12),
-
-          // ── Score bar ──────────────────────────────────────────────
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: composite / 100,
-              minHeight: 4,
-              backgroundColor: isWinner
-                  ? Colors.white.withValues(alpha: 0.20)
-                  : scheme.outlineVariant.withValues(alpha: 0.30),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                isWinner
-                    ? Colors.white.withValues(alpha: 0.85)
-                    : AppColors.primary.withValues(alpha: 0.65),
-              ),
-            ),
-          ),
-          SizedBox(height: compact ? 4 : 5),
-
-          // ── Score label ────────────────────────────────────────────
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (isWinner)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    context.l10n.cityComparisonTopBadge,
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                )
-              else
-                const SizedBox.shrink(),
-              Text(
-                _compositeTierLabel(context, composite),
-                style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
-                  color: onCardMuted,
-                ),
-              ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 9 : 11,
+          vertical: compact ? 5 : 7,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, color: Colors.white, size: compact ? 13 : 15),
+              const SizedBox(width: 6),
             ],
-          ),
-        ],
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: compact ? 0.2 : 0.55,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  double _nameFontSize(String name) {
-    if (name.length >= 18) return compact ? 8.5 : 9.5;
-    if (name.length >= 12) return compact ? 9.0 : 10.0;
-    return compact ? 10.0 : 11.0;
+String _decisionTierLabel(BuildContext context, int score) {
+  if (score >= 78) {
+    return _localizedText(
+      context,
+      pt: 'Destaque forte',
+      es: 'Destaque fuerte',
+      en: 'Strong match',
+    );
   }
+  if (score >= 62) {
+    return _localizedText(
+      context,
+      pt: 'Boa indicação',
+      es: 'Buena opción',
+      en: 'Good match',
+    );
+  }
+  if (score >= 48) {
+    return _localizedText(
+      context,
+      pt: 'Leve vantagem',
+      es: 'Leve ventaja',
+      en: 'Slight edge',
+    );
+  }
+  return _localizedText(
+    context,
+    pt: 'Melhor encaixe por agora',
+    es: 'Mejor encaje por ahora',
+    en: 'Stronger match for now',
+  );
 }
 
 class _MetricSectionGroup {
@@ -1615,112 +1565,6 @@ class _MetricRow extends StatelessWidget {
   }
 }
 
-class _WinnerBanner extends StatelessWidget {
-  const _WinnerBanner({required this.winner});
-
-  final _CityWinner winner;
-
-  String _tierLabel(BuildContext context) {
-    if (winner.score >= 78) {
-      return _localizedText(
-        context,
-        pt: 'Destaque forte',
-        es: 'Destaque fuerte',
-        en: 'Strong match',
-      );
-    }
-    if (winner.score >= 62) {
-      return _localizedText(
-        context,
-        pt: 'Boa indicação',
-        es: 'Buena opción',
-        en: 'Good match',
-      );
-    }
-    if (winner.score >= 48) {
-      return _localizedText(
-        context,
-        pt: 'Leve vantagem',
-        es: 'Leve ventaja',
-        en: 'Slight edge',
-      );
-    }
-    return _localizedText(
-      context,
-      pt: 'Melhor encaixe por agora',
-      es: 'Mejor encaje por ahora',
-      en: 'Stronger match for now',
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.success.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.success.withValues(alpha: 0.18)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(Icons.star_rounded, color: AppColors.success),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.cityComparisonWinnerLabel,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.success,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.4,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  winner.city.name,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: AppColors.success.withValues(alpha: 0.28),
-              ),
-            ),
-            child: Text(
-              _tierLabel(context),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.success,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _CityWinner {
   const _CityWinner({required this.city, required this.score});
 
@@ -1744,24 +1588,6 @@ String _localizedText(
 }
 
 /// Converts a 0–100 composite score to a human-readable tier label.
-String _compositeTierLabel(BuildContext context, double score) {
-  if (score >= 78) {
-    return _localizedText(
-      context,
-      pt: 'Excelente',
-      es: 'Excelente',
-      en: 'Excellent',
-    );
-  }
-  if (score >= 62) {
-    return _localizedText(context, pt: 'Bom', es: 'Bueno', en: 'Good');
-  }
-  if (score >= 48) {
-    return _localizedText(context, pt: 'Regular', es: 'Regular', en: 'Fair');
-  }
-  return _localizedText(context, pt: 'Atenção', es: 'Atención', en: 'Watch');
-}
-
 class _ComparisonIntelligencePanel extends StatelessWidget {
   const _ComparisonIntelligencePanel({
     required this.cities,

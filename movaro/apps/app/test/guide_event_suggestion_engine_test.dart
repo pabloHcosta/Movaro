@@ -50,4 +50,29 @@ void main() {
     expect(suggestion, isNotNull);
     expect(suggestion!.title, 'Request criminal record certificate');
   });
+
+  test('não transforma a revisão de entrada em prazo universal de 90 dias', () {
+    const entryItem = GuideActionItem(
+      id: 'item_0_1_rule_90_days',
+      title: 'Entrada e regularização',
+      shortDescription: 'Separar visitante e residência',
+      type: GuideActionType.informative,
+      phase: GuidePhase.preparation,
+      orderIndex: 0,
+      isCompleted: false,
+    );
+
+    final suggestion = engine.buildForItem(
+      plan: plan,
+      item: entryItem,
+      completedAtById: const {},
+      completedSteps: 0,
+      totalSteps: 1,
+      localeCode: 'pt',
+    );
+
+    expect(suggestion, isNotNull);
+    expect(suggestion!.hardDeadline, isNull);
+    expect(suggestion.assistantCopy, contains('sem transformar'));
+  });
 }

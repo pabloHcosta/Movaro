@@ -94,7 +94,7 @@ class _GuideEventSuggestionSheetState
 
     return SafeArea(
       child: FractionallySizedBox(
-        heightFactor: 0.74,
+        heightFactor: 0.70,
         child: Container(
           margin: EdgeInsets.only(
             left: 8,
@@ -131,9 +131,9 @@ class _GuideEventSuggestionSheetState
                       child: Text(
                         _text(
                           context,
-                          pt: 'Adicionar ao calendário',
-                          es: 'Agregar al calendario',
-                          en: 'Add to calendar',
+                          pt: 'Planejar lembrete',
+                          es: 'Planificar recordatorio',
+                          en: 'Plan reminder',
                         ),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
@@ -173,14 +173,6 @@ class _GuideEventSuggestionSheetState
                       runSpacing: 8,
                       children: [
                         _MetaPill(
-                          icon: Icons.calendar_today_rounded,
-                          label: dateFormat.format(_draft.startAt),
-                        ),
-                        _MetaPill(
-                          icon: Icons.schedule_rounded,
-                          label: timeOfDay.format(context),
-                        ),
-                        _MetaPill(
                           icon: Icons.timelapse_rounded,
                           label: _durationLabel(
                             context,
@@ -206,6 +198,18 @@ class _GuideEventSuggestionSheetState
                       ],
                     ),
                     const SizedBox(height: 14),
+                    Text(
+                      _text(
+                        context,
+                        pt: 'Quando você quer agir?',
+                        es: '¿Cuándo quieres hacerlo?',
+                        en: 'When do you want to act?',
+                      ),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(
@@ -378,9 +382,9 @@ class _GuideEventSuggestionSheetState
                             child: Text(
                               _text(
                                 context,
-                                pt: 'Depois',
-                                es: 'Después',
-                                en: 'Later',
+                                pt: 'Agora não',
+                                es: 'Ahora no',
+                                en: 'Not now',
                               ),
                             ),
                           ),
@@ -402,9 +406,9 @@ class _GuideEventSuggestionSheetState
                             child: Text(
                               _text(
                                 context,
-                                pt: 'Pular',
-                                es: 'Omitir',
-                                en: 'Skip',
+                                pt: 'Não sugerir',
+                                es: 'No sugerir',
+                                en: 'Do not suggest',
                               ),
                             ),
                           ),

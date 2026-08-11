@@ -102,6 +102,14 @@ class PreparationResourceLinks {
     'https://www.gov.br/pf/pt-br/assuntos/passaporte/suporte/duvidas_/inicio/mercosul',
   );
 
+  static final Uri argentinaEntryBrazilGuide = Uri.parse(
+    'https://www.gov.br/mre/pt-br/consulado-paso-de-los-libres/assuntos-migratorios-covid-19/entrada-en-brasil',
+  );
+
+  static final Uri federalPoliceResidenceServiceSelector = Uri.parse(
+    'https://www.gov.br/pf/pt-br/assuntos/imigracao/pt/nacionalidade/objetivo/servico',
+  );
+
   static final Uri cpfInBrazil = Uri.parse(
     'https://www.gov.br/pt-br/servicos/inscrever-no-cpf',
   );

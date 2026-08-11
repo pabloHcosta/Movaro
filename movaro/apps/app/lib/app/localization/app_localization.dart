@@ -2768,9 +2768,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
     switch (value) {
       case 'item_0_1_rule_90_days':
         return _localizedText(
-          pt: 'Entender a regra dos 90 dias',
-          es: 'Entender la regla de los 90 días',
-          en: 'Understand the 90-day rule',
+          pt: 'Entender a entrada e a regularização',
+          es: 'Entender el ingreso y la regularización',
+          en: 'Understand entry and regularization',
         );
       case 'item_0_2_antecedentes':
         return _localizedText(
