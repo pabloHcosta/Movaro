@@ -258,7 +258,10 @@ void main() {
 
     expect(find.text('Ver detalhes'), findsOneWidget);
     expect(find.text('Explorar alternativas'), findsOneWidget);
-    expect(find.textContaining('Começar preparação com'), findsOneWidget);
+    expect(find.textContaining('Escolher'), findsOneWidget);
+    expect(find.textContaining('e ver meu plano'), findsOneWidget);
+    expect(find.textContaining('apareceu primeiro'), findsOneWidget);
+    expect(find.text('Compare antes de decidir'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();

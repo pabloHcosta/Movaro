@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +28,7 @@ import 'package:movaro_app/features/cities/domain/entities/city.dart';
 import 'package:movaro_app/features/cities/presentation/widgets/city_picker_bottom_sheet.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/available_capital_ranges_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/recommendation_reveal_timing.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/option.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/question.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
@@ -52,6 +54,8 @@ class _QuestionPageState extends State<QuestionPage> {
   static const _helpPreferenceKey = 'questionnaire_flow';
   String? _inlineHint;
   bool _showProcessingScreen = false;
+  Object? _processingError;
+  Future<bool> Function()? _retryGeneration;
   bool _didPromptOriginLocation = false;
   final ScrollController _optionsScrollController = ScrollController();
   String? _scrollScopeKey;
@@ -185,7 +189,11 @@ class _QuestionPageState extends State<QuestionPage> {
                           if (_showProcessingScreen)
                             Expanded(
                               child: _ProcessingState(
-                                title: l10n.questionnaireProcessingTitle,
+                                error: _processingError,
+                                onRetry: _retryGeneration == null
+                                    ? null
+                                    : _retryPlanGeneration,
+                                onBack: _cancelProcessing,
                               ),
                             )
                           else if (controller.isInitializing ||
@@ -269,15 +277,7 @@ class _QuestionPageState extends State<QuestionPage> {
               Expanded(
                 child: OutlinedButton(
                   style: _secondaryButtonStyle(context),
-                  onPressed: () async {
-                    final completed = await controller.skipRefine();
-                    if (completed && context.mounted) {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        AppRoutes.migrationResultReveal,
-                      );
-                    }
-                  },
+                  onPressed: () => _generateAndReveal(controller.skipRefine),
                   child: Text(l10n.bmpCtaRefineNo),
                 ),
               ),
@@ -947,30 +947,17 @@ class _QuestionPageState extends State<QuestionPage> {
                   ),
                   onPressed: isEnabled
                       ? () async {
-                          setState(() {
-                            _showProcessingScreen = controller.isLastQuestion;
-                          });
-                          final completed = await controller.goNext();
-                          if (!mounted) {
+                          if (!controller.isLastQuestion) {
+                            await controller.goNext();
                             return;
                           }
-                          if (!completed) {
-                            setState(() {
-                              _showProcessingScreen = false;
-                            });
+                          if (controller.selectedVariant ==
+                                  QuestionnaireVariant.lean &&
+                              !controller.isRefineResolved) {
+                            await controller.goNext();
+                            return;
                           }
-                          if (completed && context.mounted) {
-                            await Future<void>.delayed(
-                              const Duration(milliseconds: 700),
-                            );
-                            if (!context.mounted) {
-                              return;
-                            }
-                            Navigator.pushReplacementNamed(
-                              context,
-                              AppRoutes.migrationResultReveal,
-                            );
-                          }
+                          await _generateAndReveal(controller.goNext);
                         }
                       : null,
                   child: AnimatedSwitcher(
@@ -1159,31 +1146,72 @@ class _QuestionPageState extends State<QuestionPage> {
       return;
     }
 
-    final shouldShowProcessing = controller.isLastQuestion;
-    if (shouldShowProcessing) {
+    if (!controller.isLastQuestion) {
+      await controller.goNext();
+      return;
+    }
+
+    if (controller.selectedVariant == QuestionnaireVariant.lean &&
+        !controller.isRefineResolved) {
+      await controller.goNext();
+      return;
+    }
+
+    await _generateAndReveal(controller.goNext);
+  }
+
+  Future<void> _generateAndReveal(Future<bool> Function() generation) async {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final stopwatch = Stopwatch()..start();
+
+    setState(() {
+      _showProcessingScreen = true;
+      _processingError = null;
+      _retryGeneration = generation;
+    });
+
+    try {
+      final completed = await generation();
+      if (!mounted) return;
+      if (!completed) {
+        setState(() {
+          _showProcessingScreen = false;
+          _retryGeneration = null;
+        });
+        return;
+      }
+
+      final remaining = RecommendationRevealTiming.remaining(
+        elapsed: stopwatch.elapsed,
+        reduceMotion: reduceMotion,
+      );
+      if (remaining > Duration.zero) {
+        await Future<void>.delayed(remaining);
+      }
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, AppRoutes.migrationResultReveal);
+    } catch (error, stackTrace) {
+      debugPrint('Plan generation failed: $error\n$stackTrace');
+      if (!mounted) return;
       setState(() {
-        _showProcessingScreen = true;
+        _processingError = error;
       });
     }
+  }
 
-    final completed = await controller.goNext();
-    if (!mounted) {
-      return;
-    }
+  Future<void> _retryPlanGeneration() async {
+    final retry = _retryGeneration;
+    if (retry == null) return;
+    await _generateAndReveal(retry);
+  }
 
-    if (!completed) {
-      setState(() {
-        _showProcessingScreen = false;
-      });
-      return;
-    }
-
-    await Future<void>.delayed(const Duration(milliseconds: 700));
-    if (!mounted) {
-      return;
-    }
-
-    Navigator.pushReplacementNamed(context, AppRoutes.migrationResultReveal);
+  void _cancelProcessing() {
+    if (controller.isGeneratingPlan) return;
+    setState(() {
+      _showProcessingScreen = false;
+      _processingError = null;
+      _retryGeneration = null;
+    });
   }
 
   void _handleMultiSelect(Question question, Option option) {
@@ -2562,35 +2590,329 @@ class _TravelGroupChildrenSelector extends StatelessWidget {
   }
 }
 
-class _ProcessingState extends StatelessWidget {
-  const _ProcessingState({required this.title});
+class _ProcessingState extends StatefulWidget {
+  const _ProcessingState({
+    required this.error,
+    required this.onRetry,
+    required this.onBack,
+  });
 
-  final String title;
+  final Object? error;
+  final VoidCallback? onRetry;
+  final VoidCallback onBack;
+
+  @override
+  State<_ProcessingState> createState() => _ProcessingStateState();
+}
+
+class _ProcessingStateState extends State<_ProcessingState>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _motion;
+  Timer? _stageTimer;
+  int _stage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _motion = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3600),
+    )..repeat();
+    _stageTimer = Timer.periodic(const Duration(milliseconds: 650), (_) {
+      if (!mounted || _stage >= 3 || widget.error != null) return;
+      setState(() => _stage += 1);
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant _ProcessingState oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.error != null && widget.error == null) {
+      _stage = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _stageTimer?.cancel();
+    _motion.dispose();
+    super.dispose();
+  }
+
+  List<String> _stageLabels(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'pt' => const [
+        'Entendendo suas prioridades',
+        'Comparando cidades com o seu perfil',
+        'Encontrando os melhores encaixes',
+        'Preparando sua shortlist',
+      ],
+      'es' => const [
+        'Entendiendo tus prioridades',
+        'Comparando ciudades con tu perfil',
+        'Encontrando las mejores coincidencias',
+        'Preparando tu lista final',
+      ],
+      _ => const [
+        'Understanding your priorities',
+        'Comparing cities with your profile',
+        'Finding the strongest matches',
+        'Preparing your shortlist',
+      ],
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: FrostedPanel(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(
-              width: 36,
-              height: 36,
-              child: CircularProgressIndicator(strokeWidth: 2.6),
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final labels = _stageLabels(context);
+    final locale = Localizations.localeOf(context).languageCode;
+
+    if (widget.error != null) {
+      final title = switch (locale) {
+        'pt' => 'Não conseguimos concluir a comparação',
+        'es' => 'No pudimos completar la comparación',
+        _ => 'We could not finish the comparison',
+      };
+      final body = switch (locale) {
+        'pt' =>
+          'Suas respostas continuam salvas. Tente novamente quando quiser.',
+        'es' =>
+          'Tus respuestas siguen guardadas. Inténtalo de nuevo cuando quieras.',
+        _ => 'Your answers are still saved. Try again whenever you are ready.',
+      };
+      final retryLabel = switch (locale) {
+        'pt' => 'Tentar novamente',
+        'es' => 'Intentar de nuevo',
+        _ => 'Try again',
+      };
+      final backLabel = switch (locale) {
+        'pt' => 'Voltar às respostas',
+        'es' => 'Volver a las respuestas',
+        _ => 'Back to answers',
+      };
+
+      return Semantics(
+        liveRegion: true,
+        label: '$title. $body',
+        child: Center(
+          child: FrostedPanel(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.danger.withValues(alpha: 0.12),
+                  ),
+                  child: const Icon(
+                    Icons.route_outlined,
+                    color: AppColors.danger,
+                    size: 30,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  body,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.45,
+                  ),
+                ),
+                const SizedBox(height: 22),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: widget.onRetry,
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: Text(retryLabel),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextButton(onPressed: widget.onBack, child: Text(backLabel)),
+              ],
             ),
-            const SizedBox(height: 18),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-          ],
+          ),
         ),
+      );
+    }
+
+    return Semantics(
+      liveRegion: true,
+      label: labels[_stage],
+      child: Column(
+        children: [
+          Expanded(
+            child: AnimatedBuilder(
+              animation: _motion,
+              builder: (context, _) {
+                return CustomPaint(
+                  painter: _RecommendationConstellationPainter(
+                    progress: reduceMotion ? 0.72 : _motion.value,
+                    stage: _stage,
+                    isDark: AppColors.isDark(context),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 82,
+                      height: 82,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF5BA8FF), Color(0xFF315BEA)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.30),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.30),
+                            blurRadius: 42,
+                            spreadRadius: 8,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.person_pin_circle_outlined,
+                        color: Colors.white,
+                        size: 36,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            labels[_stage],
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            switch (locale) {
+              'pt' => 'Cruzando suas respostas com sinais reais das cidades',
+              'es' =>
+                'Cruzando tus respuestas con señales reales de las ciudades',
+              _ => 'Matching your answers with real city signals',
+            },
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(4, (index) {
+              final active = index <= _stage;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                width: active ? 22 : 6,
+                height: 6,
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                decoration: BoxDecoration(
+                  color: active
+                      ? AppColors.primary
+                      : AppColors.textSoftFor(context).withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 28),
+        ],
       ),
     );
   }
+}
+
+class _RecommendationConstellationPainter extends CustomPainter {
+  const _RecommendationConstellationPainter({
+    required this.progress,
+    required this.stage,
+    required this.isDark,
+  });
+
+  final double progress;
+  final int stage;
+  final bool isDark;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) * 0.36;
+    final routePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..color = const Color(0xFF5BA8FF).withValues(alpha: 0.18);
+    final activeRoutePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round
+      ..color = const Color(0xFF5BA8FF).withValues(alpha: 0.58);
+
+    for (var index = 0; index < 8; index += 1) {
+      final angle = (math.pi * 2 * index / 8) - math.pi / 2;
+      final orbit = radius * (index.isEven ? 1 : 0.78);
+      final point = center + Offset(math.cos(angle), math.sin(angle)) * orbit;
+      final selected = index < math.min(stage + 1, 3);
+      final reveal = ((progress * 1.5) - (index * 0.06)).clamp(0.0, 1.0);
+      final routeEnd = Offset.lerp(center, point, reveal)!;
+      canvas.drawLine(
+        center,
+        routeEnd,
+        selected ? activeRoutePaint : routePaint,
+      );
+
+      final pulse = 1 + (math.sin((progress * math.pi * 2) + index) * 0.12);
+      final dotRadius = (selected ? 7.0 : 4.0) * pulse * reveal;
+      canvas.drawCircle(
+        point,
+        dotRadius + (selected ? 6 : 2),
+        Paint()
+          ..color = (selected ? const Color(0xFF37D39A) : Colors.white)
+              .withValues(alpha: selected ? 0.10 : 0.04),
+      );
+      canvas.drawCircle(
+        point,
+        dotRadius,
+        Paint()
+          ..color = (selected ? const Color(0xFF37D39A) : Colors.white)
+              .withValues(alpha: selected ? 0.92 : (isDark ? 0.44 : 0.60)),
+      );
+    }
+
+    canvas.drawCircle(
+      center,
+      radius * (0.34 + (0.03 * math.sin(progress * math.pi * 2))),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = const Color(0xFF5BA8FF).withValues(alpha: 0.12),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RecommendationConstellationPainter old) =>
+      old.progress != progress || old.stage != stage || old.isDark != isDark;
 }
 
 class _RefineIllustration extends StatelessWidget {

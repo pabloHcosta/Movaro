@@ -2664,7 +2664,7 @@
   },
   "migrationResultRevealExploreCity": "View city details",
   "migrationResultRevealCompareCta": "Compare with alternatives",
-  "migrationResultRevealStartPreparationCta": "Start preparation with {city}",
+  "migrationResultRevealStartPreparationCta": "Choose {city} and see my plan",
   "@migrationResultRevealStartPreparationCta": {
     "placeholders": {
       "city": { "type": "String" }

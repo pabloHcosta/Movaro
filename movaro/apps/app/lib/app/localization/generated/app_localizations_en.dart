@@ -6635,7 +6635,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String migrationResultRevealStartPreparationCta(String city) {
-    return 'Start preparation with $city';
+    return 'Choose $city and see my plan';
   }
 
   @override

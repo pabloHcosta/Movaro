@@ -11153,7 +11153,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationResultRevealStartPreparationCta.
   ///
   /// In en, this message translates to:
-  /// **'Start preparation with {city}'**
+  /// **'Choose {city} and see my plan'**
   String migrationResultRevealStartPreparationCta(String city);
 
   /// No description provided for @migrationResultRevealRefineAction.

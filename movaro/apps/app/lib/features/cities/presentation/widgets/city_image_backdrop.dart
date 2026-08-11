@@ -158,7 +158,7 @@ class CityImageHeader extends StatelessWidget {
         city: city,
         fit: BoxFit.cover,
         filterQuality: FilterQuality.medium,
-        errorWidget: _CityImageFallback(city: city),
+        errorWidget: CityImageFallback(city: city),
       ),
       DecoratedBox(
         decoration: BoxDecoration(
@@ -282,7 +282,7 @@ class CollapsibleCityHero extends StatelessWidget {
                     city: city,
                     fit: BoxFit.cover,
                     filterQuality: FilterQuality.medium,
-                    errorWidget: const SizedBox.shrink(),
+                    errorWidget: CityImageFallback(city: city),
                   ),
                 ),
               ),
@@ -598,8 +598,8 @@ class _CityResolvedImageState extends State<CityResolvedImage> {
   }
 }
 
-class _CityImageFallback extends StatelessWidget {
-  const _CityImageFallback({required this.city});
+class CityImageFallback extends StatelessWidget {
+  const CityImageFallback({required this.city, super.key});
 
   final City city;
 

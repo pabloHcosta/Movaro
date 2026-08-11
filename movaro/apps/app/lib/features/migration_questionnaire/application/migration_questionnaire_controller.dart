@@ -79,6 +79,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   bool get isGeneratingPlan => _isGeneratingPlan;
   bool get isSavingPlan => _isSavingPlan;
   bool get isRefinePromptVisible => _showRefinePrompt;
+  bool get isRefineResolved => _isRefineResolved;
   bool get hasInProgressDraft =>
       _selectedVariant != null ||
       _answers.any(

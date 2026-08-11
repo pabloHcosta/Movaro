@@ -9,7 +9,6 @@ import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/core/widgets/exit_flow_dialog.dart';
 import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/journey_stage_banner.dart';
 import 'package:movaro_app/features/cities/application/cities_controller.dart';
 import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
 import 'package:movaro_app/features/cities/application/services/city_seasonality_conflict_service.dart';
@@ -74,10 +73,10 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await widget.controller.initialize();
-      await _prefetchRecommendationSignals();
       if (!mounted) return;
       _recordRecommendationMetric(GuideFlowMetric.recommendationViewed);
       _anim.forward();
+      unawaited(_prefetchRecommendationSignals());
     });
   }
 
@@ -529,11 +528,16 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                           controller: _scrollController,
                           padding: const EdgeInsets.fromLTRB(20, 20, 20, 156),
                           children: [
-                            JourneyStageBanner(
-                              title: context.l10n.stageDecisionTitle,
-                              body: context.l10n.stageDecisionBody,
-                              action: context.l10n.stageDecisionAction,
-                              icon: Icons.explore_rounded,
+                            _RecommendationSnapshotCard(
+                              city: primaryCity,
+                              matchScore: primaryMatchScore,
+                              reasons: reasons,
+                              dimensions: primaryDimensionScores,
+                              onTap: () => _showCompatibilityBreakdown(
+                                primaryCity,
+                                primaryMatchScore,
+                                primaryDimensionScores,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             if (hasPreferred && preferredMatchesHighlighted)
@@ -554,16 +558,48 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               ),
 
                             if (hasPreferred) const SizedBox(height: 16),
-
-                            _CompatibilityCard(
-                              city: primaryCity,
-                              matchScore: primaryMatchScore,
-                              onTap: () => _showCompatibilityBreakdown(
-                                primaryCity,
-                                primaryMatchScore,
-                                primaryDimensionScores,
+                            if (alternatives.isNotEmpty) ...[
+                              _ResultSectionHeading(
+                                title: _localizedResultText(
+                                  context,
+                                  pt: 'Compare antes de decidir',
+                                  es: 'Compara antes de decidir',
+                                  en: 'Compare before you decide',
+                                ),
+                                subtitle: _localizedResultText(
+                                  context,
+                                  pt: 'Duas alternativas próximas, com ganhos e concessões diferentes.',
+                                  es: 'Dos alternativas cercanas, con ventajas y concesiones diferentes.',
+                                  en: 'Two close alternatives with different gains and trade-offs.',
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              _AlternativesSection(
+                                cities: alternatives,
+                                dimensionScores:
+                                    plan.candidateCityDimensionScores,
+                                highlightedCity: primaryCity,
+                                planTimeline: plan.timeline,
+                                onTap: (city) => _openCityDetail(city),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                            _ResultSectionHeading(
+                              title: _localizedResultText(
+                                context,
+                                pt: 'O que vale conferir antes de escolher',
+                                es: 'Qué conviene revisar antes de elegir',
+                                en: 'What to review before choosing',
+                              ),
+                              subtitle: _localizedResultText(
+                                context,
+                                pt: 'Sinais práticos que podem mudar sua decisão.',
+                                es: 'Señales prácticas que pueden cambiar tu decisión.',
+                                en: 'Practical signals that may change your decision.',
                               ),
                             ),
+                            const SizedBox(height: 10),
+                            _TimelineContextBar(plan: plan),
                             const SizedBox(height: 12),
                             FlightPriceBadge(
                               originCountryIso: originCountryIso,
@@ -583,45 +619,24 @@ class _MigrationResultRevealPageState extends State<MigrationResultRevealPage>
                               const SizedBox(height: 12),
                               _FlightTradeoffCard(data: alternativeTradeoff),
                             ],
-                            const SizedBox(height: 16),
-                            _TimelineContextBar(plan: plan),
-                            if (plan
-                                .recommendationMethodologyVersion
-                                .isNotEmpty) ...[
-                              const SizedBox(height: 12),
-                              _RecommendationIntegrityCard(plan: plan),
-                              if (GuideFlowMetricsStore.instance.isEnabled) ...[
-                                const SizedBox(height: 12),
-                                _RecommendationFeedbackCard(
-                                  submitted: _feedbackSubmitted,
-                                  onSubmit: _submitRecommendationFeedback,
-                                ),
-                              ],
-                            ],
-                            if (reasons.isNotEmpty) ...[
-                              const SizedBox(height: 16),
-                              _WhyCitySection(
-                                cityName: primaryCity.name,
-                                reasons: reasons,
-                              ),
-                            ],
-                            if (alternatives.isNotEmpty) ...[
-                              const SizedBox(height: 16),
-                              _AlternativesSection(
-                                cities: alternatives,
-                                matchScores: plan.candidateCityMatchScores,
-                                dimensionScores:
-                                    plan.candidateCityDimensionScores,
-                                highlightedCity: primaryCity,
-                                planTimeline: plan.timeline,
-                                onTap: (city) => _openCityDetail(city),
-                              ),
-                            ],
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 20),
                             _GuidePreviewSection(
                               plan: plan,
                               cityName: primaryCity.name,
                             ),
+                            if (plan
+                                .recommendationMethodologyVersion
+                                .isNotEmpty) ...[
+                              const SizedBox(height: 20),
+                              _RecommendationIntegrityCard(plan: plan),
+                            ],
+                            if (GuideFlowMetricsStore.instance.isEnabled) ...[
+                              const SizedBox(height: 12),
+                              _RecommendationFeedbackCard(
+                                submitted: _feedbackSubmitted,
+                                onSubmit: _submitRecommendationFeedback,
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -676,7 +691,12 @@ class _HeroSection extends StatelessWidget {
       city: city,
       scrollController: scrollController,
       title: city.name,
-      eyebrow: context.l10n.migrationResultRevealEyebrow,
+      eyebrow: _localizedResultText(
+        context,
+        pt: 'Melhor encaixe para seu perfil agora',
+        es: 'Mejor coincidencia para tu perfil ahora',
+        en: 'Best fit for your profile right now',
+      ),
       subtitle: '${city.stateName} · ${city.stateCode}',
       maxHeight: heroHeight,
     );
@@ -967,17 +987,67 @@ Color _matchBandColor(double? score) {
   return const Color(0xFF0088FF);
 }
 
-// ─── Compatibility card ────────────────────────────────────────────────────────
+String _localizedResultText(
+  BuildContext context, {
+  required String pt,
+  required String es,
+  required String en,
+}) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
+}
 
-class _CompatibilityCard extends StatelessWidget {
-  const _CompatibilityCard({
+class _ResultSectionHeading extends StatelessWidget {
+  const _ResultSectionHeading({required this.title, required this.subtitle});
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Recommendation snapshot ─────────────────────────────────────────────────
+
+class _RecommendationSnapshotCard extends StatelessWidget {
+  const _RecommendationSnapshotCard({
     required this.city,
     required this.matchScore,
+    required this.reasons,
+    required this.dimensions,
     required this.onTap,
   });
 
   final City city;
   final double? matchScore;
+  final List<String> reasons;
+  final Map<String, double> dimensions;
   final VoidCallback onTap;
 
   @override
@@ -985,45 +1055,168 @@ class _CompatibilityCard extends StatelessWidget {
     final l10n = context.l10n;
     final matchLabel = _matchBandLabel(context, matchScore);
     final matchColor = _matchBandColor(matchScore);
+    final sortedDimensions = dimensions.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final strongest = sortedDimensions.take(2).toList(growable: false);
+    final attention = sortedDimensions.isEmpty ? null : sortedDimensions.last;
 
-    return GestureDetector(
-      onTap: onTap,
+    return Semantics(
+      container: true,
+      label: _localizedResultText(
+        context,
+        pt: 'Por que ${city.name} apareceu primeiro',
+        es: 'Por qué ${city.name} apareció primero',
+        en: 'Why ${city.name} came first',
+      ),
       child: FrostedPanel(
+        padding: const EdgeInsets.all(20),
+        borderRadius: BorderRadius.circular(24),
+        borderColor: AppColors.primary.withValues(alpha: 0.24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Expanded(
-                  child: Text(
-                    matchLabel,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 7,
+                  ),
+                  decoration: BoxDecoration(
+                    color: matchColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: matchColor.withValues(alpha: 0.24),
                     ),
                   ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.auto_awesome_rounded,
+                        size: 15,
+                        color: matchColor,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        matchLabel,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: matchColor,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                Icon(
-                  Icons.info_outline_rounded,
-                  size: 16,
-                  color: AppColors.textSoftFor(context),
-                ),
+                for (final dimension in strongest)
+                  _SnapshotDimensionChip(
+                    icon: _dimensionIcon(dimension.key),
+                    label: context.l10n.dimensionLabel(dimension.key),
+                  ),
               ],
             ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Icon(Icons.tune_rounded, size: 18, color: matchColor),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l10n.migrationResultRevealTapToSeeDetails(),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSoftFor(context),
-                      fontSize: 11,
+            const SizedBox(height: 16),
+            Text(
+              _localizedResultText(
+                context,
+                pt: 'Por que ${city.name} apareceu primeiro',
+                es: 'Por qué ${city.name} apareció primero',
+                en: 'Why ${city.name} came first',
+              ),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                height: 1.12,
+              ),
+            ),
+            const SizedBox(height: 12),
+            for (final reason in reasons.take(3))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.success.withValues(alpha: 0.12),
+                      ),
+                      child: const Icon(
+                        Icons.check_rounded,
+                        size: 15,
+                        color: AppColors.success,
+                      ),
                     ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        l10n.recommendationReasonLabel(reason),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.copyWith(height: 1.4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (attention != null) ...[
+              const SizedBox(height: 4),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: AppColors.warning.withValues(alpha: 0.18),
                   ),
                 ),
-              ],
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.search_rounded,
+                      size: 18,
+                      color: AppColors.warning,
+                    ),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Text(
+                        _localizedResultText(
+                          context,
+                          pt: 'Ponto para validar: ${context.l10n.dimensionLabel(attention.key)} foi o sinal menos forte desta comparação.',
+                          es: 'Punto para validar: ${context.l10n.dimensionLabel(attention.key)} fue la señal menos fuerte de esta comparación.',
+                          en: 'Worth validating: ${context.l10n.dimensionLabel(attention.key)} was the least strong signal in this comparison.',
+                        ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSoftFor(context),
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 6),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: onTap,
+                icon: const Icon(Icons.tune_rounded, size: 18),
+                label: Text(
+                  _localizedResultText(
+                    context,
+                    pt: 'Ver comparação completa',
+                    es: 'Ver comparación completa',
+                    en: 'See full comparison',
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -1032,69 +1225,34 @@ class _CompatibilityCard extends StatelessWidget {
   }
 }
 
-// ─── Why this city ─────────────────────────────────────────────────────────────
+class _SnapshotDimensionChip extends StatelessWidget {
+  const _SnapshotDimensionChip({required this.icon, required this.label});
 
-class _WhyCitySection extends StatelessWidget {
-  const _WhyCitySection({required this.cityName, required this.reasons});
-
-  final String cityName;
-  final List<String> reasons;
+  final IconData icon;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    final l10n = context.l10n;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 10),
-          child: Text(
-            l10n.migrationResultRevealWhyTitle(cityName),
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-        ),
-        ...reasons
-            .take(3)
-            .map(
-              (reason) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: FrostedPanel(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 7,
-                        height: 7,
-                        margin: const EdgeInsets.only(top: 5, right: 12),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.5)
-                              : Colors.black.withValues(alpha: 0.4),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          // Resolve l10n key → human-readable text
-                          l10n.recommendationReasonLabel(reason),
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(height: 1.4),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: AppColors.primary),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w700,
             ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1237,128 +1395,154 @@ class _RecommendationIntegrityCard extends StatelessWidget {
         : _warningText(plan.recommendationWarnings.first, locale);
 
     return FrostedPanel(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.zero,
       borderRadius: BorderRadius.circular(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.verified_user_outlined,
-                  color: AppColors.primary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _IntegrityChip(
-                icon: Icons.dataset_outlined,
-                label: coverageLabel,
-              ),
-              _IntegrityChip(
-                icon: plan.recommendationFreshnessStatus == 'fresh'
-                    ? Icons.update_rounded
-                    : Icons.info_outline_rounded,
-                label: freshnessLabel,
-              ),
-              _IntegrityChip(
-                icon: Icons.balance_rounded,
-                label: stabilityLabel,
-              ),
-              _IntegrityChip(
-                icon: Icons.fact_check_outlined,
-                label: reliabilityLabel,
-              ),
-              _IntegrityChip(
-                icon: Icons.compare_arrows_rounded,
-                label: separationLabel,
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            evaluationNote,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.4,
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+          childrenPadding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+          leading: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.verified_user_outlined,
+              color: AppColors.primary,
+              size: 20,
             ),
           ),
-          const SizedBox(height: 10),
-          Text(
-            '$methodologyLabel · ${plan.recommendationMethodologyVersion}',
+          title: Text(
+            title,
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          subtitle: Text(
+            switch (locale) {
+              'pt' => '$coverageLabel · $freshnessLabel',
+              'es' => '$coverageLabel · $freshnessLabel',
+              _ => '$coverageLabel · $freshnessLabel',
+            },
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSoftFor(context),
             ),
           ),
-          if (generatedDate.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(
-              '$generatedLabel · $generatedDate',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSoftFor(context),
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _IntegrityChip(
+                    icon: Icons.dataset_outlined,
+                    label: coverageLabel,
+                  ),
+                  _IntegrityChip(
+                    icon: plan.recommendationFreshnessStatus == 'fresh'
+                        ? Icons.update_rounded
+                        : Icons.info_outline_rounded,
+                    label: freshnessLabel,
+                  ),
+                  _IntegrityChip(
+                    icon: Icons.balance_rounded,
+                    label: stabilityLabel,
+                  ),
+                  _IntegrityChip(
+                    icon: Icons.fact_check_outlined,
+                    label: reliabilityLabel,
+                  ),
+                  _IntegrityChip(
+                    icon: Icons.compare_arrows_rounded,
+                    label: separationLabel,
+                  ),
+                ],
               ),
             ),
-          ],
-          if (plan.recommendationSourceLabels.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Text(
-              sourcesTitle,
-              style: Theme.of(
-                context,
-              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              plan.recommendationSourceLabels.take(4).join(' · '),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSoftFor(context),
-                height: 1.4,
-              ),
-            ),
-          ],
-          if (warning != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.warning.withValues(
-                  alpha: isDark ? 0.12 : 0.08,
-                ),
-                borderRadius: BorderRadius.circular(12),
-              ),
+            const SizedBox(height: 14),
+            Align(
+              alignment: Alignment.centerLeft,
               child: Text(
-                warning,
+                evaluationNote,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSoftFor(context),
                   height: 1.4,
                 ),
               ),
             ),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '$methodologyLabel · ${plan.recommendationMethodologyVersion}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                ),
+              ),
+            ),
+            if (generatedDate.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '$generatedLabel · $generatedDate',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                  ),
+                ),
+              ),
+            ],
+            if (plan.recommendationSourceLabels.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  sourcesTitle,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  plan.recommendationSourceLabels.take(4).join(' · '),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+            if (warning != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(
+                    alpha: isDark ? 0.12 : 0.08,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  warning,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -1557,7 +1741,6 @@ class _IntegrityChip extends StatelessWidget {
 class _AlternativesSection extends StatelessWidget {
   const _AlternativesSection({
     required this.cities,
-    required this.matchScores,
     required this.dimensionScores,
     required this.highlightedCity,
     required this.onTap,
@@ -1565,7 +1748,6 @@ class _AlternativesSection extends StatelessWidget {
   });
 
   final List<City> cities;
-  final Map<String, double> matchScores;
   final Map<String, Map<String, double>> dimensionScores;
   final City highlightedCity;
   final void Function(City) onTap;
@@ -1593,10 +1775,9 @@ class _AlternativesSection extends StatelessWidget {
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
         ),
-        ...cities.take(2).map((city) {
+        ...cities.take(2).indexed.map((entry) {
+          final (index, city) = entry;
           final imageUrl = cityImageUrlFor(city.id);
-          final matchScore = matchScores[city.id];
-          final matchColor = _matchBandColor(matchScore);
 
           // Seasonality conflict check
           final seasonConflict = planTimeline != null
@@ -1681,15 +1862,21 @@ class _AlternativesSection extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Flexible(
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
                             child: Text(
-                              _matchBandLabel(context, matchScore),
-                              textAlign: TextAlign.end,
-                              overflow: TextOverflow.ellipsis,
+                              '#${index + 2}',
                               style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(
-                                    color: matchColor,
-                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w800,
                                   ),
                             ),
                           ),
@@ -2959,20 +3146,21 @@ class _GuidePreviewSection extends StatelessWidget {
     final preview = GuidePhase.values
         .where(byPhase.containsKey)
         .map((p) => byPhase[p]!)
+        .take(3)
         .toList(growable: false);
 
     if (preview.isEmpty) return const SizedBox.shrink();
 
     final isDark = AppColors.isDark(context);
     final headerLabel = switch (locale) {
-      'pt' => 'SEU PLANO DE MIGRAÇÃO',
-      'es' => 'TU PLAN DE MIGRACIÓN',
-      _ => 'YOUR MIGRATION PLAN',
+      'pt' => 'O QUE ACONTECE DEPOIS',
+      'es' => 'QUÉ PASA DESPUÉS',
+      _ => 'WHAT HAPPENS NEXT',
     };
     final stepCountLabel = switch (locale) {
-      'pt' => '${allItems.length} passos',
-      'es' => '${allItems.length} pasos',
-      _ => '${allItems.length} steps',
+      'pt' => '${preview.length} primeiros passos',
+      'es' => '${preview.length} primeros pasos',
+      _ => 'First ${preview.length} steps',
     };
 
     return Column(

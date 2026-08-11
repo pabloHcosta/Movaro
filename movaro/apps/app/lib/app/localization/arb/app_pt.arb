@@ -2664,7 +2664,7 @@
   },
   "migrationResultRevealExploreCity": "Ver detalhes",
   "migrationResultRevealCompareCta": "Explorar alternativas",
-  "migrationResultRevealStartPreparationCta": "Começar preparação com {city}",
+  "migrationResultRevealStartPreparationCta": "Escolher {city} e ver meu plano",
   "@migrationResultRevealStartPreparationCta": {
     "placeholders": {
       "city": { "type": "String" }
