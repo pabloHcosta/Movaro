@@ -307,10 +307,6 @@ class _CitySearchPageState extends State<CitySearchPage> {
                                 for (final city in visibleCities) ...[
                                   CityCard(
                                     city: city,
-                                    highlightLabel: _highlightLabel(
-                                      l10n,
-                                      _quickFilter,
-                                    ),
                                     citiesController: widget.citiesController,
                                     isFavorite: widget.citiesController
                                         .isFavorite(city.id),
@@ -546,38 +542,6 @@ class _CitySearchPageState extends State<CitySearchPage> {
         return l10n.cityLifestyleInlandLabel;
       case _CityQuickFilter.border:
         return l10n.cityLifestyleBorderLabel;
-    }
-  }
-
-  String _highlightLabel(dynamic l10n, _CityQuickFilter filter) {
-    switch (filter) {
-      case _CityQuickFilter.all:
-      case _CityQuickFilter.popular:
-        return l10n.citiesHighlightPopularLabel;
-      case _CityQuickFilter.lowCost:
-        return l10n.citiesHighlightEconomicalLabel;
-      case _CityQuickFilter.work:
-        return l10n.citiesHighlightWorkLabel;
-      case _CityQuickFilter.language:
-        return l10n.citiesHighlightLanguageLabel;
-      case _CityQuickFilter.housingEasy:
-        return l10n.citiesHighlightHousingEasyLabel;
-      case _CityQuickFilter.housingPressure:
-        return l10n.citiesHighlightHousingPressureLabel;
-      case _CityQuickFilter.softLanding:
-        return l10n.citiesHighlightSoftLandingLabel;
-      case _CityQuickFilter.familyStability:
-        return l10n.citiesHighlightFamilyStabilityLabel;
-      case _CityQuickFilter.incomeStart:
-        return l10n.citiesHighlightIncomeStartLabel;
-      case _CityQuickFilter.coastal:
-        return l10n.citiesHighlightCoastalLabel;
-      case _CityQuickFilter.metropolis:
-        return l10n.citiesHighlightMetropolisLabel;
-      case _CityQuickFilter.inland:
-        return l10n.citiesHighlightInlandLabel;
-      case _CityQuickFilter.border:
-        return l10n.citiesHighlightBorderLabel;
     }
   }
 

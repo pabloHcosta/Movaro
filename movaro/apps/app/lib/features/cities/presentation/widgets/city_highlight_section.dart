@@ -9,7 +9,6 @@ class CityHighlightSection extends StatelessWidget {
   const CityHighlightSection({
     required this.title,
     required this.cities,
-    required this.highlightLabel,
     required this.citiesController,
     required this.onCityTap,
     required this.onFavoriteToggle,
@@ -18,7 +17,6 @@ class CityHighlightSection extends StatelessWidget {
 
   final String title;
   final List<City> cities;
-  final String highlightLabel;
   final CitiesController citiesController;
   final ValueChanged<City> onCityTap;
   final ValueChanged<City> onFavoriteToggle;
@@ -59,7 +57,6 @@ class CityHighlightSection extends StatelessWidget {
           for (final city in cities) ...[
             CityCard(
               city: city,
-              highlightLabel: highlightLabel,
               citiesController: citiesController,
               isFavorite: citiesController.isFavorite(city.id),
               onFavoriteToggle: () => onFavoriteToggle(city),
