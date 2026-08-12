@@ -95,16 +95,24 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     }
 
     final profileQuestionIds = switch (variant) {
-      QuestionnaireVariant.lean => const ['intent', 'timeline', 'priorities'],
+      // The quick path only asks for signals that materially change the city
+      // shortlist. Timing still personalises the execution plan, but it does
+      // not affect city ranking and therefore belongs to the strategic path.
+      QuestionnaireVariant.lean => const [
+        'intent',
+        'travel_group',
+        'priorities',
+        'constraints',
+      ],
       QuestionnaireVariant.strategic => const [
         'intent',
-        'timeline',
         'travel_group',
         'work_arrangement',
         'funding',
         'priorities',
-        'support_needs',
         'constraints',
+        'support_needs',
+        'timeline',
       ],
     };
     final orderedQuestionIds = [
@@ -135,9 +143,6 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   List<Question> get _activeQuestions {
     final activeQuestions = <Question>[];
     for (final question in coreQuestions) {
-      if (question.id == 'constraints' && !_includeConstraints) {
-        continue;
-      }
       activeQuestions.add(question);
       if (question.id == 'funding' &&
           capitalAwareFundingOptions.contains(answerFor('funding'))) {
@@ -456,8 +461,9 @@ class MigrationQuestionnaireController extends ChangeNotifier {
         _isRefineResolved) {
       const alreadyAnsweredCoreIds = <String>{
         'intent',
-        'timeline',
+        'travel_group',
         'priorities',
+        'constraints',
       };
       final questions = _activeQuestions;
       while (nextIndex < questions.length &&

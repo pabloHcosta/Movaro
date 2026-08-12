@@ -554,7 +554,7 @@ class _QuestionPageState extends State<QuestionPage> {
     final current = controller.currentStepForProgress;
     final remaining = (total - current).clamp(0, total);
     final secondsPerQuestion =
-        controller.selectedVariant == QuestionnaireVariant.lean ? 30 : 40;
+        controller.selectedVariant == QuestionnaireVariant.lean ? 18 : 25;
     final minutes = ((remaining * secondsPerQuestion) / 60).ceil();
     return minutes <= 1
         ? context.l10n.questionRemainingTimeUnderOneMinute
@@ -854,7 +854,7 @@ class _QuestionPageState extends State<QuestionPage> {
   Widget _buildFooter(BuildContext context, Question question) {
     final l10n = context.l10n;
 
-    if (question.id == 'origin_country') {
+    if (question.id == 'origin_country' || !controller.canGoBack) {
       return const SizedBox.shrink();
     }
 
@@ -1043,11 +1043,10 @@ class _QuestionPageState extends State<QuestionPage> {
       context.l10n.questionSelectionCounterSelected;
 
   bool _shouldAutoAdvance(Question question) {
-    if (question.type != 'single_card' && question.type != 'single_chip') {
-      return false;
-    }
-
-    return question.id != 'preferred_city' && question.id != 'travel_group';
+    // Recommendation inputs are consequential and easy to tap accidentally
+    // on mobile. Keep the chosen state visible and let the user confirm it
+    // with the primary action before changing context.
+    return false;
   }
 
   Future<void> _handleSingleSelect(Question question, Option option) async {
@@ -1253,6 +1252,16 @@ class _QuestionPageState extends State<QuestionPage> {
   ) {
     if (questionId == 'available_capital' && value != 'prefer_not_say') {
       return _availableCapitalOptionLabel(context, value);
+    }
+    if (const {
+      'intent',
+      'funding',
+      'work_arrangement',
+      'travel_group',
+      'support_needs',
+      'constraints',
+    }.contains(questionId)) {
+      return context.l10n.questionOptionLabel(questionId, value);
     }
     return context.l10n.questionnaireCompactOptionLabel(questionId, value);
   }
@@ -1731,8 +1740,8 @@ class _CompactOptionRow extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
-          height: 44,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          constraints: const BoxConstraints(minHeight: 52),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: isSelected
                 ? cs.primary.withValues(alpha: 0.10)
@@ -1758,8 +1767,7 @@ class _CompactOptionRow extends StatelessWidget {
                   style: tt.bodyMedium?.copyWith(
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
               ),
               const SizedBox(width: 8),

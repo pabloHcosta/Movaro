@@ -83,13 +83,14 @@ void main() {
       }
     });
 
-    test('lean flow keeps only the 3 core questions', () {
+    test('lean flow keeps only the 4 ranking-relevant core questions', () {
       controller.selectVariant(QuestionnaireVariant.lean);
 
       expect(controller.activeQuestions.map((question) => question.id), [
         'intent',
-        'timeline',
+        'travel_group',
         'priorities',
+        'constraints',
       ]);
     });
 
@@ -103,8 +104,9 @@ void main() {
         expect(controller.activeQuestions.map((question) => question.id), [
           'origin_country',
           'intent',
-          'timeline',
+          'travel_group',
           'priorities',
+          'constraints',
         ]);
         expect(controller.currentQuestion?.id, 'origin_country');
 
@@ -112,9 +114,10 @@ void main() {
         expect(await controller.goNext(), isFalse);
         controller.selectAnswer('intent', 'remote_income');
         expect(await controller.goNext(), isFalse);
-        controller.selectAnswer('timeline', 'in_3_6m');
+        controller.selectAnswer('travel_group', 'solo');
         expect(await controller.goNext(), isFalse);
         controller.setAnswerValues('priorities', ['low_cost', 'safety']);
+        expect(await controller.goNext(), isFalse);
 
         expect(await controller.goNext(), isFalse);
         expect(controller.isRefinePromptVisible, isTrue);
@@ -130,9 +133,12 @@ void main() {
       controller.selectVariant(QuestionnaireVariant.lean);
       controller.selectAnswer('intent', 'fresh_start');
       expect(await controller.goNext(), isFalse);
-      controller.selectAnswer('timeline', 'in_3_6m');
+      controller.selectAnswer('travel_group', 'family_kids');
+      controller.selectAnswer('travel_group_children_count', '2');
       expect(await controller.goNext(), isFalse);
       controller.setAnswerValues('priorities', ['safety', 'low_cost']);
+      expect(await controller.goNext(), isFalse);
+      controller.setAnswerValues('constraints', ['avoid_expensive']);
 
       expect(await controller.goNext(), isFalse);
       expect(controller.isRefinePromptVisible, isTrue);
@@ -140,11 +146,7 @@ void main() {
       controller.acceptRefine();
 
       expect(controller.selectedVariant, QuestionnaireVariant.strategic);
-      expect(controller.currentQuestion?.id, 'travel_group');
-
-      controller.selectAnswer('travel_group', 'family_kids');
-      controller.selectAnswer('travel_group_children_count', '2');
-      expect(await controller.goNext(), isFalse);
+      expect(controller.currentQuestion?.id, 'work_arrangement');
       controller.selectAnswer('work_arrangement', 'local_job');
       expect(await controller.goNext(), isFalse);
       expect(controller.currentQuestion?.id, 'funding');
@@ -156,6 +158,8 @@ void main() {
         'continuous_medication',
         'will_drive',
       ]);
+      expect(await controller.goNext(), isFalse);
+      controller.selectAnswer('timeline', 'in_3_6m');
 
       expect(await controller.goNext(), isTrue);
       expect(controller.generatedPlan?.variant, QuestionnaireVariant.strategic);
@@ -174,21 +178,23 @@ void main() {
       () async {
         controller.selectVariant(QuestionnaireVariant.lean);
         controller.selectAnswer('intent', 'explore_unsure');
-        controller.selectAnswer('timeline', 'just_exploring');
+        controller.selectAnswer('travel_group', 'solo');
         controller.setAnswerValues('priorities', ['balanced_unsure']);
+        controller.setAnswerValues('constraints', ['no_constraints']);
 
         await controller.beginStrategicRefinement();
 
         expect(controller.activeQuestions.map((question) => question.id), [
           'intent',
-          'timeline',
           'travel_group',
           'work_arrangement',
           'funding',
           'priorities',
+          'constraints',
           'support_needs',
+          'timeline',
         ]);
-        expect(controller.currentQuestion?.id, 'travel_group');
+        expect(controller.currentQuestion?.id, 'work_arrangement');
       },
     );
 
@@ -197,37 +203,40 @@ void main() {
 
       expect(controller.activeQuestions.map((question) => question.id), [
         'intent',
-        'timeline',
         'travel_group',
         'work_arrangement',
         'funding',
         'priorities',
+        'constraints',
         'support_needs',
+        'timeline',
       ]);
 
       controller.selectAnswer('funding', 'savings');
 
       expect(controller.activeQuestions.map((question) => question.id), [
         'intent',
-        'timeline',
         'travel_group',
         'work_arrangement',
         'funding',
         'available_capital',
         'priorities',
+        'constraints',
         'support_needs',
+        'timeline',
       ]);
 
       controller.selectAnswer('funding', 'job_offer');
 
       expect(controller.activeQuestions.map((question) => question.id), [
         'intent',
-        'timeline',
         'travel_group',
         'work_arrangement',
         'funding',
         'priorities',
+        'constraints',
         'support_needs',
+        'timeline',
       ]);
     });
 
@@ -257,11 +266,30 @@ void main() {
       );
     });
 
+    test('quick choices force trade-offs and expose only hard constraints', () {
+      final priorities = controller.questions.firstWhere(
+        (item) => item.id == 'priorities',
+      );
+      final constraints = controller.questions.firstWhere(
+        (item) => item.id == 'constraints',
+      );
+
+      expect(priorities.maxSelections, 2);
+      expect(
+        constraints.options.map((option) => option.value),
+        orderedEquals([
+          'need_big_city',
+          'want_coast',
+          'need_transit',
+          'avoid_expensive',
+          'no_constraints',
+        ]),
+      );
+    });
+
     test('single parents must provide and retain the children count', () async {
       controller.selectVariant(QuestionnaireVariant.strategic);
       controller.selectAnswer('intent', 'fresh_start');
-      expect(await controller.goNext(), isFalse);
-      controller.selectAnswer('timeline', 'in_3_6m');
       expect(await controller.goNext(), isFalse);
       expect(controller.currentQuestion?.id, 'travel_group');
 

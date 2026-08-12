@@ -185,7 +185,8 @@ These dimensions should be computed locally from the existing `City` entity and 
 - `low_cost` -> affordability
 - `job_opportunities` -> job_market
 - `safety` -> safety
-- `warm_climate_beach` -> climate_warmth + nature
+- `warm_climate_beach` (chave legada exibida como litoral/praia) -> nature;
+  clima só deve voltar ao score quando houver normais comparáveis
 - `transit_infra` -> transit_infra
 - `nature` -> nature
 - `university` -> university

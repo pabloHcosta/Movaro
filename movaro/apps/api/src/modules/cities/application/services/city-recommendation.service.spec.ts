@@ -176,7 +176,7 @@ describe('CityRecommendationService', () => {
   it('returns a versioned, ordered result with evidence metadata', async () => {
     const result = await service.recommend(profile());
 
-    expect(result.methodologyVersion).toBe('city-recommendation-v2.1.0');
+    expect(result.methodologyVersion).toBe('city-recommendation-v2.2.0');
     expect(result.recommendationId).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
     );
@@ -313,16 +313,22 @@ describe('CityRecommendationService', () => {
     expect(soloAffordability).not.toBe(familyAffordability);
   });
 
-  it('reports missing climate normals instead of estimating climate', async () => {
-    const result = await service.recommend(
+  it('scores coast without pretending to measure climate normals', async () => {
+    const coastResult = await service.recommend(
+      profile({ priorities: ['warm_climate_beach'] }),
+    );
+    expect(coastResult.unavailableDimensions).not.toContain('climate_warmth');
+    expect(coastResult.warnings).not.toContain(
+      'recommendation_warning_climate_normals_unavailable',
+    );
+
+    const legacyClimateResult = await service.recommend(
       profile({
-        priorities: ['warm_climate_beach'],
+        priorities: ['nature'],
         constraints: ['prefer_cooler'],
       }),
     );
-
-    expect(result.unavailableDimensions).toContain('climate_warmth');
-    expect(result.warnings).toContain(
+    expect(legacyClimateResult.warnings).toContain(
       'recommendation_warning_climate_normals_unavailable',
     );
   });

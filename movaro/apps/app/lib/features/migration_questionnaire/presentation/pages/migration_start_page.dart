@@ -10,6 +10,7 @@ import 'package:movaro_app/features/cities/presentation/widgets/city_picker_bott
 import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 
 class MigrationStartPage extends StatefulWidget {
   const MigrationStartPage({
@@ -123,7 +124,26 @@ class _MigrationStartPageState extends State<MigrationStartPage> {
     });
 
     try {
-      await widget.controller.initializeForQuestionnaire();
+      await widget.controller.initialize();
+      if (!mounted) {
+        return;
+      }
+
+      QuestionnaireVariant? variant = widget.controller.selectedVariant;
+      if (!widget.controller.hasInProgressDraft) {
+        variant = await showModalBottomSheet<QuestionnaireVariant>(
+          context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => const _QuestionnaireModeSheet(),
+        );
+      }
+      if (!mounted || variant == null) {
+        return;
+      }
+
+      await widget.controller.initializeForQuestionnaire(variant: variant);
       if (!mounted) {
         return;
       }
@@ -290,6 +310,190 @@ class _MigrationStartPageState extends State<MigrationStartPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _QuestionnaireModeSheet extends StatelessWidget {
+  const _QuestionnaireModeSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+
+    return Container(
+      margin: const EdgeInsets.only(top: 48),
+      padding: EdgeInsets.fromLTRB(
+        context.pageHorizontalPadding,
+        12,
+        context.pageHorizontalPadding,
+        24,
+      ),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Align(
+            alignment: Alignment.center,
+            child: Container(
+              width: 42,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 22),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+          Text(
+            l10n.bmpVariantTitle,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.bmpVariantSubtitle,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 22),
+          _ModeChoiceCard(
+            icon: Icons.bolt_rounded,
+            title: l10n.bmpVariantLeanTitle,
+            body: l10n.bmpVariantLeanBody,
+            tag: l10n.bmpVariantLeanTag,
+            isRecommended: true,
+            onTap: () => Navigator.pop(context, QuestionnaireVariant.lean),
+          ),
+          const SizedBox(height: 12),
+          _ModeChoiceCard(
+            icon: Icons.tune_rounded,
+            title: l10n.bmpVariantStrategicTitle,
+            body: l10n.bmpVariantStrategicBody,
+            tag: l10n.bmpVariantStrategicTag,
+            isRecommended: false,
+            onTap: () => Navigator.pop(context, QuestionnaireVariant.strategic),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ModeChoiceCard extends StatelessWidget {
+  const _ModeChoiceCard({
+    required this.icon,
+    required this.title,
+    required this.body,
+    required this.tag,
+    required this.isRecommended,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+  final String tag;
+  final bool isRecommended;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final accent = isRecommended
+        ? theme.colorScheme.primary
+        : AppColors.secondary;
+
+    return Semantics(
+      button: true,
+      label: '$title. $body',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Ink(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: accent.withValues(alpha: isRecommended ? 0.42 : 0.20),
+                width: isRecommended ? 1.5 : 1,
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(icon, color: accent),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accent.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              tag,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: accent,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        body,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSoftFor(context),
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(Icons.arrow_forward_rounded, color: accent, size: 20),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

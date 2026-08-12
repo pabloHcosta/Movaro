@@ -5605,27 +5605,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bmpVariantSubtitle =>
-      'You can go faster or answer one extra question for a more precise recommendation.';
+      'Choose a quick direction or a fuller analysis. You can review and refine the result afterwards.';
 
   @override
   String get bmpVariantLeanTitle => 'Quick plan';
 
   @override
   String get bmpVariantLeanBody =>
-      '4 focused questions to get an initial direction with low friction.';
+      '4 essential questions · about 1 minute. Recommended to get started.';
 
   @override
-  String get bmpVariantLeanTag => 'Faster';
+  String get bmpVariantLeanTag => 'Recommended';
 
   @override
-  String get bmpVariantStrategicTitle => 'Strategic plan';
+  String get bmpVariantStrategicTitle => 'Detailed recommendation';
 
   @override
   String get bmpVariantStrategicBody =>
-      'Adds one extra preference step for a sharper starting recommendation.';
+      '8 questions, with one extra step only when relevant · about 2–3 minutes.';
 
   @override
-  String get bmpVariantStrategicTag => 'More precise';
+  String get bmpVariantStrategicTag => 'More context';
 
   @override
   String get bmpGuideEyebrow => 'Build my plan';
@@ -5672,12 +5672,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bmpGuidePrimaryAction => 'Start planning';
 
   @override
-  String get bmpRefineTitle =>
-      'Consider family, pets, a vehicle, health, and income before the recommendation?';
+  String get bmpRefineTitle => 'Would you like a more precise recommendation?';
 
   @override
   String get bmpRefineSubtitle =>
-      'Optional · adds about 1 minute and makes the city and plan more coherent';
+      'Optional · add income, savings, practical needs, and timing in about 1–2 minutes.';
 
   @override
   String get qIntentPrompt => 'What are you looking for in Brazil right now?';
@@ -5787,7 +5786,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get questionOptionSafetyPriority => 'Safety / peace of mind';
 
   @override
-  String get questionOptionWarmClimateBeach => 'Warmer climate / beach';
+  String get questionOptionWarmClimateBeach => 'Coast and beach';
 
   @override
   String get questionOptionTransitInfra => 'Good infrastructure and transit';

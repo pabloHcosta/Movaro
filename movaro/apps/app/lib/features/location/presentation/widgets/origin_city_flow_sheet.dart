@@ -184,33 +184,38 @@ class _OriginCityFlowSheetState extends State<_OriginCityFlowSheet> {
             ),
           ],
         ),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.sizeOf(context).height * 0.88,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              Container(
-                width: 42,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.textSoftFor(context).withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(99),
+        child: Material(
+          type: MaterialType.transparency,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(context).height * 0.88,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.textSoftFor(
+                      context,
+                    ).withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(99),
+                  ),
                 ),
-              ),
-              Flexible(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 240),
-                  child: switch (_step) {
-                    _OriginCityStep.request => _buildRequest(),
-                    _OriginCityStep.confirm => _buildConfirmation(),
-                    _OriginCityStep.manual => _buildManualPicker(),
-                  },
+                Flexible(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 240),
+                    child: switch (_step) {
+                      _OriginCityStep.request => _buildRequest(),
+                      _OriginCityStep.confirm => _buildConfirmation(),
+                      _OriginCityStep.manual => _buildManualPicker(),
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

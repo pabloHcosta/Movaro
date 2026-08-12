@@ -8,7 +8,8 @@ moradia, trabalho, saúde e chegada em um único fluxo.
 ## O que o produto entrega
 
 - descoberta e comparação de cidades brasileiras;
-- recomendação de cidade a partir do objetivo, prazo e prioridades;
+- recomendação de cidade a partir do objetivo, composição da mudança,
+  prioridades e condições eliminatórias;
 - refinamento explícito para família e crianças, tipo de renda, pets,
   medicação contínua, veículo e fonte de recursos;
 - plano personalizado com etapas condicionais e ordem por dependência;
@@ -23,8 +24,9 @@ aconselhamento jurídico, migratório, médico ou financeiro profissional.
 ## Fluxo principal
 
 1. O usuário confirma origem e destino.
-2. Informa objetivo, prazo e prioridades.
-3. Decide se quer refinar o contexto pessoal.
+2. Escolhe uma recomendação rápida ou detalhada.
+3. Informa objetivo, composição da mudança, prioridades e restrições; renda,
+   reserva, necessidades práticas e prazo entram apenas no modo detalhado.
 4. Analisa a cidade recomendada e as alternativas.
 5. Confirma uma cidade.
 6. Executa o plano guiado e acompanha o progresso.

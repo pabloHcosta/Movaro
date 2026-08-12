@@ -108,7 +108,7 @@ class QuestionRepositoryImpl implements QuestionRepository {
         id: 'travel_group',
         title: 'travel_group',
         type: 'single_card',
-        variants: const [QuestionnaireVariant.strategic],
+        variants: QuestionnaireVariant.values,
         options: const [
           OptionModel(id: 'solo', label: 'solo', value: 'solo'),
           OptionModel(id: 'partner', label: 'partner', value: 'partner'),
@@ -139,7 +139,7 @@ class QuestionRepositoryImpl implements QuestionRepository {
         id: 'priorities',
         title: 'priorities',
         type: 'multi_chip',
-        maxSelections: 3,
+        maxSelections: 2,
         variants: QuestionnaireVariant.values,
         options: const [
           OptionModel(id: 'low_cost', label: 'low_cost', value: 'low_cost'),
@@ -213,32 +213,17 @@ class QuestionRepositoryImpl implements QuestionRepository {
         type: 'multi_chip',
         maxSelections: 2,
         isOptional: true,
-        variants: [QuestionnaireVariant.strategic],
+        variants: QuestionnaireVariant.values,
         options: const [
-          OptionModel(
-            id: 'prefer_south',
-            label: 'prefer_south',
-            value: 'prefer_south',
-          ),
           OptionModel(
             id: 'need_big_city',
             label: 'need_big_city',
             value: 'need_big_city',
           ),
           OptionModel(
-            id: 'prefer_mid_city',
-            label: 'prefer_mid_city',
-            value: 'prefer_mid_city',
-          ),
-          OptionModel(
             id: 'want_coast',
             label: 'want_coast',
             value: 'want_coast',
-          ),
-          OptionModel(
-            id: 'prefer_cooler',
-            label: 'prefer_cooler',
-            value: 'prefer_cooler',
           ),
           OptionModel(
             id: 'need_transit',

@@ -9404,7 +9404,7 @@ abstract class AppLocalizations {
   /// No description provided for @bmpVariantSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'You can go faster or answer one extra question for a more precise recommendation.'**
+  /// **'Choose a quick direction or a fuller analysis. You can review and refine the result afterwards.'**
   String get bmpVariantSubtitle;
 
   /// No description provided for @bmpVariantLeanTitle.
@@ -9416,31 +9416,31 @@ abstract class AppLocalizations {
   /// No description provided for @bmpVariantLeanBody.
   ///
   /// In en, this message translates to:
-  /// **'4 focused questions to get an initial direction with low friction.'**
+  /// **'4 essential questions · about 1 minute. Recommended to get started.'**
   String get bmpVariantLeanBody;
 
   /// No description provided for @bmpVariantLeanTag.
   ///
   /// In en, this message translates to:
-  /// **'Faster'**
+  /// **'Recommended'**
   String get bmpVariantLeanTag;
 
   /// No description provided for @bmpVariantStrategicTitle.
   ///
   /// In en, this message translates to:
-  /// **'Strategic plan'**
+  /// **'Detailed recommendation'**
   String get bmpVariantStrategicTitle;
 
   /// No description provided for @bmpVariantStrategicBody.
   ///
   /// In en, this message translates to:
-  /// **'Adds one extra preference step for a sharper starting recommendation.'**
+  /// **'8 questions, with one extra step only when relevant · about 2–3 minutes.'**
   String get bmpVariantStrategicBody;
 
   /// No description provided for @bmpVariantStrategicTag.
   ///
   /// In en, this message translates to:
-  /// **'More precise'**
+  /// **'More context'**
   String get bmpVariantStrategicTag;
 
   /// No description provided for @bmpGuideEyebrow.
@@ -9524,13 +9524,13 @@ abstract class AppLocalizations {
   /// No description provided for @bmpRefineTitle.
   ///
   /// In en, this message translates to:
-  /// **'Consider family, pets, a vehicle, health, and income before the recommendation?'**
+  /// **'Would you like a more precise recommendation?'**
   String get bmpRefineTitle;
 
   /// No description provided for @bmpRefineSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Optional · adds about 1 minute and makes the city and plan more coherent'**
+  /// **'Optional · add income, savings, practical needs, and timing in about 1–2 minutes.'**
   String get bmpRefineSubtitle;
 
   /// No description provided for @qIntentPrompt.
@@ -9728,7 +9728,7 @@ abstract class AppLocalizations {
   /// No description provided for @questionOptionWarmClimateBeach.
   ///
   /// In en, this message translates to:
-  /// **'Warmer climate / beach'**
+  /// **'Coast and beach'**
   String get questionOptionWarmClimateBeach;
 
   /// No description provided for @questionOptionTransitInfra.

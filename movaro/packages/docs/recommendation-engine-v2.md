@@ -10,7 +10,7 @@ financeira, acadêmica ou profissional feita pelo usuário.
 
 - A API é a única autoridade de filtro, cálculo, ordenação e evidência.
 - O aplicativo não mantém um ranking personalizado alternativo ou fallback.
-- A versão P2 é `city-recommendation-v2.1.0`.
+- A versão P2 é `city-recommendation-v2.2.0`.
 - Cada execução recebe um `recommendationId` aleatório, salvo apenas junto ao
   plano local para diagnóstico e suporte futuro. Esse identificador não é
   enviado à telemetria.

@@ -43,7 +43,7 @@ interface ScoredCity {
   dataCoverage: number;
 }
 
-const METHODOLOGY_VERSION = 'city-recommendation-v2.1.0';
+const METHODOLOGY_VERSION = 'city-recommendation-v2.2.0';
 
 type StabilityBand = 'robust' | 'moderate' | 'sensitive' | 'insufficient_data';
 type ReliabilityBand = 'strong' | 'moderate' | 'limited';
@@ -183,7 +183,10 @@ const PRIORITY_DIMENSIONS: Record<
   low_cost: { affordability: 1 },
   job_opportunities: { job_market: 1 },
   safety: { safety: 1 },
-  warm_climate_beach: { climate_warmth: 0.65, nature: 0.35 },
+  // The current catalog can verify coast/nature, but it does not yet contain
+  // comparable climate normals. Keep the legacy profile key for compatibility
+  // while scoring only the signal the product can actually substantiate.
+  warm_climate_beach: { nature: 1 },
   transit_infra: { transit_infra: 1 },
   nature: { nature: 1 },
   university: { university: 1 },
@@ -749,10 +752,7 @@ export class CityRecommendationService {
     if (profile.originLatitude == null || profile.originLongitude == null) {
       warnings.push('recommendation_warning_origin_distance_unavailable');
     }
-    if (
-      profile.priorities.includes('warm_climate_beach') ||
-      profile.constraints?.includes('prefer_cooler')
-    ) {
+    if (profile.constraints?.includes('prefer_cooler')) {
       warnings.push('recommendation_warning_climate_normals_unavailable');
     }
     if (eligibleCount < 3) {
