@@ -16,13 +16,15 @@ describe('ProductAnalyticsService recommendation observability', () => {
       appEnvironment: 'production',
       events: [
         {
-          eventId: 'recommendation-event-0001',
-          eventName: 'recommendationAccepted',
+          eventId: 'refinement-event-0000001',
+          eventName: 'refinementEvaluated',
           occurredAt: '2026-07-29T01:00:00.000Z',
-          methodologyVersion: 'city-recommendation-v2.1.0',
+          methodologyVersion: 'city-recommendation-v2.3.0',
           stabilityBand: 'robust',
-          coverageBand: 'broad',
-          rankPosition: 1,
+          refinementStatus: 'ask',
+          refinementQuestionId: 'work_arrangement',
+          refinementGainBand: 'high',
+          refinementScenariosEvaluated: 8,
         },
       ],
     });
@@ -32,11 +34,13 @@ describe('ProductAnalyticsService recommendation observability', () => {
     expect(upsert).toHaveBeenCalledWith(
       [
         expect.objectContaining({
-          event_name: 'recommendationAccepted',
-          methodology_version: 'city-recommendation-v2.1.0',
+          event_name: 'refinementEvaluated',
+          methodology_version: 'city-recommendation-v2.3.0',
           stability_band: 'robust',
-          coverage_band: 'broad',
-          rank_position: 1,
+          refinement_status: 'ask',
+          refinement_question_id: 'work_arrangement',
+          refinement_gain_band: 'high',
+          refinement_scenarios_evaluated: 8,
         }),
       ],
       { onConflict: 'event_id', ignoreDuplicates: true },

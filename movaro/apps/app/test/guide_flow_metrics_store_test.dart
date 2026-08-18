@@ -93,6 +93,36 @@ void main() {
       );
     },
   );
+
+  test('uploads adaptive gain diagnostics without answers or cities', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final preferences = await SharedPreferences.getInstance();
+    final sink = _RecordingSink();
+    final store = GuideFlowMetricsStore(preferences: preferences, sink: sink);
+
+    await store.setConsent(ProductAnalyticsConsent.granted);
+    await store.record(
+      GuideFlowMetric.refinementEvaluated,
+      methodologyVersion: 'city-recommendation-v2.3.0',
+      stabilityBand: 'sensitive',
+      refinementStatus: 'ask',
+      refinementQuestionId: 'work_arrangement',
+      refinementGainBand: 'high',
+      refinementScenariosEvaluated: 8,
+    );
+
+    final event = sink.events.single;
+    expect(event.metric, GuideFlowMetric.refinementEvaluated);
+    expect(event.methodologyVersion, 'city-recommendation-v2.3.0');
+    expect(event.stabilityBand, 'sensitive');
+    expect(event.refinementStatus, 'ask');
+    expect(event.refinementQuestionId, 'work_arrangement');
+    expect(event.refinementGainBand, 'high');
+    expect(event.refinementScenariosEvaluated, 8);
+    final raw = preferences.getString(GuideFlowMetricsStore.storageKey)!;
+    expect(raw, isNot(contains('cityId')));
+    expect(raw, isNot(contains('answers')));
+  });
 }
 
 class _RecordingSink implements GuideFlowMetricsSink {

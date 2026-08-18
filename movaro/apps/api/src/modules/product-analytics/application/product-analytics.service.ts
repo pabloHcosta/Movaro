@@ -32,6 +32,11 @@ export class ProductAnalyticsService {
       stability_band: event.stabilityBand ?? null,
       coverage_band: event.coverageBand ?? null,
       rank_position: event.rankPosition ?? null,
+      refinement_status: event.refinementStatus ?? null,
+      refinement_question_id: event.refinementQuestionId ?? null,
+      refinement_gain_band: event.refinementGainBand ?? null,
+      refinement_scenarios_evaluated:
+        event.refinementScenariosEvaluated ?? null,
     }));
     const { error } = await this.supabase.admin
       .from('product_flow_events')

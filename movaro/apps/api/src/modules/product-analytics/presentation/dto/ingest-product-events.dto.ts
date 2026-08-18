@@ -16,6 +16,7 @@ import { Type } from 'class-transformer';
 const allowedEventNames = [
   'questionnaireStarted',
   'questionAnswered',
+  'refinementEvaluated',
   'planGenerated',
   'recommendationViewed',
   'primaryCityExplored',
@@ -75,6 +76,24 @@ class ProductFlowEventDto {
   @Min(1)
   @Max(3)
   rankPosition?: number;
+
+  @IsOptional()
+  @IsIn(['ask', 'stable', 'low_gain', 'no_candidates'])
+  refinementStatus?: string;
+
+  @IsOptional()
+  @IsIn(['work_arrangement', 'available_capital'])
+  refinementQuestionId?: string;
+
+  @IsOptional()
+  @IsIn(['none', 'low', 'moderate', 'high'])
+  refinementGainBand?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(20)
+  refinementScenariosEvaluated?: number;
 }
 
 export class IngestProductEventsDto {

@@ -74,6 +74,42 @@ class RecommendedCity {
   final List<CityRecommendationEvidence> evidence;
 }
 
+class CityRecommendationRefinementCandidate {
+  const CityRecommendationRefinementCandidate({
+    required this.questionId,
+    required this.discriminationGain,
+    required this.scenariosEvaluated,
+    required this.topCityVariants,
+  });
+
+  final String questionId;
+  final double discriminationGain;
+  final int scenariosEvaluated;
+  final int topCityVariants;
+}
+
+class CityRecommendationRefinement {
+  const CityRecommendationRefinement({
+    required this.status,
+    required this.discriminationGain,
+    required this.gainBand,
+    required this.minimumGain,
+    required this.scenariosEvaluated,
+    required this.candidates,
+    this.questionId,
+  });
+
+  final String status;
+  final String? questionId;
+  final double discriminationGain;
+  final String gainBand;
+  final double minimumGain;
+  final int scenariosEvaluated;
+  final List<CityRecommendationRefinementCandidate> candidates;
+
+  bool get shouldAsk => status == 'ask' && questionId != null;
+}
+
 class CityRecommendationResult {
   const CityRecommendationResult({
     required this.methodologyVersion,
@@ -92,6 +128,7 @@ class CityRecommendationResult {
     this.reliabilityBand = 'limited',
     this.scoreSeparationBand = 'single_result',
     this.scenariosEvaluated = 0,
+    this.refinement,
   });
 
   final String recommendationId;
@@ -110,4 +147,5 @@ class CityRecommendationResult {
   final String reliabilityBand;
   final String scoreSeparationBand;
   final int scenariosEvaluated;
+  final CityRecommendationRefinement? refinement;
 }

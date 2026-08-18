@@ -129,7 +129,7 @@ void main() {
       },
     );
 
-    test('quick flow offers and applies explicit profile refinement', () async {
+    test('quick flow asks only the highest-gain adaptive question', () async {
       controller.selectVariant(QuestionnaireVariant.lean);
       controller.selectAnswer('intent', 'fresh_start');
       expect(await controller.goNext(), isFalse);
@@ -142,35 +142,37 @@ void main() {
 
       expect(await controller.goNext(), isFalse);
       expect(controller.isRefinePromptVisible, isTrue);
+      expect(controller.adaptiveQuestionId, 'work_arrangement');
 
       controller.acceptRefine();
 
-      expect(controller.selectedVariant, QuestionnaireVariant.strategic);
+      expect(controller.selectedVariant, QuestionnaireVariant.lean);
       expect(controller.currentQuestion?.id, 'work_arrangement');
       controller.selectAnswer('work_arrangement', 'local_job');
-      expect(await controller.goNext(), isFalse);
-      expect(controller.currentQuestion?.id, 'funding');
-      controller.selectAnswer('funding', 'job_search');
-      expect(await controller.goNext(), isFalse);
-      expect(controller.currentQuestion?.id, 'support_needs');
-      controller.setAnswerValues('support_needs', [
-        'travel_with_pet',
-        'continuous_medication',
-        'will_drive',
-      ]);
-      expect(await controller.goNext(), isFalse);
-      controller.selectAnswer('timeline', 'in_3_6m');
-
       expect(await controller.goNext(), isTrue);
-      expect(controller.generatedPlan?.variant, QuestionnaireVariant.strategic);
+      expect(controller.generatedPlan?.variant, QuestionnaireVariant.lean);
       expect(controller.generatedPlan?.travelGroup, 'family_kids');
       expect(controller.generatedPlan?.childrenCount, 2);
       expect(controller.generatedPlan?.workArrangement, 'local_job');
-      expect(controller.generatedPlan?.funding, 'job_search');
-      expect(
-        controller.generatedPlan?.selectedConstraints,
-        containsAll(['travel_with_pet', 'continuous_medication', 'will_drive']),
-      );
+      expect(controller.answerFor('funding'), isNull);
+      expect(controller.answerFor('support_needs'), isNull);
+      expect(controller.answerFor('timeline'), isNull);
+    });
+
+    test('quick flow generates directly when refinement gain is low', () async {
+      controller.selectVariant(QuestionnaireVariant.lean);
+      controller.selectAnswer('intent', 'study');
+      expect(await controller.goNext(), isFalse);
+      controller.selectAnswer('travel_group', 'solo');
+      expect(await controller.goNext(), isFalse);
+      controller.setAnswerValues('priorities', ['university']);
+      expect(await controller.goNext(), isFalse);
+      controller.setAnswerValues('constraints', ['no_constraints']);
+
+      expect(await controller.goNext(), isTrue);
+      expect(controller.isRefinePromptVisible, isFalse);
+      expect(controller.adaptiveQuestionId, isNull);
+      expect(controller.generatedPlan, isNotNull);
     });
 
     test(
@@ -371,6 +373,7 @@ class _InMemoryQuestionnaireFlowDraftStore extends QuestionnaireFlowDraftStore {
     required bool showRefinePrompt,
     required bool isRefineResolved,
     required bool includeConstraints,
+    String? adaptiveQuestionId,
   }) async {
     _snapshot = QuestionnaireFlowDraftSnapshot(
       answers: answers,
@@ -379,6 +382,7 @@ class _InMemoryQuestionnaireFlowDraftStore extends QuestionnaireFlowDraftStore {
       showRefinePrompt: showRefinePrompt,
       isRefineResolved: isRefineResolved,
       includeConstraints: includeConstraints,
+      adaptiveQuestionId: adaptiveQuestionId,
     );
   }
 
@@ -484,6 +488,40 @@ class _FakeCitiesRepository implements CitiesRepository {
         ),
       ],
       sourceSummary: const [],
+      refinement: profile.intent == 'study'
+          ? const CityRecommendationRefinement(
+              status: 'stable',
+              discriminationGain: 0.02,
+              gainBand: 'low',
+              minimumGain: 0.08,
+              scenariosEvaluated: 8,
+              candidates: [],
+            )
+          : profile.workArrangement.isEmpty
+          ? const CityRecommendationRefinement(
+              status: 'ask',
+              questionId: 'work_arrangement',
+              discriminationGain: 0.32,
+              gainBand: 'high',
+              minimumGain: 0.08,
+              scenariosEvaluated: 3,
+              candidates: [
+                CityRecommendationRefinementCandidate(
+                  questionId: 'work_arrangement',
+                  discriminationGain: 0.32,
+                  scenariosEvaluated: 3,
+                  topCityVariants: 2,
+                ),
+              ],
+            )
+          : const CityRecommendationRefinement(
+              status: 'no_candidates',
+              discriminationGain: 0,
+              gainBand: 'none',
+              minimumGain: 0,
+              scenariosEvaluated: 0,
+              candidates: [],
+            ),
     );
   }
 

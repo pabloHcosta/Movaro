@@ -238,61 +238,77 @@ class _QuestionPageState extends State<QuestionPage> {
     final l10n = context.l10n;
     _prepareScrollableScope('refine_prompt');
 
-    return FrostedPanel(
-      padding: const EdgeInsets.all(28),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.bmpRefineTitle,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.bmpRefineSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSoftFor(context),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 360),
-                child: _RefineIllustration(),
-              ),
-            ),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  style: _secondaryButtonStyle(context),
-                  onPressed: controller.goBack,
-                  child: Text(l10n.bmpCtaBack),
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        controller: _optionsScrollController,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: FrostedPanel(
+            padding: EdgeInsets.zero,
+            borderRadius: BorderRadius.circular(32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _RefinementHero(
+                  eyebrow: l10n.adaptiveRefinementEyebrow(),
+                  optionalLabel: l10n.adaptiveRefinementOptional(),
+                  title: l10n.adaptiveRefinementTitle(
+                    controller.adaptiveQuestionId,
+                  ),
+                  body: l10n.adaptiveRefinementBody(
+                    controller.adaptiveQuestionId,
+                  ),
+                  questionCount: l10n.adaptiveRefinementQuestionCount(),
+                  time: l10n.adaptiveRefinementTime(),
+                  beforeLabel: l10n.adaptiveRefinementPreviewBefore(),
+                  afterLabel: l10n.adaptiveRefinementPreviewAfter(),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton(
-                  style: _secondaryButtonStyle(context),
-                  onPressed: () => _generateAndReveal(controller.skipRefine),
-                  child: Text(l10n.bmpCtaRefineNo),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 22, 24, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _RefinementBenefits(
+                        title: l10n.adaptiveRefinementImpactTitle(),
+                        rankingBenefit: l10n.adaptiveRefinementImpactRanking(),
+                        contextBenefit: l10n.adaptiveRefinementImpactContext(),
+                      ),
+                      const SizedBox(height: 22),
+                      FilledButton.icon(
+                        style: _primaryButtonStyle(context).copyWith(
+                          padding: const WidgetStatePropertyAll(
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                          ),
+                        ),
+                        onPressed: controller.acceptRefine,
+                        icon: const Icon(Icons.auto_awesome_rounded, size: 20),
+                        label: Text(l10n.adaptiveRefinementAction()),
+                      ),
+                      const SizedBox(height: 10),
+                      OutlinedButton(
+                        style: _secondaryButtonStyle(context),
+                        onPressed: () =>
+                            _generateAndReveal(controller.skipRefine),
+                        child: Text(l10n.adaptiveRefinementSkipAction()),
+                      ),
+                      const SizedBox(height: 2),
+                      TextButton.icon(
+                        onPressed: controller.goBack,
+                        icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                        label: Text(l10n.bmpCtaBack),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.textSoftFor(context),
+                          textStyle: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              style: _primaryButtonStyle(context),
-              onPressed: controller.acceptRefine,
-              child: Text(l10n.bmpCtaRefineYes),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -877,7 +893,7 @@ class _QuestionPageState extends State<QuestionPage> {
 
   Widget _buildStickyPrimaryAction(BuildContext context, Question question) {
     final l10n = context.l10n;
-    final isEnabled = controller.canGoNext && !controller.isGeneratingPlan;
+    final isEnabled = controller.canGoNext && !controller.isLoading;
     final isGenerate = controller.isLastQuestion;
     final isMulti = question.type == 'multi_chip';
     final selectedCount = isMulti
@@ -954,7 +970,7 @@ class _QuestionPageState extends State<QuestionPage> {
                           if (controller.selectedVariant ==
                                   QuestionnaireVariant.lean &&
                               !controller.isRefineResolved) {
-                            await controller.goNext();
+                            await _generateAndReveal(controller.goNext);
                             return;
                           }
                           await _generateAndReveal(controller.goNext);
@@ -1152,7 +1168,7 @@ class _QuestionPageState extends State<QuestionPage> {
 
     if (controller.selectedVariant == QuestionnaireVariant.lean &&
         !controller.isRefineResolved) {
-      await controller.goNext();
+      await _generateAndReveal(controller.goNext);
       return;
     }
 
@@ -2923,116 +2939,170 @@ class _RecommendationConstellationPainter extends CustomPainter {
       old.progress != progress || old.stage != stage || old.isDark != isDark;
 }
 
-class _RefineIllustration extends StatelessWidget {
-  const _RefineIllustration();
+class _RefinementHero extends StatelessWidget {
+  const _RefinementHero({
+    required this.eyebrow,
+    required this.optionalLabel,
+    required this.title,
+    required this.body,
+    required this.questionCount,
+    required this.time,
+    required this.beforeLabel,
+    required this.afterLabel,
+  });
+
+  final String eyebrow;
+  final String optionalLabel;
+  final String title;
+  final String body;
+  final String questionCount;
+  final String time;
+  final String beforeLabel;
+  final String afterLabel;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-
-    return AspectRatio(
-      aspectRatio: 1.15,
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF07162B), Color(0xFF0E3769), Color(0xFF0877C9)],
+          stops: [0, 0.56, 1],
+        ),
+      ),
       child: Stack(
         children: [
-          Align(
-            alignment: Alignment.topCenter,
+          Positioned(
+            right: -76,
+            top: -84,
             child: Container(
-              width: 210,
-              height: 210,
+              width: 230,
+              height: 230,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.primary.withValues(alpha: isDark ? 0.26 : 0.18),
+                    AppColors.accent.withValues(alpha: 0.30),
                     Colors.transparent,
                   ],
                 ),
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: 220,
-              height: 170,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF142132)
-                    : Colors.white.withValues(alpha: 0.95),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.10),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 38,
-            left: 54,
-            right: 54,
-            child: Container(
-              height: 58,
-              decoration: BoxDecoration(
-                color: AppColors.tintedSurfaceFor(
-                  context,
-                  tint: AppColors.primary,
-                  lightColor: const Color(0xFFEAF4FF),
-                  darkBase: const Color(0xFF19283B),
-                  darkAlpha: 0.26,
-                ),
-                borderRadius: BorderRadius.circular(22),
-              ),
-              child: Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  const SizedBox(width: 16),
                   Container(
-                    width: 30,
-                    height: 30,
+                    width: 34,
+                    height: 34,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.12),
+                      color: Colors.white.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.12),
+                      ),
                     ),
                     child: const Icon(
-                      Icons.tune_rounded,
+                      Icons.auto_awesome_rounded,
                       size: 18,
-                      color: AppColors.primary,
+                      color: Color(0xFF86D9FF),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: Container(
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(999),
+                    child: Text(
+                      eyebrow,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: const Color(0xFF9FDDFF),
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.25,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  _RefinementPill(
+                    icon: Icons.check_circle_outline_rounded,
+                    label: optionalLabel,
+                  ),
                 ],
               ),
-            ),
+              const SizedBox(height: 20),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 570),
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    height: 1.08,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 590),
+                child: Text(
+                  body,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.76),
+                    height: 1.42,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _RefinementPill(
+                    icon: Icons.help_outline_rounded,
+                    label: questionCount,
+                  ),
+                  _RefinementPill(icon: Icons.schedule_rounded, label: time),
+                ],
+              ),
+              const SizedBox(height: 20),
+              _RefinementPreview(
+                beforeLabel: beforeLabel,
+                afterLabel: afterLabel,
+              ),
+            ],
           ),
-          Positioned(
-            left: 66,
-            right: 66,
-            bottom: 42,
-            child: Row(
-              children: const [
-                Expanded(
-                  child: _RefineMiniCard(
-                    icon: Icons.map_outlined,
-                    tint: Color(0xFF0D7ACC),
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: _RefineMiniCard(
-                    icon: Icons.location_city_outlined,
-                    tint: Color(0xFF1F9F79),
-                  ),
-                ),
-              ],
+        ],
+      ),
+    );
+  }
+}
+
+class _RefinementPill extends StatelessWidget {
+  const _RefinementPill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white.withValues(alpha: 0.82), size: 14),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.88),
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -3041,22 +3111,200 @@ class _RefineIllustration extends StatelessWidget {
   }
 }
 
-class _RefineMiniCard extends StatelessWidget {
-  const _RefineMiniCard({required this.icon, required this.tint});
+class _RefinementPreview extends StatelessWidget {
+  const _RefinementPreview({
+    required this.beforeLabel,
+    required this.afterLabel,
+  });
 
-  final IconData icon;
-  final Color tint;
+  final String beforeLabel;
+  final String afterLabel;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 76,
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: tint.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: tint.withValues(alpha: 0.14)),
+        color: const Color(0xFF041225).withValues(alpha: 0.42),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
       ),
-      child: Icon(icon, color: tint, size: 28),
+      child: Row(
+        children: [
+          Expanded(
+            child: _RefinementRanking(
+              label: beforeLabel,
+              widths: const [0.76, 0.72, 0.68],
+              emphasizeFirst: false,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: const Color(0xFF43C6FF).withValues(alpha: 0.16),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_forward_rounded,
+                size: 18,
+                color: Color(0xFF8BE0FF),
+              ),
+            ),
+          ),
+          Expanded(
+            child: _RefinementRanking(
+              label: afterLabel,
+              widths: const [0.94, 0.69, 0.48],
+              emphasizeFirst: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RefinementRanking extends StatelessWidget {
+  const _RefinementRanking({
+    required this.label,
+    required this.widths,
+    required this.emphasizeFirst,
+  });
+
+  final String label;
+  final List<double> widths;
+  final bool emphasizeFirst;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: Colors.white.withValues(alpha: 0.62),
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 9),
+        for (var index = 0; index < widths.length; index++) ...[
+          FractionallySizedBox(
+            widthFactor: widths[index],
+            child: Container(
+              height: index == 0 && emphasizeFirst ? 7 : 5,
+              decoration: BoxDecoration(
+                color: index == 0 && emphasizeFirst
+                    ? const Color(0xFF55D6B0)
+                    : Colors.white.withValues(alpha: 0.22),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+          if (index != widths.length - 1) const SizedBox(height: 6),
+        ],
+      ],
+    );
+  }
+}
+
+class _RefinementBenefits extends StatelessWidget {
+  const _RefinementBenefits({
+    required this.title,
+    required this.rankingBenefit,
+    required this.contextBenefit,
+  });
+
+  final String title;
+  final String rankingBenefit;
+  final String contextBenefit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.tintedSurfaceFor(
+          context,
+          tint: AppColors.primary,
+          lightColor: const Color(0xFFF2F7FD),
+          darkBase: const Color(0xFF121D2B),
+          darkAlpha: 0.18,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.tintedBorderFor(
+            context,
+            tint: AppColors.primary,
+            lightColor: const Color(0xFFDCEAF8),
+            darkAlpha: 0.20,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: AppColors.textPrimaryFor(context),
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 13),
+          _RefinementBenefitRow(
+            icon: Icons.swap_vert_rounded,
+            label: rankingBenefit,
+          ),
+          const SizedBox(height: 10),
+          _RefinementBenefitRow(
+            icon: Icons.person_pin_circle_outlined,
+            label: contextBenefit,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RefinementBenefitRow extends StatelessWidget {
+  const _RefinementBenefitRow({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(
+              alpha: AppColors.isDark(context) ? 0.20 : 0.10,
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: AppColors.primary, size: 17),
+        ),
+        const SizedBox(width: 11),
+        Expanded(
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textPrimaryFor(context),
+              fontWeight: FontWeight.w600,
+              height: 1.25,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

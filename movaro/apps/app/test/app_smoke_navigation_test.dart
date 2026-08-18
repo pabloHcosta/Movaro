@@ -793,6 +793,7 @@ class _InMemoryQuestionnaireFlowDraftStore extends QuestionnaireFlowDraftStore {
     required bool showRefinePrompt,
     required bool isRefineResolved,
     required bool includeConstraints,
+    String? adaptiveQuestionId,
   }) async {
     _snapshot = QuestionnaireFlowDraftSnapshot(
       answers: answers,
@@ -801,6 +802,7 @@ class _InMemoryQuestionnaireFlowDraftStore extends QuestionnaireFlowDraftStore {
       showRefinePrompt: showRefinePrompt,
       isRefineResolved: isRefineResolved,
       includeConstraints: includeConstraints,
+      adaptiveQuestionId: adaptiveQuestionId,
     );
   }
 

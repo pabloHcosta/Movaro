@@ -17,6 +17,21 @@ class MigrationPlanGenerator {
 
   final CitiesRepository _citiesRepository;
 
+  Future<CityRecommendationResult?> evaluateRefinement({
+    required List<Answer> answers,
+  }) async {
+    final answerMap = {
+      for (final answer in answers) answer.questionId: answer.values,
+    };
+    final destinationCountry = _firstValue(answerMap['destination_country']);
+    if (!_isBrazilJourney(destinationCountry)) return null;
+
+    final result = await _citiesRepository.recommendCities(
+      _recommendationProfile(answerMap),
+    );
+    return result;
+  }
+
   Future<MigrationPlan> generate({
     required List<Answer> answers,
     required QuestionnaireVariant variant,
@@ -53,24 +68,7 @@ class MigrationPlanGenerator {
 
     final result = _isBrazilJourney(destinationCountry)
         ? await _citiesRepository.recommendCities(
-            CityRecommendationProfile(
-              destinationCountryCode: 'BR',
-              intent: intent,
-              funding: funding,
-              workArrangement: workArrangement,
-              travelGroup: travelGroup,
-              childrenCount: childrenCount,
-              availableCapital: availableCapital,
-              priorities: priorities,
-              constraints: rankingConstraints,
-              supportNeeds: supportNeeds,
-              originLatitude: _parseDouble(
-                _firstValue(answerMap['origin_latitude']),
-              ),
-              originLongitude: _parseDouble(
-                _firstValue(answerMap['origin_longitude']),
-              ),
-            ),
+            _recommendationProfile(answerMap),
           )
         : _emptyRecommendation();
     final recommendations = result.recommendations;
@@ -130,6 +128,28 @@ class MigrationPlanGenerator {
         childrenCount: childrenCount,
       ),
     ).toEntity();
+  }
+
+  CityRecommendationProfile _recommendationProfile(
+    Map<String, List<String>> answerMap,
+  ) {
+    final rawIntent = _firstValue(answerMap['intent']);
+    return CityRecommendationProfile(
+      destinationCountryCode: 'BR',
+      intent: rawIntent.isEmpty ? 'explore_unsure' : rawIntent,
+      funding: _firstValue(answerMap['funding']),
+      workArrangement: _firstValue(answerMap['work_arrangement']),
+      travelGroup: _firstValue(answerMap['travel_group']),
+      childrenCount: _parseChildrenCount(
+        _firstValue(answerMap['travel_group_children_count']),
+      ),
+      availableCapital: _firstValue(answerMap['available_capital']),
+      priorities: answerMap['priorities'] ?? const <String>[],
+      constraints: answerMap['constraints'] ?? const <String>[],
+      supportNeeds: answerMap['support_needs'] ?? const <String>[],
+      originLatitude: _parseDouble(_firstValue(answerMap['origin_latitude'])),
+      originLongitude: _parseDouble(_firstValue(answerMap['origin_longitude'])),
+    );
   }
 
   String _resolveArchetype({

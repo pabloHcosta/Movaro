@@ -171,6 +171,103 @@ extension AppLocalizationsFormatting on AppLocalizations {
     );
   }
 
+  String adaptiveRefinementTitle(String? questionId) {
+    return switch (questionId) {
+      'work_arrangement' => _localizedText(
+        pt: 'Uma resposta sobre sua renda pode desempatar as cidades',
+        es: 'Una respuesta sobre tus ingresos puede desempatar las ciudades',
+        en: 'One answer about your income may break the tie between cities',
+      ),
+      'available_capital' => _localizedText(
+        pt: 'Sua reserva inicial pode mudar a cidade mais adequada',
+        es: 'Tus ahorros iniciales pueden cambiar la ciudad más adecuada',
+        en: 'Your initial savings may change which city fits best',
+      ),
+      _ => _localizedText(
+        pt: 'Uma resposta extra pode deixar a recomendação mais precisa',
+        es: 'Una respuesta extra puede hacer la recomendación más precisa',
+        en: 'One extra answer may make the recommendation more precise',
+      ),
+    };
+  }
+
+  String adaptiveRefinementBody(String? questionId) {
+    return switch (questionId) {
+      'work_arrangement' => _localizedText(
+        pt: 'Sua forma de renda ajuda a comparar custo de vida e oportunidades com o seu cenário real.',
+        es: 'Tu forma de ingreso ayuda a comparar el costo de vida y las oportunidades con tu escenario real.',
+        en: 'Your type of income helps compare cost of living and opportunities with your real situation.',
+      ),
+      'available_capital' => _localizedText(
+        pt: 'Sua reserva ajuda a comparar o custo de chegada e a margem de segurança em cada cidade.',
+        es: 'Tus ahorros ayudan a comparar el costo de llegada y el margen de seguridad en cada ciudad.',
+        en: 'Your savings help compare arrival costs and your safety margin in each city.',
+      ),
+      _ => _localizedText(
+        pt: 'Essa resposta adiciona o contexto que mais pode diferenciar as cidades que ficaram próximas.',
+        es: 'Esta respuesta agrega el contexto que más puede diferenciar las ciudades que quedaron cerca.',
+        en: 'This answer adds the context most likely to separate the cities that are currently close.',
+      ),
+    };
+  }
+
+  String adaptiveRefinementEyebrow() => _localizedText(
+    pt: 'AJUSTE INTELIGENTE',
+    es: 'AJUSTE INTELIGENTE',
+    en: 'SMART REFINEMENT',
+  );
+
+  String adaptiveRefinementOptional() =>
+      _localizedText(pt: 'Opcional', es: 'Opcional', en: 'Optional');
+
+  String adaptiveRefinementQuestionCount() => _localizedText(
+    pt: 'Só 1 pergunta',
+    es: 'Solo 1 pregunta',
+    en: 'Just 1 question',
+  );
+
+  String adaptiveRefinementTime() =>
+      _localizedText(pt: 'Menos de 20s', es: 'Menos de 20s', en: 'Under 20s');
+
+  String adaptiveRefinementImpactTitle() => _localizedText(
+    pt: 'O que essa resposta melhora',
+    es: 'Qué mejora esta respuesta',
+    en: 'What this answer improves',
+  );
+
+  String adaptiveRefinementImpactRanking() => _localizedText(
+    pt: 'Desempata cidades próximas',
+    es: 'Desempata ciudades cercanas',
+    en: 'Breaks ties between close cities',
+  );
+
+  String adaptiveRefinementImpactContext() => _localizedText(
+    pt: 'Adapta a análise ao seu cenário',
+    es: 'Adapta el análisis a tu escenario',
+    en: 'Adapts the analysis to your situation',
+  );
+
+  String adaptiveRefinementPreviewBefore() =>
+      _localizedText(pt: 'Agora', es: 'Ahora', en: 'Now');
+
+  String adaptiveRefinementPreviewAfter() => _localizedText(
+    pt: 'Com sua resposta',
+    es: 'Con tu respuesta',
+    en: 'With your answer',
+  );
+
+  String adaptiveRefinementSkipAction() => _localizedText(
+    pt: 'Gerar sem refinar',
+    es: 'Generar sin afinar',
+    en: 'Generate without refining',
+  );
+
+  String adaptiveRefinementAction() => _localizedText(
+    pt: 'Responder 1 pergunta',
+    es: 'Responder 1 pregunta',
+    en: 'Answer 1 question',
+  );
+
   String questionOptionLabel(String questionId, String value) {
     switch (questionId) {
       case 'origin_country':

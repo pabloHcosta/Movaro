@@ -114,7 +114,7 @@ cidade. Essa separação deve permanecer explícita na metodologia.
 - Rótulos completos em objetivo, renda, composição familiar, necessidades e
   restrições; linhas suportam duas linhas e alvo mínimo de 52 px.
 - Estimativa de 18 s por etapa rápida e 25 s por etapa detalhada.
-- Metodologia do motor atualizada para `city-recommendation-v2.2.0`.
+- Metodologia do motor atualizada para `city-recommendation-v2.3.0`.
 - A chave legada `warm_climate_beach` permanece compatível, mas passa a pontuar
   apenas `nature`/litoral. O produto não apresenta clima sem normais comparáveis.
 
@@ -183,11 +183,29 @@ preço momentâneo ou viés de apresentação. Medir em três camadas:
 - queda mensurável em feedback “não combina comigo” sem reduzir cobertura;
 - estabilidade e cobertura exibidas, sem transformar score em probabilidade de acerto.
 
-## Próxima evolução técnica
+## Refinamento adaptativo implementado
 
-O passo de maior retorno é substituir a sequência estratégica fixa por seleção
-adaptativa. Após as quatro respostas rápidas, a API deve simular o ranking com
-cada pergunta candidata e pedir somente aquela com maior ganho esperado na
-shortlist, parando quando a cidade líder estiver estável ou o ganho ficar abaixo
-de um limiar. Isso exige logs agregados por versão, uma suíte offline e revisão
-humana; cliques não devem recalibrar pesos automaticamente.
+Após as quatro respostas rápidas, a API avalia apenas atributos ainda não
+respondidos que podem alterar o ranking (`work_arrangement` e
+`available_capital`). Para cada candidato, executa todos os valores permitidos e
+mede discriminação pela combinação de troca da cidade líder (70%) e deslocamento
+normalizado do top 3 (30%). A pergunta de maior ganho só é exibida quando supera
+um limiar calibrado pela separação atual entre as duas primeiras cidades.
+
+O fluxo faz no máximo uma pergunta adaptativa. Se a liderança já estiver estável,
+o ganho for baixo ou não houver candidata aplicável, o resultado é gerado sem
+interrupção adicional. Os cenários usam pesos uniformes porque ainda não há uma
+distribuição longitudinal confiável de respostas; portanto, o valor calculado é
+um sinal de discriminação, não uma probabilidade de acerto.
+
+A telemetria consentida registra somente versão, estabilidade, status da decisão,
+identificador fechado da pergunta, faixa de ganho e quantidade de cenários. Não
+registra respostas, cidades nem resultados simulados. Isso permite acompanhar:
+
+- estabilidade inicial e final por versão;
+- aceitação ou rejeição do convite de refinamento;
+- frequência e ganho marginal agregado de cada pergunta;
+- feedback negativo e aceitação da recomendação após cada decisão.
+
+Esses dados devem alimentar análise offline e revisão humana. Cliques não
+recalibram pesos automaticamente.

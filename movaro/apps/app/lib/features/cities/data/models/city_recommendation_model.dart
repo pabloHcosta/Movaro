@@ -41,6 +41,31 @@ class CityRecommendationModel {
           (json['evaluation'] as Map<String, dynamic>?)?['scenariosEvaluated']
               as int? ??
           0,
+      refinement: _refinement(json['refinement']),
+    );
+  }
+
+  static CityRecommendationRefinement? _refinement(Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    return CityRecommendationRefinement(
+      status: raw['status'] as String? ?? 'no_candidates',
+      questionId: raw['questionId'] as String?,
+      discriminationGain: (raw['discriminationGain'] as num?)?.toDouble() ?? 0,
+      gainBand: raw['gainBand'] as String? ?? 'none',
+      minimumGain: (raw['minimumGain'] as num?)?.toDouble() ?? 0,
+      scenariosEvaluated: raw['scenariosEvaluated'] as int? ?? 0,
+      candidates: (raw['candidates'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(
+            (item) => CityRecommendationRefinementCandidate(
+              questionId: item['questionId'] as String? ?? '',
+              discriminationGain:
+                  (item['discriminationGain'] as num?)?.toDouble() ?? 0,
+              scenariosEvaluated: item['scenariosEvaluated'] as int? ?? 0,
+              topCityVariants: item['topCityVariants'] as int? ?? 0,
+            ),
+          )
+          .toList(growable: false),
     );
   }
 

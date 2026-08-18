@@ -43,11 +43,20 @@ interface ScoredCity {
   dataCoverage: number;
 }
 
-const METHODOLOGY_VERSION = 'city-recommendation-v2.2.0';
+const METHODOLOGY_VERSION = 'city-recommendation-v2.3.0';
 
 type StabilityBand = 'robust' | 'moderate' | 'sensitive' | 'insufficient_data';
 type ReliabilityBand = 'strong' | 'moderate' | 'limited';
 type SeparationBand = 'close' | 'clear' | 'strong' | 'single_result';
+type RefinementQuestionId = 'work_arrangement' | 'available_capital';
+type RefinementStatus = 'ask' | 'stable' | 'low_gain' | 'no_candidates';
+
+export interface RefinementCandidate {
+  questionId: RefinementQuestionId;
+  discriminationGain: number;
+  scenariosEvaluated: number;
+  topCityVariants: number;
+}
 
 const COASTAL_CITY_IDS = new Set([
   'florianopolis-sc',
@@ -222,6 +231,13 @@ export class CityRecommendationService {
       budgetCosts,
       ranked,
     });
+    const refinement = this.selectRefinement({
+      profile,
+      eligible,
+      budgetCosts,
+      ranked,
+      evaluation,
+    });
 
     const recommendations = ranked.slice(0, 3).map((item, index) => ({
       rank: index + 1,
@@ -276,8 +292,174 @@ export class CityRecommendationService {
               ) / recommendations.length,
         ),
       },
+      refinement,
       recommendations,
       sourceSummary: this.sourceSummary(recommendations),
+    };
+  }
+
+  private selectRefinement({
+    profile,
+    eligible,
+    budgetCosts,
+    ranked,
+    evaluation,
+  }: {
+    profile: RecommendCitiesDto;
+    eligible: CityCardEntity[];
+    budgetCosts: number[];
+    ranked: ScoredCity[];
+    evaluation: {
+      stabilityBand: StabilityBand;
+      scoreSeparationBand: SeparationBand;
+    };
+  }) {
+    if (ranked.length === 0) {
+      return this.refinementResponse('no_candidates', null, [], 0);
+    }
+
+    const candidates: Array<{
+      questionId: RefinementQuestionId;
+      values: string[];
+      apply: (value: string) => RecommendCitiesDto;
+    }> = [];
+
+    if (!profile.workArrangement) {
+      candidates.push({
+        questionId: 'work_arrangement',
+        values: ['remote', 'local_job', 'both_open'],
+        apply: (value) => ({
+          ...profile,
+          workArrangement: value as RecommendCitiesDto['workArrangement'],
+        }),
+      });
+    }
+    if (!profile.availableCapital) {
+      candidates.push({
+        questionId: 'available_capital',
+        values: ['low', 'medium', 'high', 'very_high', 'prefer_not_say'],
+        apply: (value) => ({ ...profile, availableCapital: value }),
+      });
+    }
+
+    if (candidates.length === 0) {
+      return this.refinementResponse('no_candidates', null, [], 0);
+    }
+
+    const evaluated = candidates
+      .map((candidate) => {
+        const scenarioRankings = candidate.values.map((value) => {
+          const scenarioProfile = candidate.apply(value);
+          return this.rankCities(
+            eligible,
+            scenarioProfile,
+            this.buildWeights(scenarioProfile),
+            budgetCosts,
+          );
+        });
+        const usableRankings = scenarioRankings.filter(
+          (scenario) => scenario.length > 0,
+        );
+        const discriminationGain =
+          usableRankings.length === 0
+            ? 0
+            : usableRankings.reduce(
+                (sum, scenario) =>
+                  sum + this.rankingDiscrimination(ranked, scenario),
+                0,
+              ) / usableRankings.length;
+        return {
+          questionId: candidate.questionId,
+          discriminationGain: this.round(discriminationGain),
+          scenariosEvaluated: usableRankings.length,
+          topCityVariants: new Set(
+            usableRankings.map((scenario) => scenario[0]?.city.id),
+          ).size,
+        } satisfies RefinementCandidate;
+      })
+      .sort(
+        (left, right) =>
+          right.discriminationGain - left.discriminationGain ||
+          left.questionId.localeCompare(right.questionId),
+      );
+
+    const best = evaluated[0];
+    const minimumGain = this.minimumRefinementGain(
+      evaluation.scoreSeparationBand,
+    );
+    if (best.discriminationGain < minimumGain) {
+      const status: RefinementStatus =
+        evaluation.stabilityBand === 'robust' &&
+        evaluation.scoreSeparationBand !== 'close'
+          ? 'stable'
+          : 'low_gain';
+      return this.refinementResponse(status, null, evaluated, minimumGain);
+    }
+
+    return this.refinementResponse(
+      'ask',
+      best.questionId,
+      evaluated,
+      minimumGain,
+    );
+  }
+
+  private rankingDiscrimination(
+    baseline: ScoredCity[],
+    scenario: ScoredCity[],
+  ) {
+    const baselineTop = baseline.slice(0, 3);
+    const scenarioTop = scenario.slice(0, 3);
+    if (baselineTop.length === 0 || scenarioTop.length === 0) return 0;
+
+    const topChanged =
+      baselineTop[0].city.id === scenarioTop[0].city.id ? 0 : 1;
+    const scenarioPositions = new Map(
+      scenarioTop.map((item, index) => [item.city.id, index]),
+    );
+    const rankDistance =
+      baselineTop.reduce((sum, item, index) => {
+        const scenarioIndex = scenarioPositions.get(item.city.id) ?? 3;
+        return sum + Math.abs(index - scenarioIndex);
+      }, 0) /
+      (baselineTop.length * 3);
+
+    return topChanged * 0.7 + rankDistance * 0.3;
+  }
+
+  private minimumRefinementGain(separation: SeparationBand) {
+    return separation === 'close' ? 0.05 : separation === 'clear' ? 0.08 : 0.12;
+  }
+
+  private refinementResponse(
+    status: RefinementStatus,
+    questionId: RefinementQuestionId | null,
+    candidates: RefinementCandidate[],
+    minimumGain: number,
+  ) {
+    const gain = questionId
+      ? (candidates.find((item) => item.questionId === questionId)
+          ?.discriminationGain ?? 0)
+      : (candidates[0]?.discriminationGain ?? 0);
+    const gainBand =
+      gain >= 0.3
+        ? 'high'
+        : gain >= 0.15
+          ? 'moderate'
+          : gain > 0
+            ? 'low'
+            : 'none';
+    return {
+      status,
+      questionId,
+      discriminationGain: this.round(gain),
+      gainBand,
+      minimumGain,
+      scenariosEvaluated: candidates.reduce(
+        (sum, item) => sum + item.scenariosEvaluated,
+        0,
+      ),
+      candidates,
     };
   }
 

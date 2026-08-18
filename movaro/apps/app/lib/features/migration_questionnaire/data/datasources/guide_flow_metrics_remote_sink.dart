@@ -38,6 +38,15 @@ class GuideFlowMetricsRemoteSink implements GuideFlowMetricsSink {
                   'coverageBand': event.coverageBand,
                 if (event.rankPosition != null)
                   'rankPosition': event.rankPosition,
+                if (event.refinementStatus != null)
+                  'refinementStatus': event.refinementStatus,
+                if (event.refinementQuestionId != null)
+                  'refinementQuestionId': event.refinementQuestionId,
+                if (event.refinementGainBand != null)
+                  'refinementGainBand': event.refinementGainBand,
+                if (event.refinementScenariosEvaluated != null)
+                  'refinementScenariosEvaluated':
+                      event.refinementScenariosEvaluated,
               },
             )
             .toList(growable: false),

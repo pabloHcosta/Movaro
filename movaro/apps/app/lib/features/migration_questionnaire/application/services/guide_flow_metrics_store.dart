@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum GuideFlowMetric {
   questionnaireStarted,
   questionAnswered,
+  refinementEvaluated,
   planGenerated,
   recommendationViewed,
   primaryCityExplored,
@@ -50,6 +51,10 @@ class GuideFlowUploadEvent {
     this.stabilityBand,
     this.coverageBand,
     this.rankPosition,
+    this.refinementStatus,
+    this.refinementQuestionId,
+    this.refinementGainBand,
+    this.refinementScenariosEvaluated,
   });
 
   final String eventId;
@@ -60,6 +65,10 @@ class GuideFlowUploadEvent {
   final String? stabilityBand;
   final String? coverageBand;
   final int? rankPosition;
+  final String? refinementStatus;
+  final String? refinementQuestionId;
+  final String? refinementGainBand;
+  final int? refinementScenariosEvaluated;
 }
 
 class GuideFlowMetricEvent {
@@ -73,6 +82,10 @@ class GuideFlowMetricEvent {
     this.stabilityBand,
     this.coverageBand,
     this.rankPosition,
+    this.refinementStatus,
+    this.refinementQuestionId,
+    this.refinementGainBand,
+    this.refinementScenariosEvaluated,
   });
 
   factory GuideFlowMetricEvent.fromJson(Map<String, dynamic> json) {
@@ -90,6 +103,11 @@ class GuideFlowMetricEvent {
       stabilityBand: json['stabilityBand'] as String?,
       coverageBand: json['coverageBand'] as String?,
       rankPosition: json['rankPosition'] as int?,
+      refinementStatus: json['refinementStatus'] as String?,
+      refinementQuestionId: json['refinementQuestionId'] as String?,
+      refinementGainBand: json['refinementGainBand'] as String?,
+      refinementScenariosEvaluated:
+          json['refinementScenariosEvaluated'] as int?,
     );
   }
 
@@ -105,6 +123,10 @@ class GuideFlowMetricEvent {
   final String? stabilityBand;
   final String? coverageBand;
   final int? rankPosition;
+  final String? refinementStatus;
+  final String? refinementQuestionId;
+  final String? refinementGainBand;
+  final int? refinementScenariosEvaluated;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'eventId': eventId,
@@ -116,6 +138,12 @@ class GuideFlowMetricEvent {
     if (stabilityBand != null) 'stabilityBand': stabilityBand,
     if (coverageBand != null) 'coverageBand': coverageBand,
     if (rankPosition != null) 'rankPosition': rankPosition,
+    if (refinementStatus != null) 'refinementStatus': refinementStatus,
+    if (refinementQuestionId != null)
+      'refinementQuestionId': refinementQuestionId,
+    if (refinementGainBand != null) 'refinementGainBand': refinementGainBand,
+    if (refinementScenariosEvaluated != null)
+      'refinementScenariosEvaluated': refinementScenariosEvaluated,
   };
 }
 
@@ -190,6 +218,10 @@ class GuideFlowMetricsStore extends ChangeNotifier {
     String? stabilityBand,
     String? coverageBand,
     int? rankPosition,
+    String? refinementStatus,
+    String? refinementQuestionId,
+    String? refinementGainBand,
+    int? refinementScenariosEvaluated,
   }) async {
     try {
       if (!_initialized) {
@@ -214,6 +246,10 @@ class GuideFlowMetricsStore extends ChangeNotifier {
           stabilityBand: stabilityBand,
           coverageBand: coverageBand,
           rankPosition: rankPosition,
+          refinementStatus: refinementStatus,
+          refinementQuestionId: refinementQuestionId,
+          refinementGainBand: refinementGainBand,
+          refinementScenariosEvaluated: refinementScenariosEvaluated,
         ),
       ];
       final bounded = next.length <= _maxEvents
@@ -279,6 +315,11 @@ class GuideFlowMetricsStore extends ChangeNotifier {
                 stabilityBand: event.stabilityBand,
                 coverageBand: event.coverageBand,
                 rankPosition: event.rankPosition,
+                refinementStatus: event.refinementStatus,
+                refinementQuestionId: event.refinementQuestionId,
+                refinementGainBand: event.refinementGainBand,
+                refinementScenariosEvaluated:
+                    event.refinementScenariosEvaluated,
               ),
             )
             .toList(growable: false),

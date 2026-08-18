@@ -176,7 +176,7 @@ describe('CityRecommendationService', () => {
   it('returns a versioned, ordered result with evidence metadata', async () => {
     const result = await service.recommend(profile());
 
-    expect(result.methodologyVersion).toBe('city-recommendation-v2.2.0');
+    expect(result.methodologyVersion).toBe('city-recommendation-v2.3.0');
     expect(result.recommendationId).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
     );
@@ -196,6 +196,44 @@ describe('CityRecommendationService', () => {
       result.evaluation.reliabilityBand,
     );
     expect(result.recommendations.map((item) => item.rank)).toEqual([1, 2, 3]);
+    expect(result.refinement.scenariosEvaluated).toBe(8);
+    expect(result.refinement.candidates).toHaveLength(2);
+  });
+
+  it('selects only the unanswered attribute with the highest ranking gain', async () => {
+    const result = await service.recommend(profile());
+
+    // Keep the assertion output diagnostic when fixture sensitivity changes.
+    expect(result.refinement.candidates.length).toBeGreaterThan(0);
+    expect(result.refinement.status).toBe('ask');
+    expect(['work_arrangement', 'available_capital']).toContain(
+      result.refinement.questionId,
+    );
+    expect(result.refinement.discriminationGain).toBeGreaterThanOrEqual(
+      result.refinement.minimumGain,
+    );
+    expect(result.refinement.candidates[0].questionId).toBe(
+      result.refinement.questionId,
+    );
+  });
+
+  it('stops adaptive refinement when every ranking attribute was answered', async () => {
+    const result = await service.recommend(
+      profile({
+        workArrangement: 'remote',
+        availableCapital: 'medium',
+      }),
+    );
+
+    expect(result.refinement).toEqual({
+      status: 'no_candidates',
+      questionId: null,
+      discriminationGain: 0,
+      gainBand: 'none',
+      minimumGain: 0,
+      scenariosEvaluated: 0,
+      candidates: [],
+    });
   });
 
   it('treats mandatory coast, scale, transit and cost constraints as filters', async () => {

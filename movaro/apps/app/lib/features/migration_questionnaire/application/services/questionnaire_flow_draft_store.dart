@@ -15,6 +15,7 @@ class QuestionnaireFlowDraftSnapshot {
     this.showRefinePrompt = false,
     this.isRefineResolved = false,
     this.includeConstraints = false,
+    this.adaptiveQuestionId,
   });
 
   final List<Answer> answers;
@@ -23,6 +24,7 @@ class QuestionnaireFlowDraftSnapshot {
   final bool showRefinePrompt;
   final bool isRefineResolved;
   final bool includeConstraints;
+  final String? adaptiveQuestionId;
 }
 
 class QuestionnaireFlowDraftStore {
@@ -47,6 +49,7 @@ class QuestionnaireFlowDraftStore {
         showRefinePrompt: decoded['showRefinePrompt'] == true,
         isRefineResolved: decoded['isRefineResolved'] == true,
         includeConstraints: decoded['includeConstraints'] == true,
+        adaptiveQuestionId: decoded['adaptiveQuestionId'] as String?,
         answers: _readAnswers(decoded['answers']),
       );
     } catch (_) {
@@ -73,6 +76,7 @@ class QuestionnaireFlowDraftStore {
     required bool showRefinePrompt,
     required bool isRefineResolved,
     required bool includeConstraints,
+    String? adaptiveQuestionId,
   }) async {
     await PersistentJsonStore.write(
       key: _storageKey,
@@ -91,6 +95,7 @@ class QuestionnaireFlowDraftStore {
         'showRefinePrompt': showRefinePrompt,
         'isRefineResolved': isRefineResolved,
         'includeConstraints': includeConstraints,
+        'adaptiveQuestionId': ?adaptiveQuestionId,
         'updatedAt': DateTime.now().toIso8601String(),
       },
     );

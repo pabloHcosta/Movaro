@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/location/argentina_origin_classifier.dart';
 import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
@@ -62,6 +63,9 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   bool _showRefinePrompt = false;
   bool _isRefineResolved = false;
   bool _includeConstraints = false;
+  bool _isEvaluatingRefinement = false;
+  String? _adaptiveQuestionId;
+  CityRecommendationRefinement? _adaptiveRefinement;
 
   List<Question> get questions => _questions;
   List<Question> get activeQuestions => _activeQuestions;
@@ -74,12 +78,19 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   int get currentIndex => _currentIndex;
   bool get hasSelectedVariant => _selectedVariant != null;
   bool get isInitialized => _isInitialized;
-  bool get isLoading => _isInitializing || _isGeneratingPlan || _isSavingPlan;
+  bool get isLoading =>
+      _isInitializing ||
+      _isEvaluatingRefinement ||
+      _isGeneratingPlan ||
+      _isSavingPlan;
   bool get isInitializing => _isInitializing;
   bool get isGeneratingPlan => _isGeneratingPlan;
   bool get isSavingPlan => _isSavingPlan;
+  bool get isEvaluatingRefinement => _isEvaluatingRefinement;
   bool get isRefinePromptVisible => _showRefinePrompt;
   bool get isRefineResolved => _isRefineResolved;
+  String? get adaptiveQuestionId => _adaptiveQuestionId;
+  CityRecommendationRefinement? get adaptiveRefinement => _adaptiveRefinement;
   bool get hasInProgressDraft =>
       _selectedVariant != null ||
       _answers.any(
@@ -119,6 +130,8 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       if (!_journeyContextController.isJourneyReadyForPlanning)
         'origin_country',
       ...profileQuestionIds,
+      if (variant == QuestionnaireVariant.lean && _adaptiveQuestionId != null)
+        _adaptiveQuestionId!,
     ];
 
     final questionById = {
@@ -182,7 +195,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
 
   int get currentStepForProgress {
     if (_showRefinePrompt) {
-      return coreQuestions.length;
+      return _currentIndex + 1;
     }
     return currentQuestion == null ? 0 : _currentIndex + 1;
   }
@@ -228,6 +241,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _syncJourneyAnswers();
     if (_selectedVariant != resolvedVariant) {
       _selectedVariant = resolvedVariant;
+      _clearAdaptiveRefinement();
       _isRefineResolved = resolvedVariant == QuestionnaireVariant.strategic;
       if (resolvedVariant == QuestionnaireVariant.lean) {
         _clearRefinementAnswers();
@@ -260,6 +274,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _showRefinePrompt = false;
     _isRefineResolved = false;
     _includeConstraints = false;
+    _clearAdaptiveRefinement();
     await _flowDraftStore.clear();
     notifyListeners();
   }
@@ -274,6 +289,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _showRefinePrompt = false;
     _isRefineResolved = false;
     _includeConstraints = false;
+    _clearAdaptiveRefinement();
     await MigrationStateSyncCoordinator.suspend(() async {
       await _migrationPlanRepository.setCurrentPlan(null);
       await _flowDraftStore.clear();
@@ -285,6 +301,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
 
   void selectVariant(QuestionnaireVariant variant) {
     _selectedVariant = variant;
+    _clearAdaptiveRefinement();
     _currentIndex = _firstUnansweredQuestionIndex();
     _showRefinePrompt = false;
     _isRefineResolved = variant == QuestionnaireVariant.strategic;
@@ -386,6 +403,9 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     }
 
     final values = answerValuesFor(question.id);
+    if (question.id == _adaptiveQuestionId) {
+      return values.isNotEmpty;
+    }
     if (question.isOptional) {
       return true;
     }
@@ -448,10 +468,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
 
     if (isLastQuestion) {
       if (_selectedVariant == QuestionnaireVariant.lean && !_isRefineResolved) {
-        _showRefinePrompt = true;
-        notifyListeners();
-        _persistDraft();
-        return false;
+        return _evaluateAdaptiveRefinement();
       }
       return _generatePlan();
     }
@@ -496,11 +513,15 @@ class MigrationQuestionnaireController extends ChangeNotifier {
   }
 
   void acceptRefine() {
-    _selectedVariant = QuestionnaireVariant.strategic;
     _showRefinePrompt = false;
     _isRefineResolved = true;
     _includeConstraints = false;
-    _currentIndex = _firstUnansweredQuestionIndex();
+    final adaptiveIndex = _activeQuestions.indexWhere(
+      (question) => question.id == _adaptiveQuestionId,
+    );
+    _currentIndex = adaptiveIndex >= 0
+        ? adaptiveIndex
+        : _firstUnansweredQuestionIndex();
     notifyListeners();
     _persistDraft();
   }
@@ -509,7 +530,9 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _showRefinePrompt = false;
     _isRefineResolved = true;
     _includeConstraints = false;
-    _clearRefinementAnswers();
+    if (_adaptiveQuestionId != null) {
+      _removeAnswer(_adaptiveQuestionId!);
+    }
     notifyListeners();
     _persistDraft();
     return _generatePlan();
@@ -527,16 +550,62 @@ class MigrationQuestionnaireController extends ChangeNotifier {
 
   void _clearRefinementAnswers() {
     for (final questionId in const <String>[
-      'travel_group',
-      'travel_group_children_count',
       'work_arrangement',
       'support_needs',
       'funding',
       'available_capital',
-      'constraints',
+      'timeline',
     ]) {
       _removeAnswer(questionId);
     }
+  }
+
+  Future<bool> _evaluateAdaptiveRefinement() async {
+    _isEvaluatingRefinement = true;
+    notifyListeners();
+    try {
+      final evaluation = await _planGenerator.evaluateRefinement(
+        answers: _answers,
+      );
+      final decision = evaluation?.refinement;
+      unawaited(
+        _metricsStore.record(
+          GuideFlowMetric.refinementEvaluated,
+          stepIndex: _currentIndex + 1,
+          methodologyVersion: evaluation?.methodologyVersion,
+          stabilityBand: evaluation?.stabilityBand,
+          refinementStatus: decision?.status,
+          refinementQuestionId: decision?.questionId,
+          refinementGainBand: decision?.gainBand,
+          refinementScenariosEvaluated: decision?.scenariosEvaluated,
+        ),
+      );
+      final nextQuestionId = decision?.questionId;
+      final hasSupportedQuestion =
+          nextQuestionId != null && _questionById(nextQuestionId) != null;
+      if (decision?.shouldAsk == true && hasSupportedQuestion) {
+        _adaptiveRefinement = decision;
+        _adaptiveQuestionId = nextQuestionId;
+        _showRefinePrompt = true;
+        notifyListeners();
+        _persistDraft();
+        return false;
+      }
+
+      _adaptiveRefinement = decision;
+      _adaptiveQuestionId = null;
+      _isRefineResolved = true;
+      return _generatePlan();
+    } finally {
+      _isEvaluatingRefinement = false;
+      notifyListeners();
+    }
+  }
+
+  void _clearAdaptiveRefinement() {
+    _isEvaluatingRefinement = false;
+    _adaptiveQuestionId = null;
+    _adaptiveRefinement = null;
   }
 
   Future<void> saveGeneratedPlan() async {
@@ -985,6 +1054,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     _showRefinePrompt = draft.showRefinePrompt;
     _isRefineResolved = draft.isRefineResolved;
     _includeConstraints = draft.includeConstraints;
+    _adaptiveQuestionId = draft.adaptiveQuestionId;
     _currentIndex = draft.currentIndex;
   }
 
@@ -1047,6 +1117,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
         showRefinePrompt: _showRefinePrompt,
         isRefineResolved: _isRefineResolved,
         includeConstraints: _includeConstraints,
+        adaptiveQuestionId: _adaptiveQuestionId,
       ),
     );
   }

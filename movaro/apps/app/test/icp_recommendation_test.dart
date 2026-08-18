@@ -117,6 +117,22 @@ void main() {
         'scoreSeparationBand': 'clear',
         'scenariosEvaluated': 14,
       },
+      'refinement': <String, dynamic>{
+        'status': 'ask',
+        'questionId': 'work_arrangement',
+        'discriminationGain': 0.31,
+        'gainBand': 'high',
+        'minimumGain': 0.08,
+        'scenariosEvaluated': 8,
+        'candidates': <Map<String, dynamic>>[
+          <String, dynamic>{
+            'questionId': 'work_arrangement',
+            'discriminationGain': 0.31,
+            'scenariosEvaluated': 3,
+            'topCityVariants': 2,
+          },
+        ],
+      },
       'recommendations': <Map<String, dynamic>>[
         <String, dynamic>{
           'rank': 1,
@@ -138,6 +154,9 @@ void main() {
     expect(result.reliabilityBand, 'strong');
     expect(result.scoreSeparationBand, 'clear');
     expect(result.scenariosEvaluated, 14);
+    expect(result.refinement?.shouldAsk, isTrue);
+    expect(result.refinement?.questionId, 'work_arrangement');
+    expect(result.refinement?.candidates.single.topCityVariants, 2);
     expect(result.recommendations.single.rank, 1);
   });
 

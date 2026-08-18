@@ -10,7 +10,7 @@ financeira, acadêmica ou profissional feita pelo usuário.
 
 - A API é a única autoridade de filtro, cálculo, ordenação e evidência.
 - O aplicativo não mantém um ranking personalizado alternativo ou fallback.
-- A versão P2 é `city-recommendation-v2.2.0`.
+- A versão P2 é `city-recommendation-v2.3.0`.
 - Cada execução recebe um `recommendationId` aleatório, salvo apenas junto ao
   plano local para diagnóstico e suporte futuro. Esse identificador não é
   enviado à telemetria.
@@ -54,6 +54,21 @@ O resultado recebe:
 Essas faixas não são probabilidades de acerto. O aplicativo não mostra
 percentuais de compatibilidade.
 
+## Refinamento adaptativo P2
+
+Depois do núcleo rápido de quatro perguntas, o motor simula os rankings possíveis
+para cada atributo ainda não respondido que afeta a ordenação. A discriminação
+esperada combina mudança da cidade líder (70%) e deslocamento do top 3 (30%).
+Entre `work_arrangement` e `available_capital`, somente o atributo com maior ganho
+é elegível, e no máximo uma pergunta adicional é feita.
+
+O limiar varia com a separação entre as cidades líderes: disputas próximas
+aceitam ganhos menores; lideranças claras exigem ganho maior. O motor encerra o
+refinamento com `stable`, `low_gain` ou `no_candidates` quando perguntar não
+justifica o custo de interação. Como os cenários têm pesos uniformes e não uma
+distribuição longitudinal observada, `discriminationGain` não representa
+probabilidade de acerto.
+
 ## Observabilidade e feedback
 
 Eventos de recomendação dependem do consentimento de diagnóstico do usuário.
@@ -64,6 +79,8 @@ São enviados apenas:
 - faixa de estabilidade;
 - faixa de cobertura;
 - posição escolhida entre 1 e 3;
+- status do refinamento, pergunta selecionada, faixa de ganho e quantidade de
+  cenários avaliados;
 - horário e token aleatório da instalação.
 
 Não são enviados cidade, respostas, orçamento, localização, documentos,
