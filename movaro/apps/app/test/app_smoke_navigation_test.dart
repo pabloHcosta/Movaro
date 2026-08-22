@@ -19,6 +19,10 @@ import 'package:movaro_app/core/environment/app_environment.dart';
 import 'package:movaro_app/core/environment/app_flavor.dart';
 import 'package:movaro_app/features/journey/journey_context_controller.dart';
 import 'package:movaro_app/features/journey/journey_preferences_store.dart';
+import 'package:movaro_app/features/info/domain/entities/quick_guide_answer.dart';
+import 'package:movaro_app/features/info/domain/entities/guide_toolkit.dart';
+import 'package:movaro_app/features/info/presentation/pages/guide_toolkit_page.dart';
+import 'package:movaro_app/features/info/presentation/pages/quick_guide_answer_page.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/features/location/location_data.dart';
 import 'package:movaro_app/core/network/api_health_service.dart';
@@ -40,6 +44,7 @@ import 'package:movaro_app/features/cities/domain/entities/city_sources.dart';
 import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
 import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
+import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_store.dart';
@@ -84,7 +89,7 @@ void main() {
       await _pumpScreen(tester);
 
       expect(find.text('Plano'), findsOneWidget);
-      expect(find.text('Ferramentas'), findsOneWidget);
+      expect(find.text('Ajuda'), findsOneWidget);
       expect(find.text('Mais'), findsOneWidget);
       expect(
         find.byKey(const ValueKey('home-action-discover')),
@@ -111,6 +116,26 @@ void main() {
       await tester.pump();
     },
   );
+
+  testWidgets('help navigation is clear and localized in supported languages', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      harness.buildApp(initialRoute: AppRoutes.publicHome),
+    );
+    await _pumpScreen(tester);
+
+    expect(find.text('Ajuda'), findsOneWidget);
+    expect(find.byIcon(Icons.help_center_outlined), findsOneWidget);
+
+    harness.localeController.setLocale(const Locale('es'));
+    await _pumpScreen(tester);
+    expect(find.text('Ayuda'), findsOneWidget);
+
+    harness.localeController.setLocale(const Locale('en'));
+    await _pumpScreen(tester);
+    expect(find.text('Help'), findsOneWidget);
+  });
 
   testWidgets('public home discover action confirms the origin city first', (
     tester,
@@ -154,10 +179,15 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.tap(find.text('Ferramentas'));
+    await tester.tap(find.text('Ajuda'));
     await _pumpScreen(tester);
-    expect(find.text('Resolver agora'), findsOneWidget);
-    expect(find.text('Buscar voos'), findsOneWidget);
+    expect(find.text('O que você precisa resolver?'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Entender a compra do voo'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Entender a compra do voo'), findsOneWidget);
 
     await tester.tap(find.text('Mais'));
     await _pumpScreen(tester);
@@ -167,6 +197,404 @@ void main() {
     await tester.tap(find.text('Configurações'));
     await _pumpScreen(tester);
     expect(find.text('Experiência do app'), findsOneWidget);
+  });
+
+  testWidgets('guide hero remains usable with 200 percent text scaling', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      tester.platformDispatcher.clearTextScaleFactorTestValue();
+    });
+
+    await tester.pumpWidget(harness.buildApp(initialRoute: AppRoutes.tools));
+    await _pumpScreen(tester);
+
+    expect(find.text('O que você precisa resolver?'), findsOneWidget);
+    expect(find.byKey(const ValueKey('guide-question-field')), findsOneWidget);
+    expect(find.byKey(const ValueKey('guide-question-submit')), findsOneWidget);
+    expect(
+      tester
+          .widget<IconButton>(
+            find.byKey(const ValueKey('guide-question-submit')),
+          )
+          .onPressed,
+      isNull,
+    );
+
+    await tester.enterText(
+      find.byKey(const ValueKey('guide-question-field')),
+      'Consigo alugar sem fiador?',
+    );
+    await tester.pump();
+
+    expect(
+      tester
+          .widget<IconButton>(
+            find.byKey(const ValueKey('guide-question-submit')),
+          )
+          .onPressed,
+      isNotNull,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('guide answer exposes trust, context, sources and feedback', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      tester.platformDispatcher.clearTextScaleFactorTestValue();
+    });
+
+    const answer = QuickGuideAnswer(
+      entryId: 'education-test',
+      topic: 'education',
+      question: 'Como funciona a escola?',
+      answer: 'Procure a rede de ensino responsável pelo seu endereço.',
+      coverage: QuickGuideCoverage.conditional,
+      coverageReason:
+          'A aplicação depende de detalhes da rede de ensino local.',
+      expiresAt: '2027-02-18',
+      trust: QuickGuideTrust(
+        reason: 'A aplicação depende de detalhes da rede de ensino local.',
+        evidenceCoverage: 1,
+        freshness: QuickGuideFreshness.current,
+      ),
+      reviewedAt: '2026-08-18',
+      context: QuickGuideContext(
+        originCountry: 'argentina',
+        destinationCountry: 'brasil',
+      ),
+      actions: [],
+      caveats: ['Confirme os documentos solicitados pela rede local.'],
+      claims: [
+        QuickGuideClaim(
+          id: 'education-network',
+          text: 'Procure a rede de ensino responsável pelo seu endereço.',
+          evidenceIds: ['mec-basic-education'],
+          status: QuickGuideClaimStatus.conditional,
+        ),
+      ],
+      followUpQuestion: QuickGuideFollowUpQuestion(
+        id: 'education-level',
+        contextKey: 'educationLevel',
+        prompt: 'Você quer escola ou universidade?',
+        options: [
+          QuickGuideFollowUpOption(value: 'basic', label: 'Escola'),
+          QuickGuideFollowUpOption(value: 'university', label: 'Universidade'),
+        ],
+      ),
+      decisionTitle: 'Caminho recomendado',
+      steps: [
+        QuickGuideStep(id: 'education-1', label: 'Confirme a rede local.'),
+      ],
+      nextSteps: ['Peça a lista atual de documentos.'],
+      fallbackPath: ['Peça a orientação da rede por escrito.'],
+      recovery: QuickGuideRecovery(
+        reason: 'partial_coverage',
+        message: 'Use uma pergunta revisada para continuar com segurança.',
+        suggestions: [
+          QuickGuideRecoverySuggestion(
+            id: 'education-school',
+            topic: 'education',
+            question: 'Como matriculo meu filho na escola pública?',
+          ),
+        ],
+      ),
+      sources: [
+        QuickGuideSource(
+          id: 'mec-basic-education',
+          title: 'Educação básica',
+          publisher: 'Ministério da Educação',
+          url: 'https://www.gov.br/mec/pt-br/assuntos/eb',
+          checkedAt: '2026-08-18',
+          validUntil: '2027-02-18',
+          scope: 'Visão federal da educação básica.',
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        locale: const Locale('pt'),
+        supportedLocales: AppLocalization.supportedLocales,
+        localizationsDelegates: AppLocalization.localizationsDelegates,
+        home: QuickGuideAnswerPage(
+          request: const QuickGuideAnswerRequest(
+            question: 'Como funciona a escola?',
+          ),
+          environment: harness.environment,
+          journeyContextController: harness.journeyContextController,
+          citiesController: harness.citiesController,
+          migrationQuestionnaireController:
+              harness.migrationQuestionnaireController,
+          initialAnswer: answer,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'initial answer layout');
+
+    final answerScrollable = find
+        .descendant(
+          of: find.byKey(const Key('quick-guide-answer-scroll')),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    expect(find.text('Aplica-se com condições'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Esta consulta não altera seu plano.'),
+      260,
+      scrollable: answerScrollable,
+    );
+    expect(tester.takeException(), isNull, reason: 'context layout');
+    expect(find.text('Esta consulta não altera seu plano.'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Você quer escola ou universidade?'),
+      260,
+      scrollable: answerScrollable,
+    );
+    expect(tester.takeException(), isNull, reason: 'clarifier layout');
+    expect(find.text('Universidade'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Confirme a rede local.'),
+      260,
+      scrollable: answerScrollable,
+    );
+    expect(tester.takeException(), isNull, reason: 'decision layout');
+    expect(find.text('Caminho recomendado'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Peça a lista atual de documentos.'),
+      260,
+      scrollable: answerScrollable,
+    );
+    expect(tester.takeException(), isNull, reason: 'next steps layout');
+    expect(find.text('Próximos passos'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Se algo bloquear seu caminho'),
+      260,
+      scrollable: answerScrollable,
+    );
+    expect(tester.takeException(), isNull, reason: 'fallback layout');
+    expect(find.text('Se algo bloquear seu caminho'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Fontes usadas'),
+      260,
+      scrollable: answerScrollable,
+    );
+    expect(find.text('Fontes usadas'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Isso ajudou?'),
+      260,
+      scrollable: answerScrollable,
+    );
+    expect(find.text('Isso ajudou?'), findsOneWidget);
+    await tester.ensureVisible(find.text('Não'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Não'));
+    await tester.pumpAndSettle();
+    expect(find.text('O que faltou?'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('A ação não funcionou'),
+      260,
+      scrollable: answerScrollable,
+    );
+    expect(find.text('Não é meu caso'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Como matriculo meu filho na escola pública?'),
+      -260,
+      scrollable: answerScrollable,
+    );
+    await tester.ensureVisible(
+      find.text('Como matriculo meu filho na escola pública?'),
+    );
+    await tester.drag(answerScrollable, const Offset(0, 220));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(
+        OutlinedButton,
+        'Como matriculo meu filho na escola pública?',
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Como matriculo meu filho na escola pública?'),
+      findsOneWidget,
+    );
+    expect(find.text('Disponível offline'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('stage three toolkit stays usable with accessibility text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      tester.platformDispatcher.clearTextScaleFactorTestValue();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        locale: const Locale('pt'),
+        supportedLocales: AppLocalization.supportedLocales,
+        localizationsDelegates: AppLocalization.localizationsDelegates,
+        home: GuideToolkitPage(
+          request: const GuideToolkitRequest(kind: GuideToolkitKind.work),
+          journeyContextController: harness.journeyContextController,
+          citiesController: harness.citiesController,
+          migrationQuestionnaireController:
+              harness.migrationQuestionnaireController,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Assistente de trabalho'), findsOneWidget);
+    expect(
+      find.text('Ferramenta independente · não altera o plano'),
+      findsOneWidget,
+    );
+    final calculate = find.byKey(const Key('guide-toolkit-calculate'));
+    final toolkitScrollable = find
+        .descendant(
+          of: find.byKey(const Key('guide-toolkit-scroll')),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await tester.scrollUntilVisible(
+      calculate,
+      280,
+      scrollable: toolkitScrollable,
+    );
+    await tester.drag(toolkitScrollable, const Offset(0, -220));
+    await tester.pumpAndSettle();
+    await tester.tap(calculate);
+    await tester.pumpAndSettle();
+    expect(find.text('Seu caminho para trabalhar'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('help topics stay isolated and render each concept once', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    Future<void> pumpSection(DocumentationGuideSection section) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          key: ValueKey(section),
+          theme: AppTheme.light(),
+          locale: const Locale('pt'),
+          supportedLocales: AppLocalization.supportedLocales,
+          localizationsDelegates: AppLocalization.localizationsDelegates,
+          home: DocumentationTopicPage(
+            section: section,
+            exchangeRatesService: harness.copilotExchangeRatesService,
+            preferredCurrencyCountryId: 'argentina',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    await pumpSection(DocumentationGuideSection.documents);
+    expect(find.text('Ajuda'), findsOneWidget);
+    expect(find.text('Só o CPF resolve banco e contrato?'), findsOneWidget);
+    expect(find.text('Posso trabalhar só com visto de visita?'), findsNothing);
+    expect(find.text('Estrangeiro pode usar o SUS?'), findsNothing);
+
+    await pumpSection(DocumentationGuideSection.health);
+    expect(find.text('SUS, posto de saúde e acesso público'), findsOneWidget);
+    expect(find.text('Saúde privada'), findsOneWidget);
+
+    await pumpSection(DocumentationGuideSection.work);
+    expect(find.text('Carteira assinada'), findsOneWidget);
+    expect(find.text('PJ, CNPJ e trabalho por conta própria'), findsOneWidget);
+    expect(
+      find.text('Mercado de trabalho e expectativa de renda'),
+      findsOneWidget,
+    );
+    expect(find.text('Previdência pública e aposentadoria'), findsOneWidget);
+
+    await pumpSection(DocumentationGuideSection.costs);
+    expect(find.text('Calcular reserva de chegada'), findsOneWidget);
+    expect(find.text('O que entra na reserva de chegada'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('P1 health toolkit produces a safe reviewed care path', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        locale: const Locale('pt'),
+        supportedLocales: AppLocalization.supportedLocales,
+        localizationsDelegates: AppLocalization.localizationsDelegates,
+        home: GuideToolkitPage(
+          request: const GuideToolkitRequest(kind: GuideToolkitKind.health),
+          journeyContextController: harness.journeyContextController,
+          citiesController: harness.citiesController,
+          migrationQuestionnaireController:
+              harness.migrationQuestionnaireController,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Saúde contínua'), findsOneWidget);
+    final toolkitScrollable = find
+        .descendant(
+          of: find.byKey(const Key('guide-toolkit-scroll')),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    final continuousCare = find.text('Tratamento ou medicamento contínuo');
+    await tester.drag(toolkitScrollable, const Offset(0, -360));
+    await tester.pumpAndSettle();
+    await tester.tap(continuousCare);
+    final calculate = find.byKey(const Key('guide-toolkit-calculate'));
+    await tester.scrollUntilVisible(
+      calculate,
+      280,
+      scrollable: toolkitScrollable,
+    );
+    await tester.tap(calculate);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sua continuidade de cuidado'), findsOneWidget);
+    await tester.fling(toolkitScrollable, const Offset(0, -2200), 3000);
+    await tester.pumpAndSettle();
+    final medicalNotice = find.textContaining('Não substitui avaliação médica');
+    expect(medicalNotice, findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('public home known-city action confirms the origin city first', (
@@ -346,6 +774,50 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
+  });
+
+  testWidgets('help answers do not import or open a confirmed plan', (
+    tester,
+  ) async {
+    await tester.runAsync(harness.generateLeanPlan);
+
+    final city = harness
+        .migrationQuestionnaireController
+        .generatedPlan!
+        .highlightedCity!;
+    await tester.runAsync(
+      () => harness.migrationQuestionnaireController.confirmPlanCity(city),
+    );
+
+    await tester.pumpWidget(harness.buildApp(initialRoute: AppRoutes.tools));
+    await _pumpScreen(tester);
+
+    expect(
+      find.text('Respostas e recursos sem entrar no plano'),
+      findsOneWidget,
+    );
+    await tester.scrollUntilVisible(
+      find.text('Educação'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await Scrollable.ensureVisible(
+      tester.element(find.text('Educação')),
+      alignment: 0.5,
+      duration: Duration.zero,
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('Educação'));
+    await _pumpScreen(tester);
+
+    expect(find.text('Resposta da Ajuda'), findsOneWidget);
+    expect(
+      find.text('Como matriculo meu filho na escola pública?'),
+      findsWidgets,
+    );
+    expect(find.text(city.name), findsNothing);
+    expect(find.text('Ver plano completo'), findsNothing);
+    expect(find.textContaining('progresso do plano'), findsNothing);
   });
 
   testWidgets('copilot back falls back to public home when opened as root', (

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.07.26",
+  "catalogVersion": "2026.08.22",
   "corridor": "AR-BR",
-  "reviewedAt": "2026-07-26",
+  "reviewedAt": "2026-08-22",
   "reviewPolicy": {
     "criticalReviewDays": 90,
     "standardReviewDays": 180
@@ -33,7 +33,8 @@
       "authority": "Ministério da Saúde",
       "title": "Saúde para migrantes, refugiados e apátridas",
       "url": "https://www.gov.br/saude/pt-br/composicao/saps/equidade-em-saude/saude-de-migrantes-refugiados-e-apatridas",
-      "verifiedAt": "2026-07-26"
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
     },
     {
       "id": "medication_travel",
@@ -50,8 +51,9 @@
       "critical": true,
       "authority": "Ministério da Agricultura e Pecuária",
       "title": "Ingresso de cães e gatos no Brasil",
-      "url": "https://www.gov.br/agricultura/pt-br/assuntos/vigilancia-agropecuaria/animais-estimacao/entrar-no-brasil",
-      "verifiedAt": "2026-07-26"
+      "url": "https://www.gov.br/agricultura/pt-br/assuntos/vigilancia-agropecuaria/viajantes-e-bagagens/lista-de-bens-agropecuarios-que-podem-ou-nao-ingressar-no-brasil/animais-vivos/caes-e-gatos",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
     },
     {
       "id": "foreign_income_tax",
@@ -82,12 +84,193 @@
     },
     {
       "id": "consumer_rights",
-      "topic": "housing",
+      "topic": "consumer",
       "critical": false,
       "authority": "Ministério da Justiça e Segurança Pública",
       "title": "Consumidor.gov.br",
-      "url": "https://www.consumidor.gov.br/",
-      "verifiedAt": "2026-07-26"
+      "url": "https://www.consumidor.gov.br/pages/principal/",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "vaccination_calendar",
+      "topic": "health",
+      "critical": true,
+      "authority": "Ministério da Saúde",
+      "title": "Calendário Nacional de Vacinação",
+      "url": "https://www.gov.br/saude/pt-br/vacinacao/calendario",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "pregnancy_prenatal",
+      "topic": "health",
+      "critical": true,
+      "authority": "Ministério da Saúde",
+      "title": "Gravidez e pré-natal no SUS",
+      "url": "https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/g/gravidez",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "mental_health_raps",
+      "topic": "health",
+      "critical": true,
+      "authority": "Ministério da Saúde",
+      "title": "Rede de Atenção Psicossocial",
+      "url": "https://www.gov.br/saude/pt-br/composicao/saes/desmad/raps",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "private_health_waiting_periods",
+      "topic": "health",
+      "critical": true,
+      "authority": "Agência Nacional de Saúde Suplementar",
+      "title": "Carência em planos de saúde",
+      "url": "https://www.gov.br/ans/pt-br/assuntos/consumidor/carencia",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "traveler_customs",
+      "topic": "customs",
+      "critical": true,
+      "authority": "Receita Federal",
+      "title": "Guia do viajante — bagagem e declaração",
+      "url": "https://www.gov.br/receitafederal/pt-br/assuntos/aduana-e-comercio-exterior/viagens-internacionais/guia-do-viajante/perguntas-e-respostas",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "prepaid_registration",
+      "topic": "utilities",
+      "critical": false,
+      "authority": "Anatel",
+      "title": "Cadastro de linha pré-paga",
+      "url": "https://www.gov.br/anatel/pt-br/dados/utilidade-publica/cadastro-pre-pago",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "telecom_consumer_rights",
+      "topic": "utilities",
+      "critical": false,
+      "authority": "Anatel",
+      "title": "Direitos de consumidores de telecomunicações",
+      "url": "https://www.gov.br/anatel/pt-br/consumidor/conheca-seus-direitos",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "electricity_consumer_support",
+      "topic": "utilities",
+      "critical": false,
+      "authority": "ANEEL",
+      "title": "Como resolver problemas com energia elétrica",
+      "url": "https://www.gov.br/aneel/pt-br/consumidores/como-resolver",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "human_rights_hotline",
+      "topic": "protection",
+      "critical": true,
+      "authority": "Ministério dos Direitos Humanos e da Cidadania",
+      "title": "Ouvidoria Nacional de Direitos Humanos",
+      "url": "https://www.gov.br/mdh/pt-br/ondh",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "migrant_support_network",
+      "topic": "protection",
+      "critical": true,
+      "authority": "ACNUR Brasil",
+      "title": "Onde encontrar ajuda no Brasil",
+      "url": "https://help.unhcr.org/brazil/onde-encontrar-ajuda/",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "labor_complaint",
+      "topic": "protection",
+      "critical": true,
+      "authority": "Ministério do Trabalho e Emprego",
+      "title": "Realizar denúncia trabalhista",
+      "url": "https://www.gov.br/pt-br/servicos/realizar-denuncia-trabalhista",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "telecom_complaint",
+      "topic": "consumer",
+      "critical": false,
+      "authority": "Anatel",
+      "title": "Registrar reclamação na Anatel",
+      "url": "https://www.gov.br/anatel/pt-br/consumidor/quer-reclamar/reclamacao",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "electricity_complaint",
+      "topic": "consumer",
+      "critical": false,
+      "authority": "ANEEL",
+      "title": "Reclamar da distribuidora de energia",
+      "url": "https://www.gov.br/aneel/pt-br/canais_atendimento/reclame-da-distribuidora/consumidor-govbr",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "social_security_agreements",
+      "topic": "long_term",
+      "critical": true,
+      "authority": "Ministério da Previdência Social",
+      "title": "Acordos internacionais de previdência em vigor",
+      "url": "https://www.gov.br/previdencia/pt-br/assuntos/acordos-internacionais/acordos-internacionais-em-vigor",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "naturalization_service",
+      "topic": "long_term",
+      "critical": true,
+      "authority": "Ministério da Justiça e Segurança Pública",
+      "title": "Naturalizar-se brasileiro",
+      "url": "https://www.gov.br/mj/pt-br/assuntos/seus-direitos/migracoes/naturalizacao/naturalizar-se",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help", "journey"]
+    },
+    {
+      "id": "migrant_school_enrollment",
+      "topic": "school",
+      "critical": false,
+      "authority": "Conselho Nacional de Educação",
+      "title": "Diretrizes para matrícula de crianças e adolescentes migrantes",
+      "url": "https://www.gov.br/mec/pt-br/assuntos/noticias/2020/novembro/cne-aprova-diretrizes-para-matricula-de-criancas-e-adolescentes-migrantes-refugiados-apatridas-e-solicitantes-de-refugio",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help"]
+    },
+    {
+      "id": "falabr_ombudsman",
+      "topic": "residence",
+      "critical": true,
+      "authority": "Controladoria-Geral da União",
+      "title": "Fala.BR — Plataforma de Ouvidoria",
+      "url": "https://falabr.cgu.gov.br/web/home",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help"]
+    },
+    {
+      "id": "bcb_financial_complaint",
+      "topic": "consumer",
+      "critical": true,
+      "authority": "Banco Central do Brasil",
+      "title": "Registrar reclamação contra instituição supervisionada",
+      "url": "https://www.bcb.gov.br/meubc/registrar_reclamacao",
+      "verifiedAt": "2026-08-22",
+      "surfaces": ["help"]
     }
   ]
 }

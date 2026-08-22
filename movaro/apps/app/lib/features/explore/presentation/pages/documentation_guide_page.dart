@@ -20,10 +20,9 @@ import 'package:movaro_app/features/explore/application/services/documentation_g
 import 'package:movaro_app/features/explore/application/services/guide_answers_remote_service.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_decision_support_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/education_overview_section.dart';
-import 'package:movaro_app/features/explore/presentation/widgets/housing_entry_cost_section.dart';
 import 'package:movaro_app/features/explore/presentation/widgets/housing_soft_landing_section.dart';
-import 'package:movaro_app/features/explore/presentation/widgets/practical_cost_estimator.dart';
 import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
+import 'package:movaro_app/features/info/domain/entities/guide_toolkit.dart';
 import 'package:movaro_app/features/language/presentation/widgets/contextual_phrase_support_card.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
@@ -1425,12 +1424,7 @@ class DocumentationTopicPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final details = _sectionDetails(
-      context,
-      section,
-      exchangeRatesService,
-      preferredCurrencyCountryId,
-    );
+    final details = _sectionDetails(context, section);
 
     return Scaffold(
       body: Stack(
@@ -1449,7 +1443,12 @@ class DocumentationTopicPage extends StatelessWidget {
                   ),
                   children: [
                     AppGlassHeader(
-                      title: details.title,
+                      title: _guideText(
+                        context,
+                        pt: 'Ajuda',
+                        es: 'Ayuda',
+                        en: 'Help',
+                      ),
                       onBack: () => Navigator.maybePop(context),
                     ),
                     const SizedBox(height: 20),
@@ -1494,8 +1493,6 @@ class DocumentationTopicPage extends StatelessWidget {
   _DocumentationSectionDetails _sectionDetails(
     BuildContext context,
     DocumentationGuideSection section,
-    CopilotExchangeRatesService exchangeRatesService,
-    String? preferredCurrencyCountryId,
   ) {
     final l10n = context.l10n;
     final topics = _documentationTopics(context);
@@ -1506,7 +1503,7 @@ class DocumentationTopicPage extends StatelessWidget {
           title: l10n.documentationPathDocumentsTitle,
           description: l10n.documentationPathDocumentsBody,
           sections: [
-            _QuickAnswersSection(l10n: l10n),
+            _DocumentQuickAnswersSection(l10n: l10n),
             const SizedBox(height: 12),
             _DeepDiveIntro(l10n: l10n),
             const SizedBox(height: 12),
@@ -1545,9 +1542,28 @@ class DocumentationTopicPage extends StatelessWidget {
           sections: [
             const HousingDecisionSupportSection(),
             const SizedBox(height: 12),
-            HousingEntryCostSection(
-              exchangeRatesService: exchangeRatesService,
-              preferredCountryId: preferredCurrencyCountryId,
+            _ToolCtaCard(
+              icon: Icons.calculate_outlined,
+              tone: const Color(0xFFD47B19),
+              title: _guideText(
+                context,
+                pt: 'Precisa avaliar um aluguel?',
+                es: '¿Necesitás evaluar un alquiler?',
+                en: 'Need to review a rental?',
+              ),
+              body: _guideText(
+                context,
+                pt: 'Compare garantia, custo inicial, contrato, vistoria e cobranças em uma única ferramenta.',
+                es: 'Compará garantía, costo inicial, contrato, inspección y cobros en una sola herramienta.',
+                en: 'Compare the guarantee, entry cost, contract, inspection, and charges in one tool.',
+              ),
+              actionLabel: _guideText(
+                context,
+                pt: 'Analisar um aluguel',
+                es: 'Analizar un alquiler',
+                en: 'Review a rental',
+              ),
+              onTap: () => _openToolkit(context, GuideToolkitKind.housing),
             ),
             const SizedBox(height: 12),
             const HousingSoftLandingSection(),
@@ -1568,15 +1584,31 @@ class DocumentationTopicPage extends StatelessWidget {
           sections: [
             _HealthDecisionsSection(l10n: l10n),
             const SizedBox(height: 12),
-            const ContextualPhraseSupportCard(groupKey: 'health'),
-            const SizedBox(height: 12),
-            _TopicGrid(
-              topics: topics.where((topic) {
-                return topic.title == l10n.documentationHealthPublicTitle ||
-                    topic.title == l10n.documentationHealthFlowTitle ||
-                    topic.title == l10n.documentationHealthPrivateTitle;
-              }).toList(),
+            _ToolCtaCard(
+              icon: Icons.medical_information_outlined,
+              tone: const Color(0xFFC04468),
+              title: _guideText(
+                context,
+                pt: 'Vai continuar um tratamento?',
+                es: '¿Vas a continuar un tratamiento?',
+                en: 'Continuing a treatment?',
+              ),
+              body: _guideText(
+                context,
+                pt: 'Organize receita, medicamentos, vacinação, gestação ou saúde mental sem repetir a explicação do SUS.',
+                es: 'Organizá receta, medicamentos, vacunas, embarazo o salud mental sin repetir la explicación del SUS.',
+                en: 'Organize prescriptions, medicines, vaccines, pregnancy, or mental healthcare without repeating the SUS overview.',
+              ),
+              actionLabel: _guideText(
+                context,
+                pt: 'Montar continuidade de cuidado',
+                es: 'Armar continuidad de cuidado',
+                en: 'Build a continuity-of-care path',
+              ),
+              onTap: () => _openToolkit(context, GuideToolkitKind.health),
             ),
+            const SizedBox(height: 12),
+            const ContextualPhraseSupportCard(groupKey: 'health'),
           ],
         );
       case DocumentationGuideSection.education:
@@ -1606,16 +1638,37 @@ class DocumentationTopicPage extends StatelessWidget {
           sections: [
             _WorkModelsSection(l10n: l10n),
             const SizedBox(height: 12),
-            const ContextualPhraseSupportCard(groupKey: 'work'),
-            const SizedBox(height: 12),
             _TopicGrid(
               topics: topics.where((topic) {
-                return topic.title == l10n.documentationWorkCltTitle ||
-                    topic.title == l10n.documentationWorkPjTitle ||
-                    topic.title == l10n.documentationWorkMarketTitle ||
-                    topic.title == l10n.documentationRetirementTitle;
+                return topic.title == l10n.documentationWorkMarketTitle;
               }).toList(),
             ),
+            const SizedBox(height: 12),
+            _ToolCtaCard(
+              icon: Icons.route_outlined,
+              tone: AppColors.primary,
+              title: _guideText(
+                context,
+                pt: 'Qual caminho de trabalho combina com você?',
+                es: '¿Qué camino laboral encaja con vos?',
+                en: 'Which work path fits you?',
+              ),
+              body: _guideText(
+                context,
+                pt: 'Transforme sua situação em próximos passos para CLT, PJ, trabalho remoto ou profissão regulamentada.',
+                es: 'Convertí tu situación en próximos pasos para CLT, PJ, trabajo remoto o profesión regulada.',
+                en: 'Turn your situation into next steps for formal employment, self-employment, remote work, or a regulated profession.',
+              ),
+              actionLabel: _guideText(
+                context,
+                pt: 'Montar caminho de trabalho',
+                es: 'Armar camino de trabajo',
+                en: 'Build a work path',
+              ),
+              onTap: () => _openToolkit(context, GuideToolkitKind.work),
+            ),
+            const SizedBox(height: 12),
+            const ContextualPhraseSupportCard(groupKey: 'work'),
           ],
         );
       case DocumentationGuideSection.driving:
@@ -1638,13 +1691,42 @@ class DocumentationTopicPage extends StatelessWidget {
           title: l10n.documentationPathCostsTitle,
           description: l10n.documentationPathCostsBody,
           sections: [
-            PracticalCostEstimator(
-              exchangeRatesService: exchangeRatesService,
-              preferredCountryId: preferredCurrencyCountryId,
+            _CostScopeSection(),
+            const SizedBox(height: 12),
+            _ToolCtaCard(
+              icon: Icons.savings_outlined,
+              tone: AppColors.success,
+              title: _guideText(
+                context,
+                pt: 'Calcule uma reserva realista',
+                es: 'Calculá una reserva realista',
+                en: 'Calculate a realistic reserve',
+              ),
+              body: _guideText(
+                context,
+                pt: 'Use uma única estimativa para aluguel, garantia, viagem, instalação e 30, 60 ou 90 dias de despesas.',
+                es: 'Usá una sola estimación para alquiler, depósito, viaje, instalación y 30, 60 o 90 días de gastos.',
+                en: 'Use one estimate for rent, deposit, travel, setup, and 30, 60, or 90 days of expenses.',
+              ),
+              actionLabel: _guideText(
+                context,
+                pt: 'Calcular reserva de chegada',
+                es: 'Calcular reserva de llegada',
+                en: 'Calculate arrival reserve',
+              ),
+              onTap: () => _openToolkit(context, GuideToolkitKind.costs),
             ),
           ],
         );
     }
+  }
+
+  void _openToolkit(BuildContext context, GuideToolkitKind kind) {
+    Navigator.pushNamed(
+      context,
+      AppRoutes.guideToolkit,
+      arguments: GuideToolkitRequest(kind: kind),
+    );
   }
 }
 
@@ -1660,8 +1742,206 @@ class _DocumentationSectionDetails {
   final List<Widget> sections;
 }
 
-class _QuickAnswersSection extends StatelessWidget {
-  const _QuickAnswersSection({required this.l10n});
+class _CostScopeSection extends StatelessWidget {
+  const _CostScopeSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final items = [
+      (
+        Icons.flight_takeoff_outlined,
+        _guideText(context, pt: 'Chegada', es: 'Llegada', en: 'Arrival'),
+        _guideText(
+          context,
+          pt: 'Viagem, hospedagem temporária e deslocamentos iniciais.',
+          es: 'Viaje, alojamiento temporal y traslados iniciales.',
+          en: 'Travel, temporary accommodation, and initial transport.',
+        ),
+      ),
+      (
+        Icons.home_work_outlined,
+        _guideText(context, pt: 'Instalação', es: 'Instalación', en: 'Setup'),
+        _guideText(
+          context,
+          pt: 'Primeiro aluguel, garantia, taxas, móveis e serviços.',
+          es: 'Primer alquiler, depósito, cargos, muebles y servicios.',
+          en: 'First rent, deposit, fees, furniture, and utilities.',
+        ),
+      ),
+      (
+        Icons.calendar_month_outlined,
+        _guideText(
+          context,
+          pt: 'Manutenção',
+          es: 'Mantenimiento',
+          en: 'Living costs',
+        ),
+        _guideText(
+          context,
+          pt: 'Moradia, alimentação, transporte, saúde e imprevistos.',
+          es: 'Vivienda, comida, transporte, salud e imprevistos.',
+          en: 'Housing, food, transport, healthcare, and surprises.',
+        ),
+      ),
+    ];
+
+    return FrostedPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _guideText(
+              context,
+              pt: 'O que entra na reserva de chegada',
+              es: 'Qué incluye la reserva de llegada',
+              en: 'What belongs in an arrival reserve',
+            ),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _guideText(
+              context,
+              pt: 'Separe os custos em três blocos para evitar contar o mesmo gasto duas vezes.',
+              es: 'Separá los costos en tres bloques para evitar contar el mismo gasto dos veces.',
+              en: 'Separate costs into three groups to avoid counting the same expense twice.',
+            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSoftFor(context),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
+          for (final item in items) ...[
+            _CostScopeRow(icon: item.$1, title: item.$2, body: item.$3),
+            if (item != items.last) const SizedBox(height: 12),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CostScopeRow extends StatelessWidget {
+  const _CostScopeRow({
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppColors.success.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(13),
+          ),
+          child: Icon(icon, color: AppColors.success, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 4),
+              Text(
+                body,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ToolCtaCard extends StatelessWidget {
+  const _ToolCtaCard({
+    required this.icon,
+    required this.tone,
+    required this.title,
+    required this.body,
+    required this.actionLabel,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color tone;
+  final String title;
+  final String body;
+  final String actionLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return FrostedPanel(
+      padding: const EdgeInsets.all(20),
+      backgroundColor: AppColors.tintedSurfaceFor(
+        context,
+        tint: tone,
+        lightColor: Color.alphaBlend(
+          tone.withValues(alpha: 0.08),
+          Colors.white,
+        ),
+      ),
+      borderColor: tone.withValues(alpha: 0.22),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: tone.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Icon(icon, color: tone),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 6),
+                Text(
+                  body,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                FilledButton.icon(
+                  onPressed: onTap,
+                  icon: const Icon(Icons.arrow_forward_rounded),
+                  label: Text(actionLabel),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DocumentQuickAnswersSection extends StatelessWidget {
+  const _DocumentQuickAnswersSection({required this.l10n});
 
   final dynamic l10n;
 
@@ -1681,33 +1961,9 @@ class _QuickAnswersSection extends StatelessWidget {
             SizedBox(
               width: cardWidth,
               child: _QuickAnswerCard(
-                icon: Icons.work_outline_rounded,
-                question: l10n.documentationAnswerWorkQuestion,
-                answer: l10n.documentationAnswerWorkAnswer,
-              ),
-            ),
-            SizedBox(
-              width: cardWidth,
-              child: _QuickAnswerCard(
                 icon: Icons.airplane_ticket_outlined,
                 question: l10n.documentationAnswerTravelDocQuestion,
                 answer: l10n.documentationAnswerTravelDocAnswer,
-              ),
-            ),
-            SizedBox(
-              width: cardWidth,
-              child: _QuickAnswerCard(
-                icon: Icons.trending_up_rounded,
-                question: l10n.documentationAnswerMarketQuestion,
-                answer: l10n.documentationAnswerMarketAnswer,
-              ),
-            ),
-            SizedBox(
-              width: cardWidth,
-              child: _QuickAnswerCard(
-                icon: Icons.shield_outlined,
-                question: l10n.documentationAnswerSafetyQuestion,
-                answer: l10n.documentationAnswerSafetyAnswer,
               ),
             ),
             SizedBox(
@@ -1732,70 +1988,6 @@ class _QuickAnswersSection extends StatelessWidget {
                 icon: Icons.schedule_rounded,
                 question: l10n.documentationAnswerStayQuestion,
                 answer: l10n.documentationAnswerStayAnswer,
-              ),
-            ),
-            SizedBox(
-              width: cardWidth,
-              child: _QuickAnswerCard(
-                icon: Icons.health_and_safety_outlined,
-                question: l10n.documentationAnswerSusQuestion,
-                answer: l10n.documentationAnswerSusAnswer,
-              ),
-            ),
-            SizedBox(
-              width: cardWidth,
-              child: _QuickAnswerCard(
-                icon: Icons.local_hospital_outlined,
-                question: l10n.documentationAnswerSusCardQuestion,
-                answer: l10n.documentationAnswerSusCardAnswer,
-              ),
-            ),
-            SizedBox(
-              width: cardWidth,
-              child: _QuickAnswerCard(
-                icon: Icons.drive_eta_outlined,
-                question: l10n.documentationAnswerForeignLicenseQuestion,
-                answer: l10n.documentationAnswerForeignLicenseAnswer,
-              ),
-            ),
-            SizedBox(
-              width: cardWidth,
-              child: _QuickAnswerCard(
-                icon: Icons.badge_rounded,
-                question: l10n.documentationAnswerBrazilianLicenseQuestion,
-                answer: l10n.documentationAnswerBrazilianLicenseAnswer,
-              ),
-            ),
-            SizedBox(
-              width: cardWidth,
-              child: _QuickAnswerCard(
-                icon: Icons.badge_outlined,
-                question: l10n.documentationAnswerWorkCardQuestion,
-                answer: l10n.documentationAnswerWorkCardAnswer,
-              ),
-            ),
-            SizedBox(
-              width: cardWidth,
-              child: _QuickAnswerCard(
-                icon: Icons.business_center_outlined,
-                question: l10n.documentationAnswerPjQuestion,
-                answer: l10n.documentationAnswerPjAnswer,
-              ),
-            ),
-            SizedBox(
-              width: cardWidth,
-              child: _QuickAnswerCard(
-                icon: Icons.savings_outlined,
-                question: l10n.documentationAnswerInssQuestion,
-                answer: l10n.documentationAnswerInssAnswer,
-              ),
-            ),
-            SizedBox(
-              width: cardWidth,
-              child: _QuickAnswerCard(
-                icon: Icons.calendar_month_outlined,
-                question: l10n.documentationAnswerRetirementQuestion,
-                answer: l10n.documentationAnswerRetirementAnswer,
               ),
             ),
           ],
@@ -2552,9 +2744,13 @@ class _HealthDecisionsSection extends StatelessWidget {
                       highlights: [
                         l10n.documentationHealthPublicBulletOne,
                         l10n.documentationHealthPublicBulletTwo,
+                        l10n.documentationHealthPublicBulletThree,
                       ],
                       backgroundColor: const Color(0xFFF1F8F3),
                       iconTint: AppColors.success,
+                      sourceNameKey: 'ministerio_saude',
+                      sourceUrl:
+                          'https://www.gov.br/saude/pt-br/assuntos/noticias/2025/marco/sus-estrangeiros-podem-contar-com-acesso-ao-sistema-publico-de-saude',
                     ),
                   ),
                   SizedBox(
@@ -2566,9 +2762,13 @@ class _HealthDecisionsSection extends StatelessWidget {
                       highlights: [
                         l10n.documentationHealthPrivateBulletOne,
                         l10n.documentationHealthPrivateBulletTwo,
+                        l10n.documentationHealthPrivateBulletThree,
                       ],
                       backgroundColor: const Color(0xFFFFF8E7),
                       iconTint: AppColors.warning,
+                      sourceNameKey: 'ans',
+                      sourceUrl:
+                          'https://www.gov.br/ans/pt-br/assuntos/consumidor/guia-de-contratacao-de-planos-de-saude',
                     ),
                   ),
                 ],
@@ -2612,6 +2812,16 @@ class _HealthDecisionsSection extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.textSoftFor(context),
                         ),
+                      ),
+                      const SizedBox(height: 10),
+                      _InlineHighlight(
+                        text: l10n.documentationHealthFlowBulletThree,
+                      ),
+                      const SizedBox(height: 12),
+                      const _OfficialSourceBlock(
+                        sourceNameKey: 'meu_sus_digital',
+                        sourceUrl:
+                            'https://www.gov.br/saude/pt-br/acesso-a-informacao/acoes-e-programas/meu-sus-digital',
                       ),
                     ],
                   ),
@@ -2741,9 +2951,12 @@ class _WorkModelsSection extends StatelessWidget {
                       highlights: [
                         l10n.documentationWorkCltBulletOne,
                         l10n.documentationWorkCltBulletTwo,
+                        l10n.documentationWorkCltBulletThree,
                       ],
                       backgroundColor: const Color(0xFFEAF0FF),
                       iconTint: AppColors.primary,
+                      sourceNameKey: 'mte_ctps',
+                      sourceUrl: 'https://www.gov.br/pt-br/apps/ctps-digital',
                     ),
                   ),
                   SizedBox(
@@ -2755,9 +2968,13 @@ class _WorkModelsSection extends StatelessWidget {
                       highlights: [
                         l10n.documentationWorkPjBulletOne,
                         l10n.documentationWorkPjBulletTwo,
+                        l10n.documentationWorkPjBulletThree,
                       ],
                       backgroundColor: const Color(0xFFFFF5E7),
                       iconTint: AppColors.warning,
+                      sourceNameKey: 'portal_empreendedor_inss',
+                      sourceUrl:
+                          'https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/quero-ser-mei/passo-a-passo-para-se-formalizar',
                     ),
                   ),
                 ],
@@ -2801,6 +3018,16 @@ class _WorkModelsSection extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.textSoftFor(context),
                         ),
+                      ),
+                      const SizedBox(height: 10),
+                      _InlineHighlight(
+                        text: l10n.documentationRetirementBulletThree,
+                      ),
+                      const SizedBox(height: 12),
+                      const _OfficialSourceBlock(
+                        sourceNameKey: 'ministerio_previdencia_inss',
+                        sourceUrl:
+                            'https://www.gov.br/previdencia/pt-br/noticias/2026/janeiro/guia-de-aposentadoria-2026-entenda-as-regras-de-transicao-da-reforma-da-previdencia-de-2019',
                       ),
                     ],
                   ),
@@ -3067,6 +3294,8 @@ class _CompareCard extends StatelessWidget {
     required this.highlights,
     required this.backgroundColor,
     required this.iconTint,
+    required this.sourceNameKey,
+    required this.sourceUrl,
   });
 
   final IconData icon;
@@ -3075,6 +3304,8 @@ class _CompareCard extends StatelessWidget {
   final List<String> highlights;
   final Color backgroundColor;
   final Color iconTint;
+  final String sourceNameKey;
+  final String sourceUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -3129,6 +3360,57 @@ class _CompareCard extends StatelessWidget {
             _InlineHighlight(text: highlight),
             const SizedBox(height: 8),
           ],
+          const SizedBox(height: 4),
+          _OfficialSourceBlock(
+            sourceNameKey: sourceNameKey,
+            sourceUrl: sourceUrl,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OfficialSourceBlock extends StatelessWidget {
+  const _OfficialSourceBlock({
+    required this.sourceNameKey,
+    required this.sourceUrl,
+  });
+
+  final String sourceNameKey;
+  final String sourceUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMutedFor(context),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.documentationOfficialSourceLabel,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.textSoftFor(context),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.referenceSourceName(sourceNameKey),
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+          const SizedBox(height: 3),
+          SelectableText(
+            sourceUrl,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.primary),
+          ),
         ],
       ),
     );

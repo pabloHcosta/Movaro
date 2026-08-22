@@ -12,11 +12,33 @@ const apiLocalizationFile = new URL(
   "../apps/api/src/modules/chat/application/services/resolvers/corridor-guidance-profiles.ts",
   import.meta.url,
 );
+const quickHelpPageFile = new URL(
+  "../apps/app/lib/features/info/presentation/pages/quick_guide_answer_page.dart",
+  import.meta.url,
+);
+const quickHelpServiceFile = new URL(
+  "../apps/api/src/modules/chat/application/services/quick-guide.service.ts",
+  import.meta.url,
+);
+const quickHelpHubFile = new URL(
+  "../apps/app/lib/features/home/presentation/pages/tools_hub_page.dart",
+  import.meta.url,
+);
 
-const [appCatalog, apiCatalog, apiLocalization] = await Promise.all([
+const [
+  appCatalog,
+  apiCatalog,
+  apiLocalization,
+  quickHelpPage,
+  quickHelpService,
+  quickHelpHub,
+] = await Promise.all([
   readFile(appCatalogFile, "utf8"),
   readFile(apiCatalogFile, "utf8"),
   readFile(apiLocalizationFile, "utf8"),
+  readFile(quickHelpPageFile, "utf8"),
+  readFile(quickHelpServiceFile, "utf8"),
+  readFile(quickHelpHubFile, "utf8"),
 ]);
 
 const appIds = [
@@ -88,6 +110,33 @@ if (
   !/export type GuidanceLocale = 'pt' \| 'es' \| 'en';/.test(apiLocalization)
 ) {
   errors.push("Corridor guidance must keep the pt, es and en locale contract.");
+}
+
+for (const forbidden of [
+  ["generatedPlan", "must not import plan state"],
+  ["_openAction", "must not navigate to another feature"],
+  ["AppRoutes.guideToolkit", "must not open a toolkit"],
+  ["AppRoutes.documentationTopic", "must not open the journey guide"],
+]) {
+  if (quickHelpPage.includes(forbidden[0])) {
+    errors.push(`Quick Help ${forbidden[1]} (${forbidden[0]}).`);
+  }
+}
+if (!/actions:\s*\[\]/.test(quickHelpService)) {
+  errors.push("Quick Help API must return no cross-feature actions.");
+}
+for (const forbidden of [
+  "generatedPlan",
+  "_openToolkit",
+  "_openTopic",
+  "AppRoutes.guideToolkit",
+  "AppRoutes.documentationTopic",
+  "AppRoutes.proposalSafetyCheck",
+  "AppRoutes.flightSearch",
+]) {
+  if (quickHelpHub.includes(forbidden)) {
+    errors.push(`Quick Help hub must not couple to ${forbidden}.`);
+  }
 }
 
 if (errors.length > 0) {

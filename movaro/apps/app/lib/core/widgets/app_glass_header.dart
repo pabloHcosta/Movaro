@@ -19,8 +19,8 @@ class AppGlassHeader extends StatelessWidget {
   final VoidCallback? onHelp;
   final Widget? trailing;
 
-  static const double _height = 52;
-  static const double _heightWithSubtitle = 60;
+  static const double _minHeight = 52;
+  static const double _minHeightWithSubtitle = 60;
 
   @override
   Widget build(BuildContext context) {
@@ -42,91 +42,97 @@ class AppGlassHeader extends StatelessWidget {
       actionCount: hasTrailingActions == 0 ? 1 : hasTrailingActions,
     );
 
-    return SizedBox(
-      height: subtitle != null ? _heightWithSubtitle : _height,
-      child: Row(
-        children: [
-          SizedBox(
-            width: leadingWidth,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: _HeaderActionSlot(
-                child: onBack == null
-                    ? null
-                    : Transform.translate(
-                        offset: const Offset(-2, 0),
-                        child: _HeaderIconButton(
-                          onPressed: onBack,
-                          icon: Icons.arrow_back_rounded,
-                          tooltip: MaterialLocalizations.of(
-                            context,
-                          ).backButtonTooltip,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minHeight: subtitle != null ? _minHeightWithSubtitle : _minHeight,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            SizedBox(
+              width: leadingWidth,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: _HeaderActionSlot(
+                  child: onBack == null
+                      ? null
+                      : Transform.translate(
+                          offset: const Offset(-2, 0),
+                          child: _HeaderIconButton(
+                            onPressed: onBack,
+                            icon: Icons.arrow_back_rounded,
+                            tooltip: MaterialLocalizations.of(
+                              context,
+                            ).backButtonTooltip,
+                          ),
                         ),
-                      ),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: subtitle != null
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        title,
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.3,
-                              color: AppColors.textPrimaryFor(context),
-                            ),
+            Expanded(
+              child: subtitle != null
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          title,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
+                                color: AppColors.textPrimaryFor(context),
+                              ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle!,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: AppColors.textSoftFor(context),
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 0.1,
+                              ),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
+                        color: AppColors.textPrimaryFor(context),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle!,
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              color: AppColors.textSoftFor(context),
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 0.1,
-                            ),
-                      ),
-                    ],
-                  )
-                : Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.3,
-                      color: AppColors.textPrimaryFor(context),
                     ),
-                  ),
-          ),
-          SizedBox(
-            width: trailingWidth,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (helpAction != null) _HeaderActionSlot(child: helpAction),
-                  if (trailing != null) _HeaderActionSlot(child: trailing),
-                  if (helpAction == null && trailing == null)
-                    const _HeaderActionSlot(),
-                ],
+            ),
+            SizedBox(
+              width: trailingWidth,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (helpAction != null)
+                      _HeaderActionSlot(child: helpAction),
+                    if (trailing != null) _HeaderActionSlot(child: trailing),
+                    if (helpAction == null && trailing == null)
+                      const _HeaderActionSlot(),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -134,9 +140,9 @@ class AppGlassHeader extends StatelessWidget {
 
 String _helpTooltip(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'pt' => 'Ajuda',
-    'es' => 'Ayuda',
-    _ => 'Help',
+    'pt' => 'Como funciona esta tela',
+    'es' => 'Cómo funciona esta pantalla',
+    _ => 'How this screen works',
   };
 }
 

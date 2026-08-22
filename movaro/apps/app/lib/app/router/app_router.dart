@@ -10,6 +10,7 @@ import 'package:movaro_app/features/cities/presentation/pages/cities_explore_pag
 import 'package:movaro_app/features/cities/presentation/pages/city_detail_page.dart';
 import 'package:movaro_app/features/explore/presentation/pages/countries_page.dart';
 import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
+import 'package:movaro_app/features/flight_search/presentation/pages/flight_search_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
 import 'package:movaro_app/features/home/presentation/pages/favorites_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/home_page.dart';
@@ -18,6 +19,9 @@ import 'package:movaro_app/features/home/presentation/pages/plan_entry_page.dart
 import 'package:movaro_app/features/home/presentation/pages/public_home_page.dart';
 import 'package:movaro_app/features/home/presentation/pages/tools_hub_page.dart';
 import 'package:movaro_app/features/info/presentation/pages/assistant_page.dart';
+import 'package:movaro_app/features/info/domain/entities/guide_toolkit.dart';
+import 'package:movaro_app/features/info/presentation/pages/guide_toolkit_page.dart';
+import 'package:movaro_app/features/info/presentation/pages/quick_guide_answer_page.dart';
 import 'package:movaro_app/features/intro/presentation/pages/intro_page.dart';
 import 'package:movaro_app/features/language/presentation/pages/portuguese_phrasebook_page.dart';
 import 'package:movaro_app/features/journey/presentation/pages/journey_setup_page.dart';
@@ -202,6 +206,46 @@ class AppRouter {
         return _buildRoute(
           settings,
           ToolsHubPage(
+            journeyContextController: dependencies.journeyContextController,
+            citiesController: dependencies.citiesController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
+          ),
+        );
+      case AppRoutes.flightSearch:
+        return _buildRoute(
+          settings,
+          FlightSearchPage(
+            locationController: dependencies.locationController,
+            journeyContextController: dependencies.journeyContextController,
+            citiesController: dependencies.citiesController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
+          ),
+        );
+      case AppRoutes.quickGuideAnswer:
+        final request = settings.arguments is QuickGuideAnswerRequest
+            ? settings.arguments! as QuickGuideAnswerRequest
+            : const QuickGuideAnswerRequest(question: '');
+        return _buildRoute(
+          settings,
+          QuickGuideAnswerPage(
+            request: request,
+            environment: dependencies.environment,
+            journeyContextController: dependencies.journeyContextController,
+            citiesController: dependencies.citiesController,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
+          ),
+        );
+      case AppRoutes.guideToolkit:
+        final request = settings.arguments is GuideToolkitRequest
+            ? settings.arguments! as GuideToolkitRequest
+            : const GuideToolkitRequest(kind: GuideToolkitKind.dependencies);
+        return _buildRoute(
+          settings,
+          GuideToolkitPage(
+            request: request,
             journeyContextController: dependencies.journeyContextController,
             citiesController: dependencies.citiesController,
             migrationQuestionnaireController:

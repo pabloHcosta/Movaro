@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "npm run audit:guide-contract && nest build",
+    "build": "npm run audit:knowledge && npm run audit:guide-contract && nest build",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "NODE_ENV=production node dist/main",
     "start:dev": "NODE_ENV=development nest start --watch",

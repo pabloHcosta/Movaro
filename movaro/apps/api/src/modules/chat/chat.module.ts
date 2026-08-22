@@ -10,16 +10,19 @@ import { ChatPromptsService } from './application/services/chat-prompts.service'
 import { GuideAnswersService } from './application/services/guide-answers.service';
 import { IntentDetectorService } from './application/services/intent-detector.service';
 import { OrchestratorService } from './application/services/orchestrator.service';
+import { QuickGuideService } from './application/services/quick-guide.service';
+import { QuickHelpQueryPlannerService } from './application/services/quick-help-query-planner.service';
 import { CityResolverService } from './application/services/resolvers/city-resolver.service';
 import { CorridorGuidanceResolverService } from './application/services/resolvers/corridor-guidance-resolver.service';
 import { CostResolverService } from './application/services/resolvers/cost-resolver.service';
 import { DocResolverService } from './application/services/resolvers/doc-resolver.service';
 import { FaqResolverService } from './application/services/resolvers/faq-resolver.service';
 import { ChatController } from './presentation/chat.controller';
+import { QuickGuideController } from './presentation/quick-guide.controller';
 
 @Module({
   imports: [CitiesModule, ReferenceModule],
-  controllers: [ChatController],
+  controllers: [ChatController, QuickGuideController],
   providers: [
     SupabaseAdminService,
     AssistantKnowledgeService,
@@ -34,6 +37,8 @@ import { ChatController } from './presentation/chat.controller';
     DocResolverService,
     FaqResolverService,
     OrchestratorService,
+    QuickHelpQueryPlannerService,
+    QuickGuideService,
   ],
 })
 export class ChatModule {}

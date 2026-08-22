@@ -142,7 +142,23 @@ class PreparationResourceLinks {
   );
 
   static final Uri migrantHealthGuide = Uri.parse(
-    'https://www.gov.br/saude/pt-br/composicao/saps/equidade-em-saude/migrantes-refugiadas-e-apatridas',
+    'https://www.gov.br/saude/pt-br/composicao/saps/equidade-em-saude/saude-de-migrantes-refugiados-e-apatridas',
+  );
+
+  static final Uri nationalVaccinationCalendar = Uri.parse(
+    'https://www.gov.br/saude/pt-br/vacinacao/calendario',
+  );
+
+  static final Uri pregnancyPrenatalGuide = Uri.parse(
+    'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/g/gravidez',
+  );
+
+  static final Uri mentalHealthNetworkGuide = Uri.parse(
+    'https://www.gov.br/saude/pt-br/composicao/saes/desmad/raps',
+  );
+
+  static final Uri privateHealthWaitingPeriods = Uri.parse(
+    'https://www.gov.br/ans/pt-br/assuntos/consumidor/carencia',
   );
 
   static final Uri migrantSusRightsGuide = Uri.parse(
@@ -175,6 +191,14 @@ class PreparationResourceLinks {
 
   static final Uri anatelPrepaidRegistration = Uri.parse(
     'https://www.gov.br/anatel/pt-br/dados/utilidade-publica/cadastro-pre-pago',
+  );
+
+  static final Uri telecomConsumerRights = Uri.parse(
+    'https://www.gov.br/anatel/pt-br/consumidor/conheca-seus-direitos',
+  );
+
+  static final Uri laborComplaint = Uri.parse(
+    'https://www.gov.br/pt-br/servicos/realizar-denuncia-trabalhista',
   );
 
   static final Uri timForeignVisitors = Uri.parse(

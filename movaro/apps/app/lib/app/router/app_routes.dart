@@ -7,6 +7,9 @@ class AppRoutes {
   static const publicHome = '/home';
   static const plan = '/plan';
   static const tools = '/tools';
+  static const quickGuideAnswer = '/guide/answer';
+  static const guideToolkit = '/guide/toolkit';
+  static const flightSearch = '/guide/tools/flights';
   static const more = '/more';
   static const favorites = '/favorites';
   static const cityComparison = '/favorites/compare';
@@ -39,6 +42,9 @@ class AppRoutes {
     publicHome,
     plan,
     tools,
+    quickGuideAnswer,
+    guideToolkit,
+    flightSearch,
     more,
     favorites,
     cityComparison,

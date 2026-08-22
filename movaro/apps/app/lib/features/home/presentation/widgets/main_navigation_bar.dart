@@ -102,14 +102,9 @@ class MainNavigationBar extends StatelessWidget {
       ),
       _NavItemData(
         slot: 3,
-        label: _navText(
-          context,
-          pt: 'Ferramentas',
-          es: 'Herramientas',
-          en: 'Tools',
-        ),
-        icon: Icons.grid_view_outlined,
-        activeIcon: Icons.grid_view_rounded,
+        label: _navText(context, pt: 'Ajuda', es: 'Ayuda', en: 'Help'),
+        icon: Icons.help_center_outlined,
+        activeIcon: Icons.help_center_rounded,
       ),
       _NavItemData(
         slot: 4,
@@ -185,90 +180,99 @@ class _NavTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
-        borderRadius: BorderRadius.circular(16),
-        splashColor: isDark
-            ? Colors.white.withValues(alpha: 0.08)
-            : Colors.black.withValues(alpha: 0.05),
-        highlightColor: Colors.transparent,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 260),
-          curve: const Cubic(0.4, 0, 0.2, 1),
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
-          decoration: BoxDecoration(
-            gradient: isActive
-                ? LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: isDark
-                        ? const [Color(0x2E168BFF), Color(0x1814B8FF)]
-                        : const [Color(0x18168BFF), Color(0x0D14B8FF)],
-                  )
-                : null,
+    return Semantics(
+      button: true,
+      selected: isActive,
+      label: label,
+      child: ExcludeSemantics(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              onTap();
+            },
             borderRadius: BorderRadius.circular(16),
-            border: isActive
-                ? Border.all(
-                    color: const Color(0xFF1B9CFF).withValues(alpha: 0.25),
-                  )
-                : null,
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: const Color(0xFF0088FF).withValues(alpha: 0.12),
-                      blurRadius: 12,
-                      offset: const Offset(0, 3),
+            splashColor: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.05),
+            highlightColor: Colors.transparent,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 260),
+              curve: const Cubic(0.4, 0, 0.2, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
+              decoration: BoxDecoration(
+                gradient: isActive
+                    ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: isDark
+                            ? const [Color(0x2E168BFF), Color(0x1814B8FF)]
+                            : const [Color(0x18168BFF), Color(0x0D14B8FF)],
+                      )
+                    : null,
+                borderRadius: BorderRadius.circular(16),
+                border: isActive
+                    ? Border.all(
+                        color: const Color(0xFF1B9CFF).withValues(alpha: 0.25),
+                      )
+                    : null,
+                boxShadow: isActive
+                    ? [
+                        BoxShadow(
+                          color: const Color(
+                            0xFF0088FF,
+                          ).withValues(alpha: 0.12),
+                          blurRadius: 12,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 260),
+                    width: 30,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? const Color(0xFF139DFF).withValues(alpha: 0.14)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  ]
-                : null,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 260),
-                width: 30,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? const Color(0xFF139DFF).withValues(alpha: 0.14)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  isActive ? activeIcon : icon,
-                  size: 20,
-                  color: isActive
-                      ? const Color(0xFF32B5FF)
-                      : (isDark
-                            ? Colors.white.withValues(alpha: 0.42)
-                            : AppColors.textSoft.withValues(alpha: 0.85)),
-                ),
+                    child: Icon(
+                      isActive ? activeIcon : icon,
+                      size: 20,
+                      color: isActive
+                          ? const Color(0xFF32B5FF)
+                          : (isDark
+                                ? Colors.white.withValues(alpha: 0.42)
+                                : AppColors.textSoft.withValues(alpha: 0.85)),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: context.textStyles.navLabel.copyWith(
+                      fontSize: 11,
+                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                      color: isActive
+                          ? (isDark
+                                ? Colors.white.withValues(alpha: 0.92)
+                                : const Color(0xFF0F4C81))
+                          : (isDark
+                                ? Colors.white.withValues(alpha: 0.42)
+                                : AppColors.textSoft.withValues(alpha: 0.92)),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: context.textStyles.navLabel.copyWith(
-                  fontSize: 11,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive
-                      ? (isDark
-                            ? Colors.white.withValues(alpha: 0.92)
-                            : const Color(0xFF0F4C81))
-                      : (isDark
-                            ? Colors.white.withValues(alpha: 0.42)
-                            : AppColors.textSoft.withValues(alpha: 0.92)),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

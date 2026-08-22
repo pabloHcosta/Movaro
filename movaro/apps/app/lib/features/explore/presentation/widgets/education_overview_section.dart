@@ -190,8 +190,6 @@ class EducationOverviewSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        _EducationSocialSnapshot(locale: locale),
-        const SizedBox(height: 12),
         LayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.maxWidth >= 760
@@ -210,6 +208,8 @@ class EducationOverviewSection extends StatelessWidget {
             );
           },
         ),
+        const SizedBox(height: 12),
+        _EducationSocialSnapshot(locale: locale),
       ],
     );
   }
