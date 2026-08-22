@@ -182,12 +182,6 @@ void main() {
     await tester.tap(find.text('Ajuda'));
     await _pumpScreen(tester);
     expect(find.text('O que você precisa resolver?'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Entender a compra do voo'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Entender a compra do voo'), findsOneWidget);
 
     await tester.tap(find.text('Mais'));
     await _pumpScreen(tester);
@@ -240,6 +234,66 @@ void main() {
           .onPressed,
       isNotNull,
     );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('mobile help groups stay progressive at 200 percent text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      tester.platformDispatcher.clearTextScaleFactorTestValue();
+    });
+
+    await tester.pumpWidget(harness.buildApp(initialRoute: AppRoutes.tools));
+    await _pumpScreen(tester);
+
+    final scrollable = find.byType(Scrollable).first;
+    await tester.scrollUntilVisible(
+      find.text('Resolver um problema agora'),
+      280,
+      scrollable: scrollable,
+    );
+    expect(find.text('Resolver um problema agora'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Preparar a mudança'),
+      280,
+      scrollable: scrollable,
+    );
+    expect(find.text('Preparar a mudança'), findsOneWidget);
+    expect(find.text('Entender a compra do voo'), findsNothing);
+
+    final showPreparation = find.ancestor(
+      of: find.text('Ver todos os preparativos'),
+      matching: find.byType(OutlinedButton),
+    );
+    await tester.scrollUntilVisible(
+      showPreparation,
+      280,
+      scrollable: scrollable,
+    );
+    await tester.tap(showPreparation);
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.scrollUntilVisible(
+      find.text('Entender a compra do voo'),
+      280,
+      scrollable: scrollable,
+    );
+    expect(find.text('Entender a compra do voo'), findsOneWidget);
+    expect(find.text('Levar pets, bagagem e bens'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Saúde, direitos e futuro'),
+      280,
+      scrollable: scrollable,
+    );
+    expect(find.text('Saúde, direitos e futuro'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

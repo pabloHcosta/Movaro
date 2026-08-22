@@ -28,6 +28,19 @@ String _guideText(
   };
 }
 
+double _responsiveCardWidth(
+  double maxWidth, {
+  int expandedColumns = 3,
+  double gap = 14,
+}) {
+  final columns = maxWidth >= 920
+      ? expandedColumns
+      : maxWidth >= 620
+      ? 2
+      : 1;
+  return (maxWidth - (gap * (columns - 1))) / columns;
+}
+
 /// Search-first guide hub, deliberately independent from the migration plan.
 /// It shares reviewed knowledge with the journey, but never imports journey
 /// state or opens journey/tool surfaces.
@@ -53,6 +66,8 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
   final QuickGuidePreferencesStore _preferencesStore =
       const QuickGuidePreferencesStore();
   List<String> _recentQuestions = const [];
+  bool _showAllPreparation = false;
+  bool _showAllRights = false;
 
   @override
   void initState() {
@@ -130,7 +145,7 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
             bottom: false,
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 900),
+                constraints: const BoxConstraints(maxWidth: 1080),
                 child: ListView(
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
@@ -176,7 +191,7 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                         },
                       ),
                     ],
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 38),
                     _SectionHeading(
                       title: _guideText(
                         context,
@@ -191,18 +206,19 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                         en: 'Understand the topic with organized information and official sources.',
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     LayoutBuilder(
                       builder: (context, constraints) {
-                        final cardWidth = constraints.maxWidth >= 700
-                            ? (constraints.maxWidth - 12) / 2
-                            : constraints.maxWidth;
+                        final cardWidth = _responsiveCardWidth(
+                          constraints.maxWidth,
+                        );
                         return Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
+                          spacing: 14,
+                          runSpacing: 14,
                           children: [
                             _GuideCard(
                               width: cardWidth,
+                              compact: true,
                               icon: Icons.folder_copy_outlined,
                               tone: const Color(0xFF7557E8),
                               title: _guideText(
@@ -228,6 +244,7 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                             ),
                             _GuideCard(
                               width: cardWidth,
+                              compact: true,
                               icon: Icons.school_outlined,
                               tone: const Color(0xFF00897B),
                               title: _guideText(
@@ -253,6 +270,7 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                             ),
                             _GuideCard(
                               width: cardWidth,
+                              compact: true,
                               icon: Icons.home_work_outlined,
                               tone: const Color(0xFFE58A16),
                               title: _guideText(
@@ -278,6 +296,7 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                             ),
                             _GuideCard(
                               width: cardWidth,
+                              compact: true,
                               icon: Icons.work_outline_rounded,
                               tone: AppColors.primary,
                               title: _guideText(
@@ -303,6 +322,7 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                             ),
                             _GuideCard(
                               width: cardWidth,
+                              compact: true,
                               icon: Icons.savings_outlined,
                               tone: AppColors.success,
                               title: _guideText(
@@ -328,6 +348,7 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                             ),
                             _GuideCard(
                               width: cardWidth,
+                              compact: true,
                               icon: Icons.health_and_safety_outlined,
                               tone: const Color(0xFFE34B67),
                               title: _guideText(
@@ -355,22 +376,22 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                         );
                       },
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 42),
                     _SectionHeading(
                       title: _guideText(
                         context,
-                        pt: 'Perguntas complexas, respostas diretas',
-                        es: 'Preguntas complejas, respuestas directas',
-                        en: 'Complex questions, direct answers',
+                        pt: 'Resolver um problema agora',
+                        es: 'Resolver un problema ahora',
+                        en: 'Solve a problem now',
                       ),
                       body: _guideText(
                         context,
-                        pt: 'Cada opção abre uma resposta dentro da Ajuda. Nenhuma consulta usa ou altera seu plano.',
-                        es: 'Cada opción abre una respuesta dentro de Ayuda. Ninguna consulta usa o cambia tu plan.',
-                        en: 'Each option opens an answer inside Help. No query uses or changes your plan.',
+                        pt: 'Comece pelo bloqueio mais urgente. Tudo é resolvido dentro da Ajuda.',
+                        es: 'Empezá por el bloqueo más urgente. Todo se resuelve dentro de Ayuda.',
+                        en: 'Start with the most urgent blocker. Everything stays inside Help.',
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     _PracticalToolCard(
                       icon: Icons.account_tree_outlined,
                       colors: const [Color(0xFF24314D), Color(0xFF506CA8)],
@@ -401,15 +422,15 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     LayoutBuilder(
                       builder: (context, constraints) {
-                        final cardWidth = constraints.maxWidth >= 700
-                            ? (constraints.maxWidth - 12) / 2
-                            : constraints.maxWidth;
+                        final cardWidth = _responsiveCardWidth(
+                          constraints.maxWidth,
+                        );
                         return Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
+                          spacing: 14,
+                          runSpacing: 14,
                           children: [
                             _GuideCard(
                               width: cardWidth,
@@ -461,6 +482,66 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                                 ),
                               ),
                             ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 14),
+                    _PracticalToolCard(
+                      icon: Icons.radar_rounded,
+                      colors: const [Color(0xFF07354B), Color(0xFF087F7A)],
+                      eyebrow: _guideText(
+                        context,
+                        pt: 'PROTEÇÃO MOVARO',
+                        es: 'PROTECCIÓN MOVARO',
+                        en: 'MOVARO PROTECTION',
+                      ),
+                      title: _guideText(
+                        context,
+                        pt: 'Confira uma proposta antes de confiar',
+                        es: 'Revisá una propuesta antes de confiar',
+                        en: 'Check an offer before you trust it',
+                      ),
+                      body: _guideText(
+                        context,
+                        pt: 'Cole uma oferta de aluguel, vaga ou serviço e veja sinais conhecidos de fraude.',
+                        es: 'Pegá una oferta de alquiler, empleo o servicio y revisá señales conocidas de fraude.',
+                        en: 'Paste a housing, job, or service offer and check known fraud signals.',
+                      ),
+                      onTap: () => _ask(
+                        _guideText(
+                          context,
+                          pt: 'Como identifico sinais de golpe em aluguel ou vaga?',
+                          es: '¿Cómo identifico señales de estafa en alquiler o empleo?',
+                          en: 'How do I identify scam signs in a rental or job offer?',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 42),
+                    _SectionHeading(
+                      title: _guideText(
+                        context,
+                        pt: 'Preparar a mudança',
+                        es: 'Preparar la mudanza',
+                        en: 'Prepare your move',
+                      ),
+                      body: _guideText(
+                        context,
+                        pt: 'Organize chegada, moradia, trabalho, família e viagem sem transformar a dúvida em um plano.',
+                        es: 'Organizá llegada, vivienda, trabajo, familia y viaje sin convertir la duda en un plan.',
+                        en: 'Organize arrival, housing, work, family, and travel without turning the question into a plan.',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final cardWidth = _responsiveCardWidth(
+                          constraints.maxWidth,
+                        );
+                        return Wrap(
+                          spacing: 14,
+                          runSpacing: 14,
+                          children: [
                             _GuideCard(
                               width: cardWidth,
                               icon: Icons.savings_outlined,
@@ -538,31 +619,6 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                             ),
                             _GuideCard(
                               width: cardWidth,
-                              icon: Icons.receipt_long_outlined,
-                              tone: const Color(0xFF7650B5),
-                              title: _guideText(
-                                context,
-                                pt: 'Organizar renda e impostos',
-                                es: 'Organizar ingresos e impuestos',
-                                en: 'Organize income and tax',
-                              ),
-                              body: _guideText(
-                                context,
-                                pt: 'Triagem segura para renda, bens e empresa no exterior.',
-                                es: 'Orientación segura para ingresos, bienes y empresa afuera.',
-                                en: 'Safe screening for foreign income, assets, and companies.',
-                              ),
-                              onTap: () => _ask(
-                                _guideText(
-                                  context,
-                                  pt: 'Quando viro residente fiscal e como organizo renda do exterior?',
-                                  es: '¿Cuándo paso a ser residente fiscal y cómo organizo ingresos del exterior?',
-                                  en: 'When do I become a tax resident and how do I organize foreign income?',
-                                ),
-                              ),
-                            ),
-                            _GuideCard(
-                              width: cardWidth,
                               icon: Icons.family_restroom_rounded,
                               tone: const Color(0xFFB47A36),
                               title: _guideText(
@@ -586,34 +642,130 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                                 ),
                               ),
                             ),
+                            if (_showAllPreparation) ...[
+                              _GuideCard(
+                                width: cardWidth,
+                                icon: Icons.pets_outlined,
+                                tone: const Color(0xFF9A6A22),
+                                title: _guideText(
+                                  context,
+                                  pt: 'Levar pets, bagagem e bens',
+                                  es: 'Llevar mascotas, equipaje y bienes',
+                                  en: 'Bring pets, baggage, and goods',
+                                ),
+                                body: _guideText(
+                                  context,
+                                  pt: 'Certificados, medicamentos, alimentos, mudança e veículo.',
+                                  es: 'Certificados, medicamentos, alimentos, mudanza y vehículo.',
+                                  en: 'Certificates, medicines, food, household goods, and vehicles.',
+                                ),
+                                onTap: () => _ask(
+                                  _guideText(
+                                    context,
+                                    pt: 'Como levo pet, bagagem e bens para o Brasil?',
+                                    es: '¿Cómo llevo mascota, equipaje y bienes a Brasil?',
+                                    en: 'How do I bring a pet, baggage, and goods to Brazil?',
+                                  ),
+                                ),
+                              ),
+                              _GuideCard(
+                                width: cardWidth,
+                                icon: Icons.electrical_services_outlined,
+                                tone: const Color(0xFF2876A8),
+                                title: _guideText(
+                                  context,
+                                  pt: 'Ativar telefone, internet, água e luz',
+                                  es: 'Activar teléfono, internet, agua y luz',
+                                  en: 'Activate phone, internet, water, and power',
+                                ),
+                                body: _guideText(
+                                  context,
+                                  pt: 'Documentos, titularidade, contratos e comprovante.',
+                                  es: 'Documentos, titularidad, contratos y comprobante.',
+                                  en: 'Documents, account ownership, contracts, and proof.',
+                                ),
+                                onTap: () => _ask(
+                                  _guideText(
+                                    context,
+                                    pt: 'Como ativo telefone, internet, água e energia?',
+                                    es: '¿Cómo activo teléfono, internet, agua y energía?',
+                                    en: 'How do I activate phone, internet, water, and electricity?',
+                                  ),
+                                ),
+                              ),
+                              _GuideCard(
+                                width: cardWidth,
+                                icon: Icons.flight_takeoff_rounded,
+                                tone: const Color(0xFF326CE5),
+                                title: _guideText(
+                                  context,
+                                  pt: 'Entender a compra do voo',
+                                  es: 'Entender la compra del vuelo',
+                                  en: 'Understand flight booking',
+                                ),
+                                body: _guideText(
+                                  context,
+                                  pt: 'Documentos, aeroportos, bagagem, datas e fatores que mudam o preço.',
+                                  es: 'Documentos, aeropuertos, equipaje, fechas y factores que cambian el precio.',
+                                  en: 'Documents, airports, baggage, dates, and factors that change prices.',
+                                ),
+                                onTap: () => _ask(
+                                  _guideText(
+                                    context,
+                                    pt: 'O que devo conferir antes de comprar um voo para o Brasil?',
+                                    es: '¿Qué debo revisar antes de comprar un vuelo a Brasil?',
+                                    en: 'What should I check before booking a flight to Brazil?',
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         );
                       },
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 12),
+                    _SectionExpandButton(
+                      expanded: _showAllPreparation,
+                      collapsedLabel: _guideText(
+                        context,
+                        pt: 'Ver todos os preparativos',
+                        es: 'Ver todos los preparativos',
+                        en: 'See all preparation topics',
+                      ),
+                      expandedLabel: _guideText(
+                        context,
+                        pt: 'Mostrar menos',
+                        es: 'Mostrar menos',
+                        en: 'Show less',
+                      ),
+                      onPressed: () => setState(
+                        () => _showAllPreparation = !_showAllPreparation,
+                      ),
+                    ),
+                    const SizedBox(height: 42),
                     _SectionHeading(
                       title: _guideText(
                         context,
-                        pt: 'Vida, proteção e futuro',
-                        es: 'Vida, protección y futuro',
-                        en: 'Life, protection, and future',
+                        pt: 'Saúde, direitos e futuro',
+                        es: 'Salud, derechos y futuro',
+                        en: 'Health, rights, and future',
                       ),
                       body: _guideText(
                         context,
-                        pt: 'Resolva situações que aparecem depois da decisão de mudar.',
-                        es: 'Resolvé situaciones que aparecen después de decidir mudarte.',
-                        en: 'Solve situations that arise after deciding to move.',
+                        pt: 'Encontre cuidado, proteção, canais de reclamação e orientação de longo prazo.',
+                        es: 'Encontrá cuidado, protección, canales de reclamo y orientación a largo plazo.',
+                        en: 'Find care, protection, complaint channels, and long-term guidance.',
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     LayoutBuilder(
                       builder: (context, constraints) {
-                        final cardWidth = constraints.maxWidth >= 700
-                            ? (constraints.maxWidth - 12) / 2
-                            : constraints.maxWidth;
+                        final cardWidth = _responsiveCardWidth(
+                          constraints.maxWidth,
+                        );
                         return Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
+                          spacing: 14,
+                          runSpacing: 14,
                           children: [
                             _GuideCard(
                               width: cardWidth,
@@ -637,56 +789,6 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                                   pt: 'Como continuo tratamento, vacinas ou pré-natal no Brasil?',
                                   es: '¿Cómo continúo tratamiento, vacunas o prenatal en Brasil?',
                                   en: 'How do I continue treatment, vaccinations, or prenatal care in Brazil?',
-                                ),
-                              ),
-                            ),
-                            _GuideCard(
-                              width: cardWidth,
-                              icon: Icons.pets_outlined,
-                              tone: const Color(0xFF9A6A22),
-                              title: _guideText(
-                                context,
-                                pt: 'Levar pets, bagagem e bens',
-                                es: 'Llevar mascotas, equipaje y bienes',
-                                en: 'Bring pets, baggage, and goods',
-                              ),
-                              body: _guideText(
-                                context,
-                                pt: 'Certificados, medicamentos, alimentos, mudança e veículo.',
-                                es: 'Certificados, medicamentos, alimentos, mudanza y vehículo.',
-                                en: 'Certificates, medicines, food, household goods, and vehicles.',
-                              ),
-                              onTap: () => _ask(
-                                _guideText(
-                                  context,
-                                  pt: 'Como levo pet, bagagem e bens para o Brasil?',
-                                  es: '¿Cómo llevo mascota, equipaje y bienes a Brasil?',
-                                  en: 'How do I bring a pet, baggage, and goods to Brazil?',
-                                ),
-                              ),
-                            ),
-                            _GuideCard(
-                              width: cardWidth,
-                              icon: Icons.electrical_services_outlined,
-                              tone: const Color(0xFF2876A8),
-                              title: _guideText(
-                                context,
-                                pt: 'Ativar telefone, internet, água e luz',
-                                es: 'Activar teléfono, internet, agua y luz',
-                                en: 'Activate phone, internet, water, and power',
-                              ),
-                              body: _guideText(
-                                context,
-                                pt: 'Documentos, titularidade, contratos e comprovante.',
-                                es: 'Documentos, titularidad, contratos y comprobante.',
-                                en: 'Documents, account ownership, contracts, and proof.',
-                              ),
-                              onTap: () => _ask(
-                                _guideText(
-                                  context,
-                                  pt: 'Como ativo telefone, internet, água e energia?',
-                                  es: '¿Cómo activo teléfono, internet, agua y energía?',
-                                  en: 'How do I activate phone, internet, water, and electricity?',
                                 ),
                               ),
                             ),
@@ -742,94 +844,76 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                             ),
                             _GuideCard(
                               width: cardWidth,
-                              icon: Icons.timeline_rounded,
-                              tone: const Color(0xFF357F73),
+                              icon: Icons.receipt_long_outlined,
+                              tone: const Color(0xFF7650B5),
                               title: _guideText(
                                 context,
-                                pt: 'Planejar previdência e naturalização',
-                                es: 'Planificar previsión y naturalización',
-                                en: 'Plan pension and naturalization',
+                                pt: 'Organizar renda e impostos',
+                                es: 'Organizar ingresos e impuestos',
+                                en: 'Organize income and tax',
                               ),
                               body: _guideText(
                                 context,
-                                pt: 'Contribuições Brasil–Argentina, benefícios e futuro.',
-                                es: 'Aportes Brasil–Argentina, beneficios y futuro.',
-                                en: 'Brazil–Argentina contributions, benefits, and future.',
+                                pt: 'Triagem segura para renda, bens e empresa no exterior.',
+                                es: 'Orientación segura para ingresos, bienes y empresa afuera.',
+                                en: 'Safe screening for foreign income, assets, and companies.',
                               ),
                               onTap: () => _ask(
                                 _guideText(
                                   context,
-                                  pt: 'Como funcionam previdência e naturalização?',
-                                  es: '¿Cómo funcionan la previsión y la naturalización?',
-                                  en: 'How do social security and naturalization work?',
+                                  pt: 'Quando viro residente fiscal e como organizo renda do exterior?',
+                                  es: '¿Cuándo paso a ser residente fiscal y cómo organizo ingresos del exterior?',
+                                  en: 'When do I become a tax resident and how do I organize foreign income?',
                                 ),
                               ),
                             ),
+                            if (_showAllRights)
+                              _GuideCard(
+                                width: cardWidth,
+                                icon: Icons.timeline_rounded,
+                                tone: const Color(0xFF357F73),
+                                title: _guideText(
+                                  context,
+                                  pt: 'Planejar previdência e naturalização',
+                                  es: 'Planificar previsión y naturalización',
+                                  en: 'Plan pension and naturalization',
+                                ),
+                                body: _guideText(
+                                  context,
+                                  pt: 'Contribuições Brasil–Argentina, benefícios e futuro.',
+                                  es: 'Aportes Brasil–Argentina, beneficios y futuro.',
+                                  en: 'Brazil–Argentina contributions, benefits, and future.',
+                                ),
+                                onTap: () => _ask(
+                                  _guideText(
+                                    context,
+                                    pt: 'Como funcionam previdência e naturalização?',
+                                    es: '¿Cómo funcionan la previsión y la naturalización?',
+                                    en: 'How do social security and naturalization work?',
+                                  ),
+                                ),
+                              ),
                           ],
                         );
                       },
                     ),
-                    const SizedBox(height: 28),
-                    _PracticalToolCard(
-                      icon: Icons.radar_rounded,
-                      colors: const [Color(0xFF07354B), Color(0xFF087F7A)],
-                      eyebrow: _guideText(
-                        context,
-                        pt: 'PROTEÇÃO MOVARO',
-                        es: 'PROTECCIÓN MOVARO',
-                        en: 'MOVARO PROTECTION',
-                      ),
-                      title: _guideText(
-                        context,
-                        pt: 'Confira uma proposta antes de confiar',
-                        es: 'Revisá una propuesta antes de confiar',
-                        en: 'Check an offer before you trust it',
-                      ),
-                      body: _guideText(
-                        context,
-                        pt: 'Cole uma oferta de aluguel, vaga ou serviço e veja sinais conhecidos de fraude.',
-                        es: 'Pegá una oferta de alquiler, empleo o servicio y revisá señales conocidas de fraude.',
-                        en: 'Paste a housing, job, or service offer and check known fraud signals.',
-                      ),
-                      onTap: () => _ask(
-                        _guideText(
-                          context,
-                          pt: 'Como identifico sinais de golpe em aluguel ou vaga?',
-                          es: '¿Cómo identifico señales de estafa en alquiler o empleo?',
-                          en: 'How do I identify scam signs in a rental or job offer?',
-                        ),
-                      ),
-                    ),
                     const SizedBox(height: 12),
-                    _PracticalToolCard(
-                      icon: Icons.flight_takeoff_rounded,
-                      colors: const [Color(0xFF244FC7), Color(0xFF087FE8)],
-                      eyebrow: _guideText(
+                    _SectionExpandButton(
+                      expanded: _showAllRights,
+                      collapsedLabel: _guideText(
                         context,
-                        pt: 'DÚVIDA DE VIAGEM',
-                        es: 'DUDA DE VIAJE',
-                        en: 'TRAVEL QUESTION',
+                        pt: 'Ver orientação de longo prazo',
+                        es: 'Ver orientación a largo plazo',
+                        en: 'See long-term guidance',
                       ),
-                      title: _guideText(
+                      expandedLabel: _guideText(
                         context,
-                        pt: 'Entender a compra do voo',
-                        es: 'Entender la compra del vuelo',
-                        en: 'Understand flight booking',
+                        pt: 'Mostrar menos',
+                        es: 'Mostrar menos',
+                        en: 'Show less',
                       ),
-                      body: _guideText(
-                        context,
-                        pt: 'Documentos, aeroportos, bagagem, datas e fatores que mudam o preço.',
-                        es: 'Documentos, aeropuertos, equipaje, fechas y factores que cambian el precio.',
-                        en: 'Documents, airports, baggage, dates, and factors that change prices.',
-                      ),
-                      onTap: () => _ask(
-                        _guideText(
-                          context,
-                          pt: 'O que devo conferir antes de comprar um voo para o Brasil?',
-                          es: '¿Qué debo revisar antes de comprar un vuelo a Brasil?',
-                          en: 'What should I check before booking a flight to Brazil?',
-                        ),
-                      ),
+                      onPressed: () =>
+                          setState(() => _showAllRights = !_showAllRights),
                     ),
                   ],
                 ),
@@ -989,6 +1073,8 @@ class _GuideHeroState extends State<_GuideHero> {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
+    final isExpanded = MediaQuery.sizeOf(context).width >= 700;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final fieldSurface = isDark ? const Color(0xFF101F31) : Colors.white;
     final foreground = isDark ? Colors.white : const Color(0xFF10243A);
     final muted = isDark
@@ -996,36 +1082,43 @@ class _GuideHeroState extends State<_GuideHero> {
         : const Color(0xFF52677C);
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
+      duration: reduceMotion
+          ? Duration.zero
+          : const Duration(milliseconds: 180),
       curve: Curves.easeOut,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: isDark
-              ? const [Color(0xFF0A1726), Color(0xFF0B1D2B)]
-              : const [Color(0xFFF8FBFF), Color(0xFFF1FAF8)],
+              ? const [Color(0xFF081827), Color(0xFF0B2430)]
+              : const [Color(0xFFF8FBFF), Color(0xFFEFFAF8)],
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(30),
         border: Border.all(
           color: widget.focusNode.hasFocus
               ? const Color(0xFF25C7B7)
               : isDark
               ? Colors.white.withValues(alpha: 0.1)
               : const Color(0xFFDCE7F0),
-          width: widget.focusNode.hasFocus ? 2 : 1,
+          width: widget.focusNode.hasFocus ? 2.25 : 1,
         ),
         boxShadow: [
           BoxShadow(
             color: const Color(
               0xFF087F7A,
             ).withValues(alpha: widget.focusNode.hasFocus ? 0.18 : 0.09),
-            blurRadius: widget.focusNode.hasFocus ? 28 : 20,
-            offset: const Offset(0, 10),
+            blurRadius: widget.focusNode.hasFocus ? 34 : 26,
+            offset: const Offset(0, 14),
           ),
         ],
       ),
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+      padding: EdgeInsets.fromLTRB(
+        isExpanded ? 28 : 18,
+        isExpanded ? 24 : 18,
+        isExpanded ? 28 : 18,
+        isExpanded ? 24 : 18,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1072,7 +1165,7 @@ class _GuideHeroState extends State<_GuideHero> {
                 ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: isExpanded ? 18 : 14),
           Semantics(
             header: true,
             child: Text(
@@ -1082,12 +1175,16 @@ class _GuideHeroState extends State<_GuideHero> {
                 es: '¿Qué necesitás resolver?',
                 en: 'What do you need to solve?',
               ),
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: foreground,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.6,
-                height: 1.1,
-              ),
+              style:
+                  (isExpanded
+                          ? Theme.of(context).textTheme.headlineMedium
+                          : Theme.of(context).textTheme.headlineSmall)
+                      ?.copyWith(
+                        color: foreground,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.8,
+                        height: 1.08,
+                      ),
             ),
           ),
           const SizedBox(height: 4),
@@ -1102,7 +1199,7 @@ class _GuideHeroState extends State<_GuideHero> {
               context,
             ).textTheme.bodyMedium?.copyWith(color: muted, height: 1.35),
           ),
-          const SizedBox(height: 13),
+          SizedBox(height: isExpanded ? 20 : 16),
           Text(
             _guideText(
               context,
@@ -1117,10 +1214,12 @@ class _GuideHeroState extends State<_GuideHero> {
           ),
           const SizedBox(height: 6),
           AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
+            duration: reduceMotion
+                ? Duration.zero
+                : const Duration(milliseconds: 160),
             decoration: BoxDecoration(
               color: fieldSurface,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(
                 color: widget.focusNode.hasFocus
                     ? const Color(0xFF25C7B7)
@@ -1244,66 +1343,60 @@ class _GuideHeroState extends State<_GuideHero> {
             ),
           ),
           const SizedBox(height: 7),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(widget.suggestions.length, (index) {
-                final question = widget.suggestions[index];
-                final icons = [
-                  Icons.school_outlined,
-                  Icons.home_work_outlined,
-                  Icons.work_outline_rounded,
-                ];
-                final labels = [
-                  _guideText(
-                    context,
-                    pt: 'Escola pública',
-                    es: 'Escuela pública',
-                    en: 'Public school',
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: List.generate(widget.suggestions.length, (index) {
+              final question = widget.suggestions[index];
+              final icons = [
+                Icons.school_outlined,
+                Icons.home_work_outlined,
+                Icons.work_outline_rounded,
+              ];
+              final labels = [
+                _guideText(
+                  context,
+                  pt: 'Escola pública',
+                  es: 'Escuela pública',
+                  en: 'Public school',
+                ),
+                _guideText(
+                  context,
+                  pt: 'Alugar sem fiador',
+                  es: 'Alquilar sin garantía',
+                  en: 'Rent without a guarantor',
+                ),
+                _guideText(
+                  context,
+                  pt: 'Trabalho e documentos',
+                  es: 'Trabajo y documentos',
+                  en: 'Work and documents',
+                ),
+              ];
+              return Semantics(
+                button: true,
+                label:
+                    '$question. ${_guideText(context, pt: 'Abrir resposta', es: 'Abrir respuesta', en: 'Open answer')}',
+                child: ActionChip(
+                  avatar: Icon(icons[index], size: 17),
+                  label: Text(labels[index]),
+                  onPressed: () => widget.onAsk(question),
+                  backgroundColor: isDark
+                      ? Colors.white.withValues(alpha: 0.06)
+                      : Colors.white.withValues(alpha: 0.86),
+                  side: BorderSide(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : const Color(0xFFD8E4ED),
                   ),
-                  _guideText(
-                    context,
-                    pt: 'Alugar sem fiador',
-                    es: 'Alquilar sin garantía',
-                    en: 'Rent without a guarantor',
+                  labelStyle: TextStyle(
+                    color: foreground,
+                    fontWeight: FontWeight.w600,
                   ),
-                  _guideText(
-                    context,
-                    pt: 'Trabalho e documentos',
-                    es: 'Trabajo y documentos',
-                    en: 'Work and documents',
-                  ),
-                ];
-                return Padding(
-                  padding: EdgeInsets.only(
-                    right: index == widget.suggestions.length - 1 ? 0 : 7,
-                  ),
-                  child: Semantics(
-                    button: true,
-                    label:
-                        '$question. ${_guideText(context, pt: 'Abrir resposta', es: 'Abrir respuesta', en: 'Open answer')}',
-                    child: ActionChip(
-                      avatar: Icon(icons[index], size: 17),
-                      label: Text(labels[index]),
-                      onPressed: () => widget.onAsk(question),
-                      backgroundColor: isDark
-                          ? Colors.white.withValues(alpha: 0.06)
-                          : Colors.white.withValues(alpha: 0.86),
-                      side: BorderSide(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.1)
-                            : const Color(0xFFD8E4ED),
-                      ),
-                      labelStyle: TextStyle(
-                        color: foreground,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      materialTapTargetSize: MaterialTapTargetSize.padded,
-                    ),
-                  ),
-                );
-              }),
-            ),
+                  materialTapTargetSize: MaterialTapTargetSize.padded,
+                ),
+              );
+            }),
           ),
         ],
       ),
@@ -1427,25 +1520,49 @@ class _SectionHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Semantics(
-          header: true,
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.3,
+        Container(
+          width: 5,
+          height: 42,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF087FE8), Color(0xFF13A697)],
             ),
+            borderRadius: BorderRadius.circular(999),
           ),
         ),
-        const SizedBox(height: 5),
-        Text(
-          body,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSoftFor(context),
-            height: 1.4,
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Semantics(
+                header: true,
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.45,
+                    height: 1.1,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 720),
+                child: Text(
+                  body,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.45,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -1453,7 +1570,58 @@ class _SectionHeading extends StatelessWidget {
   }
 }
 
-class _GuideCard extends StatelessWidget {
+class _SectionExpandButton extends StatelessWidget {
+  const _SectionExpandButton({
+    required this.expanded,
+    required this.collapsedLabel,
+    required this.expandedLabel,
+    required this.onPressed,
+  });
+
+  final bool expanded;
+  final String collapsedLabel;
+  final String expandedLabel;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = expanded ? expandedLabel : collapsedLabel;
+    return Semantics(
+      button: true,
+      expanded: expanded,
+      label: label,
+      child: ExcludeSemantics(
+        child: SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: onPressed,
+            icon: Icon(
+              expanded ? Icons.keyboard_arrow_up_rounded : Icons.add_rounded,
+            ),
+            label: Text(label),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(52),
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
+              side: BorderSide(
+                color: AppColors.isDark(context)
+                    ? Colors.white.withValues(alpha: 0.14)
+                    : const Color(0xFFD4E1EC),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(17),
+              ),
+              textStyle: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GuideCard extends StatefulWidget {
   const _GuideCard({
     required this.width,
     required this.icon,
@@ -1461,6 +1629,7 @@ class _GuideCard extends StatelessWidget {
     required this.title,
     required this.body,
     required this.onTap,
+    this.compact = false,
   });
 
   final double width;
@@ -1469,67 +1638,208 @@ class _GuideCard extends StatelessWidget {
   final String title;
   final String body;
   final VoidCallback onTap;
+  final bool compact;
+
+  @override
+  State<_GuideCard> createState() => _GuideCardState();
+}
+
+class _GuideCardState extends State<_GuideCard> {
+  bool _hovered = false;
+  bool _focused = false;
+  bool _pressed = false;
+
+  bool get _highlighted => _hovered || _focused;
+
+  Widget _iconTile({required bool compact}) {
+    final size = compact ? 44.0 : 48.0;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color.lerp(widget.tone, Colors.white, 0.12)!, widget.tone],
+        ),
+        borderRadius: BorderRadius.circular(compact ? 14 : 16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
+        boxShadow: [
+          BoxShadow(
+            color: widget.tone.withValues(alpha: 0.24),
+            blurRadius: 13,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            top: -9,
+            right: -7,
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.13),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Icon(widget.icon, color: Colors.white, size: compact ? 22 : 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _arrow(BuildContext context, bool reduceMotion) {
+    return AnimatedContainer(
+      duration: reduceMotion
+          ? Duration.zero
+          : const Duration(milliseconds: 170),
+      width: 34,
+      height: 34,
+      decoration: BoxDecoration(
+        color: _highlighted
+            ? widget.tone.withValues(alpha: 0.18)
+            : widget.tone.withValues(alpha: 0.09),
+        shape: BoxShape.circle,
+        border: Border.all(color: widget.tone.withValues(alpha: 0.12)),
+      ),
+      child: Icon(Icons.arrow_forward_rounded, size: 19, color: widget.tone),
+    );
+  }
+
+  Widget _copy(BuildContext context, {required bool largeText}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          widget.title,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.18,
+            height: 1.18,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          widget.body,
+          maxLines: largeText ? 4 : 2,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppColors.textSoftFor(context),
+            height: 1.34,
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
+    final surface = isDark ? const Color(0xFF0E1B2A) : const Color(0xFFFFFFFF);
     return SizedBox(
-      width: width,
+      width: widget.width,
       child: Semantics(
         button: true,
-        label: '$title. $body',
+        label: '${widget.title}. ${widget.body}',
         child: ExcludeSemantics(
-          child: FrostedPanel(
-            padding: EdgeInsets.zero,
-            borderRadius: BorderRadius.circular(20),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onTap,
-                borderRadius: BorderRadius.circular(20),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 104),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 46,
-                          height: 46,
-                          decoration: BoxDecoration(
-                            color: tone.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Icon(icon, color: tone, size: 23),
+          child: MouseRegion(
+            onEnter: (_) => setState(() => _hovered = true),
+            onExit: (_) => setState(() => _hovered = false),
+            child: AnimatedScale(
+              scale: reduceMotion
+                  ? 1
+                  : _pressed
+                  ? 0.986
+                  : _highlighted
+                  ? 1.006
+                  : 1,
+              duration: reduceMotion
+                  ? Duration.zero
+                  : const Duration(milliseconds: 170),
+              curve: Curves.easeOutCubic,
+              child: AnimatedContainer(
+                duration: reduceMotion
+                    ? Duration.zero
+                    : const Duration(milliseconds: 170),
+                curve: Curves.easeOutCubic,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    stops: const [0, 0.48, 1],
+                    colors: [
+                      widget.tone.withValues(alpha: isDark ? 0.18 : 0.105),
+                      surface.withValues(alpha: isDark ? 0.96 : 0.98),
+                      surface,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: _highlighted
+                        ? widget.tone.withValues(alpha: 0.74)
+                        : isDark
+                        ? Colors.white.withValues(alpha: 0.12)
+                        : widget.tone.withValues(alpha: 0.18),
+                    width: _focused ? 2 : 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: widget.tone.withValues(
+                        alpha: _highlighted ? 0.17 : 0.08,
+                      ),
+                      blurRadius: _highlighted ? 22 : 15,
+                      offset: Offset(0, _highlighted ? 9 : 5),
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.2 : 0.035,
+                      ),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: widget.onTap,
+                    onHover: (value) {
+                      if (_hovered != value) setState(() => _hovered = value);
+                    },
+                    onFocusChange: (value) => setState(() => _focused = value),
+                    onHighlightChanged: (value) =>
+                        setState(() => _pressed = value),
+                    borderRadius: BorderRadius.circular(20),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: widget.compact ? 80 : 90,
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: widget.compact ? 12 : 14,
+                          vertical: widget.compact ? 11 : 13,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(fontWeight: FontWeight.w900),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                body,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: AppColors.textSoftFor(context),
-                                      height: 1.4,
-                                    ),
-                              ),
-                            ],
-                          ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            _iconTile(compact: widget.compact),
+                            SizedBox(width: widget.compact ? 12 : 14),
+                            Expanded(
+                              child: _copy(context, largeText: largeText),
+                            ),
+                            const SizedBox(width: 8),
+                            _arrow(context, reduceMotion),
+                          ],
                         ),
-                        const SizedBox(width: 6),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          color: AppColors.textSoftFor(context),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -1542,7 +1852,7 @@ class _GuideCard extends StatelessWidget {
   }
 }
 
-class _PracticalToolCard extends StatelessWidget {
+class _PracticalToolCard extends StatefulWidget {
   const _PracticalToolCard({
     required this.icon,
     required this.colors,
@@ -1560,78 +1870,183 @@ class _PracticalToolCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_PracticalToolCard> createState() => _PracticalToolCardState();
+}
+
+class _PracticalToolCardState extends State<_PracticalToolCard> {
+  bool _hovered = false;
+  bool _focused = false;
+  bool _pressed = false;
+
+  bool get _highlighted => _hovered || _focused;
+
+  @override
   Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
     return Semantics(
       button: true,
-      label: '$title. $body',
+      label: '${widget.title}. ${widget.body}',
       child: ExcludeSemantics(
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(24),
-            child: Ink(
-              padding: const EdgeInsets.all(18),
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _hovered = true),
+          onExit: (_) => setState(() => _hovered = false),
+          child: AnimatedScale(
+            scale: reduceMotion
+                ? 1
+                : _pressed
+                ? 0.986
+                : _highlighted
+                ? 1.006
+                : 1,
+            duration: reduceMotion
+                ? Duration.zero
+                : const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            child: AnimatedContainer(
+              duration: reduceMotion
+                  ? Duration.zero
+                  : const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: colors),
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: _focused
+                      ? Colors.white.withValues(alpha: 0.92)
+                      : Colors.white.withValues(alpha: 0.12),
+                  width: _focused ? 2 : 1,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: colors.last.withValues(alpha: 0.22),
-                    blurRadius: 24,
-                    offset: const Offset(0, 10),
+                    color: widget.colors.last.withValues(
+                      alpha: _highlighted ? 0.28 : 0.17,
+                    ),
+                    blurRadius: _highlighted ? 26 : 18,
+                    offset: Offset(0, _highlighted ? 11 : 7),
                   ),
                 ],
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(17),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: widget.onTap,
+                  onHover: (value) {
+                    if (_hovered != value) setState(() => _hovered = value);
+                  },
+                  onFocusChange: (value) => setState(() => _focused = value),
+                  onHighlightChanged: (value) =>
+                      setState(() => _pressed = value),
+                  borderRadius: BorderRadius.circular(22),
+                  child: Ink(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 17,
                     ),
-                    child: Icon(icon, color: Colors.white, size: 27),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: widget.colors,
+                      ),
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          eyebrow,
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: const Color(0xFFB9FFF4),
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.7,
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.white.withValues(alpha: 0.22),
+                                Colors.white.withValues(alpha: 0.1),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.2),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.12),
+                                blurRadius: 12,
+                                offset: const Offset(0, 5),
                               ),
+                            ],
+                          ),
+                          child: Icon(
+                            widget.icon,
+                            color: Colors.white,
+                            size: 24,
+                          ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          title,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
+                        const SizedBox(width: 13),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.eyebrow,
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(
+                                      color: const Color(0xFFB9FFF4),
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.75,
+                                    ),
                               ),
+                              const SizedBox(height: 6),
+                              Text(
+                                widget.title,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: -0.3,
+                                      height: 1.16,
+                                    ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                widget.body,
+                                maxLines: largeText ? 4 : 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.88,
+                                      ),
+                                      height: 1.34,
+                                    ),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          body,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.88),
-                                height: 1.4,
-                              ),
+                        const SizedBox(width: 9),
+                        AnimatedContainer(
+                          duration: reduceMotion
+                              ? Duration.zero
+                              : const Duration(milliseconds: 180),
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(
+                              alpha: _highlighted ? 0.2 : 0.12,
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                            size: 19,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.chevron_right_rounded, color: Colors.white),
-                ],
+                ),
               ),
             ),
           ),
