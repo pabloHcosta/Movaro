@@ -57,7 +57,8 @@ class QuickGuideAnswerService {
     required String? cityId,
   }) {
     final topic = _detectTopic(question);
-    final profile = _localProfile(topic, locale);
+    final profile = _localProfile(topic, locale, question);
+    final practicalGuidance = _localPracticalGuidance(topic, locale);
     return QuickGuideAnswer(
       resolutionId: 'quick-help-$topic-offline',
       entryId: 'quick-guide-$topic-local',
@@ -87,22 +88,20 @@ class QuickGuideAnswerService {
         cityId: cityId,
       ),
       actions: const [],
-      caveats: [
-        _tr(
-          locale,
-          pt: 'Conecte-se antes de usar esta orientação em uma decisão importante.',
-          es: 'Conectate antes de usar esta orientación para una decisión importante.',
-          en: 'Connect before using this guidance for an important decision.',
-        ),
-        ...profile.caveats,
-      ],
+      nextSteps: practicalGuidance.$1,
+      fallbackPath: practicalGuidance.$2,
+      caveats: profile.caveats,
       // Offline content is intentionally not presented as reviewed evidence.
       sources: const [],
       offline: true,
     );
   }
 
-  _LocalQuickGuideProfile _localProfile(String topic, String locale) {
+  _LocalQuickGuideProfile _localProfile(
+    String topic,
+    String locale,
+    String question,
+  ) {
     final exploreLabel = _tr(
       locale,
       pt: 'Explorar este tema',
@@ -118,13 +117,20 @@ class QuickGuideAnswerService {
 
     switch (topic) {
       case 'education':
+        final isUniversity = _normalize(question).contains('univers');
         return _LocalQuickGuideProfile(
           reviewed: true,
           answer: _tr(
             locale,
-            pt: 'Crianças e adolescentes migrantes têm direito à matrícula na educação básica. Procure a rede municipal ou estadual responsável pelo endereço, leve os documentos disponíveis e peça orientação formal se algum documento ainda estiver faltando. Para universidade, o ingresso depende do processo da instituição, como Sisu, vestibular ou seleção própria.',
-            es: 'Niños y adolescentes migrantes tienen derecho a matricularse en la educación básica. Buscá la red municipal o estadual correspondiente al domicilio, llevá los documentos disponibles y pedí orientación formal si falta alguno. Para la universidad, el ingreso depende del proceso de cada institución, como Sisu, examen o selección propia.',
-            en: 'Migrant children and adolescents have a right to basic-school enrollment. Contact the municipal or state network for the address, bring the documents you have, and request formal guidance if something is missing. University admission depends on each institution through Sisu, an entrance exam, or its own process.',
+            pt: isUniversity
+                ? 'O ingresso na universidade depende do processo de cada instituição, como Sisu, vestibular ou seleção própria. Confirme também se seus documentos escolares precisam de tradução ou validação.'
+                : 'Crianças e adolescentes migrantes podem se matricular na educação básica. Procure a rede municipal ou estadual responsável pelo endereço, leve os documentos disponíveis e peça orientação por escrito se algo faltar.',
+            es: isUniversity
+                ? 'El ingreso a la universidad depende del proceso de cada institución, como Sisu, examen o selección propia. Confirmá también si tus documentos escolares necesitan traducción o validación.'
+                : 'Niños y adolescentes migrantes pueden matricularse en la educación básica. Buscá la red municipal o estadual del domicilio, llevá los documentos disponibles y pedí orientación por escrito si falta algo.',
+            en: isUniversity
+                ? 'University admission depends on each institution through Sisu, an entrance exam, or its own process. Also confirm whether your school records need translation or validation.'
+                : 'Migrant children and adolescents can enroll in basic education. Contact the municipal or state network for the address, bring the documents you have, and request written guidance if something is missing.',
           ),
           action: QuickGuideAction(
             type: 'open_topic',
@@ -458,6 +464,169 @@ class QuickGuideAnswerService {
           ],
         );
     }
+  }
+
+  (List<String>, List<String>) _localPracticalGuidance(
+    String topic,
+    String locale,
+  ) {
+    return switch (topic) {
+      'education' => (
+        [
+          _tr(
+            locale,
+            pt: 'Identifique a rede municipal ou estadual responsável pelo endereço.',
+            es: 'Identificá la red municipal o estadual responsable del domicilio.',
+            en: 'Identify the municipal or state school network for the address.',
+          ),
+          _tr(
+            locale,
+            pt: 'Peça a lista atual de documentos e o calendário de matrícula.',
+            es: 'Pedí la lista actual de documentos y el calendario de inscripción.',
+            en: 'Request the current document list and enrollment calendar.',
+          ),
+        ],
+        [
+          _tr(
+            locale,
+            pt: 'Se houver bloqueio, peça a exigência e a orientação da rede por escrito.',
+            es: 'Si hay un bloqueo, pedí por escrito el requisito y la orientación de la red.',
+            en: 'If blocked, request the requirement and the network’s guidance in writing.',
+          ),
+        ],
+      ),
+      'housing' => (
+        [
+          _tr(
+            locale,
+            pt: 'Confirme por escrito qual garantia será usada no contrato.',
+            es: 'Confirmá por escrito qué garantía se usará en el contrato.',
+            en: 'Confirm in writing which guarantee the contract will use.',
+          ),
+          _tr(
+            locale,
+            pt: 'Verifique o imóvel, o contrato e a identidade antes de pagar.',
+            es: 'Verificá el inmueble, el contrato y la identidad antes de pagar.',
+            en: 'Verify the property, contract, and identity before paying.',
+          ),
+        ],
+        [
+          _tr(
+            locale,
+            pt: 'Se houver pressão ou cobrança duvidosa, não pague e preserve anúncio e mensagens.',
+            es: 'Si hay presión o un cobro dudoso, no pagues y guardá el anuncio y los mensajes.',
+            en: 'If pressured or charged suspiciously, do not pay and keep the listing and messages.',
+          ),
+        ],
+      ),
+      'work' => (
+        [
+          _tr(
+            locale,
+            pt: 'Confirme sua situação migratória e o acesso à Carteira de Trabalho Digital.',
+            es: 'Confirmá tu situación migratoria y el acceso a la Libreta de Trabajo Digital.',
+            en: 'Confirm your migration status and access to the Digital Work Card.',
+          ),
+          _tr(
+            locale,
+            pt: 'Adapte o currículo ao português e pesquise em mais de um canal.',
+            es: 'Adaptá el currículum al portugués y buscá en más de un canal.',
+            en: 'Adapt your résumé to Portuguese and search through more than one channel.',
+          ),
+        ],
+        [
+          _tr(
+            locale,
+            pt: 'Não pague inscrição, curso ou treinamento para ser contratado.',
+            es: 'No pagues inscripción, curso o capacitación para ser contratado.',
+            en: 'Do not pay an application, course, or training fee to be hired.',
+          ),
+        ],
+      ),
+      'health' => (
+        [
+          _tr(
+            locale,
+            pt: 'Em urgência, procure atendimento imediato; para acompanhamento, localize a UBS da região.',
+            es: 'Ante una urgencia, buscá atención inmediata; para seguimiento, localizá la UBS de la zona.',
+            en: 'For urgent needs, seek immediate care; for follow-up, find the local UBS.',
+          ),
+          _tr(
+            locale,
+            pt: 'Confirme na unidade quais documentos são usados no cadastro local.',
+            es: 'Confirmá en la unidad qué documentos se usan para el registro local.',
+            en: 'Ask the unit which documents it uses for local registration.',
+          ),
+        ],
+        [
+          _tr(
+            locale,
+            pt: 'Em uma emergência médica, ligue para o SAMU 192.',
+            es: 'En una emergencia médica, llamá al SAMU 192.',
+            en: 'In a medical emergency, call SAMU 192.',
+          ),
+        ],
+      ),
+      'documents' || 'driving' => (
+        [
+          _tr(
+            locale,
+            pt: 'Identifique o documento ou serviço exato antes de reunir comprovantes.',
+            es: 'Identificá el documento o servicio exacto antes de reunir comprobantes.',
+            en: 'Identify the exact document or service before gathering evidence.',
+          ),
+          _tr(
+            locale,
+            pt: 'Confirme a lista vigente no canal oficial responsável.',
+            es: 'Confirmá la lista vigente en el canal oficial responsable.',
+            en: 'Confirm the current list through the responsible official channel.',
+          ),
+        ],
+        [
+          _tr(
+            locale,
+            pt: 'Se houver recusa, peça o motivo por escrito e guarde o protocolo.',
+            es: 'Si hay un rechazo, pedí el motivo por escrito y guardá el protocolo.',
+            en: 'If refused, request the reason in writing and keep the protocol.',
+          ),
+        ],
+      ),
+      'finance' || 'tax' || 'costs' => (
+        [
+          _tr(
+            locale,
+            pt: 'Identifique primeiro o bloqueio ou valor que precisa confirmar.',
+            es: 'Identificá primero el bloqueo o valor que necesitás confirmar.',
+            en: 'First identify the blockage or amount you need to confirm.',
+          ),
+          _tr(
+            locale,
+            pt: 'Peça requisitos, taxas e motivo de recusa por um canal oficial.',
+            es: 'Pedí requisitos, tasas y motivo de rechazo por un canal oficial.',
+            en: 'Request requirements, fees, and refusal reasons through an official channel.',
+          ),
+        ],
+        [
+          _tr(
+            locale,
+            pt: 'Não envie dinheiro ou documentos a intermediários não verificados.',
+            es: 'No envíes dinero ni documentos a intermediarios no verificados.',
+            en: 'Do not send money or documents to unverified intermediaries.',
+          ),
+        ],
+      ),
+      _ => (
+        [
+          _tr(
+            locale,
+            pt: 'Confirme a orientação atual no canal oficial responsável.',
+            es: 'Confirmá la orientación actual en el canal oficial responsable.',
+            en: 'Confirm current guidance through the responsible official channel.',
+          ),
+        ],
+        const <String>[],
+      ),
+    };
   }
 
   String _detectTopic(String value) {

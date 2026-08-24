@@ -172,6 +172,8 @@ void main() {
       expect(answer.sources, isEmpty);
       expect(answer.trust.freshness, QuickGuideFreshness.notAvailable);
       expect(answer.actions, isEmpty);
+      expect(answer.nextSteps, hasLength(2));
+      expect(answer.fallbackPath, hasLength(1));
     },
   );
 
@@ -211,6 +213,7 @@ void main() {
         expect(answer.sources, isEmpty);
         expect(answer.trust.evidenceCoverage, 0);
         expect(answer.actions, isEmpty);
+        expect(answer.nextSteps, isNotEmpty);
       }
     },
   );

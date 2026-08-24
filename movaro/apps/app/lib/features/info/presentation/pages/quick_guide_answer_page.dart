@@ -377,6 +377,16 @@ class _QuickGuideAnswerPageState extends State<QuickGuideAnswerPage> {
     final cityName = _selectedCityId == answer.context.cityId
         ? _selectedCityName
         : null;
+    final topic = _topicVisual(context, answer.topic);
+    final showRecoveryEarly =
+        answer.recovery != null &&
+        (answer.coverage == QuickGuideCoverage.notCovered ||
+            answer.coverage == QuickGuideCoverage.partial);
+    final showLocationContext =
+        answer.context.cityId != null ||
+        (!answer.offline &&
+            (answer.coverage == QuickGuideCoverage.conditional ||
+                answer.coverage == QuickGuideCoverage.needsContext));
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 780),
@@ -389,107 +399,93 @@ class _QuickGuideAnswerPageState extends State<QuickGuideAnswerPage> {
             132,
           ),
           children: [
+            _TopicIdentity(topic: topic),
+            const SizedBox(height: 14),
             Semantics(
               header: true,
               child: Text(
-                _t(
-                  context,
-                  pt: 'SUA PERGUNTA',
-                  es: 'TU PREGUNTA',
-                  en: 'YOUR QUESTION',
-                ),
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: AppColors.primary,
+                answer.question.isEmpty
+                    ? widget.request.question
+                    : answer.question,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: AppColors.textPrimaryFor(context),
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 1.4,
+                  height: 1.18,
+                  letterSpacing: -0.6,
                 ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              answer.question.isEmpty
-                  ? widget.request.question
-                  : answer.question,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.textPrimaryFor(context),
-                fontWeight: FontWeight.w800,
-                height: 1.18,
-                letterSpacing: -0.6,
               ),
             ),
             const SizedBox(height: 20),
-            _AnswerHero(answer: answer, onSourceTap: _openSource),
-            if (answer.sections.length > 1) ...[
-              const SizedBox(height: 16),
-              _ResolutionSections(answer: answer, onSourceTap: _openSource),
-            ],
-            const SizedBox(height: 16),
-            _ContextCard(
+            _AnswerHero(
+              key: const Key('quick-guide-answer-hero'),
               answer: answer,
-              cityName: cityName,
-              onEditCity: _editCityContext,
-              onClearCity: answer.context.cityId == null
-                  ? null
-                  : _clearCityContext,
             ),
             if (answer.followUpQuestion case final question?) ...[
               const SizedBox(height: 16),
               _FollowUpCard(
+                key: const Key('quick-guide-answer-clarifier'),
                 question: question,
                 onSelected: (option) => _answerFollowUp(question, option),
               ),
             ],
-            if (answer.steps.isNotEmpty) ...[
+            if (showRecoveryEarly) ...[
               const SizedBox(height: 16),
-              _DecisionStepsCard(
-                title: answer.decisionTitle,
-                steps: answer.steps,
+              _RecoveryCard(
+                recovery: answer.recovery!,
+                onSelected: _reformulate,
               ),
             ],
-            if (answer.nextSteps.isNotEmpty) ...[
+            if (answer.sections.length > 1) ...[
               const SizedBox(height: 16),
-              _PracticalStepsCard(items: answer.nextSteps),
+              _ResolutionSections(answer: answer, onSourceTap: _openSource),
             ],
-            if (answer.fallbackPath.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _FallbackPathCard(items: answer.fallbackPath),
-            ],
-            if (answer.recovery case final recovery?) ...[
+            if (answer.steps.isNotEmpty || answer.nextSteps.isNotEmpty) ...[
               const SizedBox(height: 16),
-              _RecoveryCard(recovery: recovery, onSelected: _reformulate),
+              _DecisionStepsCard(
+                key: const Key('quick-guide-answer-actions'),
+                title: answer.decisionTitle,
+                steps: answer.steps,
+                nextSteps: answer.nextSteps,
+              ),
             ],
             if (answer.caveats.isNotEmpty) ...[
               const SizedBox(height: 16),
-              _CaveatsCard(items: answer.caveats),
-            ],
-            if (answer.sources.isNotEmpty) ...[
-              const SizedBox(height: 24),
-              _SectionTitle(
-                title: _t(
-                  context,
-                  pt: 'Fontes usadas',
-                  es: 'Fuentes utilizadas',
-                  en: 'Sources used',
-                ),
-                subtitle: _t(
-                  context,
-                  pt: 'Veja o escopo e a vigência de cada fonte.',
-                  es: 'Consultá el alcance y la vigencia de cada fuente.',
-                  en: 'Review the scope and validity of each source.',
-                ),
+              _CaveatsCard(
+                key: const Key('quick-guide-answer-caveats'),
+                items: answer.caveats,
               ),
-              const SizedBox(height: 12),
-              for (final source in answer.sources)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: _SourceCard(
-                    source: source,
-                    onTap: () => _openSource(source),
-                  ),
-                ),
             ],
-            const SizedBox(height: 24),
+            if (answer.fallbackPath.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _FallbackPathCard(
+                key: const Key('quick-guide-answer-fallback'),
+                items: answer.fallbackPath,
+              ),
+            ],
+            if (answer.recovery case final recovery?
+                when !showRecoveryEarly) ...[
+              const SizedBox(height: 16),
+              _RecoveryCard(recovery: recovery, onSelected: _reformulate),
+            ],
+            if (showLocationContext) ...[
+              const SizedBox(height: 16),
+              _ContextCard(
+                key: const Key('quick-guide-answer-context'),
+                answer: answer,
+                cityName: cityName,
+                onEditCity: _editCityContext,
+                onClearCity: answer.context.cityId == null
+                    ? null
+                    : _clearCityContext,
+              ),
+            ],
+            if (answer.sources.isNotEmpty || answer.reviewedAt != null) ...[
+              const SizedBox(height: 16),
+              _SourcesDisclosure(answer: answer, onSourceTap: _openSource),
+            ],
+            const SizedBox(height: 16),
             _FeedbackCard(
+              key: const Key('quick-guide-answer-feedback'),
               value: _helpful,
               reason: _feedbackReason,
               onChanged: (value) => _setHelpful(answer, value),
@@ -500,13 +496,13 @@ class _QuickGuideAnswerPageState extends State<QuickGuideAnswerPage> {
               height: 52,
               child: OutlinedButton.icon(
                 onPressed: () => Navigator.maybePop(context),
-                icon: const Icon(Icons.chat_bubble_outline_rounded),
+                icon: const Icon(Icons.search_rounded),
                 label: Text(
                   _t(
                     context,
-                    pt: 'Fazer outra pergunta',
-                    es: 'Hacer otra pregunta',
-                    en: 'Ask another question',
+                    pt: 'Buscar outra dúvida',
+                    es: 'Buscar otra duda',
+                    en: 'Find another question',
                   ),
                 ),
               ),
@@ -518,11 +514,209 @@ class _QuickGuideAnswerPageState extends State<QuickGuideAnswerPage> {
   }
 }
 
+class _TopicVisualData {
+  const _TopicVisualData({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.description,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String description;
+}
+
+_TopicVisualData _topicVisual(BuildContext context, String topic) {
+  return switch (topic) {
+    'documents' => _TopicVisualData(
+      icon: Icons.folder_copy_outlined,
+      color: const Color(0xFF7557E8),
+      label: _t(context, pt: 'Documentos', es: 'Documentos', en: 'Documents'),
+      description: _t(
+        context,
+        pt: 'Residência, CPF e registros',
+        es: 'Residencia, CPF y registros',
+        en: 'Residency, CPF, and records',
+      ),
+    ),
+    'education' => _TopicVisualData(
+      icon: Icons.school_outlined,
+      color: const Color(0xFF00897B),
+      label: _t(context, pt: 'Educação', es: 'Educación', en: 'Education'),
+      description: _t(
+        context,
+        pt: 'Escola, universidade e validação',
+        es: 'Escuela, universidad y validación',
+        en: 'School, university, and validation',
+      ),
+    ),
+    'housing' || 'utilities' => _TopicVisualData(
+      icon: Icons.home_work_outlined,
+      color: const Color(0xFFE58A16),
+      label: _t(
+        context,
+        pt: 'Moradia e aluguel',
+        es: 'Vivienda y alquiler',
+        en: 'Housing and rent',
+      ),
+      description: _t(
+        context,
+        pt: 'Busca, contrato e serviços da casa',
+        es: 'Búsqueda, contrato y servicios del hogar',
+        en: 'Search, contracts, and home utilities',
+      ),
+    ),
+    'work' => _TopicVisualData(
+      icon: Icons.work_outline_rounded,
+      color: AppColors.primary,
+      label: _t(context, pt: 'Trabalho', es: 'Trabajo', en: 'Work'),
+      description: _t(
+        context,
+        pt: 'Documentos, direitos e oportunidades',
+        es: 'Documentos, derechos y oportunidades',
+        en: 'Documents, rights, and opportunities',
+      ),
+    ),
+    'money' || 'finance' || 'costs' || 'tax' => _TopicVisualData(
+      icon: Icons.savings_outlined,
+      color: AppColors.success,
+      label: _t(
+        context,
+        pt: 'Custos e dinheiro',
+        es: 'Costos y dinero',
+        en: 'Costs and money',
+      ),
+      description: _t(
+        context,
+        pt: 'Reserva, contas e pagamentos',
+        es: 'Reserva, cuentas y pagos',
+        en: 'Reserve, accounts, and payments',
+      ),
+    ),
+    'health' => _TopicVisualData(
+      icon: Icons.health_and_safety_outlined,
+      color: const Color(0xFFE34B67),
+      label: _t(context, pt: 'Saúde', es: 'Salud', en: 'Health'),
+      description: _t(
+        context,
+        pt: 'SUS, cuidados e emergências',
+        es: 'SUS, atención y emergencias',
+        en: 'SUS, care, and emergencies',
+      ),
+    ),
+    'family' => _TopicVisualData(
+      icon: Icons.family_restroom_rounded,
+      color: const Color(0xFFB04B9B),
+      label: _t(context, pt: 'Família', es: 'Familia', en: 'Family'),
+      description: _t(
+        context,
+        pt: 'Dependentes, escola e cuidados',
+        es: 'Dependientes, escuela y cuidados',
+        en: 'Dependents, school, and care',
+      ),
+    ),
+    'rights' || 'protection' || 'consumer' => _TopicVisualData(
+      icon: Icons.gavel_rounded,
+      color: const Color(0xFF4361A9),
+      label: _t(context, pt: 'Direitos', es: 'Derechos', en: 'Rights'),
+      description: _t(
+        context,
+        pt: 'Proteção, consumo e segurança',
+        es: 'Protección, consumo y seguridad',
+        en: 'Protection, consumer rights, and safety',
+      ),
+    ),
+    'arrival' || 'flights' || 'driving' || 'pets_customs' => _TopicVisualData(
+      icon: Icons.flight_land_rounded,
+      color: const Color(0xFF157E96),
+      label: _t(context, pt: 'Chegada', es: 'Llegada', en: 'Arrival'),
+      description: _t(
+        context,
+        pt: 'Viagem, transporte e primeiros dias',
+        es: 'Viaje, transporte y primeros días',
+        en: 'Travel, transport, and first days',
+      ),
+    ),
+    'long_term' => _TopicVisualData(
+      icon: Icons.flag_outlined,
+      color: const Color(0xFF5C6F7B),
+      label: _t(
+        context,
+        pt: 'Vida no Brasil',
+        es: 'Vida en Brasil',
+        en: 'Life in Brazil',
+      ),
+      description: _t(
+        context,
+        pt: 'Permanência e decisões de longo prazo',
+        es: 'Permanencia y decisiones a largo plazo',
+        en: 'Long-term residence and decisions',
+      ),
+    ),
+    _ => _TopicVisualData(
+      icon: Icons.help_center_outlined,
+      color: AppColors.primary,
+      label: _t(
+        context,
+        pt: 'Ajuda rápida',
+        es: 'Ayuda rápida',
+        en: 'Quick help',
+      ),
+      description: _t(
+        context,
+        pt: 'Orientação para viver no Brasil',
+        es: 'Orientación para vivir en Brasil',
+        en: 'Guidance for living in Brazil',
+      ),
+    ),
+  };
+}
+
+class _TopicIdentity extends StatelessWidget {
+  const _TopicIdentity({required this.topic});
+
+  final _TopicVisualData topic;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      key: const Key('quick-guide-topic-identity'),
+      container: true,
+      label: '${topic.label}. ${topic.description}',
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: topic.color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: topic.color.withValues(alpha: 0.2)),
+            ),
+            child: Icon(topic.icon, color: topic.color, size: 20),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              topic.label,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: topic.color,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _AnswerHero extends StatelessWidget {
-  const _AnswerHero({required this.answer, required this.onSourceTap});
+  const _AnswerHero({required this.answer, super.key});
 
   final QuickGuideAnswer answer;
-  final ValueChanged<QuickGuideSource> onSourceTap;
 
   @override
   Widget build(BuildContext context) {
@@ -531,9 +725,9 @@ class _AnswerHero extends StatelessWidget {
         Icons.verified_rounded,
         _t(
           context,
-          pt: 'Confirmado para este contexto',
-          es: 'Confirmado para este contexto',
-          en: 'Confirmed for this context',
+          pt: 'Resposta verificada',
+          es: 'Respuesta verificada',
+          en: 'Verified answer',
         ),
         AppColors.success,
       ),
@@ -541,9 +735,9 @@ class _AnswerHero extends StatelessWidget {
         Icons.fact_check_outlined,
         _t(
           context,
-          pt: 'Aplica-se com condições',
-          es: 'Se aplica con condiciones',
-          en: 'Applies with conditions',
+          pt: 'Pode variar no seu caso',
+          es: 'Puede variar en tu caso',
+          en: 'May vary for your case',
         ),
         AppColors.primary,
       ),
@@ -551,9 +745,9 @@ class _AnswerHero extends StatelessWidget {
         Icons.tune_rounded,
         _t(
           context,
-          pt: 'Precisa de um detalhe',
-          es: 'Necesita un dato',
-          en: 'Needs one detail',
+          pt: 'Responda para ajustar',
+          es: 'Respondé para ajustar',
+          en: 'Answer to refine',
         ),
         AppColors.caution,
       ),
@@ -561,9 +755,9 @@ class _AnswerHero extends StatelessWidget {
         Icons.info_rounded,
         _t(
           context,
-          pt: 'Cobertura parcial',
-          es: 'Cobertura parcial',
-          en: 'Partial coverage',
+          pt: 'Resposta limitada',
+          es: 'Respuesta limitada',
+          en: 'Limited answer',
         ),
         AppColors.caution,
       ),
@@ -571,9 +765,9 @@ class _AnswerHero extends StatelessWidget {
         Icons.search_off_rounded,
         _t(
           context,
-          pt: 'Sem cobertura específica',
-          es: 'Sin cobertura específica',
-          en: 'No specific coverage',
+          pt: 'Ainda sem resposta revisada',
+          es: 'Aún sin respuesta revisada',
+          en: 'No reviewed answer yet',
         ),
         AppColors.textSoftFor(context),
       ),
@@ -592,34 +786,10 @@ class _AnswerHero extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _StatusPill(icon: status.$1, label: status.$2, color: status.$3),
-              if (answer.offline)
-                _StatusPill(
-                  icon: Icons.offline_bolt_rounded,
-                  label: _t(
-                    context,
-                    pt: 'Disponível offline',
-                    es: 'Disponible sin conexión',
-                    en: 'Available offline',
-                  ),
-                  color: AppColors.primary,
-                ),
-            ],
-          ),
-          const SizedBox(height: 20),
           Semantics(
             header: true,
             child: Text(
-              _t(
-                context,
-                pt: 'Resposta direta',
-                es: 'Respuesta directa',
-                en: 'Direct answer',
-              ),
+              _t(context, pt: 'Em resumo', es: 'En resumen', en: 'In short'),
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 color: AppColors.textSoftFor(context),
                 fontWeight: FontWeight.w700,
@@ -627,9 +797,12 @@ class _AnswerHero extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _DirectAnswerWithEvidence(answer: answer, onSourceTap: onSourceTap),
-          if (answer.coverageReason.isNotEmpty) ...[
-            const SizedBox(height: 14),
+          _DirectAnswer(answer: answer),
+          const SizedBox(height: 18),
+          _StatusPill(icon: status.$1, label: status.$2, color: status.$3),
+          if (answer.coverage != QuickGuideCoverage.confirmed &&
+              answer.coverageReason.isNotEmpty) ...[
+            const SizedBox(height: 10),
             Semantics(
               label: answer.coverageReason,
               child: Row(
@@ -649,40 +822,6 @@ class _AnswerHero extends StatelessWidget {
                 ],
               ),
             ),
-          ],
-          if (answer.reviewedAt != null) ...[
-            const SizedBox(height: 16),
-            Text(
-              _t(
-                context,
-                pt: answer.expiresAt == null
-                    ? 'Revisado em ${_date(answer.reviewedAt!)}'
-                    : 'Revisado em ${_date(answer.reviewedAt!)} · válido até ${_date(answer.expiresAt!)}',
-                es: answer.expiresAt == null
-                    ? 'Revisado el ${_date(answer.reviewedAt!)}'
-                    : 'Revisado el ${_date(answer.reviewedAt!)} · válido hasta ${_date(answer.expiresAt!)}',
-                en: answer.expiresAt == null
-                    ? 'Reviewed on ${_date(answer.reviewedAt!)}'
-                    : 'Reviewed on ${_date(answer.reviewedAt!)} · valid until ${_date(answer.expiresAt!)}',
-              ),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSoftFor(context),
-              ),
-            ),
-            if (answer.editorialOwner != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                _t(
-                  context,
-                  pt: 'Responsável editorial: ${answer.editorialOwner!}',
-                  es: 'Responsable editorial: ${answer.editorialOwner!}',
-                  en: 'Editorial owner: ${answer.editorialOwner!}',
-                ),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSoftFor(context),
-                ),
-              ),
-            ],
           ],
         ],
       ),
@@ -868,90 +1007,130 @@ class _ResolutionSections extends StatelessWidget {
 }
 
 class _FollowUpCard extends StatelessWidget {
-  const _FollowUpCard({required this.question, required this.onSelected});
+  const _FollowUpCard({
+    required this.question,
+    required this.onSelected,
+    super.key,
+  });
 
   final QuickGuideFollowUpQuestion question;
   final ValueChanged<QuickGuideFollowUpOption> onSelected;
 
   @override
   Widget build(BuildContext context) {
+    return _AnswerSectionCard(
+      semanticLabel: question.prompt,
+      liveRegion: true,
+      icon: Icons.tune_rounded,
+      tone: AppColors.primary,
+      title: _t(
+        context,
+        pt: 'Um detalhe muda a resposta',
+        es: 'Un dato cambia la respuesta',
+        en: 'One detail changes the answer',
+      ),
+      subtitle: question.prompt,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final option in question.options)
+            OutlinedButton(
+              onPressed: () => onSelected(option),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(0, 48),
+                backgroundColor: AppColors.surfaceFor(context),
+                side: BorderSide(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Text(option.label),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnswerSectionCard extends StatelessWidget {
+  const _AnswerSectionCard({
+    required this.icon,
+    required this.title,
+    required this.child,
+    this.subtitle,
+    this.tone = AppColors.primary,
+    this.semanticLabel,
+    this.liveRegion = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Widget child;
+  final Color tone;
+  final String? semanticLabel;
+  final bool liveRegion;
+
+  @override
+  Widget build(BuildContext context) {
     return Semantics(
       container: true,
-      liveRegion: true,
-      label: question.prompt,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.primary.withValues(alpha: 0.14),
-              AppColors.primary.withValues(alpha: 0.05),
-            ],
-          ),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.28)),
-          borderRadius: BorderRadius.circular(24),
-        ),
+      liveRegion: liveRegion,
+      label: semanticLabel,
+      child: FrostedPanel(
+        padding: const EdgeInsets.all(18),
+        borderRadius: BorderRadius.circular(22),
+        borderColor: tone.withValues(alpha: 0.22),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
-                  Icons.auto_awesome_rounded,
-                  color: AppColors.primary,
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: tone.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: Icon(icon, color: tone, size: 22),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _t(
-                          context,
-                          pt: 'Um detalhe muda a resposta',
-                          es: 'Un dato cambia la respuesta',
-                          en: 'One detail changes the answer',
-                        ),
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w800,
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: AppColors.textPrimaryFor(context),
+                                fontWeight: FontWeight.w800,
+                                height: 1.25,
+                              ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        question.prompt,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: AppColors.textPrimaryFor(context),
-                              fontWeight: FontWeight.w800,
-                              height: 1.3,
-                            ),
-                      ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 5),
+                        Text(
+                          subtitle!,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: AppColors.textSoftFor(context),
+                                height: 1.42,
+                              ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final option in question.options)
-                  OutlinedButton(
-                    onPressed: () => onSelected(option),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(0, 48),
-                      backgroundColor: AppColors.surfaceFor(context),
-                      side: BorderSide(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Text(option.label),
-                  ),
-              ],
-            ),
+            child,
           ],
         ),
       ),
@@ -960,37 +1139,39 @@ class _FollowUpCard extends StatelessWidget {
 }
 
 class _DecisionStepsCard extends StatelessWidget {
-  const _DecisionStepsCard({required this.title, required this.steps});
+  const _DecisionStepsCard({
+    required this.title,
+    required this.steps,
+    required this.nextSteps,
+    super.key,
+  });
 
   final String? title;
   final List<QuickGuideStep> steps;
+  final List<String> nextSteps;
 
   @override
   Widget build(BuildContext context) {
-    return FrostedPanel(
-      padding: const EdgeInsets.all(20),
-      borderRadius: BorderRadius.circular(24),
+    final seen = <String>{};
+    final items = <String>[
+      ...steps.map((step) => step.label),
+      ...nextSteps,
+    ].where((item) => seen.add(item.trim().toLowerCase())).toList();
+    return _AnswerSectionCard(
+      icon: Icons.signpost_outlined,
+      title: _t(
+        context,
+        pt: 'O que fazer agora',
+        es: 'Qué hacer ahora',
+        en: 'What to do now',
+      ),
+      subtitle: title,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title ??
-                _t(
-                  context,
-                  pt: 'Caminho recomendado',
-                  es: 'Camino recomendado',
-                  en: 'Recommended path',
-                ),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: AppColors.textPrimaryFor(context),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 14),
-          for (var index = 0; index < steps.length; index++)
+          for (var index = 0; index < items.length; index++)
             Padding(
               padding: EdgeInsets.only(
-                bottom: index == steps.length - 1 ? 0 : 14,
+                bottom: index == items.length - 1 ? 0 : 14,
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1014,83 +1195,6 @@ class _DecisionStepsCard extends StatelessWidget {
                   const SizedBox(width: 11),
                   Expanded(
                     child: Text(
-                      steps[index].label,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textPrimaryFor(context),
-                        height: 1.45,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PracticalStepsCard extends StatelessWidget {
-  const _PracticalStepsCard({required this.items});
-
-  final List<String> items;
-
-  @override
-  Widget build(BuildContext context) {
-    return FrostedPanel(
-      padding: const EdgeInsets.all(20),
-      borderRadius: BorderRadius.circular(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.route_rounded, color: AppColors.primary),
-              const SizedBox(width: 9),
-              Expanded(
-                child: Text(
-                  _t(
-                    context,
-                    pt: 'Próximos passos',
-                    es: 'Próximos pasos',
-                    en: 'Next steps',
-                  ),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textPrimaryFor(context),
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          for (var index = 0; index < items.length; index++)
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: index == items.length - 1 ? 0 : 12,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 26,
-                    height: 26,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.11),
-                      borderRadius: BorderRadius.circular(9),
-                    ),
-                    child: Text(
-                      '${index + 1}',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
                       items[index],
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.textPrimaryFor(context),
@@ -1108,7 +1212,7 @@ class _PracticalStepsCard extends StatelessWidget {
 }
 
 class _FallbackPathCard extends StatelessWidget {
-  const _FallbackPathCard({required this.items});
+  const _FallbackPathCard({required this.items, super.key});
 
   final List<String> items;
 
@@ -1176,99 +1280,52 @@ class _RecoveryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
+    return _AnswerSectionCard(
+      icon: Icons.assistant_direction_rounded,
+      title: _t(
+        context,
+        pt: 'Vamos por um caminho seguro',
+        es: 'Probemos un camino seguro',
+        en: 'Let’s take a safe path',
+      ),
+      subtitle: recovery.message,
       liveRegion: true,
-      child: FrostedPanel(
-        padding: const EdgeInsets.all(20),
-        borderRadius: BorderRadius.circular(24),
-        borderColor: AppColors.primary.withValues(alpha: 0.24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(13),
-                  ),
-                  child: const Icon(
-                    Icons.assistant_direction_rounded,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _t(
-                          context,
-                          pt: 'Vamos por um caminho seguro',
-                          es: 'Probemos un camino seguro',
-                          en: 'Let’s take a safe path',
-                        ),
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: AppColors.textPrimaryFor(context),
-                              fontWeight: FontWeight.w800,
-                            ),
+      child: Column(
+        children: [
+          if (recovery.suggestions.isNotEmpty)
+            for (final suggestion in recovery.suggestions)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 9),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 52),
+                  child: OutlinedButton(
+                    onPressed: () => onSelected(suggestion),
+                    style: OutlinedButton.styleFrom(
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 13,
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        recovery.message,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSoftFor(context),
-                          height: 1.45,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (recovery.suggestions.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              for (final suggestion in recovery.suggestions)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 9),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 52),
-                    child: OutlinedButton(
-                      onPressed: () => onSelected(suggestion),
-                      style: OutlinedButton.styleFrom(
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 13,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              suggestion.question,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                height: 1.3,
-                              ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            suggestion.question,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              height: 1.3,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward_rounded, size: 20),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward_rounded, size: 20),
+                      ],
                     ),
                   ),
                 ),
-            ],
-          ],
-        ),
+              ),
+        ],
       ),
     );
   }
@@ -1280,6 +1337,7 @@ class _ContextCard extends StatelessWidget {
     required this.cityName,
     required this.onEditCity,
     required this.onClearCity,
+    super.key,
   });
   final QuickGuideAnswer answer;
   final String? cityName;
@@ -1290,25 +1348,37 @@ class _ContextCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final route =
         '${_country(answer.context.originCountry)} → ${_country(answer.context.destinationCountry)}';
+    final location =
+        cityName ??
+        _t(
+          context,
+          pt: 'sem cidade definida',
+          es: 'sin ciudad definida',
+          en: 'no city selected',
+        );
     return FrostedPanel(
-      padding: const EdgeInsets.all(18),
-      borderRadius: BorderRadius.circular(22),
+      padding: const EdgeInsets.all(14),
+      borderRadius: BorderRadius.circular(18),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(14),
+                  color: AppColors.primary.withValues(alpha: 0.09),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.tune_rounded, color: AppColors.primary),
+                child: const Icon(
+                  Icons.location_on_outlined,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
               ),
-              const SizedBox(width: 13),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1316,20 +1386,21 @@ class _ContextCard extends StatelessWidget {
                     Text(
                       _t(
                         context,
-                        pt: 'Contexto usado',
-                        es: 'Contexto usado',
-                        en: 'Context used',
+                        pt: 'Local considerado',
+                        es: 'Lugar considerado',
+                        en: 'Location considered',
                       ),
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: AppColors.textPrimaryFor(context),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
                     Text(
-                      cityName == null ? route : '$route · $cityName',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      '$route · $location',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.textSoftFor(context),
+                        height: 1.35,
                       ),
                     ),
                   ],
@@ -1337,7 +1408,7 @@ class _ContextCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -1375,195 +1446,68 @@ class _ContextCard extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 2),
-                child: Icon(
-                  Icons.lock_outline_rounded,
-                  size: 16,
-                  color: AppColors.success,
-                ),
-              ),
-              const SizedBox(width: 5),
-              Expanded(
-                child: Text(
-                  _t(
-                    context,
-                    pt: 'Esta consulta não altera seu plano.',
-                    es: 'Esta consulta no cambia tu plan.',
-                    en: 'This query does not change your plan.',
-                  ),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.success,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
   }
 }
 
-class _DirectAnswerWithEvidence extends StatelessWidget {
-  const _DirectAnswerWithEvidence({
-    required this.answer,
-    required this.onSourceTap,
-  });
+class _DirectAnswer extends StatelessWidget {
+  const _DirectAnswer({required this.answer});
 
   final QuickGuideAnswer answer;
-  final ValueChanged<QuickGuideSource> onSourceTap;
 
   @override
   Widget build(BuildContext context) {
-    final claims = answer.claims;
-    if (claims.isEmpty || answer.sections.length > 1) {
-      return SelectableText(
-        answer.answer,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          color: AppColors.textPrimaryFor(context),
-          fontWeight: FontWeight.w600,
-          height: 1.55,
-        ),
-      );
-    }
-    final sourceById = {
-      for (final source in answer.sources)
-        if (source.id.isNotEmpty) source.id: source,
-    };
-    return Column(
-      children: [
-        for (var index = 0; index < claims.length; index++) ...[
-          Semantics(
-            container: true,
-            label: _t(
-              context,
-              pt: 'Afirmação ${index + 1} de ${claims.length}',
-              es: 'Afirmación ${index + 1} de ${claims.length}',
-              en: 'Claim ${index + 1} of ${claims.length}',
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      claims[index].status == QuickGuideClaimStatus.verified
-                          ? Icons.verified_outlined
-                          : Icons.rule_rounded,
-                      size: 21,
-                      color:
-                          claims[index].status == QuickGuideClaimStatus.verified
-                          ? AppColors.success
-                          : AppColors.primary,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: SelectableText(
-                        claims[index].text,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textPrimaryFor(context),
-                          height: 1.55,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(left: 31),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final evidenceId in claims[index].evidenceIds)
-                        if (sourceById[evidenceId] case final source?)
-                          ActionChip(
-                            avatar: const Icon(
-                              Icons.open_in_new_rounded,
-                              size: 15,
-                            ),
-                            label: Text(source.publisher),
-                            tooltip: source.title,
-                            onPressed: () => onSourceTap(source),
-                          ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (index < claims.length - 1)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Divider(color: AppColors.borderFor(context)),
-            ),
-        ],
-      ],
+    return SelectableText(
+      answer.answer,
+      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        color: AppColors.textPrimaryFor(context),
+        fontWeight: FontWeight.w600,
+        height: 1.5,
+      ),
     );
   }
 }
 
 class _CaveatsCard extends StatelessWidget {
-  const _CaveatsCard({required this.items});
+  const _CaveatsCard({required this.items, super.key});
   final List<String> items;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      label: _t(context, pt: 'Atenção', es: 'Atención', en: 'Attention'),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: AppColors.caution.withValues(alpha: 0.09),
-          border: Border.all(color: AppColors.caution.withValues(alpha: 0.25)),
-          borderRadius: BorderRadius.circular(22),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(Icons.shield_outlined, color: AppColors.caution),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _t(
-                      context,
-                      pt: 'Vale confirmar',
-                      es: 'Conviene confirmar',
-                      en: 'Worth confirming',
-                    ),
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimaryFor(context),
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  for (final item in items)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        item,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSoftFor(context),
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                ],
+    return _AnswerSectionCard(
+      semanticLabel: _t(
+        context,
+        pt: 'Atenção',
+        es: 'Atención',
+        en: 'Attention',
+      ),
+      icon: Icons.shield_outlined,
+      tone: AppColors.caution,
+      title: _t(
+        context,
+        pt: 'Antes de agir',
+        es: 'Antes de actuar',
+        en: 'Before you act',
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (var index = 0; index < items.length; index++)
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: index == items.length - 1 ? 0 : 8,
+              ),
+              child: Text(
+                items[index],
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                  height: 1.42,
+                ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -1600,6 +1544,188 @@ class _SectionTitle extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _SourcesDisclosure extends StatelessWidget {
+  const _SourcesDisclosure({required this.answer, required this.onSourceTap});
+
+  final QuickGuideAnswer answer;
+  final ValueChanged<QuickGuideSource> onSourceTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final sourceCount = answer.sources.length;
+    final summary = [
+      if (sourceCount > 0)
+        _t(
+          context,
+          pt: '$sourceCount ${sourceCount == 1 ? 'fonte oficial' : 'fontes oficiais'}',
+          es: '$sourceCount ${sourceCount == 1 ? 'fuente oficial' : 'fuentes oficiales'}',
+          en: '$sourceCount official ${sourceCount == 1 ? 'source' : 'sources'}',
+        ),
+      if (answer.reviewedAt != null)
+        _t(
+          context,
+          pt: 'revisado em ${_date(answer.reviewedAt!)}',
+          es: 'revisado el ${_date(answer.reviewedAt!)}',
+          en: 'reviewed on ${_date(answer.reviewedAt!)}',
+        ),
+    ].join(' · ');
+    return Container(
+      key: const Key('quick-guide-answer-sources'),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceFor(context).withValues(alpha: 0.72),
+        border: Border.all(color: AppColors.borderFor(context)),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: ExpansionTile(
+        tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+        childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+        leading: const Icon(
+          Icons.verified_user_outlined,
+          color: AppColors.primary,
+        ),
+        shape: const Border(),
+        collapsedShape: const Border(),
+        title: Text(
+          _t(
+            context,
+            pt: 'Como verificamos',
+            es: 'Cómo lo verificamos',
+            en: 'How we verified it',
+          ),
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: AppColors.textPrimaryFor(context),
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        subtitle: summary.isEmpty
+            ? null
+            : Text(
+                summary,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSoftFor(context),
+                ),
+              ),
+        children: [
+          if (answer.claims.isNotEmpty && answer.sections.length <= 1) ...[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                _t(
+                  context,
+                  pt: 'Evidências consideradas',
+                  es: 'Evidencias consideradas',
+                  en: 'Evidence considered',
+                ),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: AppColors.textPrimaryFor(context),
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            for (var index = 0; index < answer.claims.length; index++)
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: index == answer.claims.length - 1 ? 14 : 10,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      answer.claims[index].status ==
+                              QuickGuideClaimStatus.verified
+                          ? Icons.verified_outlined
+                          : Icons.rule_rounded,
+                      size: 18,
+                      color:
+                          answer.claims[index].status ==
+                              QuickGuideClaimStatus.verified
+                          ? AppColors.success
+                          : AppColors.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        answer.claims[index].text,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textPrimaryFor(context),
+                          height: 1.45,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+          if (answer.editorialOwner != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  _t(
+                    context,
+                    pt: 'Responsável editorial: ${answer.editorialOwner!}',
+                    es: 'Responsable editorial: ${answer.editorialOwner!}',
+                    en: 'Editorial owner: ${answer.editorialOwner!}',
+                  ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                  ),
+                ),
+              ),
+            ),
+          if (answer.expiresAt != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  _t(
+                    context,
+                    pt: 'Vigência editorial até ${_date(answer.expiresAt!)}',
+                    es: 'Vigencia editorial hasta ${_date(answer.expiresAt!)}',
+                    en: 'Editorial validity until ${_date(answer.expiresAt!)}',
+                  ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                  ),
+                ),
+              ),
+            ),
+          if (answer.sources.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  _t(
+                    context,
+                    pt: 'Fontes oficiais',
+                    es: 'Fuentes oficiales',
+                    en: 'Official sources',
+                  ),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.textPrimaryFor(context),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+          for (final source in answer.sources)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _SourceCard(
+                source: source,
+                onTap: () => onSourceTap(source),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -1697,6 +1823,7 @@ class _FeedbackCard extends StatelessWidget {
     required this.reason,
     required this.onChanged,
     required this.onReasonChanged,
+    super.key,
   });
   final bool? value;
   final String? reason;
@@ -1705,39 +1832,40 @@ class _FeedbackCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final title = value == null
+        ? _t(
+            context,
+            pt: 'Isso ajudou?',
+            es: '¿Esto te ayudó?',
+            en: 'Was this helpful?',
+          )
+        : value == false && reason == null
+        ? _t(
+            context,
+            pt: 'O que faltou?',
+            es: '¿Qué faltó?',
+            en: 'What was missing?',
+          )
+        : _t(
+            context,
+            pt: 'Obrigado pelo feedback.',
+            es: 'Gracias por tu opinión.',
+            en: 'Thanks for your feedback.',
+          );
     return FrostedPanel(
-      padding: const EdgeInsets.all(20),
-      borderRadius: BorderRadius.circular(22),
+      padding: const EdgeInsets.all(16),
+      borderRadius: BorderRadius.circular(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            value == null
-                ? _t(
-                    context,
-                    pt: 'Isso ajudou?',
-                    es: '¿Esto te ayudó?',
-                    en: 'Was this helpful?',
-                  )
-                : value == false && reason == null
-                ? _t(
-                    context,
-                    pt: 'O que faltou?',
-                    es: '¿Qué faltó?',
-                    en: 'What was missing?',
-                  )
-                : _t(
-                    context,
-                    pt: 'Obrigado pelo feedback.',
-                    es: 'Gracias por tu opinión.',
-                    en: 'Thanks for your feedback.',
-                  ),
+            title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: AppColors.textPrimaryFor(context),
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(

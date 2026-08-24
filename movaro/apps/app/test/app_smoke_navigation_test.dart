@@ -210,30 +210,96 @@ void main() {
 
     expect(find.text('O que você precisa resolver?'), findsOneWidget);
     expect(find.byKey(const ValueKey('guide-question-field')), findsOneWidget);
-    expect(find.byKey(const ValueKey('guide-question-submit')), findsOneWidget);
-    expect(
-      tester
-          .widget<IconButton>(
-            find.byKey(const ValueKey('guide-question-submit')),
-          )
-          .onPressed,
-      isNull,
-    );
+    expect(find.byKey(const ValueKey('guide-question-submit')), findsNothing);
 
     await tester.enterText(
       find.byKey(const ValueKey('guide-question-field')),
-      'Consigo alugar sem fiador?',
+      'aluguel sem fiador',
     );
     await tester.pump();
 
     expect(
-      tester
-          .widget<IconButton>(
-            find.byKey(const ValueKey('guide-question-submit')),
-          )
-          .onPressed,
-      isNotNull,
+      find.byKey(const ValueKey('guide-question-results')),
+      findsOneWidget,
     );
+    expect(
+      find.byKey(
+        const ValueKey('guide-question-suggestion-housing.guarantees'),
+      ),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('free text only filters reviewed questions', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(harness.buildApp(initialRoute: AppRoutes.tools));
+    await _pumpScreen(tester);
+
+    final field = find.byKey(const ValueKey('guide-question-field'));
+    await tester.enterText(field, 'uma pergunta sem cobertura xyzzy');
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('guide-question-empty')), findsOneWidget);
+    expect(find.byKey(const ValueKey('guide-question-submit')), findsNothing);
+
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(find.text('O que você precisa resolver?'), findsOneWidget);
+    expect(field, findsOneWidget);
+
+    await tester.enterText(field, 'matricula escola');
+    await tester.pump();
+    final reviewedQuestion = find.byKey(
+      const ValueKey('guide-question-suggestion-education.school'),
+    );
+    expect(reviewedQuestion, findsOneWidget);
+
+    await tester.tap(reviewedQuestion);
+    await _pumpScreen(tester);
+    expect(find.byKey(const ValueKey('guide-question-field')), findsNothing);
+  });
+
+  testWidgets('recent questions stay compact until the user expands them', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    SharedPreferences.setMockInitialValues({
+      'quick_guide_recent_questions_v1': [
+        'Pergunta recente 1',
+        'Pergunta recente 2',
+        'Pergunta recente 3',
+        'Pergunta recente 4',
+        'Pergunta recente 5',
+      ],
+    });
+
+    await tester.pumpWidget(harness.buildApp(initialRoute: AppRoutes.tools));
+    await _pumpScreen(tester);
+
+    expect(find.text('Pergunta recente 1'), findsOneWidget);
+    expect(find.text('Pergunta recente 2'), findsNothing);
+    expect(find.text('Pergunta recente 3'), findsNothing);
+    expect(find.text('Ver todas (5)'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Ver todas (5)'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('Ver todas (5)'));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Pergunta recente 5'), findsOneWidget);
+    expect(find.text('Mostrar menos'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -405,14 +471,7 @@ void main() {
           matching: find.byType(Scrollable),
         )
         .first;
-    expect(find.text('Aplica-se com condições'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Esta consulta não altera seu plano.'),
-      260,
-      scrollable: answerScrollable,
-    );
-    expect(tester.takeException(), isNull, reason: 'context layout');
-    expect(find.text('Esta consulta não altera seu plano.'), findsOneWidget);
+    expect(find.text('Pode variar no seu caso'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Você quer escola ou universidade?'),
       260,
@@ -427,13 +486,14 @@ void main() {
     );
     expect(tester.takeException(), isNull, reason: 'decision layout');
     expect(find.text('Caminho recomendado'), findsOneWidget);
+    expect(find.text('O que fazer agora'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Peça a lista atual de documentos.'),
       260,
       scrollable: answerScrollable,
     );
     expect(tester.takeException(), isNull, reason: 'next steps layout');
-    expect(find.text('Próximos passos'), findsOneWidget);
+    expect(find.byKey(const Key('quick-guide-answer-actions')), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Se algo bloquear seu caminho'),
       260,
@@ -442,11 +502,18 @@ void main() {
     expect(tester.takeException(), isNull, reason: 'fallback layout');
     expect(find.text('Se algo bloquear seu caminho'), findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('Fontes usadas'),
+      find.text('Local considerado'),
       260,
       scrollable: answerScrollable,
     );
-    expect(find.text('Fontes usadas'), findsOneWidget);
+    expect(tester.takeException(), isNull, reason: 'context layout');
+    expect(find.text('Local considerado'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Como verificamos'),
+      260,
+      scrollable: answerScrollable,
+    );
+    expect(find.text('Como verificamos'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Isso ajudou?'),
       260,
@@ -472,20 +539,135 @@ void main() {
     await tester.ensureVisible(
       find.text('Como matriculo meu filho na escola pública?'),
     );
-    await tester.drag(answerScrollable, const Offset(0, 220));
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(
-        OutlinedButton,
-        'Como matriculo meu filho na escola pública?',
-      ),
-    );
     await tester.pumpAndSettle();
     expect(
       find.text('Como matriculo meu filho na escola pública?'),
       findsOneWidget,
     );
-    expect(find.text('Disponível offline'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('guide answer keeps one visual skeleton across core topics', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    const topics = <(String, String)>[
+      ('documents', 'Documentos'),
+      ('education', 'Educação'),
+      ('housing', 'Moradia e aluguel'),
+      ('work', 'Trabalho'),
+      ('money', 'Custos e dinheiro'),
+      ('health', 'Saúde'),
+    ];
+
+    for (final topic in topics) {
+      final answer = QuickGuideAnswer(
+        entryId: 'visual-${topic.$1}',
+        topic: topic.$1,
+        question: 'Dúvida sobre ${topic.$2}',
+        answer: 'Resposta revisada para este tema.',
+        coverage: QuickGuideCoverage.confirmed,
+        context: const QuickGuideContext(
+          originCountry: 'argentina',
+          destinationCountry: 'brasil',
+        ),
+        actions: const [],
+        caveats: const [],
+        sources: const [],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          locale: const Locale('pt'),
+          supportedLocales: AppLocalization.supportedLocales,
+          localizationsDelegates: AppLocalization.localizationsDelegates,
+          home: QuickGuideAnswerPage(
+            key: ValueKey(topic.$1),
+            request: QuickGuideAnswerRequest(question: answer.question),
+            environment: harness.environment,
+            journeyContextController: harness.journeyContextController,
+            citiesController: harness.citiesController,
+            migrationQuestionnaireController:
+                harness.migrationQuestionnaireController,
+            initialAnswer: answer,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('quick-guide-topic-identity')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('quick-guide-answer-hero')), findsOneWidget);
+      expect(find.byKey(const Key('quick-guide-answer-context')), findsNothing);
+      expect(find.text(topic.$2), findsOneWidget);
+      expect(tester.takeException(), isNull, reason: topic.$1);
+    }
+  });
+
+  testWidgets('offline answer prioritizes action over ineffective context', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    const answer = QuickGuideAnswer(
+      entryId: 'education-offline',
+      topic: 'education',
+      question: 'Como funciona a escola pública?',
+      answer: 'Procure a rede responsável pelo endereço.',
+      coverage: QuickGuideCoverage.partial,
+      coverageReason: 'Sem verificação atual das fontes.',
+      context: QuickGuideContext(
+        originCountry: 'argentina',
+        destinationCountry: 'brasil',
+      ),
+      actions: [],
+      nextSteps: ['Identifique a rede responsável pelo endereço.'],
+      fallbackPath: ['Peça a orientação por escrito.'],
+      caveats: ['Conecte-se antes de tomar uma decisão importante.'],
+      sources: [],
+      offline: true,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        locale: const Locale('pt'),
+        supportedLocales: AppLocalization.supportedLocales,
+        localizationsDelegates: AppLocalization.localizationsDelegates,
+        home: QuickGuideAnswerPage(
+          request: const QuickGuideAnswerRequest(
+            question: 'Como funciona a escola pública?',
+          ),
+          environment: harness.environment,
+          journeyContextController: harness.journeyContextController,
+          citiesController: harness.citiesController,
+          migrationQuestionnaireController:
+              harness.migrationQuestionnaireController,
+          initialAnswer: answer,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Em resumo'), findsOneWidget);
+    expect(find.text('O que fazer agora'), findsOneWidget);
+    expect(find.byKey(const Key('quick-guide-answer-actions')), findsOneWidget);
+    expect(find.byKey(const Key('quick-guide-answer-context')), findsNothing);
+    expect(find.byKey(const Key('quick-guide-answer-sources')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
