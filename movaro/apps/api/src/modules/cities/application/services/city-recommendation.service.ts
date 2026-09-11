@@ -1017,6 +1017,7 @@ export class CityRecommendationService {
     if (updatedAt == null) return 'unknown';
     const date = new Date(updatedAt);
     if (Number.isNaN(date.getTime())) return 'unknown';
+    if (date.getTime() > Date.now()) return 'unknown';
     const ageDays = (Date.now() - date.getTime()) / 86_400_000;
     const maxDays =
       sourceType === 'official'

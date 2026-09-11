@@ -50,6 +50,8 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_backup_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
@@ -181,7 +183,7 @@ void main() {
 
     await tester.tap(find.text('Ajuda'));
     await _pumpScreen(tester);
-    expect(find.text('O que você precisa resolver?'), findsOneWidget);
+    expect(find.text('Encontre uma resposta'), findsOneWidget);
 
     await tester.tap(find.text('Mais'));
     await _pumpScreen(tester);
@@ -208,9 +210,13 @@ void main() {
     await tester.pumpWidget(harness.buildApp(initialRoute: AppRoutes.tools));
     await _pumpScreen(tester);
 
-    expect(find.text('O que você precisa resolver?'), findsOneWidget);
+    expect(find.text('Encontre uma resposta'), findsOneWidget);
     expect(find.byKey(const ValueKey('guide-question-field')), findsOneWidget);
     expect(find.byKey(const ValueKey('guide-question-submit')), findsNothing);
+    expect(find.text('AJUDA MOVARO · CONTEÚDO REVISADO'), findsNothing);
+    expect(find.text('40 dúvidas revisadas'), findsNothing);
+    expect(find.text('Buscar dúvidas revisadas'), findsNothing);
+    expect(find.text('Digite um tema'), findsNothing);
 
     await tester.enterText(
       find.byKey(const ValueKey('guide-question-field')),
@@ -218,6 +224,7 @@ void main() {
     );
     await tester.pump();
 
+    expect(find.byKey(const ValueKey('guide-question-clear')), findsOneWidget);
     expect(
       find.byKey(const ValueKey('guide-question-results')),
       findsOneWidget,
@@ -251,7 +258,7 @@ void main() {
 
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(find.text('O que você precisa resolver?'), findsOneWidget);
+    expect(find.text('Encontre uma resposta'), findsOneWidget);
     expect(field, findsOneWidget);
 
     await tester.enterText(field, 'matricula escola');
@@ -264,6 +271,78 @@ void main() {
     await tester.tap(reviewedQuestion);
     await _pumpScreen(tester);
     expect(find.byKey(const ValueKey('guide-question-field')), findsNothing);
+  });
+
+  testWidgets('topic cards let the user choose a specific question', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(harness.buildApp(initialRoute: AppRoutes.tools));
+    await _pumpScreen(tester);
+
+    final healthTopic = find.text('Saúde').first;
+    await tester.ensureVisible(healthTopic);
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(healthTopic);
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(
+      find.byKey(const ValueKey('guide-topic-health-sheet')),
+      findsOneWidget,
+    );
+    expect(find.text('Escolha sua dúvida'), findsOneWidget);
+    expect(
+      find.text('Como uma pessoa estrangeira acessa o SUS?'),
+      findsOneWidget,
+    );
+
+    final susQuestion = find.text('Como uma pessoa estrangeira acessa o SUS?');
+    await tester.ensureVisible(susQuestion);
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(susQuestion);
+    await _pumpScreen(tester);
+
+    expect(
+      find.byKey(const ValueKey('guide-topic-health-sheet')),
+      findsNothing,
+    );
+    expect(find.byKey(const ValueKey('guide-question-field')), findsNothing);
+  });
+
+  testWidgets('popular rental shortcut opens its exact reviewed question', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(harness.buildApp(initialRoute: AppRoutes.tools));
+    await _pumpScreen(tester);
+
+    final rentalShortcut = find.byKey(
+      const ValueKey('guide-popular-housing.guarantees'),
+    );
+    expect(rentalShortcut, findsOneWidget);
+    await tester.drag(
+      find.byKey(const ValueKey('guide-popular-shortcuts')),
+      const Offset(-170, 0),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(rentalShortcut);
+    await _pumpScreen(tester);
+
+    expect(find.text('Quais garantias podem pedir no aluguel?'), findsWidgets);
+    expect(find.textContaining('O locador pode pedir'), findsOneWidget);
+    expect(find.textContaining('Ainda não temos'), findsNothing);
   });
 
   testWidgets('recent questions stay compact until the user expands them', (
@@ -355,11 +434,11 @@ void main() {
     expect(find.text('Levar pets, bagagem e bens'), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.text('Saúde, direitos e futuro'),
+      find.text('Situações que exigem cuidado'),
       280,
       scrollable: scrollable,
     );
-    expect(find.text('Saúde, direitos e futuro'), findsOneWidget);
+    expect(find.text('Situações que exigem cuidado'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -1044,6 +1123,18 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('Educação'));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(
+      find.byKey(const ValueKey('guide-topic-education-sheet')),
+      findsOneWidget,
+    );
+    final schoolQuestion = find.text(
+      'Como matriculo meu filho na escola pública?',
+    );
+    await tester.ensureVisible(schoolQuestion);
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(schoolQuestion);
     await _pumpScreen(tester);
 
     expect(find.text('Resposta da Ajuda'), findsOneWidget);
@@ -1291,6 +1382,20 @@ class _AppTestHarness {
         currencyController: currencyController,
         exchangeRatesController: exchangeRatesController,
         guideFlowMetricsStore: guideFlowMetricsStore,
+        migrationBackupService: MigrationBackupService(
+          journeyPreferencesStore: JourneyPreferencesStore(
+            directoryProvider: () async => tempDirectory,
+          ),
+          migrationPlanRepository: LocalMigrationPlanRepository(
+            directoryProvider: () async => tempDirectory,
+          ),
+          flowDraftStore: QuestionnaireFlowDraftStore(
+            directoryProvider: () async => tempDirectory,
+          ),
+          copilotProgressStore: MigrationCopilotProgressStore(
+            directoryProvider: () async => tempDirectory,
+          ),
+        ),
       ),
       tempDirectory: tempDirectory,
     );

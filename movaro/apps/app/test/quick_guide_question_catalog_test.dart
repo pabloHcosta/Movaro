@@ -61,4 +61,16 @@ void main() {
     );
     expect(result.topicFor('en'), 'Housing');
   });
+
+  test('finds every canonical catalog question exactly in all languages', () {
+    for (final question in QuickGuideQuestionCatalog.questions) {
+      for (final value in [question.pt, question.es, question.en]) {
+        expect(
+          QuickGuideQuestionCatalog.findExactQuestion(value)?.id,
+          question.id,
+          reason: '${question.id} must keep a stable route for "$value"',
+        );
+      }
+    }
+  });
 }

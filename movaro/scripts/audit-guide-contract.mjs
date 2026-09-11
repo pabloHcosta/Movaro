@@ -24,6 +24,14 @@ const quickHelpHubFile = new URL(
   "../apps/app/lib/features/home/presentation/pages/tools_hub_page.dart",
   import.meta.url,
 );
+const quickHelpCatalogFile = new URL(
+  "../apps/app/lib/features/info/application/quick_guide_question_catalog.dart",
+  import.meta.url,
+);
+const quickHelpIntentFile = new URL(
+  "../apps/api/src/modules/chat/data/quick-help-intents.catalog.ts",
+  import.meta.url,
+);
 
 const [
   appCatalog,
@@ -32,6 +40,8 @@ const [
   quickHelpPage,
   quickHelpService,
   quickHelpHub,
+  quickHelpCatalog,
+  quickHelpIntents,
 ] = await Promise.all([
   readFile(appCatalogFile, "utf8"),
   readFile(apiCatalogFile, "utf8"),
@@ -39,6 +49,8 @@ const [
   readFile(quickHelpPageFile, "utf8"),
   readFile(quickHelpServiceFile, "utf8"),
   readFile(quickHelpHubFile, "utf8"),
+  readFile(quickHelpCatalogFile, "utf8"),
+  readFile(quickHelpIntentFile, "utf8"),
 ]);
 
 const appIds = [
@@ -53,6 +65,24 @@ const duplicateValues = (values) => [
 ];
 const errors = [];
 const appIdSet = new Set(appIds);
+const quickHelpQuestionIds = [
+  ...quickHelpCatalog.matchAll(/QuickGuideQuestion\(\s*id:\s*'([^']+)'/g),
+].map((match) => match[1]);
+const quickHelpIntentIds = [
+  ...quickHelpIntents.matchAll(/^\s{4}id:\s*'([^']+)'/gm),
+].map((match) => match[1]);
+const routesBlock =
+  quickHelpIntents.match(
+    /export const QUICK_HELP_CATALOG_ROUTES:[\s\S]*?= \{([\s\S]*?)\n\};/,
+  )?.[1] ?? "";
+const quickHelpRouteIds = [...routesBlock.matchAll(/^\s{2}'([^']+)':/gm)].map(
+  (match) => match[1],
+);
+const routedIntentIds = [
+  ...routesBlock.matchAll(/'([a-z][a-z0-9_]*\.[a-z0-9_.]+)'/g),
+]
+  .map((match) => match[1])
+  .filter((id) => !quickHelpRouteIds.includes(id));
 
 const duplicateAppIds = duplicateValues(appIds);
 const duplicateApiIds = duplicateValues(apiIds);
@@ -61,6 +91,39 @@ if (duplicateAppIds.length > 0) {
 }
 if (duplicateApiIds.length > 0) {
   errors.push(`Duplicate API guide IDs: ${duplicateApiIds.join(", ")}`);
+}
+for (const [label, values] of [
+  ["Quick Help question", quickHelpQuestionIds],
+  ["Quick Help route", quickHelpRouteIds],
+]) {
+  const duplicates = duplicateValues(values);
+  if (duplicates.length > 0) {
+    errors.push(`Duplicate ${label} IDs: ${duplicates.join(", ")}`);
+  }
+}
+const routeSet = new Set(quickHelpRouteIds);
+const intentSet = new Set(quickHelpIntentIds);
+const unroutedQuestions = quickHelpQuestionIds.filter(
+  (id) => !routeSet.has(id),
+);
+const orphanRoutes = quickHelpRouteIds.filter(
+  (id) => !quickHelpQuestionIds.includes(id),
+);
+const missingRouteIntents = routedIntentIds.filter((id) => !intentSet.has(id));
+if (unroutedQuestions.length > 0) {
+  errors.push(
+    `Quick Help questions without deterministic routes: ${unroutedQuestions.join(", ")}`,
+  );
+}
+if (orphanRoutes.length > 0) {
+  errors.push(
+    `Quick Help routes without questions: ${orphanRoutes.join(", ")}`,
+  );
+}
+if (missingRouteIntents.length > 0) {
+  errors.push(
+    `Quick Help routes targeting missing intents: ${missingRouteIntents.join(", ")}`,
+  );
 }
 
 const missingInApp = apiIds.filter((id) => !appIdSet.has(id));
@@ -128,7 +191,6 @@ if (!/actions:\s*\[\]/.test(quickHelpService)) {
 for (const forbidden of [
   "generatedPlan",
   "_openToolkit",
-  "_openTopic",
   "AppRoutes.guideToolkit",
   "AppRoutes.documentationTopic",
   "AppRoutes.proposalSafetyCheck",
@@ -146,6 +208,6 @@ if (errors.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    `Guide contract audit passed: ${apiIds.length} API items map to ${appIds.length} app items; pt/es/en locale contract present.`,
+    `Guide contract audit passed: ${apiIds.length} journey API items map to ${appIds.length} app items; all ${quickHelpQuestionIds.length} Quick Help questions have deterministic routes; pt/es/en locale contract present.`,
   );
 }

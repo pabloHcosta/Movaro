@@ -45,6 +45,73 @@ void main() {
     },
   );
 
+  test('ranks an exact locality name before longer prefix matches', () async {
+    final bundle = _StringAssetBundle({
+      ArgentinaLocalityCatalog.assetPath: jsonEncode({
+        'localities': [
+          {
+            'id': '1',
+            'name': 'Rosario de Lerma',
+            'provinceId': '66',
+            'province': 'Salta',
+            'department': 'Rosario de Lerma',
+            'latitude': -24.98,
+            'longitude': -65.58,
+          },
+          {
+            'id': '2',
+            'name': 'Rosario',
+            'provinceId': '82',
+            'province': 'Santa Fe',
+            'department': 'Rosario',
+            'latitude': -32.95,
+            'longitude': -60.66,
+          },
+        ],
+      }),
+    });
+    final catalog = ArgentinaLocalityCatalog(bundle: bundle);
+
+    final matches = catalog.search(await catalog.load(), 'Rosario');
+
+    expect(matches.map((item) => item.name), ['Rosario', 'Rosario de Lerma']);
+  });
+
+  test('adds a searchable Buenos Aires city entry for CABA records', () async {
+    final bundle = _StringAssetBundle({
+      ArgentinaLocalityCatalog.assetPath: jsonEncode({
+        'localities': [
+          {
+            'id': '0200701001',
+            'name': 'Palermo',
+            'provinceId': '02',
+            'province': 'Ciudad Autónoma de Buenos Aires',
+            'department': 'Comuna 14',
+            'latitude': -34.58,
+            'longitude': -58.42,
+          },
+          {
+            'id': '06001010',
+            'name': 'Buenos Aires Chico',
+            'provinceId': '06',
+            'province': 'Buenos Aires',
+            'department': 'Patagones',
+            'latitude': -40.7,
+            'longitude': -62.4,
+          },
+        ],
+      }),
+    });
+    final catalog = ArgentinaLocalityCatalog(bundle: bundle);
+    final localities = await catalog.load();
+
+    expect(
+      catalog.search(localities, 'Buenos Aires').first.name,
+      'Buenos Aires',
+    );
+    expect(catalog.search(localities, 'CABA').first.name, 'Buenos Aires');
+  });
+
   test('maps the confirmed city region to the recommendation profile', () {
     expect(
       ArgentinaOriginClassifier.classify(

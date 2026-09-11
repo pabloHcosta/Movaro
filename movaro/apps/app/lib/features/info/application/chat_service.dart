@@ -232,7 +232,7 @@ class ChatService {
       'health',
       'hospital',
     ])) {
-      return 'https://www.gov.br/saude/pt-br/composicao/saps/equidade-em-saude/saude-de-migrantes-refugiados-e-apatridas';
+      return 'https://www.gov.br/saude/pt-br/composicao/saps/equidade-em-saude/migrantes-refugiadas-e-apatridas';
     }
     if (_containsAny(message, [
       'impuesto',

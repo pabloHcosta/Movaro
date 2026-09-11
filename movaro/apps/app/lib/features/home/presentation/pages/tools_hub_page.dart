@@ -114,28 +114,30 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
     );
   }
 
+  Future<void> _openTopic(String topic) async {
+    HapticFeedback.selectionClick();
+    final selected = await showModalBottomSheet<QuickGuideQuestion>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      showDragHandle: false,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _GuideTopicSheet(topic: topic),
+    );
+    if (!mounted || selected == null) return;
+    _ask(selected.questionFor(Localizations.localeOf(context).languageCode));
+  }
+
   @override
   Widget build(BuildContext context) {
-    final questionSuggestions = [
-      _guideText(
-        context,
-        pt: 'Como funciona a escola pública?',
-        es: '¿Cómo funciona la escuela pública?',
-        en: 'How does public school work?',
-      ),
-      _guideText(
-        context,
-        pt: 'O que preciso para alugar?',
-        es: '¿Qué necesito para alquilar?',
-        en: 'What do I need to rent?',
-      ),
-      _guideText(
-        context,
-        pt: 'Como procurar trabalho?',
-        es: '¿Cómo busco trabajo?',
-        en: 'How do I look for work?',
-      ),
-    ];
+    const popularQuestionIds = {
+      'education.school',
+      'housing.guarantees',
+      'work.formal',
+    };
+    final questionSuggestions = QuickGuideQuestionCatalog.questions
+        .where((question) => popularQuestionIds.contains(question.id))
+        .toList(growable: false);
 
     return Scaffold(
       extendBody: true,
@@ -175,7 +177,6 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                     _GuideHero(
                       controller: _questionController,
                       focusNode: _questionFocusNode,
-                      cityName: null,
                       suggestions: questionSuggestions,
                       onAsk: _ask,
                     ),
@@ -202,9 +203,9 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                       ),
                       body: _guideText(
                         context,
-                        pt: 'Entenda o assunto com informação organizada e fontes oficiais.',
-                        es: 'Entendé el tema con información organizada y fuentes oficiales.',
-                        en: 'Understand the topic with organized information and official sources.',
+                        pt: 'Abra um tema e escolha a dúvida exata que você quer resolver.',
+                        es: 'Abrí un tema y elegí la pregunta exacta que querés resolver.',
+                        en: 'Open a topic and choose the exact question you want to solve.',
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -234,14 +235,7 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                                 es: 'Residencia, CPF, registros y fuentes oficiales.',
                                 en: 'Residency, CPF, records, and official sources.',
                               ),
-                              onTap: () => _ask(
-                                _guideText(
-                                  context,
-                                  pt: 'Qual é a diferença entre CPF, protocolo e CRNM?',
-                                  es: '¿Cuál es la diferencia entre CPF, protocolo y CRNM?',
-                                  en: 'What is the difference between CPF, protocol, and CRNM?',
-                                ),
-                              ),
+                              onTap: () => _openTopic('documents'),
                             ),
                             _GuideCard(
                               width: cardWidth,
@@ -260,14 +254,7 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                                 es: 'Escuela, universidad, matrícula y validación.',
                                 en: 'School, university, enrollment, and validation.',
                               ),
-                              onTap: () => _ask(
-                                _guideText(
-                                  context,
-                                  pt: 'Como matriculo meu filho na escola pública?',
-                                  es: '¿Cómo inscribo a mi hijo en la escuela pública?',
-                                  en: 'How do I enroll my child in public school?',
-                                ),
-                              ),
+                              onTap: () => _openTopic('education'),
                             ),
                             _GuideCard(
                               width: cardWidth,
@@ -286,14 +273,7 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                                 es: 'Garantías, contratos y una búsqueda más segura.',
                                 en: 'Guarantees, contracts, and safer searching.',
                               ),
-                              onTap: () => _ask(
-                                _guideText(
-                                  context,
-                                  pt: 'Quais garantias podem pedir no aluguel?',
-                                  es: '¿Qué garantías pueden pedir para alquilar?',
-                                  en: 'Which guarantees can a landlord request?',
-                                ),
-                              ),
+                              onTap: () => _openTopic('housing'),
                             ),
                             _GuideCard(
                               width: cardWidth,
@@ -312,14 +292,7 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                                 es: 'Mercado, documentos y canales para buscar empleo.',
                                 en: 'Market, documents, and channels for finding jobs.',
                               ),
-                              onTap: () => _ask(
-                                _guideText(
-                                  context,
-                                  pt: 'O que preciso para trabalhar formalmente?',
-                                  es: '¿Qué necesito para trabajar formalmente?',
-                                  en: 'What do I need for formal employment?',
-                                ),
-                              ),
+                              onTap: () => _openTopic('work'),
                             ),
                             _GuideCard(
                               width: cardWidth,
@@ -338,14 +311,7 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                                 es: 'Reserva, primeros gastos, cuentas y pagos.',
                                 en: 'Reserve, first expenses, accounts, and payments.',
                               ),
-                              onTap: () => _ask(
-                                _guideText(
-                                  context,
-                                  pt: 'Como organizo uma reserva para os primeiros meses?',
-                                  es: '¿Cómo organizo una reserva para los primeros meses?',
-                                  en: 'How do I organize a reserve for the first months?',
-                                ),
-                              ),
+                              onTap: () => _openTopic('money'),
                             ),
                             _GuideCard(
                               width: cardWidth,
@@ -364,14 +330,64 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                                 es: 'SUS, atención, medicamentos y emergencias.',
                                 en: 'SUS, care, medicines, and emergencies.',
                               ),
-                              onTap: () => _ask(
-                                _guideText(
-                                  context,
-                                  pt: 'Como uma pessoa estrangeira acessa o SUS?',
-                                  es: '¿Cómo accede una persona extranjera al SUS?',
-                                  en: 'How can a foreign national access SUS?',
-                                ),
+                              onTap: () => _openTopic('health'),
+                            ),
+                            _GuideCard(
+                              width: cardWidth,
+                              compact: true,
+                              icon: Icons.flight_land_rounded,
+                              tone: const Color(0xFF2979C9),
+                              title: _guideText(
+                                context,
+                                pt: 'Chegada e cotidiano',
+                                es: 'Llegada y vida cotidiana',
+                                en: 'Arrival and daily life',
                               ),
+                              body: _guideText(
+                                context,
+                                pt: 'Voo, bagagem, pets, serviços e habilitação.',
+                                es: 'Vuelo, equipaje, mascotas, servicios y licencia.',
+                                en: 'Flights, baggage, pets, utilities, and driving.',
+                              ),
+                              onTap: () => _openTopic('arrival'),
+                            ),
+                            _GuideCard(
+                              width: cardWidth,
+                              compact: true,
+                              icon: Icons.family_restroom_rounded,
+                              tone: const Color(0xFFB05ACB),
+                              title: _guideText(
+                                context,
+                                pt: 'Família',
+                                es: 'Familia',
+                                en: 'Family',
+                              ),
+                              body: _guideText(
+                                context,
+                                pt: 'Residência, escola e documentos familiares.',
+                                es: 'Residencia, escuela y documentos familiares.',
+                                en: 'Residence, school, and family documents.',
+                              ),
+                              onTap: () => _openTopic('family'),
+                            ),
+                            _GuideCard(
+                              width: cardWidth,
+                              compact: true,
+                              icon: Icons.gavel_outlined,
+                              tone: const Color(0xFF7752B3),
+                              title: _guideText(
+                                context,
+                                pt: 'Direitos e proteção',
+                                es: 'Derechos y protección',
+                                en: 'Rights and protection',
+                              ),
+                              body: _guideText(
+                                context,
+                                pt: 'Trabalho, consumo, assistência e futuro.',
+                                es: 'Trabajo, consumo, asistencia y futuro.',
+                                en: 'Work, consumer rights, support, and the future.',
+                              ),
+                              onTap: () => _openTopic('rights'),
                             ),
                           ],
                         );
@@ -747,15 +763,15 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                     _SectionHeading(
                       title: _guideText(
                         context,
-                        pt: 'Saúde, direitos e futuro',
-                        es: 'Salud, derechos y futuro',
-                        en: 'Health, rights, and future',
+                        pt: 'Situações que exigem cuidado',
+                        es: 'Situaciones que requieren atención',
+                        en: 'Situations that need extra care',
                       ),
                       body: _guideText(
                         context,
-                        pt: 'Encontre cuidado, proteção, canais de reclamação e orientação de longo prazo.',
-                        es: 'Encontrá cuidado, protección, canales de reclamo y orientación a largo plazo.',
-                        en: 'Find care, protection, complaint channels, and long-term guidance.',
+                        pt: 'Atalhos para tratamento, proteção, reclamações e decisões de longo prazo.',
+                        es: 'Accesos para tratamiento, protección, reclamos y decisiones a largo plazo.',
+                        en: 'Shortcuts for treatment, protection, complaints, and long-term decisions.',
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -780,16 +796,16 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                               ),
                               body: _guideText(
                                 context,
-                                pt: 'SUS, receita, vacinação, gestação e saúde mental.',
-                                es: 'SUS, receta, vacunas, embarazo y salud mental.',
-                                en: 'SUS, prescriptions, vaccines, pregnancy, and mental health.',
+                                pt: 'Doença crônica, receita, acompanhamento e continuidade do cuidado.',
+                                es: 'Enfermedad crónica, receta, seguimiento y continuidad del cuidado.',
+                                en: 'Chronic conditions, prescriptions, follow-up, and continuity of care.',
                               ),
                               onTap: () => _ask(
                                 _guideText(
                                   context,
-                                  pt: 'Como continuo tratamento, vacinas ou pré-natal no Brasil?',
-                                  es: '¿Cómo continúo tratamiento, vacunas o prenatal en Brasil?',
-                                  en: 'How do I continue treatment, vaccinations, or prenatal care in Brazil?',
+                                  pt: 'Como continuo um tratamento médico no Brasil?',
+                                  es: '¿Cómo continúo un tratamiento médico en Brasil?',
+                                  en: 'How do I continue medical treatment in Brazil?',
                                 ),
                               ),
                             ),
@@ -934,6 +950,346 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
   }
 }
 
+class _GuideTopicSheet extends StatelessWidget {
+  const _GuideTopicSheet({required this.topic});
+
+  final String topic;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final foreground = isDark ? Colors.white : const Color(0xFF10243A);
+    final muted = AppColors.textSoftFor(context);
+    final languageCode = Localizations.localeOf(context).languageCode;
+    final questions = QuickGuideQuestionCatalog.questions
+        .where((question) => question.topic == topic)
+        .toList(growable: false);
+    final presentation = switch (topic) {
+      'documents' => (
+        icon: Icons.folder_copy_outlined,
+        tone: const Color(0xFF7557E8),
+        title: _guideText(
+          context,
+          pt: 'Documentos',
+          es: 'Documentos',
+          en: 'Documents',
+        ),
+        body: _guideText(
+          context,
+          pt: 'CPF, residência, CRNM e processos.',
+          es: 'CPF, residencia, CRNM y trámites.',
+          en: 'CPF, residence, CRNM, and processes.',
+        ),
+      ),
+      'education' => (
+        icon: Icons.school_outlined,
+        tone: const Color(0xFF00897B),
+        title: _guideText(
+          context,
+          pt: 'Educação',
+          es: 'Educación',
+          en: 'Education',
+        ),
+        body: _guideText(
+          context,
+          pt: 'Escola, universidade, matrícula e diploma.',
+          es: 'Escuela, universidad, matrícula y título.',
+          en: 'School, university, enrollment, and qualifications.',
+        ),
+      ),
+      'housing' => (
+        icon: Icons.home_work_outlined,
+        tone: const Color(0xFFE58A16),
+        title: _guideText(
+          context,
+          pt: 'Moradia e aluguel',
+          es: 'Vivienda y alquiler',
+          en: 'Housing and rent',
+        ),
+        body: _guideText(
+          context,
+          pt: 'Garantias, contratos, custos e golpes.',
+          es: 'Garantías, contratos, costos y estafas.',
+          en: 'Guarantees, contracts, costs, and scams.',
+        ),
+      ),
+      'work' => (
+        icon: Icons.work_outline_rounded,
+        tone: AppColors.primary,
+        title: _guideText(context, pt: 'Trabalho', es: 'Trabajo', en: 'Work'),
+        body: _guideText(
+          context,
+          pt: 'Documentos, formas de trabalho e busca de vagas.',
+          es: 'Documentos, formas de trabajo y búsqueda de empleo.',
+          en: 'Documents, work arrangements, and job searches.',
+        ),
+      ),
+      'money' => (
+        icon: Icons.savings_outlined,
+        tone: AppColors.success,
+        title: _guideText(
+          context,
+          pt: 'Custos e dinheiro',
+          es: 'Costos y dinero',
+          en: 'Costs and money',
+        ),
+        body: _guideText(
+          context,
+          pt: 'Reserva, orçamento, banco, Pix e impostos.',
+          es: 'Reserva, presupuesto, banco, Pix e impuestos.',
+          en: 'Savings, budgeting, banking, Pix, and tax.',
+        ),
+      ),
+      'health' => (
+        icon: Icons.health_and_safety_outlined,
+        tone: const Color(0xFFE34B67),
+        title: _guideText(context, pt: 'Saúde', es: 'Salud', en: 'Health'),
+        body: _guideText(
+          context,
+          pt: 'SUS, tratamentos, medicamentos e cuidados específicos.',
+          es: 'SUS, tratamientos, medicamentos y cuidados específicos.',
+          en: 'SUS, treatment, medicines, and specific care.',
+        ),
+      ),
+      'arrival' => (
+        icon: Icons.flight_land_rounded,
+        tone: const Color(0xFF2979C9),
+        title: _guideText(
+          context,
+          pt: 'Chegada e cotidiano',
+          es: 'Llegada y vida cotidiana',
+          en: 'Arrival and daily life',
+        ),
+        body: _guideText(
+          context,
+          pt: 'Voo, bagagem, pets, serviços e habilitação.',
+          es: 'Vuelo, equipaje, mascotas, servicios y licencia.',
+          en: 'Flights, baggage, pets, utilities, and driving.',
+        ),
+      ),
+      'family' => (
+        icon: Icons.family_restroom_rounded,
+        tone: const Color(0xFFB05ACB),
+        title: _guideText(context, pt: 'Família', es: 'Familia', en: 'Family'),
+        body: _guideText(
+          context,
+          pt: 'Residência, escola e documentos familiares.',
+          es: 'Residencia, escuela y documentos familiares.',
+          en: 'Residence, school, and family documents.',
+        ),
+      ),
+      _ => (
+        icon: Icons.gavel_outlined,
+        tone: const Color(0xFF7752B3),
+        title: _guideText(
+          context,
+          pt: 'Direitos e proteção',
+          es: 'Derechos y protección',
+          en: 'Rights and protection',
+        ),
+        body: _guideText(
+          context,
+          pt: 'Trabalho, consumo, assistência e futuro.',
+          es: 'Trabajo, consumo, asistencia y futuro.',
+          en: 'Work, consumer rights, support, and the future.',
+        ),
+      ),
+    };
+
+    return FractionallySizedBox(
+      heightFactor: 0.84,
+      child: Material(
+        key: ValueKey('guide-topic-$topic-sheet'),
+        color: isDark ? const Color(0xFF0E1B2B) : const Color(0xFFF9FBFD),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            Container(
+              width: 38,
+              height: 4,
+              decoration: BoxDecoration(
+                color: muted.withValues(alpha: 0.32),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 10, 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: presentation.tone.withValues(alpha: 0.13),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Icon(
+                      presentation.icon,
+                      color: presentation.tone,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 13),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Semantics(
+                          header: true,
+                          child: Text(
+                            presentation.title,
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  color: foreground,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.35,
+                                ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          presentation.body,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: muted, height: 1.35),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    tooltip: _guideText(
+                      context,
+                      pt: 'Fechar',
+                      es: 'Cerrar',
+                      en: 'Close',
+                    ),
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  _guideText(
+                    context,
+                    pt: 'Escolha sua dúvida',
+                    es: 'Elegí tu pregunta',
+                    en: 'Choose your question',
+                  ),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: foreground,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: ListView.separated(
+                key: ValueKey('guide-topic-$topic-questions'),
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
+                itemCount: questions.length,
+                separatorBuilder: (_, _) => Divider(
+                  height: 1,
+                  indent: 58,
+                  endIndent: 14,
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : const Color(0xFFE2EAF0),
+                ),
+                itemBuilder: (context, index) => _GuideTopicQuestionTile(
+                  question: questions[index],
+                  languageCode: languageCode,
+                  tone: presentation.tone,
+                  foreground: foreground,
+                  muted: muted,
+                  onSelected: (question) => Navigator.pop(context, question),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GuideTopicQuestionTile extends StatelessWidget {
+  const _GuideTopicQuestionTile({
+    required this.question,
+    required this.languageCode,
+    required this.tone,
+    required this.foreground,
+    required this.muted,
+    required this.onSelected,
+  });
+
+  final QuickGuideQuestion question;
+  final String languageCode;
+  final Color tone;
+  final Color foreground;
+  final Color muted;
+  final ValueChanged<QuickGuideQuestion> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final value = question.questionFor(languageCode);
+    return Semantics(
+      button: true,
+      label:
+          '$value. ${_guideText(context, pt: 'Abrir resposta', es: 'Abrir respuesta', en: 'Open answer')}',
+      child: ExcludeSemantics(
+        child: InkWell(
+          key: ValueKey('guide-topic-question-${question.id}'),
+          onTap: () => onSelected(question),
+          borderRadius: BorderRadius.circular(16),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 62),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: tone.withValues(alpha: 0.11),
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: Icon(
+                      Icons.help_outline_rounded,
+                      color: tone,
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      value,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: foreground,
+                        fontWeight: FontWeight.w700,
+                        height: 1.28,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.chevron_right_rounded, color: muted, size: 22),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _RecentQuestions extends StatefulWidget {
   const _RecentQuestions({
     required this.questions,
@@ -1072,15 +1428,13 @@ class _GuideHero extends StatefulWidget {
   const _GuideHero({
     required this.controller,
     required this.focusNode,
-    required this.cityName,
     required this.suggestions,
     required this.onAsk,
   });
 
   final TextEditingController controller;
   final FocusNode focusNode;
-  final String? cityName;
-  final List<String> suggestions;
+  final List<QuickGuideQuestion> suggestions;
   final ValueChanged<String> onAsk;
 
   @override
@@ -1141,7 +1495,6 @@ class _GuideHeroState extends State<_GuideHero> {
     final isDark = AppColors.isDark(context);
     final isExpanded = MediaQuery.sizeOf(context).width >= 700;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
     final fieldSurface = isDark ? const Color(0xFF101F31) : Colors.white;
     final foreground = isDark ? Colors.white : const Color(0xFF10243A);
     final muted = isDark
@@ -1154,11 +1507,7 @@ class _GuideHeroState extends State<_GuideHero> {
       limit: 4,
     );
 
-    return AnimatedContainer(
-      duration: reduceMotion
-          ? Duration.zero
-          : const Duration(milliseconds: 180),
-      curve: Curves.easeOut,
+    return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -1169,19 +1518,14 @@ class _GuideHeroState extends State<_GuideHero> {
         ),
         borderRadius: BorderRadius.circular(30),
         border: Border.all(
-          color: widget.focusNode.hasFocus
-              ? const Color(0xFF25C7B7)
-              : isDark
+          color: isDark
               ? Colors.white.withValues(alpha: 0.1)
               : const Color(0xFFDCE7F0),
-          width: widget.focusNode.hasFocus ? 2.25 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(
-              0xFF087F7A,
-            ).withValues(alpha: widget.focusNode.hasFocus ? 0.18 : 0.09),
-            blurRadius: widget.focusNode.hasFocus ? 34 : 26,
+            color: const Color(0xFF087F7A).withValues(alpha: 0.08),
+            blurRadius: 28,
             offset: const Offset(0, 14),
           ),
         ],
@@ -1195,58 +1539,14 @@ class _GuideHeroState extends State<_GuideHero> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1677E8), Color(0xFF16A99A)],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.auto_awesome_rounded,
-                  color: Colors.white,
-                  size: 19,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  _guideText(
-                    context,
-                    pt: 'AJUDA MOVARO · CONTEÚDO REVISADO',
-                    es: 'AYUDA MOVARO · CONTENIDO REVISADO',
-                    en: 'MOVARO HELP · REVIEWED CONTENT',
-                  ),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: isDark
-                        ? const Color(0xFF8DE9DF)
-                        : const Color(0xFF08786F),
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.55,
-                  ),
-                ),
-              ),
-              if (widget.cityName != null)
-                _GuideContextPill(
-                  cityName: widget.cityName!,
-                  foreground: muted,
-                  isDark: isDark,
-                ),
-            ],
-          ),
-          SizedBox(height: isExpanded ? 18 : 14),
           Semantics(
             header: true,
             child: Text(
               _guideText(
                 context,
-                pt: 'O que você precisa resolver?',
-                es: '¿Qué necesitás resolver?',
-                en: 'What do you need to solve?',
+                pt: 'Encontre uma resposta',
+                es: 'Encontrá una respuesta',
+                en: 'Find an answer',
               ),
               style:
                   (isExpanded
@@ -1260,137 +1560,7 @@ class _GuideHeroState extends State<_GuideHero> {
                       ),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            _guideText(
-              context,
-              pt: 'Digite um assunto e escolha uma pergunta da nossa base revisada.',
-              es: 'Escribí un tema y elegí una pregunta de nuestra base revisada.',
-              en: 'Enter a topic and choose a question from our reviewed library.',
-            ),
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: muted, height: 1.35),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 7,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0A9A8C).withValues(alpha: 0.11),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: const Color(0xFF0A9A8C).withValues(alpha: 0.16),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.verified_outlined,
-                      size: 15,
-                      color: Color(0xFF0A9A8C),
-                    ),
-                    const SizedBox(width: 5),
-                    Flexible(
-                      child: Text(
-                        _guideText(
-                          context,
-                          pt: '${QuickGuideQuestionCatalog.questions.length} dúvidas revisadas',
-                          es: '${QuickGuideQuestionCatalog.questions.length} preguntas revisadas',
-                          en: '${QuickGuideQuestionCatalog.questions.length} reviewed questions',
-                        ),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: isDark
-                              ? const Color(0xFF8DE9DF)
-                              : const Color(0xFF08786F),
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                _guideText(
-                  context,
-                  pt: 'Você escolhe antes de abrir',
-                  es: 'Vos elegís antes de abrir',
-                  en: 'You choose before opening',
-                ),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: muted,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: isExpanded ? 18 : 15),
-          if (largeText)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _guideText(
-                    context,
-                    pt: 'Buscar dúvidas revisadas',
-                    es: 'Buscar preguntas revisadas',
-                    en: 'Search reviewed questions',
-                  ),
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: foreground,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  _guideText(
-                    context,
-                    pt: 'Digite um tema',
-                    es: 'Escribí un tema',
-                    en: 'Enter a topic',
-                  ),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(color: muted),
-                ),
-              ],
-            )
-          else
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _guideText(
-                      context,
-                      pt: 'Buscar dúvidas revisadas',
-                      es: 'Buscar preguntas revisadas',
-                      en: 'Search reviewed questions',
-                    ),
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: foreground,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                Text(
-                  _guideText(
-                    context,
-                    pt: 'Digite um tema',
-                    es: 'Escribí un tema',
-                    en: 'Enter a topic',
-                  ),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(color: muted),
-                ),
-              ],
-            ),
-          const SizedBox(height: 6),
+          SizedBox(height: isExpanded ? 18 : 13),
           AnimatedContainer(
             duration: reduceMotion
                 ? Duration.zero
@@ -1414,117 +1584,82 @@ class _GuideHeroState extends State<_GuideHero> {
                 ),
               ],
             ),
-            padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: Icon(
+            child: Semantics(
+              textField: true,
+              label: _guideText(
+                context,
+                pt: 'Buscar na Ajuda',
+                es: 'Buscar en Ayuda',
+                en: 'Search Help',
+              ),
+              child: TextField(
+                key: const ValueKey('guide-question-field'),
+                controller: widget.controller,
+                focusNode: widget.focusNode,
+                textInputAction: TextInputAction.done,
+                textCapitalization: TextCapitalization.sentences,
+                autocorrect: true,
+                enableSuggestions: true,
+                onSubmitted: (_) => widget.focusNode.unfocus(),
+                maxLines: 1,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: foreground),
+                decoration: InputDecoration(
+                  hintText: _guideText(
+                    context,
+                    pt: 'CPF, aluguel, escola...',
+                    es: 'CPF, alquiler, escuela...',
+                    en: 'CPF, rent, school...',
+                  ),
+                  hintStyle: TextStyle(color: muted),
+                  prefixIcon: Icon(
                     Icons.search_rounded,
-                    size: 20,
+                    size: 22,
                     color: widget.focusNode.hasFocus
                         ? const Color(0xFF0A9A8C)
                         : muted,
                   ),
-                ),
-                Expanded(
-                  child: Semantics(
-                    textField: true,
-                    label: _guideText(
-                      context,
-                      pt: 'Buscar dúvidas revisadas',
-                      es: 'Buscar preguntas revisadas',
-                      en: 'Search reviewed questions',
-                    ),
-                    child: TextField(
-                      key: const ValueKey('guide-question-field'),
-                      controller: widget.controller,
-                      focusNode: widget.focusNode,
-                      textInputAction: TextInputAction.done,
-                      textCapitalization: TextCapitalization.sentences,
-                      autocorrect: true,
-                      enableSuggestions: true,
-                      onSubmitted: (_) => widget.focusNode.unfocus(),
-                      maxLines: 1,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyLarge?.copyWith(color: foreground),
-                      decoration: InputDecoration(
-                        hintText: _guideText(
-                          context,
-                          pt: 'Ex.: aluguel, CPF ou escola',
-                          es: 'Ej.: alquiler, CPF o escuela',
-                          en: 'E.g. rent, CPF, or school',
-                        ),
-                        hintStyle: TextStyle(color: muted),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 11,
-                          vertical: 15,
-                        ),
-                      ),
-                    ),
+                  prefixIconConstraints: const BoxConstraints.tightFor(
+                    width: 52,
+                    height: 54,
                   ),
+                  suffixIcon: _hasQuery
+                      ? IconButton(
+                          key: const ValueKey('guide-question-clear'),
+                          onPressed: _clearSearch,
+                          tooltip: _guideText(
+                            context,
+                            pt: 'Limpar busca',
+                            es: 'Borrar búsqueda',
+                            en: 'Clear search',
+                          ),
+                          icon: Icon(
+                            Icons.cancel_rounded,
+                            size: 21,
+                            color: muted,
+                          ),
+                        )
+                      : null,
+                  suffixIconConstraints: const BoxConstraints.tightFor(
+                    width: 48,
+                    height: 48,
+                  ),
+                  filled: false,
+                  isDense: true,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 17),
                 ),
-                if (_hasQuery)
-                  IconButton(
-                    key: const ValueKey('guide-question-clear'),
-                    onPressed: _clearSearch,
-                    tooltip: _guideText(
-                      context,
-                      pt: 'Limpar busca',
-                      es: 'Borrar búsqueda',
-                      en: 'Clear search',
-                    ),
-                    constraints: const BoxConstraints.tightFor(
-                      width: 50,
-                      height: 50,
-                    ),
-                    color: muted,
-                    icon: const Icon(Icons.close_rounded),
-                  )
-                else
-                  const SizedBox(width: 8),
-              ],
+              ),
             ),
           ),
           if (_hasQuery) ...[
             const SizedBox(height: 10),
-            if (searchResults.isNotEmpty) ...[
-              Wrap(
-                spacing: 10,
-                runSpacing: 3,
-                alignment: WrapAlignment.spaceBetween,
-                children: [
-                  Text(
-                    _guideText(
-                      context,
-                      pt: 'Escolha uma pergunta',
-                      es: 'Elegí una pregunta',
-                      en: 'Choose a question',
-                    ),
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: foreground,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  Text(
-                    _guideText(
-                      context,
-                      pt: '${searchResults.length} resultados',
-                      es: '${searchResults.length} resultados',
-                      en: '${searchResults.length} results',
-                    ),
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: muted,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 7),
-            ],
             Semantics(
               liveRegion: true,
               label: searchResults.isEmpty
@@ -1556,72 +1691,81 @@ class _GuideHeroState extends State<_GuideHero> {
           if (!_hasQuery) ...[
             const SizedBox(height: 11),
             Text(
-              _guideText(
-                context,
-                pt: 'Dúvidas populares',
-                es: 'Preguntas frecuentes',
-                en: 'Popular questions',
-              ),
+              _guideText(context, pt: 'Atalhos', es: 'Atajos', en: 'Shortcuts'),
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                 color: muted,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 7),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: List.generate(widget.suggestions.length, (index) {
-                final question = widget.suggestions[index];
-                final icons = [
-                  Icons.school_outlined,
-                  Icons.home_work_outlined,
-                  Icons.work_outline_rounded,
-                ];
-                final labels = [
-                  _guideText(
-                    context,
-                    pt: 'Escola pública',
-                    es: 'Escuela pública',
-                    en: 'Public school',
-                  ),
-                  _guideText(
-                    context,
-                    pt: 'Alugar sem fiador',
-                    es: 'Alquilar sin garantía',
-                    en: 'Rent without a guarantor',
-                  ),
-                  _guideText(
-                    context,
-                    pt: 'Trabalho e documentos',
-                    es: 'Trabajo y documentos',
-                    en: 'Work and documents',
-                  ),
-                ];
-                return Semantics(
-                  button: true,
-                  label:
-                      '$question. ${_guideText(context, pt: 'Abrir resposta', es: 'Abrir respuesta', en: 'Open answer')}',
-                  child: ActionChip(
-                    avatar: Icon(icons[index], size: 17),
-                    label: Text(labels[index]),
-                    onPressed: () => widget.onAsk(question),
-                    backgroundColor: isDark
-                        ? Colors.white.withValues(alpha: 0.06)
-                        : Colors.white.withValues(alpha: 0.86),
-                    side: BorderSide(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.1)
-                          : const Color(0xFFD8E4ED),
+            SingleChildScrollView(
+              key: const ValueKey('guide-popular-shortcuts'),
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              child: Row(
+                children: List.generate(widget.suggestions.length, (index) {
+                  final question = widget.suggestions[index];
+                  final questionValue = question.questionFor(languageCode);
+                  final icons = [
+                    Icons.school_outlined,
+                    Icons.home_work_outlined,
+                    Icons.work_outline_rounded,
+                  ];
+                  final labels = [
+                    _guideText(
+                      context,
+                      pt: 'Escola pública',
+                      es: 'Escuela pública',
+                      en: 'Public school',
                     ),
-                    labelStyle: TextStyle(
-                      color: foreground,
-                      fontWeight: FontWeight.w600,
+                    _guideText(
+                      context,
+                      pt: 'Alugar sem fiador',
+                      es: 'Alquilar sin garantía',
+                      en: 'Rent without a guarantor',
                     ),
-                    materialTapTargetSize: MaterialTapTargetSize.padded,
-                  ),
-                );
-              }),
+                    _guideText(
+                      context,
+                      pt: 'Trabalho e documentos',
+                      es: 'Trabajo y documentos',
+                      en: 'Work and documents',
+                    ),
+                  ];
+                  return Semantics(
+                    button: true,
+                    label:
+                        '$questionValue. ${_guideText(context, pt: 'Abrir resposta', es: 'Abrir respuesta', en: 'Open answer')}',
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: index == widget.suggestions.length - 1 ? 0 : 8,
+                      ),
+                      child: ActionChip(
+                        key: ValueKey('guide-popular-${question.id}'),
+                        avatar: Icon(icons[index], size: 17),
+                        label: Text(labels[index]),
+                        onPressed: () => widget.onAsk(questionValue),
+                        backgroundColor: isDark
+                            ? Colors.white.withValues(alpha: 0.06)
+                            : Colors.white.withValues(alpha: 0.86),
+                        side: BorderSide(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.1)
+                              : const Color(0xFFD8E4ED),
+                        ),
+                        labelStyle: TextStyle(
+                          color: foreground,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 7,
+                        ),
+                        materialTapTargetSize: MaterialTapTargetSize.padded,
+                      ),
+                    ),
+                  );
+                }),
+              ),
             ),
           ],
         ],
@@ -1708,13 +1852,28 @@ class _GuideSearchResultTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final value = question.questionFor(languageCode);
     final topic = question.topicFor(languageCode);
+    final (topicIcon, topicColor) = switch (question.topic) {
+      'documents' => (Icons.badge_outlined, const Color(0xFF1677E8)),
+      'education' => (Icons.school_outlined, const Color(0xFF00897B)),
+      'housing' => (Icons.home_work_outlined, const Color(0xFF7557E8)),
+      'work' => (Icons.work_outline_rounded, const Color(0xFFE07A28)),
+      'money' => (
+        Icons.account_balance_wallet_outlined,
+        const Color(0xFF16875D),
+      ),
+      'health' => (Icons.health_and_safety_outlined, const Color(0xFFD55064)),
+      'family' => (Icons.family_restroom_rounded, const Color(0xFFB05ACB)),
+      'arrival' => (Icons.flight_land_rounded, const Color(0xFF2979C9)),
+      'rights' => (Icons.gavel_outlined, const Color(0xFF8B694B)),
+      _ => (Icons.help_outline_rounded, const Color(0xFF0A9A8C)),
+    };
     return Semantics(
       button: true,
       label: _guideText(
         context,
-        pt: '$value. Tema $topic. Abrir resposta revisada.',
-        es: '$value. Tema $topic. Abrir respuesta revisada.',
-        en: '$value. $topic topic. Open reviewed answer.',
+        pt: '$value. Tema $topic. Abrir resposta.',
+        es: '$value. Tema $topic. Abrir respuesta.',
+        en: '$value. $topic topic. Open answer.',
       ),
       child: ExcludeSemantics(
         child: InkWell(
@@ -1727,17 +1886,13 @@ class _GuideSearchResultTile extends StatelessWidget {
               child: Row(
                 children: [
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0A9A8C).withValues(alpha: 0.12),
+                      color: topicColor.withValues(alpha: 0.11),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
-                      Icons.fact_check_outlined,
-                      size: 19,
-                      color: Color(0xFF0A9A8C),
-                    ),
+                    child: Icon(topicIcon, size: 19, color: topicColor),
                   ),
                   const SizedBox(width: 11),
                   Expanded(
@@ -1746,12 +1901,11 @@ class _GuideSearchResultTile extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          topic.toUpperCase(),
+                          topic,
                           style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(
-                                color: const Color(0xFF0A8A7F),
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.45,
+                                color: topicColor,
+                                fontWeight: FontWeight.w800,
                               ),
                         ),
                         const SizedBox(height: 2),
@@ -1770,7 +1924,7 @@ class _GuideSearchResultTile extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Icon(Icons.arrow_forward_rounded, color: muted, size: 20),
+                  Icon(Icons.chevron_right_rounded, color: muted, size: 22),
                 ],
               ),
             ),
@@ -1828,9 +1982,9 @@ class _GuideSearchEmptyState extends StatelessWidget {
                 Text(
                   _guideText(
                     context,
-                    pt: 'Ainda não temos essa dúvida revisada',
-                    es: 'Todavía no tenemos esa pregunta revisada',
-                    en: 'We do not have that reviewed question yet',
+                    pt: 'Nenhuma pergunta encontrada',
+                    es: 'No encontramos esa pregunta',
+                    en: 'No questions found',
                   ),
                   style: Theme.of(
                     context,
@@ -1840,9 +1994,9 @@ class _GuideSearchEmptyState extends StatelessWidget {
                 Text(
                   _guideText(
                     context,
-                    pt: 'Tente um assunto mais curto ou explore os temas abaixo. Não mostraremos uma resposta aproximada.',
-                    es: 'Probá con un tema más corto o explorá los temas de abajo. No mostraremos una respuesta aproximada.',
-                    en: 'Try a shorter topic or explore the themes below. We will not show an approximate answer.',
+                    pt: 'Tente uma palavra, como “aluguel”, ou explore os temas abaixo.',
+                    es: 'Probá con una palabra, como “alquiler”, o explorá los temas de abajo.',
+                    en: 'Try one word, such as “rent”, or explore the topics below.',
                   ),
                   style: Theme.of(
                     context,
@@ -1852,65 +2006,6 @@ class _GuideSearchEmptyState extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _GuideContextPill extends StatelessWidget {
-  const _GuideContextPill({
-    required this.cityName,
-    required this.foreground,
-    required this.isDark,
-  });
-
-  final String cityName;
-  final Color foreground;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: _guideText(
-        context,
-        pt: 'Contexto opcional: $cityName',
-        es: 'Contexto opcional: $cityName',
-        en: 'Optional context: $cityName',
-      ),
-      child: ExcludeSemantics(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 250),
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.06)
-                : const Color(0xFFE8F5F3),
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.location_on_outlined, size: 14, color: foreground),
-              const SizedBox(width: 4),
-              Flexible(
-                child: Text(
-                  _guideText(
-                    context,
-                    pt: '$cityName · não altera o plano',
-                    es: '$cityName · no cambia el plan',
-                    en: '$cityName · does not change the plan',
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: foreground,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -2160,7 +2255,13 @@ class _GuideCardState extends State<_GuideCard> {
         shape: BoxShape.circle,
         border: Border.all(color: widget.tone.withValues(alpha: 0.12)),
       ),
-      child: Icon(Icons.arrow_forward_rounded, size: 19, color: widget.tone),
+      child: Icon(
+        widget.compact
+            ? Icons.format_list_bulleted_rounded
+            : Icons.arrow_forward_rounded,
+        size: 19,
+        color: widget.tone,
+      ),
     );
   }
 
@@ -2201,7 +2302,9 @@ class _GuideCardState extends State<_GuideCard> {
       width: widget.width,
       child: Semantics(
         button: true,
-        label: '${widget.title}. ${widget.body}',
+        label: widget.compact
+            ? '${widget.title}. ${widget.body}. ${_guideText(context, pt: 'Ver perguntas', es: 'Ver preguntas', en: 'View questions')}'
+            : '${widget.title}. ${widget.body}',
         child: ExcludeSemantics(
           child: MouseRegion(
             onEnter: (_) => setState(() => _hovered = true),

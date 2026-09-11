@@ -1,5 +1,6 @@
 import { QuickGuideService } from './quick-guide.service';
 import { QuickHelpQueryPlannerService } from './quick-help-query-planner.service';
+import { QUICK_HELP_CATALOG_ROUTES } from '../../data/quick-help-intents.catalog';
 
 describe('Quick Guide P3 quality evaluation', () => {
   const service = new QuickGuideService(new QuickHelpQueryPlannerService());
@@ -28,6 +29,9 @@ describe('Quick Guide P3 quality evaluation', () => {
       'Quais garantias podem pedir no aluguel?',
       'housing.rental_guarantees',
     ],
+    ['pt', 'Como alugar sem fiador?', 'housing.without_guarantor'],
+    ['es', '¿Cómo alquilo sin garante?', 'housing.without_guarantor'],
+    ['en', 'How can I rent without a guarantor?', 'housing.without_guarantor'],
     ['es', '¿Cómo accede un extranjero al SUS?', 'health.sus_access'],
     ['en', 'What do I need for formal work?', 'work.digital_card'],
     [
@@ -171,6 +175,30 @@ describe('Quick Guide P3 quality evaluation', () => {
         expect(recovered.coverage).not.toBe('not_covered');
         expect(recovered.claims.length).toBeGreaterThan(0);
         expect(recovered.sources.length).toBeGreaterThan(0);
+      }
+    },
+  );
+
+  it.each(['pt', 'es', 'en'] as const)(
+    'resolves every reviewed catalog ID deterministically with evidence in %s',
+    (locale) => {
+      for (const [questionId, expectedIntents] of Object.entries(
+        QUICK_HELP_CATALOG_ROUTES,
+      )) {
+        const result = service.resolve({
+          questionId,
+          message: `catalog:${questionId}`,
+          originCountry: 'argentina',
+          destinationCountry: 'brasil',
+          locale,
+        });
+
+        expect(result.resolvedIntents).toEqual(expectedIntents);
+        expect(result.coverage).not.toBe('not_covered');
+        expect(result.coverage).not.toBe('partial');
+        expect(result.claims.length).toBeGreaterThan(0);
+        expect(result.sources.length).toBeGreaterThan(0);
+        expect(result.actions).toEqual([]);
       }
     },
   );

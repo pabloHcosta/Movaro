@@ -209,7 +209,12 @@ export class QuickGuideService {
         'unsupported_corridor',
       );
     }
-    const plan = this.queryPlanner.plan(dto.message, locale, dto.answers);
+    const plan = this.queryPlanner.plan(
+      dto.message,
+      locale,
+      dto.answers,
+      dto.questionId,
+    );
     if (plan.matches.length === 0)
       return this.buildNotCovered(dto, locale, plan);
     return this.buildPlannedResolution(dto, locale, plan);

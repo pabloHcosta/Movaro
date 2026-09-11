@@ -39,6 +39,9 @@ const allowedEventNames = [
   'officialLinkFailed',
   'detailsExpanded',
   'fullPlanOpened',
+  'pilotCheckInShown',
+  'pilotCheckInDismissed',
+  'pilotCheckInSubmitted',
 ] as const;
 
 class ProductFlowEventDto {
@@ -94,6 +97,22 @@ class ProductFlowEventDto {
   @Min(0)
   @Max(20)
   refinementScenariosEvaluated?: number;
+
+  @IsOptional()
+  @IsIn(['clear', 'partial', 'unclear'])
+  validationClarityBand?: string;
+
+  @IsOptional()
+  @IsIn(['completed', 'blocked', 'notStarted'])
+  validationProgressBand?: string;
+
+  @IsOptional()
+  @IsIn(['high', 'moderate', 'low'])
+  validationValueBand?: string;
+
+  @IsOptional()
+  @IsIn(['preparation', 'housing', 'documents', 'work', 'arrival'])
+  validationPhaseBand?: string;
 }
 
 export class IngestProductEventsDto {

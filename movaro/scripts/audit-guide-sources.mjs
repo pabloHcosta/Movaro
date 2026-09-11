@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 
 const sourceFile = new URL(
-  "../apps/app/lib/features/migration_questionnaire/application/services/preparation_resource_links.dart",
+  "../apps/api/src/modules/chat/data/quick-help-trust.catalog.ts",
   import.meta.url,
 );
 const source = await readFile(sourceFile, "utf8");

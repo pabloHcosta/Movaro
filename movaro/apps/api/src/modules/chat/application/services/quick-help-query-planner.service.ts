@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import {
+  QUICK_HELP_CATALOG_ROUTES,
   QUICK_HELP_INTENTS,
   QuickHelpDecisionBranch,
   QuickHelpIntentDefinition,
@@ -80,28 +81,37 @@ export class QuickHelpQueryPlannerService {
     message: string,
     locale: QuickHelpLocale,
     answers: QuickGuideAnswersDto = {},
+    questionId?: string,
   ): QuickHelpQueryPlan {
     const normalizedQuery = this.normalize(message);
     const forcedIntent = this.intentSelectedByAnswer(answers);
     const unsupportedAnswerShape = UNSUPPORTED_QUERY_PATTERNS.some((pattern) =>
       pattern.test(normalizedQuery),
     );
+    const catalogIntents = !forcedIntent
+      ? this.intentsForCatalogQuestion(questionId)
+      : [];
     const ranked = forcedIntent
       ? [this.forcedMatch(forcedIntent)]
-      : unsupportedAnswerShape
-        ? []
-        : QUICK_HELP_INTENTS.map((intent) =>
-            this.scoreIntent(normalizedQuery, intent, locale),
-          )
-            .filter((match) => match.score >= 2.2)
-            .sort(
-              (a, b) =>
-                b.score - a.score || b.intent.priority - a.intent.priority,
-            );
-    const matches = this.selectMatches(
-      this.preferSpecificIntent(ranked),
-      normalizedQuery,
-    );
+      : catalogIntents.length > 0
+        ? catalogIntents.map((intent) => this.forcedMatch(intent))
+        : unsupportedAnswerShape
+          ? []
+          : QUICK_HELP_INTENTS.map((intent) =>
+              this.scoreIntent(normalizedQuery, intent, locale),
+            )
+              .filter((match) => match.score >= 2.2)
+              .sort(
+                (a, b) =>
+                  b.score - a.score || b.intent.priority - a.intent.priority,
+              );
+    const matches =
+      catalogIntents.length > 0
+        ? ranked
+        : this.selectMatches(
+            this.preferSpecificIntent(ranked),
+            normalizedQuery,
+          );
     const primary = matches[0]?.intent;
     const clarification =
       primary?.clarification &&
@@ -120,6 +130,14 @@ export class QuickHelpQueryPlannerService {
       decisionBranch,
       strategy: 'hybrid_lexical_concept',
     };
+  }
+
+  private intentsForCatalogQuestion(questionId?: string) {
+    if (!questionId) return [];
+    const ids = QUICK_HELP_CATALOG_ROUTES[questionId] ?? [];
+    return ids
+      .map((id) => QUICK_HELP_INTENTS.find((intent) => intent.id === id))
+      .filter((intent): intent is QuickHelpIntentDefinition => !!intent);
   }
 
   private scoreIntent(

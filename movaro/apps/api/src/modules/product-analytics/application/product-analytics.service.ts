@@ -37,6 +37,10 @@ export class ProductAnalyticsService {
       refinement_gain_band: event.refinementGainBand ?? null,
       refinement_scenarios_evaluated:
         event.refinementScenariosEvaluated ?? null,
+      validation_clarity_band: event.validationClarityBand ?? null,
+      validation_progress_band: event.validationProgressBand ?? null,
+      validation_value_band: event.validationValueBand ?? null,
+      validation_phase_band: event.validationPhaseBand ?? null,
     }));
     const { error } = await this.supabase.admin
       .from('product_flow_events')

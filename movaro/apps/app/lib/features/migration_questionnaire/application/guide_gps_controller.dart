@@ -119,6 +119,39 @@ class GuideGpsController extends ChangeNotifier {
 
   List<GuideActionItem> get upcomingItems => focusSnapshot.upcoming;
 
+  /// Waiting is unfinished work, never evidence that a dependency is satisfied.
+  List<GuideActionItem> get waitingItems => List.unmodifiable(
+    _items.where(
+      (item) =>
+          !item.isCompleted &&
+          !item.isDismissed &&
+          stateFor(item.id) == GuideTaskState.waiting,
+    ),
+  );
+
+  List<GuideActionItem> get actionsWhileWaiting {
+    final current = currentItem;
+    if (current == null || stateFor(current.id) != GuideTaskState.waiting) {
+      return const [];
+    }
+    final candidates =
+        _items
+            .where(
+              (item) =>
+                  item.id != current.id &&
+                  !item.isCompleted &&
+                  !item.isDismissed &&
+                  stateFor(item.id) != GuideTaskState.waiting &&
+                  isItemUnlocked(item) &&
+                  item.resolvedExecutionWindow ==
+                      current.resolvedExecutionWindow &&
+                  item.resolvedTier != GuideItemTier.optional,
+            )
+            .toList()
+          ..sort(_compareItemsForDisplay);
+    return List.unmodifiable(candidates.take(2));
+  }
+
   List<GuideActionItem> itemsForPhase(GuidePhase phase) {
     final phaseItems = _items.where((item) => item.phase == phase).toList();
     phaseItems.sort(_compareItemsForDisplay);

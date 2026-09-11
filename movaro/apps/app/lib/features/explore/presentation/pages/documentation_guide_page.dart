@@ -1333,7 +1333,7 @@ List<_DocumentationTopic> _documentationTopics(BuildContext context) {
       ],
       sourceNameKey: 'senatran_mg_gov',
       sourceUrl:
-          'https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/dirigir-no-brasil',
+          'https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/carteira-internacional',
     ),
     _DocumentationTopic(
       icon: Icons.badge_outlined,

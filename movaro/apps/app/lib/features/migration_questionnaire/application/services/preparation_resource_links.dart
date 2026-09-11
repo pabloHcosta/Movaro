@@ -142,7 +142,7 @@ class PreparationResourceLinks {
   );
 
   static final Uri migrantHealthGuide = Uri.parse(
-    'https://www.gov.br/saude/pt-br/composicao/saps/equidade-em-saude/saude-de-migrantes-refugiados-e-apatridas',
+    'https://www.gov.br/saude/pt-br/composicao/saps/equidade-em-saude/migrantes-refugiadas-e-apatridas',
   );
 
   static final Uri nationalVaccinationCalendar = Uri.parse(

@@ -38,6 +38,8 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_event_suggestion_engine.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_event_suggestion_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_personalization_service.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/housing_viability_assessment.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/market_validation_check_in_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_folder_engine.dart';
@@ -46,6 +48,7 @@ import 'package:movaro_app/features/migration_questionnaire/application/services
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_readiness_builder.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/work_viability_assessment.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_event_suggestion.dart';
@@ -60,6 +63,7 @@ import 'package:movaro_app/features/migration_questionnaire/presentation/widgets
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_readiness_section.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
 import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_structure_widgets.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/guide_waiting_card.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -1140,6 +1144,14 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     final storedCriminalProfile = CriminalRecordProfile.fromJson(
       controller.taskDecisionDataFor('item_0_2_antecedentes'),
     );
+    var workViabilityProfile = item.id == 'item_0_5_mercado_trabalho'
+        ? WorkViabilityProfile.fromJson(controller.taskDecisionDataFor(item.id))
+        : null;
+    var housingViabilityProfile = item.id == 'item_3_2_aluguel_fixo'
+        ? HousingViabilityProfile.fromJson(
+            controller.taskDecisionDataFor(item.id),
+          )
+        : null;
     final resolvedFolder = MigrationAssistantAnswerBridge.resolveDocumentFolder(
       stored: storedFolderProfile,
       entry: storedEntryProfile,
@@ -1197,10 +1209,16 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                   sheetItem.id == 'item_0_2_document_folder';
               final isEntryRegularizationStep =
                   sheetItem.id == 'item_0_1_rule_90_days';
+              final isWorkViabilityStep =
+                  sheetItem.id == 'item_0_5_mercado_trabalho';
+              final isHousingViabilityStep =
+                  sheetItem.id == 'item_3_2_aluguel_fixo';
               final isSpecialDecisionAssistant =
                   isCriminalRecordStep ||
                   isDocumentFolderStep ||
-                  isEntryRegularizationStep;
+                  isEntryRegularizationStep ||
+                  isWorkViabilityStep ||
+                  isHousingViabilityStep;
               final hasGuidedInstructions =
                   !isSpecialDecisionAssistant && sheetItem.hasSteps;
               final guidedInstructionsAreRequired =
@@ -1262,6 +1280,10 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                   ? documentFolderProfile?.allActionsCompleted == true
                   : isEntryRegularizationStep
                   ? entryRegularizationProfile?.allActionsCompleted == true
+                  : isWorkViabilityStep
+                  ? workViabilityProfile?.isComplete == true
+                  : isHousingViabilityStep
+                  ? housingViabilityProfile?.hasCompletedOutcome == true
                   : sheetItem.hasChecklist
                   ? allChecklistDone
                   : allGuidedInstructionsDone;
@@ -1271,6 +1293,12 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                   ? folderCompletedCount
                   : isEntryRegularizationStep
                   ? entryCompletedCount
+                  : isWorkViabilityStep
+                  ? (workViabilityProfile?.isComplete == true ? 1 : 0)
+                  : isHousingViabilityStep
+                  ? (housingViabilityProfile?.hasCompletedOutcome == true
+                        ? 1
+                        : 0)
                   : sheetItem.hasChecklist
                   ? sheetItem.checklistItems
                             ?.where((sub) => sub.isCompleted)
@@ -1285,6 +1313,10 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                   ? folderActionIds.length
                   : isEntryRegularizationStep
                   ? entryActionIds.length
+                  : isWorkViabilityStep
+                  ? 1
+                  : isHousingViabilityStep
+                  ? 1
                   : sheetItem.hasChecklist
                   ? sheetItem.checklistItems?.length ?? 0
                   : guidedInstructionsAreRequired
@@ -1296,6 +1328,10 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                   ? folderActionIds.isNotEmpty
                   : isEntryRegularizationStep
                   ? entryActionIds.isNotEmpty
+                  : isWorkViabilityStep
+                  ? true
+                  : isHousingViabilityStep
+                  ? true
                   : sheetItem.hasChecklist || guidedInstructionsAreRequired;
               final isInProgress =
                   hasOutcomeChecklist &&
@@ -1491,6 +1527,40 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
               ) async {
                 setSheetState(() {
                   entryRegularizationProfile = profile;
+                });
+                await controller.saveTaskDecisionData(
+                  sheetItem.id,
+                  profile.toJson(),
+                );
+                if (mounted) {
+                  setState(() {
+                    _syncFromGpsController(controller);
+                  });
+                }
+              }
+
+              Future<void> updateWorkViabilityProfile(
+                WorkViabilityProfile profile,
+              ) async {
+                setSheetState(() {
+                  workViabilityProfile = profile;
+                });
+                await controller.saveTaskDecisionData(
+                  sheetItem.id,
+                  profile.toJson(),
+                );
+                if (mounted) {
+                  setState(() {
+                    _syncFromGpsController(controller);
+                  });
+                }
+              }
+
+              Future<void> updateHousingViabilityProfile(
+                HousingViabilityProfile profile,
+              ) async {
+                setSheetState(() {
+                  housingViabilityProfile = profile;
                 });
                 await controller.saveTaskDecisionData(
                   sheetItem.id,
@@ -1784,6 +1854,22 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                       folderInheritedFieldIds,
                                                   onChanged:
                                                       updateDocumentFolderProfile,
+                                                )
+                                              : isWorkViabilityStep
+                                              ? _WorkViabilityAssistant(
+                                                  profile:
+                                                      workViabilityProfile ??
+                                                      const WorkViabilityProfile(),
+                                                  onSave:
+                                                      updateWorkViabilityProfile,
+                                                )
+                                              : isHousingViabilityStep
+                                              ? _HousingViabilityAssistant(
+                                                  profile:
+                                                      housingViabilityProfile ??
+                                                      const HousingViabilityProfile(),
+                                                  onSave:
+                                                      updateHousingViabilityProfile,
                                                 )
                                               : sheetItem.hasSurvivalPhrases ||
                                                     sheetItem.hasRequirements
@@ -2194,6 +2280,18 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                                   profile:
                                                       entryRegularizationProfile!,
                                                 )
+                                              else if (isWorkViabilityStep)
+                                                _WorkViabilitySummary(
+                                                  profile:
+                                                      workViabilityProfile ??
+                                                      const WorkViabilityProfile(),
+                                                )
+                                              else if (isHousingViabilityStep)
+                                                _HousingViabilitySummary(
+                                                  profile:
+                                                      housingViabilityProfile ??
+                                                      const HousingViabilityProfile(),
+                                                )
                                               else if (sheetItem.doneCriteria !=
                                                   null)
                                                 _GuideDoneCriteriaContent(
@@ -2487,6 +2585,10 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     GuideGpsController controller,
     String itemId,
   ) async {
+    final completedItem = controller.items.cast<GuideActionItem?>().firstWhere(
+      (item) => item?.id == itemId,
+      orElse: () => null,
+    );
     final completedPhasesBefore = _completedGuidePhases(controller);
     await controller.completeActionItem(itemId);
     if (!mounted) {
@@ -2508,6 +2610,39 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
       completedPhasesBefore: completedPhasesBefore,
       controller: controller,
     );
+    if (completedItem != null) {
+      await _maybeShowMarketValidationCheckIn(completedItem);
+    }
+  }
+
+  Future<void> _maybeShowMarketValidationCheckIn(
+    GuideActionItem completedItem,
+  ) async {
+    if (completedItem.resolvedPrimaryActionType ==
+            GuidePrimaryActionType.none ||
+        !mounted) {
+      return;
+    }
+    final store = MarketValidationCheckInStore.instance;
+    final phaseKey = completedItem.phase.name;
+    if (!await store.shouldOffer(phaseKey: phaseKey) || !mounted) {
+      return;
+    }
+    await store.markShown(phaseKey: phaseKey);
+    if (!mounted) {
+      return;
+    }
+    final response = await showModalBottomSheet<MarketValidationCheckIn>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) => const _MarketValidationCheckInSheet(),
+    );
+    if (response == null) {
+      await store.dismiss(phaseKey: phaseKey);
+      return;
+    }
+    await store.submit(phaseKey: phaseKey, checkIn: response);
   }
 
   Set<GuidePhase> _completedGuidePhases(GuideGpsController controller) {
@@ -3163,6 +3298,28 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
                                 },
                               ),
                               const SizedBox(height: 16),
+                              if (gpsController.waitingItems.isNotEmpty) ...[
+                                GuideWaitingCard(
+                                  waitingItems: gpsController.waitingItems,
+                                  alternatives:
+                                      gpsController.actionsWhileWaiting,
+                                  onSelect: (item) async {
+                                    await gpsController.jumpToItem(item.id);
+                                    if (!mounted) return;
+                                    setState(
+                                      () =>
+                                          _syncFromGpsController(gpsController),
+                                    );
+                                    await _showExecutionPage(
+                                      gpsController,
+                                      item,
+                                      plan,
+                                      city,
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                              ],
                               _GuideUpcomingSection(
                                 controller: gpsController,
                                 onSelectItem: (itemId) async {
@@ -3518,6 +3675,275 @@ class _MigrationPlanCopilotPageState extends State<MigrationPlanCopilotPage> {
     }
 
     Navigator.pushReplacementNamed(context, AppRoutes.publicHome);
+  }
+}
+
+class _MarketValidationCheckInSheet extends StatefulWidget {
+  const _MarketValidationCheckInSheet();
+
+  @override
+  State<_MarketValidationCheckInSheet> createState() =>
+      _MarketValidationCheckInSheetState();
+}
+
+class _MarketValidationCheckInSheetState
+    extends State<_MarketValidationCheckInSheet> {
+  MarketValidationClarity? _clarity;
+  MarketValidationProgress? _progress;
+  MarketValidationValue? _value;
+
+  bool get _isComplete =>
+      _clarity != null && _progress != null && _value != null;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: FrostedPanel(
+          padding: const EdgeInsets.all(20),
+          borderRadius: BorderRadius.circular(28),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.fact_check_outlined),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _localizedText(
+                          context,
+                          pt: 'Esta etapa ajudou você a avançar?',
+                          es: '¿Esta etapa te ayudó a avanzar?',
+                          en: 'Did this step help you move forward?',
+                        ),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).closeButtonTooltip,
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _localizedText(
+                    context,
+                    pt: 'São três respostas rápidas para validar o piloto. Não há campo de texto, e a tarefa, a cidade e seus dados pessoais não são enviados.',
+                    es: 'Son tres respuestas rápidas para validar el piloto. No hay campo de texto y no se envían la tarea, la ciudad ni tus datos personales.',
+                    en: 'These are three quick answers for the pilot. There is no free-text field, and the task, city, and personal data are not sent.',
+                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSoftFor(context),
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _choiceGroup<MarketValidationClarity>(
+                  title: _localizedText(
+                    context,
+                    pt: 'Você sabe qual é sua próxima ação?',
+                    es: '¿Sabés cuál es tu próxima acción?',
+                    en: 'Do you know your next action?',
+                  ),
+                  value: _clarity,
+                  options: [
+                    (
+                      MarketValidationClarity.clear,
+                      _localizedText(
+                        context,
+                        pt: 'Sim, com clareza',
+                        es: 'Sí, con claridad',
+                        en: 'Yes, clearly',
+                      ),
+                    ),
+                    (
+                      MarketValidationClarity.partial,
+                      _localizedText(
+                        context,
+                        pt: 'Em parte',
+                        es: 'En parte',
+                        en: 'Partly',
+                      ),
+                    ),
+                    (
+                      MarketValidationClarity.unclear,
+                      _localizedText(
+                        context,
+                        pt: 'Ainda não',
+                        es: 'Todavía no',
+                        en: 'Not yet',
+                      ),
+                    ),
+                  ],
+                  onSelected: (value) => setState(() => _clarity = value),
+                ),
+                const SizedBox(height: 18),
+                _choiceGroup<MarketValidationProgress>(
+                  title: _localizedText(
+                    context,
+                    pt: 'O que aconteceu fora do Movaro?',
+                    es: '¿Qué ocurrió fuera de Movaro?',
+                    en: 'What happened outside Movaro?',
+                  ),
+                  value: _progress,
+                  options: [
+                    (
+                      MarketValidationProgress.completed,
+                      _localizedText(
+                        context,
+                        pt: 'Consegui realizar',
+                        es: 'Pude realizarlo',
+                        en: 'I completed it',
+                      ),
+                    ),
+                    (
+                      MarketValidationProgress.blocked,
+                      _localizedText(
+                        context,
+                        pt: 'Tentei, mas travei',
+                        es: 'Intenté, pero me trabé',
+                        en: 'I tried but got blocked',
+                      ),
+                    ),
+                    (
+                      MarketValidationProgress.notStarted,
+                      _localizedText(
+                        context,
+                        pt: 'Ainda não comecei',
+                        es: 'Todavía no empecé',
+                        en: 'I have not started',
+                      ),
+                    ),
+                  ],
+                  onSelected: (value) => setState(() => _progress = value),
+                ),
+                const SizedBox(height: 18),
+                _choiceGroup<MarketValidationValue>(
+                  title: _localizedText(
+                    context,
+                    pt: 'Quanto o Movaro ajudou nesta etapa?',
+                    es: '¿Cuánto ayudó Movaro en esta etapa?',
+                    en: 'How much did Movaro help with this step?',
+                  ),
+                  value: _value,
+                  options: [
+                    (
+                      MarketValidationValue.high,
+                      _localizedText(
+                        context,
+                        pt: 'Ajudou de verdade',
+                        es: 'Ayudó de verdad',
+                        en: 'It really helped',
+                      ),
+                    ),
+                    (
+                      MarketValidationValue.moderate,
+                      _localizedText(
+                        context,
+                        pt: 'Ajudou em parte',
+                        es: 'Ayudó en parte',
+                        en: 'It helped partly',
+                      ),
+                    ),
+                    (
+                      MarketValidationValue.low,
+                      _localizedText(
+                        context,
+                        pt: 'Não ajudou',
+                        es: 'No ayudó',
+                        en: 'It did not help',
+                      ),
+                    ),
+                  ],
+                  onSelected: (value) => setState(() => _value = value),
+                ),
+                const SizedBox(height: 22),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _isComplete
+                        ? () => Navigator.of(context).pop(
+                            MarketValidationCheckIn(
+                              clarity: _clarity!,
+                              progress: _progress!,
+                              value: _value!,
+                            ),
+                          )
+                        : null,
+                    icon: const Icon(Icons.send_rounded),
+                    label: Text(
+                      _localizedText(
+                        context,
+                        pt: 'Enviar respostas anônimas',
+                        es: 'Enviar respuestas anónimas',
+                        en: 'Send anonymous answers',
+                      ),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      _localizedText(
+                        context,
+                        pt: 'Agora não',
+                        es: 'Ahora no',
+                        en: 'Not now',
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _choiceGroup<T>({
+    required String title,
+    required T? value,
+    required List<(T, String)> options,
+    required ValueChanged<T> onSelected,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final option in options)
+              ChoiceChip(
+                label: Text(option.$2),
+                selected: value == option.$1,
+                onSelected: (_) => onSelected(option.$1),
+              ),
+          ],
+        ),
+      ],
+    );
   }
 }
 
@@ -5630,6 +6056,20 @@ class _GuideDominantActionCard extends StatelessWidget {
                     height: 1.45,
                   ),
                 ),
+                if (item!.doneCriteria?.trim().isNotEmpty ?? false) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    _localizedText(
+                      context,
+                      pt: 'Etapa resolvida quando:',
+                      es: 'Paso resuelto cuando:',
+                      en: 'This step is resolved when:',
+                    ),
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(item!.doneCriteria!),
+                ],
                 if (item!.badgeLabel != null) ...[
                   const SizedBox(height: 12),
                   Container(
@@ -10827,6 +11267,1205 @@ class _InlineActionTag extends StatelessWidget {
 }
 
 // ─── Entry and regularization execution assistant ────────────────────────────
+
+class _HousingViabilityAssistant extends StatefulWidget {
+  const _HousingViabilityAssistant({
+    required this.profile,
+    required this.onSave,
+  });
+
+  final HousingViabilityProfile profile;
+  final Future<void> Function(HousingViabilityProfile profile) onSave;
+
+  @override
+  State<_HousingViabilityAssistant> createState() =>
+      _HousingViabilityAssistantState();
+}
+
+class _HousingViabilityAssistantState
+    extends State<_HousingViabilityAssistant> {
+  late final TextEditingController _incomeController;
+  late final TextEditingController _housingCostController;
+  late final TextEditingController _upfrontRequiredController;
+  late final TextEditingController _upfrontAvailableController;
+  late int _reviewedListings;
+  late HousingRequirementStatus? _incomeProofStatus;
+  late HousingRequirementStatus? _guaranteeStatus;
+  late bool? _hasTemporaryFallback;
+  late HousingLeaseStatus? _leaseStatus;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final profile = widget.profile;
+    _incomeController = TextEditingController(
+      text: profile.monthlyIncomeBrl?.toString() ?? '',
+    );
+    _housingCostController = TextEditingController(
+      text: profile.monthlyHousingCostBrl?.toString() ?? '',
+    );
+    _upfrontRequiredController = TextEditingController(
+      text: profile.upfrontRequiredBrl?.toString() ?? '',
+    );
+    _upfrontAvailableController = TextEditingController(
+      text: profile.upfrontAvailableBrl?.toString() ?? '',
+    );
+    _reviewedListings = profile.reviewedListings.clamp(0, 3);
+    _incomeProofStatus = profile.incomeProofStatus;
+    _guaranteeStatus = profile.guaranteeStatus;
+    _hasTemporaryFallback = profile.hasTemporaryFallback;
+    _leaseStatus = profile.leaseStatus;
+  }
+
+  @override
+  void dispose() {
+    _incomeController.dispose();
+    _housingCostController.dispose();
+    _upfrontRequiredController.dispose();
+    _upfrontAvailableController.dispose();
+    super.dispose();
+  }
+
+  HousingViabilityProfile get _profile => HousingViabilityProfile(
+    reviewedListings: _reviewedListings,
+    monthlyIncomeBrl: int.tryParse(_incomeController.text),
+    monthlyHousingCostBrl: int.tryParse(_housingCostController.text),
+    upfrontRequiredBrl: int.tryParse(_upfrontRequiredController.text),
+    upfrontAvailableBrl: int.tryParse(_upfrontAvailableController.text),
+    incomeProofStatus: _incomeProofStatus,
+    guaranteeStatus: _guaranteeStatus,
+    hasTemporaryFallback: _hasTemporaryFallback,
+    leaseStatus: _leaseStatus,
+  );
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      await widget.onSave(_profile);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _localizedText(
+            context,
+            pt: 'Use condições de anúncios ou propostas reais. O resultado organiza riscos, mas não representa aprovação da imobiliária.',
+            es: 'Usá condiciones de anuncios o propuestas reales. El resultado organiza riesgos, pero no representa aprobación de la inmobiliaria.',
+            en: 'Use conditions from real listings or proposals. The result organizes risks but does not represent landlord approval.',
+          ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4),
+        ),
+        const SizedBox(height: 14),
+        DropdownButtonFormField<int>(
+          initialValue: _reviewedListings,
+          decoration: InputDecoration(
+            labelText: _localizedText(
+              context,
+              pt: 'Imóveis reais comparados',
+              es: 'Inmuebles reales comparados',
+              en: 'Real properties compared',
+            ),
+            border: const OutlineInputBorder(),
+          ),
+          items: [
+            for (var value = 0; value <= 3; value++)
+              DropdownMenuItem(
+                value: value,
+                child: Text(value == 3 ? '3+' : '$value'),
+              ),
+          ],
+          onChanged: (value) => setState(() => _reviewedListings = value ?? 0),
+        ),
+        const SizedBox(height: 12),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth < 520
+                ? constraints.maxWidth
+                : (constraints.maxWidth - 10) / 2;
+            return Wrap(
+              spacing: 10,
+              runSpacing: 12,
+              children: [
+                SizedBox(
+                  width: width,
+                  child: _PlanningAmountField(
+                    controller: _incomeController,
+                    label: _localizedText(
+                      context,
+                      pt: 'Renda mensal comprovável (BRL)',
+                      es: 'Ingreso mensual comprobable (BRL)',
+                      en: 'Verifiable monthly income (BRL)',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: width,
+                  child: _PlanningAmountField(
+                    controller: _housingCostController,
+                    label: _localizedText(
+                      context,
+                      pt: 'Moradia mensal total (BRL)',
+                      es: 'Vivienda mensual total (BRL)',
+                      en: 'Total monthly housing cost (BRL)',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: width,
+                  child: _PlanningAmountField(
+                    controller: _upfrontRequiredController,
+                    label: _localizedText(
+                      context,
+                      pt: 'Entrada exigida (BRL)',
+                      es: 'Entrada exigida (BRL)',
+                      en: 'Required upfront amount (BRL)',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: width,
+                  child: _PlanningAmountField(
+                    controller: _upfrontAvailableController,
+                    label: _localizedText(
+                      context,
+                      pt: 'Disponível para entrada (BRL)',
+                      es: 'Disponible para la entrada (BRL)',
+                      en: 'Available upfront amount (BRL)',
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<HousingRequirementStatus>(
+          initialValue: _incomeProofStatus,
+          decoration: InputDecoration(
+            labelText: _localizedText(
+              context,
+              pt: 'Comprovação de renda para esta proposta',
+              es: 'Comprobante de ingresos para esta propuesta',
+              en: 'Income proof for this proposal',
+            ),
+            border: const OutlineInputBorder(),
+          ),
+          items: [
+            for (final value in HousingRequirementStatus.values)
+              DropdownMenuItem(
+                value: value,
+                child: Text(_housingRequirementLabel(context, value)),
+              ),
+          ],
+          onChanged: (value) => setState(() => _incomeProofStatus = value),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<HousingRequirementStatus>(
+          initialValue: _guaranteeStatus,
+          decoration: InputDecoration(
+            labelText: _localizedText(
+              context,
+              pt: 'Garantia aceita para esta proposta',
+              es: 'Garantía aceptada para esta propuesta',
+              en: 'Accepted guarantee for this proposal',
+            ),
+            border: const OutlineInputBorder(),
+          ),
+          items: [
+            for (final value in HousingRequirementStatus.values)
+              DropdownMenuItem(
+                value: value,
+                child: Text(_housingRequirementLabel(context, value)),
+              ),
+          ],
+          onChanged: (value) => setState(() => _guaranteeStatus = value),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<bool>(
+          initialValue: _hasTemporaryFallback,
+          decoration: InputDecoration(
+            labelText: _localizedText(
+              context,
+              pt: 'Hospedagem temporária se o contrato atrasar',
+              es: 'Alojamiento temporal si el contrato se demora',
+              en: 'Temporary housing if the lease is delayed',
+            ),
+            border: const OutlineInputBorder(),
+          ),
+          items: [
+            DropdownMenuItem(
+              value: true,
+              child: Text(
+                _localizedText(
+                  context,
+                  pt: 'Sim, está prevista',
+                  es: 'Sí, está prevista',
+                  en: 'Yes, it is planned',
+                ),
+              ),
+            ),
+            DropdownMenuItem(
+              value: false,
+              child: Text(
+                _localizedText(
+                  context,
+                  pt: 'Não está prevista',
+                  es: 'No está prevista',
+                  en: 'It is not planned',
+                ),
+              ),
+            ),
+          ],
+          onChanged: (value) => setState(() => _hasTemporaryFallback = value),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<HousingLeaseStatus>(
+          initialValue: _leaseStatus,
+          decoration: InputDecoration(
+            labelText: _localizedText(
+              context,
+              pt: 'Situação do aluguel',
+              es: 'Situación del alquiler',
+              en: 'Rental status',
+            ),
+            border: const OutlineInputBorder(),
+          ),
+          items: [
+            for (final value in HousingLeaseStatus.values)
+              DropdownMenuItem(
+                value: value,
+                child: Text(_housingLeaseLabel(context, value)),
+              ),
+          ],
+          onChanged: (value) => setState(() => _leaseStatus = value),
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: _saving ? null : _save,
+            icon: _saving
+                ? const SizedBox.square(
+                    dimension: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.home_work_outlined),
+            label: Text(
+              _localizedText(
+                context,
+                pt: 'Salvar e avaliar moradia',
+                es: 'Guardar y evaluar vivienda',
+                en: 'Save and assess housing',
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HousingViabilitySummary extends StatelessWidget {
+  const _HousingViabilitySummary({required this.profile});
+
+  final HousingViabilityProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final assessment = HousingViabilityAssessor.assess(profile);
+    final color = switch (assessment.level) {
+      HousingViabilityLevel.viable => const Color(0xFF278A5B),
+      HousingViabilityLevel.attention => const Color(0xFFD17A00),
+      HousingViabilityLevel.incomplete => AppColors.textSoftFor(context),
+    };
+    final title = switch (assessment.level) {
+      HousingViabilityLevel.viable => _localizedText(
+        context,
+        pt: 'Condições iniciais coerentes',
+        es: 'Condiciones iniciales coherentes',
+        en: 'Coherent starting conditions',
+      ),
+      HousingViabilityLevel.attention => _localizedText(
+        context,
+        pt: 'Há obstáculos antes de assinar',
+        es: 'Hay obstáculos antes de firmar',
+        en: 'There are obstacles before signing',
+      ),
+      HousingViabilityLevel.incomplete => _localizedText(
+        context,
+        pt: 'Avaliação de moradia incompleta',
+        es: 'Evaluación de vivienda incompleta',
+        en: 'Housing assessment incomplete',
+      ),
+    };
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          for (final signal in assessment.signalKeys)
+            _AssessmentLine(
+              icon: Icons.info_outline_rounded,
+              text: _housingSignalText(context, signal, assessment),
+            ),
+          if (assessment.actionKeys.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              _localizedText(
+                context,
+                pt: 'Próximas ações',
+                es: 'Próximas acciones',
+                en: 'Next actions',
+              ),
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: 6),
+            for (final action in assessment.actionKeys)
+              _AssessmentLine(
+                icon: Icons.arrow_forward_rounded,
+                text: _housingActionText(context, action),
+              ),
+          ],
+          if (assessment.level == HousingViabilityLevel.viable) ...[
+            const SizedBox(height: 8),
+            Text(
+              _localizedText(
+                context,
+                pt: 'Esta leitura usa os valores informados e não garante aprovação, disponibilidade do imóvel ou segurança do contrato.',
+                es: 'Esta lectura usa los valores informados y no garantiza aprobación, disponibilidad del inmueble ni seguridad del contrato.',
+                en: 'This assessment uses the values entered and does not guarantee approval, property availability, or contract safety.',
+              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.4,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+String _housingRequirementLabel(
+  BuildContext context,
+  HousingRequirementStatus value,
+) => switch (value) {
+  HousingRequirementStatus.accepted => _localizedText(
+    context,
+    pt: 'Confirmada como aceita',
+    es: 'Confirmada como aceptada',
+    en: 'Confirmed as accepted',
+  ),
+  HousingRequirementStatus.pending => _localizedText(
+    context,
+    pt: 'Ainda precisa confirmar',
+    es: 'Todavía hay que confirmar',
+    en: 'Still needs confirmation',
+  ),
+  HousingRequirementStatus.unavailable => _localizedText(
+    context,
+    pt: 'Não consigo atender agora',
+    es: 'No puedo cumplirla ahora',
+    en: 'Cannot meet it now',
+  ),
+};
+
+String _housingLeaseLabel(BuildContext context, HousingLeaseStatus value) =>
+    switch (value) {
+      HousingLeaseStatus.searching => _localizedText(
+        context,
+        pt: 'Ainda estou pesquisando',
+        es: 'Todavía estoy buscando',
+        en: 'Still searching',
+      ),
+      HousingLeaseStatus.underReview => _localizedText(
+        context,
+        pt: 'Proposta ou contrato em análise',
+        es: 'Propuesta o contrato en análisis',
+        en: 'Proposal or lease under review',
+      ),
+      HousingLeaseStatus.signedWithKeys => _localizedText(
+        context,
+        pt: 'Contrato assinado e chaves recebidas',
+        es: 'Contrato firmado y llaves recibidas',
+        en: 'Lease signed and keys received',
+      ),
+    };
+
+String _housingSignalText(
+  BuildContext context,
+  String key,
+  HousingViabilityAssessment assessment,
+) {
+  final ratioPercent = ((assessment.housingIncomeRatio ?? 0) * 100).round();
+  return switch (key) {
+    'complete_profile' => _localizedText(
+      context,
+      pt: 'Preencha custos, entrada, comprovação, garantia e plano temporário.',
+      es: 'Completá costos, entrada, comprobante, garantía y plan temporal.',
+      en: 'Complete costs, upfront funds, proof, guarantee, and temporary plan.',
+    ),
+    'limited_listing_evidence' => _localizedText(
+      context,
+      pt: 'Ainda há poucos imóveis reais para comparar preço e exigências.',
+      es: 'Todavía hay pocos inmuebles reales para comparar precio y requisitos.',
+      en: 'There are still too few real properties to compare price and requirements.',
+    ),
+    'listing_evidence_recorded' => _localizedText(
+      context,
+      pt: 'Você comparou pelo menos três imóveis reais.',
+      es: 'Comparaste al menos tres inmuebles reales.',
+      en: 'You compared at least three real properties.',
+    ),
+    'high_housing_ratio' => _localizedText(
+      context,
+      pt: 'A moradia consumiria cerca de $ratioPercent% da renda comprovável; trate 35% como alerta de planejamento, não como regra universal de aprovação.',
+      es: 'La vivienda consumiría cerca del $ratioPercent% del ingreso comprobable; tomá 35% como alerta de planificación, no como regla universal de aprobación.',
+      en: 'Housing would consume about $ratioPercent% of verifiable income; treat 35% as a planning warning, not a universal approval rule.',
+    ),
+    'housing_ratio_within_plan' => _localizedText(
+      context,
+      pt: 'O custo informado representa cerca de $ratioPercent% da renda comprovável.',
+      es: 'El costo informado representa cerca del $ratioPercent% del ingreso comprobable.',
+      en: 'The entered cost represents about $ratioPercent% of verifiable income.',
+    ),
+    'upfront_funds_gap' => _localizedText(
+      context,
+      pt: 'Faltam ${assessment.upfrontGapBrl ?? 0} BRL para o desembolso inicial informado.',
+      es: 'Faltan ${assessment.upfrontGapBrl ?? 0} BRL para el desembolso inicial informado.',
+      en: '${assessment.upfrontGapBrl ?? 0} BRL is missing for the entered upfront amount.',
+    ),
+    'upfront_funds_covered' => _localizedText(
+      context,
+      pt: 'O valor disponível cobre o desembolso inicial informado.',
+      es: 'El valor disponible cubre el desembolso inicial informado.',
+      en: 'Available funds cover the entered upfront amount.',
+    ),
+    'income_proof_accepted' => _localizedText(
+      context,
+      pt: 'A comprovação de renda foi confirmada como aceita nesta proposta.',
+      es: 'El comprobante de ingresos fue confirmado como aceptado en esta propuesta.',
+      en: 'Income proof was confirmed as accepted for this proposal.',
+    ),
+    'income_proof_pending' => _localizedText(
+      context,
+      pt: 'A aceitação da sua comprovação de renda ainda não foi confirmada.',
+      es: 'La aceptación de tu comprobante de ingresos todavía no fue confirmada.',
+      en: 'Acceptance of your income proof has not been confirmed.',
+    ),
+    'income_proof_unavailable' => _localizedText(
+      context,
+      pt: 'Você ainda não consegue apresentar a comprovação exigida.',
+      es: 'Todavía no podés presentar el comprobante exigido.',
+      en: 'You cannot yet provide the required income proof.',
+    ),
+    'guarantee_accepted' => _localizedText(
+      context,
+      pt: 'A modalidade de garantia foi confirmada como aceita.',
+      es: 'La modalidad de garantía fue confirmada como aceptada.',
+      en: 'The guarantee type was confirmed as accepted.',
+    ),
+    'guarantee_pending' => _localizedText(
+      context,
+      pt: 'A garantia disponível ainda precisa ser aceita pelo responsável.',
+      es: 'La garantía disponible todavía debe ser aceptada por el responsable.',
+      en: 'The available guarantee still needs acceptance.',
+    ),
+    'guarantee_unavailable' => _localizedText(
+      context,
+      pt: 'Você ainda não dispõe da garantia exigida nesta proposta.',
+      es: 'Todavía no disponés de la garantía exigida en esta propuesta.',
+      en: 'You do not yet have the guarantee required for this proposal.',
+    ),
+    'temporary_fallback_ready' => _localizedText(
+      context,
+      pt: 'Existe uma hospedagem temporária prevista caso o contrato atrase.',
+      es: 'Hay un alojamiento temporal previsto si el contrato se demora.',
+      en: 'Temporary housing is planned if the lease is delayed.',
+    ),
+    'temporary_fallback_missing' => _localizedText(
+      context,
+      pt: 'Não há contingência se a aprovação ou assinatura atrasar.',
+      es: 'No hay contingencia si la aprobación o la firma se demora.',
+      en: 'There is no fallback if approval or signing is delayed.',
+    ),
+    'lease_searching' => _localizedText(
+      context,
+      pt: 'A busca continua; ainda não existe contrato concluído.',
+      es: 'La búsqueda continúa; todavía no hay contrato concluido.',
+      en: 'The search is ongoing; there is no completed lease yet.',
+    ),
+    'lease_under_review' => _localizedText(
+      context,
+      pt: 'Há uma proposta ou contrato em análise, ainda sem chaves.',
+      es: 'Hay una propuesta o contrato en análisis, todavía sin llaves.',
+      en: 'A proposal or lease is under review, without keys yet.',
+    ),
+    'lease_secured' => _localizedText(
+      context,
+      pt: 'Contrato assinado e chaves confirmadas.',
+      es: 'Contrato firmado y llaves confirmadas.',
+      en: 'Lease signed and keys confirmed.',
+    ),
+    _ => key,
+  };
+}
+
+String _housingActionText(BuildContext context, String key) {
+  return switch (key) {
+    'complete_profile' => _localizedText(
+      context,
+      pt: 'Complete a avaliação antes de concluir esta etapa.',
+      es: 'Completá la evaluación antes de terminar esta etapa.',
+      en: 'Complete the assessment before finishing this step.',
+    ),
+    'compare_three_listings' => _localizedText(
+      context,
+      pt: 'Compare três imóveis: aluguel, condomínio, tributos, garantia e entrada.',
+      es: 'Compará tres inmuebles: alquiler, expensas, impuestos, garantía y entrada.',
+      en: 'Compare three properties: rent, fees, taxes, guarantee, and upfront amount.',
+    ),
+    'adjust_housing_budget' => _localizedText(
+      context,
+      pt: 'Revise bairro, tamanho ou renda necessária antes de assumir o custo.',
+      es: 'Revisá barrio, tamaño o ingreso necesario antes de asumir el costo.',
+      en: 'Review neighborhood, size, or required income before taking on the cost.',
+    ),
+    'close_upfront_gap' => _localizedText(
+      context,
+      pt: 'Aumente a reserva ou negocie uma condição inicial compatível antes de pagar.',
+      es: 'Aumentá la reserva o negociá una condición inicial compatible antes de pagar.',
+      en: 'Increase the buffer or negotiate a suitable upfront condition before paying.',
+    ),
+    'confirm_income_proof' => _localizedText(
+      context,
+      pt: 'Confirme quais documentos são aceitos; se não puder apresentá-los, procure uma proposta compatível com sua renda.',
+      es: 'Confirmá qué documentos se aceptan; si no podés presentarlos, buscá una propuesta compatible con tu ingreso.',
+      en: 'Confirm which documents are accepted; if you cannot provide them, seek a proposal compatible with your income.',
+    ),
+    'confirm_rental_guarantee' => _localizedText(
+      context,
+      pt: 'Confirme por escrito qual garantia é aceita e o custo total; se não tiver acesso, compare outra modalidade ou proposta.',
+      es: 'Confirmá por escrito qué garantía se acepta y el costo total; si no tenés acceso, compará otra modalidad o propuesta.',
+      en: 'Confirm in writing which guarantee is accepted and its total cost; if unavailable, compare another type or proposal.',
+    ),
+    'prepare_temporary_fallback' => _localizedText(
+      context,
+      pt: 'Reserve uma alternativa temporária cancelável para o período de aprovação.',
+      es: 'Reservá una alternativa temporal cancelable para el período de aprobación.',
+      en: 'Arrange a cancellable temporary option for the approval period.',
+    ),
+    'continue_verified_search' => _localizedText(
+      context,
+      pt: 'Continue a busca usando anúncios e responsáveis verificados.',
+      es: 'Continuá la búsqueda usando anuncios y responsables verificados.',
+      en: 'Continue searching through verified listings and responsible parties.',
+    ),
+    'review_before_signing' => _localizedText(
+      context,
+      pt: 'Confira responsável, imóvel, custo total, garantia e contrato antes de assinar ou pagar.',
+      es: 'Revisá responsable, inmueble, costo total, garantía y contrato antes de firmar o pagar.',
+      en: 'Check the responsible party, property, total cost, guarantee, and lease before signing or paying.',
+    ),
+    _ => key,
+  };
+}
+
+class _WorkViabilityAssistant extends StatefulWidget {
+  const _WorkViabilityAssistant({required this.profile, required this.onSave});
+
+  final WorkViabilityProfile profile;
+  final Future<void> Function(WorkViabilityProfile profile) onSave;
+
+  @override
+  State<_WorkViabilityAssistant> createState() =>
+      _WorkViabilityAssistantState();
+}
+
+class _WorkViabilityAssistantState extends State<_WorkViabilityAssistant> {
+  late final TextEditingController _areaController;
+  late final TextEditingController _incomeController;
+  late final TextEditingController _costController;
+  late WorkExperienceLevel? _experienceLevel;
+  late PortugueseWorkLevel? _portugueseLevel;
+  late ProfessionRegulationStatus? _regulationStatus;
+  late int _reviewedOpenings;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final profile = widget.profile;
+    _areaController = TextEditingController(text: profile.workArea);
+    _incomeController = TextEditingController(
+      text: profile.expectedMonthlyIncomeBrl?.toString() ?? '',
+    );
+    _costController = TextEditingController(
+      text: profile.essentialMonthlyCostBrl?.toString() ?? '',
+    );
+    _experienceLevel = profile.experienceLevel;
+    _portugueseLevel = profile.portugueseLevel;
+    _regulationStatus = profile.regulationStatus;
+    _reviewedOpenings = profile.reviewedOpenings.clamp(0, 3);
+  }
+
+  @override
+  void dispose() {
+    _areaController.dispose();
+    _incomeController.dispose();
+    _costController.dispose();
+    super.dispose();
+  }
+
+  WorkViabilityProfile get _profile => WorkViabilityProfile(
+    workArea: _areaController.text,
+    experienceLevel: _experienceLevel,
+    portugueseLevel: _portugueseLevel,
+    regulationStatus: _regulationStatus,
+    reviewedOpenings: _reviewedOpenings,
+    expectedMonthlyIncomeBrl: int.tryParse(_incomeController.text),
+    essentialMonthlyCostBrl: int.tryParse(_costController.text),
+  );
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      await widget.onSave(_profile);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _localizedText(
+            context,
+            pt: 'Registre sinais do seu caso, não apenas dados gerais da cidade.',
+            es: 'Registrá señales de tu caso, no solo datos generales de la ciudad.',
+            en: 'Record signals from your situation, not only general city data.',
+          ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4),
+        ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: _areaController,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(
+            labelText: _localizedText(
+              context,
+              pt: 'Área ou profissão buscada',
+              es: 'Área o profesión buscada',
+              en: 'Target field or profession',
+            ),
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<WorkExperienceLevel>(
+          initialValue: _experienceLevel,
+          decoration: InputDecoration(
+            labelText: _localizedText(
+              context,
+              pt: 'Experiência na área',
+              es: 'Experiencia en el área',
+              en: 'Experience in the field',
+            ),
+            border: const OutlineInputBorder(),
+          ),
+          items: [
+            for (final value in WorkExperienceLevel.values)
+              DropdownMenuItem(
+                value: value,
+                child: Text(_workExperienceLabel(context, value)),
+              ),
+          ],
+          onChanged: (value) => setState(() => _experienceLevel = value),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<PortugueseWorkLevel>(
+          initialValue: _portugueseLevel,
+          decoration: InputDecoration(
+            labelText: _localizedText(
+              context,
+              pt: 'Português para trabalhar',
+              es: 'Portugués para trabajar',
+              en: 'Portuguese for work',
+            ),
+            border: const OutlineInputBorder(),
+          ),
+          items: [
+            for (final value in PortugueseWorkLevel.values)
+              DropdownMenuItem(
+                value: value,
+                child: Text(_portugueseWorkLabel(context, value)),
+              ),
+          ],
+          onChanged: (value) => setState(() => _portugueseLevel = value),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<ProfessionRegulationStatus>(
+          initialValue: _regulationStatus,
+          decoration: InputDecoration(
+            labelText: _localizedText(
+              context,
+              pt: 'Validação ou conselho profissional',
+              es: 'Validación o consejo profesional',
+              en: 'Recognition or professional council',
+            ),
+            border: const OutlineInputBorder(),
+          ),
+          items: [
+            for (final value in ProfessionRegulationStatus.values)
+              DropdownMenuItem(
+                value: value,
+                child: Text(_regulationLabel(context, value)),
+              ),
+          ],
+          onChanged: (value) => setState(() => _regulationStatus = value),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<int>(
+          initialValue: _reviewedOpenings,
+          decoration: InputDecoration(
+            labelText: _localizedText(
+              context,
+              pt: 'Vagas reais comparadas',
+              es: 'Vacantes reales comparadas',
+              en: 'Real openings compared',
+            ),
+            border: const OutlineInputBorder(),
+          ),
+          items: [
+            for (var value = 0; value <= 3; value++)
+              DropdownMenuItem(
+                value: value,
+                child: Text(value == 3 ? '3+' : '$value'),
+              ),
+          ],
+          onChanged: (value) => setState(() => _reviewedOpenings = value ?? 0),
+        ),
+        const SizedBox(height: 12),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final fields = <Widget>[
+              _PlanningAmountField(
+                controller: _incomeController,
+                label: _localizedText(
+                  context,
+                  pt: 'Renda mensal esperada (BRL)',
+                  es: 'Ingreso mensual esperado (BRL)',
+                  en: 'Expected monthly income (BRL)',
+                ),
+              ),
+              _PlanningAmountField(
+                controller: _costController,
+                label: _localizedText(
+                  context,
+                  pt: 'Custo mensal essencial (BRL)',
+                  es: 'Costo mensual esencial (BRL)',
+                  en: 'Essential monthly cost (BRL)',
+                ),
+              ),
+            ];
+            if (constraints.maxWidth < 520) {
+              return Column(
+                children: [
+                  fields.first,
+                  const SizedBox(height: 12),
+                  fields.last,
+                ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: fields.first),
+                const SizedBox(width: 10),
+                Expanded(child: fields.last),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: _saving ? null : _save,
+            icon: _saving
+                ? const SizedBox.square(
+                    dimension: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.assessment_outlined),
+            label: Text(
+              _localizedText(
+                context,
+                pt: 'Salvar e avaliar viabilidade',
+                es: 'Guardar y evaluar viabilidad',
+                en: 'Save and assess viability',
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PlanningAmountField extends StatelessWidget {
+  const _PlanningAmountField({required this.controller, required this.label});
+
+  final TextEditingController controller;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
+}
+
+class _WorkViabilitySummary extends StatelessWidget {
+  const _WorkViabilitySummary({required this.profile});
+
+  final WorkViabilityProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final assessment = WorkViabilityAssessor.assess(profile);
+    final color = switch (assessment.level) {
+      WorkViabilityLevel.viable => const Color(0xFF278A5B),
+      WorkViabilityLevel.attention => const Color(0xFFD17A00),
+      WorkViabilityLevel.incomplete => AppColors.textSoftFor(context),
+    };
+    final title = switch (assessment.level) {
+      WorkViabilityLevel.viable => _localizedText(
+        context,
+        pt: 'Base inicial coerente',
+        es: 'Base inicial coherente',
+        en: 'Coherent starting point',
+      ),
+      WorkViabilityLevel.attention => _localizedText(
+        context,
+        pt: 'Há obstáculos para resolver',
+        es: 'Hay obstáculos por resolver',
+        en: 'There are obstacles to resolve',
+      ),
+      WorkViabilityLevel.incomplete => _localizedText(
+        context,
+        pt: 'Avaliação incompleta',
+        es: 'Evaluación incompleta',
+        en: 'Assessment incomplete',
+      ),
+    };
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          for (final signal in assessment.signalKeys)
+            _AssessmentLine(
+              icon: Icons.info_outline_rounded,
+              text: _workSignalText(context, signal, assessment.monthlyGapBrl),
+            ),
+          if (assessment.actionKeys.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              _localizedText(
+                context,
+                pt: 'Próximas ações',
+                es: 'Próximas acciones',
+                en: 'Next actions',
+              ),
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: 6),
+            for (final action in assessment.actionKeys)
+              _AssessmentLine(
+                icon: Icons.arrow_forward_rounded,
+                text: _workActionText(context, action),
+              ),
+          ],
+          if (assessment.level == WorkViabilityLevel.viable) ...[
+            const SizedBox(height: 8),
+            Text(
+              _localizedText(
+                context,
+                pt: 'Isso indica coerência entre os dados informados; não garante contratação, salário ou prazo.',
+                es: 'Esto indica coherencia entre los datos informados; no garantiza contratación, salario ni plazo.',
+                en: 'This shows consistency between the values entered; it does not guarantee hiring, salary, or timing.',
+              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.4,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _AssessmentLine extends StatelessWidget {
+  const _AssessmentLine({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(height: 1.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _workExperienceLabel(BuildContext context, WorkExperienceLevel value) =>
+    switch (value) {
+      WorkExperienceLevel.starting => _localizedText(
+        context,
+        pt: 'Começando ou mudando de área',
+        es: 'Empezando o cambiando de área',
+        en: 'Starting or changing fields',
+      ),
+      WorkExperienceLevel.junior => _localizedText(
+        context,
+        pt: 'Até 3 anos',
+        es: 'Hasta 3 años',
+        en: 'Up to 3 years',
+      ),
+      WorkExperienceLevel.experienced => _localizedText(
+        context,
+        pt: 'Mais de 3 anos',
+        es: 'Más de 3 años',
+        en: 'More than 3 years',
+      ),
+    };
+
+String _portugueseWorkLabel(BuildContext context, PortugueseWorkLevel value) =>
+    switch (value) {
+      PortugueseWorkLevel.starting => _localizedText(
+        context,
+        pt: 'Inicial',
+        es: 'Inicial',
+        en: 'Starting',
+      ),
+      PortugueseWorkLevel.functional => _localizedText(
+        context,
+        pt: 'Consigo trabalhar com apoio',
+        es: 'Puedo trabajar con apoyo',
+        en: 'Can work with support',
+      ),
+      PortugueseWorkLevel.professional => _localizedText(
+        context,
+        pt: 'Profissional',
+        es: 'Profesional',
+        en: 'Professional',
+      ),
+    };
+
+String _regulationLabel(
+  BuildContext context,
+  ProfessionRegulationStatus value,
+) => switch (value) {
+  ProfessionRegulationStatus.no => _localizedText(
+    context,
+    pt: 'Não',
+    es: 'No',
+    en: 'No',
+  ),
+  ProfessionRegulationStatus.unsure => _localizedText(
+    context,
+    pt: 'Não sei',
+    es: 'No sé',
+    en: 'Not sure',
+  ),
+  ProfessionRegulationStatus.requiredPending => _localizedText(
+    context,
+    pt: 'Exige e ainda está pendente',
+    es: 'Exige y todavía está pendiente',
+    en: 'Required and still pending',
+  ),
+  ProfessionRegulationStatus.requiredReady => _localizedText(
+    context,
+    pt: 'Exige e já está resolvida',
+    es: 'Exige y ya está resuelta',
+    en: 'Required and already resolved',
+  ),
+};
+
+String _workSignalText(BuildContext context, String key, int? gap) {
+  return switch (key) {
+    'complete_profile' => _localizedText(
+      context,
+      pt: 'Preencha área, experiência, português, regulamentação, renda e custo mensal.',
+      es: 'Completá área, experiencia, portugués, regulación, ingreso y costo mensual.',
+      en: 'Complete field, experience, Portuguese, regulation, income, and monthly cost.',
+    ),
+    'limited_opening_evidence' => _localizedText(
+      context,
+      pt: 'Ainda há pouca evidência de vagas reais compatíveis com seu perfil.',
+      es: 'Todavía hay poca evidencia de vacantes reales compatibles con tu perfil.',
+      en: 'There is still limited evidence of real openings that fit your profile.',
+    ),
+    'opening_evidence_recorded' => _localizedText(
+      context,
+      pt: 'Você comparou pelo menos três vagas reais.',
+      es: 'Comparaste al menos tres vacantes reales.',
+      en: 'You compared at least three real openings.',
+    ),
+    'portuguese_gap' => _localizedText(
+      context,
+      pt: 'O português pode limitar entrevistas e rotina de trabalho.',
+      es: 'El portugués puede limitar entrevistas y la rutina laboral.',
+      en: 'Portuguese may limit interviews and daily work.',
+    ),
+    'experience_gap' => _localizedText(
+      context,
+      pt: 'A entrada ou mudança de área pede vagas e expectativas compatíveis.',
+      es: 'Empezar o cambiar de área exige vacantes y expectativas compatibles.',
+      en: 'Starting or changing fields requires matching roles and expectations.',
+    ),
+    'regulated_profession' => _localizedText(
+      context,
+      pt: 'A profissão informada pode depender de reconhecimento ou conselho.',
+      es: 'La profesión informada puede depender de reconocimiento o consejo.',
+      en: 'The profession may depend on recognition or a professional council.',
+    ),
+    'regulation_unknown' => _localizedText(
+      context,
+      pt: 'Ainda não está confirmado se a profissão exige validação no Brasil.',
+      es: 'Todavía no está confirmado si la profesión exige validación en Brasil.',
+      en: 'It is not yet confirmed whether the profession requires recognition in Brazil.',
+    ),
+    'recognition_ready' => _localizedText(
+      context,
+      pt: 'A validação profissional necessária foi informada como resolvida.',
+      es: 'La validación profesional necesaria fue informada como resuelta.',
+      en: 'The required professional recognition was reported as resolved.',
+    ),
+    'income_below_cost' => _localizedText(
+      context,
+      pt: 'A renda esperada fica ${gap ?? 0} BRL abaixo do custo mensal essencial.',
+      es: 'El ingreso esperado queda ${gap ?? 0} BRL por debajo del costo mensual esencial.',
+      en: 'Expected income is ${gap ?? 0} BRL below essential monthly costs.',
+    ),
+    'income_covers_cost' => _localizedText(
+      context,
+      pt: 'A renda esperada cobre o custo mensal essencial informado.',
+      es: 'El ingreso esperado cubre el costo mensual esencial informado.',
+      en: 'Expected income covers the essential monthly cost entered.',
+    ),
+    _ => key,
+  };
+}
+
+String _workActionText(BuildContext context, String key) {
+  return switch (key) {
+    'complete_profile' => _localizedText(
+      context,
+      pt: 'Complete a avaliação antes de concluir esta etapa.',
+      es: 'Completá la evaluación antes de terminar esta etapa.',
+      en: 'Complete the assessment before finishing this step.',
+    ),
+    'review_three_openings' => _localizedText(
+      context,
+      pt: 'Compare três vagas atuais: requisitos, cidade, contrato e faixa salarial.',
+      es: 'Compará tres vacantes actuales: requisitos, ciudad, contrato y salario.',
+      en: 'Compare three current openings: requirements, city, contract, and salary.',
+    ),
+    'prepare_portuguese_profile' => _localizedText(
+      context,
+      pt: 'Prepare currículo e apresentação em português e pratique uma entrevista.',
+      es: 'Prepará CV y presentación en portugués y practicá una entrevista.',
+      en: 'Prepare a Portuguese CV and introduction, then practice an interview.',
+    ),
+    'target_entry_roles' => _localizedText(
+      context,
+      pt: 'Busque vagas de entrada e registre quais competências aparecem repetidamente.',
+      es: 'Buscá puestos de entrada y registrá qué competencias se repiten.',
+      en: 'Target entry roles and record which skills appear repeatedly.',
+    ),
+    'confirm_profession_recognition' => _localizedText(
+      context,
+      pt: 'Confirme no órgão da profissão se diploma, registro ou prova são exigidos.',
+      es: 'Confirmá con el organismo profesional si exige título, registro o examen.',
+      en: 'Confirm with the professional body whether a degree, registration, or exam is required.',
+    ),
+    'close_income_gap' => _localizedText(
+      context,
+      pt: 'Reduza o custo, ajuste a meta de renda ou aumente a reserva antes da mudança.',
+      es: 'Reducí el costo, ajustá la meta de ingreso o aumentá la reserva antes de mudarte.',
+      en: 'Reduce costs, adjust the income target, or increase the buffer before moving.',
+    ),
+    _ => key,
+  };
+}
 
 class _EntryRegularizationDecisionAssistant extends StatelessWidget {
   const _EntryRegularizationDecisionAssistant({

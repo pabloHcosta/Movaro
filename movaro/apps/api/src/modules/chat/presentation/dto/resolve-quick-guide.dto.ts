@@ -42,6 +42,11 @@ export class QuickGuideAnswersDto {
 
 export class ResolveQuickGuideDto extends AskChatDto {
   @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  questionId?: string;
+
+  @IsOptional()
   @ValidateNested()
   @Type(() => QuickGuideAnswersDto)
   answers?: QuickGuideAnswersDto;

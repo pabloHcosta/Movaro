@@ -131,6 +131,51 @@ void main() {
     );
   });
 
+  test('budget overrides persist without replacing task progress', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'movaro_budget_override_test',
+    );
+    addTearDown(() async {
+      if (directory.existsSync()) {
+        await directory.delete(recursive: true);
+      }
+    });
+    final progressStore = MigrationCopilotProgressStore(
+      directoryProvider: () async => directory,
+    );
+    const plan = MigrationPlan(
+      id: 'budget-plan',
+      originCountry: 'argentina',
+      destinationCountry: 'brasil',
+      goal: 'work',
+      timeline: 'in_3_6m',
+      steps: [],
+    );
+    await progressStore.write(
+      plan: plan,
+      readinessCompletedIds: const {'budget_checked'},
+      documentCompletedIds: const {},
+      arrivalCompletedIds: const {},
+    );
+
+    await progressStore.writeLandingBudgetOverrides(
+      plan: plan,
+      values: const {
+        'monthlyBaseBrl': 4200,
+        'setupBrl': 6500,
+        'bufferBrl': 8000,
+      },
+    );
+
+    final restored = await progressStore.read(plan);
+    expect(restored.readinessCompletedIds, contains('budget_checked'));
+    expect(restored.landingBudgetOverrides, {
+      'monthlyBaseBrl': 4200,
+      'setupBrl': 6500,
+      'bufferBrl': 8000,
+    });
+  });
+
   test('city change keeps documents and reopens city-specific work', () async {
     final directory = await Directory.systemTemp.createTemp(
       'movaro_city_transition_test',

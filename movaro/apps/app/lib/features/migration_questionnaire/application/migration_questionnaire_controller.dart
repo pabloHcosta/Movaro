@@ -231,6 +231,26 @@ class MigrationQuestionnaireController extends ChangeNotifier {
     }
   }
 
+  Future<void> reloadPersistedState() async {
+    await _journeyContextController.reloadPersistedState();
+    _answers = const [];
+    _selectedVariant = null;
+    _currentIndex = 0;
+    _showRefinePrompt = false;
+    _isRefineResolved = false;
+    _includeConstraints = false;
+    _clearAdaptiveRefinement();
+    _savedPlans = await _migrationPlanRepository.getSavedPlans();
+    _generatedPlan = await _migrationPlanRepository.getCurrentPlan();
+    _preferredCity = _generatedPlan?.preferredCity;
+    final draft = _generatedPlan == null ? await _flowDraftStore.read() : null;
+    _restoreDraft(draft);
+    _sanitizeDeprecatedSupportNeeds();
+    _syncJourneyAnswers();
+    _clampCurrentIndex();
+    notifyListeners();
+  }
+
   Future<void> initializeForQuestionnaire({
     QuestionnaireVariant? variant,
   }) async {

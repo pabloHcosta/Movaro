@@ -2696,7 +2696,9 @@ class _ExplorerStageCard extends StatelessWidget {
             primaryLocale: locale,
           );
 
-    return Row(
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
       children: [
         _AffordabilityChip(
           icon: Icons.home_outlined,
@@ -2708,7 +2710,6 @@ class _ExplorerStageCard extends StatelessWidget {
           ),
           isDark: isDark,
         ),
-        const SizedBox(width: 6),
         _AffordabilityChip(
           icon: Icons.attach_money_rounded,
           label: _localizedText(

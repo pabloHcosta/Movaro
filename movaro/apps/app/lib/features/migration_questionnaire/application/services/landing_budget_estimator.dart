@@ -41,11 +41,19 @@ class LandingBudgetEstimate {
     required this.summaryKey,
     required this.cityContext,
     required this.scenarios,
+    required this.householdAdults,
+    required this.householdChildren,
+    required this.householdFactor,
+    required this.usesCitySnapshot,
   });
 
   final String summaryKey;
   final String? cityContext;
   final List<LandingBudgetScenarioEstimate> scenarios;
+  final int householdAdults;
+  final int householdChildren;
+  final double householdFactor;
+  final bool usesCitySnapshot;
 }
 
 class LandingBudgetEstimator {
@@ -61,11 +69,17 @@ class LandingBudgetEstimator {
     final budgetCity = confirmedCity ?? explicitPreviewCity;
     final cityBudget = budgetCity?.budgetSnapshot;
     final householdFactor = _householdFactor(plan);
+    final householdAdults = _householdAdults(plan);
+    final householdChildren = plan.childrenCount ?? 0;
     final monthlyBase = _resolveMonthlyBase(plan, cityBudget, budgetCity);
 
     return LandingBudgetEstimate(
       summaryKey: _summaryKey(plan.timeline),
       cityContext: budgetCity?.name,
+      householdAdults: householdAdults,
+      householdChildren: householdChildren,
+      householdFactor: householdFactor,
+      usesCitySnapshot: cityBudget != null,
       scenarios: [
         _scenario(
           scenario: LandingBudgetScenario.lean,
@@ -206,12 +220,14 @@ class LandingBudgetEstimator {
 
   static double _householdFactor(MigrationPlan plan) {
     final children = plan.childrenCount ?? 0;
-    final adults = switch (plan.travelGroup) {
-      'partner' || 'family_kids' => 2,
-      _ => 1,
-    };
+    final adults = _householdAdults(plan);
     return (adults + (children * 0.65)).clamp(1, 3.6);
   }
+
+  static int _householdAdults(MigrationPlan plan) => switch (plan.travelGroup) {
+    'partner' || 'family_kids' => 2,
+    _ => 1,
+  };
 
   static int _resolveScenarioMonthlyBase(
     LandingBudgetScenario scenario,
@@ -234,7 +250,7 @@ class LandingBudgetEstimator {
                     (cityBudget.planningRentLow * 0.72)) *
                 householdFactor)
             .round(),
-      LandingBudgetScenario.balanced => cityBudget.fairLivingTotal,
+      LandingBudgetScenario.balanced => balancedMonthlyBase,
       LandingBudgetScenario.comfortable =>
         ((cityBudget.singlePersonExcludingRent +
                     cityBudget.pricierRent +

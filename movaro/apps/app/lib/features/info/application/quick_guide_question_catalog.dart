@@ -176,6 +176,11 @@ class QuickGuideQuestionCatalog {
         'seguro fiança',
         'alugar sem garantia',
         'guarantor rental guarantee',
+        'o que preciso para alugar',
+        'qué necesito para alquilar',
+        'what do i need to rent',
+        'sem fiador',
+        'sin garante',
       ],
     ),
     QuickGuideQuestion(
@@ -411,6 +416,18 @@ class QuickGuideQuestionCatalog {
       aliases: ['passagem aérea', 'aeroporto', 'bagagem voo', 'pasaje'],
     ),
   ];
+
+  static QuickGuideQuestion? findExactQuestion(String value) {
+    final normalized = _normalize(value);
+    for (final question in questions) {
+      if (_normalize(question.pt) == normalized ||
+          _normalize(question.es) == normalized ||
+          _normalize(question.en) == normalized) {
+        return question;
+      }
+    }
+    return null;
+  }
 
   static List<QuickGuideQuestion> search(
     String query, {

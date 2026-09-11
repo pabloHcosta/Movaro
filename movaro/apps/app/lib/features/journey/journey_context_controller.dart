@@ -137,6 +137,27 @@ class JourneyContextController extends ChangeNotifier {
     }
   }
 
+  Future<void> reloadPersistedState() async {
+    if (!_isInitialized) {
+      await initialize();
+      return;
+    }
+
+    final persisted = await _store.read();
+    _hasSeenIntro = persisted['hasSeenIntro'] == true;
+    _originCountryId = _resolveCountryId(persisted['originCountryId']);
+    _destinationCountryId = _resolveCountryId(
+      persisted['destinationCountryId'],
+    );
+    final detectedLocationJson = persisted['detectedLocation'];
+    _detectedLocation = detectedLocationJson is Map
+        ? DetectedLocation.fromJson(
+            detectedLocationJson.cast<String, dynamic>(),
+          )
+        : null;
+    notifyListeners();
+  }
+
   Future<void> markIntroSeen() async {
     _hasSeenIntro = true;
     await _persist();

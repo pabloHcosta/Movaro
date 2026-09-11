@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/landing_budget_runway_card.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
 import 'package:movaro_app/app/theme/app_colors.dart';
@@ -8,32 +10,72 @@ import 'package:movaro_app/core/widgets/frosted_panel.dart';
 import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/landing_budget_estimator.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
 import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
-class LandingBudgetEstimatorSection extends StatelessWidget {
+class LandingBudgetEstimatorSection extends StatefulWidget {
   const LandingBudgetEstimatorSection({
     required this.plan,
     this.exchangeRates,
     this.preferredCountryId,
+    this.progressStore,
     super.key,
   });
 
   final MigrationPlan plan;
+  final MigrationCopilotProgressStore? progressStore;
   final CopilotExchangeRates? exchangeRates;
   final String? preferredCountryId;
 
   @override
+  State<LandingBudgetEstimatorSection> createState() =>
+      _LandingBudgetEstimatorSectionState();
+}
+
+class _LandingBudgetEstimatorSectionState
+    extends State<LandingBudgetEstimatorSection> {
+  late final MigrationCopilotProgressStore _progressStore =
+      widget.progressStore ?? MigrationCopilotProgressStore();
+  Map<String, int> _customValues = const {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCustomValues();
+  }
+
+  @override
+  void didUpdateWidget(LandingBudgetEstimatorSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (MigrationPlanIdentity.storageKeyFor(oldWidget.plan) !=
+        MigrationPlanIdentity.storageKeyFor(widget.plan)) {
+      _customValues = const {};
+      _loadCustomValues();
+    }
+  }
+
+  Future<void> _loadCustomValues() async {
+    final key = MigrationPlanIdentity.storageKeyFor(widget.plan);
+    final snapshot = await _progressStore.read(widget.plan);
+    if (mounted && key == MigrationPlanIdentity.storageKeyFor(widget.plan)) {
+      setState(() => _customValues = snapshot.landingBudgetOverrides);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final estimate = LandingBudgetEstimator.build(plan: plan);
+    final estimate = LandingBudgetEstimator.build(plan: widget.plan);
     final summary = _summaryLabel(context, estimate.summaryKey);
     final title = estimate.cityContext == null
         ? l10n.landingBudgetSectionTitle
         : l10n.landingBudgetSectionTitleWithCity(estimate.cityContext!);
 
-    final cityBudget = plan.isCityConfirmed
-        ? plan.confirmedCity?.budgetSnapshot
+    final cityBudget = widget.plan.isCityConfirmed
+        ? widget.plan.confirmedCity?.budgetSnapshot
         : null;
+    final customScenario = _customScenario();
 
     return FrostedPanel(
       child: Column(
@@ -48,20 +90,22 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
               height: 1.45,
             ),
           ),
+          const SizedBox(height: 12),
+          _BudgetAssumptionsNote(estimate: estimate),
           if (cityBudget != null) ...[
             const SizedBox(height: 18),
             _CityRealCostSection(
               budget: cityBudget,
-              exchangeRates: exchangeRates,
-              preferredCountryId: preferredCountryId,
+              exchangeRates: widget.exchangeRates,
+              preferredCountryId: widget.preferredCountryId,
             ),
           ],
-          if (_hasEducationContext(plan)) ...[
+          if (_hasEducationContext(widget.plan)) ...[
             const SizedBox(height: 18),
-            _EducationBudgetNote(plan: plan),
+            _EducationBudgetNote(plan: widget.plan),
           ],
           const SizedBox(height: 18),
-          if (exchangeRates != null) ...[
+          if (widget.exchangeRates != null) ...[
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
@@ -70,7 +114,7 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
               ),
               child: Text(
                 l10n.landingBudgetExchangeUpdatedAt(
-                  _formatUpdatedAt(context, exchangeRates!.fetchedAt),
+                  _formatUpdatedAt(context, widget.exchangeRates!.fetchedAt),
                 ),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSoftFor(context),
@@ -96,6 +140,70 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
             ),
             const SizedBox(height: 14),
           ],
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  customScenario == null
+                      ? _text(
+                          context,
+                          pt: 'Use seus valores reais',
+                          es: 'Usá tus valores reales',
+                          en: 'Use your actual values',
+                        )
+                      : _text(
+                          context,
+                          pt: 'Seu orçamento está ativo',
+                          es: 'Tu presupuesto está activo',
+                          en: 'Your budget is active',
+                        ),
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: _editCustomValues,
+                icon: Icon(
+                  customScenario == null
+                      ? Icons.edit_outlined
+                      : Icons.tune_rounded,
+                  size: 18,
+                ),
+                label: Text(
+                  customScenario == null
+                      ? _text(
+                          context,
+                          pt: 'Preencher',
+                          es: 'Completar',
+                          en: 'Enter values',
+                        )
+                      : _text(context, pt: 'Editar', es: 'Editar', en: 'Edit'),
+                ),
+              ),
+              if (customScenario != null)
+                IconButton(
+                  tooltip: _text(
+                    context,
+                    pt: 'Voltar às estimativas',
+                    es: 'Volver a las estimaciones',
+                    en: 'Use estimates again',
+                  ),
+                  onPressed: _clearCustomValues,
+                  icon: const Icon(Icons.restart_alt_rounded),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (customScenario != null &&
+              _customValues['availableBrl'] != null) ...[
+            LandingBudgetRunwayCard(
+              availableBrl: _customValues['availableBrl']!,
+              monthlyBrl: customScenario.breakdown.monthlyBaseBrl,
+              setupBrl: customScenario.breakdown.setupBrl,
+              bufferBrl: customScenario.breakdown.bufferBrl,
+              months: _customValues['monthsWithoutIncome'] ?? 3,
+            ),
+            const SizedBox(height: 16),
+          ],
           LayoutBuilder(
             builder: (context, constraints) {
               final wide = constraints.maxWidth >= 960;
@@ -110,18 +218,28 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
                 spacing: 12,
                 runSpacing: 12,
                 children: [
-                  for (final scenario in estimate.scenarios)
+                  for (final scenario
+                      in customScenario == null
+                          ? estimate.scenarios
+                          : [customScenario])
                     SizedBox(
                       width: cardWidth,
                       child: _ScenarioCard(
                         scenario: scenario,
-                        title: _scenarioTitle(context, scenario.titleKey),
+                        title: customScenario == null
+                            ? _scenarioTitle(context, scenario.titleKey)
+                            : _text(
+                                context,
+                                pt: 'Meu orçamento',
+                                es: 'Mi presupuesto',
+                                en: 'My budget',
+                              ),
                         description: _scenarioBody(
                           context,
                           scenario.descriptionKey,
                         ),
-                        exchangeRates: exchangeRates,
-                        preferredCountryId: preferredCountryId,
+                        exchangeRates: widget.exchangeRates,
+                        preferredCountryId: widget.preferredCountryId,
                       ),
                     ),
                 ],
@@ -140,6 +258,230 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
       ),
     );
   }
+
+  LandingBudgetScenarioEstimate? _customScenario() {
+    final monthly = _customValues['monthlyBaseBrl'];
+    final setup = _customValues['setupBrl'];
+    final buffer = _customValues['bufferBrl'];
+    if (monthly == null || setup == null || buffer == null) return null;
+    return LandingBudgetScenarioEstimate(
+      scenario: LandingBudgetScenario.balanced,
+      titleKey: 'custom',
+      descriptionKey: 'custom',
+      breakdown: LandingBudgetBreakdown(
+        monthlyBaseBrl: monthly,
+        setupBrl: setup,
+        bufferBrl: buffer,
+        total30DaysBrl: monthly + setup + buffer,
+        total90DaysBrl: (monthly * 3) + setup + buffer,
+      ),
+    );
+  }
+
+  Future<void> _clearCustomValues() async {
+    await _progressStore.writeLandingBudgetOverrides(
+      plan: widget.plan,
+      values: const {},
+    );
+    if (mounted) setState(() => _customValues = const {});
+  }
+
+  Future<void> _editCustomValues() async {
+    final generated = LandingBudgetEstimator.build(plan: widget.plan).scenarios
+        .firstWhere(
+          (scenario) => scenario.scenario == LandingBudgetScenario.balanced,
+        )
+        .breakdown;
+    var monthlyText =
+        (_customValues['monthlyBaseBrl'] ?? generated.monthlyBaseBrl)
+            .toString();
+    var setupText = (_customValues['setupBrl'] ?? generated.setupBrl)
+        .toString();
+    var bufferText = (_customValues['bufferBrl'] ?? generated.bufferBrl)
+        .toString();
+    final editingPlan = widget.plan;
+    final editingKey = MigrationPlanIdentity.storageKeyFor(editingPlan);
+    var availableText = _customValues['availableBrl']?.toString() ?? '';
+    var months = _customValues['monthsWithoutIncome'] ?? 3;
+    if (![1, 3, 6].contains(months)) months = 3;
+    String? validationMessage;
+    final result = await showDialog<Map<String, int>>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          scrollable: true,
+          title: Text(
+            _text(
+              context,
+              pt: 'Informe seus valores reais',
+              es: 'Ingresá tus valores reales',
+              en: 'Enter your actual values',
+            ),
+          ),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _text(
+                    context,
+                    pt: 'Use valores em reais. Eles ficam salvos neste plano e substituem os cenários estimados.',
+                    es: 'Usá valores en reales. Quedan guardados en este plan y reemplazan los escenarios estimados.',
+                    en: 'Use values in BRL. They are saved in this plan and replace the estimated scenarios.',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _BudgetValueField(
+                  key: const ValueKey('landing-budget-monthly-input'),
+                  initialValue: monthlyText,
+                  onChanged: (value) => monthlyText = value,
+                  label: context.l10n.landingBudgetMonthlyBaseLabel,
+                ),
+                const SizedBox(height: 10),
+                _BudgetValueField(
+                  key: const ValueKey('landing-budget-setup-input'),
+                  initialValue: setupText,
+                  onChanged: (value) => setupText = value,
+                  label: context.l10n.landingBudgetSetupLabel,
+                ),
+                const SizedBox(height: 10),
+                _BudgetValueField(
+                  key: const ValueKey('landing-budget-buffer-input'),
+                  initialValue: bufferText,
+                  onChanged: (value) => bufferText = value,
+                  label: context.l10n.landingBudgetBufferLabel,
+                ),
+                const SizedBox(height: 10),
+                _BudgetValueField(
+                  key: const ValueKey('landing-budget-available-input'),
+                  initialValue: availableText,
+                  onChanged: (value) => availableText = value,
+                  label: _text(
+                    context,
+                    pt: 'Reserva disponível em R\$ (opcional)',
+                    es: 'Ahorros disponibles en R\$ (opcional)',
+                    en: 'Available savings in BRL (optional)',
+                  ),
+                ),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<int>(
+                  initialValue: months,
+                  decoration: InputDecoration(
+                    labelText: _text(
+                      context,
+                      pt: 'Planejar período sem renda',
+                      es: 'Planear un período sin ingresos',
+                      en: 'Plan a period without income',
+                    ),
+                  ),
+                  items: [
+                    for (final value in [1, 3, 6])
+                      DropdownMenuItem(
+                        value: value,
+                        child: Text(
+                          _text(
+                            context,
+                            pt: '$value mês(es)',
+                            es: '$value mes(es)',
+                            en: '$value month(s)',
+                          ),
+                        ),
+                      ),
+                  ],
+                  onChanged: (value) =>
+                      setDialogState(() => months = value ?? 3),
+                ),
+                if (validationMessage != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    validationMessage!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(
+                _text(context, pt: 'Cancelar', es: 'Cancelar', en: 'Cancel'),
+              ),
+            ),
+            FilledButton(
+              onPressed: () {
+                final normalizedAvailable = availableText.trim();
+                final available = int.tryParse(normalizedAvailable);
+                final monthly = int.tryParse(monthlyText);
+                final setup = int.tryParse(setupText);
+                final buffer = int.tryParse(bufferText);
+                if (monthly == null ||
+                    monthly <= 0 ||
+                    setup == null ||
+                    setup < 0 ||
+                    buffer == null ||
+                    buffer < 0 ||
+                    (normalizedAvailable.isNotEmpty &&
+                        (available == null || available < 0))) {
+                  setDialogState(() {
+                    validationMessage = _text(
+                      context,
+                      pt: 'Informe uma base mensal maior que zero e valores válidos para instalação e margem.',
+                      es: 'Ingresá una base mensual mayor que cero y valores válidos para instalación y margen.',
+                      en: 'Enter a monthly base above zero and valid setup and buffer values.',
+                    );
+                  });
+                  return;
+                }
+                Navigator.pop(dialogContext, {
+                  'monthlyBaseBrl': monthly,
+                  'setupBrl': setup,
+                  'bufferBrl': buffer,
+                  'availableBrl': ?available,
+                  'monthsWithoutIncome': months,
+                });
+              },
+              child: Text(
+                _text(
+                  context,
+                  pt: 'Salvar orçamento',
+                  es: 'Guardar presupuesto',
+                  en: 'Save budget',
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (result == null ||
+        !mounted ||
+        editingKey != MigrationPlanIdentity.storageKeyFor(widget.plan)) {
+      return;
+    }
+    await _progressStore.writeLandingBudgetOverrides(
+      plan: editingPlan,
+      values: result,
+    );
+    if (mounted &&
+        editingKey == MigrationPlanIdentity.storageKeyFor(widget.plan)) {
+      setState(() => _customValues = result);
+    }
+  }
+
+  String _text(
+    BuildContext context, {
+    required String pt,
+    required String es,
+    required String en,
+  }) => switch (Localizations.localeOf(context).languageCode) {
+    'pt' => pt,
+    'es' => es,
+    _ => en,
+  };
 
   bool _hasEducationContext(MigrationPlan plan) {
     return plan.goal == 'study' ||
@@ -173,6 +515,12 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
     return switch (key) {
       'landingBudgetLeanBody' => l10n.landingBudgetLeanBody,
       'landingBudgetComfortableBody' => l10n.landingBudgetComfortableBody,
+      'custom' => _text(
+        context,
+        pt: 'Valores informados por você para planejar o primeiro mês.',
+        es: 'Valores informados por vos para planificar el primer mes.',
+        en: 'Values you entered to plan your first month.',
+      ),
       _ => l10n.landingBudgetBalancedBody,
     };
   }
@@ -185,6 +533,94 @@ class LandingBudgetEstimatorSection extends StatelessWidget {
     }
 
     return DateFormat('dd/MM HH:mm', localeName).format(parsed.toLocal());
+  }
+}
+
+class _BudgetValueField extends StatelessWidget {
+  const _BudgetValueField({
+    required this.initialValue,
+    required this.onChanged,
+    required this.label,
+    super.key,
+  });
+
+  final String initialValue;
+  final ValueChanged<String> onChanged;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      initialValue: initialValue,
+      onChanged: onChanged,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      decoration: InputDecoration(labelText: '$label (BRL)'),
+    );
+  }
+}
+
+class _BudgetAssumptionsNote extends StatelessWidget {
+  const _BudgetAssumptionsNote({required this.estimate});
+
+  final LandingBudgetEstimate estimate;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final factor = estimate.householdFactor.toStringAsFixed(2);
+    final profile = switch (locale) {
+      'pt' =>
+        '${estimate.householdAdults} adulto(s), '
+            '${estimate.householdChildren} criança(s)',
+      'es' =>
+        '${estimate.householdAdults} adulto(s), '
+            '${estimate.householdChildren} niño(s)',
+      _ =>
+        '${estimate.householdAdults} adult(s), '
+            '${estimate.householdChildren} child(ren)',
+    };
+    final text = estimate.usesCitySnapshot
+        ? switch (locale) {
+            'pt' =>
+              'Como calculamos: a base local considera uma pessoa e aluguel de 1 quarto. Ajustamos para seu perfil ($profile; fator $factor). Confirme o aluguel e os gastos reais da família antes de decidir.',
+            'es' =>
+              'Cómo calculamos: la base local considera una persona y alquiler de 1 ambiente. La ajustamos a tu perfil ($profile; factor $factor). Confirmá el alquiler y los gastos reales de la familia antes de decidir.',
+            _ =>
+              'How we calculate it: the local baseline covers one person and a 1-bedroom rental. We adjust it to your profile ($profile; factor $factor). Confirm rent and actual household costs before deciding.',
+          }
+        : switch (locale) {
+            'pt' =>
+              'Como calculamos: usamos uma referência estimada de custo e ajustamos para seu perfil ($profile; fator $factor). Sem preços locais confirmados, trate o valor como ponto de partida.',
+            'es' =>
+              'Cómo calculamos: usamos una referencia estimada de costos y la ajustamos a tu perfil ($profile; factor $factor). Sin precios locales confirmados, tomá el valor como punto de partida.',
+            _ =>
+              'How we calculate it: we use an estimated cost baseline and adjust it to your profile ($profile; factor $factor). Without confirmed local prices, treat it as a starting point.',
+          };
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMutedFor(context),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.calculate_outlined, size: 18, color: AppColors.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSoftFor(context),
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

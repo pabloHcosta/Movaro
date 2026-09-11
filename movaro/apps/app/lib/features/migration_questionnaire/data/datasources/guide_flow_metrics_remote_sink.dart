@@ -47,6 +47,14 @@ class GuideFlowMetricsRemoteSink implements GuideFlowMetricsSink {
                 if (event.refinementScenariosEvaluated != null)
                   'refinementScenariosEvaluated':
                       event.refinementScenariosEvaluated,
+                if (event.validationClarityBand != null)
+                  'validationClarityBand': event.validationClarityBand,
+                if (event.validationProgressBand != null)
+                  'validationProgressBand': event.validationProgressBand,
+                if (event.validationValueBand != null)
+                  'validationValueBand': event.validationValueBand,
+                if (event.validationPhaseBand != null)
+                  'validationPhaseBand': event.validationPhaseBand,
               },
             )
             .toList(growable: false),

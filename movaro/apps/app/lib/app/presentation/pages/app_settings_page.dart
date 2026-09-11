@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:movaro_app/app/currency/currency_controller.dart';
 import 'package:movaro_app/app/localization/app_localization.dart';
@@ -9,6 +12,9 @@ import 'package:movaro_app/core/widgets/ambient_background.dart';
 import 'package:movaro_app/core/widgets/app_glass_header.dart';
 import 'package:movaro_app/features/location/location_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_backup_service.dart';
+import 'package:share_plus/share_plus.dart';
 
 class AppSettingsPage extends StatelessWidget {
   const AppSettingsPage({
@@ -17,6 +23,8 @@ class AppSettingsPage extends StatelessWidget {
     required this.currencyController,
     required this.locationController,
     required this.guideFlowMetricsStore,
+    required this.migrationBackupService,
+    required this.migrationQuestionnaireController,
     super.key,
   });
 
@@ -25,6 +33,8 @@ class AppSettingsPage extends StatelessWidget {
   final CurrencyController currencyController;
   final LocationController locationController;
   final GuideFlowMetricsStore guideFlowMetricsStore;
+  final MigrationBackupService migrationBackupService;
+  final MigrationQuestionnaireController migrationQuestionnaireController;
 
   @override
   Widget build(BuildContext context) {
@@ -144,6 +154,93 @@ class AppSettingsPage extends StatelessWidget {
                                         ? constraints.maxWidth
                                         : (constraints.maxWidth - 14) / 2,
                                     child: _EntranceReveal(
+                                      delayIndex: 8,
+                                      child: _SettingCard(
+                                        icon: Icons.cloud_upload_outlined,
+                                        title: _settingsText(
+                                          context,
+                                          pt: 'Backup do plano',
+                                          es: 'Copia del plan',
+                                          en: 'Plan backup',
+                                        ),
+                                        description: _settingsText(
+                                          context,
+                                          pt: 'Leve sua jornada, plano, rascunho e progresso para outro aparelho com um arquivo protegido por você.',
+                                          es: 'Llevá tu recorrido, plan, borrador y progreso a otro dispositivo con un archivo protegido por vos.',
+                                          en: 'Move your journey, plan, draft and progress to another device with a file you keep safe.',
+                                        ),
+                                        accentColor: const Color(0xFF167C80),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              _settingsText(
+                                                context,
+                                                pt: 'O backup pode conter cidades, respostas e valores do seu planejamento. Guarde-o em um local privado.',
+                                                es: 'La copia puede contener ciudades, respuestas y valores de tu planificación. Guardala en un lugar privado.',
+                                                en: 'The backup may contain cities, answers and planning amounts. Store it somewhere private.',
+                                              ),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(
+                                                    color:
+                                                        AppColors.textSoftFor(
+                                                          context,
+                                                        ),
+                                                    height: 1.4,
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Wrap(
+                                              spacing: 10,
+                                              runSpacing: 10,
+                                              children: [
+                                                FilledButton.icon(
+                                                  onPressed: () =>
+                                                      _exportBackup(context),
+                                                  icon: const Icon(
+                                                    Icons.ios_share_rounded,
+                                                    size: 18,
+                                                  ),
+                                                  label: Text(
+                                                    _settingsText(
+                                                      context,
+                                                      pt: 'Criar backup',
+                                                      es: 'Crear copia',
+                                                      en: 'Create backup',
+                                                    ),
+                                                  ),
+                                                ),
+                                                OutlinedButton.icon(
+                                                  onPressed: () =>
+                                                      _restoreBackup(context),
+                                                  icon: const Icon(
+                                                    Icons.restore_rounded,
+                                                    size: 18,
+                                                  ),
+                                                  label: Text(
+                                                    _settingsText(
+                                                      context,
+                                                      pt: 'Restaurar',
+                                                      es: 'Restaurar',
+                                                      en: 'Restore',
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: compact
+                                        ? constraints.maxWidth
+                                        : (constraints.maxWidth - 14) / 2,
+                                    child: _EntranceReveal(
                                       delayIndex: 4,
                                       child: _SettingCard(
                                         icon: Icons.insights_outlined,
@@ -155,9 +252,9 @@ class AppSettingsPage extends StatelessWidget {
                                         ),
                                         description: _settingsText(
                                           context,
-                                          pt: 'Com sua autorização, enviamos apenas eventos anônimos do fluxo. Nunca enviamos respostas, cidade, localização, documentos ou valores.',
-                                          es: 'Con tu autorización, enviamos solo eventos anónimos del flujo. Nunca enviamos respuestas, ciudad, ubicación, documentos ni valores.',
-                                          en: 'With your permission, we send only anonymous flow events. We never send answers, city, location, documents, or amounts.',
+                                          pt: 'Com sua autorização, enviamos eventos anônimos do fluxo e categorias fechadas do piloto. Nunca enviamos respostas do seu perfil, texto livre, cidade, localização, documentos ou valores.',
+                                          es: 'Con tu autorización, enviamos eventos anónimos del flujo y categorías cerradas del piloto. Nunca enviamos respuestas de tu perfil, texto libre, ciudad, ubicación, documentos ni valores.',
+                                          en: 'With your permission, we send anonymous flow events and bounded pilot categories. We never send profile answers, free text, city, location, documents, or amounts.',
                                         ),
                                         trailingLabel:
                                             guideFlowMetricsStore.isEnabled
@@ -567,6 +664,199 @@ class AppSettingsPage extends StatelessWidget {
     if (confirmed == true) {
       await locationController.clearSavedLocation();
     }
+  }
+
+  Future<void> _exportBackup(BuildContext context) async {
+    final caption = _settingsText(
+      context,
+      pt: 'Backup do seu plano Movaro',
+      es: 'Copia de tu plan Movaro',
+      en: 'Your Movaro plan backup',
+    );
+    try {
+      final backup = await migrationBackupService.exportBackup();
+      final date = DateTime.now().toIso8601String().split('T').first;
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [
+            XFile.fromData(
+              Uint8List.fromList(utf8.encode(backup)),
+              name: 'movaro-backup-$date.json',
+              mimeType: 'application/json',
+            ),
+          ],
+          text: caption,
+        ),
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      _showBackupMessage(
+        context,
+        _settingsText(
+          context,
+          pt: 'Não foi possível criar o backup. Tente novamente.',
+          es: 'No se pudo crear la copia. Intentá de nuevo.',
+          en: 'The backup could not be created. Try again.',
+        ),
+      );
+    }
+  }
+
+  Future<void> _restoreBackup(BuildContext context) async {
+    final controller = TextEditingController();
+    final rawValue = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          _settingsText(
+            dialogContext,
+            pt: 'Restaurar backup',
+            es: 'Restaurar copia',
+            en: 'Restore backup',
+          ),
+        ),
+        content: SizedBox(
+          width: 520,
+          child: TextField(
+            controller: controller,
+            minLines: 7,
+            maxLines: 12,
+            autocorrect: false,
+            decoration: InputDecoration(
+              hintText: _settingsText(
+                dialogContext,
+                pt: 'Cole aqui todo o conteúdo do arquivo JSON.',
+                es: 'Pegá acá todo el contenido del archivo JSON.',
+                en: 'Paste the full JSON file contents here.',
+              ),
+              border: const OutlineInputBorder(),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(
+              _settingsText(
+                dialogContext,
+                pt: 'Cancelar',
+                es: 'Cancelar',
+                en: 'Cancel',
+              ),
+            ),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: Text(
+              _settingsText(
+                dialogContext,
+                pt: 'Continuar',
+                es: 'Continuar',
+                en: 'Continue',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (!context.mounted || rawValue == null || rawValue.trim().isEmpty) {
+      return;
+    }
+
+    try {
+      MigrationBackupBundle.decode(rawValue.trim());
+    } on FormatException {
+      _showBackupMessage(
+        context,
+        _settingsText(
+          context,
+          pt: 'Esse conteúdo não é um backup Movaro compatível.',
+          es: 'Ese contenido no es una copia Movaro compatible.',
+          en: 'This is not a compatible Movaro backup.',
+        ),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          _settingsText(
+            dialogContext,
+            pt: 'Substituir dados deste aparelho?',
+            es: '¿Reemplazar los datos de este dispositivo?',
+            en: 'Replace this device data?',
+          ),
+        ),
+        content: Text(
+          _settingsText(
+            dialogContext,
+            pt: 'A jornada, o plano, o rascunho e o progresso atuais serão substituídos pelos dados do backup.',
+            es: 'El recorrido, el plan, el borrador y el progreso actuales se reemplazarán por los datos de la copia.',
+            en: 'The current journey, plan, draft and progress will be replaced with the backup data.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(
+              _settingsText(
+                dialogContext,
+                pt: 'Cancelar',
+                es: 'Cancelar',
+                en: 'Cancel',
+              ),
+            ),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              _settingsText(
+                dialogContext,
+                pt: 'Restaurar',
+                es: 'Restaurar',
+                en: 'Restore',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await migrationBackupService.restoreBackup(rawValue);
+      await migrationQuestionnaireController.reloadPersistedState();
+      if (!context.mounted) return;
+      _showBackupMessage(
+        context,
+        _settingsText(
+          context,
+          pt: 'Backup restaurado. Seu plano e progresso já estão disponíveis.',
+          es: 'Copia restaurada. Tu plan y progreso ya están disponibles.',
+          en: 'Backup restored. Your plan and progress are now available.',
+        ),
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      _showBackupMessage(
+        context,
+        _settingsText(
+          context,
+          pt: 'Não foi possível restaurar o backup. Seus dados anteriores foram preservados.',
+          es: 'No se pudo restaurar la copia. Tus datos anteriores se conservaron.',
+          en: 'The backup could not be restored. Your previous data was preserved.',
+        ),
+      );
+    }
+  }
+
+  void _showBackupMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 }
 

@@ -472,6 +472,9 @@ class AppRouter {
             currencyController: dependencies.currencyController,
             locationController: dependencies.locationController,
             guideFlowMetricsStore: dependencies.guideFlowMetricsStore,
+            migrationBackupService: dependencies.migrationBackupService,
+            migrationQuestionnaireController:
+                dependencies.migrationQuestionnaireController,
           ),
         );
       case AppRoutes.migrationPlanResult:

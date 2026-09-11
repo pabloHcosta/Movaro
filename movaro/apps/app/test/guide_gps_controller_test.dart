@@ -11,6 +11,73 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test(
+    'waiting offers independent actions and survives switching and reload',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      final metrics = GuideFlowMetricsStore(
+        preferences: await SharedPreferences.getInstance(),
+      );
+      await metrics.setConsent(ProductAnalyticsConsent.denied);
+      final directory = await Directory.systemTemp.createTemp(
+        'movaro-waiting-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final store = MigrationCopilotProgressStore(
+        directoryProvider: () async => directory,
+      );
+      final alternative = _dependentItem.copyWith(
+        id: 'independent',
+        dependencies: [],
+        orderIndex: 2,
+      );
+      final future = alternative.copyWith(
+        id: 'future',
+        executionWindow: GuideExecutionWindow.later,
+      );
+      final items = [_item, _dependentItem, alternative, future];
+      final controller = GuideGpsController(
+        plan: _plan,
+        progressStore: store,
+        items: items,
+        readinessCompletedIds: {},
+        documentCompletedIds: {},
+        arrivalCompletedIds: {},
+        metricsStore: metrics,
+      );
+      addTearDown(controller.dispose);
+      await controller.jumpToItem(_item.id);
+      await controller.markCurrentItemWaiting();
+      expect(controller.actionsWhileWaiting.map((item) => item.id), [
+        'independent',
+      ]);
+      await controller.jumpToItem(alternative.id);
+      expect(controller.currentItem?.id, 'independent');
+      expect(controller.waitingItems.map((item) => item.id), [_item.id]);
+      expect(controller.isItemUnlocked(_dependentItem), isFalse);
+      expect(controller.completedCount, 0);
+      final snapshot = await store.read(_plan);
+      final restored = GuideGpsController(
+        plan: _plan,
+        progressStore: store,
+        items: items,
+        readinessCompletedIds: snapshot.readinessCompletedIds,
+        documentCompletedIds: snapshot.documentCompletedIds,
+        arrivalCompletedIds: snapshot.arrivalCompletedIds,
+        taskStatesById: snapshot.taskStatesById,
+        activeItemId: snapshot.activeItemId,
+        metricsStore: metrics,
+      );
+      addTearDown(restored.dispose);
+      expect(restored.currentItem?.id, 'independent');
+      expect(restored.waitingItems.map((item) => item.id), [_item.id]);
+      await restored.jumpToItem(_item.id);
+      await restored.resumeCurrentItem();
+      expect(restored.waitingItems, isEmpty);
+      expect(restored.isItemUnlocked(_dependentItem), isFalse);
+    },
+  );
+
   test('leaving an item for later does not complete or unlock it', () async {
     SharedPreferences.setMockInitialValues({});
     final metrics = GuideFlowMetricsStore(

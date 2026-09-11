@@ -370,4 +370,44 @@ describe('CityRecommendationService', () => {
       'recommendation_warning_climate_normals_unavailable',
     );
   });
+
+  it('does not classify future source dates as fresh', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-09-10T12:00:00Z'));
+    const futureCatalog = catalog.map((item) => ({
+      ...item,
+      updatedAt: '2027-01-01',
+      budgetSnapshot: item.budgetSnapshot
+        ? { ...item.budgetSnapshot, updatedAt: '2027-01-01' }
+        : null,
+      sources: {
+        ...item.sources,
+        employment: item.sources.employment
+          ? { ...item.sources.employment, updatedAt: '2027-01-01' }
+          : null,
+        safety: item.sources.safety
+          ? { ...item.sources.safety, updatedAt: '2027-01-01' }
+          : null,
+      },
+    })) as CityCardEntity[];
+    const futureService = new CityRecommendationService({
+      getCities: jest.fn().mockResolvedValue(futureCatalog),
+    } as unknown as CitiesCatalogService);
+
+    try {
+      const result = await futureService.recommend(profile());
+      expect(result.recommendations).not.toHaveLength(0);
+      expect(result.recommendations.flatMap((item) => item.evidence)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ freshnessStatus: 'unknown' }),
+        ]),
+      );
+      expect(
+        result.recommendations.some(
+          (item) => item.freshnessStatus === 'unknown',
+        ),
+      ).toBe(true);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });

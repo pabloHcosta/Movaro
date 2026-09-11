@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { GooglePlacesCityOpinionService } from '../../../../integrations/google/google-places-city-opinion.service';
 import { IbgeLocalitiesService } from '../../../../integrations/ibge/ibge-localities.service';
@@ -17,6 +17,8 @@ import { CitySeasonalitySnapshotService } from './city-seasonality-snapshot.serv
 
 @Injectable()
 export class CityMergeService {
+  private readonly logger = new Logger(CityMergeService.name);
+
   constructor(
     private readonly ibgeLocalitiesService: IbgeLocalitiesService,
     private readonly ibgePopulationService: IbgePopulationService,
@@ -37,12 +39,26 @@ export class CityMergeService {
       metrics,
       officialMetrics,
     );
-    const [ibgeData, populationEstimate] = await Promise.all([
+    const [ibgeResult, populationResult] = await Promise.allSettled([
       this.ibgeLocalitiesService.getMunicipalityByIbgeCode(metrics.ibgeCode),
       this.ibgePopulationService.getPopulationEstimateByIbgeCode(
         metrics.ibgeCode,
       ),
     ]);
+    const ibgeData =
+      ibgeResult.status === 'fulfilled' ? ibgeResult.value : null;
+    const populationEstimate =
+      populationResult.status === 'fulfilled' ? populationResult.value : null;
+    if (ibgeResult.status === 'rejected') {
+      this.logger.warn(
+        `Using local territorial snapshot for ${metrics.id}: ${this.errorMessage(ibgeResult.reason)}`,
+      );
+    }
+    if (populationResult.status === 'rejected') {
+      this.logger.warn(
+        `Using local population snapshot for ${metrics.id}: ${this.errorMessage(populationResult.reason)}`,
+      );
+    }
     const scores = this.cityRankingService.calculateScores(resolvedMetrics);
     const recommendationReasons =
       this.cityRankingService.buildRecommendationReasons(
@@ -50,15 +66,18 @@ export class CityMergeService {
         scores,
       );
     const officialName =
-      ibgeData.officialName?.trim() || metrics.displayName || metrics.name;
+      ibgeData?.officialName?.trim() || metrics.displayName || metrics.name;
     const stateCode =
-      ibgeData.stateCode?.trim() || this.inferStateCode(metrics.id);
+      ibgeData?.stateCode?.trim() || this.inferStateCode(metrics.id);
     const stateName =
-      ibgeData.stateName?.trim() || this.stateNameFromCode(stateCode);
+      ibgeData?.stateName?.trim() || this.stateNameFromCode(stateCode);
     const sources = this.buildSources({
       stateCode,
       officialName,
       officialMetrics,
+      territorialSnapshotUsed: ibgeData == null,
+      populationSnapshotUsed: populationEstimate == null,
+      snapshotUpdatedAt: metrics.updatedAt,
     });
     const publicOpinion =
       (await this.googlePlacesCityOpinionService.getCityOpinion(
@@ -100,7 +119,7 @@ export class CityMergeService {
       resolvedMetrics.ibgeCode,
       resolvedMetrics.latitude,
       resolvedMetrics.longitude,
-      populationEstimate.population,
+      populationEstimate?.population ?? resolvedMetrics.population,
       resolvedMetrics.idhmScore,
       resolvedMetrics.idhmReferenceYear,
       resolvedMetrics.costOfLivingScore,
@@ -116,7 +135,7 @@ export class CityMergeService {
       recommendationReasons,
       sourcesWithOpinion,
       resolvedMetrics.updatedAt,
-      ibgeData.regionName,
+      ibgeData?.regionName ?? null,
       publicOpinion,
       budgetSnapshot,
       seasonalitySnapshot,
@@ -207,10 +226,16 @@ export class CityMergeService {
     stateCode,
     officialName,
     officialMetrics,
+    territorialSnapshotUsed,
+    populationSnapshotUsed,
+    snapshotUpdatedAt,
   }: {
     stateCode: string;
     officialName: string;
     officialMetrics: ReturnType<CityOfficialMetricsService['findByCity']>;
+    territorialSnapshotUsed: boolean;
+    populationSnapshotUsed: boolean;
+    snapshotUpdatedAt: string;
   }): CitySourcesEntity {
     const ibgeCityUrl = this.buildIbgeCityUrl({
       stateCode,
@@ -218,22 +243,50 @@ export class CityMergeService {
     });
 
     return new CitySourcesEntity(
-      new CitySourceEntity(
-        'territorial_identity',
-        'Identidade territorial',
-        'IBGE Localidades',
-        'Nome oficial, UF, codigo IBGE e regiao municipal.',
-        true,
-        'https://servicodados.ibge.gov.br/api/docs/localidades',
-      ),
-      new CitySourceEntity(
-        'population',
-        'Populacao',
-        'IBGE Cidades e Estados',
-        'Panorama municipal utilizado como referencia oficial para populacao.',
-        true,
-        ibgeCityUrl,
-      ),
+      territorialSnapshotUsed
+        ? new CitySourceEntity(
+            'territorial_identity',
+            'Identidade territorial',
+            'Snapshot local versionado',
+            'Nome, UF e codigo IBGE preservados no catalogo local enquanto o servico oficial esta indisponivel.',
+            false,
+            'https://servicodados.ibge.gov.br/api/docs/localidades',
+            'curated',
+            null,
+            null,
+            null,
+            snapshotUpdatedAt,
+          )
+        : new CitySourceEntity(
+            'territorial_identity',
+            'Identidade territorial',
+            'IBGE Localidades',
+            'Nome oficial, UF, codigo IBGE e regiao municipal.',
+            true,
+            'https://servicodados.ibge.gov.br/api/docs/localidades',
+          ),
+      populationSnapshotUsed
+        ? new CitySourceEntity(
+            'population',
+            'Populacao',
+            'Snapshot local versionado',
+            'Populacao preservada no catalogo local enquanto o servico oficial esta indisponivel.',
+            false,
+            ibgeCityUrl,
+            'curated',
+            null,
+            null,
+            null,
+            snapshotUpdatedAt,
+          )
+        : new CitySourceEntity(
+            'population',
+            'Populacao',
+            'IBGE Cidades e Estados',
+            'Panorama municipal utilizado como referencia oficial para populacao.',
+            true,
+            ibgeCityUrl,
+          ),
       new CitySourceEntity(
         'human_development',
         'Desenvolvimento humano',
@@ -352,5 +405,9 @@ export class CityMergeService {
     };
 
     return states[stateCode] ?? stateCode;
+  }
+
+  private errorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
   }
 }

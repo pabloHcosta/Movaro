@@ -30,6 +30,9 @@ enum GuideFlowMetric {
   officialLinkFailed,
   detailsExpanded,
   fullPlanOpened,
+  pilotCheckInShown,
+  pilotCheckInDismissed,
+  pilotCheckInSubmitted,
 }
 
 enum ProductAnalyticsConsent { undecided, granted, denied }
@@ -55,6 +58,10 @@ class GuideFlowUploadEvent {
     this.refinementQuestionId,
     this.refinementGainBand,
     this.refinementScenariosEvaluated,
+    this.validationClarityBand,
+    this.validationProgressBand,
+    this.validationValueBand,
+    this.validationPhaseBand,
   });
 
   final String eventId;
@@ -69,6 +76,10 @@ class GuideFlowUploadEvent {
   final String? refinementQuestionId;
   final String? refinementGainBand;
   final int? refinementScenariosEvaluated;
+  final String? validationClarityBand;
+  final String? validationProgressBand;
+  final String? validationValueBand;
+  final String? validationPhaseBand;
 }
 
 class GuideFlowMetricEvent {
@@ -86,6 +97,10 @@ class GuideFlowMetricEvent {
     this.refinementQuestionId,
     this.refinementGainBand,
     this.refinementScenariosEvaluated,
+    this.validationClarityBand,
+    this.validationProgressBand,
+    this.validationValueBand,
+    this.validationPhaseBand,
   });
 
   factory GuideFlowMetricEvent.fromJson(Map<String, dynamic> json) {
@@ -108,6 +123,10 @@ class GuideFlowMetricEvent {
       refinementGainBand: json['refinementGainBand'] as String?,
       refinementScenariosEvaluated:
           json['refinementScenariosEvaluated'] as int?,
+      validationClarityBand: json['validationClarityBand'] as String?,
+      validationProgressBand: json['validationProgressBand'] as String?,
+      validationValueBand: json['validationValueBand'] as String?,
+      validationPhaseBand: json['validationPhaseBand'] as String?,
     );
   }
 
@@ -127,6 +146,10 @@ class GuideFlowMetricEvent {
   final String? refinementQuestionId;
   final String? refinementGainBand;
   final int? refinementScenariosEvaluated;
+  final String? validationClarityBand;
+  final String? validationProgressBand;
+  final String? validationValueBand;
+  final String? validationPhaseBand;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'eventId': eventId,
@@ -144,6 +167,12 @@ class GuideFlowMetricEvent {
     if (refinementGainBand != null) 'refinementGainBand': refinementGainBand,
     if (refinementScenariosEvaluated != null)
       'refinementScenariosEvaluated': refinementScenariosEvaluated,
+    if (validationClarityBand != null)
+      'validationClarityBand': validationClarityBand,
+    if (validationProgressBand != null)
+      'validationProgressBand': validationProgressBand,
+    if (validationValueBand != null) 'validationValueBand': validationValueBand,
+    if (validationPhaseBand != null) 'validationPhaseBand': validationPhaseBand,
   };
 }
 
@@ -222,6 +251,10 @@ class GuideFlowMetricsStore extends ChangeNotifier {
     String? refinementQuestionId,
     String? refinementGainBand,
     int? refinementScenariosEvaluated,
+    String? validationClarityBand,
+    String? validationProgressBand,
+    String? validationValueBand,
+    String? validationPhaseBand,
   }) async {
     try {
       if (!_initialized) {
@@ -250,6 +283,10 @@ class GuideFlowMetricsStore extends ChangeNotifier {
           refinementQuestionId: refinementQuestionId,
           refinementGainBand: refinementGainBand,
           refinementScenariosEvaluated: refinementScenariosEvaluated,
+          validationClarityBand: validationClarityBand,
+          validationProgressBand: validationProgressBand,
+          validationValueBand: validationValueBand,
+          validationPhaseBand: validationPhaseBand,
         ),
       ];
       final bounded = next.length <= _maxEvents
@@ -320,6 +357,10 @@ class GuideFlowMetricsStore extends ChangeNotifier {
                 refinementGainBand: event.refinementGainBand,
                 refinementScenariosEvaluated:
                     event.refinementScenariosEvaluated,
+                validationClarityBand: event.validationClarityBand,
+                validationProgressBand: event.validationProgressBand,
+                validationValueBand: event.validationValueBand,
+                validationPhaseBand: event.validationPhaseBand,
               ),
             )
             .toList(growable: false),

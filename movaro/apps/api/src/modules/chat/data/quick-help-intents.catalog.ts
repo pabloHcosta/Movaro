@@ -419,7 +419,8 @@ export const QUICK_HELP_INTENTS: QuickHelpIntentDefinition[] = [
       ['diploma', 'sisu', 'vestibular'],
     ],
     priority: 115,
-    partialAnswer: helpTopicsAnswer,
+    entryId: 'education-diploma-profession',
+    claimIds: ['education-admission-follows-selection-route'],
   },
   {
     id: 'education.overview',
@@ -513,6 +514,30 @@ export const QUICK_HELP_INTENTS: QuickHelpIntentDefinition[] = [
     entryId: 'housing-rental-guarantees',
   },
   {
+    id: 'housing.without_guarantor',
+    topic: 'housing',
+    title: {
+      pt: 'Alugar sem fiador',
+      es: 'Alquilar sin garante',
+      en: 'Renting without a guarantor',
+    },
+    aliases: {
+      pt: ['alugar sem fiador', 'não tenho fiador', 'aluguel sem fiador'],
+      es: ['alquilar sin garante', 'no tengo garante', 'alquiler sin garante'],
+      en: [
+        'rent without guarantor',
+        'no guarantor',
+        'rental without guarantor',
+      ],
+    },
+    concepts: [
+      ['sem fiador', 'sin garante', 'without guarantor', 'no guarantor'],
+    ],
+    priority: 125,
+    entryId: 'housing-rental-guarantees',
+    claimIds: ['housing-guarantee-alternatives'],
+  },
+  {
     id: 'housing.without_brazilian_history',
     topic: 'housing',
     title: {
@@ -523,26 +548,18 @@ export const QUICK_HELP_INTENTS: QuickHelpIntentDefinition[] = [
     aliases: {
       pt: [
         'alugar sem cpf',
-        'alugar sem fiador',
         'sem histórico de crédito',
         'recém chegado aluguel',
       ],
       es: [
         'alquilar sin cpf',
-        'alquilar sin garante',
         'sin historial crediticio',
         'recién llegado alquiler',
       ],
-      en: [
-        'rent without cpf',
-        'rent without guarantor',
-        'no credit history',
-        'new arrival rent',
-      ],
+      en: ['rent without cpf', 'no credit history', 'new arrival rent'],
     },
     concepts: [
       ['sem cpf', 'sin cpf', 'without cpf'],
-      ['sem fiador', 'sin garante', 'without guarantor'],
       ['historico de credito', 'historial crediticio', 'credit history'],
     ],
     priority: 115,
@@ -581,11 +598,8 @@ export const QUICK_HELP_INTENTS: QuickHelpIntentDefinition[] = [
       ['sinal', 'reserva', 'deposit'],
     ],
     priority: 130,
-    partialAnswer: {
-      pt: 'Há sinais de possível fraude. Não faça novos pagamentos, preserve anúncio, conversas e comprovantes e procure orientação formal de defesa do consumidor ou segurança pública. Ainda não temos uma resposta jurídica revisada específica para o seu caso.',
-      es: 'Hay señales de posible fraude. No hagas nuevos pagos, guardá el anuncio, las conversaciones y los comprobantes y buscá orientación formal de defensa del consumidor o seguridad pública. Todavía no tenemos una respuesta jurídica revisada específica para tu caso.',
-      en: 'There may be signs of fraud. Do not make further payments, preserve the listing, messages, and receipts, and seek formal consumer-protection or public-safety guidance. We do not yet have reviewed legal guidance for your specific case.',
-    },
+    entryId: 'housing-rental-lifecycle',
+    claimIds: ['housing-rental-fraud-warning-signs'],
   },
   {
     id: 'work.digital_card',
@@ -646,7 +660,8 @@ export const QUICK_HELP_INTENTS: QuickHelpIntentDefinition[] = [
       ['curriculo', 'currículum', 'resume'],
     ],
     priority: 100,
-    partialAnswer: helpTopicsAnswer,
+    entryId: 'work-digital-card',
+    claimIds: ['work-search-through-sine'],
   },
   {
     id: 'health.sus_access',
@@ -2993,6 +3008,67 @@ export const QUICK_HELP_INTENTS: QuickHelpIntentDefinition[] = [
     claimIds: ['long-term-naturalization-is-separate'],
   },
   {
+    id: 'documents.identifiers_explained',
+    topic: 'documents',
+    title: {
+      pt: 'CPF, protocolo e CRNM',
+      es: 'CPF, protocolo y CRNM',
+      en: 'CPF, protocol, and CRNM',
+    },
+    aliases: {
+      pt: ['diferença entre cpf protocolo e crnm'],
+      es: ['diferencia entre cpf protocolo y crnm'],
+      en: ['difference between cpf protocol and crnm'],
+    },
+    concepts: [['cpf'], ['protocolo', 'protocol'], ['crnm']],
+    priority: 220,
+    entryId: 'documents-identifiers-and-starting-order',
+    claimIds: ['documents-cpf-protocol-crnm-have-different-functions'],
+  },
+  {
+    id: 'documents.starting_order',
+    topic: 'documents',
+    title: {
+      pt: 'Ordem para resolver documentos',
+      es: 'Orden para resolver documentos',
+      en: 'Order for resolving documents',
+    },
+    aliases: {
+      pt: ['documentos endereço e banco por onde começo'],
+      es: ['documentos domicilio y banco por dónde empiezo'],
+      en: ['documents address and banking where do i start'],
+    },
+    concepts: [
+      ['documentos', 'documents'],
+      ['banco', 'bank'],
+      ['comeco', 'empiezo', 'start'],
+    ],
+    priority: 220,
+    entryId: 'documents-identifiers-and-starting-order',
+    claimIds: ['documents-start-with-legal-route-not-bank-requirement'],
+  },
+  {
+    id: 'costs.reserve_horizon',
+    topic: 'costs',
+    title: {
+      pt: 'Reserva para 30, 60 ou 90 dias',
+      es: 'Reserva para 30, 60 o 90 días',
+      en: 'Reserve for 30, 60, or 90 days',
+    },
+    aliases: {
+      pt: ['reserva para 30 60 90 dias', 'quanto devo reservar'],
+      es: ['reserva para 30 60 90 días', 'cuánto debo reservar'],
+      en: ['reserve for 30 60 90 days', 'how much should i reserve'],
+    },
+    concepts: [
+      ['reserva', 'reserve'],
+      ['30', '60', '90'],
+    ],
+    priority: 150,
+    entryId: 'costs-personal-budget',
+    claimIds: ['costs-reserve-by-time-horizon'],
+  },
+  {
     id: 'costs.monthly_budget',
     topic: 'costs',
     title: { pt: 'Custo mensal', es: 'Costo mensual', en: 'Monthly cost' },
@@ -3015,7 +3091,8 @@ export const QUICK_HELP_INTENTS: QuickHelpIntentDefinition[] = [
       ['custo', 'costo', 'cost', 'orcamento', 'presupuesto', 'budget'],
     ],
     priority: 100,
-    partialAnswer: helpTopicsAnswer,
+    entryId: 'costs-personal-budget',
+    claimIds: ['costs-budget-from-recorded-expenses'],
   },
   {
     id: 'flights.search',
@@ -3028,10 +3105,67 @@ export const QUICK_HELP_INTENTS: QuickHelpIntentDefinition[] = [
     },
     concepts: [['voo', 'vuelo', 'flight', 'passagem', 'pasaje', 'ticket']],
     priority: 100,
-    partialAnswer: {
-      pt: 'A Central pode explicar documentos de viagem, aeroportos e fatores de preço, mas não faz uma cotação dentro desta resposta. Informe a dúvida específica sobre a viagem para receber uma orientação revisada aqui.',
-      es: 'La Central puede explicar documentos de viaje, aeropuertos y factores de precio, pero no realiza una cotización dentro de esta respuesta. Indicá la duda específica del viaje para recibir orientación revisada acá.',
-      en: 'Help can explain travel documents, airports, and price factors, but it does not quote flights within this answer. State the specific travel question to receive reviewed guidance here.',
-    },
+    entryId: 'flights-purchase-checklist',
   },
 ];
+
+// Stable editorial routes used when a user opens a question from Help's
+// reviewed catalog. Free text still goes through the lexical/concept planner,
+// but a known catalog item must never be reclassified from its translated
+// wording. Some catalog questions intentionally combine independently sourced
+// sections, hence the array value.
+export const QUICK_HELP_CATALOG_ROUTES: Readonly<Record<string, string[]>> = {
+  'documents.cpf': ['documents.cpf_registration'],
+  'documents.residence': ['documents.residence_authorization'],
+  'documents.differences': ['documents.identifiers_explained'],
+  'documents.travel': ['documents.travel_during_process'],
+  'documents.delayed': ['documents.process_delayed'],
+  'documents.dependencies': ['documents.starting_order'],
+  'education.school': ['education.basic_enrollment'],
+  'education.missing_documents': ['education.enrollment_without_documents'],
+  'education.diploma': ['education.diploma_revalidation'],
+  'education.university': ['education.university_admission'],
+  'housing.guarantees': ['housing.rental_guarantees'],
+  'housing.before_signing': ['housing.contract_lifecycle'],
+  'housing.early_termination': ['housing.early_termination'],
+  'housing.scam': ['housing.rental_fraud'],
+  'work.formal': ['work.digital_card'],
+  'work.models': [
+    'work.digital_card',
+    'work.mei_access',
+    'work.remote_foreign_income',
+  ],
+  'work.search': ['work.job_search'],
+  'work.exploitation': ['protection.labor_exploitation'],
+  'money.reserve': ['costs.reserve_horizon'],
+  'money.budget': ['costs.monthly_budget'],
+  'money.bank_refusal': ['finance.bank_refusal'],
+  'money.pix': ['finance.pix_access'],
+  'money.remittance': ['finance.international_remittance'],
+  'money.tax': ['tax.residence_status', 'tax.foreign_income'],
+  'health.sus': ['health.sus_access'],
+  'health.treatment': ['health.continuous_treatment'],
+  'health.medicine': ['health.controlled_medicine'],
+  'health.vaccination': ['health.vaccination'],
+  'health.prenatal': ['health.prenatal'],
+  'health.mental': ['health.mental_health'],
+  'family.documents': [
+    'family.reunification',
+    'education.basic_enrollment',
+    'documents.residence_authorization',
+  ],
+  'arrival.pets': ['pets_customs.dog_cat'],
+  'arrival.customs': ['pets_customs.baggage_goods'],
+  'arrival.utilities': [
+    'utilities.mobile_line',
+    'utilities.internet_contract',
+    'utilities.electricity',
+    'utilities.water_address',
+  ],
+  'rights.protection': ['protection.legal_social_aid'],
+  'rights.consumer': ['consumer.general_complaint'],
+  'rights.pension': ['long_term.social_security'],
+  'rights.naturalization': ['long_term.naturalization'],
+  'arrival.driving': ['driving.foreign_licence'],
+  'arrival.flight': ['flights.search'],
+};

@@ -28,6 +28,7 @@ import 'package:movaro_app/features/cities/data/repositories/cities_repository_i
 import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:movaro_app/features/migration_questionnaire/application/services/migration_backup_service.dart';
 import 'package:movaro_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
 import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
@@ -112,6 +113,12 @@ Future<AppDependencies> buildAppDependencies({
       copilotProgressStore: copilotProgressStore,
     ),
   );
+  final migrationBackupService = MigrationBackupService(
+    journeyPreferencesStore: journeyPreferencesStore,
+    migrationPlanRepository: migrationPlanRepository,
+    flowDraftStore: flowDraftStore,
+    copilotProgressStore: copilotProgressStore,
+  );
   final copilotExchangeRatesService = CopilotExchangeRatesService(
     remoteDataSource: CopilotExchangeRatesRemoteDataSource(
       environment: environment,
@@ -145,5 +152,6 @@ Future<AppDependencies> buildAppDependencies({
     currencyController: currencyController,
     exchangeRatesController: exchangeRatesController,
     guideFlowMetricsStore: guideFlowMetricsStore,
+    migrationBackupService: migrationBackupService,
   );
 }

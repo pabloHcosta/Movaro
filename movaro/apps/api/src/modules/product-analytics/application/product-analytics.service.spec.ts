@@ -50,4 +50,44 @@ describe('ProductAnalyticsService recommendation observability', () => {
     expect(storedRow).not.toHaveProperty('recommendation_id');
     expect(storedRow).not.toHaveProperty('answers');
   });
+
+  it('stores bounded pilot evidence without task or profile data', async () => {
+    const upsert = jest.fn().mockResolvedValue({ error: null });
+    const from = jest.fn().mockReturnValue({ upsert });
+    const supabase = {
+      isConfigured: true,
+      admin: { from },
+    } as unknown as SupabaseAdminService;
+    const service = new ProductAnalyticsService(supabase);
+
+    await service.ingest({
+      installationToken: 'b'.repeat(48),
+      appEnvironment: 'production',
+      events: [
+        {
+          eventId: 'pilot-check-in-0000001',
+          eventName: 'pilotCheckInSubmitted',
+          occurredAt: '2026-09-11T12:00:00.000Z',
+          validationClarityBand: 'clear',
+          validationProgressBand: 'blocked',
+          validationValueBand: 'moderate',
+          validationPhaseBand: 'work',
+        },
+      ],
+    });
+
+    const storedRow = upsert.mock.calls[0][0][0] as Record<string, unknown>;
+    expect(storedRow).toEqual(
+      expect.objectContaining({
+        event_name: 'pilotCheckInSubmitted',
+        validation_clarity_band: 'clear',
+        validation_progress_band: 'blocked',
+        validation_value_band: 'moderate',
+        validation_phase_band: 'work',
+      }),
+    );
+    expect(storedRow).not.toHaveProperty('task_id');
+    expect(storedRow).not.toHaveProperty('city_id');
+    expect(storedRow).not.toHaveProperty('answers');
+  });
 });

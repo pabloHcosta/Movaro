@@ -1,4 +1,5 @@
 import 'package:movaro_app/core/network/network_client.dart';
+import 'package:movaro_app/features/info/application/quick_guide_question_catalog.dart';
 import 'package:movaro_app/features/info/domain/entities/quick_guide_answer.dart';
 
 class QuickGuideAnswerService {
@@ -11,10 +12,15 @@ class QuickGuideAnswerService {
     required String originCountry,
     required String destinationCountry,
     required String locale,
+    String? questionId,
     String? cityId,
     Map<String, String> answers = const {},
   }) async {
     final normalizedQuestion = question.trim();
+    final resolvedQuestionId =
+        questionId ??
+        QuickGuideQuestionCatalog.findExactQuestion(normalizedQuestion)?.id;
+    final expectedTopic = _detectTopic(normalizedQuestion);
     final body = <String, dynamic>{
       'message': normalizedQuestion,
       'originCountry': originCountry.trim().isEmpty
@@ -24,6 +30,7 @@ class QuickGuideAnswerService {
           ? 'brasil'
           : destinationCountry,
       'locale': _normalizeLocale(locale),
+      'questionId': ?resolvedQuestionId,
       if (cityId != null && cityId.trim().isNotEmpty)
         'highlightedCityId': cityId,
       if (answers.isNotEmpty) 'answers': answers,
@@ -32,7 +39,11 @@ class QuickGuideAnswerService {
     try {
       final data = await _client.postJsonMap('/api/v1/guide/resolve', body);
       final answer = QuickGuideAnswer.fromJson(data);
-      if (answer.answer.trim().isNotEmpty) {
+      if (_isUsableRemoteAnswer(
+        answer,
+        expectedTopic,
+        isCatalogQuestion: resolvedQuestionId != null,
+      )) {
         return answer;
       }
     } catch (_) {
@@ -47,6 +58,22 @@ class QuickGuideAnswerService {
       locale: body['locale']! as String,
       cityId: cityId,
     );
+  }
+
+  bool _isUsableRemoteAnswer(
+    QuickGuideAnswer answer,
+    String expectedTopic, {
+    required bool isCatalogQuestion,
+  }) {
+    if (answer.answer.trim().isEmpty ||
+        answer.coverage == QuickGuideCoverage.notCovered) {
+      return false;
+    }
+    if (isCatalogQuestion) return answer.resolvedIntents.isNotEmpty;
+    if (expectedTopic == 'general') return true;
+    final returnedTopic = answer.topic.trim().toLowerCase();
+    return returnedTopic == expectedTopic ||
+        returnedTopic.startsWith('$expectedTopic.');
   }
 
   QuickGuideAnswer _localAnswer({
@@ -152,13 +179,37 @@ class QuickGuideAnswerService {
           ],
         );
       case 'housing':
+        final normalizedHousing = _normalize(question);
+        final isWithoutGuarantor = [
+          'sem fiador',
+          'sin garante',
+          'sin garantia',
+          'without guarantor',
+        ].any(normalizedHousing.contains);
+        final isRentalRequirements = [
+          'preciso para alugar',
+          'necesito para alquilar',
+          'need to rent',
+        ].any(normalizedHousing.contains);
         return _LocalQuickGuideProfile(
           reviewed: true,
           answer: _tr(
             locale,
-            pt: 'O locador pode pedir uma das garantias previstas em lei, como caução, fiador ou seguro-fiança, mas não deve acumular mais de uma no mesmo contrato. Antes de pagar, confirme o imóvel, a identidade de quem recebe e todas as condições por escrito.',
-            es: 'El propietario puede pedir una de las garantías previstas por ley, como depósito, garante o seguro, pero no debe acumular más de una en el mismo contrato. Antes de pagar, verificá el inmueble, la identidad de quien cobra y todas las condiciones por escrito.',
-            en: 'A landlord may request one legally permitted guarantee, such as a deposit, guarantor, or insurance, but should not stack multiple guarantees in one contract. Before paying, verify the property, the recipient’s identity, and all written terms.',
+            pt: isWithoutGuarantor
+                ? 'Sem fiador, você pode negociar caução ou seguro-fiança. A Lei do Inquilinato permite diferentes modalidades, mas o contrato deve usar somente uma. O proprietário não é obrigado a aceitar qualquer modalidade; confirme por escrito antes de pagar.'
+                : isRentalRequirements
+                ? 'Para buscar um aluguel, organize documento de identidade, comprovantes que demonstrem renda ou capacidade de pagamento e a modalidade de garantia aceita pelo proprietário. Antes de pagar, confirme o imóvel, quem está cobrando, o contrato e o custo total de entrada.'
+                : 'O locador pode pedir uma das garantias previstas em lei, como caução, fiador ou seguro-fiança, mas não deve acumular mais de uma no mesmo contrato. Antes de pagar, confirme o imóvel, a identidade de quem recebe e todas as condições por escrito.',
+            es: isWithoutGuarantor
+                ? 'Sin garante, podés negociar depósito o seguro de caución. La Ley de Alquileres de Brasil permite distintas modalidades, pero el contrato debe usar una sola. El propietario no está obligado a aceptar cualquier modalidad; confirmalo por escrito antes de pagar.'
+                : isRentalRequirements
+                ? 'Para buscar un alquiler, prepará un documento de identidad, comprobantes que demuestren ingresos o capacidad de pago y la modalidad de garantía aceptada por el propietario. Antes de pagar, verificá la vivienda, quién cobra, el contrato y el costo total de ingreso.'
+                : 'El propietario puede pedir una de las garantías previstas por ley, como depósito, garante o seguro, pero no debe acumular más de una en el mismo contrato. Antes de pagar, verificá el inmueble, la identidad de quien cobra y todas las condiciones por escrito.',
+            en: isWithoutGuarantor
+                ? 'Without a guarantor, you can negotiate a deposit or rental-guarantee insurance. Brazil’s Tenancy Law permits different options, but the agreement must use only one. The landlord does not have to accept every option, so confirm it in writing before paying.'
+                : isRentalRequirements
+                ? 'To look for a rental, prepare identification, evidence of income or ability to pay, and the guarantee type accepted by the landlord. Before paying, verify the property, the recipient, the agreement, and the total move-in cost.'
+                : 'A landlord may request one legally permitted guarantee, such as a deposit, guarantor, or insurance, but should not stack multiple guarantees in one contract. Before paying, verify the property, the recipient’s identity, and all written terms.',
           ),
           action: QuickGuideAction(
             type: 'open_topic',
@@ -397,7 +448,7 @@ class QuickGuideAnswerService {
               ),
               publisher: 'Senatran',
               url:
-                  'https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/dirigir-no-brasil',
+                  'https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/carteira-internacional',
               checkedAt: '2026-08-18',
             ),
           ],
@@ -632,10 +683,30 @@ class QuickGuideAnswerService {
   String _detectTopic(String value) {
     final normalized = _normalize(value);
     bool has(List<String> values) => values.any(normalized.contains);
-    if (has(['escola', 'escuela', 'school', 'universidade', 'universidad'])) {
+    if (has([
+      'escola',
+      'escuela',
+      'school',
+      'universidade',
+      'universidad',
+      'matricul',
+      'enroll',
+    ])) {
       return 'education';
     }
-    if (has(['aluguel', 'alquiler', 'rent', 'moradia', 'vivienda', 'fiador'])) {
+    if (has([
+      'aluguel',
+      'alugar',
+      'alquiler',
+      'alquilar',
+      'rent',
+      'moradia',
+      'vivienda',
+      'fiador',
+      'garantia',
+      'guarantee',
+      'guarantor',
+    ])) {
       return 'housing';
     }
     if (has(['sus', 'saude', 'salud', 'health', 'hospital', 'medicamento'])) {

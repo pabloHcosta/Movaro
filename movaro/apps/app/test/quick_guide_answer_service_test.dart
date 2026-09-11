@@ -149,6 +149,45 @@ void main() {
   });
 
   test(
+    'rejects an unrelated not-covered response and uses housing guidance',
+    () async {
+      final networkClient = NetworkClient(
+        environment: environment,
+        httpClient: MockClient((request) async {
+          return http.Response(
+            jsonEncode({
+              'success': true,
+              'data': {
+                'entryId': 'generic-fallback',
+                'resolutionId': 'wrong-resolution',
+                'topic': 'health',
+                'question': '¿Qué necesito para alquilar?',
+                'answer': 'Todavía no tenemos respuesta. Revisá CPF y SUS.',
+                'coverage': 'not_covered',
+              },
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+
+      final answer = await QuickGuideAnswerService(client: networkClient)
+          .resolve(
+            question: '¿Qué garantías pueden pedir para alquilar?',
+            originCountry: 'argentina',
+            destinationCountry: 'brasil',
+            locale: 'es',
+          );
+
+      expect(answer.topic, 'housing');
+      expect(answer.answer, contains('garantías previstas por ley'));
+      expect(answer.answer, isNot(contains('CPF y SUS')));
+      expect(answer.coverage, QuickGuideCoverage.partial);
+    },
+  );
+
+  test(
     'returns explicitly unverified on-device guidance when API is unavailable',
     () async {
       final networkClient = NetworkClient(
@@ -176,6 +215,26 @@ void main() {
       expect(answer.fallbackPath, hasLength(1));
     },
   );
+
+  test('sends the stable catalog question ID to the resolver', () async {
+    late Map<String, dynamic> requestBody;
+    final networkClient = NetworkClient(
+      environment: environment,
+      httpClient: MockClient((request) async {
+        requestBody = jsonDecode(request.body) as Map<String, dynamic>;
+        return http.Response('<html>unavailable</html>', 503);
+      }),
+    );
+
+    await QuickGuideAnswerService(client: networkClient).resolve(
+      question: 'Como uma pessoa estrangeira acessa o SUS?',
+      originCountry: 'argentina',
+      destinationCountry: 'brasil',
+      locale: 'pt',
+    );
+
+    expect(requestBody['questionId'], 'health.sus');
+  });
 
   test(
     'keeps P0, P1 and P2 topics explicit and contained while offline',

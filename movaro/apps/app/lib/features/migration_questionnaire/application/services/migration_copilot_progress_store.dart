@@ -20,6 +20,7 @@ class MigrationCopilotProgressSnapshot {
     this.dismissedReasonsById = const <String, GuideDismissReason>{},
     this.taskStatesById = const <String, GuideTaskState>{},
     this.taskDecisionDataById = const <String, Map<String, dynamic>>{},
+    this.landingBudgetOverrides = const <String, int>{},
   });
 
   final Set<String> readinessCompletedIds;
@@ -31,6 +32,7 @@ class MigrationCopilotProgressSnapshot {
   final Map<String, GuideDismissReason> dismissedReasonsById;
   final Map<String, GuideTaskState> taskStatesById;
   final Map<String, Map<String, dynamic>> taskDecisionDataById;
+  final Map<String, int> landingBudgetOverrides;
 
   GuideTaskState stateFor(String itemId) {
     if (getAllCompletedIds().contains(itemId)) {
@@ -90,6 +92,7 @@ class MigrationCopilotProgressStore {
         taskDecisionDataById: _readNestedDynamicMap(
           value['taskDecisionDataById'],
         ),
+        landingBudgetOverrides: _readIntMap(value['landingBudgetOverrides']),
       );
     } catch (_) {
       return const MigrationCopilotProgressSnapshot();
@@ -119,6 +122,7 @@ class MigrationCopilotProgressStore {
     Map<String, GuideDismissReason>? dismissedReasonsById,
     Map<String, GuideTaskState>? taskStatesById,
     Map<String, Map<String, dynamic>>? taskDecisionDataById,
+    Map<String, int>? landingBudgetOverrides,
   }) async {
     Map<String, dynamic> current = <String, dynamic>{};
     final existing = await PersistentJsonStore.read(
@@ -156,6 +160,9 @@ class MigrationCopilotProgressStore {
       'taskDecisionDataById':
           taskDecisionDataById ??
           _readNestedDynamicMap(existingMap['taskDecisionDataById']),
+      'landingBudgetOverrides':
+          landingBudgetOverrides ??
+          _readIntMap(existingMap['landingBudgetOverrides']),
       'updatedAt': DateTime.now().toIso8601String(),
     };
 
@@ -186,6 +193,26 @@ class MigrationCopilotProgressStore {
     MigrationStateSyncCoordinator.scheduleSync();
   }
 
+  Future<void> writeLandingBudgetOverrides({
+    required MigrationPlan plan,
+    required Map<String, int> values,
+  }) async {
+    final snapshot = await read(plan);
+    await write(
+      plan: plan,
+      readinessCompletedIds: snapshot.readinessCompletedIds,
+      documentCompletedIds: snapshot.documentCompletedIds,
+      arrivalCompletedIds: snapshot.arrivalCompletedIds,
+      activeItemId: snapshot.activeItemId,
+      completedAtById: snapshot.completedAtById,
+      prioritizedItemIds: snapshot.prioritizedItemIds,
+      dismissedReasonsById: snapshot.dismissedReasonsById,
+      taskStatesById: snapshot.taskStatesById,
+      taskDecisionDataById: snapshot.taskDecisionDataById,
+      landingBudgetOverrides: values,
+    );
+  }
+
   Future<bool> hasLocalData() async {
     final value = await exportState();
     return value != null && value.isNotEmpty;
@@ -199,6 +226,19 @@ class MigrationCopilotProgressStore {
     rawValue.forEach((key, value) {
       if (key is String && value is String) {
         result[key] = value;
+      }
+    });
+    return result;
+  }
+
+  Map<String, int> _readIntMap(Object? rawValue) {
+    if (rawValue is! Map) {
+      return <String, int>{};
+    }
+    final result = <String, int>{};
+    rawValue.forEach((key, value) {
+      if (key is String && value is num && value.isFinite && value >= 0) {
+        result[key] = value.round();
       }
     });
     return result;
