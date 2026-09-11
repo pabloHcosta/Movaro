@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/location/location_controller.dart';
-import 'package:movaro_app/core/network/api_health_service.dart';
-import 'package:movaro_app/features/auth/application/auth_controller.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/splash/presentation/pages/splash_loading_view.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/features/location/location_controller.dart';
+import 'package:mudavi_app/core/network/api_health_service.dart';
+import 'package:mudavi_app/features/auth/application/auth_controller.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/features/splash/presentation/pages/splash_loading_view.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({

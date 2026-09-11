@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/safety_check/domain/proposal_safety_analyzer.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/responsive/responsive_context.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/features/safety_check/domain/proposal_safety_analyzer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 String _safetyText(
@@ -82,9 +82,9 @@ class _ProposalSafetyCheckPageState extends State<ProposalSafetyCheckPage> {
                     AppGlassHeader(
                       title: _safetyText(
                         context,
-                        pt: 'Radar Movaro',
-                        es: 'Radar Movaro',
-                        en: 'Movaro Radar',
+                        pt: 'Radar Mudavi',
+                        es: 'Radar Mudavi',
+                        en: 'Mudavi Radar',
                       ),
                       subtitle: widget.cityName == null
                           ? _safetyText(

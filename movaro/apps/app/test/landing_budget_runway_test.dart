@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/landing_budget_runway.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/landing_budget_runway.dart';
 
 void main() {
   test('setup and emergency money are not counted as spendable months', () {

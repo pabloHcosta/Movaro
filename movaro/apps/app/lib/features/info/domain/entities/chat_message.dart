@@ -1,4 +1,4 @@
-/// A message exchanged with Movaro's local, deterministic assistant.
+/// A message exchanged with Mudavi's local, deterministic assistant.
 class ChatMessage {
   const ChatMessage({required this.role, required this.text, this.timestamp});
 

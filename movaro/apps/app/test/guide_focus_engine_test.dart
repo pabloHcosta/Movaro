@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_focus_engine.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_focus_engine.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 void main() {
   test('shows one focus action, two follow-ups, and meaningful buckets', () {

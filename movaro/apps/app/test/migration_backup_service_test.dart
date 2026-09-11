@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/journey/journey_preferences_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_backup_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
+import 'package:mudavi_app/features/journey/journey_preferences_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_backup_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -68,7 +68,7 @@ void main() {
 
   test('service replaces local state with the selected backup', () async {
     final directory = await Directory.systemTemp.createTemp(
-      'movaro_backup_test',
+      'mudavi_backup_test',
     );
     addTearDown(() async {
       if (directory.existsSync()) {

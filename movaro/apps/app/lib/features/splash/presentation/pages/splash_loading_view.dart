@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
 
 class SplashLoadingView extends StatefulWidget {
   const SplashLoadingView({
@@ -208,7 +208,7 @@ class _AnimatedHeroMark extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       image: true,
-      label: 'Movaro',
+      label: 'Mudavi',
       child: FadeTransition(
         opacity: opacity,
         child: ScaleTransition(
@@ -245,7 +245,7 @@ class _AnimatedHeroMark extends StatelessWidget {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: width * 0.04),
                     child: SvgPicture.asset(
-                      'assets/brand/movaro_splash_hero.svg',
+                      'assets/brand/mudavi_splash_hero.svg',
                       width: width,
                       fit: BoxFit.contain,
                     ),
@@ -292,7 +292,7 @@ class _BrandCopy extends StatelessWidget {
         crossAxisAlignment: crossAxisAlignment,
         children: [
           Text(
-            'Movaro',
+            'Mudavi',
             textAlign: textAlign,
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
               color: Colors.white,

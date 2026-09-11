@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/localization/locale_preferences_store.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/localization/locale_preferences_store.dart';
 
 class LocaleController extends ChangeNotifier {
   LocaleController({Locale? initialLocale, LocalePreferencesStore? store})

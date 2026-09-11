@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/presentation/pages/trust_and_support_page.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/app/presentation/pages/trust_and_support_page.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/responsive/responsive_context.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/home/presentation/widgets/main_navigation_bar.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 
 String _moreText(
   BuildContext context, {
@@ -136,9 +136,9 @@ class MorePage extends StatelessWidget {
                           ),
                           body: _moreText(
                             context,
-                            pt: 'Entenda as fontes, limites e canais oficiais usados pelo Movaro.',
-                            es: 'Entiende las fuentes, límites y canales oficiales usados por Movaro.',
-                            en: 'Understand Movaro sources, limits, and official channels.',
+                            pt: 'Entenda as fontes, limites e canais oficiais usados pelo Mudavi.',
+                            es: 'Entiende las fuentes, límites y canales oficiales usados por Mudavi.',
+                            en: 'Understand Mudavi sources, limits, and official channels.',
                           ),
                           onTap: () => Navigator.of(context).push(
                             MaterialPageRoute<void>(

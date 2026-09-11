@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/info/application/quick_guide_question_catalog.dart';
+import 'package:mudavi_app/features/info/application/quick_guide_question_catalog.dart';
 
 void main() {
   test('finds a reviewed question from natural wording', () {

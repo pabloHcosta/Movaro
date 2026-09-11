@@ -1,5 +1,5 @@
-import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart';
-import 'package:movaro_app/features/journey/country_coverage.dart';
+import 'package:mudavi_app/features/catalog/domain/entities/catalog_country.dart';
+import 'package:mudavi_app/features/journey/country_coverage.dart';
 
 class CatalogCountryModel {
   const CatalogCountryModel({

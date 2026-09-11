@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_public_opinion.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_public_opinion.dart';
 
 class CityPublicOpinionSection extends StatelessWidget {
   const CityPublicOpinionSection({required this.opinion, super.key});

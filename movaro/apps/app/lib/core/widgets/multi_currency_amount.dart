@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:movaro_app/app/currency/currency_scope.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/exchange_rates/exchange_rates_scope.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
+import 'package:mudavi_app/app/currency/currency_scope.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/exchange_rates/exchange_rates_scope.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 
 /// Renders monetary values in the single currency selected in Settings.
 ///

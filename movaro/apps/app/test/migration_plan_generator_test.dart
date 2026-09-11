@@ -1,16 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_scores.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_source.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_sources.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
-import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/answer.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_recommendation.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_highlights.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_methodology.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_scores.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_source.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_sources.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/cities/domain/repositories/cities_repository.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/answer.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 
 void main() {
   group('MigrationPlanGenerator', () {
@@ -290,7 +290,7 @@ class _FakeCitiesRepository implements CitiesRepository {
 const _source = CitySource(
   id: 'source',
   title: 'Source',
-  provider: 'Movaro',
+  provider: 'Mudavi',
   description: 'Mock source',
   isOfficial: true,
   url: null,
@@ -327,7 +327,7 @@ final _cities = <City>[
     unemploymentRate: 6,
     economicActivityScore: 76,
     topIndustries: const ['Tecnologia', 'Servicos'],
-    movaroScores: const CityScores(
+    mudaviScores: const CityScores(
       economical: 76,
       popularForArgentinians: 68,
       languageAdaptation: 72,
@@ -360,7 +360,7 @@ final _cities = <City>[
     unemploymentRate: 7,
     economicActivityScore: 71,
     topIndustries: const ['Servicos'],
-    movaroScores: const CityScores(
+    mudaviScores: const CityScores(
       economical: 73,
       popularForArgentinians: 82,
       languageAdaptation: 74,
@@ -393,7 +393,7 @@ final _cities = <City>[
     unemploymentRate: 10,
     economicActivityScore: 67,
     topIndustries: const ['Turismo', 'Servicos'],
-    movaroScores: const CityScores(
+    mudaviScores: const CityScores(
       economical: 69,
       popularForArgentinians: 58,
       languageAdaptation: 61,

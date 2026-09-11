@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 
 class CopilotExchangeRatesModel {
   const CopilotExchangeRatesModel({

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
 
 /// A compact, non-expandable entry strip anchored above the navigation bar.
 ///

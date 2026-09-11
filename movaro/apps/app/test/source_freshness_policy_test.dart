@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/core/trust/source_freshness_policy.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/core/trust/source_freshness_policy.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 
 void main() {
   test('market references expire faster than official rules', () {

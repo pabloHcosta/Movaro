@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:movaro_app/core/storage/persistent_json_store.dart';
+import 'package:mudavi_app/core/storage/persistent_json_store.dart';
 import 'package:path_provider/path_provider.dart';
 
 typedef MigrationCopilotGuideDirectoryProvider = Future<Directory> Function();
 
 class MigrationCopilotGuidePreferencesStore {
-  static const _storageKey = 'movaro_migration_copilot_guide';
+  static const _storageKey = 'mudavi_migration_copilot_guide';
 
   MigrationCopilotGuidePreferencesStore({
     MigrationCopilotGuideDirectoryProvider? directoryProvider,
@@ -57,6 +57,6 @@ class MigrationCopilotGuidePreferencesStore {
 
   Future<File> _file() async {
     final directory = await _directoryProvider();
-    return File('${directory.path}/movaro_migration_copilot_guide.json');
+    return File('${directory.path}/mudavi_migration_copilot_guide.json');
   }
 }

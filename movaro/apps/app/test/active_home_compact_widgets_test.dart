@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_theme.dart';
-import 'package:movaro_app/features/home/presentation/widgets/city_feed_widget.dart';
-import 'package:movaro_app/features/home/presentation/widgets/journey_stepper_widget.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_theme.dart';
+import 'package:mudavi_app/features/home/presentation/widgets/city_feed_widget.dart';
+import 'package:mudavi_app/features/home/presentation/widgets/journey_stepper_widget.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 void main() {
   const plan = MigrationPlan(

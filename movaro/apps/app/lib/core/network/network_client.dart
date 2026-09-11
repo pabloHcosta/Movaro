@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/network/api_error_model.dart';
-import 'package:movaro_app/core/network/api_response_model.dart';
-import 'package:movaro_app/core/network/network_exception.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/core/network/api_error_model.dart';
+import 'package:mudavi_app/core/network/api_response_model.dart';
+import 'package:mudavi_app/core/network/network_exception.dart';
 import 'package:http/http.dart' as http;
 
 class NetworkClient {
@@ -100,8 +100,8 @@ class NetworkClient {
     final requestHeaders = <String, String>{
       'accept': 'application/json',
       'content-type': 'application/json',
-      'x-movaro-client': 'app',
-      'x-movaro-environment': _environment.environmentName,
+      'x-mudavi-client': 'app',
+      'x-mudavi-environment': _environment.environmentName,
     };
 
     try {
@@ -166,8 +166,8 @@ class NetworkClient {
     final uri = baseUri.resolve(path);
     final requestHeaders = <String, String>{
       'accept': 'application/json',
-      'x-movaro-client': 'app',
-      'x-movaro-environment': _environment.environmentName,
+      'x-mudavi-client': 'app',
+      'x-mudavi-environment': _environment.environmentName,
       ...headers,
     };
 

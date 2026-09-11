@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/features/cities/application/services/city_seasonality_conflict_service.dart';
-import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/features/cities/application/services/city_seasonality_conflict_service.dart';
+import 'package:mudavi_app/features/cities/application/services/city_seasonality_profile.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
 
 /// Seasonality alert section for city detail pages.
 ///
@@ -170,9 +170,9 @@ class _CitySeasonalitySectionState extends State<CitySeasonalitySection> {
               Expanded(
                 child: Text(
                   switch (widget.locale) {
-                    'pt' => 'Estimativa Movaro · não é dado oficial',
-                    'es' => 'Estimación de Movaro · no es un dato oficial',
-                    _ => 'Movaro estimate · not official data',
+                    'pt' => 'Estimativa Mudavi · não é dado oficial',
+                    'es' => 'Estimación de Mudavi · no es un dato oficial',
+                    _ => 'Mudavi estimate · not official data',
                   },
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: AppColors.textSoftFor(context),

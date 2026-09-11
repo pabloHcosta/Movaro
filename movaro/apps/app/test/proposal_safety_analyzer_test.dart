@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/safety_check/domain/proposal_safety_analyzer.dart';
+import 'package:mudavi_app/features/safety_check/domain/proposal_safety_analyzer.dart';
 
 void main() {
   group('ProposalSafetyAnalyzer', () {

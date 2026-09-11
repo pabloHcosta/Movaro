@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/theme/theme_preferences_store.dart';
+import 'package:mudavi_app/app/theme/theme_preferences_store.dart';
 
 class ThemeController extends ChangeNotifier {
   ThemeController({ThemePreferencesStore? store})

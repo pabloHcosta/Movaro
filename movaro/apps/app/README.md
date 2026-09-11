@@ -1,4 +1,4 @@
-# movaro_app
+# mudavi_app
 
 ## API environment switching
 

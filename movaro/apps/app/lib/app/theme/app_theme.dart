@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/app/theme/app_typography.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/app/theme/app_typography.dart';
 
 class AppTheme {
   const AppTheme._();

@@ -1,16 +1,16 @@
 import 'dart:io';
 
-import 'package:movaro_app/core/storage/persistent_json_store.dart';
+import 'package:mudavi_app/core/storage/persistent_json_store.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/models/migration_plan_model.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/repositories/migration_plan_repository.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/models/migration_plan_model.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/repositories/migration_plan_repository.dart';
 
 typedef MigrationPlanDirectoryProvider = Future<Directory> Function();
 
 class LocalMigrationPlanRepository implements MigrationPlanRepository {
-  static const _storageKey = 'movaro_migration_plans';
+  static const _storageKey = 'mudavi_migration_plans';
 
   LocalMigrationPlanRepository({
     MigrationPlanDirectoryProvider? directoryProvider,
@@ -135,7 +135,7 @@ class LocalMigrationPlanRepository implements MigrationPlanRepository {
 
   Future<File> _file() async {
     final directory = await _directoryProvider();
-    return File('${directory.path}/movaro_migration_plans.json');
+    return File('${directory.path}/mudavi_migration_plans.json');
   }
 }
 

@@ -25,7 +25,7 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>$(PRODUCT_COPYRIGHT)</string>
 	<key>NSLocationUsageDescription</key>
-	<string>O Movaro usa sua localização somente para sugerir e confirmar sua cidade de origem. A posição exata não é armazenada.</string>
+	<string>O Mudavi usa sua localização somente para sugerir e confirmar sua cidade de origem. A posição exata não é armazenada.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>

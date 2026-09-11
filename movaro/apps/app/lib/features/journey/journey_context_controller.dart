@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
-import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart';
-import 'package:movaro_app/features/catalog/domain/repositories/catalog_repository.dart';
-import 'package:movaro_app/features/journey/active_journey.dart';
-import 'package:movaro_app/features/journey/detected_location.dart';
-import 'package:movaro_app/features/journey/journey_country_metadata.dart';
-import 'package:movaro_app/features/journey/journey_preferences_store.dart';
-import 'package:movaro_app/features/journey/journey_selection.dart';
-import 'package:movaro_app/features/journey/supported_country.dart';
-import 'package:movaro_app/features/location/device_location_service.dart';
+import 'package:mudavi_app/features/catalog/domain/entities/catalog_country.dart';
+import 'package:mudavi_app/features/catalog/domain/repositories/catalog_repository.dart';
+import 'package:mudavi_app/features/journey/active_journey.dart';
+import 'package:mudavi_app/features/journey/detected_location.dart';
+import 'package:mudavi_app/features/journey/journey_country_metadata.dart';
+import 'package:mudavi_app/features/journey/journey_preferences_store.dart';
+import 'package:mudavi_app/features/journey/journey_selection.dart';
+import 'package:mudavi_app/features/journey/supported_country.dart';
+import 'package:mudavi_app/features/location/device_location_service.dart';
 
 class JourneyContextController extends ChangeNotifier {
   JourneyContextController({

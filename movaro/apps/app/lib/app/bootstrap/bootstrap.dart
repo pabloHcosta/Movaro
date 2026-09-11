@@ -1,50 +1,50 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/app.dart';
-import 'package:movaro_app/app/bootstrap/app_dependencies.dart';
-import 'package:movaro_app/app/currency/currency_controller.dart';
-import 'package:movaro_app/app/localization/locale_controller.dart';
-import 'package:movaro_app/app/theme/theme_controller.dart';
-import 'package:movaro_app/core/exchange_rates/exchange_rates_controller.dart';
-import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
-import 'package:movaro_app/features/city_insights/data/datasources/city_insights_remote_data_source.dart';
-import 'package:movaro_app/features/city_insights/data/repositories/city_insight_repository_impl.dart';
-import 'package:movaro_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
-import 'package:movaro_app/features/catalog/data/repositories/catalog_repository_impl.dart';
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/environment/app_flavor.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/journey/journey_preferences_store.dart';
-import 'package:movaro_app/features/location/location_controller.dart';
-import 'package:movaro_app/core/network/api_health_service.dart';
-import 'package:movaro_app/core/supabase/supabase_bootstrap.dart';
-import 'package:movaro_app/features/auth/application/auth_controller.dart';
-import 'package:movaro_app/features/auth/data/datasources/fake_auth_data_source.dart';
-import 'package:movaro_app/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/cities/data/datasources/cities_remote_data_source.dart';
-import 'package:movaro_app/features/cities/data/repositories/cities_repository_impl.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_backup_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/datasources/guide_flow_metrics_remote_sink.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/repositories/question_repository_impl.dart';
+import 'package:mudavi_app/app/app.dart';
+import 'package:mudavi_app/app/bootstrap/app_dependencies.dart';
+import 'package:mudavi_app/app/currency/currency_controller.dart';
+import 'package:mudavi_app/app/localization/locale_controller.dart';
+import 'package:mudavi_app/app/theme/theme_controller.dart';
+import 'package:mudavi_app/core/exchange_rates/exchange_rates_controller.dart';
+import 'package:mudavi_app/features/city_insights/application/city_insight_controller.dart';
+import 'package:mudavi_app/features/city_insights/data/datasources/city_insights_remote_data_source.dart';
+import 'package:mudavi_app/features/city_insights/data/repositories/city_insight_repository_impl.dart';
+import 'package:mudavi_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
+import 'package:mudavi_app/features/catalog/data/repositories/catalog_repository_impl.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/core/environment/app_flavor.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/features/journey/journey_preferences_store.dart';
+import 'package:mudavi_app/features/location/location_controller.dart';
+import 'package:mudavi_app/core/network/api_health_service.dart';
+import 'package:mudavi_app/core/supabase/supabase_bootstrap.dart';
+import 'package:mudavi_app/features/auth/application/auth_controller.dart';
+import 'package:mudavi_app/features/auth/data/datasources/fake_auth_data_source.dart';
+import 'package:mudavi_app/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/cities/data/datasources/cities_remote_data_source.dart';
+import 'package:mudavi_app/features/cities/data/repositories/cities_repository_impl.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_backup_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_state_sync_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/datasources/guide_flow_metrics_remote_sink.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/repositories/question_repository_impl.dart';
 
 Future<void> bootstrap({required AppFlavor defaultFlavor}) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final dependencies = await buildAppDependencies(defaultFlavor: defaultFlavor);
-  runApp(MovaroApp(dependencies: dependencies));
+  runApp(MudaviApp(dependencies: dependencies));
 }
 
 Future<AppDependencies> buildAppDependencies({
@@ -58,7 +58,7 @@ Future<AppDependencies> buildAppDependencies({
     sink: GuideFlowMetricsRemoteSink(environment: environment),
   );
   debugPrint(
-    'Movaro API source: ${environment.apiSource.name} '
+    'Mudavi API source: ${environment.apiSource.name} '
     '(${environment.apiBaseUrl})',
   );
   await SupabaseBootstrap.initializeIfConfigured(environment);

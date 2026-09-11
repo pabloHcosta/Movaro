@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:movaro_app/features/catalog/data/models/catalog_country_model.dart';
+import 'package:mudavi_app/features/catalog/data/models/catalog_country_model.dart';
 
 class SeedCatalogDataSource {
   static const countriesAsset = 'assets/seed/countries.json';

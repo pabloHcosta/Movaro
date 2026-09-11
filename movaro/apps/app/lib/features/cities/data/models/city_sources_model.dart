@@ -1,5 +1,5 @@
-import 'package:movaro_app/features/cities/data/models/city_source_model.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_sources.dart';
+import 'package:mudavi_app/features/cities/data/models/city_source_model.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_sources.dart';
 
 class CitySourcesModel {
   const CitySourcesModel({

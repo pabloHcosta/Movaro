@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 /// Gives each generated plan its own persistence boundary.
 ///

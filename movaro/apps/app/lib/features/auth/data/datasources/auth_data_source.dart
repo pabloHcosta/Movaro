@@ -1,5 +1,5 @@
-import 'package:movaro_app/features/auth/domain/entities/auth_provider.dart';
-import 'package:movaro_app/features/auth/domain/entities/auth_session.dart';
+import 'package:mudavi_app/features/auth/domain/entities/auth_provider.dart';
+import 'package:mudavi_app/features/auth/domain/entities/auth_session.dart';
 
 abstract class AuthDataSource {
   Future<AuthSession> restoreSession();

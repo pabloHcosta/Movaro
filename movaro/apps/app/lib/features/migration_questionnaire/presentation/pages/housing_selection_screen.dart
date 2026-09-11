@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/responsive/responsive_context.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/multi_currency_amount.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
 
 enum HousingType { temporary, permanent }
 

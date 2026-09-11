@@ -1,9 +1,9 @@
-import 'package:movaro_app/features/home/domain/city_feed_item.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
+import 'package:mudavi_app/features/home/domain/city_feed_item.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_detail_payloads.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
 
 /// Static curated feed content for the City Feed.
 ///
@@ -489,7 +489,7 @@ class CityFeedDatasource {
   static bool _isTraceableSource(String? label, String? url) {
     if (label == null || url == null || url.trim().isEmpty) return false;
     final normalized = label.toLowerCase();
-    return !normalized.contains('movaro') &&
+    return !normalized.contains('mudavi') &&
         !normalized.contains('curadoria') &&
         !normalized.contains('curated city model') &&
         !normalized.contains('ranking methodology');

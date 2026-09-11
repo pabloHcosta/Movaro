@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/language/application/portuguese_phrasebook.dart';
+import 'package:mudavi_app/features/language/application/portuguese_phrasebook.dart';
 
 void main() {
   test('phrasebook has grouped, well-formed phrases', () {

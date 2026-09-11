@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/location/location_data.dart';
-import 'package:movaro_app/features/location/location_storage.dart';
+import 'package:mudavi_app/features/location/location_data.dart';
+import 'package:mudavi_app/features/location/location_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

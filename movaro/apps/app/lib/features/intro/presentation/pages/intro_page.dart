@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
 
 class IntroPage extends StatefulWidget {
   const IntroPage({
@@ -283,7 +283,7 @@ class _IntroTopBar extends StatelessWidget {
           SizedBox(width: isCompact ? 40 : 48),
           const Expanded(
             child: Text(
-              'Movaro',
+              'Mudavi',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white,

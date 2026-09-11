@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
 
 class CityMapCard extends StatelessWidget {
   const CityMapCard({required this.city, super.key});
@@ -89,7 +89,7 @@ class CityInteractiveMap extends StatelessWidget {
       children: [
         TileLayer(
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'com.movaro.app',
+          userAgentPackageName: 'com.mudavi.app',
         ),
         MarkerLayer(
           markers: [

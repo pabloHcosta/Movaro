@@ -2,18 +2,18 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/currency/currency_controller.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/localization/locale_controller.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/app/presentation/pages/trust_and_support_page.dart';
-import 'package:movaro_app/app/theme/theme_controller.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/features/location/location_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_backup_service.dart';
+import 'package:mudavi_app/app/currency/currency_controller.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/localization/locale_controller.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/app/presentation/pages/trust_and_support_page.dart';
+import 'package:mudavi_app/app/theme/theme_controller.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/features/location/location_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_backup_service.dart';
 import 'package:share_plus/share_plus.dart';
 
 class AppSettingsPage extends StatelessWidget {
@@ -246,9 +246,9 @@ class AppSettingsPage extends StatelessWidget {
                                         icon: Icons.insights_outlined,
                                         title: _settingsText(
                                           context,
-                                          pt: 'Ajudar a melhorar o Movaro',
-                                          es: 'Ayudar a mejorar Movaro',
-                                          en: 'Help improve Movaro',
+                                          pt: 'Ajudar a melhorar o Mudavi',
+                                          es: 'Ayudar a mejorar Mudavi',
+                                          en: 'Help improve Mudavi',
                                         ),
                                         description: _settingsText(
                                           context,
@@ -669,9 +669,9 @@ class AppSettingsPage extends StatelessWidget {
   Future<void> _exportBackup(BuildContext context) async {
     final caption = _settingsText(
       context,
-      pt: 'Backup do seu plano Movaro',
-      es: 'Copia de tu plan Movaro',
-      en: 'Your Movaro plan backup',
+      pt: 'Backup do seu plano Mudavi',
+      es: 'Copia de tu plan Mudavi',
+      en: 'Your Mudavi plan backup',
     );
     try {
       final backup = await migrationBackupService.exportBackup();
@@ -681,7 +681,7 @@ class AppSettingsPage extends StatelessWidget {
           files: [
             XFile.fromData(
               Uint8List.fromList(utf8.encode(backup)),
-              name: 'movaro-backup-$date.json',
+              name: 'mudavi-backup-$date.json',
               mimeType: 'application/json',
             ),
           ],
@@ -771,9 +771,9 @@ class AppSettingsPage extends StatelessWidget {
         context,
         _settingsText(
           context,
-          pt: 'Esse conteúdo não é um backup Movaro compatível.',
-          es: 'Ese contenido no es una copia Movaro compatible.',
-          en: 'This is not a compatible Movaro backup.',
+          pt: 'Esse conteúdo não é um backup Mudavi compatível.',
+          es: 'Ese contenido no es una copia Mudavi compatible.',
+          en: 'This is not a compatible Mudavi backup.',
         ),
       );
       return;

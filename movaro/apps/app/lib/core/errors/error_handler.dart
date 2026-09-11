@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/core/errors/error_mapper.dart';
-import 'package:movaro_app/core/errors/ui_error_state.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/core/errors/error_mapper.dart';
+import 'package:mudavi_app/core/errors/ui_error_state.dart';
 
 class ErrorHandler {
   const ErrorHandler._();

@@ -5,55 +5,55 @@ import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/errors/error_handler.dart';
-import 'package:movaro_app/features/journey/detected_location.dart';
-import 'package:movaro_app/features/location/location_controller.dart';
-import 'package:movaro_app/features/location/presentation/widgets/origin_city_flow_sheet.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/utils/number_formatters.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/city_cost_of_living_card.dart';
-import 'package:movaro_app/core/widgets/contextual_help.dart';
-import 'package:movaro_app/core/widgets/error_state_widget.dart';
-import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
-import 'package:movaro_app/core/utils/share_card_service.dart';
-import 'package:movaro_app/core/widgets/practical_info_disclaimer.dart';
-import 'package:movaro_app/core/widgets/skeletons.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
-import 'package:movaro_app/features/cities/application/services/city_affordability_check.dart';
-import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
-import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
-import 'package:movaro_app/features/cities/application/services/city_strength_story_service.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
-import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_map_card.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_public_opinion_section.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_seasonality_section.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_share_card.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_sources_section.dart';
-import 'package:movaro_app/features/flight_search/data/airport_database.dart';
-import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
-import 'package:movaro_app/features/city_insights/domain/entities/city_insight_entity.dart';
-import 'package:movaro_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
-import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/errors/error_handler.dart';
+import 'package:mudavi_app/features/journey/detected_location.dart';
+import 'package:mudavi_app/features/location/location_controller.dart';
+import 'package:mudavi_app/features/location/presentation/widgets/origin_city_flow_sheet.dart';
+import 'package:mudavi_app/core/responsive/responsive_context.dart';
+import 'package:mudavi_app/core/utils/number_formatters.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/city_cost_of_living_card.dart';
+import 'package:mudavi_app/core/widgets/contextual_help.dart';
+import 'package:mudavi_app/core/widgets/error_state_widget.dart';
+import 'package:mudavi_app/core/widgets/feature_guide_dialog.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/multi_currency_amount.dart';
+import 'package:mudavi_app/core/utils/share_card_service.dart';
+import 'package:mudavi_app/core/widgets/practical_info_disclaimer.dart';
+import 'package:mudavi_app/core/widgets/skeletons.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
+import 'package:mudavi_app/features/cities/application/services/city_affordability_check.dart';
+import 'package:mudavi_app/features/cities/application/services/city_coastal_profile.dart';
+import 'package:mudavi_app/features/cities/application/services/city_seasonality_profile.dart';
+import 'package:mudavi_app/features/cities/application/services/city_strength_story_service.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_budget_snapshot.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_detail_payloads.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/cities/domain/entities/travel_route_insight.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_map_card.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_metric_presenter.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_image_backdrop.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_public_opinion_section.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_seasonality_section.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_share_card.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_sources_section.dart';
+import 'package:mudavi_app/features/flight_search/data/airport_database.dart';
+import 'package:mudavi_app/features/city_insights/application/city_insight_controller.dart';
+import 'package:mudavi_app/features/city_insights/domain/entities/city_insight_entity.dart';
+import 'package:mudavi_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
+import 'package:mudavi_app/features/home/presentation/pages/city_comparison_screen.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 enum _SameCityPlanChoice { continuePlan, restartPlan }
 
@@ -678,7 +678,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
                                           ),
                                           const SizedBox(width: 8),
                                           _OverallScoreChip(
-                                            score: city.movaroScores.overall,
+                                            score: city.mudaviScores.overall,
                                           ),
                                         ],
                                       ),
@@ -1607,17 +1607,17 @@ class _CityDetailPageState extends State<CityDetailPage> {
       areas: city.topIndustries.take(3).map(l10n.workAreaLabel).toList(),
       footer: _cityDetailLocalizedText(
         context,
-        pt: 'Custo, trabalho e trâmites para morar no Brasil — app Movaro.',
-        es: 'Costo, trabajo y trámites para vivir en Brasil — app Movaro.',
-        en: 'Cost, work, and paperwork to live in Brazil — Movaro app.',
+        pt: 'Custo, trabalho e trâmites para morar no Brasil — app Mudavi.',
+        es: 'Costo, trabajo y trámites para vivir en Brasil — app Mudavi.',
+        en: 'Cost, work, and paperwork to live in Brazil — Mudavi app.',
       ),
     );
 
     final caption = _cityDetailLocalizedText(
       context,
-      pt: 'Pensando em morar em ${city.name}/${city.stateCode}? Veja custo e trabalho no Movaro.',
-      es: '¿Pensás vivir en ${city.name}/${city.stateCode}? Mirá costo y trabajo en Movaro.',
-      en: 'Thinking of moving to ${city.name}/${city.stateCode}? See cost and work on Movaro.',
+      pt: 'Pensando em morar em ${city.name}/${city.stateCode}? Veja custo e trabalho no Mudavi.',
+      es: '¿Pensás vivir en ${city.name}/${city.stateCode}? Mirá costo y trabajo en Mudavi.',
+      en: 'Thinking of moving to ${city.name}/${city.stateCode}? See cost and work on Mudavi.',
     );
 
     await ShareCardService.shareWidget(
@@ -1625,7 +1625,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
       card: card,
       logicalSize: const Size(340, 440),
       caption: caption,
-      fileName: 'movaro_${city.id}.png',
+      fileName: 'mudavi_${city.id}.png',
     );
   }
 }
@@ -2770,7 +2770,7 @@ class _CityMapBottomSheetState extends State<_CityMapBottomSheet> {
                     TileLayer(
                       urlTemplate:
                           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.movaro.app',
+                      userAgentPackageName: 'com.mudavi.app',
                     ),
                     if (userPoint != null)
                       PolylineLayer(
@@ -3485,7 +3485,7 @@ class _WorkAndEconomyCard extends StatelessWidget {
     final presentation = CityMetricPresentation.resolve(
       context,
       kind: CityMetricKind.work,
-      value: city.movaroScores.workOpportunity,
+      value: city.mudaviScores.workOpportunity,
     );
     return FrostedPanel(
       child: Column(
@@ -3631,7 +3631,7 @@ class _DailyLifeCard extends StatelessWidget {
     final language = CityMetricPresentation.resolve(
       context,
       kind: CityMetricKind.language,
-      value: city.movaroScores.languageAdaptation,
+      value: city.mudaviScores.languageAdaptation,
     );
     final safetySource = city.sources.safety;
     return FrostedPanel(
@@ -4156,7 +4156,7 @@ class _ArrivalViabilityCard extends StatelessWidget {
     };
     final base =
         ((city.rentScore +
-                city.movaroScores.languageAdaptation +
+                city.mudaviScores.languageAdaptation +
                 city.safetyScore) /
             3) -
         flightPenalty;
@@ -4193,7 +4193,7 @@ class _ArrivalViabilityCard extends StatelessWidget {
     final language = CityMetricPresentation.resolve(
       context,
       kind: CityMetricKind.language,
-      value: city.movaroScores.languageAdaptation,
+      value: city.mudaviScores.languageAdaptation,
     ).headline;
     final safety = CityMetricPresentation.resolve(
       context,
@@ -4238,11 +4238,11 @@ class _ArrivalViabilityCard extends StatelessWidget {
         tint: AppColors.warning,
       ),
       context.l10n.cityDetailArrivalFocusLanguage(): (
-        score: city.movaroScores.languageAdaptation,
+        score: city.mudaviScores.languageAdaptation,
         tint: AppColors.primary,
       ),
       context.l10n.cityDetailArrivalFocusWork(): (
-        score: city.movaroScores.workOpportunity,
+        score: city.mudaviScores.workOpportunity,
         tint: AppColors.success,
       ),
       context.l10n.cityDetailArrivalFocusSafety(): (
@@ -4284,11 +4284,11 @@ class _ArrivalViabilityCard extends StatelessWidget {
       final language = CityMetricPresentation.resolve(
         context,
         kind: CityMetricKind.language,
-        value: city.movaroScores.languageAdaptation,
+        value: city.mudaviScores.languageAdaptation,
       );
       return context.l10n.cityDetailArrivalFocusBasis(
         language.headline,
-        '${city.movaroScores.languageAdaptation}/100',
+        '${city.mudaviScores.languageAdaptation}/100',
       );
     }
     if (focus == context.l10n.cityDetailArrivalFocusWork()) {
@@ -5242,17 +5242,17 @@ class _CityOverviewPanel extends StatelessWidget {
           kind: CityMetricKind.safety,
           value: city.safetyScore,
         ).supporting,
-      if (city.movaroScores.workOpportunity < 62)
+      if (city.mudaviScores.workOpportunity < 62)
         CityMetricPresentation.resolve(
           context,
           kind: CityMetricKind.work,
-          value: city.movaroScores.workOpportunity,
+          value: city.mudaviScores.workOpportunity,
         ).supporting,
-      if (city.movaroScores.languageAdaptation < 62)
+      if (city.mudaviScores.languageAdaptation < 62)
         CityMetricPresentation.resolve(
           context,
           kind: CityMetricKind.language,
-          value: city.movaroScores.languageAdaptation,
+          value: city.mudaviScores.languageAdaptation,
         ).supporting,
     ];
 
@@ -5263,8 +5263,8 @@ class _CityOverviewPanel extends StatelessWidget {
     final lowest = <String, int>{
       'housing': city.rentScore,
       'safety': city.safetyScore,
-      'language': city.movaroScores.languageAdaptation,
-      'work': city.movaroScores.workOpportunity,
+      'language': city.mudaviScores.languageAdaptation,
+      'work': city.mudaviScores.workOpportunity,
     }.entries.toList()..sort((a, b) => a.value.compareTo(b.value));
 
     switch (lowest.first.key) {
@@ -5283,14 +5283,14 @@ class _CityOverviewPanel extends StatelessWidget {
         return CityMetricPresentation.resolve(
           context,
           kind: CityMetricKind.language,
-          value: city.movaroScores.languageAdaptation,
+          value: city.mudaviScores.languageAdaptation,
         ).supporting;
       case 'work':
       default:
         return CityMetricPresentation.resolve(
           context,
           kind: CityMetricKind.work,
-          value: city.movaroScores.workOpportunity,
+          value: city.mudaviScores.workOpportunity,
         ).supporting;
     }
   }
@@ -5431,7 +5431,7 @@ class _BrazilLocationMiniMap extends StatelessWidget {
                   TileLayer(
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.movaro.app',
+                    userAgentPackageName: 'com.mudavi.app',
                   ),
                   MarkerLayer(
                     markers: [
@@ -6343,8 +6343,8 @@ String _lowestScoreKey(City city) {
   final scores = <String, int>{
     'housing': city.rentScore,
     'safety': city.safetyScore,
-    'language': city.movaroScores.languageAdaptation,
-    'work': city.movaroScores.workOpportunity,
+    'language': city.mudaviScores.languageAdaptation,
+    'work': city.mudaviScores.workOpportunity,
   }.entries.toList()..sort((a, b) => a.value.compareTo(b.value));
   return scores.first.key;
 }
@@ -6725,7 +6725,7 @@ class _AnalysisIndicatorsSection extends StatelessWidget {
     final cost = CityMetricPresentation.resolve(
       context,
       kind: CityMetricKind.cost,
-      value: city.movaroScores.economical,
+      value: city.mudaviScores.economical,
     );
     final safety = CityMetricPresentation.resolve(
       context,
@@ -6739,12 +6739,12 @@ class _AnalysisIndicatorsSection extends StatelessWidget {
     final work = CityMetricPresentation.resolve(
       context,
       kind: CityMetricKind.work,
-      value: city.movaroScores.workOpportunity,
+      value: city.mudaviScores.workOpportunity,
     );
     final language = CityMetricPresentation.resolve(
       context,
       kind: CityMetricKind.language,
-      value: city.movaroScores.languageAdaptation,
+      value: city.mudaviScores.languageAdaptation,
     );
 
     return _AnalysisBlock(
@@ -6778,7 +6778,7 @@ class _AnalysisIndicatorsSection extends StatelessWidget {
             icon: Icons.payments_outlined,
             label: context.l10n.cityDetailCostLabel,
             headline: cost.headline,
-            score: city.movaroScores.economical,
+            score: city.mudaviScores.economical,
             tint: cost.tint,
           ),
           const SizedBox(height: 10),
@@ -6794,7 +6794,7 @@ class _AnalysisIndicatorsSection extends StatelessWidget {
             icon: Icons.work_outline_rounded,
             label: context.l10n.cityDetailWorkLabel,
             headline: work.headline,
-            score: city.movaroScores.workOpportunity,
+            score: city.mudaviScores.workOpportunity,
             tint: work.tint,
           ),
           const SizedBox(height: 10),
@@ -6802,7 +6802,7 @@ class _AnalysisIndicatorsSection extends StatelessWidget {
             icon: Icons.translate_rounded,
             label: context.l10n.cityDetailLanguageLabel,
             headline: language.headline,
-            score: city.movaroScores.languageAdaptation,
+            score: city.mudaviScores.languageAdaptation,
             tint: language.tint,
           ),
         ],
@@ -7188,7 +7188,7 @@ class _AnalysisContextSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final popularityScore = city.movaroScores.popularForArgentinians;
+    final popularityScore = city.mudaviScores.popularForArgentinians;
     final popularityTint = popularityScore >= 80
         ? AppColors.success
         : popularityScore >= 60

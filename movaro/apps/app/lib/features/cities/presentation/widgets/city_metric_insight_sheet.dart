@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_source.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_card_metric_classifier.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/widgets/multi_currency_amount.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_source.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_card_metric_classifier.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_metric_presenter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 enum CityMetricInsightTopic { housing, safety, work, language }
@@ -688,7 +688,7 @@ class _CityMetricInsightContent {
         final work = CityMetricPresentation.resolve(
           context,
           kind: CityMetricKind.work,
-          value: city.movaroScores.workOpportunity,
+          value: city.mudaviScores.workOpportunity,
         );
         final employmentSource = city.sources.employment;
         final hasOfficialEmployment = employmentSource != null;
@@ -804,22 +804,22 @@ class _CityMetricInsightContent {
         final language = CityMetricPresentation.resolve(
           context,
           kind: CityMetricKind.language,
-          value: city.movaroScores.languageAdaptation,
+          value: city.mudaviScores.languageAdaptation,
         );
         return _CityMetricInsightContent(
           cityName: city.name,
           label: l10n.cityDetailLanguageLabel,
           headline: _languageLevel(
             context,
-            city.movaroScores.languageAdaptation,
+            city.mudaviScores.languageAdaptation,
           ),
           icon: language.icon,
           tint: language.tint,
           whyThisCity: _localizedText(
             context,
-            pt: 'A adaptação inicial em ${city.name} parece ${_languageLevel(context, city.movaroScores.languageAdaptation).toLowerCase()}. Isso considera presença argentina e apoio percebido ao espanhol, não uma medição oficial de idioma.',
-            es: 'La adaptación inicial en ${city.name} parece ${_languageLevel(context, city.movaroScores.languageAdaptation).toLowerCase()}. Esto considera presencia argentina y apoyo percibido en español, no una medición oficial de idioma.',
-            en: 'Early adaptation in ${city.name} looks ${_languageLevel(context, city.movaroScores.languageAdaptation).toLowerCase()}. This considers Argentine presence and perceived Spanish support, not an official language measure.',
+            pt: 'A adaptação inicial em ${city.name} parece ${_languageLevel(context, city.mudaviScores.languageAdaptation).toLowerCase()}. Isso considera presença argentina e apoio percebido ao espanhol, não uma medição oficial de idioma.',
+            es: 'La adaptación inicial en ${city.name} parece ${_languageLevel(context, city.mudaviScores.languageAdaptation).toLowerCase()}. Esto considera presencia argentina y apoyo percibido en español, no una medición oficial de idioma.',
+            en: 'Early adaptation in ${city.name} looks ${_languageLevel(context, city.mudaviScores.languageAdaptation).toLowerCase()}. This considers Argentine presence and perceived Spanish support, not an official language measure.',
           ),
           meaning: l10n.cityMetricInsightLanguageMeaning,
           method: l10n.cityMetricInsightLanguageMethod,
@@ -834,7 +834,7 @@ class _CityMetricInsightContent {
               ),
               value: _languageLevel(
                 context,
-                city.movaroScores.languageAdaptation,
+                city.mudaviScores.languageAdaptation,
               ),
             ),
             _InsightFact(
@@ -931,7 +931,7 @@ class _CityMetricInsightContent {
 
   static String _costLevel(BuildContext context, City city) {
     return switch (CityCardMetricClassifier.levelFor(
-      city.movaroScores.economical,
+      city.mudaviScores.economical,
     )) {
       CityCardMetricLevel.high => context.l10n.cityCardCostLow,
       CityCardMetricLevel.medium => context.l10n.cityCardCostMedium,

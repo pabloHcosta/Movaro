@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_scores.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_source.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_sources.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
-import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_card.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_budget_snapshot.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_scores.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_source.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_sources.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/cities/domain/repositories/cities_repository.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_card.dart';
 
 void main() {
   testWidgets('city card explains metrics without exposing internal scores', (
@@ -101,7 +101,7 @@ const _city = City(
   unemploymentRate: 6,
   economicActivityScore: 74,
   topIndustries: ['Tecnologia', 'Serviços'],
-  movaroScores: CityScores(
+  mudaviScores: CityScores(
     economical: 65,
     popularForArgentinians: 76,
     languageAdaptation: 69,

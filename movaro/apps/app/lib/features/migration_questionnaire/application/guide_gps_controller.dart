@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_focus_engine.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_focus_engine.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 class GuideGpsController extends ChangeNotifier {
   GuideGpsController({

@@ -1,6 +1,6 @@
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/network/network_client.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/core/network/network_client.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
 
 class GuideFlowMetricsRemoteSink implements GuideFlowMetricsSink {
   GuideFlowMetricsRemoteSink({

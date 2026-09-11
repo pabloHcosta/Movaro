@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:add_2_calendar_new/add_2_calendar_new.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_event_suggestion.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_event_suggestion.dart';
 
 class CalendarEventService {
   CalendarEventService({PlanNotificationService? notificationService})

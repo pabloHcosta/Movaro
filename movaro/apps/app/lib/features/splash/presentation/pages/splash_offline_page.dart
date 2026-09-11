@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/movaro_logo.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/mudavi_logo.dart';
 
 class SplashOfflinePage extends StatelessWidget {
   const SplashOfflinePage({required this.onRetry, super.key});
@@ -48,7 +48,7 @@ class SplashOfflinePage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const MovaroLogo(
+                        const MudaviLogo(
                           markSize: 20,
                           textColor: Colors.white,
                           markColor: Colors.white,

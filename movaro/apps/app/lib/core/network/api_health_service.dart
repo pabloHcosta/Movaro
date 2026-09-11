@@ -1,6 +1,6 @@
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/network/network_client.dart';
-import 'package:movaro_app/core/network/network_exception.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/core/network/network_client.dart';
+import 'package:mudavi_app/core/network/network_exception.dart';
 
 class ApiHealthService {
   ApiHealthService({required AppEnvironment environment})
@@ -11,7 +11,7 @@ class ApiHealthService {
   Future<void> check() async {
     final response = await _networkClient.getJsonMapWithHeaders(
       '/api/v1/health',
-      headers: const {'x-movaro-health-check': 'startup'},
+      headers: const {'x-mudavi-health-check': 'startup'},
     );
 
     final status = response['status'];

@@ -1,18 +1,18 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_event_suggestion_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/latest_migration_plan_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_event_suggestion_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/latest_migration_plan_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_plan_reset_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('new plan clears progress and plan-scoped cached data', () async {
     final directory = await Directory.systemTemp.createTemp(
-      'movaro_plan_reset_test',
+      'mudavi_plan_reset_test',
     );
     addTearDown(() async {
       if (directory.existsSync()) {
@@ -86,7 +86,7 @@ void main() {
 
   test('different plan ids never share completed steps', () async {
     final directory = await Directory.systemTemp.createTemp(
-      'movaro_plan_identity_test',
+      'mudavi_plan_identity_test',
     );
     addTearDown(() async {
       if (directory.existsSync()) {
@@ -133,7 +133,7 @@ void main() {
 
   test('budget overrides persist without replacing task progress', () async {
     final directory = await Directory.systemTemp.createTemp(
-      'movaro_budget_override_test',
+      'mudavi_budget_override_test',
     );
     addTearDown(() async {
       if (directory.existsSync()) {
@@ -178,7 +178,7 @@ void main() {
 
   test('city change keeps documents and reopens city-specific work', () async {
     final directory = await Directory.systemTemp.createTemp(
-      'movaro_city_transition_test',
+      'mudavi_city_transition_test',
     );
     addTearDown(() async {
       if (directory.existsSync()) {

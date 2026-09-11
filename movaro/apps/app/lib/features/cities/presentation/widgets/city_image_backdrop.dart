@@ -1,10 +1,10 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
-import 'package:movaro_app/features/cities/application/services/places_photo_service.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/features/cities/application/services/city_image_catalog.dart';
+import 'package:mudavi_app/features/cities/application/services/places_photo_service.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
 
 /// Pre-warms the Flutter image cache for [city] before navigation.
 ///
@@ -12,7 +12,7 @@ import 'package:movaro_app/features/cities/domain/entities/city.dart';
 /// Places API photo. Silently ignores errors — [CityResolvedImage] handles
 /// its own fallback chain if the image isn't cached.
 Future<void> precacheCityImage(BuildContext context, City city) async {
-  const headers = {'User-Agent': 'Movaro/1.0'};
+  const headers = {'User-Agent': 'Mudavi/1.0'};
   final primaryUrl = cityImageUrlFor(city.id);
   if (primaryUrl != null) {
     try {
@@ -522,7 +522,7 @@ class _CityResolvedImageState extends State<CityResolvedImage> {
       return Image.network(
         _activeUrl!,
         fit: widget.fit,
-        headers: const {'User-Agent': 'Movaro/1.0'},
+        headers: const {'User-Agent': 'Mudavi/1.0'},
         filterQuality: widget.filterQuality,
         loadingBuilder: widget.placeholder == null
             ? null
@@ -565,7 +565,7 @@ class _CityResolvedImageState extends State<CityResolvedImage> {
         return Image.network(
           fallbackUrl,
           fit: widget.fit,
-          headers: const {'User-Agent': 'Movaro/1.0'},
+          headers: const {'User-Agent': 'Mudavi/1.0'},
           filterQuality: widget.filterQuality,
           loadingBuilder: widget.placeholder == null
               ? null

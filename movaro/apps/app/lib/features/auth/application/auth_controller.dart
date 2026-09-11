@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/features/auth/domain/entities/auth_provider.dart';
-import 'package:movaro_app/features/auth/domain/entities/auth_session.dart';
-import 'package:movaro_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/features/auth/domain/entities/auth_provider.dart';
+import 'package:mudavi_app/features/auth/domain/entities/auth_session.dart';
+import 'package:mudavi_app/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthController extends ChangeNotifier {
   AuthController({required AuthRepository repository})

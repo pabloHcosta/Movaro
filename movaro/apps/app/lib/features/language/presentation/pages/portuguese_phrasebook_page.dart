@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:movaro_app/features/language/application/portuguese_phrasebook.dart';
+import 'package:mudavi_app/features/language/application/portuguese_phrasebook.dart';
 
 /// Browsable, situation-based Portuguese phrasebook. Attacks the #1 pain
 /// (Portuguese) directly: practical phrases to say at the Federal Police, bank,

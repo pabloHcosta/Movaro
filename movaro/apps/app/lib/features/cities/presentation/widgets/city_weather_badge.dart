@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
 
 class CityWeatherBadge extends StatefulWidget {
   const CityWeatherBadge({

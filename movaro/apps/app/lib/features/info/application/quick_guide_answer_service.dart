@@ -1,6 +1,6 @@
-import 'package:movaro_app/core/network/network_client.dart';
-import 'package:movaro_app/features/info/application/quick_guide_question_catalog.dart';
-import 'package:movaro_app/features/info/domain/entities/quick_guide_answer.dart';
+import 'package:mudavi_app/core/network/network_client.dart';
+import 'package:mudavi_app/features/info/application/quick_guide_question_catalog.dart';
+import 'package:mudavi_app/features/info/domain/entities/quick_guide_answer.dart';
 
 class QuickGuideAnswerService {
   QuickGuideAnswerService({required NetworkClient client}) : _client = client;

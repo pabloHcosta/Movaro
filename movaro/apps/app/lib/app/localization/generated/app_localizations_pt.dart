@@ -9,7 +9,7 @@ class AppLocalizationsPt extends AppLocalizations {
   AppLocalizationsPt([String locale = 'pt']) : super(locale);
 
   @override
-  String get homeTitle => 'Movaro';
+  String get homeTitle => 'Mudavi';
 
   @override
   String get homeEnvironmentLabel => 'Ambiente atual';
@@ -23,7 +23,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get splashLoadingLabel => 'Preparando seu caminho';
 
   @override
-  String get splashHeroTitle => 'Você escolhe onde. O Movaro mostra o caminho.';
+  String get splashHeroTitle => 'Você escolhe onde. O Mudavi mostra o caminho.';
 
   @override
   String get splashHeroBody =>
@@ -47,7 +47,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get journeySetupHeroBody =>
-      'O Movaro vai usar essa escolha para montar a experiência certa para você. Hoje, o beta está liberado para Argentina -> Brasil, mas a estrutura já está pronta para crescer.';
+      'O Mudavi vai usar essa escolha para montar a experiência certa para você. Hoje, o beta está liberado para Argentina -> Brasil, mas a estrutura já está pronta para crescer.';
 
   @override
   String get journeyOriginTitle => 'País de origem';
@@ -103,14 +103,14 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get publicHomeFocusedDescription =>
-      'Hoje, o Movaro foi desenhado para quem está avaliando a mudança da Argentina para o Brasil. Em vez de mostrar tudo de uma vez, ele ajuda você a explorar pontos de partida úteis.';
+      'Hoje, o Mudavi foi desenhado para quem está avaliando a mudança da Argentina para o Brasil. Em vez de mostrar tudo de uma vez, ele ajuda você a explorar pontos de partida úteis.';
 
   @override
   String publicHomeSelectedJourneyDescription(
     String origin,
     String destination,
   ) {
-    return 'O Movaro vai organizar sua experiência para a jornada $origin -> $destination. Você começa com o essencial e aprofunda só quando fizer sentido.';
+    return 'O Mudavi vai organizar sua experiência para a jornada $origin -> $destination. Você começa com o essencial e aprofunda só quando fizer sentido.';
   }
 
   @override
@@ -209,7 +209,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get publicHomeQuestionsAction => 'Tirar dúvidas';
 
   @override
-  String get homeHeroWelcomeDefault => 'Bem-vindo ao Movaro';
+  String get homeHeroWelcomeDefault => 'Bem-vindo ao Mudavi';
 
   @override
   String get homeHeroWelcomeBack => 'Continue de onde parou';
@@ -327,7 +327,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String publicHomeJourneyDraftBody(Object destination) {
-    return 'Seu destino é $destination. Agora responda poucas perguntas e conte de onde você sai para que o Movaro gere o plano certo.';
+    return 'Seu destino é $destination. Agora responda poucas perguntas e conte de onde você sai para que o Mudavi gere o plano certo.';
   }
 
   @override
@@ -346,7 +346,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get decisionSupportBody =>
-      'Quem pensa em morar fora geralmente quer respostas rápidas sobre idioma, custo, burocracia e trabalho. O Movaro precisa deixar isso claro logo de cara.';
+      'Quem pensa em morar fora geralmente quer respostas rápidas sobre idioma, custo, burocracia e trabalho. O Mudavi precisa deixar isso claro logo de cara.';
 
   @override
   String get decisionSupportLanguageTitle =>
@@ -454,11 +454,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get exploreCreatePostAction => 'Criar post';
 
   @override
-  String get exploreIntroTitle => 'Como usar o Movaro';
+  String get exploreIntroTitle => 'Como usar o Mudavi';
 
   @override
   String get exploreIntroDescription =>
-      'Antes de sair navegando, veja em menos de um minuto o que o Movaro ajuda a resolver e o que já está disponível neste beta.';
+      'Antes de sair navegando, veja em menos de um minuto o que o Mudavi ajuda a resolver e o que já está disponível neste beta.';
 
   @override
   String get exploreIntroAction => 'Abrir introdução';
@@ -598,7 +598,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get explorePlanEmptyBody =>
-      'Choose your destination, answer a few questions, and let Movaro turn exploration into a practical direction.';
+      'Choose your destination, answer a few questions, and let Mudavi turn exploration into a practical direction.';
 
   @override
   String get explorePlanReadyTitle => 'Your plan is ready to continue';
@@ -662,7 +662,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get documentationHeroDescription =>
-      'Escreva uma dúvida ou escolha um tema. O Movaro ajuda você a encontrar a orientação e o guia certo sobre documentos, saúde, trabalho, moradia, mobilidade e custos iniciais.';
+      'Escreva uma dúvida ou escolha um tema. O Mudavi ajuda você a encontrar a orientação e o guia certo sobre documentos, saúde, trabalho, moradia, mobilidade e custos iniciais.';
 
   @override
   String get documentationFocusTitle => 'Useful for your current journey';
@@ -777,7 +777,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get documentationGuideCountryPendingBody =>
-      'No momento, o Movaro tem cobertura de guia prático para o Brasil. Escolha Brasil para continuar navegando pelo conteúdo disponível.';
+      'No momento, o Mudavi tem cobertura de guia prático para o Brasil. Escolha Brasil para continuar navegando pelo conteúdo disponível.';
 
   @override
   String get documentationGuideUsingPlanLabel => 'Do seu plano';
@@ -1540,7 +1540,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get loginDescription =>
-      'O Movaro deixa a exploração aberta. O login aparece apenas quando você quer salvar algo pessoal.';
+      'O Mudavi deixa a exploração aberta. O login aparece apenas quando você quer salvar algo pessoal.';
 
   @override
   String get loginGoogleAction => 'Continuar com Google';
@@ -1694,7 +1694,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String planRecommendedCityDescription(String city, String stateCode) {
-    return 'Com base nas suas respostas, o Movaro sugere que você olhe primeiro para $city, $stateCode.';
+    return 'Com base nas suas respostas, o Mudavi sugere que você olhe primeiro para $city, $stateCode.';
   }
 
   @override
@@ -2238,7 +2238,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get citiesExploreEmptyDescription =>
-      'As sugestões de cidades vão aparecer aqui conforme a base do Movaro crescer.';
+      'As sugestões de cidades vão aparecer aqui conforme a base do Mudavi crescer.';
 
   @override
   String get citiesSearchTitle => 'Buscar cidades';
@@ -2361,7 +2361,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get citiesSearchEmptyDescription =>
-      'Tente outro nome ou explore o catálogo inicial do Movaro.';
+      'Tente outro nome ou explore o catálogo inicial do Mudavi.';
 
   @override
   String get citiesSearchFirstEmptyDescription =>
@@ -2372,7 +2372,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get citiesCatalogEmptyDescription =>
-      'As cidades do catálogo do Movaro vão aparecer aqui.';
+      'As cidades do catálogo do Mudavi vão aparecer aqui.';
 
   @override
   String get cityDetailTitleFallback => 'Cidade';
@@ -2396,7 +2396,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String cityDetailDecisionSnapshotSubtitle(Object bestFor) {
-    return 'O Movaro vê esta cidade como uma boa opção se você prioriza $bestFor.';
+    return 'O Mudavi vê esta cidade como uma boa opção se você prioriza $bestFor.';
   }
 
   @override
@@ -2822,7 +2822,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get mainNavPlanNeedsJourney =>
-      'Choose your destination first so Movaro can open the right plan step.';
+      'Choose your destination first so Mudavi can open the right plan step.';
 
   @override
   String get mainNavFavoritesDisabled =>
@@ -3070,7 +3070,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get profileJourneyBody =>
-      'O Movaro usa esta rota para manter a home, a exploração e o conteúdo conectados ao mesmo contexto de mudança.';
+      'O Mudavi usa esta rota para manter a home, a exploração e o conteúdo conectados ao mesmo contexto de mudança.';
 
   @override
   String profileJourneyValue(Object origin, Object destination) {
@@ -3119,7 +3119,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get publicHomeJourneyResetBody =>
-      'Sua rota atual já está salva neste dispositivo. Se você reiniciar agora, o Movaro vai abrir novamente a seleção para escolher outra origem ou destino.';
+      'Sua rota atual já está salva neste dispositivo. Se você reiniciar agora, o Mudavi vai abrir novamente a seleção para escolher outra origem ou destino.';
 
   @override
   String get publicHomeJourneyResetConfirm => 'Refazer rota';
@@ -3137,14 +3137,14 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get introPageTitle => 'Como o Movaro funciona';
+  String get introPageTitle => 'Como o Mudavi funciona';
 
   @override
   String get introHeroTitle => 'Entenda o app em menos de um minuto';
 
   @override
   String get introHeroDescription =>
-      'O Movaro ajuda você a comparar cidades, entender burocracias práticas e montar uma primeira direção de mudança sem começar pelo excesso de informação.';
+      'O Mudavi ajuda você a comparar cidades, entender burocracias práticas e montar uma primeira direção de mudança sem começar pelo excesso de informação.';
 
   @override
   String get introExploreTitle => 'Explore cidades com contexto';
@@ -3622,7 +3622,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get journeyEntryBody =>
-      'Primeiro escolha para onde você quer ir. O Movaro salva essa decisão agora e coleta sua origem na primeira parte do questionário.';
+      'Primeiro escolha para onde você quer ir. O Mudavi salva essa decisão agora e coleta sua origem na primeira parte do questionário.';
 
   @override
   String get journeyEntryDestinationLabel => 'Para onde você quer ir?';
@@ -3636,7 +3636,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get journeyEntryDynamicBody =>
-      'Você pode usar a localização como sugestão ou escolher tudo manualmente. O Movaro nunca define sua origem sem confirmação.';
+      'Você pode usar a localização como sugestão ou escolher tudo manualmente. O Mudavi nunca define sua origem sem confirmação.';
 
   @override
   String get journeyEntryUseLocationTitle => 'Usar minha localização';
@@ -3672,7 +3672,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get journeySetupFlowHint =>
-      'Se houver só uma rota disponível agora, o Movaro preenche isso para você. Se houver mais de uma opção, você escolhe manualmente.';
+      'Se houver só uma rota disponível agora, o Mudavi preenche isso para você. Se houver mais de uma opção, você escolhe manualmente.';
 
   @override
   String get journeySetupManualChangeHint =>
@@ -3693,7 +3693,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get journeyLocationPanelBody =>
-      'Com autorização, o Movaro sugere seu país como origem. Você pode recusar e escolher manualmente.';
+      'Com autorização, o Mudavi sugere seu país como origem. Você pode recusar e escolher manualmente.';
 
   @override
   String get journeyLocationFallbackTitle =>
@@ -3730,7 +3730,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String journeyDetectedUnknownBody(Object country) {
-    return 'O Movaro detectou $country, mas não encontrou esse país no catálogo atual. Escolha a origem manualmente.';
+    return 'O Mudavi detectou $country, mas não encontrou esse país no catálogo atual. Escolha a origem manualmente.';
   }
 
   @override
@@ -3752,7 +3752,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String questionnaireOriginUnsupportedBody(Object country) {
-    return 'O Movaro detectou $country, mas o plano guiado está disponível apenas para quem vem da Argentina neste momento. Você pode escolher a Argentina manualmente ou usar essa origem para continuar.';
+    return 'O Mudavi detectou $country, mas o plano guiado está disponível apenas para quem vem da Argentina neste momento. Você pode escolher a Argentina manualmente ou usar essa origem para continuar.';
   }
 
   @override
@@ -3841,7 +3841,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get journeyCoverageUnsupportedBody =>
-      'O Movaro ainda mostra cidades e conteúdo prático, mas o plano guiado exige cobertura completa.';
+      'O Mudavi ainda mostra cidades e conteúdo prático, mas o plano guiado exige cobertura completa.';
 
   @override
   String get journeyCoverageChooseRouteAction => 'Escolher outra rota';
@@ -3955,7 +3955,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get recommendationReasonBalanced =>
-      'Opção equilibrada dentro do catálogo inicial do Movaro';
+      'Opção equilibrada dentro do catálogo inicial do Mudavi';
 
   @override
   String get planReasonGoalWork =>
@@ -4179,8 +4179,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get errorValidationTitle => 'Não foi possível concluir.';
 
   @override
-  String get errorNetworkMovaroDescription =>
-      'Não conseguimos falar com o Movaro neste momento. Tente novamente em instantes.';
+  String get errorNetworkMudaviDescription =>
+      'Não conseguimos falar com o Mudavi neste momento. Tente novamente em instantes.';
 
   @override
   String get errorApiGenericDescription =>
@@ -4188,7 +4188,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get apiUnavailableTitle =>
-      'O Movaro não conseguiu se conectar à API agora.';
+      'O Mudavi não conseguiu se conectar à API agora.';
 
   @override
   String get apiUnavailableDescription =>
@@ -4212,11 +4212,11 @@ class AppLocalizationsPt extends AppLocalizations {
       'Atlas do Desenvolvimento Humano no Brasil (PNUD, Ipea e FJP)';
 
   @override
-  String get sourceProviderMovaroDataset =>
+  String get sourceProviderMudaviDataset =>
       'Base comparativa interna (não oficial)';
 
   @override
-  String get sourceProviderMovaroRanking =>
+  String get sourceProviderMudaviRanking =>
       'Metodologia comparativa interna (não oficial)';
 
   @override
@@ -4281,7 +4281,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get sourceProviderBancoCentralBrasil => 'Banco Central do Brasil';
 
   @override
-  String get sourceProviderMovaro =>
+  String get sourceProviderMudavi =>
       'Checklist baseado nas suas respostas (não oficial)';
 
   @override
@@ -4563,7 +4563,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get housingDecisionSectionNote =>
-      'Hoje, o Movaro organiza o contexto para ajudar você a decidir melhor. Contrato, garantia aceita e política de cada proprietário ou plataforma ainda precisam ser validados na fonte antes de fechar a moradia.';
+      'Hoje, o Mudavi organiza o contexto para ajudar você a decidir melhor. Contrato, garantia aceita e política de cada proprietário ou plataforma ainda precisam ser validados na fonte antes de fechar a moradia.';
 
   @override
   String get housingEntrySectionTitle =>
@@ -5112,7 +5112,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get migrationPlanCopilotStagesBody =>
-      'Você pode entrar direto na etapa que precisa, mas o Movaro mantém a ordem clara para a mudança não perder prioridade.';
+      'Você pode entrar direto na etapa que precisa, mas o Mudavi mantém a ordem clara para a mudança não perder prioridade.';
 
   @override
   String get migrationPlanCopilotRecommendedTitle =>
@@ -5150,7 +5150,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get migrationPlanCopilotQuickQuestionDocumentsAnswer =>
-      'Comece pelos documentos que demoram mais para sair ou vencer primeiro. A etapa documental do Movaro ajuda a separar o que destrava residência, CPF e chegada prática sem te jogar num fluxo burocrático inteiro de uma vez.';
+      'Comece pelos documentos que demoram mais para sair ou vencer primeiro. A etapa documental do Mudavi ajuda a separar o que destrava residência, CPF e chegada prática sem te jogar num fluxo burocrático inteiro de uma vez.';
 
   @override
   String get migrationPlanCopilotQuickQuestionHousingTitle =>
@@ -5955,7 +5955,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get planStepDescriptionCpfStart =>
-      'O CPF destrava várias etapas práticas no Brasil. Comece com a orientação oficial e depois siga no Movaro passo a passo.';
+      'O CPF destrava várias etapas práticas no Brasil. Comece com a orientação oficial e depois siga no Mudavi passo a passo.';
 
   @override
   String get migrationPlanPrepHeroTitle =>
@@ -6190,7 +6190,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get migrationPlanPrepWorkSignalsBody =>
-      'Hoje o Movaro mostra sinais de mercado, atividade econômica e desemprego. A renda média ainda não está integrada no catálogo atual.';
+      'Hoje o Mudavi mostra sinais de mercado, atividade econômica e desemprego. A renda média ainda não está integrada no catálogo atual.';
 
   @override
   String get migrationPlanPrepMoneyPracticeTitle =>
@@ -6480,7 +6480,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Use a barra de busca para encontrar respostas sobre CPF, visto, SUS ou qualquer outro assunto.';
 
   @override
-  String get infoGuideStepThreeTitle => 'Pergunte ao assistente Movaro';
+  String get infoGuideStepThreeTitle => 'Pergunte ao assistente Mudavi';
 
   @override
   String get infoGuideStepThreeBody =>
@@ -6542,7 +6542,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Como validar minha carteira de motorista?';
 
   @override
-  String get homeAssistantTitle => 'Assistente Movaro';
+  String get homeAssistantTitle => 'Assistente Mudavi';
 
   @override
   String get homeAssistantSubtitle =>
@@ -6731,7 +6731,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeVisualWaypointRoute => 'rota';
 
   @override
-  String get assistantEntryTitle => 'Assistente Movaro';
+  String get assistantEntryTitle => 'Assistente Mudavi';
 
   @override
   String get assistantEntrySubtitle => 'Tire dúvidas sobre sua mudança';

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/explore/application/services/documentation_guide_search.dart';
+import 'package:mudavi_app/features/explore/application/services/documentation_guide_search.dart';
 
 void main() {
   group('DocumentationGuideSearch', () {

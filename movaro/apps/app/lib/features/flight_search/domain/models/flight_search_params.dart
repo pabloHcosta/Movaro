@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/flight_search/domain/models/airport.dart';
+import 'package:mudavi_app/features/flight_search/domain/models/airport.dart';
 
 /// Immutable parameters for a one-way flight search.
 ///

@@ -103,7 +103,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Movaro'**
+  /// **'Mudavi'**
   String get homeTitle;
 
   /// No description provided for @homeEnvironmentLabel.
@@ -127,7 +127,7 @@ abstract class AppLocalizations {
   /// No description provided for @splashHeroTitle.
   ///
   /// In en, this message translates to:
-  /// **'You choose where. Movaro shows you the way.'**
+  /// **'You choose where. Mudavi shows you the way.'**
   String get splashHeroTitle;
 
   /// No description provided for @splashHeroBody.
@@ -169,7 +169,7 @@ abstract class AppLocalizations {
   /// No description provided for @journeySetupHeroBody.
   ///
   /// In en, this message translates to:
-  /// **'Movaro uses this choice to shape the right experience for you. Today, the beta is open for Argentina -> Brazil, but the structure is already built to grow globally.'**
+  /// **'Mudavi uses this choice to shape the right experience for you. Today, the beta is open for Argentina -> Brazil, but the structure is already built to grow globally.'**
   String get journeySetupHeroBody;
 
   /// No description provided for @journeyOriginTitle.
@@ -265,13 +265,13 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomeFocusedDescription.
   ///
   /// In en, this message translates to:
-  /// **'Movaro is currently designed for people evaluating a move from Argentina to Brazil. Instead of showing everything at once, it helps you explore useful starting points.'**
+  /// **'Mudavi is currently designed for people evaluating a move from Argentina to Brazil. Instead of showing everything at once, it helps you explore useful starting points.'**
   String get publicHomeFocusedDescription;
 
   /// No description provided for @publicHomeSelectedJourneyDescription.
   ///
   /// In en, this message translates to:
-  /// **'Movaro will organize your experience for the {origin} -> {destination} journey. You start with what matters now and go deeper only when it helps.'**
+  /// **'Mudavi will organize your experience for the {origin} -> {destination} journey. You start with what matters now and go deeper only when it helps.'**
   String publicHomeSelectedJourneyDescription(
     String origin,
     String destination,
@@ -442,7 +442,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeHeroWelcomeDefault.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Movaro'**
+  /// **'Welcome to Mudavi'**
   String get homeHeroWelcomeDefault;
 
   /// No description provided for @homeHeroWelcomeBack.
@@ -652,7 +652,7 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomeJourneyDraftBody.
   ///
   /// In en, this message translates to:
-  /// **'You\'re heading toward {destination}. Next, answer a few short questions and tell us where you\'re coming from so Movaro can generate the right plan.'**
+  /// **'You\'re heading toward {destination}. Next, answer a few short questions and tell us where you\'re coming from so Mudavi can generate the right plan.'**
   String publicHomeJourneyDraftBody(Object destination);
 
   /// No description provided for @publicHomeStoriesTitle.
@@ -682,7 +682,7 @@ abstract class AppLocalizations {
   /// No description provided for @decisionSupportBody.
   ///
   /// In en, this message translates to:
-  /// **'People moving abroad usually want quick first answers about language, cost, paperwork, and work. Movaro should make that obvious.'**
+  /// **'People moving abroad usually want quick first answers about language, cost, paperwork, and work. Mudavi should make that obvious.'**
   String get decisionSupportBody;
 
   /// No description provided for @decisionSupportLanguageTitle.
@@ -862,13 +862,13 @@ abstract class AppLocalizations {
   /// No description provided for @exploreIntroTitle.
   ///
   /// In en, this message translates to:
-  /// **'How to use Movaro'**
+  /// **'How to use Mudavi'**
   String get exploreIntroTitle;
 
   /// No description provided for @exploreIntroDescription.
   ///
   /// In en, this message translates to:
-  /// **'Before diving into the app, see in under a minute what Movaro helps with and what is already available in this beta.'**
+  /// **'Before diving into the app, see in under a minute what Mudavi helps with and what is already available in this beta.'**
   String get exploreIntroDescription;
 
   /// No description provided for @exploreIntroAction.
@@ -1108,7 +1108,7 @@ abstract class AppLocalizations {
   /// No description provided for @explorePlanEmptyBody.
   ///
   /// In en, this message translates to:
-  /// **'Choose your destination, answer a few questions, and let Movaro turn exploration into a practical direction.'**
+  /// **'Choose your destination, answer a few questions, and let Mudavi turn exploration into a practical direction.'**
   String get explorePlanEmptyBody;
 
   /// No description provided for @explorePlanReadyTitle.
@@ -1210,7 +1210,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationHeroDescription.
   ///
   /// In en, this message translates to:
-  /// **'Type a question or choose a topic. Movaro helps you find the right guidance and guide across documents, health, work, housing, mobility, and early costs.'**
+  /// **'Type a question or choose a topic. Mudavi helps you find the right guidance and guide across documents, health, work, housing, mobility, and early costs.'**
   String get documentationHeroDescription;
 
   /// No description provided for @documentationFocusTitle.
@@ -1396,7 +1396,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentationGuideCountryPendingBody.
   ///
   /// In en, this message translates to:
-  /// **'Movaro currently has practical guide coverage for Brazil. Choose Brazil to continue browsing the available guidance.'**
+  /// **'Mudavi currently has practical guide coverage for Brazil. Choose Brazil to continue browsing the available guidance.'**
   String get documentationGuideCountryPendingBody;
 
   /// No description provided for @documentationGuideUsingPlanLabel.
@@ -2626,7 +2626,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginDescription.
   ///
   /// In en, this message translates to:
-  /// **'Movaro keeps exploration open. Sign-in appears only when you want to save something personal.'**
+  /// **'Mudavi keeps exploration open. Sign-in appears only when you want to save something personal.'**
   String get loginDescription;
 
   /// No description provided for @loginGoogleAction.
@@ -3772,7 +3772,7 @@ abstract class AppLocalizations {
   /// No description provided for @citiesExploreEmptyDescription.
   ///
   /// In en, this message translates to:
-  /// **'City suggestions will appear here as the Movaro catalog grows.'**
+  /// **'City suggestions will appear here as the Mudavi catalog grows.'**
   String get citiesExploreEmptyDescription;
 
   /// No description provided for @citiesSearchTitle.
@@ -3994,7 +3994,7 @@ abstract class AppLocalizations {
   /// No description provided for @citiesSearchEmptyDescription.
   ///
   /// In en, this message translates to:
-  /// **'Try another name or explore the initial Movaro catalog.'**
+  /// **'Try another name or explore the initial Mudavi catalog.'**
   String get citiesSearchEmptyDescription;
 
   /// No description provided for @citiesSearchFirstEmptyDescription.
@@ -4012,7 +4012,7 @@ abstract class AppLocalizations {
   /// No description provided for @citiesCatalogEmptyDescription.
   ///
   /// In en, this message translates to:
-  /// **'Cities from the Movaro catalog will appear here.'**
+  /// **'Cities from the Mudavi catalog will appear here.'**
   String get citiesCatalogEmptyDescription;
 
   /// No description provided for @cityDetailTitleFallback.
@@ -4786,7 +4786,7 @@ abstract class AppLocalizations {
   /// No description provided for @mainNavPlanNeedsJourney.
   ///
   /// In en, this message translates to:
-  /// **'Choose your destination first so Movaro can open the right plan step.'**
+  /// **'Choose your destination first so Mudavi can open the right plan step.'**
   String get mainNavPlanNeedsJourney;
 
   /// No description provided for @mainNavFavoritesDisabled.
@@ -5230,7 +5230,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileJourneyBody.
   ///
   /// In en, this message translates to:
-  /// **'Movaro uses this route to keep home, exploration, and content connected to the same move context.'**
+  /// **'Mudavi uses this route to keep home, exploration, and content connected to the same move context.'**
   String get profileJourneyBody;
 
   /// No description provided for @profileJourneyValue.
@@ -5308,7 +5308,7 @@ abstract class AppLocalizations {
   /// No description provided for @publicHomeJourneyResetBody.
   ///
   /// In en, this message translates to:
-  /// **'Your current route is already saved on this device. If you restart it now, Movaro will open the route selection again so you can choose a different origin or destination.'**
+  /// **'Your current route is already saved on this device. If you restart it now, Mudavi will open the route selection again so you can choose a different origin or destination.'**
   String get publicHomeJourneyResetBody;
 
   /// No description provided for @publicHomeJourneyResetConfirm.
@@ -5338,7 +5338,7 @@ abstract class AppLocalizations {
   /// No description provided for @introPageTitle.
   ///
   /// In en, this message translates to:
-  /// **'How Movaro works'**
+  /// **'How Mudavi works'**
   String get introPageTitle;
 
   /// No description provided for @introHeroTitle.
@@ -5350,7 +5350,7 @@ abstract class AppLocalizations {
   /// No description provided for @introHeroDescription.
   ///
   /// In en, this message translates to:
-  /// **'Movaro helps you compare cities, understand practical bureaucracy, and build an initial direction for your move without starting from information overload.'**
+  /// **'Mudavi helps you compare cities, understand practical bureaucracy, and build an initial direction for your move without starting from information overload.'**
   String get introHeroDescription;
 
   /// No description provided for @introExploreTitle.
@@ -6166,7 +6166,7 @@ abstract class AppLocalizations {
   /// No description provided for @journeyEntryBody.
   ///
   /// In en, this message translates to:
-  /// **'Pick where you want to move first. Movaro will save that choice now and ask for your origin in the first step of the questionnaire.'**
+  /// **'Pick where you want to move first. Mudavi will save that choice now and ask for your origin in the first step of the questionnaire.'**
   String get journeyEntryBody;
 
   /// No description provided for @journeyEntryDestinationLabel.
@@ -6190,7 +6190,7 @@ abstract class AppLocalizations {
   /// No description provided for @journeyEntryDynamicBody.
   ///
   /// In en, this message translates to:
-  /// **'You can use your current location as a quick hint or choose everything manually. Movaro never locks your origin from device location, and you can always override it.'**
+  /// **'You can use your current location as a quick hint or choose everything manually. Mudavi never locks your origin from device location, and you can always override it.'**
   String get journeyEntryDynamicBody;
 
   /// No description provided for @journeyEntryUseLocationTitle.
@@ -6250,7 +6250,7 @@ abstract class AppLocalizations {
   /// No description provided for @journeySetupFlowHint.
   ///
   /// In en, this message translates to:
-  /// **'If there is only one route available right now, Movaro fills it in for you. If there is more than one option, you choose it manually.'**
+  /// **'If there is only one route available right now, Mudavi fills it in for you. If there is more than one option, you choose it manually.'**
   String get journeySetupFlowHint;
 
   /// No description provided for @journeySetupManualChangeHint.
@@ -6280,7 +6280,7 @@ abstract class AppLocalizations {
   /// No description provided for @journeyLocationPanelBody.
   ///
   /// In en, this message translates to:
-  /// **'If you allow location, Movaro tries to detect your current country and suggests it as origin. You can reject the suggestion and choose manually instead.'**
+  /// **'If you allow location, Mudavi tries to detect your current country and suggests it as origin. You can reject the suggestion and choose manually instead.'**
   String get journeyLocationPanelBody;
 
   /// No description provided for @journeyLocationFallbackTitle.
@@ -6310,7 +6310,7 @@ abstract class AppLocalizations {
   /// No description provided for @journeyLocationFailedBody.
   ///
   /// In en, this message translates to:
-  /// **'Movaro could not detect your location this time. You can retry or choose manually.'**
+  /// **'Mudavi could not detect your location this time. You can retry or choose manually.'**
   String get journeyLocationFailedBody;
 
   /// No description provided for @journeyLocationRetryAction.
@@ -6334,7 +6334,7 @@ abstract class AppLocalizations {
   /// No description provided for @journeyDetectedUnknownBody.
   ///
   /// In en, this message translates to:
-  /// **'Movaro detected {country}, but it could not match that country to the current route catalog. Choose your origin manually to continue.'**
+  /// **'Mudavi detected {country}, but it could not match that country to the current route catalog. Choose your origin manually to continue.'**
   String journeyDetectedUnknownBody(Object country);
 
   /// No description provided for @journeyDetectedConfirmAction.
@@ -6364,7 +6364,7 @@ abstract class AppLocalizations {
   /// No description provided for @questionnaireOriginUnsupportedBody.
   ///
   /// In en, this message translates to:
-  /// **'Movaro detected {country}, but the guided plan is only available for people coming from Argentina right now. You can choose Argentina manually or use it to continue.'**
+  /// **'Mudavi detected {country}, but the guided plan is only available for people coming from Argentina right now. You can choose Argentina manually or use it to continue.'**
   String questionnaireOriginUnsupportedBody(Object country);
 
   /// No description provided for @questionnaireOriginUseArgentinaAction.
@@ -6508,7 +6508,7 @@ abstract class AppLocalizations {
   /// No description provided for @journeyCoverageUnsupportedBody.
   ///
   /// In en, this message translates to:
-  /// **'Movaro can still show cities and practical content, but the guided migration flow is only available on routes with full coverage.'**
+  /// **'Mudavi can still show cities and practical content, but the guided migration flow is only available on routes with full coverage.'**
   String get journeyCoverageUnsupportedBody;
 
   /// No description provided for @journeyCoverageChooseRouteAction.
@@ -6718,7 +6718,7 @@ abstract class AppLocalizations {
   /// No description provided for @recommendationReasonBalanced.
   ///
   /// In en, this message translates to:
-  /// **'A balanced option within the initial Movaro catalog'**
+  /// **'A balanced option within the initial Mudavi catalog'**
   String get recommendationReasonBalanced;
 
   /// No description provided for @planReasonGoalWork.
@@ -7099,11 +7099,11 @@ abstract class AppLocalizations {
   /// **'We could not complete this request.'**
   String get errorValidationTitle;
 
-  /// No description provided for @errorNetworkMovaroDescription.
+  /// No description provided for @errorNetworkMudaviDescription.
   ///
   /// In en, this message translates to:
-  /// **'We could not reach Movaro right now. Try again in a moment.'**
-  String get errorNetworkMovaroDescription;
+  /// **'We could not reach Mudavi right now. Try again in a moment.'**
+  String get errorNetworkMudaviDescription;
 
   /// No description provided for @errorApiGenericDescription.
   ///
@@ -7114,7 +7114,7 @@ abstract class AppLocalizations {
   /// No description provided for @apiUnavailableTitle.
   ///
   /// In en, this message translates to:
-  /// **'Movaro could not reach the API right now.'**
+  /// **'Mudavi could not reach the API right now.'**
   String get apiUnavailableTitle;
 
   /// No description provided for @apiUnavailableDescription.
@@ -7153,17 +7153,17 @@ abstract class AppLocalizations {
   /// **'Human Development Atlas in Brazil (UNDP, Ipea, and FJP)'**
   String get sourceProviderAtlasHumanDevelopment;
 
-  /// No description provided for @sourceProviderMovaroDataset.
+  /// No description provided for @sourceProviderMudaviDataset.
   ///
   /// In en, this message translates to:
   /// **'Internal comparative dataset (not official)'**
-  String get sourceProviderMovaroDataset;
+  String get sourceProviderMudaviDataset;
 
-  /// No description provided for @sourceProviderMovaroRanking.
+  /// No description provided for @sourceProviderMudaviRanking.
   ///
   /// In en, this message translates to:
   /// **'Internal comparative methodology (not official)'**
-  String get sourceProviderMovaroRanking;
+  String get sourceProviderMudaviRanking;
 
   /// No description provided for @sourceProviderGoogleMaps.
   ///
@@ -7279,11 +7279,11 @@ abstract class AppLocalizations {
   /// **'Central Bank of Brazil'**
   String get sourceProviderBancoCentralBrasil;
 
-  /// No description provided for @sourceProviderMovaro.
+  /// No description provided for @sourceProviderMudavi.
   ///
   /// In en, this message translates to:
   /// **'Checklist based on your answers (not official)'**
-  String get sourceProviderMovaro;
+  String get sourceProviderMudavi;
 
   /// No description provided for @documentReadinessSectionTitle.
   ///
@@ -7708,7 +7708,7 @@ abstract class AppLocalizations {
   /// No description provided for @housingDecisionSectionNote.
   ///
   /// In en, this message translates to:
-  /// **'Movaro currently organizes the context to help you decide better. Contract terms, accepted guarantees, and each landlord’s or platform’s policy still need to be validated at the source before signing for housing.'**
+  /// **'Mudavi currently organizes the context to help you decide better. Contract terms, accepted guarantees, and each landlord’s or platform’s policy still need to be validated at the source before signing for housing.'**
   String get housingDecisionSectionNote;
 
   /// No description provided for @housingEntrySectionTitle.
@@ -8566,7 +8566,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanCopilotStagesBody.
   ///
   /// In en, this message translates to:
-  /// **'You can jump directly to the stage you need, but Movaro keeps the order clear so the move does not lose priority.'**
+  /// **'You can jump directly to the stage you need, but Mudavi keeps the order clear so the move does not lose priority.'**
   String get migrationPlanCopilotStagesBody;
 
   /// No description provided for @migrationPlanCopilotRecommendedTitle.
@@ -9986,7 +9986,7 @@ abstract class AppLocalizations {
   /// No description provided for @planStepDescriptionCpfStart.
   ///
   /// In en, this message translates to:
-  /// **'CPF unlocks many practical steps in Brazil. Start with the official guidance and continue later in Movaro step by step.'**
+  /// **'CPF unlocks many practical steps in Brazil. Start with the official guidance and continue later in Mudavi step by step.'**
   String get planStepDescriptionCpfStart;
 
   /// No description provided for @migrationPlanPrepHeroTitle.
@@ -10370,7 +10370,7 @@ abstract class AppLocalizations {
   /// No description provided for @migrationPlanPrepWorkSignalsBody.
   ///
   /// In en, this message translates to:
-  /// **'Movaro currently shows labor-market, economic-activity, and unemployment signals. Average income is not integrated into the catalog yet.'**
+  /// **'Mudavi currently shows labor-market, economic-activity, and unemployment signals. Average income is not integrated into the catalog yet.'**
   String get migrationPlanPrepWorkSignalsBody;
 
   /// No description provided for @migrationPlanPrepMoneyPracticeTitle.
@@ -10847,7 +10847,7 @@ abstract class AppLocalizations {
   /// No description provided for @infoGuideStepThreeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Ask the Movaro assistant'**
+  /// **'Ask the Mudavi assistant'**
   String get infoGuideStepThreeTitle;
 
   /// No description provided for @infoGuideStepThreeBody.
@@ -10955,7 +10955,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeAssistantTitle.
   ///
   /// In en, this message translates to:
-  /// **'Movaro Assistant'**
+  /// **'Mudavi Assistant'**
   String get homeAssistantTitle;
 
   /// No description provided for @homeAssistantSubtitle.
@@ -11285,7 +11285,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantEntryTitle.
   ///
   /// In en, this message translates to:
-  /// **'Movaro Assistant'**
+  /// **'Mudavi Assistant'**
   String get assistantEntryTitle;
 
   /// No description provided for @assistantEntrySubtitle.

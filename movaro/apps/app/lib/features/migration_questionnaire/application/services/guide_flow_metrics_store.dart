@@ -190,13 +190,13 @@ class GuideFlowMetricsStore extends ChangeNotifier {
        _sink = sink;
 
   static final GuideFlowMetricsStore instance = GuideFlowMetricsStore();
-  static const String storageKey = 'movaro.guide_flow_metrics.v2';
-  static const String _legacyStorageKey = 'movaro.guide_flow_metrics.v1';
-  static const String _consentKey = 'movaro.product_analytics.consent.v1';
+  static const String storageKey = 'mudavi.guide_flow_metrics.v2';
+  static const String _legacyStorageKey = 'mudavi.guide_flow_metrics.v1';
+  static const String _consentKey = 'mudavi.product_analytics.consent.v1';
   static const String _installationTokenKey =
-      'movaro.product_analytics.installation.v1';
+      'mudavi.product_analytics.installation.v1';
   static const String _uploadedIdsKey =
-      'movaro.product_analytics.uploaded_ids.v1';
+      'mudavi.product_analytics.uploaded_ids.v1';
   static const int _maxEvents = 160;
 
   SharedPreferences? _preferences;

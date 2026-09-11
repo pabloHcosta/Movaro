@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/localization/generated/app_localizations.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/localization/generated/app_localizations.dart';
 
 enum ProtectedPlaceholderType { communityCreate }
 

@@ -1,23 +1,23 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/network/network_client.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_picker_bottom_sheet.dart';
-import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
-import 'package:movaro_app/features/info/application/quick_guide_answer_service.dart';
-import 'package:movaro_app/features/info/application/quick_guide_preferences_store.dart';
-import 'package:movaro_app/features/info/domain/entities/quick_guide_answer.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/core/network/network_client.dart';
+import 'package:mudavi_app/core/responsive/responsive_context.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_picker_bottom_sheet.dart';
+import 'package:mudavi_app/features/home/presentation/widgets/main_navigation_bar.dart';
+import 'package:mudavi_app/features/info/application/quick_guide_answer_service.dart';
+import 'package:mudavi_app/features/info/application/quick_guide_preferences_store.dart';
+import 'package:mudavi_app/features/info/domain/entities/quick_guide_answer.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
 
 class QuickGuideAnswerRequest {
   const QuickGuideAnswerRequest({required this.question});

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:movaro_app/core/trust/source_freshness_policy.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
-import 'package:movaro_app/app/theme/app_typography.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
-import 'package:movaro_app/features/home/application/city_feed_datasource.dart';
-import 'package:movaro_app/features/home/domain/city_feed_item.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
+import 'package:mudavi_app/core/trust/source_freshness_policy.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/widgets/multi_currency_amount.dart';
+import 'package:mudavi_app/app/theme/app_typography.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_detail_payloads.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/home/application/city_feed_datasource.dart';
+import 'package:mudavi_app/features/home/domain/city_feed_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Horizontally scrollable snackable content feed.

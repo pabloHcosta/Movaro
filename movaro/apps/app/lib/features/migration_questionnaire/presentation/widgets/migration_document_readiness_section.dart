@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/app/theme/app_text_styles.dart';
-import 'package:movaro_app/app/theme/app_typography.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/document_checklist_adapter.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/app/theme/app_text_styles.dart';
+import 'package:mudavi_app/app/theme/app_typography.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/document_checklist_adapter.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MigrationDocumentReadinessSection extends StatefulWidget {

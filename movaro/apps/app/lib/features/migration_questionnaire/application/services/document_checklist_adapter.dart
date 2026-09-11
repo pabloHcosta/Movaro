@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/generated/app_localizations.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
+import 'package:mudavi_app/app/localization/generated/app_localizations.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
 
 enum DocumentPhase { beforeTravel, uponArrival }
 

@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/auth/domain/entities/auth_provider.dart';
+import 'package:mudavi_app/features/auth/domain/entities/auth_provider.dart';
 
 class AuthSession {
   const AuthSession({

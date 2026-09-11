@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/info/application/chat_service.dart';
+import 'package:mudavi_app/features/info/application/chat_service.dart';
 
 void main() {
   test(

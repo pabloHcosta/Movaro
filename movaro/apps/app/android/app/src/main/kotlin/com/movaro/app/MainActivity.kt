@@ -1,4 +1,4 @@
-package com.movaro.app
+package com.mudavi.app
 
 import io.flutter.embedding.android.FlutterActivity
 

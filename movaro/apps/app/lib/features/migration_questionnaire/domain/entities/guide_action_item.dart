@@ -31,12 +31,12 @@ enum GuideDismissReason { alreadyDone, notApplicable, later }
 
 enum GuideTaskState { notStarted, inProgress, waiting, completed }
 
-enum GuideEvidenceType { official, derived, marketReference, movaroGuidance }
+enum GuideEvidenceType { official, derived, marketReference, mudaviGuidance }
 
 /// Traceability attached to a practical claim.
 ///
 /// Legal, migration, health and money guidance must expose where it came from
-/// and when Movaro last checked it. This is intentionally part of the domain
+/// and when Mudavi last checked it. This is intentionally part of the domain
 /// model so every presentation surface can render the same trust information.
 class GuideEvidence {
   const GuideEvidence({

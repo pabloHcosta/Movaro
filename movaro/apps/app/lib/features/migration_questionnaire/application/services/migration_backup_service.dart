@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:movaro_app/features/journey/journey_preferences_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
+import 'package:mudavi_app/features/journey/journey_preferences_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
 
 class MigrationBackupBundle {
   const MigrationBackupBundle({
@@ -15,7 +15,7 @@ class MigrationBackupBundle {
     required this.copilotProgress,
   });
 
-  static const format = 'movaro-migration-backup';
+  static const format = 'mudavi-migration-backup';
   static const schemaVersion = 1;
 
   final DateTime exportedAt;

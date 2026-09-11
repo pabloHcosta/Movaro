@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_step.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_step.dart';
 
 class MigrationStepModel {
   const MigrationStepModel({

@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
 
 class HomeVisualLayout extends StatelessWidget {
   const HomeVisualLayout({
@@ -259,13 +259,13 @@ class _BrandSignature extends StatelessWidget {
           ),
           child: SvgPicture.asset(
             isDark
-                ? 'assets/brand/movaro_mark_light.svg'
-                : 'assets/brand/movaro_mark_dark.svg',
+                ? 'assets/brand/mudavi_mark_light.svg'
+                : 'assets/brand/mudavi_mark_dark.svg',
           ),
         ),
         const SizedBox(width: 10),
         Text(
-          'Movaro',
+          'Mudavi',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
             color: scheme.onSurface,
             fontWeight: FontWeight.w800,

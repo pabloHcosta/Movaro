@@ -7,8 +7,8 @@
 /// inside the city's peak season and assigns a conflict level.
 library;
 
-import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/application/services/city_seasonality_profile.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
 
 // ─── Conflict level ────────────────────────────────────────────────────────────
 

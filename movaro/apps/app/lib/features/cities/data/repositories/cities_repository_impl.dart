@@ -1,19 +1,19 @@
-import 'package:movaro_app/features/cities/data/datasources/cities_remote_data_source.dart';
-import 'package:movaro_app/features/cities/data/models/city_detail_payloads_model.dart';
-import 'package:movaro_app/features/cities/data/models/city_highlights_model.dart';
-import 'package:movaro_app/features/cities/data/models/city_methodology_model.dart';
-import 'package:movaro_app/features/cities/data/models/city_model.dart';
-import 'package:movaro_app/features/cities/data/models/city_recommendation_model.dart';
-import 'package:movaro_app/features/cities/data/models/travel_route_insight_model.dart';
-import 'package:movaro_app/features/cities/data/models/city_weather_model.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
-import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
-import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
+import 'package:mudavi_app/features/cities/data/datasources/cities_remote_data_source.dart';
+import 'package:mudavi_app/features/cities/data/models/city_detail_payloads_model.dart';
+import 'package:mudavi_app/features/cities/data/models/city_highlights_model.dart';
+import 'package:mudavi_app/features/cities/data/models/city_methodology_model.dart';
+import 'package:mudavi_app/features/cities/data/models/city_model.dart';
+import 'package:mudavi_app/features/cities/data/models/city_recommendation_model.dart';
+import 'package:mudavi_app/features/cities/data/models/travel_route_insight_model.dart';
+import 'package:mudavi_app/features/cities/data/models/city_weather_model.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_recommendation.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_detail_payloads.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_highlights.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_methodology.dart';
+import 'package:mudavi_app/features/cities/domain/entities/travel_route_insight.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/cities/domain/repositories/cities_repository.dart';
 
 class CitiesRepositoryImpl implements CitiesRepository {
   const CitiesRepositoryImpl({required CitiesRemoteDataSource remoteDataSource})

@@ -1,6 +1,6 @@
-import 'package:movaro_app/app/localization/generated/app_localizations.dart';
-import 'package:movaro_app/core/errors/app_error.dart';
-import 'package:movaro_app/core/network/network_exception.dart';
+import 'package:mudavi_app/app/localization/generated/app_localizations.dart';
+import 'package:mudavi_app/core/errors/app_error.dart';
+import 'package:mudavi_app/core/network/network_exception.dart';
 
 class ErrorMapper {
   const ErrorMapper._();
@@ -9,7 +9,7 @@ class ErrorMapper {
     if (error is NetworkException) {
       return NetworkError(
         title: l10n.errorNetworkTitle,
-        description: l10n.errorNetworkMovaroDescription,
+        description: l10n.errorNetworkMudaviDescription,
         isRetryable: error.isRetryable,
       );
     }

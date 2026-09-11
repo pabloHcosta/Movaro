@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
-import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_weather_badge.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/widgets/multi_currency_amount.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/cities/application/services/city_coastal_profile.dart';
+import 'package:mudavi_app/features/cities/application/services/city_seasonality_profile.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_image_backdrop.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_weather_badge.dart';
 
 /// Compact discovery card used by Explore.
 ///

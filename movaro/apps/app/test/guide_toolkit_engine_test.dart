@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/info/application/guide_toolkit_engine.dart';
-import 'package:movaro_app/features/info/domain/entities/guide_toolkit.dart';
+import 'package:mudavi_app/features/info/application/guide_toolkit_engine.dart';
+import 'package:mudavi_app/features/info/domain/entities/guide_toolkit.dart';
 
 void main() {
   const engine = GuideToolkitEngine();

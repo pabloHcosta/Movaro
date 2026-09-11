@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_event_suggestion.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_event_suggestion.dart';
 
 enum GuideEventSuggestionAction { added, later, skipped }
 

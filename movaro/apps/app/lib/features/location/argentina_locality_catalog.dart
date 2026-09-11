@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:movaro_app/features/location/argentina_locality.dart';
+import 'package:mudavi_app/features/location/argentina_locality.dart';
 
 class ArgentinaLocalityCatalog {
   ArgentinaLocalityCatalog({AssetBundle? bundle})

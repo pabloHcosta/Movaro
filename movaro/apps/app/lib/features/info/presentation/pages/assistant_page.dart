@@ -2,34 +2,34 @@ import 'dart:async';
 import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/network/network_client.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/practical_info_disclaimer.dart';
-import 'package:movaro_app/core/widgets/contextual_help.dart';
-import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
-import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
-import 'package:movaro_app/features/info/application/chat_service.dart';
-import 'package:movaro_app/features/info/domain/entities/chat_message.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/core/network/network_client.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/practical_info_disclaimer.dart';
+import 'package:mudavi_app/core/widgets/contextual_help.dart';
+import 'package:mudavi_app/core/widgets/feature_guide_dialog.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/explore/presentation/pages/documentation_guide_page.dart';
+import 'package:mudavi_app/features/home/presentation/widgets/main_navigation_bar.dart';
+import 'package:mudavi_app/features/info/application/chat_service.dart';
+import 'package:mudavi_app/features/info/domain/entities/chat_message.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 enum _AssistantMode { conversation, guides }
 
 /// The Assistant tab page — replaces the old InfoTab (slot 3).
 ///
 /// Contains two modes via a [SegmentedButton]:
-/// - Conversation: backend-mediated Movaro chat
+/// - Conversation: backend-mediated Mudavi chat
 /// - Guias: the existing [DocumentationGuidePage] content (embedded)
 class AssistantPage extends StatefulWidget {
   const AssistantPage({

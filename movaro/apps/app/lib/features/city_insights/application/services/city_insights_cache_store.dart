@@ -2,13 +2,13 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:movaro_app/features/city_insights/data/models/city_insight_explore_place_model.dart';
-import 'package:movaro_app/features/city_insights/data/models/city_insight_model.dart';
+import 'package:mudavi_app/features/city_insights/data/models/city_insight_explore_place_model.dart';
+import 'package:mudavi_app/features/city_insights/data/models/city_insight_model.dart';
 
 class CityInsightsCacheStore {
   CityInsightsCacheStore();
 
-  static const _prefix = 'movaro.city_insights.';
+  static const _prefix = 'mudavi.city_insights.';
   static const _ttl = Duration(hours: 12);
 
   Future<List<CityInsightModel>?> readFresh(String key) async {

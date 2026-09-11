@@ -1,7 +1,7 @@
-import 'package:movaro_app/features/flight_search/data/airport_database.dart';
-import 'package:movaro_app/features/flight_search/domain/models/airport.dart';
-import 'package:movaro_app/features/flight_search/domain/services/airport_finder_service.dart';
-import 'package:movaro_app/features/location/location_data.dart';
+import 'package:mudavi_app/features/flight_search/data/airport_database.dart';
+import 'package:mudavi_app/features/flight_search/domain/models/airport.dart';
+import 'package:mudavi_app/features/flight_search/domain/services/airport_finder_service.dart';
+import 'package:mudavi_app/features/location/location_data.dart';
 
 class FlightRouteContextResolver {
   const FlightRouteContextResolver._();

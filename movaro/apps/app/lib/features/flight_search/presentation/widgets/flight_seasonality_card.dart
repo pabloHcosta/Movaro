@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/currency/currency_scope.dart';
-import 'package:movaro_app/app/localization/generated/app_localizations.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
-import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/currency/currency_scope.dart';
+import 'package:mudavi_app/app/localization/generated/app_localizations.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/multi_currency_amount.dart';
+import 'package:mudavi_app/features/cities/domain/entities/travel_route_insight.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
 
 enum _PriceLevel { low, mid, high }
 

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/responsive/responsive_context.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/home/presentation/widgets/main_navigation_bar.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 
 String _planEntryText(
   BuildContext context, {
@@ -100,9 +100,9 @@ class PlanEntryPage extends StatelessWidget {
                           Text(
                             _planEntryText(
                               context,
-                              pt: 'O plano organiza documentos, custos, moradia, trabalho e chegada na ordem certa. Primeiro escolha uma cidade ou deixe o Movaro ajudar na decisão.',
-                              es: 'El plan organiza documentos, costos, vivienda, trabajo y llegada en el orden correcto. Primero elige una ciudad o deja que Movaro te ayude a decidir.',
-                              en: 'Your plan organizes documents, costs, housing, work, and arrival in the right order. First choose a city or let Movaro help you decide.',
+                              pt: 'O plano organiza documentos, custos, moradia, trabalho e chegada na ordem certa. Primeiro escolha uma cidade ou deixe o Mudavi ajudar na decisão.',
+                              es: 'El plan organiza documentos, costos, vivienda, trabajo y llegada en el orden correcto. Primero elige una ciudad o deja que Mudavi te ayude a decidir.',
+                              en: 'Your plan organizes documents, costs, housing, work, and arrival in the right order. First choose a city or let Mudavi help you decide.',
                             ),
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.bodyMedium

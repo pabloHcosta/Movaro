@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart';
+import 'package:mudavi_app/features/catalog/domain/entities/catalog_country.dart';
 
 extension JourneyCountryMetadata on CatalogCountry {
   String get flagEmoji {

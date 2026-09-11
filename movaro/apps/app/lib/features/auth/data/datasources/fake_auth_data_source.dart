@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/environment/app_flavor.dart';
-import 'package:movaro_app/features/auth/data/datasources/auth_data_source.dart';
-import 'package:movaro_app/features/auth/domain/entities/auth_provider.dart';
-import 'package:movaro_app/features/auth/domain/entities/auth_session.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/core/environment/app_flavor.dart';
+import 'package:mudavi_app/features/auth/data/datasources/auth_data_source.dart';
+import 'package:mudavi_app/features/auth/domain/entities/auth_provider.dart';
+import 'package:mudavi_app/features/auth/domain/entities/auth_session.dart';
 
 class FakeAuthDataSource implements AuthDataSource {
   FakeAuthDataSource({required AppEnvironment environment})
@@ -31,8 +31,8 @@ class FakeAuthDataSource implements AuthDataSource {
     _session = AuthSession(
       userId: 'dev-user-001',
       displayName: provider == AuthProvider.google
-          ? 'Movaro Google User'
-          : 'Movaro Apple User',
+          ? 'Mudavi Google User'
+          : 'Mudavi Apple User',
       provider: provider,
       isAuthenticated: true,
     );

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/recommendation_reveal_timing.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/recommendation_reveal_timing.dart';
 
 void main() {
   test('keeps the standard reveal visible for at least 2.6 seconds', () {

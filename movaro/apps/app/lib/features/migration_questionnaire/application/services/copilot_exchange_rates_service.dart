@@ -1,7 +1,7 @@
-import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/models/copilot_exchange_rates_model.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/copilot_exchange_rates_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/models/copilot_exchange_rates_model.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 
 class CopilotExchangeRatesService {
   CopilotExchangeRatesService({

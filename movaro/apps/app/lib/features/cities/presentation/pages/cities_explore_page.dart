@@ -4,32 +4,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/errors/error_handler.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/contextual_help.dart';
-import 'package:movaro_app/core/widgets/empty_state_widget.dart';
-import 'package:movaro_app/core/widgets/error_state_widget.dart';
-import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/journey_stage_banner.dart';
-import 'package:movaro_app/core/widgets/loading_state_widget.dart';
-import 'package:movaro_app/core/widgets/skeletons.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
-import 'package:movaro_app/features/cities/application/services/city_work_area_lens.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_arrival_profile_ranker.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_card.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_picker_bottom_sheet.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_search_matcher.dart';
-import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/errors/error_handler.dart';
+import 'package:mudavi_app/core/responsive/responsive_context.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/contextual_help.dart';
+import 'package:mudavi_app/core/widgets/empty_state_widget.dart';
+import 'package:mudavi_app/core/widgets/error_state_widget.dart';
+import 'package:mudavi_app/core/widgets/feature_guide_dialog.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/journey_stage_banner.dart';
+import 'package:mudavi_app/core/widgets/loading_state_widget.dart';
+import 'package:mudavi_app/core/widgets/skeletons.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/cities/application/services/city_coastal_profile.dart';
+import 'package:mudavi_app/features/cities/application/services/city_work_area_lens.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_arrival_profile_ranker.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_card.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_picker_bottom_sheet.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_search_matcher.dart';
+import 'package:mudavi_app/features/home/presentation/widgets/main_navigation_bar.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 
 class CitiesExplorePage extends StatefulWidget {
   const CitiesExplorePage({
@@ -832,23 +832,23 @@ class _CitiesExplorePageState extends State<CitiesExplorePage> {
         return activeCities;
       case _CityQuickFilter.popular:
         activeCities.sort(
-          (a, b) => b.movaroScores.popularForArgentinians.compareTo(
-            a.movaroScores.popularForArgentinians,
+          (a, b) => b.mudaviScores.popularForArgentinians.compareTo(
+            a.mudaviScores.popularForArgentinians,
           ),
         );
         return activeCities;
       case _CityQuickFilter.lowCost:
         activeCities.sort(
           (a, b) =>
-              b.movaroScores.economical.compareTo(a.movaroScores.economical),
+              b.mudaviScores.economical.compareTo(a.mudaviScores.economical),
         );
         return activeCities;
       case _CityQuickFilter.work:
         return CityWorkAreaLens.applyWorkLens(activeCities, area: _workArea);
       case _CityQuickFilter.language:
         activeCities.sort(
-          (a, b) => b.movaroScores.languageAdaptation.compareTo(
-            a.movaroScores.languageAdaptation,
+          (a, b) => b.mudaviScores.languageAdaptation.compareTo(
+            a.mudaviScores.languageAdaptation,
           ),
         );
         return activeCities;
@@ -1516,7 +1516,7 @@ class _CitiesMapBottomSheetState extends State<_CitiesMapBottomSheet> {
                     TileLayer(
                       urlTemplate:
                           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.movaro.app',
+                      userAgentPackageName: 'com.mudavi.app',
                     ),
                     MarkerLayer(
                       markers: [
@@ -1880,10 +1880,10 @@ class _CitySemanticSearch {
     }
 
     if (tokens.any(_cheapTerms.contains)) {
-      score += city.movaroScores.economical;
+      score += city.mudaviScores.economical;
     }
     if (tokens.any(_jobTerms.contains)) {
-      score += city.movaroScores.workOpportunity;
+      score += city.mudaviScores.workOpportunity;
     }
     if (tokens.any(_beachTerms.contains) &&
         CityCoastalProfile.isCoastal(city)) {

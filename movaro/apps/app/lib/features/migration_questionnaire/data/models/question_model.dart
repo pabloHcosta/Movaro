@@ -1,6 +1,6 @@
-import 'package:movaro_app/features/migration_questionnaire/data/models/option_model.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/question.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/models/option_model.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/question.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 
 class QuestionModel {
   const QuestionModel({

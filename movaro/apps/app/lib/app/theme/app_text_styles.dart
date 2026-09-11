@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/theme/app_typography.dart';
+import 'package:mudavi_app/app/theme/app_typography.dart';
 
-/// Semantic text styles for the Movaro app.
+/// Semantic text styles for the Mudavi app.
 ///
 /// ## Usage rules
 ///

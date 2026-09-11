@@ -2,15 +2,15 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/cities/data/models/city_model.dart';
-import 'package:movaro_app/features/cities/data/models/city_recommendation_model.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
-import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/models/migration_plan_model.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/answer.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
+import 'package:mudavi_app/features/cities/data/models/city_model.dart';
+import 'package:mudavi_app/features/cities/data/models/city_recommendation_model.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_recommendation.dart';
+import 'package:mudavi_app/features/cities/domain/repositories/cities_repository.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/models/migration_plan_model.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/answer.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 
 class _RecordingCitiesRepository implements CitiesRepository {
   _RecordingCitiesRepository(this._cities);

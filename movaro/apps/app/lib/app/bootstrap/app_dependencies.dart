@@ -1,19 +1,19 @@
-import 'package:movaro_app/app/currency/currency_controller.dart';
-import 'package:movaro_app/app/localization/locale_controller.dart';
-import 'package:movaro_app/app/theme/theme_controller.dart';
-import 'package:movaro_app/core/exchange_rates/exchange_rates_controller.dart';
-import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
-import 'package:movaro_app/features/catalog/domain/repositories/catalog_repository.dart';
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/location/location_controller.dart';
-import 'package:movaro_app/core/network/api_health_service.dart';
-import 'package:movaro_app/features/auth/application/auth_controller.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_backup_service.dart';
+import 'package:mudavi_app/app/currency/currency_controller.dart';
+import 'package:mudavi_app/app/localization/locale_controller.dart';
+import 'package:mudavi_app/app/theme/theme_controller.dart';
+import 'package:mudavi_app/core/exchange_rates/exchange_rates_controller.dart';
+import 'package:mudavi_app/features/city_insights/application/city_insight_controller.dart';
+import 'package:mudavi_app/features/catalog/domain/repositories/catalog_repository.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/features/location/location_controller.dart';
+import 'package:mudavi_app/core/network/api_health_service.dart';
+import 'package:mudavi_app/features/auth/application/auth_controller.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_backup_service.dart';
 
 class AppDependencies {
   const AppDependencies({

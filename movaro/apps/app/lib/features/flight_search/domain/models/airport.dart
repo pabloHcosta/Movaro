@@ -1,5 +1,5 @@
 /// Represents a commercial airport that can be used as a flight origin or
-/// destination within the Movaro flight-search tool.
+/// destination within the Mudavi flight-search tool.
 class Airport {
   const Airport({
     required this.iataCode,

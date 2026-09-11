@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/journey/country_coverage.dart';
+import 'package:mudavi_app/features/journey/country_coverage.dart';
 
 class CatalogCountry {
   const CatalogCountry({

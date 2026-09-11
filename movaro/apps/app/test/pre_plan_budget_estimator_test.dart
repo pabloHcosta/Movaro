@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/explore/application/services/pre_plan_budget_estimator.dart';
+import 'package:mudavi_app/features/explore/application/services/pre_plan_budget_estimator.dart';
 
 void main() {
   group('PrePlanBudgetEstimator', () {

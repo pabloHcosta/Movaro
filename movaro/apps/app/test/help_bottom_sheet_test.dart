@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/help_bottom_sheet.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/widgets/help_bottom_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -30,7 +30,7 @@ void main() {
               body: HelpBottomSheet(
                 contextLabel: 'Motor de cidades',
                 contextIcon: Icons.route_outlined,
-                title: 'Como a Movaro sugere cidades',
+                title: 'Como a Mudavi sugere cidades',
                 description:
                     'Suas respostas viram critérios de comparação claros.',
                 steps: [
@@ -59,14 +59,14 @@ void main() {
         );
         await tester.pump();
 
-        expect(find.text('Como a Movaro sugere cidades'), findsOneWidget);
+        expect(find.text('Como a Mudavi sugere cidades'), findsOneWidget);
         expect(find.byType(Checkbox), findsOneWidget);
         expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isFalse);
         expect(find.text('Entendi'), findsOneWidget);
         expect(find.byTooltip('Close'), findsOneWidget);
 
         final title = tester.widget<Text>(
-          find.text('Como a Movaro sugere cidades'),
+          find.text('Como a Mudavi sugere cidades'),
         );
         final expectedColor = brightness == Brightness.dark
             ? const Color(0xFFF5F7FB)

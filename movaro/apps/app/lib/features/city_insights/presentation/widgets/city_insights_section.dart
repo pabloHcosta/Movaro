@@ -4,14 +4,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
-import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
-import 'package:movaro_app/features/city_insights/domain/entities/city_insight_entity.dart';
-import 'package:movaro_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/features/cities/application/services/city_image_catalog.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/city_insights/application/city_insight_controller.dart';
+import 'package:mudavi_app/features/city_insights/domain/entities/city_insight_entity.dart';
+import 'package:mudavi_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
 
 class CityInsightsSection extends StatefulWidget {
   const CityInsightsSection({

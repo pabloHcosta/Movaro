@@ -1,6 +1,6 @@
-import 'package:movaro_app/features/migration_questionnaire/application/services/criminal_record_decision_engine.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/entry_regularization_decision_engine.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_folder_engine.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/criminal_record_decision_engine.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/entry_regularization_decision_engine.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_document_folder_engine.dart';
 
 class ReusedAssistantAnswers<T> {
   const ReusedAssistantAnswers({

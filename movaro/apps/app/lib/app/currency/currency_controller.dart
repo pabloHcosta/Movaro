@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:movaro_app/app/currency/currency_preferences_store.dart';
+import 'package:mudavi_app/app/currency/currency_preferences_store.dart';
 
 /// Supported currencies for display throughout the app.
 enum AppCurrency {

@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
+import 'package:mudavi_app/features/cities/domain/entities/travel_route_insight.dart';
 
 enum FlightRoutePriceLevel { low, mid, high }
 

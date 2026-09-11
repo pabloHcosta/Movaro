@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/cities/domain/entities/city_source.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_source.dart';
 
 class CitySources {
   const CitySources({

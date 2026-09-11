@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/city_insights/domain/entities/city_insight_entity.dart';
+import 'package:mudavi_app/features/city_insights/domain/entities/city_insight_entity.dart';
 
 class CityInsightModel {
   const CityInsightModel({

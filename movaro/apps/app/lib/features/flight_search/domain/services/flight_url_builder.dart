@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/flight_search/domain/models/flight_search_params.dart';
+import 'package:mudavi_app/features/flight_search/domain/models/flight_search_params.dart';
 
 /// Builds a stable Google Flights deep-link from [FlightSearchParams].
 ///

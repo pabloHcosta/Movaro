@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_search_matcher.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_search_matcher.dart';
 
 void main() {
   group('CitySearchMatcher', () {

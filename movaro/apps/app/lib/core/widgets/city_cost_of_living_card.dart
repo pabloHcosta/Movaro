@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/multi_currency_amount.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_budget_snapshot.dart';
 
 class CityCostOfLivingCard extends StatelessWidget {
   const CityCostOfLivingCard({

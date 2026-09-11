@@ -1,8 +1,8 @@
-import 'package:movaro_app/features/cities/data/models/city_model.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/models/migration_step_model.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
+import 'package:mudavi_app/features/cities/data/models/city_model.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/models/migration_step_model.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 
 class MigrationPlanModel {
   const MigrationPlanModel({

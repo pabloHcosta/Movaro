@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
 
 class SkeletonBox extends StatefulWidget {
   const SkeletonBox({

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/localization/locale_scope.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/localization/locale_scope.dart';
 
 class LanguageSelectorButton extends StatelessWidget {
   const LanguageSelectorButton({

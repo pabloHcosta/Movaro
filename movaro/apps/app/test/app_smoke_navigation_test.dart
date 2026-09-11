@@ -2,63 +2,63 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/app/bootstrap/app_dependencies.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/localization/locale_controller.dart';
-import 'package:movaro_app/app/localization/locale_scope.dart';
-import 'package:movaro_app/app/router/app_router.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_theme.dart';
-import 'package:movaro_app/app/currency/currency_controller.dart';
-import 'package:movaro_app/app/theme/theme_controller.dart';
-import 'package:movaro_app/core/exchange_rates/exchange_rates_controller.dart';
-import 'package:movaro_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
-import 'package:movaro_app/features/catalog/data/repositories/catalog_repository_impl.dart';
-import 'package:movaro_app/core/environment/api_source.dart';
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/environment/app_flavor.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/journey/journey_preferences_store.dart';
-import 'package:movaro_app/features/info/domain/entities/quick_guide_answer.dart';
-import 'package:movaro_app/features/info/domain/entities/guide_toolkit.dart';
-import 'package:movaro_app/features/info/presentation/pages/guide_toolkit_page.dart';
-import 'package:movaro_app/features/info/presentation/pages/quick_guide_answer_page.dart';
-import 'package:movaro_app/features/location/location_controller.dart';
-import 'package:movaro_app/features/location/location_data.dart';
-import 'package:movaro_app/core/network/api_health_service.dart';
-import 'package:movaro_app/features/auth/application/auth_controller.dart';
-import 'package:movaro_app/features/auth/data/datasources/fake_auth_data_source.dart';
-import 'package:movaro_app/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/city_insights/application/city_insight_controller.dart';
-import 'package:movaro_app/features/city_insights/domain/entities/city_insight_entity.dart';
-import 'package:movaro_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
-import 'package:movaro_app/features/city_insights/domain/repositories/city_insight_repository.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_scores.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_source.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_sources.dart';
-import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
-import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
-import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_backup_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/repositories/question_repository_impl.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/answer.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
+import 'package:mudavi_app/app/bootstrap/app_dependencies.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/localization/locale_controller.dart';
+import 'package:mudavi_app/app/localization/locale_scope.dart';
+import 'package:mudavi_app/app/router/app_router.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_theme.dart';
+import 'package:mudavi_app/app/currency/currency_controller.dart';
+import 'package:mudavi_app/app/theme/theme_controller.dart';
+import 'package:mudavi_app/core/exchange_rates/exchange_rates_controller.dart';
+import 'package:mudavi_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
+import 'package:mudavi_app/features/catalog/data/repositories/catalog_repository_impl.dart';
+import 'package:mudavi_app/core/environment/api_source.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/core/environment/app_flavor.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/features/journey/journey_preferences_store.dart';
+import 'package:mudavi_app/features/info/domain/entities/quick_guide_answer.dart';
+import 'package:mudavi_app/features/info/domain/entities/guide_toolkit.dart';
+import 'package:mudavi_app/features/info/presentation/pages/guide_toolkit_page.dart';
+import 'package:mudavi_app/features/info/presentation/pages/quick_guide_answer_page.dart';
+import 'package:mudavi_app/features/location/location_controller.dart';
+import 'package:mudavi_app/features/location/location_data.dart';
+import 'package:mudavi_app/core/network/api_health_service.dart';
+import 'package:mudavi_app/features/auth/application/auth_controller.dart';
+import 'package:mudavi_app/features/auth/data/datasources/fake_auth_data_source.dart';
+import 'package:mudavi_app/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/city_insights/application/city_insight_controller.dart';
+import 'package:mudavi_app/features/city_insights/domain/entities/city_insight_entity.dart';
+import 'package:mudavi_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
+import 'package:mudavi_app/features/city_insights/domain/repositories/city_insight_repository.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_recommendation.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_highlights.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_methodology.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_scores.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_source.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_sources.dart';
+import 'package:mudavi_app/features/cities/domain/entities/travel_route_insight.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/cities/domain/repositories/cities_repository.dart';
+import 'package:mudavi_app/features/explore/presentation/pages/documentation_guide_page.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/copilot_exchange_rates_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_backup_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/datasources/copilot_exchange_rates_remote_data_source.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/repositories/question_repository_impl.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/answer.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -213,7 +213,7 @@ void main() {
     expect(find.text('Encontre uma resposta'), findsOneWidget);
     expect(find.byKey(const ValueKey('guide-question-field')), findsOneWidget);
     expect(find.byKey(const ValueKey('guide-question-submit')), findsNothing);
-    expect(find.text('AJUDA MOVARO · CONTEÚDO REVISADO'), findsNothing);
+    expect(find.text('AJUDA MUDAVI · CONTEÚDO REVISADO'), findsNothing);
     expect(find.text('40 dúvidas revisadas'), findsNothing);
     expect(find.text('Buscar dúvidas revisadas'), findsNothing);
     expect(find.text('Digite um tema'), findsNothing);
@@ -1286,7 +1286,7 @@ class _AppTestHarness {
     bool initializeQuestionnaire = true,
   }) async {
     final tempDirectory = await Directory.systemTemp.createTemp(
-      'movaro_app_smoke',
+      'mudavi_app_smoke',
     );
     final environment = AppEnvironment(
       flavor: AppFlavor.development,
@@ -1294,8 +1294,8 @@ class _AppTestHarness {
       apiSource: ApiSource.local,
       apiBaseUrl: 'http://127.0.0.1:3000',
       localApiBaseUrl: 'http://127.0.0.1:3000',
-      railwayApiBaseUrl: 'https://movaro-production.up.railway.app',
-      appName: 'Movaro Test',
+      railwayApiBaseUrl: 'https://mudavi-production.up.railway.app',
+      appName: 'Mudavi Test',
     );
     final catalogRepository = CatalogRepositoryImpl(
       dataSource: SeedCatalogDataSource(),
@@ -1682,7 +1682,7 @@ class _FakeCopilotExchangeRatesService extends CopilotExchangeRatesService {
 const _source = CitySource(
   id: 'test_source',
   title: 'Test source',
-  provider: 'Movaro',
+  provider: 'Mudavi',
   description: 'Mock source',
   isOfficial: true,
   url: null,
@@ -1718,7 +1718,7 @@ const _curitiba = City(
   unemploymentRate: 6,
   economicActivityScore: 76,
   topIndustries: ['Tecnologia', 'Servicos'],
-  movaroScores: CityScores(
+  mudaviScores: CityScores(
     economical: 76,
     popularForArgentinians: 68,
     languageAdaptation: 72,
@@ -1752,7 +1752,7 @@ const _portoAlegre = City(
   unemploymentRate: 6.5,
   economicActivityScore: 71,
   topIndustries: ['Servicos', 'Industria'],
-  movaroScores: CityScores(
+  mudaviScores: CityScores(
     economical: 70,
     popularForArgentinians: 80,
     languageAdaptation: 82,
@@ -1786,7 +1786,7 @@ const _salvador = City(
   unemploymentRate: 9.2,
   economicActivityScore: 64,
   topIndustries: ['Turismo', 'Servicos'],
-  movaroScores: CityScores(
+  mudaviScores: CityScores(
     economical: 72,
     popularForArgentinians: 60,
     languageAdaptation: 58,

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/work_viability_assessment.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/work_viability_assessment.dart';
 
 void main() {
   test('does not call an incomplete profile viable', () {

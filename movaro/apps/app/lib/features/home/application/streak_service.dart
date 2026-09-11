@@ -11,8 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///  - Older date → reset to 1 (streak broken).
 ///  - 0 or no record → start at 1.
 class StreakService {
-  static const _lastDateKey = 'movaro_streak_last_date';
-  static const _daysKey = 'movaro_streak_days';
+  static const _lastDateKey = 'mudavi_streak_last_date';
+  static const _daysKey = 'mudavi_streak_days';
 
   /// Records today's activity and returns the updated streak count.
   Future<int> recordActivity() async {

@@ -2,11 +2,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
-import 'package:movaro_app/features/location/location_data.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/location/location_data.dart';
 
 class ArgentinaBrazilGuideDataSource {
   const ArgentinaBrazilGuideDataSource._();
@@ -1805,9 +1805,9 @@ class ArgentinaBrazilGuideDataSource {
           lastVerified: DateTime(2026, 7, 26),
           scopeNote: _t(
             locale,
-            pt: 'A elegibilidade é individual. Movaro organiza a informação, mas não substitui a decisão da Polícia Federal.',
-            es: 'La elegibilidad es individual. Movaro organiza la información, pero no reemplaza la decisión de la Policía Federal.',
-            en: 'Eligibility is individual. Movaro organizes information but does not replace Federal Police decisions.',
+            pt: 'A elegibilidade é individual. Mudavi organiza a informação, mas não substitui a decisão da Polícia Federal.',
+            es: 'La elegibilidad es individual. Mudavi organiza la información, pero no reemplaza la decisión de la Policía Federal.',
+            en: 'Eligibility is individual. Mudavi organizes information but does not replace Federal Police decisions.',
           ),
         ),
       ),
@@ -3565,9 +3565,9 @@ class ArgentinaBrazilGuideDataSource {
           lastVerified: DateTime(2026, 7, 26),
           scopeNote: _t(
             locale,
-            pt: 'Movaro não calcula enquadramento ou tributos. Em caso de renda exterior, procure orientação contábil.',
-            es: 'Movaro no calcula encuadre ni impuestos. Con ingresos del exterior, busca orientación contable.',
-            en: 'Movaro does not calculate tax classification or liabilities. Seek accounting guidance for foreign income.',
+            pt: 'Mudavi não calcula enquadramento ou tributos. Em caso de renda exterior, procure orientação contábil.',
+            es: 'Mudavi no calcula encuadre ni impuestos. Con ingresos del exterior, busca orientación contable.',
+            en: 'Mudavi does not calculate tax classification or liabilities. Seek accounting guidance for foreign income.',
           ),
         ),
       ),
@@ -4756,8 +4756,8 @@ class ArgentinaBrazilGuideDataSource {
         estimatedEffort: GuideEstimatedEffort.fast,
         tier: GuideItemTier.recommended,
         evidence: GuideEvidence(
-          type: GuideEvidenceType.movaroGuidance,
-          sourceLabel: 'Movaro · Revisão do próprio orçamento',
+          type: GuideEvidenceType.mudaviGuidance,
+          sourceLabel: 'Mudavi · Revisão do próprio orçamento',
           sourceUrl: PreparationResourceLinks.consumerFinancialEducation
               .toString(),
           lastVerified: DateTime(2026, 7, 26),

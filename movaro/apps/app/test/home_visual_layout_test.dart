@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_theme.dart';
-import 'package:movaro_app/features/home/presentation/home_visual_layout.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_theme.dart';
+import 'package:mudavi_app/features/home/presentation/home_visual_layout.dart';
 
 void main() {
   testWidgets(

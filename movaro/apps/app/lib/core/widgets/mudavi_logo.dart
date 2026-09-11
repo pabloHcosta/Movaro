@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
 
-class MovaroLogo extends StatelessWidget {
-  const MovaroLogo({
+class MudaviLogo extends StatelessWidget {
+  const MudaviLogo({
     this.markSize = 28,
     this.showWordmark = true,
     this.markColor,
@@ -24,8 +24,8 @@ class MovaroLogo extends StatelessWidget {
     final resolvedMarkColor = markColor ?? resolvedTextColor;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final assetPath = isDark
-        ? 'assets/brand/movaro_mark_light.svg'
-        : 'assets/brand/movaro_mark_dark.svg';
+        ? 'assets/brand/mudavi_mark_light.svg'
+        : 'assets/brand/mudavi_mark_dark.svg';
 
     final mark = SvgPicture.asset(
       assetPath,
@@ -33,7 +33,7 @@ class MovaroLogo extends StatelessWidget {
       height: markSize,
       fit: BoxFit.contain,
       colorFilter: ColorFilter.mode(resolvedMarkColor, BlendMode.srcIn),
-      semanticsLabel: 'Movaro logo',
+      semanticsLabel: 'Mudavi logo',
     );
 
     if (!showWordmark) {
@@ -46,7 +46,7 @@ class MovaroLogo extends StatelessWidget {
         mark,
         SizedBox(width: spacing),
         Text(
-          'Movaro',
+          'Mudavi',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             color: resolvedTextColor,
             fontWeight: FontWeight.w700,

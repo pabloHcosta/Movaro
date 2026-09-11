@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:movaro_app/app/localization/locale_controller.dart';
+import 'package:mudavi_app/app/localization/locale_controller.dart';
 
 class LocaleScope extends InheritedNotifier<LocaleController> {
   const LocaleScope({

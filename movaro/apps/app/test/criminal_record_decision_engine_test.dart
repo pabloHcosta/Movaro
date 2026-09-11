@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/criminal_record_decision_engine.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/criminal_record_decision_engine.dart';
 
 void main() {
   test('minor is exempt without collecting more information', () {

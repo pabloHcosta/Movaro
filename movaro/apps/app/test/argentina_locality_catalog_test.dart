@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/location/argentina_locality_catalog.dart';
-import 'package:movaro_app/features/location/argentina_origin_classifier.dart';
+import 'package:mudavi_app/features/location/argentina_locality_catalog.dart';
+import 'package:mudavi_app/features/location/argentina_origin_classifier.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/features/location/argentina_locality.dart';
-import 'package:movaro_app/features/location/argentina_locality_catalog.dart';
-import 'package:movaro_app/features/location/location_controller.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/features/location/argentina_locality.dart';
+import 'package:mudavi_app/features/location/argentina_locality_catalog.dart';
+import 'package:mudavi_app/features/location/location_controller.dart';
 
 Future<bool> showOriginCityFlowSheet({
   required BuildContext context,

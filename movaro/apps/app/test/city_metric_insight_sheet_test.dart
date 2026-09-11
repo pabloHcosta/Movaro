@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/features/cities/data/models/city_model.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_metric_insight_sheet.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/features/cities/data/models/city_model.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_metric_insight_sheet.dart';
 
 void main() {
   testWidgets(

@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/cities/application/services/city_work_area_lens.dart';
-import 'package:movaro_app/features/cities/data/models/city_model.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/application/services/city_work_area_lens.dart';
+import 'package:mudavi_app/features/cities/data/models/city_model.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -42,8 +42,8 @@ void main() {
     // Ranked by work opportunity (descending).
     for (var i = 0; i < agro.length - 1; i++) {
       expect(
-        agro[i].movaroScores.workOpportunity >=
-            agro[i + 1].movaroScores.workOpportunity,
+        agro[i].mudaviScores.workOpportunity >=
+            agro[i + 1].mudaviScores.workOpportunity,
         isTrue,
       );
     }
@@ -62,8 +62,8 @@ void main() {
     expect(all.length, cities.length);
     for (var i = 0; i < all.length - 1; i++) {
       expect(
-        all[i].movaroScores.workOpportunity >=
-            all[i + 1].movaroScores.workOpportunity,
+        all[i].mudaviScores.workOpportunity >=
+            all[i + 1].mudaviScores.workOpportunity,
         isTrue,
       );
     }

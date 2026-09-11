@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:developer' as dev;
 import 'dart:ui';
 
-import 'package:movaro_app/app/localization/generated/app_localizations.dart';
-import 'package:movaro_app/core/network/network_client.dart';
-import 'package:movaro_app/features/info/domain/entities/chat_message.dart';
+import 'package:mudavi_app/app/localization/generated/app_localizations.dart';
+import 'package:mudavi_app/core/network/network_client.dart';
+import 'package:mudavi_app/features/info/domain/entities/chat_message.dart';
 
 /// The answer source returned by the backend orchestrator.
 enum ChatAnswerSource { appData, ai, unknown }
@@ -456,9 +456,9 @@ class ChatService {
     ])) {
       return _tr(
         locale,
-        es: 'Guía Movaro sin IA: el CPF puede solicitarse por los canales oficiales en Brasil o en el exterior. El servicio público es gratuito; unidades asociadas pueden cobrar la tarifa publicada. Para DNI o pasaporte, confirmá el documento aceptado según tu forma de ingreso. Abrí Guías › Documentos y verificá la fuente oficial vigente.',
-        pt: 'Guia Movaro sem IA: o CPF pode ser solicitado pelos canais oficiais no Brasil ou no exterior. O serviço público é gratuito; unidades conveniadas podem cobrar a tarifa publicada. Para DNI ou passaporte, confirme o documento aceito conforme sua forma de entrada. Abra Guias › Documentos e verifique a fonte oficial vigente.',
-        en: 'Movaro guidance without AI: CPF can be requested through official channels in Brazil or abroad. The public service is free; partner units may charge the published fee. For DNI or passport, confirm what your entry method accepts. Open Guides › Documents and verify the current official source.',
+        es: 'Guía Mudavi sin IA: el CPF puede solicitarse por los canales oficiales en Brasil o en el exterior. El servicio público es gratuito; unidades asociadas pueden cobrar la tarifa publicada. Para DNI o pasaporte, confirmá el documento aceptado según tu forma de ingreso. Abrí Guías › Documentos y verificá la fuente oficial vigente.',
+        pt: 'Guia Mudavi sem IA: o CPF pode ser solicitado pelos canais oficiais no Brasil ou no exterior. O serviço público é gratuito; unidades conveniadas podem cobrar a tarifa publicada. Para DNI ou passaporte, confirme o documento aceito conforme sua forma de entrada. Abra Guias › Documentos e verifique a fonte oficial vigente.',
+        en: 'Mudavi guidance without AI: CPF can be requested through official channels in Brazil or abroad. The public service is free; partner units may charge the published fee. For DNI or passport, confirm what your entry method accepts. Open Guides › Documents and verify the current official source.',
       );
     }
     if (has([
@@ -474,17 +474,17 @@ class ChatService {
     ])) {
       return _tr(
         locale,
-        es: 'Guía Movaro sin IA: si sos argentino y cumplís los requisitos, el acuerdo bilateral Brasil–Argentina prevé una ruta de residencia permanente. La estadía como visitante y el pedido de residencia son temas distintos; no usamos 90 días como plazo universal para solicitarla. Abrí Guías › Documentos y confirmá tu elegibilidad en la Policía Federal.',
-        pt: 'Guia Movaro sem IA: se você é argentino e cumpre os requisitos, o acordo bilateral Brasil–Argentina prevê uma rota de residência permanente. A estada como visitante e o pedido de residência são assuntos diferentes; não usamos 90 dias como prazo universal para solicitá-la. Abra Guias › Documentos e confirme sua elegibilidade na Polícia Federal.',
-        en: 'Movaro guidance without AI: eligible Argentine nationals may use the Brazil–Argentina bilateral route to permanent residence. Visitor stay and residence are separate matters; we do not treat 90 days as a universal filing deadline. Open Guides › Documents and confirm eligibility with Federal Police.',
+        es: 'Guía Mudavi sin IA: si sos argentino y cumplís los requisitos, el acuerdo bilateral Brasil–Argentina prevé una ruta de residencia permanente. La estadía como visitante y el pedido de residencia son temas distintos; no usamos 90 días como plazo universal para solicitarla. Abrí Guías › Documentos y confirmá tu elegibilidad en la Policía Federal.',
+        pt: 'Guia Mudavi sem IA: se você é argentino e cumpre os requisitos, o acordo bilateral Brasil–Argentina prevê uma rota de residência permanente. A estada como visitante e o pedido de residência são assuntos diferentes; não usamos 90 dias como prazo universal para solicitá-la. Abra Guias › Documentos e confirme sua elegibilidade na Polícia Federal.',
+        en: 'Mudavi guidance without AI: eligible Argentine nationals may use the Brazil–Argentina bilateral route to permanent residence. Visitor stay and residence are separate matters; we do not treat 90 days as a universal filing deadline. Open Guides › Documents and confirm eligibility with Federal Police.',
       );
     }
     if (has(['banco', 'conta', 'cuenta', 'bank', 'nubank', 'pix'])) {
       return _tr(
         locale,
-        es: 'Guía Movaro sin IA: cada banco define sus documentos y hace su propio análisis. CPF, identificación migratoria y comprobante de domicilio suelen ser relevantes, pero no garantizan aprobación. Compará tarifas, Pix, atención y requisitos en Guías › Dinero, sin asumir que una marca aceptará tu caso.',
-        pt: 'Guia Movaro sem IA: cada banco define seus documentos e faz sua própria análise. CPF, identificação migratória e comprovante de endereço costumam ser relevantes, mas não garantem aprovação. Compare tarifas, Pix, atendimento e requisitos em Guias › Dinheiro, sem presumir que uma marca aceitará seu caso.',
-        en: 'Movaro guidance without AI: each bank sets its documents and performs its own review. CPF, migration ID, and proof of address are often relevant but do not guarantee approval. Compare fees, Pix, support, and requirements in Guides › Money without assuming a specific bank will accept your case.',
+        es: 'Guía Mudavi sin IA: cada banco define sus documentos y hace su propio análisis. CPF, identificación migratoria y comprobante de domicilio suelen ser relevantes, pero no garantizan aprobación. Compará tarifas, Pix, atención y requisitos en Guías › Dinero, sin asumir que una marca aceptará tu caso.',
+        pt: 'Guia Mudavi sem IA: cada banco define seus documentos e faz sua própria análise. CPF, identificação migratória e comprovante de endereço costumam ser relevantes, mas não garantem aprovação. Compare tarifas, Pix, atendimento e requisitos em Guias › Dinheiro, sem presumir que uma marca aceitará seu caso.',
+        en: 'Mudavi guidance without AI: each bank sets its documents and performs its own review. CPF, migration ID, and proof of address are often relevant but do not guarantee approval. Compare fees, Pix, support, and requirements in Guides › Money without assuming a specific bank will accept your case.',
       );
     }
     if (has([
@@ -498,9 +498,9 @@ class ChatService {
     ])) {
       return _tr(
         locale,
-        es: 'Guía Movaro sin IA: el propietario puede pedir una garantía prevista en la ley, pero no debe acumular más de una en el mismo contrato; el depósito en dinero tiene límite legal. Leé el contrato, no pagues antes de verificar inmueble y titular, y abrí Guías › Vivienda para la fuente oficial.',
-        pt: 'Guia Movaro sem IA: o locador pode pedir uma garantia prevista em lei, mas não deve acumular mais de uma no mesmo contrato; a caução em dinheiro tem limite legal. Leia o contrato, não pague antes de verificar imóvel e titular, e abra Guias › Moradia para a fonte oficial.',
-        en: 'Movaro guidance without AI: a landlord may request one legally permitted guarantee but should not stack multiple guarantees in one contract; cash deposits have a legal cap. Read the contract, verify property and owner before paying, and open Guides › Housing for the official source.',
+        es: 'Guía Mudavi sin IA: el propietario puede pedir una garantía prevista en la ley, pero no debe acumular más de una en el mismo contrato; el depósito en dinero tiene límite legal. Leé el contrato, no pagues antes de verificar inmueble y titular, y abrí Guías › Vivienda para la fuente oficial.',
+        pt: 'Guia Mudavi sem IA: o locador pode pedir uma garantia prevista em lei, mas não deve acumular mais de uma no mesmo contrato; a caução em dinheiro tem limite legal. Leia o contrato, não pague antes de verificar imóvel e titular, e abra Guias › Moradia para a fonte oficial.',
+        en: 'Mudavi guidance without AI: a landlord may request one legally permitted guarantee but should not stack multiple guarantees in one contract; cash deposits have a legal cap. Read the contract, verify property and owner before paying, and open Guides › Housing for the official source.',
       );
     }
     if (has([
@@ -524,9 +524,9 @@ class ChatService {
     if (has(['sus', 'salud', 'saude', 'health', 'medico', 'hospital'])) {
       return _tr(
         locale,
-        es: 'Guía Movaro sin IA: migrantes pueden acceder al SUS; una urgencia no debe esperar a que tengas CPF o Tarjeta SUS. Para seguimiento, buscá la UBS de tu zona y confirmá los documentos locales. Abrí Guías › Salud. En emergencia: SAMU 192.',
-        pt: 'Guia Movaro sem IA: migrantes podem acessar o SUS; uma urgência não deve esperar CPF ou Cartão SUS. Para acompanhamento, procure a UBS da sua região e confirme os documentos locais. Abra Guias › Saúde. Em emergência: SAMU 192.',
-        en: 'Movaro guidance without AI: migrants can access SUS; urgent care should not wait for a CPF or SUS card. For ongoing care, find your local UBS and confirm local documents. Open Guides › Health. In an emergency call SAMU 192.',
+        es: 'Guía Mudavi sin IA: migrantes pueden acceder al SUS; una urgencia no debe esperar a que tengas CPF o Tarjeta SUS. Para seguimiento, buscá la UBS de tu zona y confirmá los documentos locales. Abrí Guías › Salud. En emergencia: SAMU 192.',
+        pt: 'Guia Mudavi sem IA: migrantes podem acessar o SUS; uma urgência não deve esperar CPF ou Cartão SUS. Para acompanhamento, procure a UBS da sua região e confirme os documentos locais. Abra Guias › Saúde. Em emergência: SAMU 192.',
+        en: 'Mudavi guidance without AI: migrants can access SUS; urgent care should not wait for a CPF or SUS card. For ongoing care, find your local UBS and confirm local documents. Open Guides › Health. In an emergency call SAMU 192.',
       );
     }
     if (has([
@@ -540,17 +540,17 @@ class ChatService {
     ])) {
       return _tr(
         locale,
-        es: 'Guía Movaro sin IA: para viajar con medicamentos, llevá receta y documentación médica compatible con la cantidad. Los controlados tienen orientación específica de Anvisa. Abrí Guías › Medicamentos antes de embarcar.',
-        pt: 'Guia Movaro sem IA: para viajar com medicamentos, leve receita e documentação médica compatível com a quantidade. Controlados têm orientação específica da Anvisa. Abra Guias › Medicamentos antes de embarcar.',
-        en: 'Movaro guidance without AI: carry a prescription and medical documentation matching the quantity. Controlled medicines have specific Anvisa guidance. Open Guides › Medicines before travel.',
+        es: 'Guía Mudavi sin IA: para viajar con medicamentos, llevá receta y documentación médica compatible con la cantidad. Los controlados tienen orientación específica de Anvisa. Abrí Guías › Medicamentos antes de embarcar.',
+        pt: 'Guia Mudavi sem IA: para viajar com medicamentos, leve receita e documentação médica compatível com a quantidade. Controlados têm orientação específica da Anvisa. Abra Guias › Medicamentos antes de embarcar.',
+        en: 'Mudavi guidance without AI: carry a prescription and medical documentation matching the quantity. Controlled medicines have specific Anvisa guidance. Open Guides › Medicines before travel.',
       );
     }
     if (has(['mascota', 'pet', 'perro', 'gato', 'cachorro', 'dog', 'cat'])) {
       return _tr(
         locale,
-        es: 'Guía Movaro sin IA: perros y gatos deben cumplir requisitos sanitarios vigentes y también las reglas de la aerolínea. Abrí Guías › Viajar con mascota y confirmá todo antes de emitir el pasaje.',
-        pt: 'Guia Movaro sem IA: cães e gatos precisam cumprir requisitos sanitários vigentes e também as regras da transportadora. Abra Guias › Viajar com pet e confirme tudo antes de emitir a passagem.',
-        en: 'Movaro guidance without AI: dogs and cats must meet current health requirements and carrier rules. Open Guides › Traveling with a pet and confirm everything before ticketing.',
+        es: 'Guía Mudavi sin IA: perros y gatos deben cumplir requisitos sanitarios vigentes y también las reglas de la aerolínea. Abrí Guías › Viajar con mascota y confirmá todo antes de emitir el pasaje.',
+        pt: 'Guia Mudavi sem IA: cães e gatos precisam cumprir requisitos sanitários vigentes e também as regras da transportadora. Abra Guias › Viajar com pet e confirme tudo antes de emitir a passagem.',
+        en: 'Mudavi guidance without AI: dogs and cats must meet current health requirements and carrier rules. Open Guides › Traveling with a pet and confirm everything before ticketing.',
       );
     }
     if (has([
@@ -565,9 +565,9 @@ class ChatService {
     ])) {
       return _tr(
         locale,
-        es: 'Guía Movaro sin IA: residencia fiscal, ingresos de Argentina y MEI son temas distintos. Abrir MEI no regulariza automáticamente ingresos del exterior. Revisá Guías › Impuestos y, si tenés ingresos o patrimonio en ambos países, buscá un contador internacional.',
-        pt: 'Guia Movaro sem IA: residência fiscal, renda da Argentina e MEI são assuntos diferentes. Abrir MEI não regulariza automaticamente renda do exterior. Veja Guias › Impostos e, se houver renda ou patrimônio nos dois países, procure contador internacional.',
-        en: 'Movaro guidance without AI: tax residence, Argentine income, and MEI are separate matters. Opening MEI does not automatically settle foreign income. See Guides › Taxes and seek cross-border accounting advice if you have income or assets in both countries.',
+        es: 'Guía Mudavi sin IA: residencia fiscal, ingresos de Argentina y MEI son temas distintos. Abrir MEI no regulariza automáticamente ingresos del exterior. Revisá Guías › Impuestos y, si tenés ingresos o patrimonio en ambos países, buscá un contador internacional.',
+        pt: 'Guia Mudavi sem IA: residência fiscal, renda da Argentina e MEI são assuntos diferentes. Abrir MEI não regulariza automaticamente renda do exterior. Veja Guias › Impostos e, se houver renda ou patrimônio nos dois países, procure contador internacional.',
+        en: 'Mudavi guidance without AI: tax residence, Argentine income, and MEI are separate matters. Opening MEI does not automatically settle foreign income. See Guides › Taxes and seek cross-border accounting advice if you have income or assets in both countries.',
       );
     }
     if (has([
@@ -583,9 +583,9 @@ class ChatService {
     ])) {
       return _tr(
         locale,
-        es: 'Guía Movaro sin IA: niños y adolescentes migrantes tienen derecho a matrícula. Buscá la Secretaría de Educación local, llevá los documentos disponibles y pedí orientación formal si falta alguno. Abrí Guías › Familia.',
-        pt: 'Guia Movaro sem IA: crianças e adolescentes migrantes têm direito à matrícula. Procure a Secretaria de Educação local, leve os documentos disponíveis e peça orientação formal se faltar algum. Abra Guias › Família.',
-        en: 'Movaro guidance without AI: migrant children and adolescents have a right to school enrollment. Contact the local Education Department, bring available documents, and request formal guidance if one is missing. Open Guides › Family.',
+        es: 'Guía Mudavi sin IA: niños y adolescentes migrantes tienen derecho a matrícula. Buscá la Secretaría de Educación local, llevá los documentos disponibles y pedí orientación formal si falta alguno. Abrí Guías › Familia.',
+        pt: 'Guia Mudavi sem IA: crianças e adolescentes migrantes têm direito à matrícula. Procure a Secretaria de Educação local, leve os documentos disponíveis e peça orientação formal se faltar algum. Abra Guias › Família.',
+        en: 'Mudavi guidance without AI: migrant children and adolescents have a right to school enrollment. Contact the local Education Department, bring available documents, and request formal guidance if one is missing. Open Guides › Family.',
       );
     }
     if (has([
@@ -606,9 +606,9 @@ class ChatService {
 
     return _tr(
       locale,
-      es: 'Guía Movaro sin IA: puedo orientarte con contenido revisado sobre residencia, CPF, vivienda, salud, dinero, impuestos, familia, mascotas y medicamentos. Escribí uno de esos temas o abrí Guías; para una decisión legal, médica o fiscal, confirmá siempre la fuente oficial o un profesional.',
-      pt: 'Guia Movaro sem IA: posso orientar com conteúdo revisado sobre residência, CPF, moradia, saúde, dinheiro, impostos, família, pets e medicamentos. Escreva um desses temas ou abra Guias; para uma decisão jurídica, médica ou fiscal, confirme sempre a fonte oficial ou um profissional.',
-      en: 'Movaro guidance without AI: I can help with reviewed content on residence, CPF, housing, health, money, taxes, family, pets, and medicines. Type one of those topics or open Guides; for legal, medical, or tax decisions, always confirm the official source or a professional.',
+      es: 'Guía Mudavi sin IA: puedo orientarte con contenido revisado sobre residencia, CPF, vivienda, salud, dinero, impuestos, familia, mascotas y medicamentos. Escribí uno de esos temas o abrí Guías; para una decisión legal, médica o fiscal, confirmá siempre la fuente oficial o un profesional.',
+      pt: 'Guia Mudavi sem IA: posso orientar com conteúdo revisado sobre residência, CPF, moradia, saúde, dinheiro, impostos, família, pets e medicamentos. Escreva um desses temas ou abra Guias; para uma decisão jurídica, médica ou fiscal, confirme sempre a fonte oficial ou um profissional.',
+      en: 'Mudavi guidance without AI: I can help with reviewed content on residence, CPF, housing, health, money, taxes, family, pets, and medicines. Type one of those topics or open Guides; for legal, medical, or tax decisions, always confirm the official source or a professional.',
     );
   }
 

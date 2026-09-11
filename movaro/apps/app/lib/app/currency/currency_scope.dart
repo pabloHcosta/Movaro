@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:movaro_app/app/currency/currency_controller.dart';
+import 'package:mudavi_app/app/currency/currency_controller.dart';
 
 class CurrencyScope extends InheritedNotifier<CurrencyController> {
   const CurrencyScope({

@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
-import 'package:movaro_app/features/cities/application/services/city_favorites_store.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
-import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
-import 'package:movaro_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
-import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
+import 'package:mudavi_app/features/cities/application/services/city_favorites_store.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_detail_payloads.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_highlights.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_methodology.dart';
+import 'package:mudavi_app/features/cities/domain/entities/travel_route_insight.dart';
+import 'package:mudavi_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/cities/domain/repositories/cities_repository.dart';
 
 enum CityFavoriteToggleResult { added, removed, limitReached }
 

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/entry_regularization_decision_engine.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/entry_regularization_decision_engine.dart';
 
 void main() {
   test('Argentine resident intent receives the bilateral route', () {

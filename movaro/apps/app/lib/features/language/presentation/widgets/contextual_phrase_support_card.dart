@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/language/application/portuguese_phrasebook.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/features/language/application/portuguese_phrasebook.dart';
 
 /// Small, passive language support placed inside the task where it is useful.
 ///

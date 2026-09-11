@@ -1,6 +1,6 @@
 {
   "@@locale": "es",
-  "homeTitle": "Movaro",
+  "homeTitle": "Mudavi",
   "homeEnvironmentLabel": "Entorno actual",
   "environmentValue": "{environment}",
   "@environmentValue": {
@@ -11,14 +11,14 @@
     }
   },
   "splashLoadingLabel": "Preparando tu camino",
-  "splashHeroTitle": "Vos elegís dónde. Movaro te muestra el camino.",
+  "splashHeroTitle": "Vos elegís dónde. Mudavi te muestra el camino.",
   "splashHeroBody": "Preparando ciudades, costos y orientación para tu próximo paso.",
   "splashInitializingLabel": "Iniciando la experiencia",
   "loadingCountriesLabel": "Cargando países",
   "loadingCitiesCatalogLabel": "Cargando catálogo de ciudades",
   "journeySetupPageTitle": "Elegí tu trayecto",
   "journeySetupHeroTitle": "Empezá definiendo desde dónde salís y a dónde querés ir",
-  "journeySetupHeroBody": "Movaro usa esta elección para armar la experiencia correcta para vos. Hoy, el beta está disponible para Argentina -> Brasil, pero la estructura ya está pensada para crecer a nivel global.",
+  "journeySetupHeroBody": "Mudavi usa esta elección para armar la experiencia correcta para vos. Hoy, el beta está disponible para Argentina -> Brasil, pero la estructura ya está pensada para crecer a nivel global.",
   "journeyOriginTitle": "País de origen",
   "journeyOriginBody": "Elegí el país desde el que salís. Esto ayuda a contextualizar idioma, trámites y adaptación.",
   "journeyDestinationTitle": "País de destino",
@@ -44,8 +44,8 @@
   "publicHomeHeadline": "Planificá tu mudanza con más claridad",
   "publicHomeDescription": "Entendé tus opciones en pocos pasos antes de decidir qué querés guardar.",
   "publicHomeScopeBadge": "Hoy: Argentina -> Brasil",
-  "publicHomeFocusedDescription": "Hoy, Movaro está diseñado para quienes están evaluando una mudanza de Argentina a Brasil. En vez de mostrar todo de una sola vez, te ayuda a explorar puntos de partida útiles.",
-  "publicHomeSelectedJourneyDescription": "Movaro va a organizar tu experiencia para el trayecto {origin} -> {destination}. Empezás con lo esencial y profundizás solo cuando haga falta.",
+  "publicHomeFocusedDescription": "Hoy, Mudavi está diseñado para quienes están evaluando una mudanza de Argentina a Brasil. En vez de mostrar todo de una sola vez, te ayuda a explorar puntos de partida útiles.",
+  "publicHomeSelectedJourneyDescription": "Mudavi va a organizar tu experiencia para el trayecto {origin} -> {destination}. Empezás con lo esencial y profundizás solo cuando haga falta.",
   "@publicHomeSelectedJourneyDescription": {
     "placeholders": {
       "origin": {
@@ -93,7 +93,7 @@
   "publicHomeQuestionsTitle": "Guía práctica",
   "publicHomeQuestionsBody": "Abrí la guía para entender documentos, salud, vivienda y costos iniciales sin investigación dispersa.",
   "publicHomeQuestionsAction": "Resolver dudas",
-  "homeHeroWelcomeDefault": "Bienvenido a Movaro",
+  "homeHeroWelcomeDefault": "Bienvenido a Mudavi",
   "homeHeroWelcomeBack": "Continuá donde lo dejaste",
   "homeHeroGreetingMorning": "Buen día, {name}",
   "@homeHeroGreetingMorning": {
@@ -160,7 +160,7 @@
   "publicHomePlanTitle": "Crear mi plan",
   "publicHomePlanBody": "Respondé pocas preguntas y recibí un plan inicial con sugerencias más claras.",
   "publicHomeJourneyDraftTitle": "Empezá tu plan con el destino ya definido",
-  "publicHomeJourneyDraftBody": "Tu destino es {destination}. Ahora respondé pocas preguntas y contanos desde dónde salís para que Movaro genere el plan correcto.",
+  "publicHomeJourneyDraftBody": "Tu destino es {destination}. Ahora respondé pocas preguntas y contanos desde dónde salís para que Mudavi genere el plan correcto.",
   "@publicHomeJourneyDraftBody": {
     "placeholders": {
       "destination": {}
@@ -170,7 +170,7 @@
   "publicHomeStoriesBody": "Entendé qué están buscando otras personas antes de decidir tu siguiente paso.",
   "publicHomeStoriesAction": "Explorar historias",
   "decisionSupportTitle": "Empezá por la pregunta que más te importa",
-  "decisionSupportBody": "Quien piensa en mudarse suele buscar respuestas rápidas sobre idioma, costo, papeles y trabajo. Movaro debería dejar eso claro desde el inicio.",
+  "decisionSupportBody": "Quien piensa en mudarse suele buscar respuestas rápidas sobre idioma, costo, papeles y trabajo. Mudavi debería dejar eso claro desde el inicio.",
   "decisionSupportLanguageTitle": "¿Voy a poder manejarme sin portugués al principio?",
   "decisionSupportLanguageBody": "Usá la señal de adaptación al idioma para ver qué lugares se sienten más fáciles si todavía dependés del español.",
   "decisionSupportCostTitle": "¿La vida diaria se va a sentir demasiado cara?",
@@ -200,8 +200,8 @@
   "exploreCommunityTitle": "Contenido de la comunidad",
   "exploreCommunityDescription": "El contenido de la comunidad es público, pero publicar requiere autenticación.",
   "exploreCreatePostAction": "Crear post",
-  "exploreIntroTitle": "Cómo usar Movaro",
-  "exploreIntroDescription": "Antes de salir a navegar, mirá en menos de un minuto qué resuelve Movaro y qué ya está disponible en este beta.",
+  "exploreIntroTitle": "Cómo usar Mudavi",
+  "exploreIntroDescription": "Antes de salir a navegar, mirá en menos de un minuto qué resuelve Mudavi y qué ya está disponible en este beta.",
   "exploreIntroAction": "Abrir introducción",
   "exploreChecklistTitle": "Tu plan inicial",
   "exploreChecklistDescription": "Las personas visitantes pueden responder un flujo corto y generar un plan inicial antes de iniciar sesión.",
@@ -220,7 +220,7 @@
   "documentationPageTitle": "Guía",
   "documentationHeroEyebrow": "Guía práctica",
   "documentationHeroTitle": "Entendé mejor cómo organizar la vida práctica en Brasil",
-  "documentationHeroDescription": "Escribí una duda o elegí un tema. Movaro te ayuda a entender mejor el camino y encontrar la guía correcta sobre documentos, salud, trabajo, vivienda, movilidad y costos iniciales.",
+  "documentationHeroDescription": "Escribí una duda o elegí un tema. Mudavi te ayuda a entender mejor el camino y encontrar la guía correcta sobre documentos, salud, trabajo, vivienda, movilidad y costos iniciales.",
   "documentationHeroStepOneTitle": "Escribí una duda",
   "documentationHeroStepOneBody": "Podés buscar en español, portugués o inglés.",
   "documentationHeroStepTwoTitle": "Elegí un tema",
@@ -257,7 +257,7 @@
       "country": {}
     }
   },
-  "documentationGuideCountryPendingBody": "Por ahora Movaro tiene cobertura de guía práctica para Brasil. Elegí Brasil para seguir navegando el contenido disponible.",
+  "documentationGuideCountryPendingBody": "Por ahora Mudavi tiene cobertura de guía práctica para Brasil. Elegí Brasil para seguir navegando el contenido disponible.",
   "documentationGuideUsingPlanLabel": "Desde tu plan",
   "documentationGuideManualCountryLabel": "País manual",
   "documentationGuideCountryLabel": "País de la guía",
@@ -486,7 +486,7 @@
   "publicAccessLabel": "Acceso público",
   "loginPageTitle": "Entrar",
   "loginHeadline": "Entrá solo cuando tenga sentido para vos",
-  "loginDescription": "Movaro deja la exploración abierta. El inicio de sesión aparece solo cuando querés guardar algo personal.",
+  "loginDescription": "Mudavi deja la exploración abierta. El inicio de sesión aparece solo cuando querés guardar algo personal.",
   "loginGoogleAction": "Continuar con Google",
   "loginAppleAction": "Continuar con Apple",
   "loginDevOnlyHint": "Estos botones usan FakeAuthDataSource solo en desarrollo.",
@@ -577,7 +577,7 @@
   "migrationPlanPageTitle": "Tu primer plan",
   "migrationPlanSummaryTitle": "Lo que nos contaste",
   "planRecommendedCityTitle": "Ciudad sugerida para empezar",
-  "planRecommendedCityDescription": "Según tus respuestas, Movaro sugiere mirar primero {city}, {stateCode}.",
+  "planRecommendedCityDescription": "Según tus respuestas, Mudavi sugiere mirar primero {city}, {stateCode}.",
   "@planRecommendedCityDescription": {
     "placeholders": {
       "city": {
@@ -802,7 +802,7 @@
   "citiesHighlightCoastalSoftLandingLabel": "Playa con mejor soft landing",
   "citiesHighlightCoastalBalancedLabel": "Playa con mejor equilibrio entre rutina y costo",
   "citiesExploreEmptyTitle": "Seguimos ampliando este catálogo",
-  "citiesExploreEmptyDescription": "Las sugerencias de ciudades van a aparecer acá a medida que la base de Movaro crezca.",
+  "citiesExploreEmptyDescription": "Las sugerencias de ciudades van a aparecer acá a medida que la base de Mudavi crezca.",
   "citiesSearchTitle": "Buscar ciudades",
   "citiesSearchHeadline": "Validá una ciudad antes de asumir un plan",
   "citiesSearchDescription": "Buscá por nombre, compará alternativas y abrí los detalles para entender costo, encaje y próximos pasos.",
@@ -853,17 +853,17 @@
   },
   "citiesResultsMoreHint": "Deslizá para cargar más ciudades",
   "citiesSearchEmptyTitle": "No encontramos esa ciudad",
-  "citiesSearchEmptyDescription": "Probá con otro nombre o explorá el catálogo inicial de Movaro.",
+  "citiesSearchEmptyDescription": "Probá con otro nombre o explorá el catálogo inicial de Mudavi.",
   "citiesSearchFirstEmptyDescription": "Probá otro nombre o cambiá el filtro para ampliar los resultados.",
   "citiesCatalogEmptyTitle": "El catálogo todavía está vacío",
-  "citiesCatalogEmptyDescription": "Las ciudades del catálogo de Movaro aparecerán acá.",
+  "citiesCatalogEmptyDescription": "Las ciudades del catálogo de Mudavi aparecerán acá.",
   "cityDetailTitleFallback": "Ciudad",
   "cityDetailLoadingLabel": "Cargando detalles de la ciudad",
   "cityDetailEmptyTitle": "Ciudad no disponible",
   "cityDetailEmptyDescription": "No encontramos los detalles de esta ciudad en este momento.",
   "cityDetailContextNote": "Usá estos indicadores como punto de partida, no como una verdad absoluta.",
   "cityDetailDecisionSnapshotTitle": "Resumen para decidir",
-  "cityDetailDecisionSnapshotSubtitle": "Movaro ve esta ciudad como una buena opción si hoy priorizás {bestFor}.",
+  "cityDetailDecisionSnapshotSubtitle": "Mudavi ve esta ciudad como una buena opción si hoy priorizás {bestFor}.",
   "@cityDetailDecisionSnapshotSubtitle": {
     "placeholders": {
       "bestFor": {}
@@ -1163,7 +1163,7 @@
   "favoritesGuidePrimaryAction": "Entendido",
   "publicHomeJourneyResetAction": "Elegir otra ruta",
   "publicHomeJourneyResetTitle": "¿Elegir otra ruta?",
-  "publicHomeJourneyResetBody": "Tu ruta actual ya está guardada en este dispositivo. Si la reiniciás ahora, Movaro va a abrir de nuevo la selección para que elijas otro origen o destino.",
+  "publicHomeJourneyResetBody": "Tu ruta actual ya está guardada en este dispositivo. Si la reiniciás ahora, Mudavi va a abrir de nuevo la selección para que elijas otro origen o destino.",
   "publicHomeJourneyResetConfirm": "Rehacer ruta",
   "publicHomePlanResetTitle": "¿Iniciar otro plan?",
   "publicHomePlanResetBody": "Tu plan actual se va a eliminar de este dispositivo para que puedas responder el cuestionario otra vez desde cero.",
@@ -1173,9 +1173,9 @@
       "temperature": {}
     }
   },
-  "introPageTitle": "Cómo funciona Movaro",
+  "introPageTitle": "Cómo funciona Mudavi",
   "introHeroTitle": "Entendé la app en menos de un minuto",
-  "introHeroDescription": "Movaro te ayuda a comparar ciudades, entender burocracias prácticas y armar una primera dirección de mudanza sin empezar por un exceso de información.",
+  "introHeroDescription": "Mudavi te ayuda a comparar ciudades, entender burocracias prácticas y armar una primera dirección de mudanza sin empezar por un exceso de información.",
   "introExploreTitle": "Explorá ciudades con contexto",
   "introExploreDescription": "Mirá costo, seguridad, adaptación al idioma y señales locales para entender por qué una ciudad aparece como buena opción.",
   "introPlanTitle": "Armá un primer plan",
@@ -1316,7 +1316,7 @@
   "protectedCommunityCreateDescription": "Este espacio va a permitir crear publicaciones cuando la comunidad esté habilitada.",
   "questionOriginCountryTitle": "¿De dónde venís?",
   "journeyEntryTitle": "Elegí tu destino y empezá más rápido",
-  "journeyEntryBody": "Primero elegí a dónde querés mudarte. Movaro guarda esa decisión ahora y te pide el origen en la primera parte del cuestionario.",
+  "journeyEntryBody": "Primero elegí a dónde querés mudarte. Mudavi guarda esa decisión ahora y te pide el origen en la primera parte del cuestionario.",
   "journeyEntryDestinationLabel": "¿A dónde querés ir?",
   "journeyEntryStartAction": "Empezar mi plan",
   "journeyEntrySelectedDestination": "Destino elegido: {destination}",
@@ -1326,7 +1326,7 @@
     }
   },
   "journeyEntryOriginPending": "Vamos a pedir tu origen en la primera pregunta antes de generar el plan.",
-  "journeySetupFlowHint": "Si ahora solo hay una ruta disponible, Movaro la completa por vos. Si hay más de una opción, la elegís manualmente.",
+  "journeySetupFlowHint": "Si ahora solo hay una ruta disponible, Mudavi la completa por vos. Si hay más de una opción, la elegís manualmente.",
   "journeySetupManualChangeHint": "Podés cambiar origen y destino después, sin reiniciar la app.",
   "journeySetupDetectedOriginHint": "Detectamos {country} como sugerencia de origen. Podés confirmarlo o cambiarlo manualmente.",
   "@journeySetupDetectedOriginHint": {
@@ -1364,7 +1364,7 @@
   "recommendationReasonLanguageSupport": "Adaptación más fácil si todavía dependés del español",
   "recommendationReasonWorkMarket": "Mercado laboral más fuerte",
   "recommendationReasonInfrastructure": "Costo más alto, pero mejor infraestructura",
-  "recommendationReasonBalanced": "Opción equilibrada dentro del catálogo inicial de Movaro",
+  "recommendationReasonBalanced": "Opción equilibrada dentro del catálogo inicial de Mudavi",
   "planReasonGoalWork": "Se destaca para quien está buscando más oportunidades de trabajo.",
   "planReasonGoalRemoteWork": "Encaja mejor para quien quiere trabajar remoto y equilibrar costo con calidad de vida.",
   "planReasonGoalStudy": "Tiene una buena combinación de estructura urbana y adaptación inicial para estudiar.",
@@ -1433,17 +1433,17 @@
   "errorUnknownTitle": "Ocurrió algo inesperado.",
   "errorUnknownDescription": "Intentá de nuevo en unos instantes.",
   "errorValidationTitle": "No fue posible completar la acción.",
-  "errorNetworkMovaroDescription": "No pudimos comunicarnos con Movaro en este momento. Intentá de nuevo en unos instantes.",
+  "errorNetworkMudaviDescription": "No pudimos comunicarnos con Mudavi en este momento. Intentá de nuevo en unos instantes.",
   "errorApiGenericDescription": "No fue posible completar esta acción ahora.",
-  "apiUnavailableTitle": "Movaro no pudo conectarse con la API en este momento.",
+  "apiUnavailableTitle": "Mudavi no pudo conectarse con la API en este momento.",
   "apiUnavailableDescription": "La app abrió, pero el servicio principal no está disponible ahora. Sin esa conexión, no puede cargar tu recorrido con datos reales.",
   "apiUnavailableSupportingText": "Intentá nuevamente en unos instantes. Si el problema sigue, revisá si la API está online y si este ambiente apunta a la URL correcta.",
   "apiUnavailableRetryAction": "Intentar de nuevo",
   "sourceProviderIbgeLocalities": "IBGE Localidades",
   "sourceProviderIbgeCities": "IBGE Ciudades y Estados",
   "sourceProviderAtlasHumanDevelopment": "Atlas de Desarrollo Humano en Brasil (PNUD, Ipea y FJP)",
-  "sourceProviderMovaroDataset": "Base comparativa interna (no oficial)",
-  "sourceProviderMovaroRanking": "Metodología comparativa interna (no oficial)",
+  "sourceProviderMudaviDataset": "Base comparativa interna (no oficial)",
+  "sourceProviderMudaviRanking": "Metodología comparativa interna (no oficial)",
   "sourceProviderGoogleMaps": "Google Maps",
   "sourceProviderReceitaFederalGovBr": "Receita Federal / Gov.br",
   "sourceProviderArgentinaMigraciones": "Argentina.gob.ar / Migraciones",
@@ -1463,7 +1463,7 @@
   "sourceProviderIbgePnadContinua": "IBGE / PNAD Continua",
   "sourceProviderForumBrasileiroSegurancaPublica": "Foro Brasileño de Seguridad Pública",
   "sourceProviderBancoCentralBrasil": "Banco Central de Brasil",
-  "sourceProviderMovaro": "Checklist basado en tus respuestas (no oficial)",
+  "sourceProviderMudavi": "Checklist basado en tus respuestas (no oficial)",
   "documentReadinessSectionTitle": "Preparación documental antes de la mudanza",
   "documentReadinessPriorityCritical": "Crítico ahora",
   "documentReadinessPriorityPrepare": "Prepará con anticipación",
@@ -1559,7 +1559,7 @@
       "city": {}
     }
   },
-  "housingDecisionSectionNote": "Hoy, Movaro organiza el contexto para decidir mejor. El contrato, la garantía aceptada y la política de cada propietario o plataforma todavía deben validarse en la fuente antes de cerrar vivienda.",
+  "housingDecisionSectionNote": "Hoy, Mudavi organiza el contexto para decidir mejor. El contrato, la garantía aceptada y la política de cada propietario o plataforma todavía deben validarse en la fuente antes de cerrar vivienda.",
   "housingEntrySectionTitle": "Estimación del costo de entrada a la vivienda",
   "housingEntrySectionTitleWithCity": "Cuánto puede exigir la vivienda para entrar en {city}",
   "@housingEntrySectionTitleWithCity": {
@@ -1781,7 +1781,7 @@
   "migrationPlanCopilotRiskReadiness": "La mudanza todavía necesita una base inicial más fuerte. Resolvé primero los bloqueos prácticos antes de gastar más energía en detalles.",
   "migrationPlanCopilotRiskHousing": "La entrada a vivienda todavía puede generar fricción en la llegada. Revisá reserva, garantías y plan de fallback antes de tratar la mudanza como algo operativo.",
   "migrationPlanCopilotStagesTitle": "Abrí una etapa guiada",
-  "migrationPlanCopilotStagesBody": "Podés entrar directo en la etapa que necesitás, pero Movaro mantiene el orden claro para que la mudanza no pierda prioridad.",
+  "migrationPlanCopilotStagesBody": "Podés entrar directo en la etapa que necesitás, pero Mudavi mantiene el orden claro para que la mudanza no pierda prioridad.",
   "migrationPlanCopilotRecommendedTitle": "Área sugerida para revisar ahora",
   "migrationPlanCopilotRecommendedReadinessBody": "Esta etapa puede ayudar a destrabar los primeros bloqueos y darle una base más sólida al resto del plan.",
   "migrationPlanCopilotRecommendedDocumentsBody": "La capa documental podría merecer atención primero. Revisarla ahora puede reducir trabas más costosas después.",
@@ -1791,7 +1791,7 @@
   "migrationPlanCopilotQuickQuestionsTitle": "Dudas rápidas",
   "migrationPlanCopilotQuickQuestionsBody": "Usá estas respuestas cortas cuando aparezca una duda práctica antes de avanzar.",
   "migrationPlanCopilotQuickQuestionDocumentsTitle": "¿Qué documentos debería mover primero?",
-  "migrationPlanCopilotQuickQuestionDocumentsAnswer": "Empezá por los documentos que tardan más en salir o vencen antes. La etapa documental de Movaro te ayuda a separar lo que destraba residencia, CPF y llegada práctica sin empujarte de golpe a un flujo burocrático completo.",
+  "migrationPlanCopilotQuickQuestionDocumentsAnswer": "Empezá por los documentos que tardan más en salir o vencen antes. La etapa documental de Mudavi te ayuda a separar lo que destraba residencia, CPF y llegada práctica sin empujarte de golpe a un flujo burocrático completo.",
   "migrationPlanCopilotQuickQuestionHousingTitle": "¿Tengo que resolver vivienda definitiva ahora?",
   "migrationPlanCopilotQuickQuestionHousingAnswer": "No siempre. En muchos casos conviene entrar con un plan de vivienda temporal, entender garantías y recién después asumir un alquiler mayor. Lo importante ahora es estimar reserva, costo de entrada y plan de fallback.",
   "migrationPlanCopilotQuickQuestionArrivalTitle": "¿Qué tengo que resolver apenas llego?",
@@ -2187,7 +2187,7 @@
   "planStepDescriptionResidencePathBalanced": "Entendé la ruta de residencia y empezá a juntar los documentos base antes de entrar en burocracia fina.",
   "planStepDescriptionResidencePathUrgent": "Revisá la ruta de residencia y separá ya los documentos base para no trabarte en la ejecución.",
   "planStepDescriptionResidencePathFundingUnknown": "Antes de avanzar, entendé la ruta de residencia y aclará cómo vas a sostenerte los primeros meses para evitar bloqueos.",
-  "planStepDescriptionCpfStart": "El CPF te destraba muchas cosas en Brasil. Empezá con la guía oficial y seguí después en Movaro paso a paso.",
+  "planStepDescriptionCpfStart": "El CPF te destraba muchas cosas en Brasil. Empezá con la guía oficial y seguí después en Mudavi paso a paso.",
   "migrationPlanPrepHeroTitle": "Prepará la mudanza sin perderte en el proceso",
   "migrationPlanPrepHeroBody": "La idea acá no es marcar checklist. Primero entendé qué emitir, dónde abrir cada tema y qué guía resuelve tu próximo paso.",
   "migrationPlanPrepHeroBodyCompact": "Abrí la etapa correcta y prepará la mudanza sin perder el orden del plan.",
@@ -2251,7 +2251,7 @@
   "migrationPlanPrepWorkGuideTitle": "Vida práctica después de elegir ciudad",
   "migrationPlanPrepWorkGuideBody": "Usá estos bloques para abrir rápido trabajo, salud y movilidad. Son los temas que más se vuelven duda después de decidir la ciudad.",
   "migrationPlanPrepWorkSignalsTitle": "Señales de trabajo de la ciudad",
-  "migrationPlanPrepWorkSignalsBody": "Hoy Movaro muestra señales de mercado laboral, actividad económica y desempleo. El ingreso promedio todavía no está integrado al catálogo.",
+  "migrationPlanPrepWorkSignalsBody": "Hoy Mudavi muestra señales de mercado laboral, actividad económica y desempleo. El ingreso promedio todavía no está integrado al catálogo.",
   "migrationPlanPrepMoneyPracticeTitle": "Banco y dinero en la práctica",
   "migrationPlanPrepMoneyPracticeBody": "Abrí la guía pública del Banco Central para entender cuenta, Pix, pagos y organización financiera para migrantes.",
   "migrationPlanPrepDiplomaTitle": "Reconocer diploma y profesión",
@@ -2348,7 +2348,7 @@
   },
   "exploreNoJourneyLabel": "Set a destination to make exploration more relevant.",
   "explorePlanEmptyTitle": "Start a plan before you go deeper",
-  "explorePlanEmptyBody": "Choose your destination, answer a few questions, and let Movaro turn exploration into a practical direction.",
+  "explorePlanEmptyBody": "Choose your destination, answer a few questions, and let Mudavi turn exploration into a practical direction.",
   "explorePlanReadyTitle": "Your plan is ready to continue",
   "explorePlanReadyBody": "{city} is already confirmed. Open your checklist and keep moving through the next actions.",
   "@explorePlanReadyBody": {
@@ -2403,9 +2403,9 @@
   "mainNavExplore": "Explore",
   "mainNavPlan": "Plan",
   "mainNavProfile": "Profile",
-  "mainNavPlanNeedsJourney": "Choose your destination first so Movaro can open the right plan step.",
+  "mainNavPlanNeedsJourney": "Choose your destination first so Mudavi can open the right plan step.",
   "profileJourneyTitle": "Journey",
-  "profileJourneyBody": "Movaro usa esta ruta para mantener inicio, exploración y contenido conectados al mismo contexto de mudanza.",
+  "profileJourneyBody": "Mudavi usa esta ruta para mantener inicio, exploración y contenido conectados al mismo contexto de mudanza.",
   "profileJourneyValue": "{origin} -> {destination}",
   "@profileJourneyValue": {
     "placeholders": {
@@ -2433,7 +2433,7 @@
   "profileSavedCitiesTitle": "Ciudades guardadas",
   "profileSavedCitiesBody": "Guardá hasta 3 ciudades para compararlas sin perder la ruta ni el contexto del plan.",
   "journeyEntryDynamicTitle": "Empezá con una ruta que conecte tu origen y tu destino",
-  "journeyEntryDynamicBody": "Podés usar la ubicación como sugerencia o elegir todo manualmente. Movaro nunca fija tu origen sin confirmación.",
+  "journeyEntryDynamicBody": "Podés usar la ubicación como sugerencia o elegir todo manualmente. Mudavi nunca fija tu origen sin confirmación.",
   "journeyEntryUseLocationTitle": "Usar mi ubicación",
   "journeyEntryUseLocationBody": "Pedir permiso ahora, detectar tu país si es posible y dejarte confirmar el origen.",
   "journeyEntryUseLocationAction": "Usar mi ubicación",
@@ -2442,7 +2442,7 @@
   "journeyEntryManualAction": "Elegir manualmente",
   "journeyEntryContinueAction": "Continuar con preguntas rápidas",
   "journeyLocationPanelTitle": "La ubicación ahorra un paso, pero nunca decide por vos",
-  "journeyLocationPanelBody": "Con permiso, Movaro sugiere tu país como origen. Podés rechazarlo y elegir manualmente.",
+  "journeyLocationPanelBody": "Con permiso, Mudavi sugiere tu país como origen. Podés rechazarlo y elegir manualmente.",
   "journeyLocationFallbackTitle": "No encontramos un país utilizable",
   "journeyLocationDeniedBody": "El permiso fue rechazado. Seguí eligiendo origen y destino manualmente.",
   "journeyLocationDeniedForeverBody": "La ubicación está bloqueada para esta app. Igual podés elegir manualmente.",
@@ -2461,7 +2461,7 @@
       "country": {}
     }
   },
-  "journeyDetectedUnknownBody": "Movaro detectó {country}, pero no encontró ese país en el catálogo actual. Elegí el origen manualmente.",
+  "journeyDetectedUnknownBody": "Mudavi detectó {country}, pero no encontró ese país en el catálogo actual. Elegí el origen manualmente.",
   "@journeyDetectedUnknownBody": {
     "placeholders": {
       "country": {}
@@ -2476,7 +2476,7 @@
   "questionnaireOriginAutoDetectTitle": "Encontramos tu ubicación",
   "questionnaireOriginUnsupportedTitle": "Este país todavía no está cubierto",
   "questionnaireOriginLocationFailedTitle": "No pudimos detectar tu ubicación",
-  "questionnaireOriginUnsupportedBody": "Movaro detectó {country}, pero el plan guiado solo está disponible para personas que vienen desde Argentina por ahora. Podés elegir Argentina manualmente o usarla para continuar.",
+  "questionnaireOriginUnsupportedBody": "Mudavi detectó {country}, pero el plan guiado solo está disponible para personas que vienen desde Argentina por ahora. Podés elegir Argentina manualmente o usarla para continuar.",
   "@questionnaireOriginUnsupportedBody": {
     "placeholders": {
       "country": {}
@@ -2526,7 +2526,7 @@
     }
   },
   "journeyCoverageUnsupportedTitle": "Elegí una ruta con soporte para generar el plan",
-  "journeyCoverageUnsupportedBody": "Movaro todavía muestra ciudades y contenido práctico, pero el plan guiado requiere cobertura completa.",
+  "journeyCoverageUnsupportedBody": "Mudavi todavía muestra ciudades y contenido práctico, pero el plan guiado requiere cobertura completa.",
   "journeyCoverageChooseRouteAction": "Elegir otra ruta",
   "journeyCoverageBrowseAction": "Explorar ciudades",
   "journeyCoverageContentAction": "Abrir contenido",
@@ -2576,7 +2576,7 @@
   "infoGuideStepOneBody": "Tocá una tarjeta de sección para ver guías detalladas con fuentes oficiales de cada tema.",
   "infoGuideStepTwoTitle": "Buscá cualquier tema",
   "infoGuideStepTwoBody": "Usá la barra de búsqueda para encontrar respuestas sobre CPF, visa, SUS o cualquier otro asunto.",
-  "infoGuideStepThreeTitle": "Preguntale al asistente Movaro",
+  "infoGuideStepThreeTitle": "Preguntale al asistente Mudavi",
   "infoGuideStepThreeBody": "Tocá el botón azul en la esquina inferior derecha para chatear con nuestro asistente y obtener respuestas personalizadas.",
 
   "aiChatTitle": "Asistente",
@@ -2596,7 +2596,7 @@
   "aiChatSuggestCosts": "¿Cuánto cuesta mudarse?",
   "aiChatSuggestLicense": "¿Cómo validar mi licencia de conducir?",
 
-  "homeAssistantTitle": "Asistente Movaro",
+  "homeAssistantTitle": "Asistente Mudavi",
   "homeAssistantSubtitle": "Pregunta cualquier cosa sobre tu viaje",
   "homeAssistantSwipeHint": "Desliza para expandir ↑",
   "homeAssistantInputPlaceholder": "Pregunta algo...",
@@ -2691,7 +2691,7 @@
   "homeVisualWaypointDocuments": "docs",
   "homeVisualWaypointCosts": "costos",
   "homeVisualWaypointRoute": "ruta",
-  "assistantEntryTitle": "Asistente Movaro",
+  "assistantEntryTitle": "Asistente Mudavi",
   "assistantEntrySubtitle": "Resuelve dudas sobre tu mudanza",
   "assistantEntryOpenAction": "Abrir ↑",
   "assistantEntryInputHint": "O escribe tu pregunta...",

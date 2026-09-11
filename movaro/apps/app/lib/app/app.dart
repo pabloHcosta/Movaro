@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/bootstrap/app_dependencies.dart';
-import 'package:movaro_app/app/currency/currency_scope.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/localization/locale_scope.dart';
-import 'package:movaro_app/app/router/app_router.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_theme.dart';
-import 'package:movaro_app/core/exchange_rates/exchange_rates_scope.dart';
+import 'package:mudavi_app/app/bootstrap/app_dependencies.dart';
+import 'package:mudavi_app/app/currency/currency_scope.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/localization/locale_scope.dart';
+import 'package:mudavi_app/app/router/app_router.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_theme.dart';
+import 'package:mudavi_app/core/exchange_rates/exchange_rates_scope.dart';
 
-class MovaroApp extends StatelessWidget {
-  const MovaroApp({required this.dependencies, super.key});
+class MudaviApp extends StatelessWidget {
+  const MudaviApp({required this.dependencies, super.key});
 
   final AppDependencies dependencies;
 

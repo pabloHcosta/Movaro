@@ -1,7 +1,7 @@
-import 'package:movaro_app/core/constants/dart_define_keys.dart';
-import 'package:movaro_app/core/environment/api_source.dart';
-import 'package:movaro_app/core/environment/app_flavor.dart';
-import 'package:movaro_app/core/error/app_configuration_exception.dart';
+import 'package:mudavi_app/core/constants/dart_define_keys.dart';
+import 'package:mudavi_app/core/environment/api_source.dart';
+import 'package:mudavi_app/core/environment/app_flavor.dart';
+import 'package:mudavi_app/core/error/app_configuration_exception.dart';
 
 class AppEnvironment {
   const AppEnvironment({
@@ -80,8 +80,8 @@ class AppEnvironment {
         : apiBaseUrlValue.trim();
     final appName = appNameValue.isEmpty
         ? (flavor == AppFlavor.production
-              ? 'Movaro'
-              : 'Movaro ${flavor.displayName}')
+              ? 'Mudavi'
+              : 'Mudavi ${flavor.displayName}')
         : appNameValue;
 
     if (environmentName.trim().isEmpty) {
@@ -182,9 +182,9 @@ class AppEnvironment {
     switch (flavor) {
       case AppFlavor.development:
       case AppFlavor.production:
-        return 'https://movaro-production.up.railway.app';
+        return 'https://mudavi-production.up.railway.app';
       case AppFlavor.staging:
-        return 'https://staging.api.movaro.local';
+        return 'https://staging.api.mudavi.local';
     }
   }
 

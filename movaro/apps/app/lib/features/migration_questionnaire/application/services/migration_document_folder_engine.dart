@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/migration_questionnaire/application/services/criminal_record_decision_engine.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/criminal_record_decision_engine.dart';
 
 enum MigrationFolderAgeGroup { under18, adult }
 

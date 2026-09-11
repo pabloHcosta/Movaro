@@ -2,29 +2,29 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/practical_info_disclaimer.dart';
-import 'package:movaro_app/core/widgets/error_state_widget.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/skeletons.dart';
-import 'package:movaro_app/core/widgets/visual_data_cards.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
-import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_public_opinion.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/explore_entry_card.dart';
-import 'package:movaro_app/features/cities/presentation/pages/city_explore_screen.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
-import 'package:movaro_app/features/home/presentation/pages/city_comparison_screen.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/practical_info_disclaimer.dart';
+import 'package:mudavi_app/core/widgets/error_state_widget.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/skeletons.dart';
+import 'package:mudavi_app/core/widgets/visual_data_cards.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/cities/application/services/city_coastal_profile.dart';
+import 'package:mudavi_app/features/cities/application/services/city_image_catalog.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_public_opinion.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_metric_presenter.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/explore_entry_card.dart';
+import 'package:mudavi_app/features/cities/presentation/pages/city_explore_screen.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/home/presentation/pages/city_comparison_screen.dart';
 
 class MigrationPlanResultPage extends StatefulWidget {
   const MigrationPlanResultPage({
@@ -606,7 +606,7 @@ class _PlanHero extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          _ResultCityRating(score: city.movaroScores.overall),
+                          _ResultCityRating(score: city.mudaviScores.overall),
                           const SizedBox(height: 10),
                           Wrap(
                             spacing: 8,
@@ -716,7 +716,7 @@ class _HeroImageState extends State<_HeroImage> {
     return CachedNetworkImage(
       imageUrl: urls[_sourceIndex],
       fit: BoxFit.cover,
-      httpHeaders: const {'User-Agent': 'Movaro/1.0'},
+      httpHeaders: const {'User-Agent': 'Mudavi/1.0'},
       placeholder: (_, _) => const _HeroImagePlaceholder(),
       errorWidget: (_, _, _) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1004,7 +1004,7 @@ class _MetricsGrid extends StatelessWidget {
     final work = CityMetricPresentation.resolve(
       context,
       kind: CityMetricKind.work,
-      value: city.movaroScores.workOpportunity,
+      value: city.mudaviScores.workOpportunity,
     );
     final publicOpinion = city.publicOpinion;
     final alternativeMetric = publicOpinion?.rating != null
@@ -1451,7 +1451,7 @@ _ReasonInsight? _reasonInsightFor(
   final work = CityMetricPresentation.resolve(
     context,
     kind: CityMetricKind.work,
-    value: city.movaroScores.workOpportunity,
+    value: city.mudaviScores.workOpportunity,
   );
 
   switch (reasonId) {

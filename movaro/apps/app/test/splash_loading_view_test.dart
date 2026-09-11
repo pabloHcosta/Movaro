@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_theme.dart';
-import 'package:movaro_app/features/splash/presentation/pages/splash_loading_view.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_theme.dart';
+import 'package:mudavi_app/features/splash/presentation/pages/splash_loading_view.dart';
 
 void main() {
   testWidgets('splash keeps the brand hero readable on a compact phone', (
@@ -15,13 +15,13 @@ void main() {
   ) async {
     await _pumpSplash(tester, size: const Size(390, 844));
 
-    expect(find.text('Movaro'), findsOneWidget);
+    expect(find.text('Mudavi'), findsOneWidget);
     expect(find.text('Seu próximo passo começa com clareza.'), findsOneWidget);
     expect(find.text('Preparando seu caminho'), findsOneWidget);
     expect(find.byType(SvgPicture), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    await _captureIfRequested(tester, 'movaro-splash-portrait.png');
+    await _captureIfRequested(tester, 'mudavi-splash-portrait.png');
   });
 
   testWidgets('splash switches to a horizontal hero on desktop', (
@@ -30,13 +30,13 @@ void main() {
     await _pumpSplash(tester, size: const Size(1280, 720));
 
     final mark = tester.getRect(find.byType(SvgPicture));
-    final wordmark = tester.getRect(find.text('Movaro'));
+    final wordmark = tester.getRect(find.text('Mudavi'));
 
     expect(mark.center.dx, lessThan(wordmark.center.dx));
     expect(find.text('Preparando seu caminho'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    await _captureIfRequested(tester, 'movaro-splash-landscape.png');
+    await _captureIfRequested(tester, 'mudavi-splash-landscape.png');
   });
 }
 

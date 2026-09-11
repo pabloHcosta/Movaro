@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/flight_search/data/airport_database.dart';
-import 'package:movaro_app/features/flight_search/domain/services/flight_logistics_assessment_service.dart';
-import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
-import 'package:movaro_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
-import 'package:movaro_app/features/location/location_data.dart';
+import 'package:mudavi_app/features/flight_search/data/airport_database.dart';
+import 'package:mudavi_app/features/flight_search/domain/services/flight_logistics_assessment_service.dart';
+import 'package:mudavi_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
+import 'package:mudavi_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
+import 'package:mudavi_app/features/location/location_data.dart';
 
 void main() {
   group('FlightRouteContextResolver.resolveDestinationAirport', () {

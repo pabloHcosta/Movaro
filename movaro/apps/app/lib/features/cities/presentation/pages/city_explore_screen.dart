@@ -4,17 +4,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/config/api_keys.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/skeletons.dart';
-import 'package:movaro_app/features/cities/application/services/places_photo_service.dart';
-import 'package:movaro_app/features/cities/application/services/youtube_service.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/config/api_keys.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/skeletons.dart';
+import 'package:mudavi_app/features/cities/application/services/places_photo_service.dart';
+import 'package:mudavi_app/features/cities/application/services/youtube_service.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_image_backdrop.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -790,7 +790,7 @@ class _FeaturedVideoCard extends StatelessWidget {
                 child: CachedNetworkImage(
                   imageUrl: video.thumbnailUrl,
                   fit: BoxFit.cover,
-                  httpHeaders: const {'User-Agent': 'Movaro/1.0'},
+                  httpHeaders: const {'User-Agent': 'Mudavi/1.0'},
                   placeholder: (_, _) => const SkeletonBox(height: 120),
                   errorWidget: (_, _, _) => const ColoredBox(
                     color: Color(0xFF0D1F38),
@@ -923,7 +923,7 @@ class _VideoRowCard extends StatelessWidget {
                       height: 52,
                       width: 80,
                       fit: BoxFit.cover,
-                      httpHeaders: const {'User-Agent': 'Movaro/1.0'},
+                      httpHeaders: const {'User-Agent': 'Mudavi/1.0'},
                       placeholder: (_, _) =>
                           const SkeletonBox(height: 52, width: 80),
                       errorWidget: (_, _, _) => const ColoredBox(
@@ -1092,7 +1092,7 @@ class _PhotoTile extends StatelessWidget {
                 child: CachedNetworkImage(
                   imageUrl: item.url,
                   fit: BoxFit.cover,
-                  httpHeaders: const {'User-Agent': 'Movaro/1.0'},
+                  httpHeaders: const {'User-Agent': 'Mudavi/1.0'},
                   placeholder: (_, _) =>
                       SizedBox(height: height, child: const SkeletonBox()),
                   errorWidget: (_, _, _) => const ColoredBox(
@@ -1170,7 +1170,7 @@ class _PhotoHeroTile extends StatelessWidget {
                 child: CachedNetworkImage(
                   imageUrl: item.url,
                   fit: BoxFit.cover,
-                  httpHeaders: const {'User-Agent': 'Movaro/1.0'},
+                  httpHeaders: const {'User-Agent': 'Mudavi/1.0'},
                   placeholder: (_, _) => const SkeletonBox(height: 90),
                   errorWidget: (_, _, _) => const ColoredBox(
                     color: Color(0xFF163457),
@@ -1283,7 +1283,7 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
               return PhotoViewGalleryPageOptions(
                 imageProvider: CachedNetworkImageProvider(
                   widget.photos[index].url,
-                  headers: const {'User-Agent': 'Movaro/1.0'},
+                  headers: const {'User-Agent': 'Mudavi/1.0'},
                 ),
                 heroAttributes: PhotoViewHeroAttributes(tag: '$index-$title'),
               );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 
 class GuideWaitingCard extends StatelessWidget {
   const GuideWaitingCard({

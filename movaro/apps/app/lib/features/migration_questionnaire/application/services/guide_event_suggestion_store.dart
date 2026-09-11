@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:movaro_app/core/storage/persistent_json_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/core/storage/persistent_json_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:path_provider/path_provider.dart';
 
 typedef GuideEventSuggestionDirectoryProvider = Future<Directory> Function();
@@ -39,7 +39,7 @@ class GuideEventSuggestionPreference {
 }
 
 class GuideEventSuggestionStore {
-  static const _storageKey = 'movaro_guide_event_suggestions';
+  static const _storageKey = 'mudavi_guide_event_suggestions';
 
   GuideEventSuggestionStore({
     GuideEventSuggestionDirectoryProvider? directoryProvider,
@@ -171,6 +171,6 @@ class GuideEventSuggestionStore {
 
   Future<File> _file() async {
     final directory = await _directoryProvider();
-    return File('${directory.path}/movaro_guide_event_suggestions.json');
+    return File('${directory.path}/mudavi_guide_event_suggestions.json');
   }
 }

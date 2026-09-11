@@ -3,22 +3,22 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:movaro_app/core/environment/api_source.dart';
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/environment/app_flavor.dart';
-import 'package:movaro_app/core/network/network_client.dart';
-import 'package:movaro_app/features/info/application/quick_guide_answer_service.dart';
-import 'package:movaro_app/features/info/domain/entities/quick_guide_answer.dart';
+import 'package:mudavi_app/core/environment/api_source.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/core/environment/app_flavor.dart';
+import 'package:mudavi_app/core/network/network_client.dart';
+import 'package:mudavi_app/features/info/application/quick_guide_answer_service.dart';
+import 'package:mudavi_app/features/info/domain/entities/quick_guide_answer.dart';
 
 void main() {
   const environment = AppEnvironment(
     flavor: AppFlavor.production,
     environmentName: 'test',
     apiSource: ApiSource.railway,
-    apiBaseUrl: 'https://api.movaro.example',
+    apiBaseUrl: 'https://api.mudavi.example',
     localApiBaseUrl: '',
-    railwayApiBaseUrl: 'https://api.movaro.example',
-    appName: 'Movaro Test',
+    railwayApiBaseUrl: 'https://api.mudavi.example',
+    appName: 'Mudavi Test',
   );
 
   test('parses the structured quick-guide response', () async {

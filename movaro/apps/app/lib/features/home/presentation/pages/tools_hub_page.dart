@@ -2,19 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
-import 'package:movaro_app/features/info/application/quick_guide_question_catalog.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/info/presentation/pages/quick_guide_answer_page.dart';
-import 'package:movaro_app/features/info/application/quick_guide_preferences_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/responsive/responsive_context.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/home/presentation/widgets/main_navigation_bar.dart';
+import 'package:mudavi_app/features/info/application/quick_guide_question_catalog.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/features/info/presentation/pages/quick_guide_answer_page.dart';
+import 'package:mudavi_app/features/info/application/quick_guide_preferences_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
 
 String _guideText(
   BuildContext context, {
@@ -509,9 +509,9 @@ class _ToolsHubPageState extends State<ToolsHubPage> {
                       colors: const [Color(0xFF07354B), Color(0xFF087F7A)],
                       eyebrow: _guideText(
                         context,
-                        pt: 'PROTEÇÃO MOVARO',
-                        es: 'PROTECCIÓN MOVARO',
-                        en: 'MOVARO PROTECTION',
+                        pt: 'PROTEÇÃO MUDAVI',
+                        es: 'PROTECCIÓN MUDAVI',
+                        en: 'MUDAVI PROTECTION',
                       ),
                       title: _guideText(
                         context,

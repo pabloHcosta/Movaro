@@ -1,10 +1,10 @@
-import 'package:movaro_app/features/city_insights/application/services/city_insights_cache_store.dart';
-import 'package:movaro_app/features/city_insights/data/datasources/city_insights_remote_data_source.dart';
-import 'package:movaro_app/features/city_insights/data/models/city_insight_explore_place_model.dart';
-import 'package:movaro_app/features/city_insights/data/models/city_insight_model.dart';
-import 'package:movaro_app/features/city_insights/domain/entities/city_insight_entity.dart';
-import 'package:movaro_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
-import 'package:movaro_app/features/city_insights/domain/repositories/city_insight_repository.dart';
+import 'package:mudavi_app/features/city_insights/application/services/city_insights_cache_store.dart';
+import 'package:mudavi_app/features/city_insights/data/datasources/city_insights_remote_data_source.dart';
+import 'package:mudavi_app/features/city_insights/data/models/city_insight_explore_place_model.dart';
+import 'package:mudavi_app/features/city_insights/data/models/city_insight_model.dart';
+import 'package:mudavi_app/features/city_insights/domain/entities/city_insight_entity.dart';
+import 'package:mudavi_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
+import 'package:mudavi_app/features/city_insights/domain/repositories/city_insight_repository.dart';
 
 class CityInsightRepositoryImpl implements CityInsightRepository {
   CityInsightRepositoryImpl({

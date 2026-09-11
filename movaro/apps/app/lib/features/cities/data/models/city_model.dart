@@ -1,9 +1,9 @@
-import 'package:movaro_app/features/cities/data/models/city_budget_snapshot_model.dart';
-import 'package:movaro_app/features/cities/data/models/city_public_opinion_model.dart';
-import 'package:movaro_app/features/cities/data/models/city_scores_model.dart';
-import 'package:movaro_app/features/cities/data/models/city_seasonality_snapshot_model.dart';
-import 'package:movaro_app/features/cities/data/models/city_sources_model.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/data/models/city_budget_snapshot_model.dart';
+import 'package:mudavi_app/features/cities/data/models/city_public_opinion_model.dart';
+import 'package:mudavi_app/features/cities/data/models/city_scores_model.dart';
+import 'package:mudavi_app/features/cities/data/models/city_seasonality_snapshot_model.dart';
+import 'package:mudavi_app/features/cities/data/models/city_sources_model.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
 
 class CityModel {
   const CityModel({
@@ -27,7 +27,7 @@ class CityModel {
     required this.unemploymentRate,
     required this.economicActivityScore,
     required this.topIndustries,
-    required this.movaroScores,
+    required this.mudaviScores,
     required this.recommendationReasons,
     required this.sources,
     required this.updatedAt,
@@ -61,8 +61,8 @@ class CityModel {
       topIndustries: (json['topIndustries'] as List<dynamic>)
           .map((item) => item as String)
           .toList(),
-      movaroScores: CityScoresModel.fromJson(
-        json['movaroScores'] as Map<String, dynamic>,
+      mudaviScores: CityScoresModel.fromJson(
+        json['mudaviScores'] as Map<String, dynamic>,
       ),
       recommendationReasons: (json['recommendationReasons'] as List<dynamic>)
           .map((item) => item as String)
@@ -110,7 +110,7 @@ class CityModel {
   final double unemploymentRate;
   final int economicActivityScore;
   final List<String> topIndustries;
-  final CityScoresModel movaroScores;
+  final CityScoresModel mudaviScores;
   final List<String> recommendationReasons;
   final CitySourcesModel sources;
   final String updatedAt;
@@ -141,7 +141,7 @@ class CityModel {
       unemploymentRate: city.unemploymentRate,
       economicActivityScore: city.economicActivityScore,
       topIndustries: city.topIndustries,
-      movaroScores: CityScoresModel.fromEntity(city.movaroScores),
+      mudaviScores: CityScoresModel.fromEntity(city.mudaviScores),
       recommendationReasons: city.recommendationReasons,
       sources: CitySourcesModel.fromEntity(city.sources),
       updatedAt: city.updatedAt,
@@ -213,7 +213,7 @@ class CityModel {
     'unemploymentRate': unemploymentRate,
     'economicActivityScore': economicActivityScore,
     'topIndustries': topIndustries,
-    'movaroScores': movaroScores.toJson(),
+    'mudaviScores': mudaviScores.toJson(),
     'recommendationReasons': recommendationReasons,
     'sources': sources.toJson(),
     'updatedAt': updatedAt,
@@ -280,7 +280,7 @@ class CityModel {
     unemploymentRate: unemploymentRate,
     economicActivityScore: economicActivityScore,
     topIndustries: topIndustries,
-    movaroScores: movaroScores.toEntity(),
+    mudaviScores: mudaviScores.toEntity(),
     recommendationReasons: recommendationReasons,
     sources: sources.toEntity(),
     updatedAt: updatedAt,

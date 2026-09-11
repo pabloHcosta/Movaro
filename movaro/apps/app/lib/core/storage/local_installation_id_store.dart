@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalInstallationIdStore {
-  static const String _key = 'movaro.local_installation_id';
+  static const String _key = 'mudavi.local_installation_id';
 
   Future<String> getOrCreate() async {
     final preferences = await SharedPreferences.getInstance();

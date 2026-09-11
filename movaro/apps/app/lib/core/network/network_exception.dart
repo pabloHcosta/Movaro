@@ -1,4 +1,4 @@
-import 'package:movaro_app/core/network/api_error_model.dart';
+import 'package:mudavi_app/core/network/api_error_model.dart';
 
 class ApiException implements Exception {
   const ApiException(this.error);

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/info/application/quick_guide_preferences_store.dart';
+import 'package:mudavi_app/features/info/application/quick_guide_preferences_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

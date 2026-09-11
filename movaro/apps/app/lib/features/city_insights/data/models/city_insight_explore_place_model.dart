@@ -1,5 +1,5 @@
-import 'package:movaro_app/features/city_insights/domain/entities/city_insight_entity.dart';
-import 'package:movaro_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
+import 'package:mudavi_app/features/city_insights/domain/entities/city_insight_entity.dart';
+import 'package:mudavi_app/features/city_insights/domain/entities/city_insight_explore_place_entity.dart';
 
 class CityInsightExplorePlaceModel {
   const CityInsightExplorePlaceModel({

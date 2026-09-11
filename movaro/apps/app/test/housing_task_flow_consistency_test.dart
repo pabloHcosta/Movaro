@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_scores.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_source.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_sources.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/pages/housing_selection_screen.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_scores.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_source.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_sources.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/pages/housing_selection_screen.dart';
 
 void main() {
   testWidgets('housing task screens keep the same chrome in light and dark', (
@@ -97,7 +97,7 @@ const _city = City(
   unemploymentRate: 6,
   economicActivityScore: 74,
   topIndustries: ['Tecnologia', 'Serviços'],
-  movaroScores: CityScores(
+  mudaviScores: CityScores(
     economical: 65,
     popularForArgentinians: 76,
     languageAdaptation: 69,

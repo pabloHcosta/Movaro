@@ -1,10 +1,10 @@
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
-import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_recommendation.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_detail_payloads.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_highlights.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_methodology.dart';
+import 'package:mudavi_app/features/cities/domain/entities/travel_route_insight.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
 
 abstract class CitiesRepository {
   Future<CityRecommendationResult> recommendCities(

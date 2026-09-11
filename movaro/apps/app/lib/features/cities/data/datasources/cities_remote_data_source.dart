@@ -1,8 +1,8 @@
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/network/json_response_cache.dart';
-import 'package:movaro_app/core/network/network_client.dart';
-import 'package:movaro_app/core/network/network_exception.dart';
-import 'package:movaro_app/features/cities/data/datasources/cities_asset_fallback.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/core/network/json_response_cache.dart';
+import 'package:mudavi_app/core/network/network_client.dart';
+import 'package:mudavi_app/core/network/network_exception.dart';
+import 'package:mudavi_app/features/cities/data/datasources/cities_asset_fallback.dart';
 
 class CitiesRemoteDataSource {
   CitiesRemoteDataSource({

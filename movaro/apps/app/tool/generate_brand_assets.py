@@ -103,11 +103,11 @@ def _svg_markup(stroke: str) -> str:
 
 
 def _write_svgs() -> None:
-    (BRAND_DIR / "movaro_mark_light.svg").write_text(
+    (BRAND_DIR / "mudavi_mark_light.svg").write_text(
         _svg_markup("#F7FAFF"),
         encoding="utf-8",
     )
-    (BRAND_DIR / "movaro_mark_dark.svg").write_text(
+    (BRAND_DIR / "mudavi_mark_dark.svg").write_text(
         _svg_markup("#09111F"),
         encoding="utf-8",
     )
@@ -120,27 +120,27 @@ def generate() -> None:
     icon = _apply_mask(icon, rounded=True)
     icon_draw = ImageDraw.Draw(icon, "RGBA")
     _draw_mark(icon_draw, MARK_LIGHT)
-    icon.save(BRAND_DIR / "movaro_app_icon.png")
+    icon.save(BRAND_DIR / "mudavi_app_icon.png")
 
     foreground = _new_transparent()
     foreground_draw = ImageDraw.Draw(foreground, "RGBA")
     _draw_mark(foreground_draw, (255, 255, 255, 255))
-    foreground.save(BRAND_DIR / "movaro_app_icon_foreground.png")
+    foreground.save(BRAND_DIR / "mudavi_app_icon_foreground.png")
 
     monochrome = _new_transparent()
     monochrome_draw = ImageDraw.Draw(monochrome, "RGBA")
     _draw_mark(monochrome_draw, (0, 0, 0, 255))
-    monochrome.save(BRAND_DIR / "movaro_app_icon_monochrome.png")
+    monochrome.save(BRAND_DIR / "mudavi_app_icon_monochrome.png")
 
     ios_dark = _new_transparent()
     ios_dark_draw = ImageDraw.Draw(ios_dark, "RGBA")
     _draw_mark(ios_dark_draw, (255, 255, 255, 255))
-    ios_dark.save(BRAND_DIR / "movaro_app_icon_ios_dark.png")
+    ios_dark.save(BRAND_DIR / "mudavi_app_icon_ios_dark.png")
 
     ios_tinted = _new_transparent()
     ios_tinted_draw = ImageDraw.Draw(ios_tinted, "RGBA")
     _draw_mark(ios_tinted_draw, MARK_TINTED)
-    ios_tinted.save(BRAND_DIR / "movaro_app_icon_ios_tinted.png")
+    ios_tinted.save(BRAND_DIR / "mudavi_app_icon_ios_tinted.png")
 
     _write_svgs()
 

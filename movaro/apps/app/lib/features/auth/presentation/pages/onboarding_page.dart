@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart';
-import 'package:movaro_app/features/catalog/domain/repositories/catalog_repository.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/empty_state_widget.dart';
-import 'package:movaro_app/core/widgets/error_state_widget.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/loading_state_widget.dart';
-import 'package:movaro_app/core/widgets/skeletons.dart';
-import 'package:movaro_app/features/auth/application/auth_controller.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/features/catalog/domain/entities/catalog_country.dart';
+import 'package:mudavi_app/features/catalog/domain/repositories/catalog_repository.dart';
+import 'package:mudavi_app/core/responsive/responsive_context.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/empty_state_widget.dart';
+import 'package:mudavi_app/core/widgets/error_state_widget.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/loading_state_widget.dart';
+import 'package:mudavi_app/core/widgets/skeletons.dart';
+import 'package:mudavi_app/features/auth/application/auth_controller.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({

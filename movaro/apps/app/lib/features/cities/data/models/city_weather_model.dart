@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
 
 class CityWeatherModel {
   const CityWeatherModel({

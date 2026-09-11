@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
-import 'package:movaro_app/features/home/application/city_feed_datasource.dart';
-import 'package:movaro_app/features/home/presentation/widgets/city_feed_widget.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_detail_payloads.dart';
+import 'package:mudavi_app/features/home/application/city_feed_datasource.dart';
+import 'package:mudavi_app/features/home/presentation/widgets/city_feed_widget.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
 
 void main() {
   test('For You fallback exposes only traceable official cards', () {
@@ -22,7 +22,7 @@ void main() {
     );
     expect(
       items.any(
-        (item) => (item.sourceLabel ?? '').toLowerCase().contains('movaro'),
+        (item) => (item.sourceLabel ?? '').toLowerCase().contains('mudavi'),
       ),
       isFalse,
     );
@@ -36,7 +36,7 @@ void main() {
       argentinaPopularityScore: 90,
       socialSignals: [],
       sources: [
-        CityDetailSource(label: 'Movaro internal model', type: 'curated'),
+        CityDetailSource(label: 'Mudavi internal model', type: 'curated'),
       ],
     );
 

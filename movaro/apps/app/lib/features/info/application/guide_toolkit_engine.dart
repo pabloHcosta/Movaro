@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/info/domain/entities/guide_toolkit.dart';
+import 'package:mudavi_app/features/info/domain/entities/guide_toolkit.dart';
 
 class GuideToolkitEngine {
   const GuideToolkitEngine();

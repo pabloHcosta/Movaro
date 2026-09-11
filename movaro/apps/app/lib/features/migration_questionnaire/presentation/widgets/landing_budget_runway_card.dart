@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/landing_budget_runway.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/landing_budget_runway.dart';
 
 class LandingBudgetRunwayCard extends StatelessWidget {
   const LandingBudgetRunwayCard({

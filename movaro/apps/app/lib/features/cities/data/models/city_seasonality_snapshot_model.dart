@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/cities/domain/entities/city_seasonality_snapshot.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_seasonality_snapshot.dart';
 
 class CitySeasonalitySnapshotModel {
   const CitySeasonalitySnapshotModel({

@@ -1,26 +1,26 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
-import 'package:movaro_app/features/catalog/data/repositories/catalog_repository_impl.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/journey/journey_preferences_store.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_highlights.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_methodology.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_scores.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_source.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_sources.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
-import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/repositories/question_repository_impl.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/answer.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
+import 'package:mudavi_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
+import 'package:mudavi_app/features/catalog/data/repositories/catalog_repository_impl.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/features/journey/journey_preferences_store.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_recommendation.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_highlights.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_methodology.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_scores.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_source.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_sources.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/cities/domain/repositories/cities_repository.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_plan_generator.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/questionnaire_flow_draft_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/repositories/local_migration_plan_repository.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/repositories/question_repository_impl.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/answer.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +33,7 @@ void main() {
 
     setUp(() async {
       tempDirectory = await Directory.systemTemp.createTemp(
-        'movaro_questionnaire_test',
+        'mudavi_questionnaire_test',
       );
       final catalogRepository = CatalogRepositoryImpl(
         dataSource: SeedCatalogDataSource(),
@@ -395,7 +395,7 @@ class _InMemoryQuestionnaireFlowDraftStore extends QuestionnaireFlowDraftStore {
 const _testSource = CitySource(
   id: 'source',
   title: 'Source',
-  provider: 'Movaro',
+  provider: 'Mudavi',
   description: 'Mock source',
   isOfficial: true,
   url: null,
@@ -446,7 +446,7 @@ class _FakeCitiesRepository implements CitiesRepository {
       unemploymentRate: 6,
       economicActivityScore: 76,
       topIndustries: ['Tecnologia'],
-      movaroScores: CityScores(
+      mudaviScores: CityScores(
         economical: 76,
         popularForArgentinians: 68,
         languageAdaptation: 72,

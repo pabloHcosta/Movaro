@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart';
-import 'package:movaro_app/features/journey/detected_location.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/location/argentina_locality.dart';
-import 'package:movaro_app/features/location/argentina_locality_catalog.dart';
-import 'package:movaro_app/features/location/location_data.dart';
-import 'package:movaro_app/features/location/location_service.dart';
-import 'package:movaro_app/features/location/location_storage.dart';
+import 'package:mudavi_app/features/catalog/domain/entities/catalog_country.dart';
+import 'package:mudavi_app/features/journey/detected_location.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/features/location/argentina_locality.dart';
+import 'package:mudavi_app/features/location/argentina_locality_catalog.dart';
+import 'package:mudavi_app/features/location/location_data.dart';
+import 'package:mudavi_app/features/location/location_service.dart';
+import 'package:mudavi_app/features/location/location_storage.dart';
 
 class LocationController extends ChangeNotifier {
   LocationController({

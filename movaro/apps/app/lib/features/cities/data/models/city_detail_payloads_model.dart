@@ -1,5 +1,5 @@
-import 'package:movaro_app/features/cities/data/models/city_public_opinion_model.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_detail_payloads.dart';
+import 'package:mudavi_app/features/cities/data/models/city_public_opinion_model.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_detail_payloads.dart';
 
 class CityDetailPayloadsModel {
   const CityDetailPayloadsModel._();

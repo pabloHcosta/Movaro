@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 abstract class MigrationPlanRepository {
   Future<MigrationPlan?> getCurrentPlan();

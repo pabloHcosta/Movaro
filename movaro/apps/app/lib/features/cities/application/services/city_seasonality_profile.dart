@@ -1,8 +1,8 @@
-export 'package:movaro_app/features/cities/domain/entities/city_seasonality_snapshot.dart'
+export 'package:mudavi_app/features/cities/domain/entities/city_seasonality_snapshot.dart'
     show CitySeasonalitySnapshot, CitySeasonalitySeverity;
 
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_seasonality_snapshot.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_seasonality_snapshot.dart';
 
 typedef CitySeasonalityData = CitySeasonalitySnapshot;
 

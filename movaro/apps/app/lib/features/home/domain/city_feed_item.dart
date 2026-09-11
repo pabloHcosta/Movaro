@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
 
 enum CityFeedItemType {
   costUpdate,

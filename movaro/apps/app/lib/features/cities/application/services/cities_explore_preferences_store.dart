@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:movaro_app/core/storage/persistent_json_store.dart';
+import 'package:mudavi_app/core/storage/persistent_json_store.dart';
 import 'package:path_provider/path_provider.dart';
 
 typedef CitiesExploreDirectoryProvider = Future<Directory> Function();
 
 class CitiesExplorePreferencesStore {
-  static const _storageKey = 'movaro_cities_explore';
+  static const _storageKey = 'mudavi_cities_explore';
 
   CitiesExplorePreferencesStore({
     CitiesExploreDirectoryProvider? directoryProvider,
@@ -47,6 +47,6 @@ class CitiesExplorePreferencesStore {
 
   Future<File> _file() async {
     final directory = await _directoryProvider();
-    return File('${directory.path}/movaro_cities_explore.json');
+    return File('${directory.path}/mudavi_cities_explore.json');
   }
 }

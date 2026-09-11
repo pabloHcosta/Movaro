@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:movaro_app/core/environment/api_source.dart';
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/environment/app_flavor.dart';
-import 'package:movaro_app/core/network/network_client.dart';
-import 'package:movaro_app/core/network/network_exception.dart';
+import 'package:mudavi_app/core/environment/api_source.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/core/environment/app_flavor.dart';
+import 'package:mudavi_app/core/network/network_client.dart';
+import 'package:mudavi_app/core/network/network_exception.dart';
 
 void main() {
   const environment = AppEnvironment(
@@ -16,8 +16,8 @@ void main() {
     apiSource: ApiSource.local,
     apiBaseUrl: 'https://expired-local-tunnel.example',
     localApiBaseUrl: 'https://expired-local-tunnel.example',
-    railwayApiBaseUrl: 'https://movaro-production.up.railway.app',
-    appName: 'Movaro',
+    railwayApiBaseUrl: 'https://mudavi-production.up.railway.app',
+    appName: 'Mudavi',
   );
 
   test('falls back to Railway when the local transport is invalid', () async {
@@ -44,7 +44,7 @@ void main() {
     expect(result, {'status': 'ok'});
     expect(visitedHosts, [
       'expired-local-tunnel.example',
-      'movaro-production.up.railway.app',
+      'mudavi-production.up.railway.app',
     ]);
   });
 

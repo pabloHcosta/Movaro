@@ -1,8 +1,8 @@
-import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_scores.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_public_opinion.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_seasonality_snapshot.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_sources.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_budget_snapshot.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_scores.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_public_opinion.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_seasonality_snapshot.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_sources.dart';
 
 class City {
   const City({
@@ -26,7 +26,7 @@ class City {
     required this.unemploymentRate,
     required this.economicActivityScore,
     required this.topIndustries,
-    required this.movaroScores,
+    required this.mudaviScores,
     required this.recommendationReasons,
     required this.sources,
     required this.updatedAt,
@@ -56,7 +56,7 @@ class City {
   final double unemploymentRate;
   final int economicActivityScore;
   final List<String> topIndustries;
-  final CityScores movaroScores;
+  final CityScores mudaviScores;
   final List<String> recommendationReasons;
   final CitySources sources;
   final String updatedAt;

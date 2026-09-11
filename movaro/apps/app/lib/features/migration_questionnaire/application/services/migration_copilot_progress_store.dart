@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:movaro_app/core/storage/persistent_json_store.dart';
+import 'package:mudavi_app/core/storage/persistent_json_store.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 typedef CopilotDirectoryProvider = Future<Directory> Function();
 
@@ -58,7 +58,7 @@ class MigrationCopilotProgressSnapshot {
 }
 
 class MigrationCopilotProgressStore {
-  static const _storageKey = 'movaro_copilot_progress';
+  static const _storageKey = 'mudavi_copilot_progress';
 
   MigrationCopilotProgressStore({CopilotDirectoryProvider? directoryProvider})
     : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
@@ -342,6 +342,6 @@ class MigrationCopilotProgressStore {
 
   Future<File> _file() async {
     final directory = await _directoryProvider();
-    return File('${directory.path}/movaro_copilot_progress.json');
+    return File('${directory.path}/mudavi_copilot_progress.json');
   }
 }

@@ -1,6 +1,6 @@
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_step.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_step.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
 
 class MigrationPlan {
   const MigrationPlan({

@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:movaro_app/features/flight_search/data/airport_database.dart';
-import 'package:movaro_app/features/flight_search/domain/models/airport.dart';
+import 'package:mudavi_app/features/flight_search/data/airport_database.dart';
+import 'package:mudavi_app/features/flight_search/domain/models/airport.dart';
 
 /// Finds airports near the user's GPS position using the Haversine formula.
 class AirportFinderService {

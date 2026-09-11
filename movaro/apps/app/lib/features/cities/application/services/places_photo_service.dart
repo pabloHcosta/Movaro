@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:movaro_app/core/config/api_keys.dart';
-import 'package:movaro_app/features/cities/application/services/city_image_catalog.dart';
+import 'package:mudavi_app/core/config/api_keys.dart';
+import 'package:mudavi_app/features/cities/application/services/city_image_catalog.dart';
 
 class CityPhotoItem {
   const CityPhotoItem({

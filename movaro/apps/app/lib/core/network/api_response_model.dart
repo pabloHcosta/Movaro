@@ -1,4 +1,4 @@
-import 'package:movaro_app/core/network/api_error_model.dart';
+import 'package:mudavi_app/core/network/api_error_model.dart';
 
 class ApiResponseModel<T> {
   const ApiResponseModel({required this.success, this.data, this.error});

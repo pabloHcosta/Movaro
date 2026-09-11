@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
 
 class FederalPoliceUnitContact {
   const FederalPoliceUnitContact({required this.label, required this.email});

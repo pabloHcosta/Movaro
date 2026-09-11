@@ -64,7 +64,7 @@ class CityShareCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 const Text(
-                  'Movaro',
+                  'Mudavi',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,

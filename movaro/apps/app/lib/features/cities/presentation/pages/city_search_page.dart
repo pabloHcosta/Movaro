@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/errors/error_handler.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/empty_state_widget.dart';
-import 'package:movaro_app/core/widgets/error_state_widget.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/journey_stage_banner.dart';
-import 'package:movaro_app/core/widgets/loading_state_widget.dart';
-import 'package:movaro_app/core/widgets/skeletons.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/cities/application/services/city_coastal_profile.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_arrival_profile_ranker.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_card.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_search_matcher.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/methodology_info_banner.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/errors/error_handler.dart';
+import 'package:mudavi_app/core/responsive/responsive_context.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/empty_state_widget.dart';
+import 'package:mudavi_app/core/widgets/error_state_widget.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/journey_stage_banner.dart';
+import 'package:mudavi_app/core/widgets/loading_state_widget.dart';
+import 'package:mudavi_app/core/widgets/skeletons.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/cities/application/services/city_coastal_profile.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_arrival_profile_ranker.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_card.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_search_matcher.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/methodology_info_banner.dart';
 
 class CitySearchPage extends StatefulWidget {
   const CitySearchPage({required this.citiesController, super.key});
@@ -350,28 +350,28 @@ class _CitySearchPageState extends State<CitySearchPage> {
         return ranked.map((entry) => entry.city).toList();
       case _CityQuickFilter.popular:
         filteredCities.sort(
-          (a, b) => b.movaroScores.popularForArgentinians.compareTo(
-            a.movaroScores.popularForArgentinians,
+          (a, b) => b.mudaviScores.popularForArgentinians.compareTo(
+            a.mudaviScores.popularForArgentinians,
           ),
         );
         return filteredCities;
       case _CityQuickFilter.lowCost:
         filteredCities.sort(
           (a, b) =>
-              b.movaroScores.economical.compareTo(a.movaroScores.economical),
+              b.mudaviScores.economical.compareTo(a.mudaviScores.economical),
         );
         return filteredCities;
       case _CityQuickFilter.work:
         filteredCities.sort(
-          (a, b) => b.movaroScores.workOpportunity.compareTo(
-            a.movaroScores.workOpportunity,
+          (a, b) => b.mudaviScores.workOpportunity.compareTo(
+            a.mudaviScores.workOpportunity,
           ),
         );
         return filteredCities;
       case _CityQuickFilter.language:
         filteredCities.sort(
-          (a, b) => b.movaroScores.languageAdaptation.compareTo(
-            a.movaroScores.languageAdaptation,
+          (a, b) => b.mudaviScores.languageAdaptation.compareTo(
+            a.mudaviScores.languageAdaptation,
           ),
         );
         return filteredCities;
@@ -1097,16 +1097,16 @@ class _CitySemanticSearch {
     }
 
     if (_hasAny(_cheapTerms)) {
-      total += city.movaroScores.economical;
+      total += city.mudaviScores.economical;
     }
     if (_hasAny(_popularTerms)) {
-      total += city.movaroScores.popularForArgentinians;
+      total += city.mudaviScores.popularForArgentinians;
     }
     if (_hasAny(_workTerms)) {
-      total += city.movaroScores.workOpportunity;
+      total += city.mudaviScores.workOpportunity;
     }
     if (_hasAny(_languageTerms)) {
-      total += city.movaroScores.languageAdaptation;
+      total += city.mudaviScores.languageAdaptation;
     }
     if (_hasAny(_safetyTerms)) {
       total += city.safetyScore;

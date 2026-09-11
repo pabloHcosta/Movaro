@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:movaro_app/core/storage/versioned_json_file_store.dart';
+import 'package:mudavi_app/core/storage/versioned_json_file_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 typedef PersistentJsonFileProvider = Future<File> Function();

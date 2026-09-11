@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 
 enum GuideTaskContentDensity { light, balanced, rich }
 

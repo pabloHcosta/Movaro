@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 String _t(
@@ -19,7 +19,7 @@ String _t(
   };
 }
 
-/// "Por que confiar no Movaro" (F6) + "Apoio oficial" (F5) + a categories-only
+/// "Por que confiar no Mudavi" (F6) + "Apoio oficial" (F5) + a categories-only
 /// services scaffold (F6 monetization groundwork — no invented listings).
 class TrustAndSupportPage extends StatelessWidget {
   const TrustAndSupportPage({super.key});
@@ -50,9 +50,9 @@ class TrustAndSupportPage extends StatelessWidget {
                         context,
                         title: _t(
                           context,
-                          pt: 'Por que confiar no Movaro',
-                          es: 'Por qué confiar en Movaro',
-                          en: 'Why trust Movaro',
+                          pt: 'Por que confiar no Mudavi',
+                          es: 'Por qué confiar en Mudavi',
+                          en: 'Why trust Mudavi',
                         ),
                         children: [
                           _point(
@@ -130,9 +130,9 @@ class TrustAndSupportPage extends StatelessWidget {
                             ),
                             body: _t(
                               context,
-                              pt: 'O Movaro é um ponto de partida prático. Para decisões oficiais, confirme sempre na fonte (Polícia Federal, gov.br).',
-                              es: 'Movaro es un punto de partida práctico. Para decisiones oficiales, confirmá siempre en la fuente (Policía Federal, gov.br).',
-                              en: 'Movaro is a practical starting point. For official decisions, always confirm at the source (Federal Police, gov.br).',
+                              pt: 'O Mudavi é um ponto de partida prático. Para decisões oficiais, confirme sempre na fonte (Polícia Federal, gov.br).',
+                              es: 'Mudavi es un punto de partida práctico. Para decisiones oficiales, confirmá siempre en la fuente (Policía Federal, gov.br).',
+                              en: 'Mudavi is a practical starting point. For official decisions, always confirm at the source (Federal Police, gov.br).',
                             ),
                           ),
                         ],
@@ -336,9 +336,9 @@ class TrustAndSupportPage extends StatelessWidget {
                             context,
                             _t(
                               context,
-                              pt: 'Parcerias verificadas chegarão aqui. Por ora, o Movaro não recomenda empresas específicas — confirme credenciais antes de contratar.',
-                              es: 'Pronto habrá alianzas verificadas. Por ahora, Movaro no recomienda empresas específicas — verificá credenciales antes de contratar.',
-                              en: 'Verified partners are coming. For now, Movaro does not endorse specific companies — verify credentials before hiring.',
+                              pt: 'Parcerias verificadas chegarão aqui. Por ora, o Mudavi não recomenda empresas específicas — confirme credenciais antes de contratar.',
+                              es: 'Pronto habrá alianzas verificadas. Por ahora, Mudavi no recomienda empresas específicas — verificá credenciales antes de contratar.',
+                              en: 'Verified partners are coming. For now, Mudavi does not endorse specific companies — verify credentials before hiring.',
                             ),
                           ),
                         ],

@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
 
 enum CityLifestyleKind { coastal, metropolis, border, inland }
 
@@ -92,7 +92,7 @@ class CityCoastalProfile {
         (city.rentScore * 20) +
         (city.spanishSupportScore * 15) +
         (city.argentinaPopularityScore * 15) +
-        (city.movaroScores.overall * 20);
+        (city.mudaviScores.overall * 20);
   }
 
   static int softLandingScore(City city) {
@@ -100,7 +100,7 @@ class CityCoastalProfile {
         (city.spanishSupportScore * 25) +
         (city.safetyScore * 20) +
         (city.argentinaPopularityScore * 10) +
-        (city.movaroScores.overall * 10);
+        (city.mudaviScores.overall * 10);
   }
 
   static int balancedScore(City city) {
@@ -108,6 +108,6 @@ class CityCoastalProfile {
         (city.rentScore * 20) +
         (city.jobMarketScore * 15) +
         (city.costOfLivingScore * 15) +
-        (city.movaroScores.overall * 20);
+        (city.mudaviScores.overall * 20);
   }
 }

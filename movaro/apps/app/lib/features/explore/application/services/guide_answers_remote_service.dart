@@ -1,4 +1,4 @@
-import 'package:movaro_app/core/network/network_client.dart';
+import 'package:mudavi_app/core/network/network_client.dart';
 
 class GuideAnswerRemoteItem {
   const GuideAnswerRemoteItem({

@@ -14,7 +14,7 @@ class ShareCardService {
     required Widget card,
     required Size logicalSize,
     required String caption,
-    String fileName = 'movaro_card.png',
+    String fileName = 'mudavi_card.png',
     double pixelRatio = 3.0,
   }) async {
     final overlay = Overlay.of(context, rootOverlay: true);

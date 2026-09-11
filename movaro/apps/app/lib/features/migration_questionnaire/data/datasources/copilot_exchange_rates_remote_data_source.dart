@@ -1,5 +1,5 @@
-import 'package:movaro_app/core/environment/app_environment.dart';
-import 'package:movaro_app/core/network/network_client.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/core/network/network_client.dart';
 
 class CopilotExchangeRatesRemoteDataSource {
   CopilotExchangeRatesRemoteDataSource({required AppEnvironment environment})

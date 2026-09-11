@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/features/location/location_controller.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/features/flight_search/data/airport_database.dart';
-import 'package:movaro_app/features/flight_search/domain/models/airport.dart';
-import 'package:movaro_app/features/flight_search/domain/models/flight_search_params.dart';
-import 'package:movaro_app/features/flight_search/domain/services/airport_finder_service.dart';
-import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
-import 'package:movaro_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
-import 'package:movaro_app/features/flight_search/domain/services/flight_url_builder.dart';
-import 'package:movaro_app/app/currency/currency_scope.dart';
-import 'package:movaro_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/features/location/location_controller.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/features/flight_search/data/airport_database.dart';
+import 'package:mudavi_app/features/flight_search/domain/models/airport.dart';
+import 'package:mudavi_app/features/flight_search/domain/models/flight_search_params.dart';
+import 'package:mudavi_app/features/flight_search/domain/services/airport_finder_service.dart';
+import 'package:mudavi_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
+import 'package:mudavi_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
+import 'package:mudavi_app/features/flight_search/domain/services/flight_url_builder.dart';
+import 'package:mudavi_app/app/currency/currency_scope.dart';
+import 'package:mudavi_app/features/flight_search/presentation/widgets/flight_seasonality_card.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
 
 // ── Public entry-point widget ─────────────────────────────────────────────────
 
-/// Intelligent flight-search card shown inside the Movaro migration guide.
+/// Intelligent flight-search card shown inside the Mudavi migration guide.
 ///
 /// Reads the user's GPS via [locationController] to pre-select the nearest
 /// departure airport. The destination is pre-filled from [destinationCityName]

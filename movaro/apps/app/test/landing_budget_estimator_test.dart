@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_scores.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_source.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_sources.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/landing_budget_estimator.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_budget_snapshot.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_scores.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_source.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_sources.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/landing_budget_estimator.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 void main() {
   test('applies the household factor to every city-backed scenario', () {
@@ -90,7 +90,7 @@ const _city = City(
   unemploymentRate: 7,
   economicActivityScore: 78,
   topIndustries: ['Tecnologia'],
-  movaroScores: CityScores(
+  mudaviScores: CityScores(
     economical: 70,
     popularForArgentinians: 60,
     languageAdaptation: 55,

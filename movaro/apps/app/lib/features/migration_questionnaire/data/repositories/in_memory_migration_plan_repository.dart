@@ -1,5 +1,5 @@
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/repositories/migration_plan_repository.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/repositories/migration_plan_repository.dart';
 
 class InMemoryMigrationPlanRepository implements MigrationPlanRepository {
   final List<MigrationPlan> _savedPlans = [];

@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
-import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_budget_snapshot.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 enum LandingBudgetScenario { lean, balanced, comfortable }
 

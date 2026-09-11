@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:movaro_app/features/location/location_data.dart';
+import 'package:mudavi_app/features/location/location_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocationStorage {

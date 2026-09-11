@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:movaro_app/core/storage/persistent_json_store.dart';
+import 'package:mudavi_app/core/storage/persistent_json_store.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/answer.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/answer.dart';
 
 typedef QuestionnaireFlowDirectoryProvider = Future<Directory> Function();
 
@@ -28,7 +28,7 @@ class QuestionnaireFlowDraftSnapshot {
 }
 
 class QuestionnaireFlowDraftStore {
-  static const _storageKey = 'movaro_questionnaire_flow_draft';
+  static const _storageKey = 'mudavi_questionnaire_flow_draft';
 
   QuestionnaireFlowDraftStore({
     QuestionnaireFlowDirectoryProvider? directoryProvider,
@@ -156,6 +156,6 @@ class QuestionnaireFlowDraftStore {
 
   Future<File> _file() async {
     final directory = await _directoryProvider();
-    return File('${directory.path}/movaro_questionnaire_flow_draft.json');
+    return File('${directory.path}/mudavi_questionnaire_flow_draft.json');
   }
 }

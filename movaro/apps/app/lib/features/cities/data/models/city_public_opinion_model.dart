@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/cities/domain/entities/city_public_opinion.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_public_opinion.dart';
 
 class CityPublicOpinionModel {
   const CityPublicOpinionModel({

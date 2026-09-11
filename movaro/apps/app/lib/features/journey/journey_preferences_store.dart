@@ -1,13 +1,13 @@
 import 'dart:io';
 
-import 'package:movaro_app/core/storage/persistent_json_store.dart';
+import 'package:mudavi_app/core/storage/persistent_json_store.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_state_sync_coordinator.dart';
 
 typedef JourneyDirectoryProvider = Future<Directory> Function();
 
 class JourneyPreferencesStore {
-  static const _storageKey = 'movaro_journey_context';
+  static const _storageKey = 'mudavi_journey_context';
 
   JourneyPreferencesStore({JourneyDirectoryProvider? directoryProvider})
     : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
@@ -49,6 +49,6 @@ class JourneyPreferencesStore {
 
   Future<File> _file() async {
     final directory = await _directoryProvider();
-    return File('${directory.path}/movaro_journey_context.json');
+    return File('${directory.path}/mudavi_journey_context.json');
   }
 }

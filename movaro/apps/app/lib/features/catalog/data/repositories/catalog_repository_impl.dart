@@ -1,6 +1,6 @@
-import 'package:movaro_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
-import 'package:movaro_app/features/catalog/domain/entities/catalog_country.dart';
-import 'package:movaro_app/features/catalog/domain/repositories/catalog_repository.dart';
+import 'package:mudavi_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
+import 'package:mudavi_app/features/catalog/domain/entities/catalog_country.dart';
+import 'package:mudavi_app/features/catalog/domain/repositories/catalog_repository.dart';
 
 class CatalogRepositoryImpl implements CatalogRepository {
   CatalogRepositoryImpl({required SeedCatalogDataSource dataSource})

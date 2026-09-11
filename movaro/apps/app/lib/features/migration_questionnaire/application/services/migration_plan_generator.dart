@@ -1,10 +1,10 @@
-import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
-import 'package:movaro_app/features/cities/domain/repositories/cities_repository.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/models/migration_plan_model.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/models/migration_step_model.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/answer.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_recommendation.dart';
+import 'package:mudavi_app/features/cities/domain/repositories/cities_repository.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/models/migration_plan_model.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/models/migration_step_model.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/answer.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
 
 /// Builds a migration plan from the versioned recommendation returned by API.
 ///

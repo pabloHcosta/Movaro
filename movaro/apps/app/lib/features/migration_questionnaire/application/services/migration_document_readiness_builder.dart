@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/generated/app_localizations.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/app/localization/generated/app_localizations.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 enum MigrationDocumentReadinessPriority { critical, prepare, arrival }
 
@@ -84,7 +84,7 @@ class MigrationDocumentReadinessBuilder {
           priority: MigrationDocumentReadinessPriority.critical,
           risk: MigrationDocumentReadinessRisk.blocking,
           reviewMoment: MigrationDocumentReadinessReviewMoment.beforeBooking,
-          sourceLabel: l10n.sourceProviderMovaro,
+          sourceLabel: l10n.sourceProviderMudavi,
           icon: Icons.perm_identity_outlined,
           title: l10n.documentReadinessIdentityPackTitle,
           description: l10n.documentReadinessIdentityPackBody,
@@ -114,7 +114,7 @@ class MigrationDocumentReadinessBuilder {
           priority: MigrationDocumentReadinessPriority.prepare,
           risk: MigrationDocumentReadinessRisk.caution,
           reviewMoment: MigrationDocumentReadinessReviewMoment.closeToMove,
-          sourceLabel: l10n.sourceProviderMovaro,
+          sourceLabel: l10n.sourceProviderMudavi,
           icon: Icons.house_siding_outlined,
           title: l10n.documentReadinessHousingProofTitle,
           description: l10n.documentReadinessHousingProofBodyBrazil,
@@ -144,7 +144,7 @@ class MigrationDocumentReadinessBuilder {
           priority: MigrationDocumentReadinessPriority.arrival,
           risk: MigrationDocumentReadinessRisk.review,
           reviewMoment: MigrationDocumentReadinessReviewMoment.onArrival,
-          sourceLabel: l10n.sourceProviderMovaro,
+          sourceLabel: l10n.sourceProviderMudavi,
           icon: Icons.cloud_done_outlined,
           title: l10n.documentReadinessCopiesTitle,
           description: l10n.documentReadinessCopiesBody,
@@ -175,7 +175,7 @@ class MigrationDocumentReadinessBuilder {
           priority: MigrationDocumentReadinessPriority.critical,
           risk: MigrationDocumentReadinessRisk.blocking,
           reviewMoment: MigrationDocumentReadinessReviewMoment.beforeBooking,
-          sourceLabel: l10n.sourceProviderMovaro,
+          sourceLabel: l10n.sourceProviderMudavi,
           icon: Icons.account_box_outlined,
           title: l10n.documentReadinessRouteTitle,
           description: l10n.documentReadinessRouteBodyGeneric,
@@ -185,7 +185,7 @@ class MigrationDocumentReadinessBuilder {
           priority: MigrationDocumentReadinessPriority.critical,
           risk: MigrationDocumentReadinessRisk.blocking,
           reviewMoment: MigrationDocumentReadinessReviewMoment.beforeBooking,
-          sourceLabel: l10n.sourceProviderMovaro,
+          sourceLabel: l10n.sourceProviderMudavi,
           icon: Icons.perm_identity_outlined,
           title: l10n.documentReadinessIdentityPackTitle,
           description: l10n.documentReadinessIdentityPackBody,
@@ -195,7 +195,7 @@ class MigrationDocumentReadinessBuilder {
           priority: MigrationDocumentReadinessPriority.critical,
           risk: MigrationDocumentReadinessRisk.blocking,
           reviewMoment: MigrationDocumentReadinessReviewMoment.beforeBooking,
-          sourceLabel: l10n.sourceProviderMovaro,
+          sourceLabel: l10n.sourceProviderMudavi,
           icon: Icons.rule_folder_outlined,
           title: l10n.documentReadinessRuleCheckTitle,
           description: l10n.documentReadinessRuleCheckBody,
@@ -205,7 +205,7 @@ class MigrationDocumentReadinessBuilder {
           priority: MigrationDocumentReadinessPriority.prepare,
           risk: MigrationDocumentReadinessRisk.caution,
           reviewMoment: MigrationDocumentReadinessReviewMoment.closeToMove,
-          sourceLabel: l10n.sourceProviderMovaro,
+          sourceLabel: l10n.sourceProviderMudavi,
           icon: Icons.translate_outlined,
           title: l10n.documentReadinessTranslationTitle,
           description: l10n.documentReadinessTranslationBodyGeneric,
@@ -215,7 +215,7 @@ class MigrationDocumentReadinessBuilder {
           priority: MigrationDocumentReadinessPriority.prepare,
           risk: MigrationDocumentReadinessRisk.caution,
           reviewMoment: MigrationDocumentReadinessReviewMoment.closeToMove,
-          sourceLabel: l10n.sourceProviderMovaro,
+          sourceLabel: l10n.sourceProviderMudavi,
           icon: Icons.wallet_outlined,
           title: l10n.documentReadinessProofPackTitle,
           description: l10n.documentReadinessProofPackBody,
@@ -235,7 +235,7 @@ class MigrationDocumentReadinessBuilder {
           priority: MigrationDocumentReadinessPriority.arrival,
           risk: MigrationDocumentReadinessRisk.review,
           reviewMoment: MigrationDocumentReadinessReviewMoment.onArrival,
-          sourceLabel: l10n.sourceProviderMovaro,
+          sourceLabel: l10n.sourceProviderMudavi,
           icon: Icons.cloud_done_outlined,
           title: l10n.documentReadinessCopiesTitle,
           description: l10n.documentReadinessCopiesBody,
@@ -245,7 +245,7 @@ class MigrationDocumentReadinessBuilder {
           priority: MigrationDocumentReadinessPriority.arrival,
           risk: MigrationDocumentReadinessRisk.review,
           reviewMoment: MigrationDocumentReadinessReviewMoment.onArrival,
-          sourceLabel: l10n.sourceProviderMovaro,
+          sourceLabel: l10n.sourceProviderMudavi,
           icon: Icons.inventory_2_outlined,
           title: l10n.documentReadinessArrivalFolderTitle,
           description: l10n.documentReadinessArrivalFolderBodyGeneric,
@@ -363,7 +363,7 @@ class MigrationDocumentReadinessBuilder {
       case 'quality_of_life':
       case 'beach_life':
       default:
-        return l10n.sourceProviderMovaro;
+        return l10n.sourceProviderMudavi;
     }
   }
 }

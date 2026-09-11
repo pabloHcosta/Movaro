@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
 
 /// "Jobs lens" for the explore surface — primary ICP (economic migrant).
 ///
@@ -48,8 +48,8 @@ class CityWorkAreaLens {
         : cities.where((city) => offersArea(city, area)).toList();
 
     filtered.sort((a, b) {
-      final byWork = b.movaroScores.workOpportunity.compareTo(
-        a.movaroScores.workOpportunity,
+      final byWork = b.mudaviScores.workOpportunity.compareTo(
+        a.mudaviScores.workOpportunity,
       );
       if (byWork != 0) {
         return byWork;
@@ -58,7 +58,7 @@ class CityWorkAreaLens {
       if (byJob != 0) {
         return byJob;
       }
-      return b.movaroScores.economical.compareTo(a.movaroScores.economical);
+      return b.mudaviScores.economical.compareTo(a.mudaviScores.economical);
     });
 
     return filtered;

@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// temporary backend outage from emptying core surfaces (city catalog,
 /// explore, city detail) for users who have already loaded them once.
 class JsonResponseCache {
-  JsonResponseCache({String namespace = 'movaro.json_cache'})
+  JsonResponseCache({String namespace = 'mudavi.json_cache'})
     : _namespace = namespace;
 
   final String _namespace;

@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
 
 enum SourceFreshnessStatus { current, reviewSoon, stale, invalidFutureDate }
 
@@ -74,7 +74,7 @@ class SourceFreshnessPolicy {
     GuideEvidenceType.official => const Duration(days: 90),
     GuideEvidenceType.derived => const Duration(days: 30),
     GuideEvidenceType.marketReference => const Duration(days: 14),
-    GuideEvidenceType.movaroGuidance => const Duration(days: 180),
+    GuideEvidenceType.mudaviGuidance => const Duration(days: 180),
   };
 
   static DateTime? parseCurationDate(String? value) {

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_card_metric_classifier.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_card_metric_classifier.dart';
 
 void main() {
   group('CityCardMetricClassifier', () {

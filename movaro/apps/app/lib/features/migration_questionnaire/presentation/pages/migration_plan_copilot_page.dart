@@ -2,68 +2,68 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/trust/source_freshness_policy.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/practical_info_disclaimer.dart';
-import 'package:movaro_app/core/widgets/contextual_help.dart';
-import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/journey_stage_banner.dart';
-import 'package:movaro_app/core/widgets/skeletons.dart';
-import 'package:movaro_app/core/widgets/visual_data_cards.dart';
-import 'package:movaro_app/features/location/location_controller.dart';
-import 'package:movaro_app/features/location/presentation/pages/location_permission_screen.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
-import 'package:movaro_app/features/flight_search/presentation/widgets/flight_search_tool.dart';
-import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
-import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/guide_gps_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/criminal_record_decision_engine.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/entry_regularization_decision_engine.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/arrival_execution_builder.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/calendar_event_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/document_checklist_adapter.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_event_suggestion_engine.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_event_suggestion_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_personalization_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/housing_viability_assessment.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/market_validation_check_in_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_folder_engine.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_assistant_answer_bridge.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_readiness_builder.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/work_viability_assessment.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_event_suggestion.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/pages/housing_selection_screen.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/arrival_execution_section.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/guide_event_suggestion_sheet.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/landing_budget_estimator_section.dart';
-import 'package:movaro_app/features/language/presentation/widgets/contextual_phrase_support_card.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_document_readiness_section.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/migration_readiness_section.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/plan_structure_widgets.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/widgets/guide_waiting_card.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/core/responsive/responsive_context.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/trust/source_freshness_policy.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/practical_info_disclaimer.dart';
+import 'package:mudavi_app/core/widgets/contextual_help.dart';
+import 'package:mudavi_app/core/widgets/feature_guide_dialog.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/journey_stage_banner.dart';
+import 'package:mudavi_app/core/widgets/skeletons.dart';
+import 'package:mudavi_app/core/widgets/visual_data_cards.dart';
+import 'package:mudavi_app/features/location/location_controller.dart';
+import 'package:mudavi_app/features/location/presentation/pages/location_permission_screen.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
+import 'package:mudavi_app/features/flight_search/presentation/widgets/flight_search_tool.dart';
+import 'package:mudavi_app/features/explore/presentation/pages/documentation_guide_page.dart';
+import 'package:mudavi_app/features/home/presentation/widgets/main_navigation_bar.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/guide_gps_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/criminal_record_decision_engine.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/entry_regularization_decision_engine.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/arrival_execution_builder.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/calendar_event_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_guide_registry.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/document_checklist_adapter.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_event_suggestion_engine.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_event_suggestion_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_personalization_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/housing_viability_assessment.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/market_validation_check_in_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_plan_identity.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_document_folder_engine.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_assistant_answer_bridge.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_readiness_builder.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/plan_notification_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/work_viability_assessment.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_event_suggestion.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/pages/preparation_webview_page.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/pages/housing_selection_screen.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/widgets/arrival_execution_section.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/widgets/guide_event_suggestion_sheet.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/widgets/landing_budget_estimator_section.dart';
+import 'package:mudavi_app/features/language/presentation/widgets/contextual_phrase_support_card.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/widgets/migration_document_readiness_section.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/widgets/migration_readiness_section.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/widgets/plan_reset_dialog.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/widgets/plan_structure_widgets.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/widgets/guide_waiting_card.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -3792,9 +3792,9 @@ class _MarketValidationCheckInSheetState
                 _choiceGroup<MarketValidationProgress>(
                   title: _localizedText(
                     context,
-                    pt: 'O que aconteceu fora do Movaro?',
-                    es: '¿Qué ocurrió fuera de Movaro?',
-                    en: 'What happened outside Movaro?',
+                    pt: 'O que aconteceu fora do Mudavi?',
+                    es: '¿Qué ocurrió fuera de Mudavi?',
+                    en: 'What happened outside Mudavi?',
                   ),
                   value: _progress,
                   options: [
@@ -3832,9 +3832,9 @@ class _MarketValidationCheckInSheetState
                 _choiceGroup<MarketValidationValue>(
                   title: _localizedText(
                     context,
-                    pt: 'Quanto o Movaro ajudou nesta etapa?',
-                    es: '¿Cuánto ayudó Movaro en esta etapa?',
-                    en: 'How much did Movaro help with this step?',
+                    pt: 'Quanto o Mudavi ajudou nesta etapa?',
+                    es: '¿Cuánto ayudó Mudavi en esta etapa?',
+                    en: 'How much did Mudavi help with this step?',
                   ),
                   value: _value,
                   options: [
@@ -5945,11 +5945,11 @@ class _GuideDominantActionCard extends StatelessWidget {
                             );
                       final text = switch (locale) {
                         'pt' =>
-                          'Completei todos os passos do meu plano de migração para $city com o Movaro! 🇧🇷🏆',
+                          'Completei todos os passos do meu plano de migração para $city com o Mudavi! 🇧🇷🏆',
                         'es' =>
-                          '¡Completé todos los pasos de mi plan de migración a $city con Movaro! 🇧🇷🏆',
+                          '¡Completé todos los pasos de mi plan de migración a $city con Mudavi! 🇧🇷🏆',
                         _ =>
-                          'I completed all steps of my migration plan to $city with Movaro! 🇧🇷🏆',
+                          'I completed all steps of my migration plan to $city with Mudavi! 🇧🇷🏆',
                       };
                       unawaited(
                         SharePlus.instance.share(ShareParams(text: text)),
@@ -7685,7 +7685,7 @@ class _GuideEvidenceCard extends StatelessWidget {
         es: 'Referencia de mercado',
         en: 'Market reference',
       ),
-      GuideEvidenceType.movaroGuidance => _localizedText(
+      GuideEvidenceType.mudaviGuidance => _localizedText(
         context,
         pt: 'Orientação geral não oficial',
         es: 'Orientación general no oficial',
@@ -7909,9 +7909,9 @@ class _CpfDecisionContent extends StatelessWidget {
         Text(
           _localizedText(
             context,
-            pt: 'Escolha um caminho. O Movaro mostra apenas as instruções dessa rota e você pode trocar quando quiser.',
-            es: 'Elige un camino. Movaro muestra solo las instrucciones de esa ruta y puedes cambiar cuando quieras.',
-            en: 'Choose one path. Movaro shows only that route’s instructions, and you can switch at any time.',
+            pt: 'Escolha um caminho. O Mudavi mostra apenas as instruções dessa rota e você pode trocar quando quiser.',
+            es: 'Elige un camino. Mudavi muestra solo las instrucciones de esa ruta y puedes cambiar cuando quieras.',
+            en: 'Choose one path. Mudavi shows only that route’s instructions, and you can switch at any time.',
           ),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: AppColors.textSoftFor(context),
@@ -14132,9 +14132,9 @@ class _CriminalRecordDecisionAssistantState
           Text(
             _localizedText(
               context,
-              pt: 'O Movaro guarda somente estas escolhas de rota. Não pedimos número do DNI nem o arquivo do certificado.',
-              es: 'Movaro guarda solo estas decisiones de ruta. No pedimos el número de DNI ni el archivo del certificado.',
-              en: 'Movaro stores only these route choices. We do not ask for a DNI number or certificate file.',
+              pt: 'O Mudavi guarda somente estas escolhas de rota. Não pedimos número do DNI nem o arquivo do certificado.',
+              es: 'Mudavi guarda solo estas decisiones de ruta. No pedimos el número de DNI ni el archivo del certificado.',
+              en: 'Mudavi stores only these route choices. We do not ask for a DNI number or certificate file.',
             ),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSoftFor(context),

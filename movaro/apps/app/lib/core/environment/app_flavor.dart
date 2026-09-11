@@ -1,4 +1,4 @@
-import 'package:movaro_app/core/error/app_configuration_exception.dart';
+import 'package:mudavi_app/core/error/app_configuration_exception.dart';
 
 enum AppFlavor {
   development,

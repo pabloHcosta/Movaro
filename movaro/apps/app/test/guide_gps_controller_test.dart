@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/guide_gps_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/guide_gps_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_copilot_progress_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -20,7 +20,7 @@ void main() {
       );
       await metrics.setConsent(ProductAnalyticsConsent.denied);
       final directory = await Directory.systemTemp.createTemp(
-        'movaro-waiting-',
+        'mudavi-waiting-',
       );
       addTearDown(() => directory.delete(recursive: true));
       final store = MigrationCopilotProgressStore(
@@ -85,7 +85,7 @@ void main() {
     );
     await metrics.setConsent(ProductAnalyticsConsent.denied);
     final directory = await Directory.systemTemp.createTemp(
-      'movaro-guide-gps-',
+      'mudavi-guide-gps-',
     );
     addTearDown(() => directory.delete(recursive: true));
     final store = MigrationCopilotProgressStore(
@@ -128,7 +128,7 @@ void main() {
     );
     await metrics.setConsent(ProductAnalyticsConsent.denied);
     final directory = await Directory.systemTemp.createTemp(
-      'movaro-guide-gps-legacy-',
+      'mudavi-guide-gps-legacy-',
     );
     addTearDown(() => directory.delete(recursive: true));
 
@@ -159,7 +159,7 @@ void main() {
     );
     await metrics.setConsent(ProductAnalyticsConsent.denied);
     final directory = await Directory.systemTemp.createTemp(
-      'movaro-guide-gps-applicability-',
+      'mudavi-guide-gps-applicability-',
     );
     addTearDown(() => directory.delete(recursive: true));
 
@@ -195,7 +195,7 @@ void main() {
     );
     await metrics.setConsent(ProductAnalyticsConsent.denied);
     final directory = await Directory.systemTemp.createTemp(
-      'movaro-guide-decision-data-',
+      'mudavi-guide-decision-data-',
     );
     addTearDown(() => directory.delete(recursive: true));
     final store = MigrationCopilotProgressStore(

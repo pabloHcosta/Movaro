@@ -67,7 +67,7 @@ export interface QuickHelpEntryDefinition {
 }
 
 const CONTENT_VERSION = '2026.08.22-p2-recovery';
-const EDITORIAL_OWNER = 'Movaro Content Operations';
+const EDITORIAL_OWNER = 'Mudavi Content Operations';
 
 export const QUICK_HELP_ENTRIES: QuickHelpEntryDefinition[] = [
   {
@@ -767,9 +767,9 @@ export const QUICK_HELP_ENTRIES: QuickHelpEntryDefinition[] = [
       },
     ],
     caveat: {
-      pt: 'O Movaro não recomenda uma instituição específica nem confirma taxa, câmbio, limite ou aprovação de conta.',
-      es: 'Movaro no recomienda una institución específica ni confirma tasa, cambio, límite o aprobación de cuenta.',
-      en: 'Movaro does not recommend a specific institution or confirm fees, exchange rates, limits, or account approval.',
+      pt: 'O Mudavi não recomenda uma instituição específica nem confirma taxa, câmbio, limite ou aprovação de conta.',
+      es: 'Mudavi no recomienda una institución específica ni confirma tasa, cambio, límite o aprobación de cuenta.',
+      en: 'Mudavi does not recommend a specific institution or confirm fees, exchange rates, limits, or account approval.',
     },
   },
   {

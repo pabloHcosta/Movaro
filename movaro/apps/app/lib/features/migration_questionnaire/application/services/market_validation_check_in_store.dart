@@ -1,4 +1,4 @@
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_flow_metrics_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum MarketValidationClarity { clear, partial, unclear }
@@ -34,9 +34,9 @@ class MarketValidationCheckInStore {
   static final MarketValidationCheckInStore instance =
       MarketValidationCheckInStore();
   static const String _submittedPhasesKey =
-      'movaro.market_validation.submitted_phases.v1';
+      'mudavi.market_validation.submitted_phases.v1';
   static const String _lastDismissedAtKey =
-      'movaro.market_validation.last_dismissed_at.v1';
+      'mudavi.market_validation.last_dismissed_at.v1';
   static const Duration _dismissalCooldown = Duration(days: 7);
 
   SharedPreferences? _preferences;

@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_personalization_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/guide_focus_engine.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
-import 'package:movaro_app/features/migration_questionnaire/presentation/models/guide_task_presentation_policy.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/argentina_brazil_guide_datasource.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_personalization_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/guide_focus_engine.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/preparation_resource_links.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/migration_questionnaire/presentation/models/guide_task_presentation_policy.dart';
 
 void main() {
   group('ArgentinaBrazilGuideDatasource safety review', () {

@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.movaro" "\0"
-            VALUE "FileDescription", "movaro_app" "\0"
+            VALUE "CompanyName", "com.mudavi" "\0"
+            VALUE "FileDescription", "mudavi_app" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "movaro_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.movaro. All rights reserved." "\0"
-            VALUE "OriginalFilename", "movaro_app.exe" "\0"
-            VALUE "ProductName", "movaro_app" "\0"
+            VALUE "InternalName", "mudavi_app" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.mudavi. All rights reserved." "\0"
+            VALUE "OriginalFilename", "mudavi_app.exe" "\0"
+            VALUE "ProductName", "mudavi_app" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

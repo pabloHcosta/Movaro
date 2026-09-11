@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/cities/data/datasources/cities_asset_fallback.dart';
-import 'package:movaro_app/features/cities/data/models/city_model.dart';
+import 'package:mudavi_app/features/cities/data/datasources/cities_asset_fallback.dart';
+import 'package:mudavi_app/features/cities/data/models/city_model.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

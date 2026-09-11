@@ -1,6 +1,6 @@
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:movaro_app/features/location/location_data.dart';
+import 'package:mudavi_app/features/location/location_data.dart';
 
 class LocationService {
   const LocationService();

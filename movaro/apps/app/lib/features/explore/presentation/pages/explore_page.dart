@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/contextual_help.dart';
-import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/visual_data_cards.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/explore/presentation/pages/documentation_guide_page.dart';
-import 'package:movaro_app/features/home/presentation/widgets/main_navigation_bar.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
-import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
-import 'package:movaro_app/features/home/application/city_feed_datasource.dart';
-import 'package:movaro_app/features/home/domain/city_feed_item.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_metric_presenter.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/core/responsive/responsive_context.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/contextual_help.dart';
+import 'package:mudavi_app/core/widgets/feature_guide_dialog.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/visual_data_cards.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/explore/presentation/pages/documentation_guide_page.dart';
+import 'package:mudavi_app/features/home/presentation/widgets/main_navigation_bar.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/features/cities/application/services/city_seasonality_profile.dart';
+import 'package:mudavi_app/features/home/application/city_feed_datasource.dart';
+import 'package:mudavi_app/features/home/domain/city_feed_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/user_journey_stage.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_metric_presenter.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_housing_viability_presenter.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({
@@ -896,7 +896,7 @@ class _CityFeatureCard extends StatelessWidget {
                     width: metricWidth,
                     child: _CitySignalMetric(
                       label: context.l10n.cityDetailWorkLabel,
-                      score: city.movaroScores.workOpportunity,
+                      score: city.mudaviScores.workOpportunity,
                       icon: Icons.work_outline_rounded,
                       accent: AppColors.caution,
                     ),

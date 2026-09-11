@@ -2,32 +2,32 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/app/router/app_routes.dart';
-import 'package:movaro_app/app/theme/app_colors.dart';
-import 'package:movaro_app/core/responsive/responsive_context.dart';
-import 'package:movaro_app/core/widgets/ambient_background.dart';
-import 'package:movaro_app/core/widgets/app_glass_header.dart';
-import 'package:movaro_app/core/widgets/contextual_help.dart';
-import 'package:movaro_app/core/widgets/feature_guide_dialog.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
-import 'package:movaro_app/core/widgets/multi_currency_amount.dart';
-import 'package:movaro_app/core/widgets/skeletons.dart';
-import 'package:movaro_app/features/cities/application/cities_controller.dart';
-import 'package:movaro_app/features/cities/application/services/city_seasonality_profile.dart';
-import 'package:movaro_app/features/cities/application/services/city_strength_story_service.dart';
-import 'package:movaro_app/features/cities/domain/entities/city.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_budget_snapshot.dart';
-import 'package:movaro_app/features/cities/domain/entities/travel_route_insight.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_weather.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_image_backdrop.dart';
-import 'package:movaro_app/features/cities/presentation/widgets/city_search_matcher.dart';
-import 'package:movaro_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
-import 'package:movaro_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
-import 'package:movaro_app/features/location/location_data.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/app/router/app_routes.dart';
+import 'package:mudavi_app/app/theme/app_colors.dart';
+import 'package:mudavi_app/core/responsive/responsive_context.dart';
+import 'package:mudavi_app/core/widgets/ambient_background.dart';
+import 'package:mudavi_app/core/widgets/app_glass_header.dart';
+import 'package:mudavi_app/core/widgets/contextual_help.dart';
+import 'package:mudavi_app/core/widgets/feature_guide_dialog.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/multi_currency_amount.dart';
+import 'package:mudavi_app/core/widgets/skeletons.dart';
+import 'package:mudavi_app/features/cities/application/cities_controller.dart';
+import 'package:mudavi_app/features/cities/application/services/city_seasonality_profile.dart';
+import 'package:mudavi_app/features/cities/application/services/city_strength_story_service.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_budget_snapshot.dart';
+import 'package:mudavi_app/features/cities/domain/entities/travel_route_insight.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_weather.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_image_backdrop.dart';
+import 'package:mudavi_app/features/cities/presentation/widgets/city_search_matcher.dart';
+import 'package:mudavi_app/features/flight_search/domain/services/flight_route_context_resolver.dart';
+import 'package:mudavi_app/features/flight_search/domain/services/flight_route_price_insight_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/migration_questionnaire_controller.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/copilot_exchange_rates_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
+import 'package:mudavi_app/features/location/location_data.dart';
 
 class CityComparisonScreen extends StatefulWidget {
   const CityComparisonScreen({
@@ -2690,10 +2690,10 @@ class _ComparisonCityData {
       jobStabilityLabel: _jobStabilityLabel(context, jobStabilityScore),
       communityScore: city.argentinaPopularityScore,
       communityLabel: _communityLabel(context, city.argentinaPopularityScore),
-      languageScore: city.movaroScores.languageAdaptation,
+      languageScore: city.mudaviScores.languageAdaptation,
       languageLabel: _languageLabel(
         context,
-        city.movaroScores.languageAdaptation,
+        city.mudaviScores.languageAdaptation,
       ),
       costScore: city.costOfLivingScore,
       distanceKm: distanceKm,
@@ -3015,7 +3015,7 @@ class _ComparisonCityData {
           };
     final score =
         ((city.rentScore +
-                city.movaroScores.languageAdaptation +
+                city.mudaviScores.languageAdaptation +
                 city.safetyScore +
                 city.costOfLivingScore) /
             4) -

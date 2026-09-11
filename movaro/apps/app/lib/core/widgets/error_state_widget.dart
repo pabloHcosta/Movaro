@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:movaro_app/app/localization/app_localization.dart';
-import 'package:movaro_app/core/responsive/app_breakpoints.dart';
-import 'package:movaro_app/core/responsive/responsive_content.dart';
+import 'package:mudavi_app/app/localization/app_localization.dart';
+import 'package:mudavi_app/core/responsive/app_breakpoints.dart';
+import 'package:mudavi_app/core/responsive/responsive_content.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   const ErrorStateWidget({

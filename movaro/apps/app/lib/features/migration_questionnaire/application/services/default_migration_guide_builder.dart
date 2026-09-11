@@ -1,10 +1,10 @@
-import 'package:movaro_app/app/localization/generated/app_localizations.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/arrival_execution_builder.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/document_checklist_adapter.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/migration_readiness_builder.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
+import 'package:mudavi_app/app/localization/generated/app_localizations.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/arrival_execution_builder.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/document_checklist_adapter.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_document_readiness_builder.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/migration_readiness_builder.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/guide_action_item.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/migration_plan.dart';
 
 class DefaultMigrationGuideBuilder {
   const DefaultMigrationGuideBuilder._();

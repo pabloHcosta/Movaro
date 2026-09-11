@@ -1,12 +1,12 @@
-import 'package:movaro_app/features/catalog/domain/repositories/catalog_repository.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/journey/journey_country_metadata.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/available_capital_ranges_store.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/models/option_model.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/models/question_model.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/question.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/repositories/question_repository.dart';
+import 'package:mudavi_app/features/catalog/domain/repositories/catalog_repository.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/features/journey/journey_country_metadata.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/available_capital_ranges_store.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/models/option_model.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/models/question_model.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/question.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/questionnaire_variant.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/repositories/question_repository.dart';
 
 class QuestionRepositoryImpl implements QuestionRepository {
   const QuestionRepositoryImpl({

@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
-import 'package:movaro_app/features/catalog/data/repositories/catalog_repository_impl.dart';
-import 'package:movaro_app/features/journey/journey_context_controller.dart';
-import 'package:movaro_app/features/journey/journey_preferences_store.dart';
+import 'package:mudavi_app/features/catalog/data/datasources/seed_catalog_data_source.dart';
+import 'package:mudavi_app/features/catalog/data/repositories/catalog_repository_impl.dart';
+import 'package:mudavi_app/features/journey/journey_context_controller.dart';
+import 'package:mudavi_app/features/journey/journey_preferences_store.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +14,7 @@ void main() {
       dataSource: SeedCatalogDataSource(),
     );
     final journeyTempDir = await Directory.systemTemp.createTemp(
-      'movaro_test_journey',
+      'mudavi_test_journey',
     );
     final journeyContextController = JourneyContextController(
       catalogRepository: catalogRepository,
@@ -42,7 +42,7 @@ void main() {
       dataSource: SeedCatalogDataSource(),
     );
     final journeyTempDir = await Directory.systemTemp.createTemp(
-      'movaro_test_journey_uybr',
+      'mudavi_test_journey_uybr',
     );
     final journeyContextController = JourneyContextController(
       catalogRepository: catalogRepository,

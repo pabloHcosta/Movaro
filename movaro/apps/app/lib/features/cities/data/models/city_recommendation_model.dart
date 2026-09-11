@@ -1,5 +1,5 @@
-import 'package:movaro_app/features/cities/data/models/city_model.dart';
-import 'package:movaro_app/features/cities/domain/entities/city_recommendation.dart';
+import 'package:mudavi_app/features/cities/data/models/city_model.dart';
+import 'package:mudavi_app/features/cities/domain/entities/city_recommendation.dart';
 
 class CityRecommendationModel {
   const CityRecommendationModel._();

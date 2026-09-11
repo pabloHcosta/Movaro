@@ -1,14 +1,14 @@
 import 'dart:io';
 
-import 'package:movaro_app/core/storage/persistent_json_store.dart';
+import 'package:mudavi_app/core/storage/persistent_json_store.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:movaro_app/features/migration_questionnaire/data/models/copilot_exchange_rates_model.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
+import 'package:mudavi_app/features/migration_questionnaire/data/models/copilot_exchange_rates_model.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 
 typedef CopilotExchangeDirectoryProvider = Future<Directory> Function();
 
 class CopilotExchangeRatesStore {
-  static const _storageKey = 'movaro_copilot_exchange_rates';
+  static const _storageKey = 'mudavi_copilot_exchange_rates';
 
   CopilotExchangeRatesStore({
     CopilotExchangeDirectoryProvider? directoryProvider,
@@ -43,6 +43,6 @@ class CopilotExchangeRatesStore {
 
   Future<File> _file() async {
     final directory = await _directoryProvider();
-    return File('${directory.path}/movaro_copilot_exchange_rates.json');
+    return File('${directory.path}/mudavi_copilot_exchange_rates.json');
   }
 }

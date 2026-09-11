@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:movaro_app/app/localization/generated/app_localizations.dart';
+import 'package:mudavi_app/app/localization/generated/app_localizations.dart';
 
 class AppLocalization {
   const AppLocalization._();
@@ -1291,9 +1291,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String questionnaireGuideTitle() => _localizedText(
-    pt: 'Como a Movaro sugere cidades',
-    es: 'Cómo Movaro sugiere ciudades',
-    en: 'How Movaro suggests cities',
+    pt: 'Como a Mudavi sugere cidades',
+    es: 'Cómo Mudavi sugiere ciudades',
+    en: 'How Mudavi suggests cities',
   );
 
   String questionnaireGuideBody() => _localizedText(
@@ -2089,9 +2089,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
   );
 
   String cityDetailFlightBurdenSource() => _localizedText(
-    pt: 'Fonte: histórico de rotas do Movaro (USD) + comparação ao vivo em Google Flights/Skyscanner',
-    es: 'Fuente: historial de rutas de Movaro (USD) + comparación en vivo en Google Flights/Skyscanner',
-    en: 'Source: Movaro route history (USD) + live comparison on Google Flights/Skyscanner',
+    pt: 'Fonte: histórico de rotas do Mudavi (USD) + comparação ao vivo em Google Flights/Skyscanner',
+    es: 'Fuente: historial de rutas de Mudavi (USD) + comparación en vivo en Google Flights/Skyscanner',
+    en: 'Source: Mudavi route history (USD) + live comparison on Google Flights/Skyscanner',
   );
 
   String migrationResultFlightTradeoffTitle() => _localizedText(
@@ -3147,9 +3147,9 @@ extension AppLocalizationsFormatting on AppLocalizations {
       case 'human_development':
         return sourceProviderAtlasHumanDevelopment;
       case 'curated_metrics':
-        return sourceProviderMovaroDataset;
+        return sourceProviderMudaviDataset;
       case 'ranking':
-        return sourceProviderMovaroRanking;
+        return sourceProviderMudaviRanking;
       case 'public_reviews':
         return sourceProviderGoogleMaps;
       default:
@@ -3195,8 +3195,8 @@ extension AppLocalizationsFormatting on AppLocalizations {
         return sourceProviderForumBrasileiroSegurancaPublica;
       case 'banco_central_brasil':
         return sourceProviderBancoCentralBrasil;
-      case 'movaro':
-        return sourceProviderMovaro;
+      case 'mudavi':
+        return sourceProviderMudavi;
       default:
         return value;
     }

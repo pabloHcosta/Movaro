@@ -1,7 +1,7 @@
-import 'package:movaro_app/features/auth/data/datasources/auth_data_source.dart';
-import 'package:movaro_app/features/auth/domain/entities/auth_provider.dart';
-import 'package:movaro_app/features/auth/domain/entities/auth_session.dart';
-import 'package:movaro_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:mudavi_app/features/auth/data/datasources/auth_data_source.dart';
+import 'package:mudavi_app/features/auth/domain/entities/auth_provider.dart';
+import 'package:mudavi_app/features/auth/domain/entities/auth_session.dart';
+import 'package:mudavi_app/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   const AuthRepositoryImpl({required AuthDataSource dataSource})

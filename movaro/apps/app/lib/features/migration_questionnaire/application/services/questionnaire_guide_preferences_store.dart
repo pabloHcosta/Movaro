@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:movaro_app/core/storage/persistent_json_store.dart';
+import 'package:mudavi_app/core/storage/persistent_json_store.dart';
 import 'package:path_provider/path_provider.dart';
 
 typedef QuestionnaireGuideDirectoryProvider = Future<Directory> Function();
 
 class QuestionnaireGuidePreferencesStore {
-  static const _storageKey = 'movaro_questionnaire_guide';
+  static const _storageKey = 'mudavi_questionnaire_guide';
 
   QuestionnaireGuidePreferencesStore({
     QuestionnaireGuideDirectoryProvider? directoryProvider,
@@ -57,6 +57,6 @@ class QuestionnaireGuidePreferencesStore {
 
   Future<File> _file() async {
     final directory = await _directoryProvider();
-    return File('${directory.path}/movaro_questionnaire_guide.json');
+    return File('${directory.path}/mudavi_questionnaire_guide.json');
   }
 }

@@ -1,6 +1,6 @@
 {
-    "name": "movaro_app",
-    "short_name": "movaro_app",
+    "name": "mudavi_app",
+    "short_name": "mudavi_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#050B15",

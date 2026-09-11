@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:movaro_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
-import 'package:movaro_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
+import 'package:mudavi_app/features/migration_questionnaire/application/services/copilot_exchange_rates_service.dart';
+import 'package:mudavi_app/features/migration_questionnaire/domain/entities/copilot_exchange_rates.dart';
 
 /// Holds app-wide exchange rates loaded once and made available via [ExchangeRatesScope].
 /// Widgets that already receive exchange rates explicitly can keep doing so; others

@@ -1,4 +1,4 @@
-import 'package:movaro_app/core/constants/dart_define_keys.dart';
+import 'package:mudavi_app/core/constants/dart_define_keys.dart';
 
 class ApiKeys {
   const ApiKeys._();

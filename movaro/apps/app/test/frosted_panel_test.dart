@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movaro_app/core/widgets/frosted_panel.dart';
+import 'package:mudavi_app/core/widgets/frosted_panel.dart';
 
 void main() {
   testWidgets('provides a visible Material surface for ListTile interactions', (

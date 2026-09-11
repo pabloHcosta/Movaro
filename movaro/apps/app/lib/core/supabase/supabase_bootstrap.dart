@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:movaro_app/core/environment/app_environment.dart';
+import 'package:mudavi_app/core/environment/app_environment.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseBootstrap {
