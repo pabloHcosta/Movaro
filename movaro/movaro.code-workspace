@@ -20,7 +20,7 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "Movaro App (Development - Local API - Chrome)",
+        "name": "Mudavi App (Development - Local API - Chrome)",
         "request": "launch",
         "type": "dart",
         "program": "lib/main_development.dart",
@@ -29,7 +29,7 @@
         "toolArgs": ["--dart-define-from-file=.env.development.json"]
       },
       {
-        "name": "Movaro App (Production - Current API Source - Chrome)",
+        "name": "Mudavi App (Production - Current API Source - Chrome)",
         "request": "launch",
         "type": "dart",
         "program": "lib/main_production.dart",
@@ -38,7 +38,7 @@
         "toolArgs": ["--dart-define-from-file=.env.production.json"]
       },
       {
-        "name": "Movaro App (Production - Railway Override - Chrome)",
+        "name": "Mudavi App (Production - Railway Override - Chrome)",
         "request": "launch",
         "type": "dart",
         "program": "lib/main_production.dart",
@@ -50,7 +50,7 @@
         ]
       },
       {
-        "name": "Movaro API (Development)",
+        "name": "Mudavi API (Development)",
         "type": "node-terminal",
         "request": "launch",
         "command": "npm run start:dev",
@@ -60,7 +60,7 @@
         }
       },
       {
-        "name": "Movaro App (Cloudflare Tunnel - localhost:3000)",
+        "name": "Mudavi App (Cloudflare Tunnel - localhost:3000)",
         "type": "node-terminal",
         "request": "launch",
         "command": "bash ./scripts/start_cloudflare_tunnel.sh",
@@ -69,25 +69,25 @@
     ],
     "compounds": [
       {
-        "name": "Movaro App + API (Development)",
+        "name": "Mudavi App + API (Development)",
         "configurations": [
-          "Movaro API (Development)",
-          "Movaro App (Development - Local API - Chrome)"
+          "Mudavi API (Development)",
+          "Mudavi App (Development - Local API - Chrome)"
         ]
       },
       {
-        "name": "Movaro Local Stack (API + Tunnel)",
+        "name": "Mudavi Local Stack (API + Tunnel)",
         "configurations": [
-          "Movaro API (Development)",
-          "Movaro App (Cloudflare Tunnel - localhost:3000)"
+          "Mudavi API (Development)",
+          "Mudavi App (Cloudflare Tunnel - localhost:3000)"
         ]
       },
       {
-        "name": "Movaro Production Local (API + Tunnel + Chrome)",
+        "name": "Mudavi Production Local (API + Tunnel + Chrome)",
         "configurations": [
-          "Movaro API (Development)",
-          "Movaro App (Cloudflare Tunnel - localhost:3000)",
-          "Movaro App (Production - Current API Source - Chrome)"
+          "Mudavi API (Development)",
+          "Mudavi App (Cloudflare Tunnel - localhost:3000)",
+          "Mudavi App (Production - Current API Source - Chrome)"
         ]
       }
     ]
