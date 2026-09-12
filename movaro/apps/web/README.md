@@ -1,4 +1,21 @@
-# Movaro Web — páginas SEO por cidade
+# Mudavi Web
+
+Landing page de apresentação do produto e páginas SEO por cidade.
+
+## Landing page
+
+Aplicação React + TypeScript + Vite em `src/`. Para executar:
+
+```sh
+npm install
+npm run dev
+```
+
+O formulário de acesso antecipado possui apenas o estado visual nesta primeira
+etapa. A persistência dos emails será conectada quando o canal de captação for
+definido.
+
+## Páginas SEO por cidade
 
 Páginas estáticas (HTML) para SEO: "vivir en &lt;ciudad&gt; Brasil / costo / trabajo".
 Flutter web é ruim para SEO, então estas páginas dão conteúdo real e indexável
@@ -16,7 +33,7 @@ cd apps/api
 npm run export:snapshot        # se mexeu nos dados/seeds da API
 npm run generate:city-pages    # gera apps/web/public/**
 ```
-Variável opcional: `SITE_BASE_URL` (default `https://movaro.app`) define o domínio
+Variável opcional: `SITE_BASE_URL` define o domínio
 canônico nas meta tags e no sitemap.
 
 ## Deploy grátis (escolha um)
@@ -24,13 +41,6 @@ canônico nas meta tags e no sitemap.
   conecte o repositório com *base directory* = `apps/web` (ver `netlify.toml`).
 - **Cloudflare Pages**: build command vazio, output dir = `apps/web/public`.
 - **GitHub Pages / qualquer host estático**: publique o conteúdo de `public/`.
-
-## Preview local
-```sh
-cd apps/web/public
-python3 -m http.server 8091
-# abra http://127.0.0.1:8091
-```
 
 > Os arquivos gerados em `public/` podem ser commitados (deploy simples) ou
 > ignorados e gerados no build/CI — escolha do time.

@@ -56,7 +56,7 @@ export class CityResolverService {
   }
 
   private buildSummary(city: CityCardEntity, locale: string): string {
-    const scores = city.movaroScores;
+    const scores = city.mudaviScores;
     const costLabel = this.costLabel(city.costOfLivingScore, locale);
     const safetyLabel = this.safetyLabel(city.safetyScore, locale);
 

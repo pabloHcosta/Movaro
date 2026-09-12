@@ -2,8 +2,10 @@ import { QuickGuideService } from './quick-guide.service';
 import { QuickHelpQueryPlannerService } from './quick-help-query-planner.service';
 import { QUICK_HELP_ENTRIES } from '../../data/quick-help-trust.catalog';
 import { QUICK_HELP_INTENTS } from '../../data/quick-help-intents.catalog';
+import { afterEach, beforeEach, describe } from 'node:test';
+import { expect, it, jest } from '@jest/globals';
 
-describe('QuickGuideService', () => {
+void describe('QuickGuideService', () => {
   let service: QuickGuideService;
 
   beforeEach(() => {
@@ -204,7 +206,9 @@ describe('QuickGuideService', () => {
     });
 
     expect(result.resolvedIntents).toContain('documents.entry_document');
-    expect(result.claims.map((claim) => claim.id)).toEqual(
+
+    const claims = result.claims as Array<{ id: string }>;
+    expect(claims.map((claim) => claim.id)).toEqual(
       expect.arrayContaining([
         'entry-purpose-changes-document',
         'residence-route-is-separate-from-entry',

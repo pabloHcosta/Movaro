@@ -62,7 +62,7 @@ export function validateEnvironment(config: EnvRecord): EnvRecord {
     NODE_ENV: nodeEnv,
     PORT: config.PORT ?? '3000',
     HOST: config.HOST ?? '0.0.0.0',
-    APP_NAME: config.APP_NAME ?? 'Movaro API',
+    APP_NAME: config.APP_NAME ?? 'Mudavi API',
     ALLOWED_ORIGINS: config.ALLOWED_ORIGINS ?? '',
     BODY_LIMIT_BYTES: config.BODY_LIMIT_BYTES ?? '1048576',
     RATE_LIMIT_MAX: config.RATE_LIMIT_MAX ?? '120',

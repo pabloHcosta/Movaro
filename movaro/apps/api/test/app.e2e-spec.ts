@@ -12,7 +12,7 @@ import {
   APP_GLOBAL_PREFIX,
 } from '../src/common/constants/app.constants';
 
-describe('Movaro API (e2e)', () => {
+describe('Mudavi API (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {

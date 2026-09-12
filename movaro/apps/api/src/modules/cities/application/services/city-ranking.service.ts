@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 import { CityMetricsModel } from '../../data/models/city-metrics.model';
-import { MovaroScoresEntity } from '../../domain/entities/movaro-scores.entity';
+import { MudaviScoresEntity } from '../../domain/entities/mudavi-scores.entity';
 
 @Injectable()
 export class CityRankingService {
-  calculateScores(city: CityMetricsModel): MovaroScoresEntity {
+  calculateScores(city: CityMetricsModel): MudaviScoresEntity {
     const economical = this.round(
       (city.costOfLivingScore + city.rentScore) / 2,
     );
@@ -26,7 +26,7 @@ export class CityRankingService {
         popularForArgentinians * 0.15,
     );
 
-    return new MovaroScoresEntity(
+    return new MudaviScoresEntity(
       economical,
       popularForArgentinians,
       languageAdaptation,
@@ -37,7 +37,7 @@ export class CityRankingService {
 
   buildRecommendationReasons(
     city: CityMetricsModel,
-    scores: MovaroScoresEntity,
+    scores: MudaviScoresEntity,
   ): string[] {
     const reasons: string[] = [];
 

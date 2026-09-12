@@ -1094,7 +1094,7 @@ export class CityInsightsService {
           method: 'POST',
           headers: {
             'Content-Type': 'text/plain;charset=UTF-8',
-            'User-Agent': 'Movaro/1.0 city-insights',
+            'User-Agent': 'Mudavi/1.0 city-insights',
           },
           body: query,
           signal: AbortSignal.timeout(14_000),
@@ -2382,7 +2382,7 @@ out tags center;`;
 
   private buildGenerationSystemPrompt(locale: InsightLocale): string {
     return [
-      'You are generating city inspiration cards for the Movaro mobile app.',
+      'You are generating city inspiration cards for the Mudavi mobile app.',
       'Return JSON only. No markdown. No prose outside the array.',
       'Keep each shortText compact enough for two app lines.',
       'Balance practical guidance with emotional connection.',
@@ -2518,7 +2518,7 @@ Make the set feel varied and useful:
       const response = await fetch(
         uri.toString().replace('wikipedia.org', `${language}.wikipedia.org`),
         {
-          headers: { 'User-Agent': 'Movaro/1.0 city-insights' },
+          headers: { 'User-Agent': 'Mudavi/1.0 city-insights' },
           signal: AbortSignal.timeout(8_000),
         },
       );
@@ -2571,7 +2571,7 @@ Make the set feel varied and useful:
       uri.searchParams.set('origin', '*');
 
       const response = await fetch(uri.toString(), {
-        headers: { 'User-Agent': 'Movaro/1.0 city-insights' },
+        headers: { 'User-Agent': 'Mudavi/1.0 city-insights' },
         signal: AbortSignal.timeout(8_000),
       });
       if (!response.ok) {

@@ -1,7 +1,7 @@
 {
-  "name": "movaro-api",
+  "name": "mudavi-api",
   "version": "0.0.1",
-  "description": "Movaro API base with NestJS and Fastify.",
+  "description": "Mudavi API base with NestJS and Fastify.",
   "author": "",
   "private": true,
   "license": "UNLICENSED",

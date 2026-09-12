@@ -9,14 +9,14 @@
  * Run:    npm run generate:city-pages   (in apps/api)
  *
  * Env:
- *   SITE_BASE_URL  canonical base (default https://movaro.app)
+ *   SITE_BASE_URL  canonical base (default https://mudavi.app)
  */
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
 
-const BASE_URL = (process.env.SITE_BASE_URL || 'https://movaro.app').replace(
+const BASE_URL = (process.env.SITE_BASE_URL || 'https://mudavi.app').replace(
   /\/$/,
   '',
 );
@@ -100,7 +100,7 @@ function pageShell({ title, description, canonical, body }) {
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${esc(canonical)}">
-<meta property="og:site_name" content="Movaro">
+<meta property="og:site_name" content="Mudavi">
 <style>
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -126,7 +126,7 @@ nav.cities{columns:2;gap:18px}
 </head>
 <body>
 <div class="wrap">
-<header><a href="/">Movaro</a></header>
+<header><a href="/">Mudavi</a></header>
 ${body}
 <p class="muted">Datos de referencia con fuentes oficiales (IBGE) y estimaciones
 de costo de vida. No es asesoría legal; es un punto de partida práctico.</p>
@@ -144,7 +144,7 @@ function cityPage(city) {
   const fair = fairLiving(budget);
   const industries = (city.topIndustries || []).slice(0, 5).map(industryLabel);
 
-  const title = `Vivir en ${city.name}, ${stateName} (Brasil): costo, trabajo y trámites | Movaro`;
+  const title = `Vivir en ${city.name}, ${stateName} (Brasil): costo, trabajo y trámites | Mudavi`;
   const descParts = [
     `Mudarte a ${city.name} (${city.stateCode}) desde Argentina`,
   ];
@@ -158,7 +158,7 @@ function cityPage(city) {
   }
   const description = `${descParts.join('. ')}.`;
 
-  const scores = city.movaroScores || {};
+  const scores = city.mudaviScores || {};
   const costSection = budget
     ? `<h2>Costo de vida</h2>
 <div class="stat">Costo de vida típico (1 persona, incl. alquiler): <strong>${esc(brl(fair))}/mes</strong></div>
@@ -203,7 +203,7 @@ ${
 <li>Convalidación de la licencia de conducir y revalidación de título.</li>
 </ul>
 
-<a class="cta" href="${esc(BASE_URL)}">Planificá tu mudanza con Movaro</a>
+<a class="cta" href="${esc(BASE_URL)}">Planificá tu mudanza con Mudavi</a>
 `;
 
   return pageShell({ title, description, canonical, body });
@@ -235,10 +235,10 @@ function indexPage(cities) {
 <p class="sub">Costo de vida, trabajo y trámites por ciudad — para decidir con
 claridad y empezar con el pie derecho.</p>
 ${sections}
-<a class="cta" href="${esc(BASE_URL)}">Abrir Movaro</a>
+<a class="cta" href="${esc(BASE_URL)}">Abrir Mudavi</a>
 `;
   return pageShell({
-    title: 'Vivir en Brasil siendo argentino: ciudades, costo y trabajo | Movaro',
+    title: 'Vivir en Brasil siendo argentino: ciudades, costo y trabajo | Mudavi',
     description:
       'Guía por ciudad para mudarte de Argentina a Brasil: costo de vida, mercado laboral y trámites (Mercosur, CPF, CNH).',
     canonical: `${BASE_URL}/`,

@@ -12,7 +12,7 @@ const OVERPASS_ENDPOINTS = [
 async function main() {
   const metricsPath = path.resolve(
     __dirname,
-    '../src/modules/cities/data/seeds/movaro_city_metrics.json',
+    '../src/modules/cities/data/seeds/mudavi_city_metrics.json',
   );
   const neighborhoodsPath = path.resolve(
     __dirname,
@@ -71,7 +71,7 @@ out tags center;`;
         method: 'POST',
         headers: {
           'content-type': 'text/plain;charset=UTF-8',
-          'user-agent': 'Movaro/1.0 dataset-ingest',
+          'user-agent': 'Mudavi/1.0 dataset-ingest',
         },
         body: query,
         signal: AbortSignal.timeout(22_000),

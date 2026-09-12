@@ -710,7 +710,7 @@ export class CityRecommendationService {
         ),
       );
     } else {
-      values.affordability = city.movaroScores.economical / 100;
+      values.affordability = city.mudaviScores.economical / 100;
       evidence.push(
         this.evidence(
           'affordability',
@@ -728,12 +728,12 @@ export class CityRecommendationService {
         : city.budgetSnapshot.averageMonthlyNetSalary / Math.max(budgetCost, 1);
     values.job_market =
       salaryCoverage == null
-        ? city.movaroScores.workOpportunity / 100
+        ? city.mudaviScores.workOpportunity / 100
         : Math.max(
             0,
             Math.min(
               1,
-              (city.movaroScores.workOpportunity / 100) * 0.55 +
+              (city.mudaviScores.workOpportunity / 100) * 0.55 +
                 Math.min(salaryCoverage / 1.2, 1) * 0.45,
             ),
           );
@@ -802,7 +802,7 @@ export class CityRecommendationService {
       evidence.push(
         this.evidence(
           'transit_infra',
-          'Curadoria Movaro sobre o Projeto Acesso a Oportunidades / Ipea',
+          'Curadoria Mudavi sobre o Projeto Acesso a Oportunidades / Ipea',
           'curated',
           '2026-07-29',
           'https://www.ipea.gov.br/acessooportunidades/',
@@ -838,7 +838,7 @@ export class CityRecommendationService {
       (profile.childrenCount ?? 0) > 0 ||
       profile.supportNeeds?.includes('children_school');
     if (hasChildren) {
-      values.family_fit = values.safety! * 0.55 + values.affordability! * 0.45;
+      values.family_fit = values.safety * 0.55 + values.affordability * 0.45;
       evidence.push(
         this.evidence(
           'family_fit',
@@ -849,7 +849,7 @@ export class CityRecommendationService {
         ),
       );
     } else {
-      values.family_fit = values.safety! * 0.5 + values.affordability! * 0.5;
+      values.family_fit = values.safety * 0.5 + values.affordability * 0.5;
       evidence.push(
         this.evidence(
           'family_fit',

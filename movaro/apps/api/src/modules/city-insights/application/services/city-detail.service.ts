@@ -4,6 +4,7 @@ import { CitiesCatalogService } from '../../../cities/application/services/citie
 import { CityCardEntity } from '../../../cities/domain/entities/city-card.entity';
 import { CityNeighborhoodSeedService } from './city-neighborhood-seed.service';
 import { CityInsightsService } from './city-insights.service';
+import { CityInsightTheme } from '../../domain/entities/city-insight.entity';
 
 type DetailLocale = 'pt' | 'es' | 'en';
 
@@ -39,18 +40,22 @@ export class CityDetailService {
       locale,
       limit: 6,
     });
-    const trustedInsights = insights.filter((item) => item.source !== 'template');
+    const trustedInsights = insights.filter(
+      (item) => item.source !== 'template',
+    );
 
     const routineInsight =
       trustedInsights.find(
         (item) =>
-          item.theme === 'local_routine' ||
-          item.theme === 'food_and_cafes' ||
-          item.theme === 'nightlife',
+          item.theme === CityInsightTheme.LocalRoutine ||
+          item.theme === CityInsightTheme.FoodAndCafes ||
+          item.theme === CityInsightTheme.Nightlife,
       ) ?? null;
 
     const neighborhoodInsight =
-      trustedInsights.find((item) => item.theme === 'neighborhoods') ?? null;
+      trustedInsights.find(
+        (item) => item.theme === CityInsightTheme.Neighborhoods,
+      ) ?? null;
 
     return {
       cityId: city.id,
@@ -184,7 +189,9 @@ export class CityDetailService {
       locale,
       limit: 8,
     });
-    const trustedInsights = insights.filter((item) => item.source !== 'template');
+    const trustedInsights = insights.filter(
+      (item) => item.source !== 'template',
+    );
     const neighborhoods = await this.cityInsightsService.getExplorePlaces({
       cityId: city.id,
       theme: 'neighborhoods',
@@ -204,7 +211,9 @@ export class CityDetailService {
           body.includes('adapt')
         );
       }) ??
-      trustedInsights.find((item) => item.theme === 'local_routine') ??
+      trustedInsights.find(
+        (item) => item.theme === CityInsightTheme.LocalRoutine,
+      ) ??
       trustedInsights[0] ??
       null;
     const trustedNeighborhoods = this.uniqueNeighborhoods([
@@ -311,11 +320,11 @@ export class CityDetailService {
           es: 'Trabajo',
           en: 'Work',
         }),
-        primary.movaroScores.workOpportunity,
+        primary.mudaviScores.workOpportunity,
         comparisonCities.map((city) => ({
           cityId: city.id,
           cityName: city.name,
-          value: city.movaroScores.workOpportunity,
+          value: city.mudaviScores.workOpportunity,
         })),
         'score',
       ),
@@ -327,11 +336,11 @@ export class CityDetailService {
           es: 'Adaptación de idioma',
           en: 'Language adaptation',
         }),
-        primary.movaroScores.languageAdaptation,
+        primary.mudaviScores.languageAdaptation,
         comparisonCities.map((city) => ({
           cityId: city.id,
           cityName: city.name,
-          value: city.movaroScores.languageAdaptation,
+          value: city.mudaviScores.languageAdaptation,
         })),
         'score',
       ),
@@ -430,7 +439,7 @@ export class CityDetailService {
       },
       {
         id: 'language',
-        score: city.movaroScores.languageAdaptation,
+        score: city.mudaviScores.languageAdaptation,
         label: this.copy(locale, {
           pt: 'Idioma',
           es: 'Idioma',
@@ -439,7 +448,7 @@ export class CityDetailService {
       },
       {
         id: 'work',
-        score: city.movaroScores.workOpportunity,
+        score: city.mudaviScores.workOpportunity,
         label: this.copy(locale, {
           pt: 'Trabalho',
           es: 'Trabajo',
@@ -615,14 +624,12 @@ export class CityDetailService {
 
   private neighborhoodsFromHighlights(
     city: CityCardEntity,
-    insight:
-      | {
-          id: string;
-          title: string;
-          shortText: string;
-          placeHighlights?: string[];
-        }
-      | null,
+    insight: {
+      id: string;
+      title: string;
+      shortText: string;
+      placeHighlights?: string[];
+    } | null,
   ) {
     const highlights = (insight?.placeHighlights ?? []).filter(
       (value) => value.trim().length > 0,
@@ -654,9 +661,48 @@ export class CityDetailService {
 
   private monthList(locale: DetailLocale, months: number[]) {
     const labels = {
-      pt: ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'],
-      es: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
-      en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      pt: [
+        'jan',
+        'fev',
+        'mar',
+        'abr',
+        'mai',
+        'jun',
+        'jul',
+        'ago',
+        'set',
+        'out',
+        'nov',
+        'dez',
+      ],
+      es: [
+        'ene',
+        'feb',
+        'mar',
+        'abr',
+        'may',
+        'jun',
+        'jul',
+        'ago',
+        'sep',
+        'oct',
+        'nov',
+        'dic',
+      ],
+      en: [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ],
     }[locale];
     return months
       .filter((month) => month >= 1 && month <= 12)
@@ -665,7 +711,12 @@ export class CityDetailService {
   }
 
   private uniqueNeighborhoods<
-    T extends { name: string; neighborhood?: string; region?: string; mapUrl: string },
+    T extends {
+      name: string;
+      neighborhood?: string;
+      region?: string;
+      mapUrl: string;
+    },
   >(items: T[]) {
     const seen = new Set<string>();
     return items.filter((item) => {

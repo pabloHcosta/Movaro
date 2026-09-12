@@ -1,6 +1,6 @@
-# Movaro API
+# Mudavi API
 
-API NestJS com adaptador Fastify para os dados e serviços do Movaro.
+API NestJS com adaptador Fastify para os dados e serviços do Mudavi.
 
 ## Responsabilidades
 

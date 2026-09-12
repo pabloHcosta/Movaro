@@ -1,4 +1,4 @@
-import { MovaroScoresEntity } from './movaro-scores.entity';
+import { MudaviScoresEntity } from './mudavi-scores.entity';
 import { CitySourcesEntity } from './city-sources.entity';
 import { CityPublicOpinionEntity } from './city-public-opinion.entity';
 import { CityBudgetSnapshotEntity } from './city-budget-snapshot.entity';
@@ -26,7 +26,7 @@ export class CityCardEntity {
     public readonly unemploymentRate: number,
     public readonly economicActivityScore: number,
     public readonly topIndustries: string[],
-    public readonly movaroScores: MovaroScoresEntity,
+    public readonly mudaviScores: MudaviScoresEntity,
     public readonly recommendationReasons: string[],
     public readonly sources: CitySourcesEntity,
     public readonly updatedAt: string,

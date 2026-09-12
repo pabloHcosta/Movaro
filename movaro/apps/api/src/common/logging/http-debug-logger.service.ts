@@ -159,7 +159,7 @@ export class HttpDebugLoggerService {
   }
 
   private resolveSource(request: RequestLike): string {
-    const clientHeader = request.headers?.['x-movaro-client'];
+    const clientHeader = request.headers?.['x-mudavi-client'];
     const source = Array.isArray(clientHeader) ? clientHeader[0] : clientHeader;
 
     if (typeof source === 'string' && source.trim().length > 0) {
@@ -170,7 +170,7 @@ export class HttpDebugLoggerService {
   }
 
   private resolveHealthCheck(request: RequestLike): string | undefined {
-    const healthHeader = request.headers?.['x-movaro-health-check'];
+    const healthHeader = request.headers?.['x-mudavi-health-check'];
     const value = Array.isArray(healthHeader) ? healthHeader[0] : healthHeader;
 
     if (typeof value === 'string' && value.trim().length > 0) {

@@ -44,7 +44,7 @@ export const STATIC_FAQ_ENTRIES: FaqEntry[] = [
 
 **Comunidade argentina:** Florianópolis, São Paulo e Campinas têm comunidades argentinas consolidadas com grupos de WhatsApp ativos onde novos chegados obtêm ajuda prática.
 
-💡 O maior desafio não é a cultura — é a burocracia inicial (CPF, conta bancária, aluguel). O Movaro te guia por cada etapa.`,
+💡 O maior desafio não é a cultura — é a burocracia inicial (CPF, conta bancária, aluguel). O Mudavi te guia por cada etapa.`,
 
       es: `La adaptación de argentinos en Brasil suele ser fluida — hay muchas similitudes culturales, pero algunos puntos merecen atención:
 
@@ -56,7 +56,7 @@ export const STATIC_FAQ_ENTRIES: FaqEntry[] = [
 
 **Comunidad argentina:** Florianópolis, São Paulo y Campinas tienen comunidades argentinas consolidadas con grupos de WhatsApp activos donde los recién llegados obtienen ayuda práctica.
 
-💡 El mayor desafío no es la cultura — es la burocracia inicial (CPF, cuenta bancaria, alquiler). Movaro te guía en cada etapa.`,
+💡 El mayor desafío no es la cultura — es la burocracia inicial (CPF, cuenta bancaria, alquiler). Mudavi te guía en cada etapa.`,
     },
   },
 
@@ -210,7 +210,7 @@ Use Airbnb, hostel ou quarto em república — não assine contrato de longo pra
 - Florianópolis: Lagoa da Conceição, Trindade, Ingleses
 - Curitiba: Batel, Água Verde, Cristo Rei
 
-💡 O guia Movaro tem um passo a passo completo para encontrar moradia, incluindo dicas de negociação com imobiliárias.`,
+💡 O guia Mudavi tem um passo a passo completo para encontrar moradia, incluindo dicas de negociação com imobiliárias.`,
 
       es: `**Vivienda en Brasil: primeros pasos**
 
@@ -229,7 +229,7 @@ Usá Airbnb, hostel o habitación compartida — no firmes contrato de largo pla
 - Florianópolis: Lagoa da Conceição, Trindade, Ingleses
 - Curitiba: Batel, Água Verde, Cristo Rei
 
-💡 La guía Movaro tiene un paso a paso completo para encontrar vivienda, incluyendo consejos para negociar con inmobiliarias.`,
+💡 La guía Mudavi tiene un paso a paso completo para encontrar vivienda, incluyendo consejos para negociar con inmobiliarias.`,
     },
   },
 

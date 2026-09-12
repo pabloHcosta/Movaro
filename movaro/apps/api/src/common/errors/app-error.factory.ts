@@ -8,8 +8,8 @@ export class AppErrorFactory {
     return new AppException({
       code: ErrorCode.CityNotFound,
       status: HttpStatus.NOT_FOUND,
-      message: `City "${cityId}" was not found in the Movaro catalog.`,
-      userMessage: 'Nao encontramos essa cidade no catalogo atual do Movaro.',
+      message: `City "${cityId}" was not found in the Mudavi catalog.`,
+      userMessage: 'Nao encontramos essa cidade no catalogo atual do Mudavi.',
     });
   }
 

@@ -1,12 +1,7 @@
-# Static deploy for the Movaro SEO city pages.
-# There is NO build step — the HTML is pre-generated. Regenerate with:
-#   cd apps/api && npm run generate:city-pages
-#
-# On Netlify: set the site "base directory" to `apps/web` and this file makes
-# `public/` the publish directory.
+# Mudavi landing page and SEO city pages.
 [build]
-  publish = "public"
-  command = ""
+  publish = "dist"
+  command = "npm run build"
 
 [[headers]]
   for = "/*"

@@ -93,14 +93,14 @@ export class CostResolverService {
     if (locale === 'es') {
       return (
         `Los costos varían según la ciudad, la zona y el estilo de vida. ` +
-        `Consultá las franjas de la ciudad en Movaro para comparar una opción económica ` +
+        `Consultá las franjas de la ciudad en Mudavi para comparar una opción económica ` +
         `con otra más cómoda.\n\nNo pude validar el cambio ahora; los valores permanecen ` +
         `en reales hasta obtener una referencia oficial del BCB y BCRA.`
       );
     }
     if (locale === 'en') {
       return (
-        `Costs vary by city, area and lifestyle. Use Movaro's city ranges to compare ` +
+        `Costs vary by city, area and lifestyle. Use Mudavi's city ranges to compare ` +
         `an economical option with a more comfortable one.\n\nI could not validate the ` +
         `exchange rate now; amounts remain in BRL until an official BCB and BCRA ` +
         `reference is available.`
@@ -108,7 +108,7 @@ export class CostResolverService {
     }
     return (
       `Os custos variam por cidade, zona e estilo de vida. Use as faixas da cidade ` +
-      `no Movaro para comparar uma opção econômica com outra mais confortável.\n\n` +
+      `no Mudavi para comparar uma opção econômica com outra mais confortável.\n\n` +
       `Não consegui validar o câmbio agora; os valores permanecem em reais até haver ` +
       `uma referência oficial do BCB e do BCRA.`
     );

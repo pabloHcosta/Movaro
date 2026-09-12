@@ -1,8 +1,10 @@
 import { ChatContextBuilderService } from './chat-context-builder.service';
 import { CitiesCatalogService } from '../../../cities/application/services/cities-catalog.service';
+import { describe, it } from 'node:test';
+import { expect, jest } from '@jest/globals';
 
-describe('ChatContextBuilderService', () => {
-  it('builds city context even when highlightedCityId arrives without state suffix', async () => {
+void describe('ChatContextBuilderService', () => {
+  void it('builds city context even when highlightedCityId arrives without state suffix', async () => {
     const service = new ChatContextBuilderService({
       resolveCityId: jest.fn().mockReturnValue('florianopolis-sc'),
       getCityById: jest.fn().mockResolvedValue({
@@ -14,7 +16,7 @@ describe('ChatContextBuilderService', () => {
         unemploymentRate: 5.2,
         idhmScore: 0.847,
         topIndustries: ['Tecnologia', 'Turismo'],
-        movaroScores: {
+        mudaviScores: {
           overall: 76,
           economical: 74,
           workOpportunity: 68,
@@ -23,7 +25,7 @@ describe('ChatContextBuilderService', () => {
         },
         recommendationReasons: ['Popular entre argentinos'],
         updatedAt: '2026-01-01',
-      }),
+      } as never),
     } as unknown as CitiesCatalogService);
 
     const context = await service.buildContext({
@@ -38,7 +40,7 @@ describe('ChatContextBuilderService', () => {
     expect(context.appDataBlock).toContain('Santa Catarina');
   });
 
-  it('supports country aliases when resolving corridor coverage', async () => {
+  void it('supports country aliases when resolving corridor coverage', async () => {
     const service = new ChatContextBuilderService({
       resolveCityId: jest.fn().mockReturnValue(null),
       getCityById: jest.fn(),
@@ -54,7 +56,7 @@ describe('ChatContextBuilderService', () => {
     expect(context.supportedCorridor).toBe('Argentina → Brasil');
   });
 
-  it('marks Uruguay -> Brasil as partial coverage', async () => {
+  void it('marks Uruguay -> Brasil as partial coverage', async () => {
     const service = new ChatContextBuilderService({
       resolveCityId: jest.fn().mockReturnValue(null),
       getCityById: jest.fn(),

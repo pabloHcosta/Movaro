@@ -95,7 +95,9 @@ export class CitiesCatalogService {
       return aliasMatch.id;
     }
 
-    const prefixMatch = metrics.find((item) => item.id.startsWith(`${normalized}-`));
+    const prefixMatch = metrics.find((item) =>
+      item.id.startsWith(`${normalized}-`),
+    );
     return prefixMatch?.id ?? null;
   }
 
@@ -187,15 +189,15 @@ export class CitiesCatalogService {
   ): number {
     switch (category) {
       case 'economical':
-        return city.movaroScores.economical;
+        return city.mudaviScores.economical;
       case 'popular_argentina':
-        return city.movaroScores.popularForArgentinians;
+        return city.mudaviScores.popularForArgentinians;
       case 'language':
-        return city.movaroScores.languageAdaptation;
+        return city.mudaviScores.languageAdaptation;
       case 'work':
-        return city.movaroScores.workOpportunity;
+        return city.mudaviScores.workOpportunity;
       default:
-        return city.movaroScores.overall;
+        return city.mudaviScores.overall;
     }
   }
 }

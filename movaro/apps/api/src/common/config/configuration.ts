@@ -4,7 +4,7 @@ import { AppConfiguration } from './types/app-configuration.type';
 
 export default (): AppConfiguration => ({
   app: {
-    name: process.env.APP_NAME ?? 'Movaro API',
+    name: process.env.APP_NAME ?? 'Mudavi API',
     nodeEnv:
       (process.env.NODE_ENV as AppEnvironment) ?? AppEnvironment.Development,
   },

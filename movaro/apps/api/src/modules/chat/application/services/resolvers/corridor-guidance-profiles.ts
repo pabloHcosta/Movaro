@@ -359,12 +359,12 @@ export const uruguayBrazilGuidanceProfile: CorridorGuidanceProfile = {
   },
   buildAnswer(topic, locale) {
     if (locale === 'es') {
-      return `Este corredor ya fue reconocido por Movaro, pero todavía tiene cobertura parcial. Hoy la recomendación segura es usar el asistente para orientación inicial y confirmar reglas operativas antes de tratarlo como guía cerrada. Tema consultado: ${topic}.`;
+      return `Este corredor ya fue reconocido por Mudavi, pero todavía tiene cobertura parcial. Hoy la recomendación segura es usar el asistente para orientación inicial y confirmar reglas operativas antes de tratarlo como guía cerrada. Tema consultado: ${topic}.`;
     }
     if (locale === 'en') {
-      return `This corridor is already recognized by Movaro, but it still has partial coverage. For now, the safe recommendation is to use the assistant for initial orientation and confirm operational rules before treating it as a closed guide. Topic requested: ${topic}.`;
+      return `This corridor is already recognized by Mudavi, but it still has partial coverage. For now, the safe recommendation is to use the assistant for initial orientation and confirm operational rules before treating it as a closed guide. Topic requested: ${topic}.`;
     }
-    return `Esse corredor já foi reconhecido pelo Movaro, mas ainda está com cobertura parcial. Por enquanto, a recomendação segura é usar o assistente para orientação inicial e confirmar regras operacionais antes de tratar isso como um guia fechado. Tema consultado: ${topic}.`;
+    return `Esse corredor já foi reconhecido pelo Mudavi, mas ainda está com cobertura parcial. Por enquanto, a recomendação segura é usar o assistente para orientação inicial e confirmar regras operacionais antes de tratar isso como um guia fechado. Tema consultado: ${topic}.`;
   },
 };
 

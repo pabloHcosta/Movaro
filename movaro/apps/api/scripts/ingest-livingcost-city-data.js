@@ -8,7 +8,7 @@ const USER_AGENT =
 async function main() {
   const metricsPath = path.resolve(
     __dirname,
-    '../src/modules/cities/data/seeds/movaro_city_metrics.json',
+    '../src/modules/cities/data/seeds/mudavi_city_metrics.json',
   );
   const budgetPath = path.resolve(
     __dirname,
@@ -267,30 +267,40 @@ function parseUpdatedAt(html) {
 
 function parseRowUsd(html, rowId) {
   const regex = new RegExp(
-    `<th id="${rowId}"[\\s\\S]*?<span data-usd="([0-9.]+)"`,
+    `<th id="${rowId}"[\\s\\S]*?<span data-usd="([0-9][0-9,\\.\\s]*)"`,
     'i',
   );
   const match = html.match(regex);
-  return match ? Number(match[1]) : null;
+  return match ? normalizeUsdNumber(match[1]) : null;
 }
 
 function parsePriceUsd(html, label) {
   const escaped = escapeRegex(label);
   const regex = new RegExp(
-    `<th[^>]*>[\\s\\S]*?${escaped}[\\s\\S]*?<span data-usd="([0-9.]+)"`,
+    `<th[^>]*>[\\s\\S]*?${escaped}[\\s\\S]*?<span data-usd="([0-9][0-9,\\.\\s]*)"`,
     'i',
   );
   const match = html.match(regex);
-  return match ? Number(match[1]) : null;
+  return match ? normalizeUsdNumber(match[1]) : null;
 }
 
 function parsePlainNumberRow(html, rowId) {
   const regex = new RegExp(
-    `<th id="${rowId}"[\\s\\S]*?<div class="bar-table[^"]*">\\s*([0-9.]+)\\s*<span`,
+    `<th id="${rowId}"[\\s\\S]*?<div class="bar-table[^"]*">\\s*([0-9][0-9,\\.\\s]*)\\s*<span`,
     'i',
   );
   const match = html.match(regex);
-  return match ? Number(match[1]) : null;
+  return match ? normalizeUsdNumber(match[1]) : null;
+}
+
+function normalizeUsdNumber(raw) {
+  const normalized = String(raw).replace(/,/g, '').trim();
+  if (!normalized) {
+    return null;
+  }
+
+  const value = Number(normalized);
+  return Number.isFinite(value) ? value : null;
 }
 
 function parseTableValue(html, label) {

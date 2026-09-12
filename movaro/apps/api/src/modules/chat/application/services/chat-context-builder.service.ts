@@ -120,7 +120,7 @@ export class ChatContextBuilderService {
       lines.push(this.industriesLabel(lang, city.topIndustries));
     }
 
-    // Movaro scores summary
+    // Mudavi scores summary
     lines.push(this.scoresLabel(lang, city));
 
     // Reasons this city may be relevant in the current plan context
@@ -177,7 +177,7 @@ export class ChatContextBuilderService {
   }
 
   private scoresLabel(lang: string, city: CityCardEntity): string {
-    const s = city.movaroScores;
+    const s = city.mudaviScores;
     return lang === 'pt'
       ? `- Scores comparativos internos (não oficiais) — Geral: ${s.overall} | Econômico: ${s.economical} | Trabalho: ${s.workOpportunity} | Popular entre argentinos: ${s.popularForArgentinians} | Adaptação ao espanhol: ${s.languageAdaptation}`
       : lang === 'es'

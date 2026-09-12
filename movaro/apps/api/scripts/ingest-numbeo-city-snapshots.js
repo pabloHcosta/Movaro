@@ -8,7 +8,7 @@ const USER_AGENT =
 async function main() {
   const metricsPath = path.resolve(
     __dirname,
-    '../src/modules/cities/data/seeds/movaro_city_metrics.json',
+    '../src/modules/cities/data/seeds/mudavi_city_metrics.json',
   );
   const budgetPath = path.resolve(
     __dirname,

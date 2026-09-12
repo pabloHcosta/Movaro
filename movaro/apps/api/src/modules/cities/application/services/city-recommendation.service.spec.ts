@@ -1,6 +1,8 @@
 import { CityCardEntity } from '../../domain/entities/city-card.entity';
 import { CityRecommendationService } from './city-recommendation.service';
 import { CitiesCatalogService } from './cities-catalog.service';
+import { describe, beforeEach, it } from 'node:test';
+import { expect, jest } from '@jest/globals';
 
 const source = {
   provider: 'IBGE',
@@ -53,7 +55,7 @@ function city({
     unemploymentRate: 7,
     economicActivityScore: work,
     topIndustries: [],
-    movaroScores: {
+    mudaviScores: {
       economical,
       popularForArgentinians: 60,
       languageAdaptation: 60,
@@ -88,7 +90,7 @@ function city({
       sourceType: 'official',
     },
     seasonalitySnapshot: null,
-  } as CityCardEntity;
+  } as unknown as CityCardEntity;
 }
 
 const catalog = [
@@ -165,15 +167,17 @@ function profile(overrides: Record<string, unknown> = {}) {
   };
 }
 
-describe('CityRecommendationService', () => {
+void describe('CityRecommendationService', () => {
   const catalogService = {
-    getCities: jest.fn().mockResolvedValue(catalog),
+    getCities: jest
+      .fn<CitiesCatalogService['getCities']>()
+      .mockResolvedValue(catalog),
   } as unknown as CitiesCatalogService;
   const service = new CityRecommendationService(catalogService);
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns a versioned, ordered result with evidence metadata', async () => {
+  void it('returns a versioned, ordered result with evidence metadata', async () => {
     const result = await service.recommend(profile());
 
     expect(result.methodologyVersion).toBe('city-recommendation-v2.3.0');
@@ -200,7 +204,7 @@ describe('CityRecommendationService', () => {
     expect(result.refinement.candidates).toHaveLength(2);
   });
 
-  it('selects only the unanswered attribute with the highest ranking gain', async () => {
+  void it('selects only the unanswered attribute with the highest ranking gain', async () => {
     const result = await service.recommend(profile());
 
     // Keep the assertion output diagnostic when fixture sensitivity changes.
@@ -217,7 +221,7 @@ describe('CityRecommendationService', () => {
     );
   });
 
-  it('stops adaptive refinement when every ranking attribute was answered', async () => {
+  void it('stops adaptive refinement when every ranking attribute was answered', async () => {
     const result = await service.recommend(
       profile({
         workArrangement: 'remote',
@@ -236,7 +240,7 @@ describe('CityRecommendationService', () => {
     });
   });
 
-  it('treats mandatory coast, scale, transit and cost constraints as filters', async () => {
+  void it('treats mandatory coast, scale, transit and cost constraints as filters', async () => {
     const coast = await service.recommend(
       profile({ constraints: ['want_coast'] }),
     );
@@ -271,7 +275,7 @@ describe('CityRecommendationService', () => {
     ).toBe(false);
   });
 
-  it('requires verified higher education presence for a study route', async () => {
+  void it('requires verified higher education presence for a study route', async () => {
     const result = await service.recommend(
       profile({ intent: 'study', priorities: ['university'] }),
     );
@@ -292,7 +296,7 @@ describe('CityRecommendationService', () => {
     ).toBe(false);
   });
 
-  it('uses exact origin coordinates instead of a regional proxy', async () => {
+  void it('uses exact origin coordinates instead of a regional proxy', async () => {
     const result = await service.recommend(
       profile({
         priorities: ['close_to_argentina'],
@@ -313,7 +317,7 @@ describe('CityRecommendationService', () => {
     );
   });
 
-  it('uses work arrangement and household composition as scoring inputs', async () => {
+  void it('uses work arrangement and household composition as scoring inputs', async () => {
     const remote = await service.recommend(
       profile({
         intent: 'remote_income',
@@ -351,7 +355,7 @@ describe('CityRecommendationService', () => {
     expect(soloAffordability).not.toBe(familyAffordability);
   });
 
-  it('scores coast without pretending to measure climate normals', async () => {
+  void it('scores coast without pretending to measure climate normals', async () => {
     const coastResult = await service.recommend(
       profile({ priorities: ['warm_climate_beach'] }),
     );
@@ -371,9 +375,9 @@ describe('CityRecommendationService', () => {
     );
   });
 
-  it('does not classify future source dates as fresh', async () => {
+  void it('does not classify future source dates as fresh', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-09-10T12:00:00Z'));
-    const futureCatalog = catalog.map((item) => ({
+    const futureCatalog: CityCardEntity[] = catalog.map((item) => ({
       ...item,
       updatedAt: '2027-01-01',
       budgetSnapshot: item.budgetSnapshot
@@ -388,9 +392,11 @@ describe('CityRecommendationService', () => {
           ? { ...item.sources.safety, updatedAt: '2027-01-01' }
           : null,
       },
-    })) as CityCardEntity[];
+    }));
     const futureService = new CityRecommendationService({
-      getCities: jest.fn().mockResolvedValue(futureCatalog),
+      getCities: jest
+        .fn<CitiesCatalogService['getCities']>()
+        .mockResolvedValue(futureCatalog),
     } as unknown as CitiesCatalogService);
 
     try {

@@ -1,4 +1,4 @@
-export class MovaroScoresEntity {
+export class MudaviScoresEntity {
   constructor(
     public readonly economical: number,
     public readonly popularForArgentinians: number,

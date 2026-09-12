@@ -215,9 +215,9 @@ async function bootstrap() {
     allowedHeaders: [
       'content-type',
       'x-trace-id',
-      'x-movaro-client',
-      'x-movaro-environment',
-      'x-movaro-health-check',
+      'x-mudavi-client',
+      'x-mudavi-environment',
+      'x-mudavi-health-check',
     ],
     exposedHeaders: ['x-trace-id'],
     credentials: false,
@@ -244,7 +244,7 @@ async function bootstrap() {
   });
 
   logger.log(
-    `Movaro API running on http://${appConfig.host}:${appConfig.port}/${APP_GLOBAL_PREFIX}/v${API_VERSION}`,
+    `Mudavi API running on http://${appConfig.host}:${appConfig.port}/${APP_GLOBAL_PREFIX}/v${API_VERSION}`,
   );
   logger.log(`Environment: ${appConfig.nodeEnv}`);
   logger.log(

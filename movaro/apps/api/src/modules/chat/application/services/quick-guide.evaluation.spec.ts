@@ -1,8 +1,10 @@
 import { QuickGuideService } from './quick-guide.service';
 import { QuickHelpQueryPlannerService } from './quick-help-query-planner.service';
 import { QUICK_HELP_CATALOG_ROUTES } from '../../data/quick-help-intents.catalog';
+import { describe } from 'node:test';
+import { afterAll, beforeAll, expect, it, jest } from '@jest/globals';
 
-describe('Quick Guide P3 quality evaluation', () => {
+void describe('Quick Guide P3 quality evaluation', () => {
   const service = new QuickGuideService(new QuickHelpQueryPlannerService());
 
   beforeAll(() => {
@@ -119,14 +121,20 @@ describe('Quick Guide P3 quality evaluation', () => {
       locale: 'pt',
     });
 
-    expect(result.sections.map((section) => section.intentId)).toEqual(
+    const sectionIntentIds = (
+      (result.sections ?? []) as Array<{ intentId: string }>
+    ).map((section) => section.intentId);
+
+    expect(sectionIntentIds).toEqual(
       expect.arrayContaining([
         'education.basic_enrollment',
         'health.sus_access',
       ]),
     );
     expect(
-      result.sections.every((section) => section.claimIds.length > 0),
+      (result.sections ?? []).every(
+        (section: { claimIds: string[] }) => section.claimIds.length > 0,
+      ),
     ).toBe(true);
   });
 
