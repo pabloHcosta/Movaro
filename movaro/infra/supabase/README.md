@@ -4,7 +4,7 @@ Estado atual deste workspace:
 
 - a API ja esta conectada ao projeto Supabase por `SUPABASE_URL` + `SUPABASE_SECRET_KEY`
 - a conectividade basica foi validada
-- o schema publico ainda nao tinha as tabelas operacionais do Movaro
+- as migrations do workspace estao aplicadas ao projeto remoto
 
 ## Migration inicial
 
@@ -12,30 +12,23 @@ Arquivo:
 
 - `infra/supabase/migrations/20260326144540_assistant_foundation.sql`
 
-Essa migration cria a base para:
+Essa migration historica criou uma base normalizada para:
 
-- `migration_plans`
-- `migration_plan_progress`
-- `assistant_chat_sessions`
-- `assistant_chat_messages`
-- `assistant_message_feedback`
+- planos e progresso de migracao
+- sessoes, mensagens e feedback do assistente
 
-Tambem inclui:
+Essa modelagem nunca foi ligada ao runtime e foi removida posteriormente por:
 
-- `updated_at` trigger
-- sincronizacao de `owner_user_id` no progresso
-- indices principais
-- RLS para usuarios autenticados
+- `infra/supabase/migrations/20260913104500_remove_unused_foundation_tables.sql`
+
+O estado de migracao realmente usado pelo app e sincronizado em
+`app_state_snapshots`. A API usa as tabelas de conhecimento do assistente,
+cache de insights, analytics e interesses de lancamento.
 
 ## Como aplicar no projeto Supabase
 
-Como este ambiente nao tem `supabase` CLI nem token de Management API, aplique de um destes jeitos:
-
-1. Abrir o SQL Editor do projeto Supabase
-2. Colar o conteudo da migration
-3. Executar
-
-Ou, quando a CLI estiver disponivel:
+As migrations podem ser aplicadas pelo Supabase MCP configurado no Codex ou,
+quando a CLI estiver disponivel, com:
 
 ```bash
 supabase db push
@@ -49,12 +42,12 @@ Na API:
 npm run supabase:check
 ```
 
-Esse script verifica se as tabelas-base do Movaro existem no projeto configurado no `.env.local` da API.
+Esse script verifica se todas as tabelas usadas pelo runtime existem no projeto
+configurado no `.env.local` da API.
 
 ## Observacao de arquitetura
 
-Esse schema foi pensado para um backend server-first:
+O schema atual combina duas formas de acesso:
 
-- o app nao precisa escrever direto no Supabase
-- a API pode usar a service key e persistir com controle
-- quando auth entrar de verdade, as policies ja suportam `auth.uid()`
+- o app escreve diretamente apenas em `app_state_snapshots`, protegido por RLS
+- a API usa a service key para conhecimento, cache, analytics e leads

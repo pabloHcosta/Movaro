@@ -22,6 +22,7 @@ export class LaunchInterestsService {
         locale: body.locale,
         source: 'landing_page',
         status: 'interested',
+        analytics_session_id: body.analyticsSessionId ?? null,
         last_submitted_at: now,
         updated_at: now,
       },

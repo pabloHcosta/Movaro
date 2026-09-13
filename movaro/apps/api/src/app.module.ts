@@ -19,6 +19,7 @@ import { LaunchInterestsModule } from './modules/launch-interests/launch-interes
 import { MigrationModule } from './modules/migration/migration.module';
 import { ProductAnalyticsModule } from './modules/product-analytics/product-analytics.module';
 import { ReferenceModule } from './modules/reference/reference.module';
+import { SiteAnalyticsModule } from './modules/site-analytics/site-analytics.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ReferenceModule } from './modules/reference/reference.module';
     MigrationModule,
     ProductAnalyticsModule,
     ReferenceModule,
+    SiteAnalyticsModule,
   ],
   providers: [
     HttpDebugLoggerService,

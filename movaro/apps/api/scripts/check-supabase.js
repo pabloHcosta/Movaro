@@ -8,12 +8,19 @@ const ENV_CANDIDATES = [
   '.env',
 ];
 
-const FOUNDATION_TABLES = [
-  'migration_plans',
-  'migration_plan_progress',
-  'assistant_chat_sessions',
-  'assistant_chat_messages',
-  'assistant_message_feedback',
+const REQUIRED_TABLES = [
+  'app_state_snapshots',
+  'assistant_language_rules',
+  'assistant_faq_entries',
+  'assistant_faq_keywords',
+  'assistant_document_entries',
+  'assistant_document_keywords',
+  'assistant_quick_prompt_templates',
+  'assistant_guide_answers',
+  'city_insights_cache',
+  'product_flow_events',
+  'landing_page_sessions',
+  'landing_page_section_engagement',
   'launch_interests',
 ];
 
@@ -83,7 +90,7 @@ async function main() {
   });
 
   const results = [];
-  for (const table of FOUNDATION_TABLES) {
+  for (const table of REQUIRED_TABLES) {
     results.push(await checkTable(supabase, table));
   }
 

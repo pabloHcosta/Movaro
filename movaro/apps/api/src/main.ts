@@ -48,6 +48,13 @@ const routeLimitRules: RouteLimitRule[] = [
     windowMs: 10 * 60 * 1000,
   },
   {
+    key: 'site-analytics',
+    path: `/${APP_GLOBAL_PREFIX}/v${API_VERSION}/site-analytics/session`,
+    methods: ['POST'],
+    max: 240,
+    windowMs: 10 * 60 * 1000,
+  },
+  {
     key: 'city-search',
     path: `/${APP_GLOBAL_PREFIX}/v${API_VERSION}/cities/search`,
     methods: ['GET'],

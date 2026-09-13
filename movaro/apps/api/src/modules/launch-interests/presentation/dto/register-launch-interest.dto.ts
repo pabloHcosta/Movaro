@@ -1,4 +1,4 @@
-import { IsEmail, IsIn, MaxLength } from 'class-validator';
+import { IsEmail, IsIn, IsOptional, IsUUID, MaxLength } from 'class-validator';
 
 export class RegisterLaunchInterestDto {
   @IsEmail()
@@ -8,4 +8,7 @@ export class RegisterLaunchInterestDto {
   @IsIn(['pt', 'es', 'en'])
   locale!: 'pt' | 'es' | 'en';
 
+  @IsOptional()
+  @IsUUID()
+  analyticsSessionId?: string;
 }
