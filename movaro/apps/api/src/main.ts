@@ -27,6 +27,13 @@ type RouteLimitRule = {
 
 const routeLimitRules: RouteLimitRule[] = [
   {
+    key: 'launch-interests',
+    path: `/${APP_GLOBAL_PREFIX}/v${API_VERSION}/launch-interests`,
+    methods: ['POST'],
+    max: 8,
+    windowMs: 60 * 60 * 1000,
+  },
+  {
     key: 'migration-plan',
     path: `/${APP_GLOBAL_PREFIX}/v${API_VERSION}/migration/plan`,
     methods: ['POST'],

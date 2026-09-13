@@ -9,7 +9,7 @@
  *   1. Start the API:   npm run start:dev      (here, in apps/api)
  *   2. Export snapshot: npm run export:snapshot
  *
- * Re-run whenever you change city data (e.g. mudavi_city_metrics.json) and want
+ * Re-run whenever you change city data (e.g. movaro_city_metrics.json) and want
  * the offline build to reflect it. Then rebuild the Flutter app.
  *
  * Env:

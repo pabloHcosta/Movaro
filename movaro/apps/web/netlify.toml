@@ -3,6 +3,12 @@
   publish = "dist"
   command = "npm run build"
 
+[[redirects]]
+  from = "/api/*"
+  to = "https://movaro-production.up.railway.app/api/:splat"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]

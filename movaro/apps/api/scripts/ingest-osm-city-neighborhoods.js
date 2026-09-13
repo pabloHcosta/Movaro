@@ -12,7 +12,7 @@ const OVERPASS_ENDPOINTS = [
 async function main() {
   const metricsPath = path.resolve(
     __dirname,
-    '../src/modules/cities/data/seeds/mudavi_city_metrics.json',
+    '../src/modules/cities/data/seeds/movaro_city_metrics.json',
   );
   const neighborhoodsPath = path.resolve(
     __dirname,

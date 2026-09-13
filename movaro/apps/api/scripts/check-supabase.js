@@ -14,6 +14,7 @@ const FOUNDATION_TABLES = [
   'assistant_chat_sessions',
   'assistant_chat_messages',
   'assistant_message_feedback',
+  'launch_interests',
 ];
 
 function loadEnv() {

@@ -42,15 +42,15 @@ class HomeVisualLayout extends StatelessWidget {
               builder: (context, constraints) {
                 final isNarrow = constraints.maxWidth < 390;
                 final isShort = constraints.maxHeight < 700;
-                final horizontalPadding = isNarrow ? 16.0 : 20.0;
+                final horizontalPadding = isNarrow ? 20.0 : 28.0;
 
                 return SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   padding: EdgeInsets.fromLTRB(
                     horizontalPadding,
-                    isShort ? 14 : 20,
+                    isShort ? 16 : 28,
                     horizontalPadding,
-                    isShort ? 18 : 24,
+                    120,
                   ),
                   child: Center(
                     child: ConstrainedBox(
@@ -59,15 +59,14 @@ class HomeVisualLayout extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _BrandSignature(isDark: isDark, scheme: scheme),
-                          SizedBox(height: isShort ? 20 : 26),
+                          SizedBox(height: isShort ? 24 : 36),
                           _HeroMessage(
                             scheme: scheme,
                             isNarrow: isNarrow,
                             isShort: isShort,
                           ),
-                          SizedBox(height: isShort ? 20 : 26),
+                          SizedBox(height: isShort ? 24 : 36),
                           _PrimaryAction(
-                            scheme: scheme,
                             isDark: isDark,
                             onTap: onDiscoverDirectionTap,
                           ),
@@ -77,7 +76,7 @@ class HomeVisualLayout extends StatelessWidget {
                             isDark: isDark,
                             onTap: onKnownCityTap,
                           ),
-                          SizedBox(height: isShort ? 22 : 28),
+                          SizedBox(height: isShort ? 28 : 36),
                           _QuickActions(
                             scheme: scheme,
                             isDark: isDark,
@@ -136,7 +135,7 @@ class _PremiumBackdrop extends StatelessWidget {
           child: _AmbientOrb(
             size: 430,
             color: const Color(0xFF168BFF),
-            opacity: isDark ? 0.24 : 0.16,
+            opacity: isDark ? 0.18 : 0.10,
           ),
         ),
         Positioned(
@@ -145,7 +144,7 @@ class _PremiumBackdrop extends StatelessWidget {
           child: _AmbientOrb(
             size: 380,
             color: const Color(0xFF6D5BFF),
-            opacity: isDark ? 0.12 : 0.08,
+            opacity: isDark ? 0.08 : 0.035,
           ),
         ),
         Positioned(
@@ -157,7 +156,6 @@ class _PremiumBackdrop extends StatelessWidget {
             opacity: isDark ? 0.08 : 0.07,
           ),
         ),
-        CustomPaint(painter: _SubtleGridPainter(isDark: isDark)),
       ],
     );
   }
@@ -191,34 +189,6 @@ class _AmbientOrb extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _SubtleGridPainter extends CustomPainter {
-  const _SubtleGridPainter({required this.isDark});
-
-  final bool isDark;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = (isDark ? Colors.white : const Color(0xFF0A315F)).withValues(
-        alpha: isDark ? 0.018 : 0.022,
-      )
-      ..strokeWidth = 0.6;
-    const step = 48.0;
-
-    for (var x = 0.0; x <= size.width; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    for (var y = 0.0; y <= size.height; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _SubtleGridPainter oldDelegate) {
-    return oldDelegate.isDark != isDark;
   }
 }
 
@@ -307,10 +277,10 @@ class _HeroMessage extends StatelessWidget {
           child: Text(
             context.l10n.homeEntryTitle,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontSize: isShort ? 29 : (isNarrow ? 32 : 35),
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1.15,
-              height: 1.04,
+              fontSize: isShort ? 29 : (isNarrow ? 32 : 36),
+              fontWeight: FontWeight.w700,
+              letterSpacing: -1.25,
+              height: 1.10,
               color: scheme.onSurface,
               shadows: scheme.brightness == Brightness.dark
                   ? [
@@ -327,8 +297,9 @@ class _HeroMessage extends StatelessWidget {
         Text(
           context.l10n.homeEntrySubtitle,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: scheme.onSurface.withValues(alpha: 0.70),
-            height: 1.42,
+            color: scheme.onSurface.withValues(alpha: 0.60),
+            fontSize: 15,
+            height: 1.5,
           ),
         ),
       ],
@@ -338,12 +309,10 @@ class _HeroMessage extends StatelessWidget {
 
 class _PrimaryAction extends StatelessWidget {
   const _PrimaryAction({
-    required this.scheme,
     required this.isDark,
     required this.onTap,
   });
 
-  final ColorScheme scheme;
   final bool isDark;
   final VoidCallback onTap;
 
@@ -351,115 +320,98 @@ class _PrimaryAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
+    final radius = BorderRadius.circular(26);
     return Semantics(
       key: const ValueKey('home-action-discover'),
       button: true,
       label: l10n.homeEntryDiscoverAction,
       hint: l10n.homeEntrySupportLine,
       child: ExcludeSemantics(
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              onTap();
-            },
-            borderRadius: BorderRadius.circular(20),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 72),
-              child: Ink(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 13,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0878F5).withValues(
+                  alpha: isDark ? 0.22 : 0.18,
                 ),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF2BA9FF),
-                      Color(0xFF0878F5),
-                      Color(0xFF3151DA),
-                    ],
-                    stops: [0, 0.55, 1],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.18),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(
-                        0xFF0878F5,
-                      ).withValues(alpha: isDark ? 0.38 : 0.25),
-                      blurRadius: 30,
-                      offset: const Offset(0, 13),
-                    ),
+                blurRadius: 24,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Material(
+            color: const Color(0xFF0878F5),
+            borderRadius: radius,
+            clipBehavior: Clip.antiAlias,
+            child: Ink(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF249FFF),
+                    Color(0xFF0878F5),
+                    Color(0xFF2856D8),
                   ],
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.16),
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.auto_awesome_rounded,
-                        color: Colors.white,
-                        size: 21,
-                      ),
-                    ),
-                    const SizedBox(width: 13),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
+              ),
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  onTap();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(22),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Text(
-                            l10n.homeEntryDiscoverAction,
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1.15,
-                                ),
+                          Container(
+                            padding: const EdgeInsets.all(11),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.20),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.auto_awesome_rounded,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            l10n.homeEntrySupportLine,
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.78),
-                                  fontWeight: FontWeight.w600,
-                                ),
+                          const Spacer(),
+                          const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                            size: 24,
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.16),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.15),
+                      const SizedBox(height: 22),
+                      Text(
+                        l10n.homeEntryDiscoverAction,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.5,
+                          height: 1.15,
                         ),
                       ),
-                      child: const Icon(
-                        Icons.arrow_forward_rounded,
-                        color: Colors.white,
-                        size: 19,
+                      const SizedBox(height: 7),
+                      Text(
+                        l10n.homeEntrySupportLine,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.86),
+                          height: 1.3,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -550,7 +502,7 @@ class _SecondaryAction extends StatelessWidget {
                         context.l10n.homeEntryKnownCityAction,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                           color: scheme.onSurface,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -596,78 +548,67 @@ class _QuickActions extends StatelessWidget {
         key: const ValueKey('home-shortcut-costs'),
         label: l10n.homeVisualCostsAction,
         onTap: onOpenCostsTap,
-        accent: const Color(0xFF34D399),
+        accent: const Color(0xFF169B7A),
       ),
       (
         icon: Icons.description_rounded,
         key: const ValueKey('home-shortcut-documents'),
         label: l10n.homeVisualDocumentsAction,
         onTap: onOpenDocumentsTap,
-        accent: const Color(0xFFA78BFA),
+        accent: const Color(0xFF8665D6),
       ),
       (
         icon: Icons.home_work_rounded,
         key: const ValueKey('home-shortcut-housing'),
         label: l10n.homeVisualHousingAction,
         onTap: onOpenHousingTap,
-        accent: const Color(0xFFF59E0B),
+        accent: const Color(0xFFC58116),
       ),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 24,
-              height: 3,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF2BA9FF), Color(0xFF6D5BFF)],
-                ),
-                borderRadius: BorderRadius.circular(999),
-                boxShadow: [
-                  BoxShadow(
-                    color: scheme.primary.withValues(alpha: 0.28),
-                    blurRadius: 9,
-                  ),
-                ],
-              ),
+        Semantics(
+          header: true,
+          child: Text(
+            l10n.homeEntryShortcutsTitle,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: scheme.onSurface.withValues(alpha: 0.65),
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.2,
             ),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Text(
-                l10n.homeEntryShortcutsTitle,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: scheme.onSurface,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.25,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
         const SizedBox(height: 12),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (var index = 0; index < items.length; index++) ...[
-              if (index > 0) const SizedBox(width: 9),
-              Expanded(
-                child: _QuickActionTile(
-                  icon: items[index].icon,
-                  actionKey: items[index].key,
-                  label: items[index].label,
-                  onTap: items[index].onTap,
-                  accent: items[index].accent,
-                  scheme: scheme,
-                  isDark: isDark,
-                  compact: compact,
-                ),
-              ),
-            ],
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final stacked = constraints.maxWidth < 280 ||
+                MediaQuery.textScalerOf(context).scale(14) > 20;
+            final width = stacked
+                ? constraints.maxWidth
+                : (constraints.maxWidth - 20) / 3;
+            return Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                for (final item in items)
+                  SizedBox(
+                    width: width,
+                    child: _QuickActionTile(
+                      icon: item.icon,
+                      actionKey: item.key,
+                      label: item.label,
+                      onTap: item.onTap,
+                      accent: item.accent,
+                      scheme: scheme,
+                      isDark: isDark,
+                      compact: compact,
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ],
     );
@@ -711,11 +652,11 @@ class _QuickActionTile extends StatelessWidget {
             },
             borderRadius: BorderRadius.circular(18),
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: compact ? 82 : 88),
+              constraints: BoxConstraints(minHeight: compact ? 100 : 112),
               child: Ink(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 8,
-                  vertical: 10,
+                  vertical: 16,
                 ),
                 decoration: BoxDecoration(
                   color: isDark
@@ -727,20 +668,6 @@ class _QuickActionTile extends StatelessWidget {
                         ? Colors.white.withValues(alpha: 0.09)
                         : Colors.white,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: accent.withValues(alpha: isDark ? 0.08 : 0.07),
-                      blurRadius: 20,
-                      offset: const Offset(0, 9),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withValues(
-                        alpha: isDark ? 0.15 : 0.035,
-                      ),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -767,8 +694,6 @@ class _QuickActionTile extends StatelessWidget {
                     const SizedBox(height: 7),
                     Text(
                       label,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: scheme.onSurface.withValues(alpha: 0.82),

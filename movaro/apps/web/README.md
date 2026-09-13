@@ -11,9 +11,11 @@ npm install
 npm run dev
 ```
 
-O formulário de acesso antecipado possui apenas o estado visual nesta primeira
-etapa. A persistência dos emails será conectada quando o canal de captação for
-definido.
+O formulário de lançamento envia os interessados para
+`POST /api/v1/launch-interests`. Configure `VITE_API_BASE_URL` com a URL pública
+da API (consulte `.env.example`). A API normaliza o email e grava na tabela
+`public.launch_interests` do Supabase; nenhuma chave do Supabase fica exposta no
+navegador.
 
 ## Páginas SEO por cidade
 

@@ -8,7 +8,7 @@ const path = require('path');
 const root = path.resolve(__dirname, '..');
 const citySeedPath = path.join(
   root,
-  'src/modules/cities/data/seeds/mudavi_city_metrics.json',
+  'src/modules/cities/data/seeds/movaro_city_metrics.json',
 );
 const outputPath = path.join(
   root,

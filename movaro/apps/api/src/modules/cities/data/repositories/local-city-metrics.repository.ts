@@ -17,11 +17,11 @@ export class LocalCityMetricsRepository implements CityMetricsRepository {
 
     const distFilePath = resolve(
       __dirname,
-      '../seeds/mudavi_city_metrics.json',
+      '../seeds/movaro_city_metrics.json',
     );
     const sourceFilePath = resolve(
       process.cwd(),
-      'src/modules/cities/data/seeds/mudavi_city_metrics.json',
+      'src/modules/cities/data/seeds/movaro_city_metrics.json',
     );
     const filePath = existsSync(distFilePath) ? distFilePath : sourceFilePath;
     const fileContent = readFileSync(filePath, 'utf-8');

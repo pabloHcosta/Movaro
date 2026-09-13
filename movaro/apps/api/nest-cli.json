@@ -5,8 +5,7 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "assets": [
-      "src/modules/cities/data/seeds/*.json",
-      "src/modules/migration/data/seeds/*.json"
+      "modules/**/data/seeds/*.json"
     ]
   }
 }

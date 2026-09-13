@@ -15,6 +15,7 @@ import { ChatModule } from './modules/chat/chat.module';
 import { CityInsightsModule } from './modules/city-insights/city-insights.module';
 import { CitiesModule } from './modules/cities/cities.module';
 import { HealthModule } from './modules/health/health.module';
+import { LaunchInterestsModule } from './modules/launch-interests/launch-interests.module';
 import { MigrationModule } from './modules/migration/migration.module';
 import { ProductAnalyticsModule } from './modules/product-analytics/product-analytics.module';
 import { ReferenceModule } from './modules/reference/reference.module';
@@ -33,6 +34,7 @@ import { ReferenceModule } from './modules/reference/reference.module';
     CityInsightsModule,
     CitiesModule,
     HealthModule,
+    LaunchInterestsModule,
     MigrationModule,
     ProductAnalyticsModule,
     ReferenceModule,
