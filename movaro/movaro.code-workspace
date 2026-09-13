@@ -60,6 +60,25 @@
         }
       },
       {
+        "name": "Mudavi API (Production - Local Container)",
+        "type": "node-terminal",
+        "request": "launch",
+        "command": "npm run cloudflare:dev",
+        "cwd": "${workspaceFolder:api}"
+      },
+      {
+        "name": "Mudavi App (Production - Cloudflare API - Chrome)",
+        "request": "launch",
+        "type": "dart",
+        "program": "lib/main_production.dart",
+        "cwd": "${workspaceFolder:app}",
+        "deviceId": "chrome",
+        "toolArgs": [
+          "--dart-define-from-file=.env.production.json",
+          "--dart-define=API_BASE_URL=https://mudavi-api.mudavi-app.workers.dev"
+        ]
+      },
+      {
         "name": "Mudavi App (Cloudflare Tunnel - localhost:3000)",
         "type": "node-terminal",
         "request": "launch",
