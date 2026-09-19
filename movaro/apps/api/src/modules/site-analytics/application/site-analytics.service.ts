@@ -1,6 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 
 import { SupabaseAdminService } from '../../../common/supabase/supabase-admin.service';
+import { RecordSiteIntentDto } from '../presentation/dto/record-site-intent.dto';
 import { UpsertSiteAnalyticsDto } from '../presentation/dto/upsert-site-analytics.dto';
 
 @Injectable()
@@ -8,6 +9,43 @@ export class SiteAnalyticsService {
   private readonly logger = new Logger(SiteAnalyticsService.name);
 
   constructor(private readonly supabase: SupabaseAdminService) {}
+
+  async recordIntent(body: RecordSiteIntentDto): Promise<{ accepted: true }> {
+    if (!this.supabase.isConfigured) {
+      throw new ServiceUnavailableException('Landing intent storage is unavailable.');
+    }
+
+    const now = new Date().toISOString();
+    const { error } = await this.supabase.admin
+      .from('landing_page_intent_signals')
+      .upsert(
+        {
+          session_id: body.sessionId,
+          locale: body.locale,
+          intent_category: body.intentCategory,
+          move_stage: body.moveStage,
+          submitted_at: now,
+          updated_at: now,
+        },
+        { onConflict: 'session_id' },
+      );
+
+    if (error) {
+      this.logger.warn(`Landing intent was not stored: ${error.message}`);
+      throw new ServiceUnavailableException('Landing intent storage is unavailable.');
+    }
+
+    const { error: sessionError } = await this.supabase.admin
+      .from('landing_page_sessions')
+      .update({ converted: true, converted_at: now })
+      .eq('session_id', body.sessionId);
+
+    if (sessionError) {
+      this.logger.warn(`Landing conversion was not updated: ${sessionError.message}`);
+    }
+
+    return { accepted: true };
+  }
 
   async upsert(body: UpsertSiteAnalyticsDto): Promise<{ accepted: boolean }> {
     if (!this.supabase.isConfigured) {

@@ -11,11 +11,13 @@ npm install
 npm run dev
 ```
 
-O formulário de lançamento envia os interessados para
-`POST /api/v1/launch-interests`. Configure `VITE_API_BASE_URL` com a URL pública
-da API (consulte `.env.example`). A API normaliza o email e grava na tabela
-`public.launch_interests` do Supabase; nenhuma chave do Supabase fica exposta no
-navegador.
+A validação de interesse faz duas perguntas de resposta fechada, sem solicitar
+email ou outros dados pessoais, e envia o sinal anônimo para
+`POST /api/v1/site-analytics/intent`. Configure `VITE_API_BASE_URL` com a URL
+pública da API (consulte `.env.example`). A API grava apenas a necessidade
+principal, o estágio da mudança, o idioma e um identificador efêmero de sessão
+na tabela `public.landing_page_intent_signals`; nenhuma chave do Supabase fica
+exposta no navegador.
 
 ## Páginas SEO por cidade
 
