@@ -1,8 +1,8 @@
-# Brand Direction V1 - Movaro
+# Brand Direction V1 - Mudavi
 
 ## O que a marca precisa comunicar
 
-Movaro nao e um app de viagem aspiracional nem uma consultoria juridica pesada.
+Mudavi nao e um app de viagem aspiracional nem uma consultoria juridica pesada.
 O produto fica no meio desses dois extremos:
 
 - reduz a neblina inicial da mudanca
@@ -31,7 +31,7 @@ A referencia nao e copiar Google, Uber ou Nubank. A referencia e a disciplina de
 
 ### Nome
 
-Movaro sugere movimento, direcao e progresso.
+Mudavi sugere mudanca, movimento, direcao e progresso.
 
 ### Simbolo
 
@@ -41,7 +41,7 @@ sem detalhe ilustrativo e sem metafora literal demais.
 
 Esse simbolo junta tres ideias:
 
-- `M` de Movaro
+- `M` de Mudavi
 - movimento organizado
 - firmeza e clareza de produto
 
@@ -65,6 +65,16 @@ Esse simbolo junta tres ideias:
 - splash: simbolo com wordmark opcional
 - superfícies pequenas: preferir simbolo sozinho
 - contextos editoriais ou web: usar simbolo + wordmark
+
+### Assinatura horizontal
+
+Na assinatura, `Mudavi` e uma unica peca vetorial. O `M` e redesenhado como uma
+fita proporcional a altura do nome; as demais letras usam construcao monolinear
+arredondada, com um `v` angular que repete a direcao da fita e um ponto coral no
+`i` que ecoa o destino do simbolo.
+
+Nunca montar a assinatura encostando o simbolo isolado em texto ou em outro
+SVG. Usar sempre o wordmark completo para preservar proporcao e leitura.
 
 ## O que evitar
 

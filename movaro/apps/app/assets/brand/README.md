@@ -14,6 +14,9 @@ to remain recognizable without letters at launcher-icon sizes.
 - `mudavi_mark_dark.svg`: full-color symbol for light surfaces.
 - `mudavi_mark_monochrome.svg`: single-color source for Android themed icons
   and other template treatments.
+- `mudavi_wordmark_light.svg` and `mudavi_wordmark_dark.svg`: complete custom
+  `Mudavi` signatures, with a proportional ribbon-built `M` and integrated
+  lettering.
 - `mudavi_splash_hero.svg`: tightly cropped full-color hero for launch and
   branded loading surfaces.
 - PNG files are generated from these SVG masters and should not be edited by
@@ -23,7 +26,8 @@ to remain recognizable without letters at launcher-icon sizes.
 
 Keep clear space around the symbol equal to at least half the ribbon width.
 Use the light mark on dark/navy backgrounds and the dark mark on white or pale
-backgrounds. Do not rotate, outline, recolor individual ribbon segments, bake
+backgrounds. Use the complete wordmark SVG for the horizontal signature; do
+not assemble the name from separate assets. Do not rotate, outline, recolor individual ribbon segments, bake
 corner masks into the app icon, or place text inside the launcher icon.
 
 Core colors: midnight `#050B15`, cobalt `#0B64EE`, cyan `#57DCF7`, coral
