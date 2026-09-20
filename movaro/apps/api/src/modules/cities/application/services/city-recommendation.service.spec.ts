@@ -1,8 +1,7 @@
 import { CityCardEntity } from '../../domain/entities/city-card.entity';
 import { CityRecommendationService } from './city-recommendation.service';
 import { CitiesCatalogService } from './cities-catalog.service';
-import { describe, beforeEach, it } from 'node:test';
-import { expect, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 const source = {
   provider: 'IBGE',

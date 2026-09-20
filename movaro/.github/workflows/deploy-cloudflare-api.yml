@@ -2,20 +2,21 @@ name: Deploy Mudavi API to Cloudflare
 
 on:
   push:
-    branches: [main]
+    branches: [staging, main]
     paths:
       - "apps/api/**"
       - ".github/workflows/deploy-cloudflare-api.yml"
   workflow_dispatch:
 
 concurrency:
-  group: mudavi-api-production
+  group: mudavi-api-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   deploy:
-    if: vars.CLOUDFLARE_CONTAINER_DEPLOY_ENABLED == 'true'
+    if: vars.DEPLOY_ENABLED == 'true' && vars.CLOUDFLARE_CONTAINER_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     timeout-minutes: 60
     defaults:
       run:
@@ -36,4 +37,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/api
-          command: deploy --config wrangler.container.jsonc --containers-rollout=immediate
+          command: deploy --config wrangler.container.jsonc ${{ github.ref_name == 'staging' && '--env staging' || '' }} --containers-rollout=immediate

@@ -95,7 +95,7 @@ const moveStages = ['exploring', 'withinSixMonths', 'organizingMove'] as const;
 type IntentCategory = (typeof intentCategories)[number];
 type MoveStage = (typeof moveStages)[number];
 const reveal = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } };
-const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? window.location.origin).replace(/\/$/, '');
 function getSiteSessionId() {
   const key = 'mudavi-site-session-id';
   try {

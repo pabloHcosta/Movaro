@@ -33,5 +33,35 @@
       "tag": "v1",
       "new_sqlite_classes": ["MudaviApiContainer"]
     }
-  ]
+  ],
+  "env": {
+    "staging": {
+      "name": "mudavi-api-staging",
+      "vars": {
+        "ALLOWED_ORIGINS": "https://staging.mudavi.app"
+      },
+      "containers": [
+        {
+          "class_name": "MudaviApiContainer",
+          "image": "./Dockerfile.cloudflare",
+          "max_instances": 1,
+          "instance_type": "lite"
+        }
+      ],
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "API_CONTAINER",
+            "class_name": "MudaviApiContainer"
+          }
+        ]
+      },
+      "migrations": [
+        {
+          "tag": "v1",
+          "new_sqlite_classes": ["MudaviApiContainer"]
+        }
+      ]
+    }
+  }
 }

@@ -1,8 +1,7 @@
 import { QuickGuideService } from './quick-guide.service';
 import { QuickHelpQueryPlannerService } from './quick-help-query-planner.service';
 import { QUICK_HELP_CATALOG_ROUTES } from '../../data/quick-help-intents.catalog';
-import { describe } from 'node:test';
-import { afterAll, beforeAll, expect, it, jest } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals';
 
 void describe('Quick Guide P3 quality evaluation', () => {
   const service = new QuickGuideService(new QuickHelpQueryPlannerService());

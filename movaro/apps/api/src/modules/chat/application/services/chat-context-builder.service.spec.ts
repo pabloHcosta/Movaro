@@ -1,7 +1,6 @@
 import { ChatContextBuilderService } from './chat-context-builder.service';
 import { CitiesCatalogService } from '../../../cities/application/services/cities-catalog.service';
-import { describe, it } from 'node:test';
-import { expect, jest } from '@jest/globals';
+import { describe, expect, it, jest } from '@jest/globals';
 
 void describe('ChatContextBuilderService', () => {
   void it('builds city context even when highlightedCityId arrives without state suffix', async () => {

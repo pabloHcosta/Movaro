@@ -2,8 +2,7 @@ import { QuickGuideService } from './quick-guide.service';
 import { QuickHelpQueryPlannerService } from './quick-help-query-planner.service';
 import { QUICK_HELP_ENTRIES } from '../../data/quick-help-trust.catalog';
 import { QUICK_HELP_INTENTS } from '../../data/quick-help-intents.catalog';
-import { afterEach, beforeEach, describe } from 'node:test';
-import { expect, it, jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 void describe('QuickGuideService', () => {
   let service: QuickGuideService;

@@ -101,3 +101,10 @@ npm test -- --runInBand
 Antes de publicar, confirme as variáveis de ambiente e as chaves externas,
 restrinja as chaves de cliente por aplicativo/domínio e execute o checklist
 em `packages/docs/store-release-readiness-v1.md`.
+
+## Branches e publicação
+
+O fluxo oficial é `develop` → `staging` → `main`. A branch `main` representa
+produção; não mantemos uma `master` paralela. Consulte
+`packages/docs/delivery-branches-and-environments.md` para o processo de
+promoção, os ambientes e os segredos exigidos pelos pipelines.

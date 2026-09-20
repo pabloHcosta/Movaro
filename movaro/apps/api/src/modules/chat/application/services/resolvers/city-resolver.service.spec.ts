@@ -1,7 +1,6 @@
 import { CityResolverService } from './city-resolver.service';
 import { CitiesCatalogService } from '../../../../cities/application/services/cities-catalog.service';
-import { describe, it } from 'node:test';
-import { expect, jest } from '@jest/globals';
+import { describe, expect, it, jest } from '@jest/globals';
 
 void describe('CityResolverService', () => {
   void it('normalizes a city slug without state suffix before resolving', async () => {

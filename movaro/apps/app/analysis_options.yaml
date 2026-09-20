@@ -13,6 +13,7 @@ analyzer:
   exclude:
     - build/**
     - lib/app/localization/generated/**
+    - packages/add_2_calendar_new/example/**
 
 linter:
   # The lint rules applied to this project can be customized in the
