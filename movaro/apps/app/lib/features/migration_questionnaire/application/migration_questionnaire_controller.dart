@@ -615,7 +615,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       _adaptiveRefinement = decision;
       _adaptiveQuestionId = null;
       _isRefineResolved = true;
-      return _generatePlan();
+      return await _generatePlan();
     } finally {
       _isEvaluatingRefinement = false;
       notifyListeners();
