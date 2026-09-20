@@ -4,8 +4,10 @@ on:
   push:
     branches: [staging, main]
     paths:
-      - "apps/api/**"
-      - ".github/workflows/deploy-cloudflare-api.yml"
+      - movaro/apps/api/**
+      - movaro/packages/contracts/**
+      - movaro/scripts/audit-*.mjs
+      - .github/workflows/deploy-cloudflare-api.yml
   workflow_dispatch:
 
 concurrency:
@@ -20,14 +22,14 @@ jobs:
     timeout-minutes: 60
     defaults:
       run:
-        working-directory: apps/api
+        working-directory: movaro/apps/api
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: apps/api/package-lock.json
+          cache-dependency-path: movaro/apps/api/package-lock.json
       - run: npm ci
       - run: npm run build
       - run: npm run cloudflare:check
@@ -36,5 +38,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: apps/api
+          workingDirectory: movaro/apps/api
           command: deploy --config wrangler.container.jsonc ${{ github.ref_name == 'staging' && '--env staging' || '' }} --containers-rollout=immediate
