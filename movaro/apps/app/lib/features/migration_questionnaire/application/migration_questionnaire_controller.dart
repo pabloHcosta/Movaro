@@ -490,7 +490,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       if (_selectedVariant == QuestionnaireVariant.lean && !_isRefineResolved) {
         return _evaluateAdaptiveRefinement();
       }
-      return _generatePlan();
+      return await _generatePlan();
     }
 
     var nextIndex = _currentIndex + 1;
@@ -615,7 +615,7 @@ class MigrationQuestionnaireController extends ChangeNotifier {
       _adaptiveRefinement = decision;
       _adaptiveQuestionId = null;
       _isRefineResolved = true;
-      return _generatePlan();
+      return await _generatePlan();
     } finally {
       _isEvaluatingRefinement = false;
       notifyListeners();
