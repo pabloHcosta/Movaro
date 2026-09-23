@@ -13,6 +13,7 @@ node_modules/
 
 # Build artifacts
 .dart_tool/
+.wrangler/
 .flutter-plugins-dependencies
 .pub/
 .pub-cache/
