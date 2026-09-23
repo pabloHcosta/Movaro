@@ -86,6 +86,12 @@ const tourCopy = {
   },
 } as const;
 
+const demoCopy = {
+  pt: ['EXPERIÊNCIA INTERATIVA', 'Teste o Mudavi de verdade.', 'A versão web está conectada à API de teste. Explore o aplicativo em uma tela de celular, sem instalar nada.', 'Começar o teste', 'Abrir em tela cheia', 'Aplicativo disponível agora'],
+  es: ['EXPERIENCIA INTERACTIVA', 'Probá Mudavi de verdad.', 'La versión web está conectada a la API de prueba. Explorá la aplicación en una pantalla de celular, sin instalar nada.', 'Empezar la prueba', 'Abrir en pantalla completa', 'Aplicación disponible ahora'],
+  en: ['INTERACTIVE EXPERIENCE', 'Try the real Mudavi.', 'The web version is connected to the test API. Explore the app in a phone-sized screen, with nothing to install.', 'Start the test', 'Open full screen', 'App available now'],
+} as const;
+
 const benefitIcons = [Compass, Route, FileCheck2];
 const audienceIcons = [MapPinned, FileCheck2, ClipboardList];
 const featureIcons = [MapPinned, Calculator, House, BriefcaseBusiness, FileCheck2, Route];
@@ -146,6 +152,41 @@ function ProductTour({ locale }: { locale: Locale }) {
   </section>;
 }
 
+function LiveProductDemo({ locale, appUrl }: { locale: Locale; appUrl: string }) {
+  const [started, setStarted] = useState(false);
+  const text = demoCopy[locale];
+
+  return <section className="live-demo band" id="produto">
+    <div className="live-demo-heading"><div><p className="section-label">{text[0]}</p><h2>{text[1]}</h2><p>{text[2]}</p><div className="live-demo-actions"><button className="button button-primary" type="button" onClick={() => setStarted(true)}>{text[3]}<ArrowRight size={18} /></button><a className="text-link" href={appUrl} target="_blank" rel="noreferrer">{text[4]}<ChevronRight size={17} /></a></div><span className="live-demo-status"><i />{text[5]}</span></div></div>
+    <div className={`live-demo-device ${started ? 'started' : ''}`}>
+      <div className="live-demo-glow" />
+      <div className="live-demo-phone">
+        <span className="live-demo-speaker" aria-hidden="true" />
+        {started ? <iframe src={appUrl} title={text[1]} allow="geolocation" /> : <button type="button" className="live-demo-cover" onClick={() => setStarted(true)}><img src="/product-tour/01-home.jpg" alt="" /><span><strong>{text[3]}</strong><ArrowRight size={20} /></span></button>}
+      </div>
+    </div>
+  </section>;
+}
+
+function ProductExperience({ locale }: { locale: Locale }) {
+  const appUrl = (import.meta.env.VITE_DEMO_APP_URL ?? 'https://mudavi-app-demo.mudavi-app.workers.dev').replace(/\/$/, '');
+  const healthUrl = (import.meta.env.VITE_DEMO_API_URL ?? 'https://movaro-production.up.railway.app').replace(/\/$/, '');
+  const [available, setAvailable] = useState(false);
+
+  useEffect(() => {
+    if (!appUrl || !healthUrl) return;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 3000);
+    fetch(`${healthUrl}/api/v1/health`, { signal: controller.signal, cache: 'no-store', headers: { 'x-mudavi-health-check': 'landing-demo' } })
+      .then((response) => setAvailable(response.ok))
+      .catch(() => setAvailable(false))
+      .finally(() => window.clearTimeout(timeout));
+    return () => { window.clearTimeout(timeout); controller.abort(); };
+  }, [appUrl, healthUrl]);
+
+  return available ? <LiveProductDemo locale={locale} appUrl={appUrl} /> : <ProductTour locale={locale} />;
+}
+
 export function App() {
   const [locale, setLocale] = useState<Locale>(detectLocale);
   const [menuOpen, setMenuOpen] = useState(false); const [selectedIntent, setSelectedIntent] = useState<IntentCategory | null>(null); const [sent, setSent] = useState(false); const [sending, setSending] = useState(false); const [submitError, setSubmitError] = useState(false); const reduceMotion = useReducedMotion(); const t = copy[locale];
@@ -180,7 +221,7 @@ export function App() {
   return <div className="site-shell"><motion.div className="reading-progress" style={{ scaleX: progress }} /><header className="nav-shell"><nav className="nav" aria-label="Mudavi"><Logo /><div id="site-navigation" className={`nav-links ${menuOpen ? 'open' : ''}`}><a href="#como-funciona" onClick={() => setMenuOpen(false)}>{t.nav[0]}</a><a href="#diferencial" onClick={() => setMenuOpen(false)}>{t.nav[1]}</a><a href="#confianza" onClick={() => setMenuOpen(false)}>{t.nav[2]}</a><a className="nav-cta" href="#acceso" onClick={() => setMenuOpen(false)}>{t.nav[3]}</a></div><div className="nav-tools"><LanguageSelector locale={locale} onChange={changeLocale} label={t.menu[2]} /><button className="menu-button" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-controls="site-navigation" aria-expanded={menuOpen} aria-label={menuOpen ? t.menu[1] : t.menu[0]}>{menuOpen ? <X /> : <Menu />}</button></div></nav></header><main>
     <section className="hero" id="inicio"><div className="hero-light" /><div className="hero-countries" aria-hidden="true"><div className="country-flag country-arg"><span /><small>ARG</small></div><div className="country-route"><span>ARG</span><i /><ArrowRight /><span>BR</span></div><div className="country-flag country-br"><span /><small>BR</small></div></div><div className="hero-inner"><motion.div className="hero-copy" initial="hidden" animate="visible" variants={reveal} transition={{ duration: reduceMotion ? 0 : .7 }}><div className="eyebrow"><span>01</span>{t.hero[0]}</div><h1>{t.hero[1]}<br /><span>{t.hero[2]}</span></h1><p className="hero-lead">{t.hero[3]}</p><div className="hero-actions"><a className="button button-primary" href="#produto">{t.hero[4]}<ArrowRight size={18} /></a><a className="text-link" href="#como-funciona">{t.hero[5]}<ChevronRight size={17} /></a></div><div className="trust-line"><ShieldCheck size={18} /><span>{t.hero[6]}</span></div></motion.div><motion.div className="hero-product" style={{ y: phoneY }} initial={{ opacity: 0, scale: .9, rotate: 3 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: reduceMotion ? 0 : 1.1, delay: .15, ease: [.22, 1, .36, 1] }}><span className="product-caption">MUDAVI / PRODUCT 01</span><PhonePreview text={t.phone} /></motion.div></div><a className="scroll-cue" href="#produto" aria-label={t.hero[4]}><span /></a></section>
     <section className="audience-strip" aria-labelledby="audience-title"><motion.div className="audience-heading" initial="hidden" whileInView="visible" viewport={{ once: true, amount: .45 }} variants={reveal}><p>{t.audienceIntro[0]}</p><h2 id="audience-title">{t.audienceIntro[1]}</h2></motion.div><div className="audience-path">{t.audience.map((item, index) => { const Icon = audienceIcons[index]; return <motion.article key={item} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .35 }} transition={{ duration: reduceMotion ? 0 : .6, delay: reduceMotion ? 0 : index * .13 }}><span className="audience-number">0{index + 1}</span><span className="audience-icon"><Icon size={28} strokeWidth={1.7} /></span><p>{item}</p><span className="audience-dot" aria-hidden="true" /></motion.article>; })}</div></section>
-    <ProductTour locale={locale} />
+    <ProductExperience locale={locale} />
     <section className="problem band" id="como-funciona"><motion.div className="section-intro" initial="hidden" whileInView="visible" viewport={{ once: true, amount: .4 }} variants={reveal}><p className="section-label">{t.problem[0]}</p><h2>{t.problem[1]}<br />{t.problem[2]}</h2><p>{t.problem[3]}</p></motion.div><div className="benefit-grid">{t.benefits.map(([title, text], index) => { const Icon = benefitIcons[index]; return <motion.article className={`benefit benefit-${index + 1}`} key={title} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .3 }} variants={reveal} transition={{ duration: reduceMotion ? 0 : .6, delay: reduceMotion ? 0 : index * .12 }}><span className="benefit-icon"><Icon size={32} strokeWidth={1.7} /></span><span className="benefit-number">0{index + 1}</span><h3>{title}</h3><p>{text}</p></motion.article>; })}</div></section>
     <section className="journey band" id="diferencial"><motion.div className="journey-copy" initial="hidden" whileInView="visible" viewport={{ once: true, amount: .3 }} variants={reveal}><p className="section-label">{t.journey[0]}</p><h2>{t.journey[1]}</h2><p>{t.journey[2]}</p></motion.div><div className="journey-visual" aria-label={t.journey[1]}><motion.div className="route-line" initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} viewport={{ once: true, amount: .15 }} transition={{ duration: reduceMotion ? 0 : 1.1, ease: [.22, 1, .36, 1] }} />{t.steps.map(([label, title, text], index) => <motion.div className="route-step" key={title} initial={{ opacity: .3, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .15 }} transition={{ duration: reduceMotion ? 0 : .55, delay: reduceMotion ? 0 : index * .14 }}><motion.span whileInView={{ backgroundColor: '#64daf1', color: '#07172b', scale: [1, 1.12, 1] }} viewport={{ once: true, amount: .2 }} transition={{ duration: reduceMotion ? 0 : .7, delay: reduceMotion ? 0 : index * .16 }}>{index + 1}</motion.span><div><small>{label}</small><strong>{title}</strong><p>{text}</p></div></motion.div>)}</div></section>
     <section className="features band" id="recursos"><div className="features-heading"><div><p className="section-label">{t.features[0]}</p><h2>{t.features[1]}</h2></div><p>{t.features[2]}</p></div><div className="feature-rail">{t.features.slice(3).map((title, index) => { const Icon = featureIcons[index]; return <motion.div key={title} initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .4 }} transition={{ delay: reduceMotion ? 0 : index * .06 }}><Icon size={22} /><span>{title}</span></motion.div>; })}</div></section>
