@@ -177,8 +177,8 @@ function ProductExperience({ locale }: { locale: Locale }) {
     if (!appUrl || !healthUrl) return;
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 3000);
-    fetch(`${healthUrl}/api/v1/health`, { signal: controller.signal, cache: 'no-store', headers: { 'x-mudavi-health-check': 'landing-demo' } })
-      .then((response) => setAvailable(response.ok))
+    fetch(`${healthUrl}/api/v1/health`, { signal: controller.signal, cache: 'no-store', mode: 'no-cors' })
+      .then(() => setAvailable(true))
       .catch(() => setAvailable(false))
       .finally(() => window.clearTimeout(timeout));
     return () => { window.clearTimeout(timeout); controller.abort(); };
